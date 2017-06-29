@@ -661,7 +661,7 @@ import java.text.SimpleDateFormat
                     if (refBookPersonIdentifier != null) {
 
                         String primaryInp = BaseWeigthCalculator.prepareString(primaryPersonIdentifier.getInp());
-                        String refbookInp = BaseWeigthCalculator.prepareString(primaryPersonIdentifier.getInp());
+                        String refbookInp = BaseWeigthCalculator.prepareString(refBookPersonIdentifier.getInp());
 
                         if (!BaseWeigthCalculator.isEqualsNullSafeStr(primaryInp, refbookInp)) {
 
@@ -670,7 +670,7 @@ import java.text.SimpleDateFormat
                             changeEvent.setType(AttributeChangeEventType.REFRESHED);
                             taxpayerIdentityAttrCnt.processAttr(changeEvent);
 
-                            Map<String, RefBookValue> refBookPersonIdentifierValues = mapPersonIdentifierAttr(refBookPersonIdentifier);
+                            Map<String, RefBookValue> refBookPersonIdentifierValues = mapPersonIdentifierAttr(primaryPersonIdentifier);
                             fillSystemAliases(refBookPersonIdentifierValues, refBookPersonIdentifier);
                             updateIdentifierList.add(refBookPersonIdentifierValues);
                         }
@@ -692,9 +692,6 @@ import java.text.SimpleDateFormat
                             refBookPerson.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
                     updCnt++;
                 }
-
-
-
             } else {
                 //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
                 insertPersonList.add(primaryPerson);
@@ -1151,11 +1148,8 @@ import java.text.SimpleDateFormat
      */
     Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
         if (inpActualCache.isEmpty()) {
-            String whereClause = """
-                    JOIN ref_book_person p ON (frb.person_id = p.id)
-                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
-                """
-            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause, getReportPeriodEndDate() - 1)
+            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} AND ref_book_id_tax_payer.person_id = np.person_id)"
+            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_TAX_PAYER_ID, whereClause)
 
             refBookMap.each { id, refBook ->
                 List<String> inpList = inpActualCache.get(refBook?.PERSON_ID?.referenceValue)
@@ -1656,9 +1650,7 @@ def createXlsxReport() {
 
         // "Загрузка ТФ РНУ НДФЛ" п.9
         // Проверка соответствия атрибута ДатаОтч периоду в наименовании файла
-        // reportPeriod.endDate создаётся на основании периода из имени файла
-
-        def reportPeriodEndDate = reportPeriod.endDate?.format(DATE_FORMAT)
+        // reportPeriodEndDate создаётся на основании периода из имени файла
 
         File dFile = dataFile
 
@@ -1666,7 +1658,9 @@ def createXlsxReport() {
             throw new ServiceException("Отсутствует значение параметра dataFile!")
         }
 
-        def Файл = new XmlSlurper().parse(dataFile)
+        def reportPeriodEndDate = getReportPeriodEndDate().format(DATE_FORMAT)
+
+        def Файл = new XmlSlurper().parse(dFile)
         String reportDate = Файл.СлЧасть.'@ДатаОтч'
 
         if(reportPeriodEndDate != reportDate ){
@@ -2343,6 +2337,22 @@ class NdflPersonFL {
     }
 
     /**
+     * Выгрузка из справочников по условию
+     * @param refBookId
+     * @param whereClause
+     * @return
+     * Поскольку поиск осуществляется с использованием оператора EXISTS необходимодимо всегда связывать поле подзапроса через ALIAS frb
+     */
+    def getRefBookByRecordWhere(def long refBookId, def whereClause) {
+        Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordDataWhere(whereClause)
+        if (refBookMap == null || refBookMap.size() == 0) {
+            //throw new ScriptException("Не найдены записи справочника " + refBookId)
+            return Collections.emptyMap();
+        }
+        return refBookMap
+    }
+
+    /**
      * Получить "Страны"
      * @return
      */
@@ -2488,11 +2498,8 @@ class NdflPersonFL {
      */
     Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
         if (dulActualCache.isEmpty()) {
-            String whereClause = """
-                    JOIN ref_book_person p ON (frb.person_id = p.id)
-                    JOIN ndfl_person np ON (np.declaration_data_id = ${declarationData.id} AND p.id = np.person_id)
-                """
-            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
+            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} AND ref_book_id_doc.person_id = np.person_id)"
+            Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
             refBookMap.each { personId, refBookValues ->
                 Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
