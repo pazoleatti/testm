@@ -1718,9 +1718,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
         declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("Обнаружены фатальные ошибки!");
-        }
 
         int success = 0;
         int fail = 0;
