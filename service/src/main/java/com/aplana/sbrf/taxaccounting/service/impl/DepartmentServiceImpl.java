@@ -229,8 +229,12 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartmentIds());
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
-            // 1
-            retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
+            Set<Integer> departments = new LinkedHashSet<Integer>();
+            departments.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
+            for(int tbId : getTBDepartmentIdsByDeclarationPerformer(tAUser.getDepartmentId())) {
+                departments.addAll(departmentDao.getDepartmentTBChildrenId(tbId));
+            }
+            retList.addAll(departments);
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
             // 1
             retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
@@ -447,6 +451,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public int getHierarchyLevel(int departmentId) {
         return departmentDao.getHierarchyLevel(departmentId);
+    }
+
+    @Override
+    public List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId) {
+        return departmentDao.getTBDepartmentIdsByDeclarationPerformer(performerDepartmentId);
     }
 
     @Override

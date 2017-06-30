@@ -19,7 +19,7 @@ import java.util.Set;
 
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
- * 
+ *
  * @author dsultanbekov
  */
 @Service
@@ -44,7 +44,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,
 	 * логика вынесена в отдельный метод, так как используется в нескольких
 	 * местах данного сервиса
-	 * 
+	 *
 	 * @param userInfo информация о пользователе
 	 * @param departmentReportPeriod Отчетный период подразделения
      * @param checkedSet необязательный параметр — набор проверенных наборов параметров, используется для оптимизации
@@ -58,7 +58,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             checkedSet.add(key);
         }
 
-		Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        //Подразделение формы
+		Department declDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+
         TaxType taxType = TaxType.NDFL;
 		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
         if (departmentReportPeriod.isBalance()) {
@@ -73,16 +75,32 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			return;
 		}
 
-        // Контролёр или Контролёр НС
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)
-                || userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+        // Оператор (НДФЛ или Сборы)
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
 			List<Integer> executors = departmentService.getTaxDeclarationDepartments(userInfo.getUser(), declarationTemplate.getType());
-			if (executors.contains(declarationDepartment.getId())) {
-			    if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS) ||
-                        !declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
+			if (executors.contains(declDepartment.getId())) {
+			    if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
                     return;
                 }
 			}
+        }
+
+        // Контролёр или Контролёр НС
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
+            //ТБ формы
+            int declarationTB = departmentService.getParentTB(declDepartment.getId()).getId();
+
+            //Подразделение и ТБ пользователя
+            int userTB = departmentService.getParentTB(userInfo.getUser().getDepartmentId()).getId();
+
+            //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
+            List<Integer> tbDepartments = departmentService.getTBDepartmentIdsByDeclarationPerformer(userInfo.getUser().getDepartmentId());
+
+            //Подразделение формы и подразделение пользователя должны относиться к одному ТБ или
+            //Подразделение формы относится к одному из ТБ подразделений, для которых подразделение пользователя является исполнителем
+            if(userTB == declarationTB || tbDepartments.contains(declarationTB)) {
+                return;
+            }
         }
 
         // Прочие

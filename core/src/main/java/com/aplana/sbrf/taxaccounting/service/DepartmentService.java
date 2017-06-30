@@ -266,4 +266,11 @@ public interface DepartmentService {
     String getReportDepartmentName(int departmentId);
 
     int getHierarchyLevel(int departmentId);
+
+    /**
+     * Получить список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     * @param performerDepartmentId ID подразделения, которое является исполнителем
+     * @return Список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     */
+    List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
 }
