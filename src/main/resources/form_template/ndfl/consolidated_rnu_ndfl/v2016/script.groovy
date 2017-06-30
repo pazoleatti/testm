@@ -570,11 +570,11 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
             consNdflPerson = new NdflPerson();
             consNdflPerson.recordId = personRecordId;
             result.put(personRecordId, consNdflPerson);
-            consNdflPerson.incomes.addAll(ndflPerson.incomes);
-            consNdflPerson.deductions.addAll(ndflPerson.deductions);
-            consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
-        }
 
+        }
+        consNdflPerson.incomes.addAll(ndflPerson.incomes);
+        consNdflPerson.deductions.addAll(ndflPerson.deductions);
+        consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
     }
 
     return result;
