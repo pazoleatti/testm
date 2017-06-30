@@ -74,7 +74,7 @@ public class SelectPersonDocumentCalc {
         String citizenshipCode = citizenship != null ? citizenship.getCode() : null;
 
         //статус (обяз.) по умолчанию = 1 (резидент РФ)
-        String taxPayerStatusCode = naturalPerson.getTaxPayerStatus().getCode();
+        String taxPayerStatusCode = naturalPerson.getTaxPayerStatus() != null ? naturalPerson.getTaxPayerStatus().getCode() : null;
 
         if (citizenshipCode == null || citizenshipCode.isEmpty()) {
             //4. Если ЗСФЛ."Гражданство" пуст
@@ -82,10 +82,10 @@ public class SelectPersonDocumentCalc {
         } else if (citizenshipCode.equals(RUS_CODE)) {
             //1. Если ЗСФЛ."Гражданство" = RUS
             return selectRussianCitizenshipDocuments(personDocumentList);
-        } else if (!citizenshipCode.equals(RUS_CODE) && !taxPayerStatusCode.equals(STATUS_5)) {
+        } else if (!citizenshipCode.equals(RUS_CODE) && !STATUS_5.equals(taxPayerStatusCode)) {
             //2. Если ЗСФЛ."Гражданство" ≠ RUS и не пуст и ЗСФЛ."Статус налогоплательщика"  ≠  5
             return selectNonRussianDocuments(personDocumentList);
-        } else if (!citizenshipCode.equals(RUS_CODE) && taxPayerStatusCode.equals(STATUS_5)) {
+        } else if (!citizenshipCode.equals(RUS_CODE) && STATUS_5.equals(taxPayerStatusCode)) {
             //3. Если ЗСФЛ."Гражданство" ≠ RUS и ЗСФЛ."Статус налогоплательщика" = 5
             return selectNonRussianTaxpayerDocuments(personDocumentList);
         } else {
