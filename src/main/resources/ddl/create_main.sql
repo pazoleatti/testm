@@ -2057,7 +2057,7 @@ create table ref_book_person
   version        date not null,
   status         number(1) default 0 not null,
   source_id      number(18),
-  old_id         number(10),
+  old_id         number(18),
   old_status     number(1)
 );
 

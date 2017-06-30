@@ -7,6 +7,10 @@ prompt alter ref_book_address and update attributes
 @@alter_ref_book_address.sql;
 commit;
 
+-- alter ref_book_person.old_id and update attributes
+prompt alter ref_book_person.old_id and update attributes
+@@alter_person_old_id.sql;
+commit;
 
 -- changes fias_addrobj
 prompt drop unuseable columns from fias_addrobj
