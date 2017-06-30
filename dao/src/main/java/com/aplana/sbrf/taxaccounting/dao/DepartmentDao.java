@@ -203,4 +203,11 @@ public interface DepartmentDao {
     List<Integer> getAllPerformers(int departmentId, int declarationTypeId);
 
     List<Integer> getAllPerformers(int userDepId, List<TaxType> taxTypes);
+
+    /**
+     * Получить список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     * @param performerDepartmentId ID подразделения, которое является исполнителем
+     * @return Список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     */
+    List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
 }

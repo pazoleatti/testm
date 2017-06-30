@@ -587,4 +587,22 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
+    @Override
+    public List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("performerDepartmentId", performerDepartmentId);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("SELECT id\n" +
+                    "FROM department\n" +
+                    "WHERE parent_id = 0 AND type = 2\n" +
+                    "CONNECT BY id = prior parent_id START WITH id IN (\n" +
+                    "  SELECT DISTINCT ddt.department_id\n" +
+                    "  FROM department_declaration_type ddt\n" +
+                    "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
+                    "  WHERE ddtp.performer_dep_id = :performerDepartmentId)", params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
+    }
+
 }
