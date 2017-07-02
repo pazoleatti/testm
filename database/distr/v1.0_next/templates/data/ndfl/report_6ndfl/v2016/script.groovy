@@ -1047,6 +1047,7 @@ List<PairKppOktmo> getPairKppOktmoList() {
 
         if (declarations.isEmpty()) {
             createCorrPeriodNotFoundMessage(departmentReportPeriod, true)
+            return null
         }
 
         declarations.each { declaration ->
@@ -1093,9 +1094,9 @@ def createCorrPeriodNotFoundMessage(DepartmentReportPeriod departmentReportPerio
     Department department = departmentService.get(departmentReportPeriod.departmentId)
     String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
     if (forDepartment) {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
     } else {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены физические лица для формирования уточненной отчетности")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены физические лица для формирования уточненной отчетности")
     }
 }
 
@@ -1254,12 +1255,17 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         allDeclarationData.addAll(declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, it))
     }
 
-    if (allDeclarationData.isEmpty()) {
+    if (!checkExistingConsDDForCurrTB(departmentReportPeriod, allDeclarationData)) {
         createEmptyMessage(departmentReportPeriod, false)
-        return null
+        return null;
     }
 
-    // удаление форм не со статусом Принята
+    if (!checkExistingAcceptedConsDDForCurrTB(departmentReportPeriod, allDeclarationData)) {
+        createEmptyMessage(departmentReportPeriod, true)
+        return null;
+    }
+
+     // удаление форм не со статусом Принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
         if (declaration.state != State.ACCEPTED) {
@@ -1268,23 +1274,37 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
     }
     allDeclarationData.removeAll(declarationsForRemove)
 
-    if (allDeclarationData.isEmpty()) {
-        createEmptyMessage(departmentReportPeriod, true)
-        return null
-    }
-
     return allDeclarationData
 }
 
+@TypeChecked
+boolean checkExistingAcceptedConsDDForCurrTB(DepartmentReportPeriod departmentReportPeriod, List<DeclarationData> ddList) {
+    for (DeclarationData dd : ddList) {
+        if (dd.departmentReportPeriodId == departmentReportPeriod.id && dd.state == State.ACCEPTED) {
+            return true;
+        }
+    }
+    return false;
+}
+
+@TypeChecked
+boolean checkExistingConsDDForCurrTB(DepartmentReportPeriod departmentReportPeriod, List<DeclarationData> ddList) {
+    for (DeclarationData dd : ddList) {
+        if (dd.departmentReportPeriodId == departmentReportPeriod.id) {
+            return true;
+        }
+    }
+    return false;
+}
 
 @TypeChecked
 def createEmptyMessage(DepartmentReportPeriod departmentReportPeriod, boolean acceptChecking) {
     Department department = departmentService.get(departmentReportPeriod.departmentId)
     String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
     if (acceptChecking) {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
     } else {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
     }
 }
 
