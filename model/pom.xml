@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.aplana.taxaccounting</groupId>
-		<artifactId>ndfl</artifactId>
+    <parent>
+        <groupId>com.aplana.taxaccounting</groupId>
+        <artifactId>ndfl</artifactId>
         <version>1.0</version>
-	</parent>
+    </parent>
 
-	<artifactId>model</artifactId>
-	<description>АС "Учёт налогов" - Модельные объекты</description>
+    <artifactId>model</artifactId>
+    <description>АС "Учёт налогов" - Модельные объекты</description>
 
     <dependencies>
         <dependency>
@@ -29,13 +29,30 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.mysema.querydsl</groupId>
+            <artifactId>querydsl-sql</artifactId>
+            <version>3.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-core</artifactId>
+            <version>4.1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-sql-spring</artifactId>
+            <version>4.1.4</version>
+        </dependency>
     </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -44,8 +61,8 @@
                         </goals>
                     </execution>
                 </executions>
-			</plugin>
-		</plugins>
-	</build>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 

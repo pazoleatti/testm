@@ -203,7 +203,6 @@
             <artifactId>ejb-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
 	</dependencies>
 
 	<build>

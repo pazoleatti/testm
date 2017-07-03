@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>ndfl</artifactId>
+        <groupId>com.aplana.taxaccounting</groupId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>querydsl</artifactId>
+    <description>АС "Учёт налогов" - Модуль для Q-классов</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-sql-codegen</artifactId>
+            <version>4.1.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-maven-plugin</artifactId>
+                <version>4.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>export</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jdbcDriver>oracle.jdbc.OracleDriver</jdbcDriver>
+                    <jdbcUrl>jdbc:oracle:thin:@//172.19.214.46:1521/ORCL.APLANA.LOCAL</jdbcUrl>
+                    <jdbcUser>ndfl_1_0</jdbcUser>
+                    <jdbcPassword>ndfl_1_0</jdbcPassword>
+                    <customTypes>
+                        <customType>com.querydsl.sql.types.DateTimeType</customType>
+                        <customType>com.querydsl.sql.types.LocalDateType</customType>
+                    </customTypes>
+                    <packageName>com.aplana.sbrf.taxaccounting.model</packageName>
+                    <sourceFolder></sourceFolder>
+                    <targetFolder>model/src/main/java</targetFolder>
+                    <exportViews>false</exportViews>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                        <version>1.7.12</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.oracle</groupId>
+                        <artifactId>ojdbc6</artifactId>
+                        <version>11.2.0.1.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>taxaccounting-thirdparty</id>
+            <name>Сторонние библиотеки, используемые в проекте</name>
+            <url>http://172.19.214.42:8081/nexus/content/repositories/thirdparty/</url>
+        </pluginRepository>
+    </pluginRepositories>
+</project>

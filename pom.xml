@@ -11,6 +11,7 @@
 
 	<modules>
 		<module>model</module>
+		<module>querydsl</module>
 		<module>core</module>
 		<module>dao</module>
 		<module>service</module>
@@ -319,6 +320,11 @@
 				<version>${org.slf4j.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${org.slf4j.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.pdfbox</groupId>
 				<artifactId>pdfbox</artifactId>
 				<version>1.8.0</version>
@@ -462,7 +468,6 @@
 				<artifactId>reflections</artifactId>
 				<version>0.9.10</version>
 			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 
