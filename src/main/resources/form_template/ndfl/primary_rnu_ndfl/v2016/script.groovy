@@ -3929,7 +3929,7 @@ class ColumnFillConditionData {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                                "Для «Графа 14 Раздел 2 = ${ndflPersonIncome.taxRate}» не выполнено условие: «Графа 7 Раздел 1» не равно 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» не равно 1")
+                                "Для «Графа 14 Раздел 2 = ${ndflPersonIncome.taxRate?: ""}» не выполнено условие: «Графа 7 Раздел 1» не равно 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» не равно 1")
                     }
                 }
 
