@@ -38,6 +38,7 @@
                     <jdbcUrl>jdbc:oracle:thin:@//172.19.214.46:1521/ORCL.APLANA.LOCAL</jdbcUrl>
                     <jdbcUser>ndfl_1_0</jdbcUser>
                     <jdbcPassword>ndfl_1_0</jdbcPassword>
+                    <schemaPattern>NDFL_1_0</schemaPattern>
                     <customTypes>
                         <customType>com.querydsl.sql.types.DateTimeType</customType>
                         <customType>com.querydsl.sql.types.LocalDateType</customType>
