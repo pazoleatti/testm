@@ -101,7 +101,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         // Оператор (НДФЛ или Сборы)
         if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER)) {
             if (asnuId != null && !checkUserAsnu(userInfo, asnuId)) {
-                throw new AccessDeniedException("Нет прав на АСНУ налоговой формы");
+                throw new AccessDeniedException("Нет прав на доступ к форме");
             }
 
 			List<Integer> executors = departmentService.getTaxDeclarationDepartments(userInfo.getUser(), declarationTemplate.getType());
