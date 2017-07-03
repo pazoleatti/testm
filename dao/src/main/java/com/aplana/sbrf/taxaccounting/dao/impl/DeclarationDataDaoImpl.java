@@ -342,14 +342,29 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
                 .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id and dec.declaration_template_id = dectemplate.id");
 
-        if (filter.getUserDepartmentId() != null) {
-            sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
-                .append(" OR :userDepId IN (\n" +
-                    "SELECT DISTINCT ddtp.performer_dep_id \n" +
-                    "FROM department_decl_type_performer ddtp \n" +
-                    "INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
-                    "WHERE ddt.declaration_type_id = dectemplate.declaration_type_id AND ddt.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.parent_id = dep_ddtp.ID START WITH dep_ddtp.ID = drp.department_id)\n" +
-                    "))");
+        if (filter.getUserDepartmentId() != null &&  filter.getControlNs() != null) {
+            if (!filter.getControlNs()) {
+                sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
+                        .append(" OR :userDepId IN (\n" +
+                                "SELECT DISTINCT ddtp.performer_dep_id \n" +
+                                "FROM department_decl_type_performer ddtp \n" +
+                                "INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
+                                "WHERE ddt.declaration_type_id = dectemplate.declaration_type_id AND ddt.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.parent_id = dep_ddtp.ID START WITH dep_ddtp.ID = drp.department_id)\n" +
+                                "))");
+            } else {
+                sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
+                        .append(" OR :userDepId IN (\n" +
+                                "SELECT dep.ID \n" +
+                                "FROM department dep \n" +
+                                "WHERE dep.parent_id = 0 and dep.type = 2 \n" +
+                                "CONNECT BY PRIOR dep.parent_id = dep.ID\n" +
+                                "START WITH dep.id in (" +
+                                "   SELECT DISTINCT ddtp.performer_dep_id \n" +
+                                "   FROM department_decl_type_performer ddtp \n" +
+                                "   INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
+                                "   WHERE ddt.declaration_type_id = dectemplate.declaration_type_id AND ddt.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = drp.department_id)\n" +
+                                ")))");
+            }
             values.put("userDepId", filter.getUserDepartmentId());
         }
 
