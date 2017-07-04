@@ -789,4 +789,27 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return new ArrayList<DeclarationData>();
         }
     }
+
+    @Override
+    public List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo) {
+        StringBuilder query = new StringBuilder("select ")
+                .append("dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, ")
+                .append("dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, ")
+                .append("drp.report_period_id, drp.department_id, dd.note ")
+                .append("from declaration_data dd join declaration_template dt on dt.id = dd.declaration_template_id ")
+                .append("join department_report_period drp on drp.ID = dd.department_report_period_id ")
+                .append("where dd.kpp = :kpp and dd.oktmo = :oktmo and dt.id = :declarationTemplate ")
+                .append("and drp.id = :departmentReportPeriodId and dd.tax_organ_code = :taxOrganCode");
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTemplate", declarationTemplate)
+                .addValue("departmentReportPeriodId", departmentReportPeriodId)
+                .addValue("taxOrganCode", taxOrganCode)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
+        try {
+            return getNamedParameterJdbcTemplate().query(query.toString(), params, new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<DeclarationData>();
+        }
+    }
 }

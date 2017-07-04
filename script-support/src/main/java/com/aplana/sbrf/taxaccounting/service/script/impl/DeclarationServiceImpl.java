@@ -460,4 +460,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
         return declarationDataDao.findAllActive(declarationTypeId, reportPeriodId);
     }
+
+    @Override
+    public List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo) {
+        return declarationDataDao.find(declarationTemplate, departmentReportPeriodId, taxOrganCode, kpp, oktmo);
+    }
 }
