@@ -182,14 +182,11 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
 
         // Выполнение импорта скрипта справочника
-        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" + event.getTitle()
-                + "» для справочника «" + refBook.getName() + "»"));
         if (scriptFilePath == null || versionInfoProperties == null || versionInfoProperties.getProperty("productionMode").equals("true")) {
             executeScript(bindings, script, scriptLogger);
         } else {
             executeLocalScript(toBinding(bindings), scriptFilePath, logger);
         }
-        scriptLogger.setMessageDecorator(null);
 
         // Перенос записей из локального лога в глобальный
         logger.getEntries().addAll(scriptLogger.getEntries());
