@@ -357,13 +357,25 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                                 "SELECT dep.ID \n" +
                                 "FROM department dep \n" +
                                 "WHERE dep.parent_id = 0 and dep.type = 2 \n" +
-                                "CONNECT BY PRIOR dep.parent_id = dep.ID\n" +
-                                "START WITH dep.id in (" +
-                                "   SELECT DISTINCT ddtp.performer_dep_id \n" +
+                                "CONNECT BY PRIOR dep.parent_id = dep.ID \n" +
+                                "START WITH dep.id in ( \n" +
+                                "   SELECT ddtp.performer_dep_id \n" +
                                 "   FROM department_decl_type_performer ddtp \n" +
                                 "   INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
-                                "   WHERE ddt.declaration_type_id = dectemplate.declaration_type_id AND ddt.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = drp.department_id)\n" +
-                                ")))");
+                                "   WHERE ddt.declaration_type_id = dectemplate.declaration_type_id \n" +
+                                "   AND ddt.department_id IN ( \n" +
+                                "       SELECT dep_ddtp.ID " +
+                                "       FROM department dep_ddtp \n" +
+                                "       CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id \n" +
+                                "       START WITH dep_ddtp.ID = ( \n" +
+                                "                      SELECT dep.ID \n" +
+                                "                      FROM department dep \n" +
+                                "                      WHERE dep.parent_id = 0 and dep.type = 2 \n" +
+                                "                      CONNECT BY PRIOR dep.parent_id = dep.id \n" +
+                                "                      START WITH dep.id = drp.department_id \n" +
+                                "                ) \n" +
+                                "   ) \n" +
+                                "))) \n");
             }
             values.put("userDepId", filter.getUserDepartmentId());
         }
