@@ -3211,7 +3211,7 @@ class NdflPersonFL {
     }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("Ошибка в значенииt: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
             "'Значение гр. \"" + name + "\" (\""+ value + "\") отсутствует в справочнике \"КЛАДР\"")
 }
 
