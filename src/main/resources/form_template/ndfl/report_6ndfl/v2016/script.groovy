@@ -111,8 +111,8 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field final int REF_BOOK_OKTMO_ID = 96;
 @Field final int REPORT_PERIOD_TYPE_ID = 8
 
-@Field final FORM_NAME_NDFL6 = "НДФЛ6"
-@Field final FORM_NAME_NDFL2 = "НДФЛ2"
+@Field final FORM_NAME_NDFL6 = "6-НДФЛ"
+@Field final FORM_NAME_NDFL2 = "2-НДФЛ(1)"
 @Field final int DECLARATION_TYPE_RNU_NDFL_ID = 101
 @Field final int DECLARATION_TYPE_NDFL2_1_ID = 102
 @Field final int DECLARATION_TYPE_NDFL2_2_ID = 104
@@ -706,18 +706,18 @@ def checkXml() {
 
         // ВнДок1 Сравнение сумм вычетов и дохода
         if (vichetNal > nachislDoh) {
-            logger.error(msgError + " сумма налоговых вычетов превышает сумму начисленного дохода.")
+            logger.errorExp(msgError + " «Сумма налоговых вычетов» превышает «Cумму начисленного дохода»", "«Сумма налоговых вычетов» превышает «Cумму начисленного дохода»", "")
         }
 
         // ВнДок2 Исчисленный налог
         if ((Math.round((nachislDoh - vichetNal) / 100 * stavka) > ischislNal + mathError) ||
                 (Math.round((nachislDoh - vichetNal) / 100 * stavka) < ischislNal - mathError)) {
-            logger.warn(msgError + " неверно рассчитана сумма исчисленного налога.")
+            logger.warnExp(msgError + " неверно рассчитана «Cумма исчисленного налога»", "«Cумма исчисленного налога» рассчитана некорректно", "")
         }
 
         // ВнДок3 Авансовый платеж
         if (avansPlat > ischislNal) {
-            logger.error(msgError + " завышена сумма фиксированного авансового платежа.")
+            logger.errorExp(msgError + " завышена «Cумма фиксированного авансового платежа»", "«Cумма фиксированного авансового платежа» заполнена некорректно", "")
         }
     }
 
@@ -877,15 +877,15 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
         def sumDohObch2 = mapSumDohObch2.get(stavka6)
 
         if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
-            def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по ставке " + stavka6
-            logger.error(msgErrorRes)
+            def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по «Ставке» " + stavka6
+            logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
         }
     }
 
     // МежДок5
     if (ScriptUtils.round(nachislDohDiv6, 2) != ScriptUtils.round(sumDohDivObch2, 2)) {
-        def msgErrorRes = sprintf(msgError, "сумме начисленного дохода в виде дивидендов")
-        logger.error(msgErrorRes)
+        def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода» в виде дивидендов")
+        logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
     }
 
     // МежДок6
@@ -893,21 +893,21 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     mapIschislNal6.each { stavka6, ischislNal6 ->
         def nalIschisl2 = mapNalIschisl2.get(stavka6)
         if (ischislNal6 != nalIschisl2) {
-            def msgErrorRes = sprintf(msgError, "сумме налога исчисленного") + " по ставке " + stavka6
-            logger.error(msgErrorRes)
+            def msgErrorRes = sprintf(msgError, "«Сумме налога исчисленного»") + " по «Ставке» " + stavka6
+            logger.errorExp(msgErrorRes, "«Сумма налога исчисленного» рассчитана некорректно", "")
         }
     }
 
     // МежДок7
     if (neUderzNalIt6 != nalNeUderz2) {
-        def msgErrorRes = sprintf(msgError, "сумме налога, не удержанная налоговым агентом")
-        logger.error(msgErrorRes)
+        def msgErrorRes = sprintf(msgError, "«Сумме налога, не удержанной налоговым агентом»")
+        logger.errorExp(msgErrorRes, "«Сумма налога, не удержанная налоговым агентом» рассчитана некорректно", "")
     }
 
     // МежДок8
     if (kolFl6 != kolFl2) {
         def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
-        logger.error(msgErrorRes)
+        logger.errorExp(msgErrorRes, "«Количество физических лиц, получивших доход» рассчитано некорректно", "")
     }
 }
 

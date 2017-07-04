@@ -417,4 +417,15 @@ public interface DeclarationService {
      * @return
      */
     List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId);
+
+    /**
+     * Найти НФ по типу, периоду, и значениям Налоговый орган, КПП, ОКТМО
+     * @param declarationTemplate
+     * @param departmentReportPeriodId
+     * @param taxOrganCode
+     * @param kpp
+     * @param oktmo
+     * @return
+     */
+    List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
 }
