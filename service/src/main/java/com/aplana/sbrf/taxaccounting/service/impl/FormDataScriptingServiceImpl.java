@@ -112,13 +112,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
             }
         }
 
-
-        ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
-        logger.setMessageDecorator(d);
-
         executeScript(b, script, logger);
 
-        logger.setMessageDecorator(null);
         return true;
     }
 

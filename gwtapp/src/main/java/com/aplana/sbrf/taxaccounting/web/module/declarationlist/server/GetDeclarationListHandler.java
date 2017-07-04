@@ -104,9 +104,12 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 
         action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
 
-        if (!currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS) && currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_OPER) ||
-                taxType.equals(TaxType.PFR) && !currentUser.hasRole(TARole.F_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.F_ROLE_OPER)) {
+        if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
+            action.getDeclarationFilter().setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
+            action.getDeclarationFilter().setControlNs(true);
+        } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
             action.getDeclarationFilter().setUserDepartmentId(currentUser.getDepartmentId());
+            action.getDeclarationFilter().setControlNs(false);
         }
 
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());

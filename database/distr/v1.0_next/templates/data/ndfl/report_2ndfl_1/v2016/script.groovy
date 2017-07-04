@@ -1619,6 +1619,7 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
 
         if (declarations.isEmpty()) {
             createCorrPeriodNotFoundMessage(departmentReportPeriod, true)
+            return null
         }
 
         declarations.each { declaration ->
@@ -1633,7 +1634,7 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
         }
 
         if (ndflReferencesWithError.isEmpty()) {
-            createCorrPeriodNotFoundMessage(departmentReportPeriod, departmentReportPeriodList, false)
+            createCorrPeriodNotFoundMessage(departmentReportPeriod, false)
             return null
         }
     } else {
@@ -1723,9 +1724,9 @@ def createCorrPeriodNotFoundMessage(DepartmentReportPeriod departmentReportPerio
     Department department = departmentService.get(departmentReportPeriod.departmentId)
     String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
     if (forDepartment) {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
     } else {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены физические лица для формирования уточненной отчетности")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены физические лица для формирования уточненной отчетности")
     }
 }
 
@@ -1777,14 +1778,14 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         allDeclarationData.addAll(declarationService.find(RNU_NDFL_DECLARATION_TYPE, it))
     }
 
-    if (!checkExistingAcceptedConsDDForCurrTB(departmentReportPeriod, allDeclarationData)) {
-        createNotExistAcceptedConsDDForCurrTBMesage(departmentReportPeriod)
+    if (!checkExistingConsDDForCurrTB(departmentReportPeriod, allDeclarationData)) {
+        createEmptyMessage(departmentReportPeriod, false)
         return null;
     }
 
-    if (allDeclarationData.isEmpty()) {
-        createEmptyMessage(departmentReportPeriod, false)
-        return null
+    if (!checkExistingAcceptedConsDDForCurrTB(departmentReportPeriod, allDeclarationData)) {
+        createEmptyMessage(departmentReportPeriod, true)
+        return null;
     }
 
     // удаление форм не со статусом Принята
@@ -1797,10 +1798,6 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
 
     allDeclarationData.removeAll(declarationsForRemove)
 
-    if (allDeclarationData.isEmpty()) {
-        createEmptyMessage(departmentReportPeriod, true)
-        return null
-    }
     return allDeclarationData
 }
 
@@ -1815,10 +1812,13 @@ boolean checkExistingAcceptedConsDDForCurrTB(DepartmentReportPeriod departmentRe
 }
 
 @TypeChecked
-def createNotExistAcceptedConsDDForCurrTBMesage(DepartmentReportPeriod departmentReportPeriod) {
-    Department department = departmentService.get(departmentReportPeriod.departmentId)
-    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
-    logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
+boolean checkExistingConsDDForCurrTB(DepartmentReportPeriod departmentReportPeriod, List<DeclarationData> ddList) {
+    for (DeclarationData dd : ddList) {
+        if (dd.departmentReportPeriodId == departmentReportPeriod.id) {
+            return true;
+        }
+    }
+    return false;
 }
 
 @TypeChecked
@@ -1826,9 +1826,9 @@ def createEmptyMessage(DepartmentReportPeriod departmentReportPeriod, boolean ac
     Department department = departmentService.get(departmentReportPeriod.departmentId)
     String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
     if (acceptChecking) {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
     } else {
-        logger.info("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
+        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
     }
 }
 /************************************* ВЫГРУЗКА ***********************************************************************/

@@ -3211,7 +3211,7 @@ class NdflPersonFL {
     }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("Ошибка в значенииt: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
             "'Значение гр. \"" + name + "\" (\""+ value + "\") отсутствует в справочнике \"КЛАДР\"")
 }
 
@@ -3826,6 +3826,18 @@ class ColumnFillConditionData {
                 NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
+                List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
+                List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+
+                //Графа 4 Раздел 2
+                String ndflPersonIncomingCodeInOperation = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.findAll {
+                    it.incomeCode ?: ""
+                }.first().incomeCode?:""
+                //Графа 14 Раздел 2
+                String ndflPersonIncomingTaxRate = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.findAll {
+                    it.taxRate ?: ""
+                }.first().taxRate?:""
+
                 // СведДох1 Доход.Дата.Начисление (Графа 6)
                 if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
                     dateConditionDataList.each { dateConditionData ->
@@ -3861,10 +3873,10 @@ class ColumnFillConditionData {
                 }
 
                 // СведДох4 НДФЛ.Процентная ставка (Графа 14)
-                if (ndflPersonIncome.taxRate == 13) {
-                    Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
-                    Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status == "1"
-                    Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
+                if (Integer.parseInt(ndflPersonIncomingTaxRate) == 13) {
+                    Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncomingTaxRate != "1010" && ndflPerson.status != "2"
+                    Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncomingCodeInOperation) && ndflPerson.status == "1"
+                    Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncomingCodeInOperation) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
                     if (!(conditionA || conditionB || conditionC)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
@@ -3917,7 +3929,7 @@ class ColumnFillConditionData {
                         String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "",
                                 "НДФЛ.Процентная ставка (Графа 14)='${ndflPersonIncome.taxRate ?: ""}'")
                         logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Заполнение Раздела 2 Графы 14", fioAndInp, pathError,
-                                "Для «Графа 14 Раздел 2 = ${ndflPersonIncome.taxRate}» не выполнено условие: «Графа 7 Раздел 1» не равно 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» не равно 1")
+                                "Для «Графа 14 Раздел 2 = ${ndflPersonIncome.taxRate?: ""}» не выполнено условие: «Графа 7 Раздел 1» не равно 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» не равно 1")
                     }
                 }
 
@@ -4163,9 +4175,7 @@ class ColumnFillConditionData {
                     }
                 }
 
-                List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
-                List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
-                // "Сумма Граф 16"
+//              // "Сумма Граф 16"
                 Long calculatedTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.calculatedTax ?: 0 } ?: 0
                 // "Сумма Граф 17"
                 Long withholdingTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.withholdingTax ?: 0 } ?: 0

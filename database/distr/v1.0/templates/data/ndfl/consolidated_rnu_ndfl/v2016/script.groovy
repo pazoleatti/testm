@@ -370,12 +370,8 @@ Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String
 Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
     Map<Long, List<Map<String, RefBookValue>>> result = new HashMap<Long, List<Map<String, RefBookValue>>>();
     declarationDataIdList.each {
-        String whereClause = """
-            JOIN ref_book_person p ON (frb.person_id = p.id)
-            JOIN ndfl_person np ON (np.declaration_data_id = ${it} AND p.id = np.person_id)
-        """
-
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate())
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id)"
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
         refBookMap.each { personId, refBookValues ->
             Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
@@ -570,11 +566,11 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
             consNdflPerson = new NdflPerson();
             consNdflPerson.recordId = personRecordId;
             result.put(personRecordId, consNdflPerson);
-            consNdflPerson.incomes.addAll(ndflPerson.incomes);
-            consNdflPerson.deductions.addAll(ndflPerson.deductions);
-            consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
-        }
 
+        }
+        consNdflPerson.incomes.addAll(ndflPerson.incomes);
+        consNdflPerson.deductions.addAll(ndflPerson.deductions);
+        consNdflPerson.prepayments.addAll(ndflPerson.prepayments);
     }
 
     return result;
@@ -2363,7 +2359,7 @@ def checkDataReference(
 }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("Ошибка в значенииt: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
             "'Значение гр. \"" + name + "\" (\""+ value + "\") отсутствует в справочнике \"КЛАДР\"")
 }
 
