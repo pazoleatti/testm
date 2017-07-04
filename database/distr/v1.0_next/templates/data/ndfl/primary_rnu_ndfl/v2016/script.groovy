@@ -3211,7 +3211,7 @@ class NdflPersonFL {
     }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("Ошибка в значенииt: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
+    logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие адресов ФЛ КЛАДР", fioAndInp, pathError,
             "'Значение гр. \"" + name + "\" (\""+ value + "\") отсутствует в справочнике \"КЛАДР\"")
 }
 
@@ -3830,13 +3830,14 @@ class ColumnFillConditionData {
                 List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
 
                 //Графа 4 Раздел 2
-                String ndflPersonIncomingCodeInOperation = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.findAll {
-                    it.incomeCode ?: ""
-                }.first().incomeCode?:""
-                //Графа 14 Раздел 2
-                String ndflPersonIncomingTaxRate = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.findAll {
-                    it.taxRate ?: ""
-                }.first().taxRate?:""
+                String ndflPersonIncomingCodeInOperation = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.find {
+                        it.incomeCode
+                    }?.incomeCode?: ""
+                    //Графа 14 Раздел 2
+                Integer ndflPersonIncomingTaxRate = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.find {
+                        it.taxRate
+                    }?.taxRate?: 0
+
 
                 // СведДох1 Доход.Дата.Начисление (Графа 6)
                 if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
@@ -3873,7 +3874,7 @@ class ColumnFillConditionData {
                 }
 
                 // СведДох4 НДФЛ.Процентная ставка (Графа 14)
-                if (Integer.parseInt(ndflPersonIncomingTaxRate) == 13) {
+                if (ndflPersonIncomingTaxRate == 13) {
                     Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncomingTaxRate != "1010" && ndflPerson.status != "2"
                     Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncomingCodeInOperation) && ndflPerson.status == "1"
                     Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncomingCodeInOperation) && Integer.parseInt(ndflPerson.status ?: 0) >= 3

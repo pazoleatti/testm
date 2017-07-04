@@ -30,6 +30,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHolder
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.PagingParams
+import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -43,12 +44,12 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import java.util.zip.ZipInputStream
 
 switch (formDataEvent) {
     case FormDataEvent.CHECK: //Проверки
         println "!CHECK!"
+        check()
         break
     case FormDataEvent.CALCULATE: //формирование xml
         println "!CALCULATE!"
@@ -2685,4 +2686,592 @@ void departmentParamException(int departmentId, int reportPeriodId) {
             departmentService.get(departmentId).getName(),
             reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
     ) as Throwable
+}
+
+//******************************* ПРОВЕРКИ *****************************************************************************
+
+@Field
+final String FILE_NODE = "Файл"
+@Field
+final String DOCUMENT_NODE = "Документ";
+@Field
+final String SVEDDOH_NODE = "СведДох";
+@Field
+final String SV_SUM_DOH = "СвСумДох";
+@Field
+final String SV_SUM_VICH = "СвСумВыч";
+@Field
+final String PRED_VICH_SSI = "ПредВычССИ";
+@Field
+final String LAST_NAME = "Фамилия"
+@Field
+final String FIRST_NAME = "Имя"
+@Field
+final String MIDDLE_NAME = "Отчество"
+@Field
+final String NUM_SPR = "НомСпр"
+@Field
+final String TAX_RATE = "Ставка"
+@Field
+final String CALCULATED_TAX = "НалИсчисл"
+@Field
+final String TAX_SUM = "НалПеречисл"
+@Field
+final String WITHHOLDING_TAX = "НалУдерж"
+@Field
+final String PREPAYMENT_SUM = "АвансПлатФикс"
+@Field
+final String INCOME_SUM_COMMON = "СумДохОбщ"
+@Field
+final String SUM_DOHOD = "СумДоход"
+@Field
+final String INCOME_CODE = "КодДоход"
+@Field
+final String DEDUCTION_SUM = "СумВычет"
+@Field
+final String TAX_BASE = "НалБаза"
+@Field
+final String NOT_HOLDING_TAX = "НалНеУдерж"
+
+def check() {
+    //List<DeclarationData> declarationDataList = declarationService.find(declarationData.declarationTemplateId, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
+    if (false) {
+        logger.warnExp();
+    }
+    ScriptUtils.checkInterrupted()
+    ZipInputStream xmlStream = declarationService.getXmlStream(declarationData.id)
+
+    // Парсим xml и компонуем содержимое в группу объектов со структурой дерева из узлов и листьев
+    def fileNode = new XmlSlurper().parse(xmlStream)
+    Ndfl2Node fileNdfl2Node = new Ndfl2Node(FILE_NODE);
+    def documentNodes = fileNode.depthFirst().grep {
+        it.name() == DOCUMENT_NODE
+    }
+
+    documentNodes.each { docNodeItem ->
+        Ndfl2Node documentNdfl2Node = new Ndfl2Node(DOCUMENT_NODE)
+        Ndfl2Leaf<String> lastNameLeaf = new Ndfl2Leaf<>(LAST_NAME, docNodeItem.ПолучДох.ФИО.@Фамилия.text(), String.class)
+        Ndfl2Leaf<String> firstNameLeaf = new Ndfl2Leaf<>(FIRST_NAME, docNodeItem.ПолучДох.ФИО.@Имя.text(), String.class)
+        Ndfl2Leaf<String> middleNameLeaf = new Ndfl2Leaf<>(MIDDLE_NAME, docNodeItem.ПолучДох.ФИО.@Отчество.text(), String.class)
+        Ndfl2Leaf<String> numSprLeaf = new Ndfl2Leaf<>(NUM_SPR, docNodeItem.@НомСпр.text(), Integer.class)
+        documentNdfl2Node.addLeaf(lastNameLeaf)
+        documentNdfl2Node.addLeaf(firstNameLeaf)
+        documentNdfl2Node.addLeaf(middleNameLeaf)
+        documentNdfl2Node.addLeaf(numSprLeaf)
+        def svedDohNodes = docNodeItem.depthFirst().grep {
+            it.name() == SVEDDOH_NODE
+        }
+        svedDohNodes.each { svedDohNodeItem ->
+            Ndfl2Node svedDohNdfl2Node = new Ndfl2Node(SVEDDOH_NODE)
+            Ndfl2Leaf<Integer> taxRateLeaf = new Ndfl2Leaf<>(TAX_RATE, svedDohNodeItem.@Ставка.text(), Integer.class)
+            Ndfl2Leaf<BigDecimal> calculatedTaxLeaf = new Ndfl2Leaf<>(CALCULATED_TAX, svedDohNodeItem.СумИтНалПер.@НалИсчисл.text(), BigDecimal.class)
+            Ndfl2Leaf<BigDecimal> taxSummLeaf = new Ndfl2Leaf<>(TAX_SUM, svedDohNodeItem.СумИтНалПер.@НалПеречисл.text(), BigDecimal.class)
+            Ndfl2Leaf<BigDecimal> withholdingTaxLeaf = new Ndfl2Leaf<>(WITHHOLDING_TAX, svedDohNodeItem.СумИтНалПер.@НалУдерж.text(), BigDecimal.class)
+            Ndfl2Leaf<Long> prepaymentSumLeaf = new Ndfl2Leaf<>(PREPAYMENT_SUM, svedDohNodeItem.СумИтНалПер.@АвансПлатФикс.text(), Long.class)
+            Ndfl2Leaf<BigDecimal> incomeSumCommonLeaf = new Ndfl2Leaf<>(INCOME_SUM_COMMON, svedDohNodeItem.СумИтНалПер.@СумДохОбщ.text(), BigDecimal.class)
+            Ndfl2Leaf<BigDecimal> taxBaseLeaf = new Ndfl2Leaf<>(TAX_BASE, svedDohNodeItem.СумИтНалПер.@НалБаза.text(), BigDecimal.class)
+            Ndfl2Leaf<BigDecimal> notHoldingTaxLeaf = new Ndfl2Leaf<>(NOT_HOLDING_TAX, svedDohNodeItem.СумИтНалПер.@НалНеУдерж.text(), BigDecimal.class)
+            svedDohNdfl2Node.addLeaf(taxRateLeaf)
+            svedDohNdfl2Node.addLeaf(calculatedTaxLeaf)
+            svedDohNdfl2Node.addLeaf(taxSummLeaf)
+            svedDohNdfl2Node.addLeaf(withholdingTaxLeaf)
+            svedDohNdfl2Node.addLeaf(prepaymentSumLeaf)
+            svedDohNdfl2Node.addLeaf(incomeSumCommonLeaf)
+            svedDohNdfl2Node.addLeaf(taxBaseLeaf)
+            svedDohNdfl2Node.addLeaf(notHoldingTaxLeaf)
+            def svSumDoh = svedDohNodeItem.ДохВыч.depthFirst().grep {
+                it.name() == SV_SUM_DOH
+            }
+            svSumDoh.each { svSumDohItem ->
+                Ndfl2Node svSumDohNdfl2Node = new Ndfl2Node(SV_SUM_DOH)
+                Ndfl2Leaf<BigDecimal> incomeSumLeaf = new Ndfl2Leaf<>(SUM_DOHOD, svSumDohItem.@СумДоход.text(), BigDecimal.class)
+                Ndfl2Leaf<String> incomeCodeLeaf = new Ndfl2Leaf<>(INCOME_CODE, svSumDohItem.@КодДоход.text(), String.class)
+                svSumDohNdfl2Node.addLeaf(incomeSumLeaf)
+                svSumDohNdfl2Node.addLeaf(incomeCodeLeaf)
+                def svSumVich = svSumDohItem.depthFirst().grep {
+                    it.name() == SV_SUM_VICH
+                }
+                svSumVich.each { svSumVichItem ->
+                    Ndfl2Node svSumVichNdfl2Node = new Ndfl2Node(SV_SUM_VICH)
+                    Ndfl2Leaf<BigDecimal> deductionSumLeaf = new Ndfl2Leaf<>(DEDUCTION_SUM, svSumVichItem.@СумВычет.text(), BigDecimal.class)
+                    svSumVichNdfl2Node.addLeaf(deductionSumLeaf)
+                    svSumDohNdfl2Node.addChild(svSumVichNdfl2Node)
+                }
+                svedDohNdfl2Node.addChild(svSumDohNdfl2Node)
+            }
+
+            def predVichSSI = svedDohNodeItem.НалВычССИ.depthFirst().grep {
+                it.name() == PRED_VICH_SSI
+            }
+            predVichSSI.each { predVichSSIItem ->
+                Ndfl2Node predVichSSINdfl2Node = new Ndfl2Node(PRED_VICH_SSI)
+                Ndfl2Leaf<BigDecimal> predVichSSIDeductionSumLeaf = new Ndfl2Leaf<>(DEDUCTION_SUM, predVichSSIItem.@СумВычет.text(), BigDecimal.class)
+                predVichSSINdfl2Node.addLeaf(predVichSSIDeductionSumLeaf)
+                svedDohNdfl2Node.addChild(predVichSSINdfl2Node)
+            }
+            documentNdfl2Node.addChild(svedDohNdfl2Node)
+        }
+        fileNdfl2Node.addChild(documentNdfl2Node)
+    }
+    // Внутридокументарные проверки инкапсулированы в классы реализующие интерфейс Checker, в конструктор передается корневой узел созданного дерева
+    Checker calculatedTaxChecker = new CalculatedTaxChecker(fileNdfl2Node)
+    calculatedTaxChecker.check(logger)
+    Checker taxSummAndWithHoldingTaxChecker = new TaxSummAndWithHoldingTaxChecker(fileNdfl2Node)
+    taxSummAndWithHoldingTaxChecker.check(logger)
+    Checker calculatedTaxPrepaymentChecker = new CalculatedTaxPrepaymentChecker(fileNdfl2Node)
+    calculatedTaxPrepaymentChecker.check(logger)
+    Checker commonIncomeSumChecker = new CommonIncomeSumChecker(fileNdfl2Node)
+    commonIncomeSumChecker.check(logger)
+    Checker incomeSumAndDeductionChecker = new IncomeSumAndDeductionChecker(fileNdfl2Node)
+    incomeSumAndDeductionChecker.check(logger)
+    if (declarationData.declarationTemplateId == NDFL_2_2_DECLARATION_TYPE) {
+        Checker notHoldingTaxChecker = new NotHoldingTaxChecker(fileNdfl2Node)
+        notHoldingTaxChecker.check(logger)
+        Checker withHoldingTaxChecker = new WithHoldingTaxChecker(fileNdfl2Node)
+        withHoldingTaxChecker.check(logger)
+    }
+    // Междокументарные проверки
+    if (declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE) {
+        List<DeclarationData> declarationDataNdfl_2_1_List = declarationService.find(declarationData.declarationTemplateId, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
+        List<DeclarationData> declarationDataNdfl_2_2_List = declarationService.find(NDFL_2_2_DECLARATION_TYPE, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
+        if (declarationDataNdfl_2_2_List.isEmpty()) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            Department department = departmentService.get(departmentReportPeriod.departmentId)
+            ReportPeriod reportPeriod = departmentReportPeriod.reportPeriod
+            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+            def periodCode = period?.CODE?.stringValue
+            def periodName = period?.NAME?.stringValue
+            def calendarStartDate = reportPeriod?.calendarStartDate
+            String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format(DATE_FORMAT_DOTTED)},"
+            logger.warnExp("Сравнение физических лиц форм 2-НДФЛ (2) и 2-НДФЛ (1) не выполнено. Не найдена форма 2-НДФЛ (2) со следующими параметрами: КПП: \"%s\", ОКТМО: \"%s\", КодНо: \"%s\", Период: \"%s\", Подразделение: \"%s\"", "Не найдено физическое лицо из 2-НДФЛ (2) в 2-НДФЛ (1)", "", declarationData.kpp, declarationData.oktmo, declarationData.taxOrganCode, "$periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" + " года" + correctionDateExpression, department.getName())
+        }
+        PagingResult<Map<String, RefBookValue>> ndfl_2_2ReferencesList = new PagingResult<>()
+        PagingResult<Map<String, RefBookValue>> ndfl_2_1ReferencesList = new PagingResult<>()
+        for (DeclarationData declarationData1Ndfl_2_2: declarationDataNdfl_2_2_List) {
+            ndfl_2_2ReferencesList.addAll(getProvider(NDFL_REFERENCES).getRecords(null, null, "DECLARATION_DATA_ID = ${declarationData1Ndfl_2_2.id}", null))
+        }
+        for (DeclarationData declarationData1Ndfl_2_1: declarationDataNdfl_2_1_List) {
+            ndfl_2_1ReferencesList.addAll(getProvider(NDFL_REFERENCES).getRecords(null, null, "DECLARATION_DATA_ID = ${declarationData1Ndfl_2_1.id}", null))
+        }
+        List<Long> ndfl2_1PersonIdList = new ArrayList<>()
+        for (Map<String, RefBookValue> ndfl_2_1Reference: ndfl_2_1ReferencesList) {
+            ndfl2_1PersonIdList.add(ndfl_2_1Reference.get("PERSON_ID").value)
+        }
+        for (Map<String, RefBookValue> ndfl_2_2Reference: ndfl_2_2ReferencesList) {
+            if (!ndfl2_1PersonIdList.contains(ndfl_2_2Reference.get("PERSON_ID").value)) {
+                Long numSpr = ndfl_2_2Reference.get("NUM").value
+                Long ddId = ndfl_2_2Reference.get("DECLARATION_DATA_ID").value
+                StringBuilder fio = new StringBuilder(ndfl_2_2Reference.get("SURNAME").value ?: "")
+                        .append(" ")
+                        .append(ndfl_2_2Reference.get("NAME").value?: "")
+                        .append(" ")
+                        .append(ndfl_2_2Reference.get("LASTNAME").value ?: "")
+                StringBuilder fioAndNumSpr = fio.append(", Номер справки: ")
+                        .append(numSpr.toString())
+                logger.warnExp("Ошибка сравнения физических лиц форм 2-НДФЛ (2) и 2-НДФЛ (1). В форме 2-НДФЛ (1) не найдено физическое лицо \"%s\" формы 2-НДФЛ (2) со следующими параметрами: «Номер формы»: \"%d\", «Номер справки»: \"%d\"", "Не найдено физическое лицо из 2-НДФЛ (2) в 2-НДФЛ (1)", fioAndNumSpr.toString(), fio.toString(), ddId, numSpr)
+            }
+        }
+    }
+}
+
+/**
+ * Компонент дерева представляющий узел
+ */
+class Ndfl2Node {
+    String name;
+    List<Ndfl2Node> childNodes = new ArrayList<>()
+    List<Ndfl2Leaf<?>> attributes = new ArrayList<>()
+
+    Ndfl2Node(String name) {
+        this.name = name
+    }
+
+    String getName() {
+        return name
+    }
+
+    void addChild(Ndfl2Node ndfl2Node) {
+        childNodes.add(ndfl2Node)
+    }
+
+    void addLeaf(Ndfl2Leaf<?> ndfl2Leaf) {
+        attributes.add(ndfl2Leaf)
+    }
+
+    List<Ndfl2Node> getChildNodes() {
+        return childNodes
+    }
+
+    List<Ndfl2Leaf<?>> getAttributes() {
+        return attributes
+    }
+}
+
+/**
+ * Компонент дерева представляющий атрибут
+ * @param <T> - Класс значения атрибута из xml, с которым будем работать
+ */
+class Ndfl2Leaf<T> {
+    String name;
+    T value;
+
+    Ndfl2Leaf(String name, String value, Class<T> clazz) {
+        this.name = name
+        if (value == null) {
+            this.value == null
+        } else if (clazz == BigDecimal.class) {
+            this.value = value ? new BigDecimal(value) : null
+        } else if (clazz == Integer.class) {
+            this.value = value ? Integer.valueOf(value) : null
+        } else if (clazz == Long.class) {
+            this.value = value ? Long.valueOf(value) : null
+        } else if (clazz == String.class) {
+            this.value = value ?: ""
+        } else {
+            this.value = null
+        }
+    }
+
+    String getName() {
+        return name
+    }
+
+    void setName(String name) {
+        this.name = name
+    }
+
+    T getValue() {
+        return value
+    }
+
+    void setValue(T value) {
+        this.value = value
+    }
+}
+
+/**
+ * Интерфейс объявляющий метод проверки
+ */
+interface Checker {
+    void check(Logger logger)
+}
+
+/**
+ * Абстрактная реализация интерфейса Checker
+ */
+abstract class AbstractChecker implements Checker {
+    final String LAST_NAME = "Фамилия"
+    final String FIRST_NAME = "Имя"
+    final String MIDDLE_NAME = "Отчество"
+    final String NUM_SPR = "НомСпр"
+    final String TAX_RATE = "Ставка"
+    final String SVEDDOH_NODE = "СведДох"
+    final String SV_SUM_DOH = "СвСумДох"
+    final String INCOME_CODE = "КодДоход"
+    final String SUM_DOHOD = "СумДоход"
+    final String SV_SUM_VICH = "СвСумВыч"
+    final String DEDUCTION_SUM = "СумВычет"
+    final String PRED_VICH_SSI = "ПредВычССИ";
+    final String CALCULATED_TAX = "НалИсчисл"
+    final String DOCUMENT_NODE = "Документ";
+    final String TAX_BASE = "НалБаза"
+    final String WITHHOLDING_TAX = "НалУдерж"
+    final String TAX_SUM = "НалПеречисл"
+    final String PREPAYMENT_SUM = "АвансПлатФикс"
+    final String INCOME_SUM_COMMON = "СумДохОбщ"
+    final String NOT_HOLDING_TAX = "НалНеУдерж"
+
+    Ndfl2Node headNode;
+
+    AbstractChecker(Ndfl2Node headNode) {
+        this.headNode = headNode
+    }
+
+
+    List<Ndfl2Node> extractNdfl2Nodes(String name, Ndfl2Node parentNode) {
+        List<Ndfl2Node> toReturn = new ArrayList<>()
+        for (Ndfl2Node node : parentNode.getChildNodes()) {
+            if (node.getName() == name) {
+                toReturn.add(node)
+            }
+        }
+        return toReturn
+    }
+
+    Ndfl2Leaf<?> extractAttribute(String name, Ndfl2Node node) {
+        for (Ndfl2Leaf<?> attribute : node.getAttributes()) {
+            if (attribute.getName() == name) {
+                return attribute
+            }
+        }
+        return null
+    }
+
+    void createErrorMessage(Logger logger, Ndfl2Node documentNode, String type, String message) {
+        Ndfl2Leaf<String> lastNameAttribute = extractAttribute(LAST_NAME, documentNode)
+        Ndfl2Leaf<String> firstNameAttribute = extractAttribute(FIRST_NAME, documentNode)
+        Ndfl2Leaf<String> middleNameAttribute = extractAttribute(MIDDLE_NAME, documentNode)
+        Ndfl2Leaf<String> numSprAttribute = extractAttribute(NUM_SPR, documentNode)
+        StringBuilder fioAndNumSpr = new StringBuilder(lastNameAttribute.getValue() ? (String) lastNameAttribute.getValue() : "")
+                .append(" ")
+                .append(firstNameAttribute.getValue() ? (String) firstNameAttribute.getValue() : "")
+                .append(" ")
+                .append(middleNameAttribute.getValue() ? (String) middleNameAttribute.getValue() : "")
+                .append(", Номер справки: ")
+                .append(numSprAttribute.getValue()?.toString())
+        logger.errorExp(message, type, fioAndNumSpr.toString())
+    }
+}
+
+/**
+ * п.4 Проверка расчета суммы исчисленного налога
+ */
+class CalculatedTaxChecker extends AbstractChecker {
+
+    CalculatedTaxChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                Ndfl2Leaf<Integer> taxRateAttribute = extractAttribute(TAX_RATE, svedDohNode)
+                if (taxRateAttribute != null && (taxRateAttribute.getValue() == 13 || taxRateAttribute.getValue() == 15)) {
+                    List<Ndfl2Node> svSumDohList = extractNdfl2Nodes(SV_SUM_DOH, svedDohNode)
+                    // Сумма разностей Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход - Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет
+                    BigDecimal differenceTotalSumDohSumVichForCode1010 = new BigDecimal(0)
+                    BigDecimal differenceTotalSumDohSumVichForCodeNot1010 = new BigDecimal(0)
+                    for (Ndfl2Node svSumDoh : svSumDohList) {
+                        Ndfl2Leaf<String> incomeCodeAttribute = extractAttribute(INCOME_CODE, svSumDoh)
+                        if (incomeCodeAttribute != null && incomeCodeAttribute.getValue() == "1010") {
+                            Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
+                            List<Ndfl2Node> svSumVichNodeList = extractNdfl2Nodes(SV_SUM_VICH, svSumDoh)
+                            // Сумма значений Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет
+                            BigDecimal deductionSumValue = new BigDecimal(0)
+                            for (Ndfl2Node svSumVich : svSumVichNodeList) {
+                                Ndfl2Leaf<BigDecimal> sumVichAttribute = extractAttribute(DEDUCTION_SUM, svSumVich)
+                                deductionSumValue.add(sumVichAttribute.getValue())
+                            }
+                            //Разность между доходом и вычетом
+                            BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
+                            differenceTotalSumDohSumVichForCode1010 = differenceTotalSumDohSumVichForCode1010.add(differenceSumDohSumVich)
+                        } else {
+                            Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
+                            List<Ndfl2Node> svSumVichNodeList = extractNdfl2Nodes(SV_SUM_VICH, svSumDoh)
+                            // Сумма значений Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет
+                            BigDecimal deductionSumValue = new BigDecimal(0)
+                            for (Ndfl2Node svSumVich : svSumVichNodeList) {
+                                Ndfl2Leaf<BigDecimal> sumVichAttribute = extractAttribute(DEDUCTION_SUM, svSumVich)
+                                deductionSumValue.add(sumVichAttribute.getValue())
+                            }
+                            //Разность между доходом и вычетом
+                            BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
+                            differenceTotalSumDohSumVichForCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.add(differenceSumDohSumVich)
+                            List<Ndfl2Node> predVichSSINodeList = extractNdfl2Nodes(PRED_VICH_SSI, svedDohNode)
+                            // Сумма Файл.Документ.СведДох.НалВычССИ.ПредВычССИ.СумВычет
+                            BigDecimal sumVich = new BigDecimal(0)
+                            for (Ndfl2Node predVichSSI : predVichSSINodeList) {
+                                Ndfl2Leaf<BigDecimal> vich = extractAttribute(DEDUCTION_SUM, predVichSSI)
+                                BigDecimal valueVich = (BigDecimal) vich.getValue()
+                                sumVich = sumVich.add(valueVich)
+                            }
+                            differenceTotalSumDohSumVichForCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.subtract(sumVich)
+                        }
+                    }
+                    //Результат для п.4 Проверка расчета суммы исчисленного налога I.1
+                    BigDecimal calclulateTaxCheckValueForIncomeCode1010 = differenceTotalSumDohSumVichForCode1010.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    //Результат для п.4 Проверка расчета суммы исчисленного налога I.2
+                    BigDecimal calclulateTaxCheckValueForIncomeCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    //Результат для п.4 Проверка расчета суммы исчисленного налога I.3
+                    BigDecimal calculatedTaxCheckSum = calclulateTaxCheckValueForIncomeCode1010.add(calclulateTaxCheckValueForIncomeCodeNot1010)
+                    Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
+                    if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheckSum, 0)) {
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\") должна быть равна произведению «Ставки» (\"Файл.Документ.СведДох.Ставка\") и «Налоговой базы» (\"Файл.Документ.СведДох.СумИтНалПер.НалБаза\").")
+                    }
+                } else if (taxRateAttribute != null && taxRateAttribute.getValue() == 30) {
+                    Ndfl2Leaf<BigDecimal> taxBaseAttribute = extractAttribute(TAX_BASE, svedDohNode)
+                    BigDecimal calculatedTaxCheck = taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
+                    if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheck, 0)) {
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\") должна быть равна произведению «Ставки» (\"Файл.Документ.СведДох.Ставка\") и «Налоговой базы» (\"Файл.Документ.СведДох.СумИтНалПер.НалБаза\").")
+                    }
+                } else {
+                    List<Ndfl2Node> svSumDohList = extractNdfl2Nodes(SV_SUM_DOH, svedDohNode)
+                    BigDecimal differenceTotalSumDohSumVich = new BigDecimal(0)
+                    for (Ndfl2Node svSumDoh : svSumDohList) {
+                        Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
+                        List<Ndfl2Node> svSumVichNodeList = extractNdfl2Nodes(SV_SUM_VICH, svSumDoh)
+                        // Сумма значений Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет
+                        BigDecimal deductionSumValue = new BigDecimal(0)
+                        for (Ndfl2Node svSumVich : svSumVichNodeList) {
+                            Ndfl2Leaf<BigDecimal> sumVichAttribute = extractAttribute(DEDUCTION_SUM, svSumVich)
+                            deductionSumValue.add(sumVichAttribute.getValue())
+                        }
+                        //Разность между доходом и вычетом
+                        BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
+                        differenceTotalSumDohSumVich = differenceTotalSumDohSumVich.add(differenceSumDohSumVich)
+                    }
+                    BigDecimal calculatedTaxCheckSum = differenceTotalSumDohSumVich.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
+                    if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheckSum, 0)) {
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\") должна быть равна произведению «Ставки» (\"Файл.Документ.СведДох.Ставка\") и «Налоговой базы» (\"Файл.Документ.СведДох.СумИтНалПер.НалБаза\").")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * п.5 Сравнение сумм перечисленного и удержанного налога
+ */
+class TaxSummAndWithHoldingTaxChecker extends AbstractChecker {
+
+    TaxSummAndWithHoldingTaxChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                Ndfl2Leaf<BigDecimal> withHoldingTaxAttribute = extractAttribute(WITHHOLDING_TAX, svedDohNode)
+                Ndfl2Leaf<BigDecimal> taxSumAttribute = extractAttribute(TAX_SUM, svedDohNode)
+                if (withHoldingTaxAttribute.getValue() < taxSumAttribute.getValue()) {
+                    createErrorMessage(logger, documentNode, "«Сумма налога перечисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога перечисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалПеречисл\") не должна превышать «Сумму налога удержанную» (\"Файл.Документ.СведДох.СумИтНалПер.НалУдерж\").")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * п.6 Сравнение сумм исчисленного налога и авансовых платежей
+ */
+class CalculatedTaxPrepaymentChecker extends AbstractChecker {
+    CalculatedTaxPrepaymentChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                Ndfl2Leaf<BigDecimal> prepaymentAttribute = extractAttribute(PREPAYMENT_SUM, svedDohNode)
+                Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
+                if (prepaymentAttribute.getValue() > calculatedTaxAttribute.getValue()) {
+                    createErrorMessage(logger, documentNode, "«Сумма фиксированных авансовых платежей» заполнена некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма фиксированных авансовых платежей» (\"Файл.Документ.СведДох.СумИтНалПер.АвансПлатФикс\") не должна превышать «Сумму налога исчисленного» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\").")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * п.7 Расчет общей суммы дохода
+ */
+class CommonIncomeSumChecker extends AbstractChecker {
+    CommonIncomeSumChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                List<Ndfl2Node> svSumDohList = extractNdfl2Nodes(SV_SUM_DOH, svedDohNode)
+                // Сумма атрибутов(Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход)
+                BigDecimal sumDohodSum = new BigDecimal(0)
+                for (Ndfl2Node svSumDoh : svSumDohList) {
+                    Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
+                    sumDohodSum = sumDohodSum.add(incomeSumAttribute.getValue())
+                }
+                Ndfl2Leaf<BigDecimal> incomeSumCommonAttribute = extractAttribute(INCOME_SUM_COMMON, svedDohNode)
+                if (incomeSumCommonAttribute.getValue() != sumDohodSum) {
+                    createErrorMessage(logger, documentNode, "«Общая сумма дохода» рассчитана некорректно", "В \"Раздел 5. \"Общие суммы дохода и налога\" «Общая сумма дохода» (\"Файл.Документ.СведДох.СумИтНалПер.СумДохОбщ\") должна быть равна «Сумме доходов по всем месяцам» (\"СУММА Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход\") \"Раздела 3. \"Доходы, облагаемые по ставке <(\"Файл.Документ.СведДох.Ставка\")> %\"")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * п.8 Сравнение сумм дохода и вычета
+ */
+class IncomeSumAndDeductionChecker extends AbstractChecker {
+    IncomeSumAndDeductionChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                List<Ndfl2Node> svSumDohList = extractNdfl2Nodes(SV_SUM_DOH, svedDohNode)
+
+                for (Ndfl2Node svSumDoh : svSumDohList) {
+                    Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
+                    List<Ndfl2Node> svSumVichList = extractNdfl2Nodes(SV_SUM_VICH, svSumDoh)
+                    Ndfl2Leaf<BigDecimal> deductionSumAttribute = null
+                    if (!svSumVichList.isEmpty()) {
+                        deductionSumAttribute = extractAttribute(DEDUCTION_SUM, svSumVichList.get(0))
+                    }
+                    if (incomeSumAttribute.getValue() < deductionSumAttribute? deductionSumAttribute.getValue(): new BigDecimal(0)) {
+                        createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Разделе 3. \"Доходы, облагаемые по ставке <(\"Файл.Документ.СведДох.Ставка\")> %\" «Сумма вычета» (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет\") по коду (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.КодВычет\") превышает «Сумму полученного дохода» (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход\"), к которому он применен.")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * п.9 Заполнение поля суммы не удержанного налога (только для 2-НДФЛ (2))
+ */
+class NotHoldingTaxChecker extends AbstractChecker {
+    NotHoldingTaxChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                Ndfl2Leaf<BigDecimal> notHoldingTaxAttribute = extractAttribute(NOT_HOLDING_TAX, svedDohNode)
+                if (notHoldingTaxAttribute <= 0) {
+                    createErrorMessage(logger, documentNode, "«Сумма налога, не удержанная налоговым агентом» заполнена некорректно", "В соответствии с п.5 ст.226 НК РФ должна быть больше «0» «Сумма налога, не удержанная налоговым агентом» в \"Разделе 5. \"Общие суммы дохода и налога\"")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * п.10 Отсутствие суммы налога удержанного (только для 2-НДФЛ (2))
+ */
+class WithHoldingTaxChecker extends AbstractChecker {
+
+    WithHoldingTaxChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                Ndfl2Leaf<BigDecimal> withHoldingTaxAttribute = extractAttribute(WITHHOLDING_TAX, svedDohNode)
+                if (withHoldingTaxAttribute.getValue() != new BigDecimal(0)){
+                    createErrorMessage(logger, documentNode, "«Сумма налога удержанная» заполнена некорректно", "Сумма налога удержанная» (\"Файл.Документ.СведДох.СумИтНалПер.НалУдерж\") в \"Разделе 5. \"Общие суммы дохода и налога\" должна быть равна \"0\"")
+                }
+            }
+        }
+    }
 }
