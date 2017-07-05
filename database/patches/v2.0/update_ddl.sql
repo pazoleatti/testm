@@ -1,3 +1,8 @@
+-- alter tables
+prompt alter table notification.id
+alter table notification modify id number(18);
+
+
 -- indexes
 prompt add indexes
 @@indexes.sql;

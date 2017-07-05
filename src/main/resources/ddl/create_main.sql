@@ -302,7 +302,6 @@ create sequence seq_report_period start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table declaration_type (
   id        number(9)           not null,
-  tax_type  char(1)             not null,
   name      varchar2(1000)      not null,
   status    number(1) default 0 not null,
   is_ifrs   number(1) default 0 not null,
@@ -310,7 +309,6 @@ create table declaration_type (
 );
 comment on table declaration_type is ' Виды налоговых форм';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_type.tax_type is 'Вид налога';
 comment on column declaration_type.name is 'Наименование';
 comment on column declaration_type.status is 'Статус версии (-1 -удаленная версия, 0 -действующая версия, 1 - черновик версии, 2 - фиктивная версия)';
 comment on column declaration_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
@@ -514,14 +512,12 @@ create sequence seq_sec_user start with 10000;
 create table sec_role (
   id    number(9)    not null,
   alias varchar2(20) not null,
-  name  varchar2(50) not null,
-  tax_type varchar2(1 char) not null
+  name  varchar2(50) not null
 );
 comment on table sec_role is 'Системные роли';
 comment on column sec_role.id is 'Первичный ключ';
 comment on column sec_role.alias is 'Код роли (мнемонический идентификатор)';
 comment on column sec_role.name is 'Наименование роли';
-comment on column sec_role.tax_type is 'Вид налога';
 ---------------------------------------------------------------------------------------------------
 create table sec_user_role (
   user_id number(9) not null,
@@ -650,7 +646,7 @@ comment on column task_context.user_id is 'Идентификатор польз
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
 create table notification (
-  id                     number(9),
+  id                     number(18),
   report_period_id       number(9)              null,
   sender_department_id   number(9)              null,
   receiver_department_id number(9)              null,
@@ -2048,7 +2044,6 @@ create table ref_book_person
   last_name      varchar2(60 char),
   first_name     varchar2(60 char),
   middle_name    varchar2(60 char),
-  sex            number(1),
   inn            varchar2(12 char),
   inn_foreign    varchar2(50 char),
   snils          varchar2(14 char),
@@ -2057,15 +2052,12 @@ create table ref_book_person
   birth_place    varchar2(255 char),
   citizenship    number(18),
   address        number(18),
-  pension        number(1) default 2,
-  medical        number(1) default 2,
-  social         number(1) default 2,
   employee       number(1) default 2,
   record_id      number(18) not null,
   version        date not null,
   status         number(1) default 0 not null,
   source_id      number(18),
-  old_id         number(10),
+  old_id         number(18),
   old_status     number(1)
 );
 
@@ -2074,7 +2066,6 @@ comment on column ref_book_person.id is 'Уникальный идентифик
 comment on column ref_book_person.last_name is 'Фамилия';
 comment on column ref_book_person.first_name is 'Имя';
 comment on column ref_book_person.middle_name is 'Отчество';
-comment on column ref_book_person.sex is 'Пол';
 comment on column ref_book_person.inn is 'ИНН в Российской Федерации';
 comment on column ref_book_person.inn_foreign is 'ИНН в стране гражданства';
 comment on column ref_book_person.snils is 'СНИЛС';
@@ -2083,9 +2074,6 @@ comment on column ref_book_person.birth_date is 'Дата рождения';
 comment on column ref_book_person.birth_place is 'Место рождения';
 comment on column ref_book_person.citizenship is 'Гражданство';
 comment on column ref_book_person.address is 'Место жительства';
-comment on column ref_book_person.pension is 'Признак застрахованного лица в системе обязательного пенсионного страхования. Возможные значения: 1 - да; 2 - нет';
-comment on column ref_book_person.medical is 'Признак застрахованного лица в системе обязательного медицинского страхования. Возможные значения: 1 - да; 2 - нет';
-comment on column ref_book_person.social is 'Признак застрахованного лица в системе обязательного социального страхования. Возможные значения: 1 - да; 2 - нет';
 comment on column ref_book_person.employee is 'Признак, показывающий, является ли ФЛ сотрудником Сбербанка. Возможные значения: 1 - является; 2 - не является';
 comment on column ref_book_person.record_id is 'Идентификатор строки. Может повторяться у разных версий';
 comment on column ref_book_person.version is 'Версия. Дата актуальности записи';
@@ -2103,8 +2091,6 @@ create table ref_book_id_doc
   person_id           number(18),
   doc_id              number(18),
   doc_number          varchar2(25 char),
-  issued_by           varchar2(255 char),
-  issued_date         date,
   inc_rep             number(1),
   duplicate_record_id number(18)
 );
@@ -2117,8 +2103,6 @@ comment on column ref_book_id_doc.status is 'Статус записи (0 - об
 comment on column ref_book_id_doc.person_id is 'Физическое лицо';
 comment on column ref_book_id_doc.doc_id is 'Вид документа';
 comment on column ref_book_id_doc.doc_number is 'Серия и номер документа';
-comment on column ref_book_id_doc.issued_by is 'Кем выдан документ';
-comment on column ref_book_id_doc.issued_date is 'Дата выдачи';
 comment on column ref_book_id_doc.inc_rep is 'Включается в отчетность';
 comment on column ref_book_id_doc.duplicate_record_id is 'Идентификатор ФЛ - дубля, у которого был скопирован ДУЛ при назначении дубля';
 
@@ -2337,38 +2321,3 @@ create table department_decl_type_performer
 comment on table department_decl_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
 comment on column department_decl_type_performer.department_decl_type_id is 'Идентификатор связи подразделения с формой';
 comment on column department_decl_type_performer.performer_dep_id is 'Исполнитель'; 
---------------------------------------------------------------------------------------------------------------------------
--- Планировщик задач
---------------------------------------------------------------------------------------------------------------------------
-create table configuration_scheduler (
-  id        			number(9)           not null,
-  task_name 			varchar2(200 char) not null,
-  schedule  			varchar2(100 char),
-  active    			number(1) 			    not null,
-  modification_date   	date          not null,
-  last_fire_date 		date
-);
-
-comment on table configuration_scheduler is 'Настройки задач планировщика';
-comment on column configuration_scheduler.id is 'Идентификатор задачи';
-comment on column configuration_scheduler.task_name is 'Название';
-comment on column configuration_scheduler.schedule is 'Расписание';
-comment on column configuration_scheduler.active is 'Признак активности';
-comment on column configuration_scheduler.modification_date is 'Дата редактирования';
-comment on column configuration_scheduler.last_fire_date is 'Дата последнего запуска';
---
-create table configuration_scheduler_param(
-  id        			number(9)           not null,
-  param_name 			varchar2(200 char) not null,
-  task_id      			number(9)           not null,
-  ord        			number(9)           not null,
-  type        			number(1)           not null,
-  value		  			varchar2(200 char) not null
-);
-
-comment on table configuration_scheduler_param is 'Параметры задач планировщика';
-comment on column configuration_scheduler_param.id is 'Идентификатор параметра';
-comment on column configuration_scheduler_param.task_id is 'Сслыка на задачу планирощика';
-comment on column configuration_scheduler_param.ord is 'Порядок следования';
-comment on column configuration_scheduler_param.type is 'Тип параметра(1 - Строка, 2 - Целое число, 3 - Число с плавающей запятой)';
-comment on column configuration_scheduler_param.value is 'Значение';
