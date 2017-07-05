@@ -61,18 +61,14 @@ create index idx_ra_sv_vypl_parent on raschsv_sv_vypl(raschsv_pers_sv_strah_lic_
 create index idx_ra_sv_vypl_mk_parent on raschsv_sv_vypl_mk(raschsv_sv_vypl_id);
 create index idx_ra_vypl_sv_dop_parent on raschsv_vypl_sv_dop(raschsv_pers_sv_strah_lic_id);
 create index idx_ra_vypl_sv_dop_mt_parent on raschsv_vypl_sv_dop_mt(raschsv_vypl_sv_dop_id);
-create index idx_f_fias_addrobj_formalname on fias_addrobj (replace(lower(formalname),' ',''));
-create index idx_fias_addrobj_parentguid on fias_addrobj (parentguid);
-create index idx_fias_addrobj_region_status on fias_addrobj (regioncode, currstatus);
-create index idx_fias_addrobj_aoid on fias_addrobj(aoid);
 create index idx_log_entry_date on log_entry(creation_date);
 create index idx_ref_book_cal_work on ref_book_calendar(ctype);
 --create index i_ref_book_oktmo_code on ref_book_oktmo (code); -- дубль в create_ref_constraints.sql
 create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndfl_id,tax_organ_code,kpp);
-create index idx_fias_socrbase_lev on fias_socrbase(lev);
 create index idx_ndfl_references_person on ndfl_references(ndfl_person_id);
 create index idx_rbook_country_svr on ref_book_country(status,version,record_id);
 create index idx_rbook_oktmo_svr on ref_book_oktmo(status,version,record_id);
+create index idx_fias_addr_currst_aolev on fias_addrobj(currstatus,aolevel,replace(lower(formalname),' ',''));
 
 create index srch_fsocrbase_lev_scname on fias_socrbase(lev, trim(lower(scname)));
 create index srch_fsocrbase_lev_scname_n on fias_socrbase(lev, trim(lower(scname||'.')));
@@ -83,9 +79,6 @@ create index srch_refb_tax_payer_inp_asnu on ref_book_id_tax_payer(as_nu,lower(i
 create index srch_ref_book_person_inn on ref_book_person(replace(inn, ' ', ''));
 create index srch_ref_book_person_inn_f on ref_book_person(replace(inn_foreign, ' ', ''));
 create index srch_full_ref_pers_duble on ref_book_person (replace(lower(nvl(last_name,'empty')),' ',''), replace(lower(nvl(first_name,'empty')),' ',''), replace(lower(nvl(middle_name,'empty')),' ',''), birth_date, replace(replace(nvl(snils,'empty'),' ',''),'-',''), replace(nvl(inn,'empty'),' ',''), replace(nvl(inn_foreign,'empty'),' ',''));
-create index srch_fias_addrobj_postcode on fias_addrobj(replace(postalcode,' ',''));
-create index srch_fias_addrobj_regfnls on fias_addrobj(livestatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
-create index srch_fias_addrobj_csregfn on fias_addrobj(currstatus,regioncode,replace(lower(formalname),' ',''),trim(lower(shortname)));
 
 create index i_log_system_log_id on log_system(log_id);
 create index i_notification_log_id on notification(log_id);

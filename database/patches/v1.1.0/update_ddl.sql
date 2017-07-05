@@ -16,6 +16,9 @@ commit;
 prompt drop unuseable columns from fias_addrobj
 @@fias_addrobj_drop_cols.sql
 
+prompt recreate indexes on fias_addrobj
+@@recreate_fias_idxs.sql;
+
 prompt recreate mat views
 @@recreate_mat_views.sql;
 
