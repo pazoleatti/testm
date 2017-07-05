@@ -68,6 +68,7 @@ create index idx_ref_book_ndfl_detail_load on ref_book_ndfl_detail (ref_book_ndf
 create index idx_ndfl_references_person on ndfl_references(ndfl_person_id);
 create index idx_rbook_country_svr on ref_book_country(status,version,record_id);
 create index idx_rbook_oktmo_svr on ref_book_oktmo(status,version,record_id);
+create index idx_fias_addr_currst_aolev on fias_addrobj(currstatus,aolevel,replace(lower(formalname),' ',''));
 
 create index srch_fsocrbase_lev_scname on fias_socrbase(lev, trim(lower(scname)));
 create index srch_fsocrbase_lev_scname_n on fias_socrbase(lev, trim(lower(scname||'.')));
