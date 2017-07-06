@@ -1,17 +1,8 @@
 @grid-float-breakpoint: 1;
 
-@import "select-0.19.4";
-@import "bootstrap";
-//@import "bootstrap-theme";
+@import "bootstrap.css";
 @import "bootstrap-custom";
-@import "overlay";
-@import "dialogs";
-@import "app-modals";
-@import "alert";
-
 @import "less/bootstrap";
-//@import "tables";
-/* style.css */
 
 @mts_red: #1a9f29;
 // Высота шапки модального окна
@@ -49,46 +40,9 @@ a{
   width: 100%;
 }
 
-#refbook {
-  width: 100%;
-}
-
-#refbook-content, .content-with-table {
-  overflow: hidden;
-  height: 550px;
-}
-
 .notifications-content, #role-management-content {
   overflow: hidden;
   height: 750px;
-}
-
-#refbook-grid {
-  overflow: hidden;
-  height: 100%;
-  position: relative;
-  box-sizing: border-box;
-}
-
-.usim-grid {
-  overflow: hidden;
-  height: 100%;
-  position: relative;
-  box-sizing: border-box;
-}
-
-#refbook-edit-panel, .notifications-edit-panel {
-  padding-top: 10px;
-  width: 400px;
-  float: right;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  height: 600px;
-}
-
-#refbook-edit-panel .control-label, #refbook-edit-panel .form-control, #refbook-edit-panel div,
-.notifications-edit-panel .control-label, .notifications-edit-panel .form-control, .notifications-edit-panel div {
-  padding-right: 0;
 }
 
 .right {
@@ -129,45 +83,8 @@ body {
   padding-top: 16px;
 }
 
-.aplanaAlert .close {
-  font-size: 21px;
-  color: #555;
-  opacity: 1;
-}
-
-.aplanaAlert .icon.error {
-  margin-top: 10px;
-}
-
-.icon.error {
-  background-image: url('../img/alert/error.png');
-}
-
-/* Кнопка "Выход" */
-.logout_link {
-  cursor: pointer;
-  margin-left: 20px;
-  border: 1px #1a9f29 solid;
-  margin: 8px 0 8px 8px;
-  padding: 5px 9px !important;
-  border-radius: 5px;
-}
-
-.logout_link:hover {
-  border-color: red;
-}
-
 #edit-object .modal-header h4 {
   color: #1a9f29;
-}
-
-/* Фикс длинного текста для выбранного элемент в ui-select - текст обрезается */
-.ui-select-bootstrap .ui-select-match-text > span {
-  display: block;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  padding-right: 20px;
-
 }
 
 /***************************************** Стили для модальных окон ***************************************************/
@@ -205,20 +122,6 @@ body {
   background-color: #1a9f29;
   border-color: #1a9f29;
 }
-
-.modal-dialog .btn-primary:focus,
-.modal-dialog .btn-primary.focus {
-  color: #ffffff;
-  background-color: #c9302c;
-  border-color: #761c19;
-}
-
-.modal-dialog .btn-primary:hover {
-  color: #ffffff;
-  background-color: #c9302c;
-  border-color: #ac2925;
-}
-
 .button_panel {
   margin-bottom: 2px;
 }
@@ -248,7 +151,7 @@ button.btn.btn-default:hover:not([disabled]) {
 }
 
 button.btn-back-to-list {
-  padding: 0px 15px 0px 0px;
+  padding: 0 15px 0 0;
   border-color: #FFFFFF;
   border-radius: 4px;
   margin-right: 4px;
@@ -263,10 +166,6 @@ button.btn-back-to-list.btn-default:hover:not([disabled]),
   border-radius: 4px;
   background-color: #FFFFFF;
   color: inherit;
-}
-
-#refbook-right-btn-group, .notification-right-btn-group {
-  margin-left: -4px;
 }
 
 .grid-filter .form-group {
@@ -288,29 +187,8 @@ button.btn-back-to-list.btn-default:hover:not([disabled]),
   margin-right: 15px;
 }
 
-.red {
-  background-color: red;
-}
-
-.blue {
-  background-color: blue;
-}
-
-.green {
-  background-color: green;
-}
-
-.yellow {
-  background-color: yellow;
-}
-
 input[type="checkbox"] {
   margin-top: 2px;
-}
-
-.form-group.required .control-label:after {
-  content: "*";
-  color: red;
 }
 
 ::-ms-clear {
@@ -337,11 +215,11 @@ input[type="checkbox"] {
 }
 
 .form-bordered-column > div {
-  margin: 9px 0px;
+  margin: 9px 0;
 }
 
 .form-bordered-column > button {
-  margin: 8px 0px;
+  margin: 8px 0;
   height: 32px;
   width: 35px;
   padding: 0;
@@ -362,7 +240,7 @@ input[type="checkbox"] {
 }
 
 .role-table .row {
-  margin: 0px 15px;
+  margin: 0 15px;
 }
 
 .operation-table,
@@ -389,59 +267,13 @@ input[type="checkbox"] {
 .build_info {
   font-size: 100%;
   position: fixed; /* Фиксированное положение */
-  left: 0; bottom: 0px; /* Левый нижний угол */
+  left: 0; bottom: 0; /* Левый нижний угол */
 }
 
 /* Признак обязательности поля */
 label.required:after {
   content: "*";
   color: red;
-}
-
-/* Оформление главной страницы. Текст по центру */
-#main-page {
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  height: 1px;
-}
-
-#main-page > div {
-  color: #cccccc;
-  text-align: center;
-  font-size: 30px;
-  margin-top: -50px;
-  text-shadow: 5px 5px 5px rgba(180, 180, 180, 0.2);
-}
-
-#main-page p + p {
-  font-size: 20px;
-}
-
-#splitForecast .form-group {
-  margin-bottom: auto;
-}
-
-#splitForecast .col-md-4 {
-  margin-left: -100px;
-}
-
-/* В окне назначения прав доступа ролям сделал выравнивание текста по левому краю */
-.operation-table .control-label {
-  width: 100%;
-  text-align: left;
-}
-
-#planningCommonInfo .form-group {
-  margin: 0;
-}
-
-.deletedRow {
-  background-color: rgba(255, 0, 0, 0.47) !important;
-}
-
-.returnedRow {
-  background-color: rgba(255, 102, 14, 0.47) !important;
 }
 
 .header-details {
@@ -482,49 +314,6 @@ label.required:after {
 
 .w500 {
   width: 500px;
-}
-
-.main-label::before {
-  content: "• ";
-  color: #ff0000;
-}
-
-.numberItems,
-.numberItemsHistory {
-  font-size: medium;
-  margin-top: 10px;
-}
-
-.ui-grid-cell.ui-grid-disable-selection.ui-grid-row-header-cell {
-  pointer-events: auto;
-}
-
-.ui-grid-disable-selection {
-  user-select: text;
-  cursor: default;
-  -ms-user-select: text;
-}
-
-.ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell,
-.ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell {
-  background-color: #FFF0F5;
-}
-
-.ui-select-container > div {
-  max-height: 60px;
-}
-
-.ui-select-match > span,
-.ui-select-match-text > span {
-  max-height: 20px;
-}
-
-input.ui-select-search {
-  width: 98% !important;
-}
-
-.ui-grid-header-cell-label {
-  white-space: nowrap;
 }
 
 hr {
@@ -620,16 +409,6 @@ button.btn.btn-default.ng-binding {
 
 .ui-select-bootstrap > .ui-select-match > .btn {
   padding: 3px 5px;
-}
-
-.form-group {
-  .form-control {
-    padding: 1px 5px;
-    min-height: 25px;
-    &:focus {
-      border-color: #1a9f29;
-    }
-  }
 }
 
 .form-control {
