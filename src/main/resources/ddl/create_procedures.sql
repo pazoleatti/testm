@@ -1609,6 +1609,13 @@ as
   -- Обновить материализованные представления
   procedure RefreshViews;
   
+  -- Переключить внешние ключи
+  -- p_mode: DISABLE - отключить, ENABLE - включить
+  procedure TurnForeignKeys(p_mode varchar2);
+  
+  -- Очистить таблицу FIAS_ADDROBJ
+  procedure ClearFiasAddrObj;
+  
 end fias_pkg;
 /
 show errors;
@@ -2080,93 +2087,7 @@ begin
 
      return v_ref;
    end;
-  /*
-  -------------------------------------------------------------------------------------------------------------
-  -- Выполнить проверку на полное совпадение с ФИАС адресов, указанных в декларации
-  -- возвращается курсор на таблицу типа TTblCheckAddrByFias
-  -- для записей, по которым не установлен адрес в ФИАС, выполняется проверка наличия/отсутствия в ФИАС элементов адресов
-  -- проверка выполняется по функции GetFiasAddrsFS
-  -------------------------------------------------------------------------------------------------------------
-  function CheckAddrByFias(p_declaration number,p_check_type number default 0) return ref_cursor
-  is
-    v_ref ref_cursor;
-  begin
-    v_check_path:=(p_check_type=1);
-    open v_ref for
-      select n.id,n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
-             n.ndfl_full_addr,n.area_type,n.area_fname,n.city_type,n.city_fname,n.loc_type,n.loc_fname,n.street_type,n.street_fname,
-             f.id fias_id,
-             f.postalcode fias_index,
-             f.formalname fias_street,
-             f.shortname fias_street_type,
-             fc.id fias_city_id,
-             fc.formalname fias_city_name,
-             (select decode(count(*),0,0,1) 
-                from mv_fias_street_act f 
-               where f.regioncode=n.region_code 
-                 and f.postalcode=n.post_index) chk_index,
-             (select decode(count(*),0,0,1) 
-                from mv_fias_street_act f 
-               where f.regioncode=n.region_code) chk_region,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.area_fname,',','AREA',0) 
-                  else 1
-             end chk_area,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.city_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';',';'),n.area_fname),'CITY',n.city_leaf) 
-                  else 1
-             end chk_city,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.loc_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';',';')||nvl2(n.city_fname,n.city_fname||';',''),nvl(n.city_fname,n.area_fname)),'LOCALITY',n.loc_leaf) 
-                  else 1
-             end chk_loc,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.street_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';','')||nvl2(n.city_fname,n.city_fname||';','')||nvl2(n.loc_fname,n.loc_fname||';',''),nvl(n.loc_fname,n.city_fname)),'STREET',1) 
-                  else 1
-             end chk_street
-        from (
-              select tab.*,
-                     nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||nvl2(tab.loc_fname,tab.loc_fname||',','')||
-                     nvl2(tab.street_fname,tab.street_fname||',','') ndfl_full_addr,
-                     (select min(f.street_id)
-                        from table(fias_pkg.GetFiasAddrsFS(tab.region_code,replace(lower(tab.area_fname),' ',''),replace(lower(tab.city_fname),' ',''),replace(lower(tab.loc_fname),' ',''),replace(lower(tab.street_fname),' ',''),
-                                                           trim(lower(tab.area_type)),trim(lower(tab.city_type)),trim(lower(tab.loc_type)),trim(lower(tab.street_type)),tab.post_index)) f
-                       where lower(f.full_addr)=lower(nvl2(tab.area_fname,tab.area_fname||',','')||nvl2(tab.city_fname,tab.city_fname||',','')||nvl2(tab.loc_fname,tab.loc_fname||',','')||
-                                                           nvl2(tab.street_fname,tab.street_fname||',',''))
-                     ) fa_id
-                from (
-                      select n.id,
-                             n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
-                             fias_pkg.GetParseType(3,n.area) area_type,
-                             fias_pkg.GetParseName(3,n.area) area_fname,
-                             case when n.city is null and n.region_code='77' then 'г'
-                                  when n.city is null and n.region_code='78' then 'г'
-                                  when n.city is null and n.region_code='92' then 'г'
-                                  when n.city is null and n.region_code='99' then 'г'
-                                  when n.region_code='78' and upper(n.city)='САНКТ-ПЕТЕРБУРГ' then 'г'
-                                  else fias_pkg.GetParseType(4,n.city)
-                             end  city_type,
-                             case when n.city is null and n.region_code='77' then 'Москва'
-                                  when n.city is null and n.region_code='78' then 'Санкт-Петербург'
-                                  when n.city is null and n.region_code='92' then 'Севастополь'
-                                  when n.city is null and n.region_code='99' then 'Байконур'
-                                  else fias_pkg.GetParseName(4,n.city)
-                             end city_fname,
-                             fias_pkg.GetParseType(7,n.street) street_type,
-                             fias_pkg.GetParseName(7,n.street) street_fname,
-                             fias_pkg.GetParseType(6,n.locality) loc_type,
-                             fias_pkg.GetParseName(6,n.locality) loc_fname,
-                             case when n.street is null and n.city is not null then 1
-                                  else 0
-                             end city_leaf,
-                             case when n.street is null and n.locality is not null then 1
-                                  else 0
-                             end loc_leaf       
-                        from ndfl_person n
-                       where n.declaration_data_id=p_declaration
-                         --and n.id between p_start_id and p_start_id+999
-                      ) tab
-                ) n left join fias_addrobj f on (f.id=n.fa_id) left join fias_addrobj fc on (fc.id=f.parentguid);
-    
-    return v_ref;
-  end;
-*/
+
   -------------------------------------------------------------------------------------------------------------
   -- Выполнить проверку на наличие/отсутствие в ФИАС элементов адресов, указанных в декларации
   -- возвращается курсор на таблицу типа TTblCheckExistsAddrByFias
@@ -2226,7 +2147,9 @@ begin
     return v_ref;
   end;
 
+  ------------------------------------------------------------------------------
   -- Обновить материализованные представления
+  ------------------------------------------------------------------------------
   procedure RefreshViews
   is
   begin
@@ -2236,78 +2159,42 @@ begin
     dbms_mview.REFRESH('MV_FIAS_STREET_ACT', 'C');
   end;
   
-
-end fias_pkg;
-/
-show errors;
-create or replace package report_pkg as 
-
-  -- Сконвертировать BLOB в CLOB
-  function blob_to_clob (p_blob in blob) return clob;
-  
-  -- Получить количество ФЛ в отчетной форме НДФЛ-6
-  function GetNDFL6PersCnt(p_declaration number) return number;
-
-end report_pkg;
-/
-show errors;
-
-create or replace package body report_pkg as
-
-  --------------------------------------------------------------------------------
-  -- Сконвертировать BLOB в CLOB
-  --------------------------------------------------------------------------------
-  function blob_to_clob (p_blob in blob) return clob
+  ------------------------------------------------------------------------------
+  -- Переключить внешние ключи
+  -- p_mode: DISABLE - отключить, ENABLE - включить
+  ------------------------------------------------------------------------------
+  procedure TurnForeignKeys(p_mode varchar2)
   is
-  v_file_clob clob;
-  v_file_size integer := 1024;
-  v_dest_offset integer := 1;
-  v_src_offset integer := 1;
-  v_blob_csid number :=  nls_charset_id('CL8MSWIN1251');--dbms_lob.default_csid;
-  v_lang_context number := dbms_lob.default_lang_ctx;
-  v_warning integer;
-  v_size integer := 0;
-  
+    cursor foreign_keys is
+      select fk.table_name,fk.constraint_name
+        from user_constraints pk left join user_constraints fk on (fk.r_constraint_name=pk.constraint_name)
+       where pk.table_name='FIAS_ADDROBJ'
+         and pk.constraint_type='P';
+    v_mode varchar2(8 char):=lower(p_mode);
   begin
-  
-  dbms_lob.createtemporary(v_file_clob, true);
-  
-  select dbms_lob.getlength(p_blob) into v_size from dual;
-  
-  --if (v_size <= v_file_size) then v_file_size := v_size; end if;
-  
-  v_file_size := v_size;
-  
-  dbms_lob.converttoclob(v_file_clob,
-  p_blob,
-  v_file_size,
-  v_dest_offset,
-  v_src_offset,
-  v_blob_csid,
-  v_lang_context,
-  v_warning);
-  
-  return v_file_clob;
-  
+    if v_mode not in ('disable','enable') then
+      return;
+    end if;
+    
+    for c in foreign_keys loop
+      execute immediate 'alter table '||lower(c.table_name)||' '||v_mode||' constraint '||lower(c.constraint_name);
+    end loop;
+    
   end;
 
-
-  function GetNDFL6PersCnt(p_declaration number) return number 
-  as
-    v_result number:=null;
+  ------------------------------------------------------------------------------
+  -- Очистить таблицу FIAS_ADDROBJ
+  ------------------------------------------------------------------------------
+  procedure ClearFiasAddrObj
+  is
   begin
-    select to_number(extractValue(xmltype(report_pkg.blob_to_clob(bd.data)),'/Файл/Документ/НДФЛ6/ОбобщПоказ/@КолФЛДоход')) into v_result
-      from declaration_data_file ddf left join blob_data bd on (bd.id=ddf.blob_data_id)
-     where declaration_data_id=p_declaration;
-
-    return v_result;
+    TurnForeignKeys('disable');
+    delete from fias_addrobj;
+    TurnForeignKeys('enable');
+    
+  end;
   
-  exception when others then
   
-    return null;
-  
-  end getndfl6perscnt;
-
-end report_pkg;
+end fias_pkg;
 /
 show errors;
