@@ -650,7 +650,7 @@ comment on column task_context.user_id is 'Идентификатор польз
 create sequence seq_task_context start with 100;
 ------------------------------------------------------------------------------------------------------
 create table notification (
-  id                     number(9),
+  id                     number(18),
   report_period_id       number(9)              null,
   sender_department_id   number(9)              null,
   receiver_department_id number(9)              null,

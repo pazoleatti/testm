@@ -69,7 +69,7 @@
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
                         data-ng-click="checkButtonClick()">
-                    <img src="/client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/check.png"
+                    <img src="client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/check.png"
                          width="32px" height="22px"
                          alt="{{'button.check' | translate}}"/>
                     <span data-translate-once="button.check"></span>
@@ -79,7 +79,7 @@
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
                         data-ng-click="calculateButtonClick()">
-                    <img src="/client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/calculate.png"
+                    <img src="client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/calculate.png"
                          width="32px" height="22px"
                          alt="{{'button.calculate' | translate}}"/>
                     <span data-translate-once="button.calculate"></span>
@@ -89,7 +89,7 @@
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
                         data-ng-click="acceptButtonClick()">
-                    <img src="/client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/accept.png"
+                    <img src="client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/accept.png"
                          width="32px" height="22px"
                          alt="{{'button.accept' | translate}}"/>
                     <span data-translate-once="button.accept"></span>
@@ -99,7 +99,7 @@
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
                         data-ng-click="returnButtonClick()">
-                    <img src="/client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/return.png"
+                    <img src="client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/return.png"
                          width="32px" height="22px"
                          alt="{{'button.return' | translate}}"/>
                     <span data-translate-once="button.return"></span>
@@ -109,7 +109,7 @@
                     <span>
                 <button type="button" class="btn btn-default" data-ng-disabled="!editButtonEnabled"
                         data-ng-click="editRecordClick()">
-                    <img src="/client/img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px"
+                    <img src="client/img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px"
                          height="22px"
                          alt="{{'button.edit' | translate}}"/>
                     <span data-translate-once="button.edit"></span>
@@ -126,21 +126,21 @@
             <div data-ng-controller="ndflCtrl">
                 <div class="container-grid" style="height: 100%">
                     <div class='container-grid-top'>
-                        <span data-ng-include="'/client/app/taxes/ndfl/ndflFilter.html'"></span>
+                        <span data-ng-include="'client/app/taxes/ndfl/ndflFilter.html'"></span>
                         <div class="button_panel" style="float: right;">
                             <div class="btn-toolbar" role="toolbar">
                                 <!--Редактировать запись в таблице-->
                                     <span>
                                 <button type="button" class="btn btn-default" data-ng-disabled="!editReqsEnabled"
                                         data-ng-click="editFLClick()">
-                                    <img src="/client/img/button/enable/edit_entry.png" width="15px" height="15px"/>
+                                    <img src="client/img/button/enable/edit_entry.png" width="15px" height="15px"/>
                                 </button>
                             </span>
                                 <!--Создать запись в таблице-->
                                     <span>
                                 <button type="button" class="btn btn-default"
                                         data-ng-click="createFLClick()">
-                                    <img src="/client/img/button/enable/create_entry.png" width="15px"
+                                    <img src="client/img/button/enable/create_entry.png" width="15px"
                                          height="15px"/>
                                 </button>
                             </span>
@@ -148,7 +148,7 @@
                                     <span>
                                 <button type="button" class="btn btn-default" data-ng-disabled="!deleteReqsEnabled"
                                         data-ng-click="deleteFLClick()">
-                                    <img src="/client/img/button/enable/delete_entry.png" width="15px"
+                                    <img src="client/img/button/enable/delete_entry.png" width="15px"
                                          height="15px"/>
                                 </button>
                             </span>
