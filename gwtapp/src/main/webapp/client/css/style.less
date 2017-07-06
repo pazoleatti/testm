@@ -1,7 +1,6 @@
 @grid-float-breakpoint: 1;
 
 @import "bootstrap.css";
-@import "bootstrap-custom";
 @import "less/bootstrap";
 
 @mts_red: #1a9f29;
@@ -86,7 +85,192 @@ body {
 #edit-object .modal-header h4 {
   color: #1a9f29;
 }
+/*===========================bootstrap-custom==================================*/
+/* bootstrap-custom.css */
 
+/* Уменьшаем расстояние между пунктами главного меню */
+.nav > li > a {
+  padding: 15px 5px;
+}
+
+.navbar {
+  margin-bottom: 0; /* Устраняем лишнее пространство межжу меню и основным содержимым*/
+}
+
+.navbar .dropdown:hover {
+  background-color: #e8e8e8;
+}
+
+.navbar-right {
+  margin-left: 0;
+  margin-right: 15px;
+}
+/* Курсор мыши в виде кисти для пунктов меню */
+.dropdown, .dropdown-menu > .active {
+  cursor: pointer;
+}
+
+/* Стили для логотипа */
+.navbar-header a {
+  text-decoration: none;
+}
+.navbar-header a span {
+  color: #777;
+  display: inline-block;
+  vertical-align: middle;
+  text-transform: uppercase;
+  font-size: 9px;
+  margin-right: 15px;
+}
+
+a.collapse-link {
+  cursor: pointer;
+}
+
+//TODO для bootstrap найти исходники less, управлять переменными, а не переопределять стили
+body {
+  font-size: 12px;
+}
+h1,
+.h1 {
+  font-size: 24px;
+}
+h2,
+.h2 {
+  font-size: 21px;
+}
+h3,
+.h3 {
+  font-size: 18px;
+}
+h4,
+.h4 {
+  font-size: 16px;
+}
+h5,
+.h5 {
+  font-size: 14px;
+}
+h6,
+.h6 {
+  font-size: 12px;
+}
+.btn, .form-control {
+  font-size: 12px;
+}
+/* Цвет выделения строки в таблице. Желтый */
+.ui-grid-row.ui-grid-row-selected > [ui-grid-row] > .ui-grid-cell {
+  background-color: #F6E8B6;
+}
+/* Настройка для кнопки удаления в выпадающих списках ui-select*/
+.ui-select-toggle .btn {
+  margin-right: 20px !important;
+  color: black;
+}
+.ui-select-toggle .btn i:before{
+  content: "\e020" !important;
+}
+/*Удалаяем кнопку очистки поля. Появляется в IE 10 версии и выше*/
+input::-ms-clear {
+  width: 0;
+  height: 0;
+}
+.nav-tabs > li > a {
+  padding: 5px 20px;
+  font-weight: bold
+}
+/* Звездочка для обязательных полей*/
+.form-group.required .control-label:after {
+  content: "*";
+  color: red;
+}
+input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match >span{
+  box-shadow: inset 0 0 3px red;
+}
+.form-group .text-danger p, .form-group .text-danger span {
+  position: relative;
+  bottom: 0;
+  margin: 0;
+  font-size: 90%;
+}
+/* Расширим, чтобы уместились сообщения об ошибках */
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group .input-group{
+  margin-bottom: 0;
+}
+p.input-group{
+  margin-bottom: 0;
+}
+input[type="number"]{
+  text-align: right;
+}
+
+/* Перенос текста в ui-select */
+.ui-select-bootstrap .ui-select-choices-row > span {
+  white-space: normal;
+}
+/* Перенос текста в выпадашках с мультивыбором */
+.btn {
+  /* white-space: normal;*/
+}
+/* Скролл в выпадашках с мультивыбором */
+.ui-select-multiple > div{
+  max-height: 100px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+/* Перенос текста в ячейках таблицы */
+.ui-grid:not(.no-wrapping) > .ui-grid-contents-wrapper > .ui-grid-render-container > .ui-grid-viewport > .ui-grid-canvas > .ui-grid-row,
+.ui-grid:not(.no-wrapping) > .ui-grid-contents-wrapper > .ui-grid-pinned-container > .ui-grid-render-container > .ui-grid-viewport > .ui-grid-canvas > .ui-grid-row {
+  height: auto!important;
+}
+.ui-grid:not(.no-wrapping) > .ui-grid-contents-wrapper > .ui-grid-render-container > .ui-grid-viewport > .ui-grid-canvas > .ui-grid-row  > div,
+.ui-grid:not(.no-wrapping) > .ui-grid-contents-wrapper > .ui-grid-pinned-container > .ui-grid-render-container > .ui-grid-viewport > .ui-grid-canvas > .ui-grid-row  > div {
+  display: table-row;
+}
+.ui-grid:not(.no-wrapping) > .ui-grid-contents-wrapper > .ui-grid-render-container > .ui-grid-viewport > .ui-grid-canvas > .ui-grid-row  > div .ui-grid-cell,
+.ui-grid:not(.no-wrapping) > .ui-grid-contents-wrapper > .ui-grid-pinned-container > .ui-grid-render-container > .ui-grid-viewport > .ui-grid-canvas > .ui-grid-row  > div .ui-grid-cell {
+  display: table-cell;
+  float: none;
+  vertical-align: middle;
+  height: auto!important;
+}
+.ui-grid-cell-contents {
+  white-space: normal;
+  text-overflow: inherit;
+  word-break: normal;
+}
+.ui-grid-viewport {
+  overflow-anchor: none;
+}
+.form-control{
+  height: 25px;
+  padding: 1px 12px;
+}
+/* Убрал синие свечение в полях ввода */
+.form-control:focus {
+  border-color: black;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(100, 100, 100, 0.5);
+}
+/* Цвет текста в модальном окне уведомления */
+.text-info {
+  color: inherit;
+}
+.dropdown-menu{
+  font-size: inherit;
+}
+.dropdown-menu > li > a, .btn-default, .form-control , .ui-select-bootstrap .ui-select-choices-row > span {
+  color: #777777;
+}
+.ui-grid-cell-contents{
+  padding: 3px;
+}
+.ui-select-bootstrap .ui-select-choices-row > span {
+  padding-left: 10px;
+  padding-right: 10px;
+}
 /***************************************** Стили для модальных окон ***************************************************/
 .modal-header {
   background-color: #ffffff;
@@ -712,5 +896,12 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 .uib-datepicker-popup {
   .btn {
     padding: 6px 9px;
+  }
+}
+.form-horizontal {
+  .modal-body {
+    .control-label {
+      text-align: left;
+    }
   }
 }
