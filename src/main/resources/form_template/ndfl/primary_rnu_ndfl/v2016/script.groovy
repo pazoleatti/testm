@@ -945,7 +945,8 @@ import java.text.SimpleDateFormat
         //подготовка записей
         if (identityObjectList != null && !identityObjectList.isEmpty()) {
 
-            logForDebug("Добавление записей: refBookId=" + refBookId + ", size="+identityObjectList.size())
+            def refBookName = getProvider(refBookId).refBook.name
+            logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
 
             List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
             for (IdentityObject identityObject : identityObjectList) {
