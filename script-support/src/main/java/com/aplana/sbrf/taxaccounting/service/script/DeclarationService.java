@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -428,4 +429,11 @@ public interface DeclarationService {
      * @return
      */
     List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
+
+    /**
+     * Находит все пары КПП/ОКТМО которых нет в справочнике Подразделений, но которые представлены у  операций относящихся к НФ
+     * @param declarationDataId
+     * @return
+     */
+    List<Pair<String, String >> findNotPresentedPairKppOktmo(Long declarationDataId);
 }

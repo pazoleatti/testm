@@ -605,4 +605,23 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
+    @Override
+    public String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate) {
+        String query = "select dep.name, max(rnd.version) " +
+                "from department dep " +
+                "join ref_book_ndfl_detail rnd on dep.id = rnd.department_id " +
+                "join ref_book_oktmo ro on ro.id = rnd.oktmo " +
+                "where rnd.kpp = :kpp and ro.code = :oktmo and rnd.version <= :reportPeriodEndDate group by dep.NAME";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo)
+                .addValue("reportPeriodEndDate", reportPeriodEndDate);
+
+        return getNamedParameterJdbcTemplate().queryForObject(query, params, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet resultSet, int i) throws SQLException {
+                return resultSet.getString("name");
+            }
+        });
+    }
 }
