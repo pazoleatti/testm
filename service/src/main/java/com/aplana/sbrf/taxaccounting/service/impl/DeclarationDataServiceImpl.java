@@ -1743,7 +1743,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else {
                     success++;
                     String message = getDeclarationFullName(entry.getKey(), null);
-                    logger.info("Успешно выполнен расчет для " + message.replace("Налоговая форма", "налоговой формы"));
+                    logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"));
                     logger.getEntries().addAll(scriptLogger.getEntries());
                 }
             }
