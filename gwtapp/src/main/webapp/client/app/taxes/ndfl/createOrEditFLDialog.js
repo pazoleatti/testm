@@ -7,9 +7,9 @@
 
     angular.module('sbrfNdfl.createOrEditFLDialog', [])
 
-        /**
-         * @description Контроллер формы создания/редактирования ФЛ
-         */
+    /**
+     * @description Контроллер формы создания/редактирования ФЛ
+     */
         .controller('createOrEditFLCtrl', ["$scope", "$http", "$uibModalInstance", "$alertService", "$translate", 'data', 'FormLeaveConfirmer',
             function ($scope, $http, $uibModalInstance, $alertService, $translate, data, FormLeaveConfirmer) {
                 /**
@@ -56,12 +56,6 @@
                             initSelection: function (element, callback) {
                                 //данные об выбранном значении лучше брать в ng-model
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    //запрашиваем расширенную информацию по id. если все данные уже есть - запрос можно не далать, просто вернуть их
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
@@ -83,11 +77,6 @@
                             },
                             initSelection: function (element, callback) {
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
@@ -109,11 +98,6 @@
                             },
                             initSelection: function (element, callback) {
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
@@ -135,11 +119,6 @@
                             },
                             initSelection: function (element, callback) {
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
@@ -161,11 +140,6 @@
                             },
                             initSelection: function (element, callback) {
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
@@ -189,11 +163,6 @@
                             },
                             initSelection: function (element, callback) {
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
@@ -217,11 +186,6 @@
                             },
                             initSelection: function (element, callback) {
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
@@ -242,11 +206,6 @@
                             },
                             initSelection: function (element, callback) {
                                 var id = $(element).data('$ngModelController').$modelValue ? $(element).data('$ngModelController').$modelValue.id : null;
-                                if (id) {
-                                    $http.get('/getData?id='+id).success(function (res) {
-                                        callback(res);
-                                    });
-                                }
                             },
                             data: {
                                 results: [
