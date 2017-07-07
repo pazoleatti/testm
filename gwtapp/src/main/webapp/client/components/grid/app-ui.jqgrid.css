@@ -141,7 +141,7 @@
 }
 
 .ui-state-default .ui-icon {
-    background-image: url("/ui-icons_000000_256x240.png");
+    background-image: url("ui-icons_000000_256x240.png");
     /* background-image: url(../img/sprites_orange/next-prew-arrow.png);
      background-size: cover;*/
 }
@@ -198,14 +198,14 @@ background-position: -40px 0;*/
 }
 
 .ui-state-hover .ui-icon, .ui-state-focus .ui-icon {
-    background-image: url("../components/grid/ui-icons_7d7d7d_256x240.png");
+    background-image: url("ui-icons_7d7d7d_256x240.png");
     /* background-image: url("../img/sprites_orange/next-prew-arrow.png");*/
 }
 
 .ui-state-disabled .ui-icon,
 .ui-widget-content .ui-state-disabled .ui-icon,
 .ui-widget-header .ui-state-disabled .ui-icon {
-    background-image: url("../components/grid/ui-icons_b2b2b2_256x240.png");
+    background-image: url("ui-icons_b2b2b2_256x240.png");
     /*background-image: url("../img/sprites_orange/next-prew-arrow.png");*/
 .opacity(100);
 }
@@ -304,7 +304,7 @@ background-position: -40px 0;*/
 }
 
 .ui-icon {
-    background-image: url("../components/grid/ui-icons_000000_256x240.png");
+    background-image: url("ui-icons_000000_256x240.png");
     background-repeat: no-repeat;
     display: block;
     overflow: hidden;
