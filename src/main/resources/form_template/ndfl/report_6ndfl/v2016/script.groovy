@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.Logger
+import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.service.script.*
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
@@ -153,6 +154,8 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
 @Field
 final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
+@Field
+int pairKppOktmoSize = 0
 
 // Кэш провайдеров
 @Field def providerCache = [:]
@@ -989,7 +992,10 @@ final int REF_BOOK_DOC_STATE = 929
 List<PairKppOktmo> getPairKppOktmoList() {
     def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def pairKppOktmoList = []
-
+    departmentParam = getDepartmentParam(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id, false)
+    String depName = departmentService.get(departmentParam.DEPARTMENT_ID.value.toInteger()).name
+    def reportPeriod = departmentReportPeriod.reportPeriod
+    def otchetGod = reportPeriod.taxPeriod.year
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
     if (departmentReportPeriod.correctionDate != null) {
@@ -1079,6 +1085,11 @@ List<PairKppOktmo> getPairKppOktmoList() {
                 }
             }
         }
+        if (pairKppOktmoList.isEmpty()) {
+            logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", FORM_NAME_NDFL6, depName, "$otchetGod ${reportPeriod.name}")
+            return
+        }
+        pairKppOktmoSize = pairKppOktmoList.size()
     }
     return pairKppOktmoList
 }
@@ -1091,12 +1102,13 @@ List<PairKppOktmo> getPairKppOktmoList() {
  */
 @TypeChecked
 def createCorrPeriodNotFoundMessage(DepartmentReportPeriod departmentReportPeriod, boolean forDepartment) {
+    DepartmentReportPeriod prevDrp = getPrevDepartmentReportPeriod(departmentReportPeriod)
     Department department = departmentService.get(departmentReportPeriod.departmentId)
-    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
+    String correctionDateExpression = getCorrectionDateExpression(departmentReportPeriod)
     if (forDepartment) {
-        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
+        logger.error("Уточненная отчетность $FORM_NAME_NDFL6 для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не сформирована. Для подразделения ${department.name} и периода ${prevDrp.reportPeriod.taxPeriod.year}, ${prevDrp.reportPeriod.name}" + getCorrectionDateExpression(prevDrp) + " не найдены отчетные формы, \"Состояние ЭД\" которых равно \"Отклонен\", \"Требует уточнения\" или \"Ошибка\".")
     } else {
-        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдены физические лица для формирования уточненной отчетности")
+        logger.error("Уточненная отчетность $FORM_NAME_NDFL6 для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не сформирована. Для заданного В отчетных формах подразделения ${department.name} и периода ${prevDrp.reportPeriod.taxPeriod.year}, ${prevDrp.reportPeriod.name}" +  getCorrectionDateExpression(prevDrp) + " не найдены физические лица, \"Текст ошибки от ФНС\" которых заполнен. Уточненная отчетность формируется только для указанных физических лиц.")
     }
 }
 
@@ -1132,14 +1144,20 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
             if (ndflPersons != null && ndflPersons.size() != 0) {
                 addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
             } else {
-                logger.warn("Для подразделения: $depName, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo} за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют сведения о НДФЛ.")
+                String depChildName = departmentService.getDepartmentNameByPairKppOktmo(pair.kpp, pair.oktmo, departmentReportPeriod.reportPeriod.endDate)
+                logger.warn("Не удалось создать форму $FORM_NAME_NDFL6, за период $otchetGod ${reportPeriod.name} $strCorrPeriod, подразделение: ${depChildName?: ""}, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo}. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName, за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют сведения о НДФЛ для указанных КПП и ОКТМО.")
             }
         }
+    }
+    if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
+        logger.error("Отчетность $FORM_NAME_NDFL6 для $depName за период $otchetGod ${reportPeriod.name} $strCorrPeriod не сформирована. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют сведения о не удержанном налоге.")
     }
     return ndflPersonsGroupedByKppOktmo
 }
 
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
+@Field
+DeclarationData declarationDataConsolidated;
 /**
  * Проверки которые относятся только к консолидированной
  * @return
@@ -1206,6 +1224,7 @@ def checkDataConsolidated() {
 }
 
 def createForm() {
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
     def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
     def declarationTypeId = currDeclarationTemplate.type.id
     // Список физлиц для каждой пары КПП и ОКТМО
@@ -1215,10 +1234,15 @@ def createForm() {
         declarationService.delete(it.id, userInfo)
     }
 
-    if (ndflPersonsGroupedByKppOktmo == null) {
+    if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
         return
     }
-
+    // Пары КПП/ОКТМО отсутствующие в справочнике настройки подразделений
+    declarationDataConsolidated = declarationDataConsolidated ?: declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, departmentReportPeriod.id).get(0)
+    List<Pair<String, String>> kppOktmoNotPresentedInRefBookList = declarationService.findNotPresentedPairKppOktmo(declarationDataConsolidated.id);
+    for (Pair<String, String> kppOktmoNotPresentedInRefBook: kppOktmoNotPresentedInRefBookList) {
+        logger.warn("Для подразделения Тербанк отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.", kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
+    }
     ndflPersonsGroupedByKppOktmo.each { npGroup ->
         ScriptUtils.checkInterrupted()
         Map<String, Object> params
@@ -1232,9 +1256,9 @@ def createForm() {
                 departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, null)
 
         params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
+        params.put("pairKppOktmoTotal", pairKppOktmoSize)
         formMap.put(ddId, params)
     }
-
 }
 
 def getOktmoByIdList(idList) {
@@ -1259,7 +1283,9 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         createEmptyMessage(departmentReportPeriod, false)
         return null;
     }
-
+    if (declarationDataConsolidated == null) {
+        declarationDataConsolidated = declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, departmentReportPeriod.id).get(0)
+    }
     if (!checkExistingAcceptedConsDDForCurrTB(departmentReportPeriod, allDeclarationData)) {
         createEmptyMessage(departmentReportPeriod, true)
         return null;
@@ -1300,11 +1326,11 @@ boolean checkExistingConsDDForCurrTB(DepartmentReportPeriod departmentReportPeri
 @TypeChecked
 def createEmptyMessage(DepartmentReportPeriod departmentReportPeriod, boolean acceptChecking) {
     Department department = departmentService.get(departmentReportPeriod.departmentId)
-    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
+    String correctionDateExpression = getCorrectionDateExpression(departmentReportPeriod)
     if (acceptChecking) {
-        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
+        logger.error("Отчетность $FORM_NAME_NDFL6 для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не сформирована. Для указанного подразделения и периода форма РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated?.id} должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
     } else {
-        logger.error("Для заданного подразделения ${department.name} и периода ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
+        logger.error("Отчетность $FORM_NAME_NDFL6 для ${department.name} за период ${departmentReportPeriod.reportPeriod.taxPeriod.year}, ${departmentReportPeriod.reportPeriod.name}" + correctionDateExpression + " не сформирована. Для указанного подразделения и периода не найдена форма РНУ НДФЛ (консолидированная).")
     }
 }
 
@@ -1327,8 +1353,8 @@ def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndf
     }
 }
 
-def getPrevDepartmentReportPeriod(departmentReportPeriod) {
-    def prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
+DepartmentReportPeriod getPrevDepartmentReportPeriod(DepartmentReportPeriod departmentReportPeriod) {
+    DepartmentReportPeriod prevDepartmentReportPeriod = departmentReportPeriodService.getPrevLast(declarationData.departmentId, departmentReportPeriod.reportPeriod.id)
     if (prevDepartmentReportPeriod == null) {
         prevDepartmentReportPeriod = departmentReportPeriodService.getFirst(departmentReportPeriod.departmentId, departmentReportPeriod.reportPeriod.id)
     }
@@ -1566,6 +1592,15 @@ def getDepartmentFullName(def id) {
     return departmentFullNameMap[id]
 }
 /************************************* ОБЩИЕ МЕТОДЫ** *****************************************************************/
+
+/**
+ * Получить строку о дате корректировки
+ * @param departmentReportPeriod
+ * @return
+ */
+String getCorrectionDateExpression(DepartmentReportPeriod departmentReportPeriod) {
+    return departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
+}
 
 // Получить список детали подразделения из справочника для некорректировочного периода
 def getDepartmentParamTableList(def departmentParamId, def departmentId, def reportPeriodId, boolean throwIfEmpty) {

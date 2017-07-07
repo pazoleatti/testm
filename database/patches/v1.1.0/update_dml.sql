@@ -35,6 +35,10 @@ update ref_book_tariff_payer
 set code='22'
 where name='Плательщики страховых взносов, уплачивающие страховые взносы по дополнительным тарифам, установленных пунктом 2 статьи 428 Кодекса';
 
+-- insert new asnu
+prompt insert new asnu
+insert into ref_book_asnu (id,code,name,type) values (15,'9000','АС "ЕКС"','Возврат платы за подключение к программе страхования)');
+
 prompt update and alter ref_books
 @upd_ref_books.sql;
 

@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,10 +91,10 @@ public abstract class CreateFormsAsyncTask extends AbstractAsyncTask {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.get().format(departmentReportPeriod.getCorrectionDate());
         }
 
-        return String.format("Выполнено создание отчетных форм \"%s\": Период: \"%s, %s%s\", Подразделение: \"%s\"",
+        return String.format("Выполнено создание отчетных форм %s для %s за период %s, %s%s",
                 declarationTemplate.getName(),
-                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
-                department.getName());
+                department.getName(),
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod);
     }
 
     @Override

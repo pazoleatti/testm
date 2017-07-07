@@ -210,4 +210,13 @@ public interface DepartmentDao {
      * @return Список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
      */
     List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
+
+    /**
+     * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
+     * @param kpp
+     * @param oktmo
+     * @param reportPeriodEndDate
+     * @return
+     */
+    String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
 }

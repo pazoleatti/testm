@@ -1720,9 +1720,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
 
         int success = 0;
-        int fail = 0;
-        List<String> oktmoKppList = new ArrayList<String>();
+        int pairKppOktomoTotal = 0;
+        List<String> errorMsgList = new ArrayList<String>();
         for (Map.Entry<Long, Map<String, Object>> entry: formMap.entrySet()) {
+            pairKppOktomoTotal = (Integer) entry.getValue().get("pairKppOktmoTotal");
             Logger scriptLogger = new Logger();
             boolean createForm = true;
             try {
@@ -1734,25 +1735,35 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             } finally {
                 if (!createForm || scriptLogger.containsLevel(LogLevel.ERROR)) {
-                    fail++;
-                    DeclarationData declarationData = get(entry.getKey(), userInfo);
-                    oktmoKppList.add(String.format("ОКТМО: %s, КПП: %s.", declarationData.getOktmo(), declarationData.getKpp()));
+                    for (LogEntry logEntry: scriptLogger.getEntries()) {
+                        DeclarationData declarationData = get(entry.getKey(), userInfo);
+                        if (logEntry.getLevel().equals(LogLevel.ERROR)) {
+                                errorMsgList.add(String.format("Не удалось создать форму %s, за период %s, %s%s, подразделение: %s, КПП: %s ОКТМО: %s. Ошибка: %s",
+                                    declarationTemplateService.get(declarationDataTemp.getDeclarationTemplateId()).getName(),
+                                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(),
+                                    departmentReportPeriod.getCorrectionDate() != null? ", с датой сдачи корректировки " + new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()): "",
+                                    departmentService.getDepartment(departmentReportPeriod.getDepartmentId()).getName(),
+                                    declarationData.getKpp(),
+                                    declarationData.getOktmo(),
+                                    logEntry.getMessage()));
+                        }
+                    }
                     logger.error("Произошла непредвиденная ошибка при расчете для объекта: " + getDeclarationFullName(entry.getKey(), null));
                     logger.getEntries().addAll(scriptLogger.getEntries());
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
                     String message = getDeclarationFullName(entry.getKey(), null);
-                    logger.info("Успешно выполнен расчет для " + message.replace("Налоговая форма", "налоговой формы"));
+                    logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"));
                     logger.getEntries().addAll(scriptLogger.getEntries());
                 }
             }
         }
-        logger.info("Успешно созданных форм: %d. Не удалось создать форм: %d.", success, fail);
-        if (!oktmoKppList.isEmpty()) {
-            logger.info("Не удалось создать формы со следующими параметрами:");
-            for(String oktmoKpp: oktmoKppList) {
-                logger.warn(oktmoKpp);
+        logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", success, pairKppOktomoTotal - success);
+        if (!errorMsgList.isEmpty()) {
+            logger.warn("Не удалось создать формы со следующими параметрами:");
+            for(String errorMsg: errorMsgList) {
+                logger.warn(errorMsg);
             }
         }
     }

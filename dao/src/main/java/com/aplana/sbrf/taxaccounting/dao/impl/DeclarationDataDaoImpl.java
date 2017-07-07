@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultIt
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -837,6 +838,37 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getNamedParameterJdbcTemplate().query(query.toString(), params, new DeclarationDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<DeclarationData>();
+        }
+    }
+
+    @Override
+    public List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId) {
+        String sql = "select distinct npi.kpp, npi.oktmo " +
+                "from ndfl_person_income npi " +
+                "join ndfl_person np on npi.ndfl_person_id = np.id " +
+                "join declaration_data dd on np.declaration_data_id = dd.ID " +
+                "join department_report_period drp on dd.department_report_period_id = drp.id " +
+                "join report_period rp on drp.report_period_id = rp.ID " +
+                "where dd.id = :declarationDataId " +
+                "and (npi.kpp, npi.oktmo) " +
+                "not in (" +
+                "select rnd.kpp, ro.code " +
+                "from ref_book_ndfl_detail rnd " +
+                "join ref_book_oktmo ro on ro.id = rnd.oktmo " +
+                "where rnd.version <= rp.end_date)";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("declarationDataId", declarationDataId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Pair<String, String>>() {
+                @Override
+                public Pair<String, String> mapRow(ResultSet resultSet, int i) throws SQLException {
+                    String kpp = resultSet.getString("kpp");
+                    String oktmo = resultSet.getString("oktmo");
+                    return new Pair<String, String>(kpp, oktmo);
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Pair<String, String>>();
         }
     }
 }
