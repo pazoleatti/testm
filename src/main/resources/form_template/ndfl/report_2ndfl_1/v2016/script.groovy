@@ -2778,6 +2778,8 @@ final String SUM_DOHOD = "СумДоход"
 @Field
 final String INCOME_CODE = "КодДоход"
 @Field
+final String DEDUCTION_CODE = "КодВычет"
+@Field
 final String DEDUCTION_SUM = "СумВычет"
 @Field
 final String TAX_BASE = "НалБаза"
@@ -2845,7 +2847,9 @@ def check() {
                 svSumVich.each { svSumVichItem ->
                     Ndfl2Node svSumVichNdfl2Node = new Ndfl2Node(SV_SUM_VICH)
                     Ndfl2Leaf<BigDecimal> deductionSumLeaf = new Ndfl2Leaf<>(DEDUCTION_SUM, svSumVichItem.@СумВычет.text(), BigDecimal.class)
+                    Ndfl2Leaf<String> deductionCodeLeaf = new Ndfl2Leaf<>(DEDUCTION_CODE, svSumVichItem.@КодВычет.text(), String.class)
                     svSumVichNdfl2Node.addLeaf(deductionSumLeaf)
+                    svSumVichNdfl2Node.addLeaf(deductionCodeLeaf)
                     svSumDohNdfl2Node.addChild(svSumVichNdfl2Node)
                 }
                 svedDohNdfl2Node.addChild(svSumDohNdfl2Node)
@@ -3019,6 +3023,7 @@ abstract class AbstractChecker implements Checker {
     final String SVEDDOH_NODE = "СведДох"
     final String SV_SUM_DOH = "СвСумДох"
     final String INCOME_CODE = "КодДоход"
+    final String DEDUCTION_CODE = "КодВычет"
     final String SUM_DOHOD = "СумДоход"
     final String SV_SUM_VICH = "СвСумВыч"
     final String DEDUCTION_SUM = "СумВычет"
@@ -3139,14 +3144,14 @@ class CalculatedTaxChecker extends AbstractChecker {
                     BigDecimal calculatedTaxCheckSum = calclulateTaxCheckValueForIncomeCode1010.add(calclulateTaxCheckValueForIncomeCodeNot1010)
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
                     if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheckSum, 0)) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\") должна быть равна произведению «Ставки» (\"Файл.Документ.СведДох.Ставка\") и «Налоговой базы» (\"Файл.Документ.СведДох.СумИтНалПер.НалБаза\").")
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${extractAttribute(TAX_BASE, svedDohNode).getValue()}.")
                     }
                 } else if (taxRateAttribute != null && taxRateAttribute.getValue() == 30) {
                     Ndfl2Leaf<BigDecimal> taxBaseAttribute = extractAttribute(TAX_BASE, svedDohNode)
                     BigDecimal calculatedTaxCheck = taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
                     if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheck, 0)) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\") должна быть равна произведению «Ставки» (\"Файл.Документ.СведДох.Ставка\") и «Налоговой базы» (\"Файл.Документ.СведДох.СумИтНалПер.НалБаза\").")
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${taxBaseAttribute.getValue()}.")
                     }
                 } else {
                     List<Ndfl2Node> svSumDohList = extractNdfl2Nodes(SV_SUM_DOH, svedDohNode)
@@ -3167,7 +3172,7 @@ class CalculatedTaxChecker extends AbstractChecker {
                     BigDecimal calculatedTaxCheckSum = differenceTotalSumDohSumVich.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
                     if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheckSum, 0)) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\") должна быть равна произведению «Ставки» (\"Файл.Документ.СведДох.Ставка\") и «Налоговой базы» (\"Файл.Документ.СведДох.СумИтНалПер.НалБаза\").")
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${extractAttribute(TAX_BASE, svedDohNode).getValue()}.")
                     }
                 }
             }
@@ -3194,7 +3199,7 @@ class TaxSummAndWithHoldingTaxChecker extends AbstractChecker {
                 BigDecimal taxSum = taxSumAttribute.getValue()
                 BigDecimal withHoldingTax = withHoldingTaxAttribute.getValue()
                 if (taxSum > withHoldingTax) {
-                    createErrorMessage(logger, documentNode, "«Сумма налога перечисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога перечисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалПеречисл\") не должна превышать «Сумму налога удержанную» (\"Файл.Документ.СведДох.СумИтНалПер.НалУдерж\").")
+                    createErrorMessage(logger, documentNode, "«Сумма налога перечисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога перечисленная» $taxSum не должна превышать «Сумму налога удержанную» $withHoldingTax.")
                 }
             }
         }
@@ -3216,8 +3221,10 @@ class CalculatedTaxPrepaymentChecker extends AbstractChecker {
             for (Ndfl2Node svedDohNode : svedDohNodeList) {
                 Ndfl2Leaf<BigDecimal> prepaymentAttribute = extractAttribute(PREPAYMENT_SUM, svedDohNode)
                 Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
-                if (prepaymentAttribute.getValue() > calculatedTaxAttribute.getValue()) {
-                    createErrorMessage(logger, documentNode, "«Сумма фиксированных авансовых платежей» заполнена некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма фиксированных авансовых платежей» (\"Файл.Документ.СведДох.СумИтНалПер.АвансПлатФикс\") не должна превышать «Сумму налога исчисленного» (\"Файл.Документ.СведДох.СумИтНалПер.НалИсчисл\").")
+                BigDecimal prepayment = prepaymentAttribute.getValue()
+                BigDecimal calculatedTax = calculatedTaxAttribute.getValue()
+                if (prepayment > calculatedTax) {
+                    createErrorMessage(logger, documentNode, "«Сумма фиксированных авансовых платежей» заполнена некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма фиксированных авансовых платежей» $prepayment не должна превышать «Сумму налога исчисленного» $calculatedTax.")
                 }
             }
         }
@@ -3245,8 +3252,9 @@ class CommonIncomeSumChecker extends AbstractChecker {
                     sumDohodSum = sumDohodSum.add(incomeSumAttribute.getValue())
                 }
                 Ndfl2Leaf<BigDecimal> incomeSumCommonAttribute = extractAttribute(INCOME_SUM_COMMON, svedDohNode)
-                if (incomeSumCommonAttribute.getValue() != sumDohodSum) {
-                    createErrorMessage(logger, documentNode, "«Общая сумма дохода» рассчитана некорректно", "В \"Раздел 5. \"Общие суммы дохода и налога\" «Общая сумма дохода» (\"Файл.Документ.СведДох.СумИтНалПер.СумДохОбщ\") должна быть равна «Сумме доходов по всем месяцам» (\"СУММА Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход\") \"Раздела 3. \"Доходы, облагаемые по ставке <(\"Файл.Документ.СведДох.Ставка\")> %%\"")
+                BigDecimal incomeSumCommon = incomeSumCommonAttribute.getValue()
+                if (incomeSumCommon != sumDohodSum) {
+                    createErrorMessage(logger, documentNode, "«Общая сумма дохода» рассчитана некорректно", "В \"Раздел 5. \"Общие суммы дохода и налога\" «Общая сумма дохода» $incomeSumCommon должна быть равна «Сумме доходов по всем месяцам» $sumDohodSum \"Раздела 3. \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %%\"")
                 }
             }
         }
@@ -3271,14 +3279,16 @@ class IncomeSumAndDeductionChecker extends AbstractChecker {
                 for (Ndfl2Node svSumDoh : svSumDohList) {
                     Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
                     List<Ndfl2Node> svSumVichList = extractNdfl2Nodes(SV_SUM_VICH, svSumDoh)
-                    Ndfl2Leaf<BigDecimal> deductionSumAttribute = null
-                    if (!svSumVichList.isEmpty()) {
-                        deductionSumAttribute = extractAttribute(DEDUCTION_SUM, svSumVichList.get(0))
-                    }
                     BigDecimal income = incomeSumAttribute.getValue()
-                    BigDecimal deduction = deductionSumAttribute? deductionSumAttribute.getValue(): new BigDecimal(0)
-                    if (income < deduction) {
-                        createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Разделе 3. \"Доходы, облагаемые по ставке <(\"Файл.Документ.СведДох.Ставка\")> %%\" «Сумма вычета» (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет\") по коду (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.КодВычет\") превышает «Сумму полученного дохода» (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход\"), к которому он применен.")
+                    for (Ndfl2Node svSumVich : svSumVichList) {
+                        Ndfl2Leaf<BigDecimal> deductionSumAttribute = null
+                        if (!svSumVichList.isEmpty()) {
+                            deductionSumAttribute = extractAttribute(DEDUCTION_SUM, svSumVich)
+                        }
+                        BigDecimal deduction = deductionSumAttribute? deductionSumAttribute.getValue(): new BigDecimal(0)
+                        if (income < deduction) {
+                            createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Разделе 3. \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %%\" «Сумма вычета» $deduction по коду ${extractAttribute(DEDUCTION_CODE, svSumVich)} превышает «Сумму полученного дохода» $income, к которому он применен.")
+                        }
                     }
                 }
             }
@@ -3323,8 +3333,9 @@ class WithHoldingTaxChecker extends AbstractChecker {
             List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
             for (Ndfl2Node svedDohNode : svedDohNodeList) {
                 Ndfl2Leaf<BigDecimal> withHoldingTaxAttribute = extractAttribute(WITHHOLDING_TAX, svedDohNode)
+                BigDecimal withHoldingTax = withHoldingTaxAttribute.getValue()
                 if (withHoldingTaxAttribute.getValue() != new BigDecimal(0)){
-                    createErrorMessage(logger, documentNode, "«Сумма налога удержанная» заполнена некорректно", "Сумма налога удержанная» (\"Файл.Документ.СведДох.СумИтНалПер.НалУдерж\") в \"Разделе 5. \"Общие суммы дохода и налога\" должна быть равна \"0\"")
+                    createErrorMessage(logger, documentNode, "«Сумма налога удержанная» заполнена некорректно", "Сумма налога удержанная» $withHoldingTax в \"Разделе 5. \"Общие суммы дохода и налога\" должна быть равна \"0\"")
                 }
             }
         }
