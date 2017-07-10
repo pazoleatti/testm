@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Chec
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.EnableDuplicateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OnTimerEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
@@ -146,6 +147,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void addEnterNativePreviewHandler();
 
         void removeEnterNativePreviewHandler();
+
+        void setEnableDuplicateButton(boolean enable);
     }
 
     @Inject
@@ -155,6 +158,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 PersonPresenter personPresenter,
                                 PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        eventBus.addHandler(EnableDuplicateEvent.TYPE, new EnableDuplicateEvent.EnableDuplicateHandler() {
+            @Override
+            public void onSelectTableRow(EnableDuplicateEvent event) {
+                getView().setEnableDuplicateButton(event.isEnableDuplicate());
+            }
+        });
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
         this.editFormPresenter = editFormPresenter;
