@@ -945,7 +945,8 @@ import java.text.SimpleDateFormat
         //подготовка записей
         if (identityObjectList != null && !identityObjectList.isEmpty()) {
 
-            logForDebug("Добавление записей: refBookId=" + refBookId + ", size="+identityObjectList.size())
+            def refBookName = getProvider(refBookId).refBook.name
+            logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
 
             List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
             for (IdentityObject identityObject : identityObjectList) {
@@ -1677,6 +1678,7 @@ def createXlsxReport() {
         XMLEventReader reader = xmlFactory.createXMLEventReader(xmlInputStream)
 
         def ndflPersonNum = 1;
+        def success = 0
         def sb;
         try {
             while (reader.hasNext()) {
@@ -1707,13 +1709,18 @@ def createXlsxReport() {
                     String personData = sb.toString();
                     if (personData != null && !personData.isEmpty()) {
                         def infoPart = new XmlSlurper().parseText(sb.toString())
-                        processInfoPart(infoPart, ndflPersonNum)
+                        if(processInfoPart(infoPart, ndflPersonNum)) {
+                            success++
+                        }
                         ndflPersonNum++
                     }
                 }
             }
         } finally {
             reader?.close()
+        }
+        if (success == 0){
+            logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду. Налоговая форма не создана")
         }
     }
 
@@ -1746,7 +1753,7 @@ def createXlsxReport() {
         return var1.toString();
     }
 
-    void processInfoPart(infoPart, rowNum) {
+    boolean processInfoPart(infoPart, rowNum) {
 
         def ndflPersonNode = infoPart.'ПолучДох'[0]
 
@@ -1775,7 +1782,9 @@ def createXlsxReport() {
             ndflPersonService.save(ndflPerson)
         } else {
             logger.warn("ФЛ ФИО = $fio ФЛ ИНП = ${ndflPerson.inp} Не загружен в систему поскольку не имеет операций в отчетном периоде")
+            return false
         }
+        return true
     }
 
     void processNdflPersonOperation(NdflPerson ndflPerson, NodeChild ndflPersonOperationsNode, String fio, def incomeCodeMap, def deductionTypeList) {
@@ -1786,9 +1795,9 @@ def createXlsxReport() {
             transformNdflPersonIncome(it, ndflPerson, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio, incomeCodeMap)
         });
         // Если проверка на даты не прошла, то операция не добавляется.
-        // https://jira.aplana.com/browse/SBRFNDFL-581 - временное решение если дата не прошла то загружаем, но выводим сообщение
+        // https://jira.aplana.com/browse/SBRFNDFL-1350 - если дата не прошла то ничего не загружаем и выводим сообщение
         if (incomes.contains(null)) {
-            //TODO return
+            return
         }
 
         incomes.each {
@@ -3830,13 +3839,14 @@ class ColumnFillConditionData {
                 List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
 
                 //Графа 4 Раздел 2
-                String ndflPersonIncomingCodeInOperation = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.findAll {
-                    it.incomeCode ?: ""
-                }.first().incomeCode?:""
-                //Графа 14 Раздел 2
-                String ndflPersonIncomingTaxRate = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.findAll {
-                    it.taxRate ?: ""
-                }.first().taxRate?:""
+                String ndflPersonIncomingCodeInOperation = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.find {
+                        it.incomeCode
+                    }?.incomeCode?: ""
+                    //Графа 14 Раздел 2
+                Integer ndflPersonIncomingTaxRate = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.find {
+                        it.taxRate
+                    }?.taxRate?: 0
+
 
                 // СведДох1 Доход.Дата.Начисление (Графа 6)
                 if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
@@ -3873,7 +3883,7 @@ class ColumnFillConditionData {
                 }
 
                 // СведДох4 НДФЛ.Процентная ставка (Графа 14)
-                if (Integer.parseInt(ndflPersonIncomingTaxRate) == 13) {
+                if (ndflPersonIncomingTaxRate == 13) {
                     Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncomingTaxRate != "1010" && ndflPerson.status != "2"
                     Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncomingCodeInOperation) && ndflPerson.status == "1"
                     Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncomingCodeInOperation) && Integer.parseInt(ndflPerson.status ?: 0) >= 3

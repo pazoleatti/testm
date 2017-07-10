@@ -197,8 +197,6 @@ def getPeriodNdflMap() {
 }
 
 def importTF() {
-    logger.setMessageDecorator(null)
-
     Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN)
     Pattern patternKvOtch = Pattern.compile(KV_PATTERN)
     Pattern patternUoOtch = Pattern.compile(UO_PATTERN)
@@ -1198,7 +1196,6 @@ def importNdflResponse() {
 
 @Deprecated
 def _importTF() {
-    logger.setMessageDecorator(null)
     Integer declarationTypeId;
     int departmentId;
     String departmentCode;

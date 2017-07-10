@@ -1872,7 +1872,6 @@ def checkData() {
 def checkAccept() {
     List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
     if (ndflPersonList.isEmpty()) {
-        logger.setMessageDecorator(null)
         logger.error("Консолидированная форма не содержит данных, принятие формы невозможно")
     }
 }

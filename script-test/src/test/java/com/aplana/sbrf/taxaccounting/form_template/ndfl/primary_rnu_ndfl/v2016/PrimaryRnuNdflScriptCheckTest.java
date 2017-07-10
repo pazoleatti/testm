@@ -471,9 +471,8 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
         testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
-        Assert.assertTrue(containLog("(.*)«Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»(.*)"));
-        Assert.assertTrue(containLog("(.*)Значение не соответствует правилу: «Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»(.*)"));
-        Assert.assertTrue(containLog("(.*)сумма значений «Граф 16 Раздела 3» <= «Графа 10 Раздел 2»(.*)"));
+        Assert.assertTrue(containLog("(.*)Значение гр\\. \"Сумма вычета\" \\(\"125\"\\) должно быть равно сумме гр\\. \"Сумма вычета\" \\(\"250\"\\) раздела 3(.*)"));
+        Assert.assertTrue(containLog("(.*)Значение гр\\. \"Сумма вычета\" \\(\"125\"\\) должно быть не меньше значение гр\\. \"Начисление\" \\(\"125\"\\) раздела 3(.*)"));
     }
 
     /**
