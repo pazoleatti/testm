@@ -65,6 +65,7 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
                     logger.info("Успешно удалён объект: %s, № %d.", declarationFullName, declarationId);
                     logger.info(msg);
                     sendNotifications("Успешно удалён объект: " + declarationFullName + ", № " + declarationId, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                    logger.clear();
                 } catch (Exception e) {
                     logger.error("При удалении объекта: %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
                     if (e instanceof ServiceLoggerException) {

@@ -616,12 +616,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 .addValue("kpp", kpp)
                 .addValue("oktmo", oktmo)
                 .addValue("reportPeriodEndDate", reportPeriodEndDate);
-
-        return getNamedParameterJdbcTemplate().queryForObject(query, params, new RowMapper<String>() {
+        List<String> result = getNamedParameterJdbcTemplate().query(query, params, new RowMapper<String>() {
             @Override
             public String mapRow(ResultSet resultSet, int i) throws SQLException {
                 return resultSet.getString("name");
             }
         });
+        if (result != null) {
+            return result.get(0);
+        }
+        return "";
     }
 }
