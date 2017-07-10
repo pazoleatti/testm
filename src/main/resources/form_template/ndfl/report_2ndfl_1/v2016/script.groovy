@@ -3191,7 +3191,9 @@ class TaxSummAndWithHoldingTaxChecker extends AbstractChecker {
             for (Ndfl2Node svedDohNode : svedDohNodeList) {
                 Ndfl2Leaf<BigDecimal> withHoldingTaxAttribute = extractAttribute(WITHHOLDING_TAX, svedDohNode)
                 Ndfl2Leaf<BigDecimal> taxSumAttribute = extractAttribute(TAX_SUM, svedDohNode)
-                if (withHoldingTaxAttribute.getValue() < taxSumAttribute.getValue()) {
+                BigDecimal taxSum = taxSumAttribute.getValue()
+                BigDecimal withHoldingTax = withHoldingTaxAttribute.getValue()
+                if (taxSum > withHoldingTax) {
                     createErrorMessage(logger, documentNode, "«Сумма налога перечисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога перечисленная» (\"Файл.Документ.СведДох.СумИтНалПер.НалПеречисл\") не должна превышать «Сумму налога удержанную» (\"Файл.Документ.СведДох.СумИтНалПер.НалУдерж\").")
                 }
             }
@@ -3273,7 +3275,9 @@ class IncomeSumAndDeductionChecker extends AbstractChecker {
                     if (!svSumVichList.isEmpty()) {
                         deductionSumAttribute = extractAttribute(DEDUCTION_SUM, svSumVichList.get(0))
                     }
-                    if (incomeSumAttribute.getValue() < deductionSumAttribute? deductionSumAttribute.getValue(): new BigDecimal(0)) {
+                    BigDecimal income = incomeSumAttribute.getValue()
+                    BigDecimal deduction = deductionSumAttribute? deductionSumAttribute.getValue(): new BigDecimal(0)
+                    if (income < deduction) {
                         createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Разделе 3. \"Доходы, облагаемые по ставке <(\"Файл.Документ.СведДох.Ставка\")> %\" «Сумма вычета» (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет\") по коду (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.КодВычет\") превышает «Сумму полученного дохода» (\"Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход\"), к которому он применен.")
                     }
                 }
