@@ -360,8 +360,8 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
             if (field.getKey().getType().equals(DeclarationSubreportParamType.STRING)) {
                 String string = "";
                 if (field.getKey().getAlias().equals(SNILS_ALIAS)) {
-                   TextMaskBox textMaskBox = (TextMaskBox) field.getValue();
-                   string = (textMaskBox.getText() == null || textMaskBox.getText().trim().isEmpty()) ?
+                    TextMaskBox textMaskBox = (TextMaskBox) field.getValue();
+                    string = (textMaskBox.getText() == null || textMaskBox.getText().trim().isEmpty()) ?
                             null : textMaskBox.getText();
                 } else {
                     string = (field.getValue().getValue() == null || ((String) field.getValue().getValue()).trim().isEmpty()) ?
@@ -388,9 +388,6 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
                 }
             } else if (field.getKey().getType().equals(DeclarationSubreportParamType.NUMBER)) {
                 value = checkNumber(field.getKey(), field.getValue(), warnMap);
-                if (value != null && field.getKey().getAlias().equals(INN_ALIAS)) {
-                    checkPersonStringFields(value.toString(), INN_LENGTH, warnMap, field);
-                }
             } else if (field.getKey().getType().equals(DeclarationSubreportParamType.DATE)) {
                 Date date = field.getValue().getValue() == null ? null : (Date) field.getValue().getValue();
                 value = date;

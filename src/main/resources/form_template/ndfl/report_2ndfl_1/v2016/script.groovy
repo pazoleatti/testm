@@ -2224,7 +2224,7 @@ def prepareSpecificReport() {
     def resultReportParameters = [:]
     reportParameters.each { key, value ->
         if (value != null) {
-            if (key == "birthDay") {
+            if (key == "toBirthDay" || key == "fromBirthDay") {
                 resultReportParameters.put(key, ScriptUtils.formatDate(value, "dd.MM.yyyy"))
             } else {
                 resultReportParameters.put(key, value)
@@ -2236,7 +2236,7 @@ def prepareSpecificReport() {
     int pageSize = 10
 
     // Поиск данных по фильтру
-    def docs = searchData(resultReportParameters, pageSize)
+    def docs = searchData(resultReportParameters, pageSize, result)
 
     // Формирование списка данных для вывода в таблицу
     docs.each() { doc ->
@@ -2250,15 +2250,8 @@ def prepareSpecificReport() {
         dataRows.add(row)
     }
 
-    int countOfAvailableNdflPerson = docs.size()
-
-    if (countOfAvailableNdflPerson >= pageSize) {
-        countOfAvailableNdflPerson = counter;
-    }
-
     result.setTableColumns(tableColumns);
     result.setDataRows(dataRows);
-    result.setCountAvailableDataRows(countOfAvailableNdflPerson)
     scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
     scriptSpecificReportHolder.setSubreportParamValues(params)
 }
@@ -2353,18 +2346,23 @@ def createRowColumns() {
 @Field
 int counter = 0
 
-def searchData(def params, pageSize) {
+def searchData(def params, pageSize, PrepareSpecificReportResult prepareSpecificReportResult) {
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)
-    def docs = Файл.Документ.findAll { doc ->
-        (params['pNumSpravka'] ? StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka']) : true) &&
-                (params['lastName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName']) : true) &&
-                (params['firstName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName']) : true) &&
-                (params['middleName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName']) : true) &&
-                (params['birthDay'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.@ДатаРожд.text(), params['birthDay']) : true) &&
-                (params['idDocNumber'] ? (StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) ||
-                        StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s,.-]", ""), params['idDocNumber'])) : true)
+    def docs = []
+    Файл.Документ.each { doc ->
+        boolean passed = true
+        if (params['pNumSpravka'] != null && !StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka'])) passed = false
+        if (params['lastName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName'])) passed = false
+        if (params['firstName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName'])) passed = false
+        if (params['middleName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName'])) passed = false
+        if (params['inn'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.@ИННФЛ.text(), params['inn'])) passed = false
+        if (searchBirthDay(params, doc.ПолучДох.@ДатаРожд.text())) passed = false
+        if (params['idDocNumber'] != null && !((StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) ||
+                StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s,.-]", ""), params['idDocNumber'])))) passed = false
+        if (passed) docs << doc
     }
+    prepareSpecificReportResult.countAvailableDataRows = docs.size()
     // ограничиваем размер выборки
     def result = []
     docs.each {
@@ -2374,6 +2372,25 @@ def searchData(def params, pageSize) {
         counter++
     }
     result
+}
+
+def searchBirthDay(def params, String birthDate) {
+    Date date = ScriptUtils.parseDate(DATE_FORMAT_DOTTED, birthDate)
+    if (params['fromBirthDay'] != null && params ['toBirthDay'] != null) {
+        if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['fromBirthDay']) && date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['toBirthDay'])) {
+            return false
+        }
+    } else if (params['fromBirthDay'] != null) {
+        if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['fromBirthDay'])) {
+            return false
+        }
+    } else if (params['toBirthDay'] != null) {
+        if (date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['toBirthDay'])) {
+            return false
+        }
+    }
+
+    return true
 }
 
 /**
