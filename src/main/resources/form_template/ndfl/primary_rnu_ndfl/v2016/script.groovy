@@ -178,7 +178,7 @@ import java.text.SimpleDateFormat
 
     List<Country> getCountryRefBookList() {
         if (countryRefBookCache.isEmpty()) {
-            List<Map<String, RefBookValue>> refBookRecords = getRefBook(RefBook.Id.COUNTRY.getId());
+            List<Map<String, RefBookValue>> refBookRecords = getRefBookAll(RefBook.Id.COUNTRY.getId());
             refBookRecords.each { refBookValueMap ->
                 Country country = new Country();
                 country.setId(refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue());
@@ -193,7 +193,7 @@ import java.text.SimpleDateFormat
 
     List<DocType> getDocTypeRefBookList() {
         if (docTypeRefBookCache.isEmpty()) {
-            List<Map<String, RefBookValue>> refBookRecords = getRefBook(RefBook.Id.DOCUMENT_CODES.getId());
+            List<Map<String, RefBookValue>> refBookRecords = getRefBookAll(RefBook.Id.DOCUMENT_CODES.getId());
             refBookRecords.each { refBookValueMap ->
                 DocType docType = new DocType();
                 docType.setId(refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue());
@@ -210,7 +210,7 @@ import java.text.SimpleDateFormat
 
     List<TaxpayerStatus> getTaxpayerStatusRefBookList() {
         if (taxpayerStatusRefBookCache.isEmpty()) {
-            List<Map<String, RefBookValue>> refBookRecords = getRefBook(RefBook.Id.TAXPAYER_STATUS.getId());
+            List<Map<String, RefBookValue>> refBookRecords = getRefBookAll(RefBook.Id.TAXPAYER_STATUS.getId());
             refBookRecords.each { refBookValueMap ->
                 TaxpayerStatus taxpayerStatus = new TaxpayerStatus();
                 taxpayerStatus.setId(refBookValueMap?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue())
@@ -2528,14 +2528,34 @@ class NdflPersonFL {
     }
 
     /**
-     * Получить все записи справочника по его идентификатору
+     * Получить записи справочника по его идентификатору в отчётном периоде
      * @param refBookId - идентификатор справочника
-     * @return - возвращает лист
+     * @return - список записей справочника
      */
     def getRefBook(def long refBookId) {
         // Передаем как аргумент только срок действия версии справочника
         def refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
         if (refBookList == null || refBookList.size() == 0) {
+            throw new Exception("Ошибка при получении записей справочника " + refBookId)
+        }
+        return refBookList
+    }
+
+    /**
+     * Получить все записи справочника по его идентификатору
+     * @param refBookId - идентификатор справочника
+     * @return - список всех версий всех записей справочника
+     */
+    def getRefBookAll(long refBookId) {
+        def recordData = getProvider(refBookId).getRecordDataWhere("1 = 1")
+        def refBookList = []
+        if (recordData != null) {
+            recordData.each { key, value ->
+                refBookList.add(value)
+            }
+        }
+
+        if (refBookList.size() == 0) {
             throw new Exception("Ошибка при получении записей справочника " + refBookId)
         }
         return refBookList
