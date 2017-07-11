@@ -247,8 +247,8 @@ import java.text.SimpleDateFormat
                 String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
                 String inp = ndflPerson.getPersonIdentifier()?.inp?:""
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, inp])
-                String pathError = String.format("Раздел '%s'. Строка '%s'. %s", T_PERSON, ndflPerson.num ?: "",
-                    "Документ удостоверяющий личность.Код (Графа 10)='${code ?: ""}'")
+                String pathError = String.format(SECTION_LINE_MSG + ". %s", T_PERSON, ndflPerson.num ?: "",
+                    "ДУЛ Код='${code ?: ""}'")
                 if (code == null) {
                     result = null
                     if (isLog) {
@@ -264,7 +264,7 @@ import java.text.SimpleDateFormat
                 } else if (result == null) {
                     if (isLog) {
                         localLogger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_ID_DOC_TYPE), fioAndInp, pathError,
-                                "'Документ удостоверяющий личность.Код (Графа 10)' не соответствует справочнику '$R_ID_DOC_TYPE'")
+                                "\"ДУЛ Код (Графа 10)\" не соответствует справочнику '$R_ID_DOC_TYPE'")
                     }
                 }
                 return result;
@@ -1895,10 +1895,10 @@ def createXlsxReport() {
         }) {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
-                    "Доход.Вид.Код", personIncome.incomeCode ?: "",
+                    C_INCOME_CODE, personIncome.incomeCode ?: "",
                     R_INCOME_CODE
             )
-            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, personIncome.rowNum ?: "")
+            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, personIncome.rowNum ?: "")
             logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError,
                     errMsg)
         }
@@ -1959,10 +1959,10 @@ def createXlsxReport() {
         if (!deductionTypeList.contains(personDeduction.typeCode)) {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
-                    "Код вычета", personDeduction.typeCode ?: "",
+                    C_TYPE_CODE, personDeduction.typeCode ?: "",
                     R_INCOME_CODE
             )
-            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, personDeduction.rowNum ?: "")
+            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, personDeduction.rowNum ?: "")
             logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_TYPE_CODE), fioAndInp, pathError,
                     errMsg)
         }
@@ -2184,7 +2184,9 @@ def createXlsxReport() {
 
 // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
 @Field def ndflPersonFLMap = [:]
-@Field final TEMPLATE_PERSON_FL = "ФИО: '%s', ИНП: '%s'"
+@Field final TEMPLATE_PERSON_FL = "%s, ИНП: %s"
+@Field final SECTION_LINE_MSG = "Раздел %s. Строка %s"
+
 @CompileStatic
 class NdflPersonFL {
     String fio
@@ -2582,10 +2584,15 @@ class NdflPersonFL {
     @Field final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" (%d записей)."
 
     // Таблицы
-    @Field final String T_PERSON = "Реквизиты"
-    @Field final String T_PERSON_INCOME = "Сведения о доходах и НДФЛ"
-    @Field final String T_PERSON_DEDUCTION = "Сведения о вычетах"
-    @Field final String T_PERSON_PREPAYMENT = "Сведения о доходах в виде авансовых платежей"
+    @Field final String T_PERSON = "1" //"Реквизиты"
+    @Field final String T_PERSON_INCOME = "2" // "Сведения о доходах и НДФЛ"
+    @Field final String T_PERSON_DEDUCTION = "3" // "Сведения о вычетах"
+    @Field final String T_PERSON_PREPAYMENT = "4" //"Сведения о доходах в виде авансовых платежей"
+
+    @Field final String T_PERSON_NAME = "Реквизиты"
+    @Field final String T_PERSON_INCOME_NAME  = "Сведения о доходах и НДФЛ"
+    @Field final String T_PERSON_DEDUCTION_NAME  =  "Сведения о вычетах"
+    @Field final String T_PERSON_PREPAYMENT_NAME  = "Сведения о доходах в виде авансовых платежей"
 
     // Справочники
     @Field final String R_FIAS = "КЛАДР" //TODO замена
@@ -2610,8 +2617,8 @@ class NdflPersonFL {
     @Field final String C_ID_DOC_TYPE = "Документ удостоверяющий личность.Код"
     @Field final String C_STATUS = "Статус"
     @Field final String C_RATE = "Ставка"
-    @Field final String C_TYPE_CODE = "Код вычета"
-    @Field final String C_NOTIF_SOURCE = "Документ о праве на налоговый вычет.Код источника"
+@Field final String C_TYPE_CODE = "Код вычета" //" Код вычета"
+@Field final String C_NOTIF_SOURCE = "Подтверждающий документ. Код источника" //" Документ о праве на налоговый вычет.Код источника"
     @Field final String C_LAST_NAME = "Налогоплательщик.Фамилия"
     @Field final String C_FIRST_NAME = "Налогоплательщик.Имя"
     @Field final String C_MIDDLE_NAME = "Налогоплательщик.Отчество"
@@ -2628,34 +2635,39 @@ class NdflPersonFL {
     @Field final String C_BUILDING = "Адрес регистрации в Российской Федерации.Корпус"
     @Field final String C_FLAT = "Адрес регистрации в Российской Федерации.Квартира"
 
-    // Сведения о доходах и НДФЛ
-    @Field final String C_INCOME_CODE = "Доход.Вид.Код"
-    @Field final String C_INCOME_TYPE = "Доход.Вид.Признак"
-    @Field final String C_INCOME_ACCRUED_DATE = "Доход.Дата.Начисление"
-    @Field final String C_INCOME_PAYOUT_DATE = "Доход.Дата.Выплата"
-    @Field final String C_INCOME_ACCRUED_SUMM = "Доход.Сумма.Начисление"
-    @Field final String C_INCOME_PAYOUT_SUMM = "Доход.Сумма.Выплата"
-    @Field final String C_TOTAL_DEDUCTIONS_SUMM = "Сумма вычета"
-    @Field final String C_TAX_BASE = "Налоговая база"
-    @Field final String C_TAX_RATE = "НДФЛ.Процентная ставка"
-    @Field final String C_TAX_DATE = "НДФЛ.Расчет.Дата"
-    @Field final String C_CALCULATED_TAX = "НДФЛ.Расчет.Сумма.Исчисленный"
-    @Field final String C_WITHHOLDING_TAX = "НДФЛ.Расчет.Сумма.Удержанный"
-    @Field final String C_NOT_HOLDING_TAX = "НДФЛ.Расчет.Сумма.Не удержанный"
-    @Field final String C_OVERHOLDING_TAX = "НДФЛ.Расчет.Сумма.Излишне удержанный"
-    @Field final String C_REFOUND_TAX = "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику"
-    @Field final String C_TAX_TRANSFER_DATE = "НДФЛ.Перечисление в бюджет.Срок"
-    @Field final String C_PAYMENT_DATE = "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата"
-    @Field final String C_PAYMENT_NUMBER = "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер"
-    @Field final String C_TAX_SUMM = "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
-    @Field final String C_OKTMO = "Доход.Источник выплаты.ОКТМО"
-    @Field final String C_KPP = "Доход.Источник выплаты.КПП"
+// Сведения о доходах и НДФЛ
+@Field final String C_INCOME_CODE = "Код дохода" //"Доход.Вид.Код"
+@Field final String C_INCOME_TYPE = "Признак дохода" //"Доход.Вид.Признак"
+@Field final String C_INCOME_ACCRUED_DATE = "Дата начисления дохода" //"Доход.Дата.Начисление"
+@Field final String C_INCOME_PAYOUT_DATE = "Дата выплаты дохода" //"Доход.Дата.Выплата"
+@Field final String C_INCOME_ACCRUED_SUMM = "Сумма начисленного дохода" //"Доход.Сумма.Начисление"
+@Field final String C_INCOME_PAYOUT_SUMM = "Сумма выплаченного дохода" //"Доход.Сумма.Выплата"
+@Field final String C_TOTAL_DEDUCTIONS_SUMM = "Сумма вычета" //"Сумма вычета"
+@Field final String C_TAX_BASE = "Налоговая база" //"Налоговая база"
+@Field final String C_TAX_RATE = "Процентная ставка (%%)" //"НДФЛ.Процентная ставка"
+@Field final String C_TAX_DATE = "Дата НДФЛ" //"НДФЛ.Расчет.Дата"
+@Field final String C_CALCULATED_TAX = "НДФЛ исчисленный" //" НДФЛ.Расчет.Сумма.Исчисленный"
+@Field final String C_WITHHOLDING_TAX = "НДФЛ удержанный" //"НДФЛ.Расчет.Сумма.Удержанный"
+@Field final String C_NOT_HOLDING_TAX = "НДФЛ не удержанный" //"НДФЛ.Расчет.Сумма.Не удержанный"
+@Field final String C_OVERHOLDING_TAX = "НДФЛ излишне удержанный" //"НДФЛ.Расчет.Сумма.Излишне удержанный"
+@Field final String C_REFOUND_TAX = "НДФЛ возвращенный НП" //C_REFOUND_TAX
+@Field final String C_TAX_TRANSFER_DATE = "Срок перечисления в бюджет" //"НДФЛ.Перечисление в бюджет.Срок"
+@Field final String C_PAYMENT_DATE = "Дата платежного поручения" //"НДФЛ.Перечисление в бюджет.Платежное поручение.Дата"
+@Field final String C_PAYMENT_NUMBER = "Номер платежного поручения" //"НДФЛ.Перечисление в бюджет.Платежное поручение.Номер"
+@Field final String C_TAX_SUMM = "Сумма платежного поручения" //"НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+@Field final String C_OKTMO = "ОКТМО" //"Доход.Источник выплаты.ОКТМО"
+@Field final String C_KPP = "КПП" //"Доход.Источник выплаты.КПП"
 
-    // Сведения о вычетах
-    @Field final String C_NOTIF_DATE = "Документ о праве на налоговый вычет.Дата"
-    @Field final String C_INCOME_ACCRUED = "Начисленный доход.Дата"
-    @Field final String C_PERIOD_PREV_DATE = "Применение вычета.Предыдущий период.Дата"
-    @Field final String C_PERIOD_CURR_DATE = "Применение вычета.Текущий период.Дата"
+// Сведения о вычетах
+@Field final String C_NOTIF_DATE = "Подтверждающий документ. Дата" //" Документ о праве на налоговый вычет.Дата"
+@Field final String C_NOTIF_SUMM = "Подтверждающий документ. Сумма" //" Документ о праве на налоговый вычет.Сумма"
+@Field final String C_NOTIF_NUMBER = "Подтверждающий документ. Номер" //" Документ о праве на налоговый вычет.Номер"
+@Field final String C_INCOME_ACCRUED = "Доход. Дата" //" Начисленный доход.Дата"
+@Field final String C_INCOME_ACCRUED_P_SUMM = "Доход. Сумма" //" Начисленный доход.Сумма"
+@Field final String C_INCOME_ACCRUED_CODE = "Доход. Код дохода" //" Начисленный доход.Код дохода"
+@Field final String C_PERIOD_PREV_DATE = "Вычет. Предыдущий период. Дата" //" Применение вычета.Предыдущий период.Дата"
+@Field final String C_PERIOD_CURR_DATE = "Вычет. Текущий период. Дата" //" Применение вычета.Текущий период.Дата"
+@Field final String C_PERIOD_CURR_SUMM = "Вычет. Текущий период. Сумма" //" Применение вычета.Текущий период.Сумма"
 
     // Поля справочника Физические лица
     @Field final String RF_LAST_NAME = "LAST_NAME"
@@ -2723,19 +2735,19 @@ class NdflPersonFL {
         long time = System.currentTimeMillis();
         // Реквизиты
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
-        logForDebug(SUCCESS_GET_TABLE, T_PERSON, ndflPersonList.size())
+        logForDebug(SUCCESS_GET_TABLE, T_PERSON_NAME, ndflPersonList.size())
 
         // Сведения о доходах и НДФЛ
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
-        logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME, ndflPersonIncomeList.size())
+        logForDebug(SUCCESS_GET_TABLE, T_PERSON_INCOME_NAME, ndflPersonIncomeList.size())
 
         // Сведения о вычетах
         List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
-        logForDebug(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION, ndflPersonDeductionList.size())
+        logForDebug(SUCCESS_GET_TABLE, T_PERSON_DEDUCTION_NAME, ndflPersonDeductionList.size())
 
         // Сведения о доходах в виде авансовых платежей
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
-        logForDebug(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT, ndflPersonPrepaymentList.size())
+        logForDebug(SUCCESS_GET_TABLE, T_PERSON_PREPAYMENT_NAME, ndflPersonPrepaymentList.size())
 
         logForDebug("Получение записей из таблиц НФДЛ (" + (System.currentTimeMillis() - time) + " мс)");
 
@@ -2876,7 +2888,7 @@ class NdflPersonFL {
 
                 List<String> address = []
                 FiasCheckInfo fiasCheckInfo = checkFiasExistAddressMap.get(ndflPerson.id)
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 if (!ScriptUtils.isEmpty(ndflPerson.regionCode) && !fiasCheckInfo.validRegion) {
                     logFiasError(fioAndInp, pathError, "Код субъекта", ndflPerson.regionCode)
                 } else if (!ScriptUtils.isEmpty(ndflPerson.area) && !fiasCheckInfo.validArea ) {
@@ -2888,7 +2900,7 @@ class NdflPersonFL {
                 } else if (!ScriptUtils.isEmpty(ndflPerson.street) && !fiasCheckInfo.validStreet) {
                     logFiasError(fioAndInp, pathError, "Улица", ndflPerson.street)
                 }
-                if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))){
+                if (ndflPerson.postIndex != null && !ndflPerson.postIndex.matches("[0-9]{6}")){
                     logFiasIndexError(fioAndInp, pathError, "Индекс", ndflPerson.postIndex)
                 }
             }
@@ -2901,7 +2913,7 @@ class NdflPersonFL {
                         "Форма.Реквизиты.Гражданство (код страны)", ndflPerson.citizenship ?: "",
                         R_CITIZENSHIP
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_CITIZENSHIP), fioAndInp, pathError, errMsg)
             }
 
@@ -2912,13 +2924,13 @@ class NdflPersonFL {
                         "Форма.Реквизиты.Статус (Код)", ndflPerson.status ?: "",
                         R_STATUS
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_STATUS), fioAndInp, pathError, errMsg)
             }
 
             // Спр10 Наличие связи с "Физическое лицо"
             if (ndflPerson.personId == null || ndflPerson.personId == 0) {
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.errorExp("%s. %s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp, pathError,
                         "Не удалось установить связь со справочником \"$R_PERSON\"")
             } else {
@@ -2926,38 +2938,38 @@ class NdflPersonFL {
 
                 if (!personRecord) {
                     //TODO turn_to_error
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp, pathError,
-                            "Не удалось установить связь со справочником \"$R_PERSON\".")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+                    logger.errorExp("%s. %s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp, pathError,
+                            "Не удалось установить связь со справочником \"$R_PERSON\"")
                 } else {
                     // Спр11 Фамилия (Обязательное поле)
                     if (personRecord.get(RF_LAST_NAME).value != null && !ndflPerson.lastName.equals(personRecord.get(RF_LAST_NAME).value)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Налогоплательщик.Фамилия", ndflPerson.lastName ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "Фамилия", ndflPerson.lastName ?: "", R_PERSON))
                     }
 
                     // Спр11 Имя (Обязательное поле)
                     if (personRecord.get(RF_FIRST_NAME).value != null && !ndflPerson.firstName.equals(personRecord.get(RF_FIRST_NAME).value)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Налогоплательщик.Имя", ndflPerson.firstName ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "Имя", ndflPerson.firstName ?: "", R_PERSON))
                     }
 
                     // Спр11 Отчество (Необязательное поле)
                     if (personRecord.get(RF_MIDDLE_NAME).value != null && ndflPerson.middleName != null && !ndflPerson.middleName.equals(personRecord.get(RF_MIDDLE_NAME).value)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ФИО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Налогоплательщик.Отчество", ndflPerson.middleName ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "Отчество", ndflPerson.middleName ?: "", R_PERSON))
                     }
 
                     if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                         // Спр12 ИНП первичная (Обязательное поле)
                         def inpList = inpMap.get(personRecord.get("id")?.value)
                         if (!(ndflPerson.inp == personRecord.get(RF_SNILS)?.value || inpList?.contains(ndflPerson.inp))) {
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "ИНП не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                    String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Налогоплательщик.ИНП", ndflPerson.inp ?: "", R_PERSON))
+                                    String.format(LOG_TYPE_PERSON_MSG, "ИНП", ndflPerson.inp ?: "", R_PERSON))
                         }
                     } else {
                         //Спр12.1 ИНП консолидированная - проверка соответствия RECORD_ID
@@ -2965,39 +2977,39 @@ class NdflPersonFL {
                         String recordId = String.valueOf(personRecord.get(RF_RECORD_ID).getNumberValue().longValue());
                         if (!ndflPerson.inp.equals(recordId)) {
                             //TODO turn_to_error
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "ИНП не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                    String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Налогоплательщик.ИНП", ndflPerson.inp ?: "", R_PERSON))
+                                    String.format(LOG_TYPE_PERSON_MSG, "ИНП", ndflPerson.inp ?: "", R_PERSON))
                         }
                     }
 
                     // Спр13 Дата рождения (Обязательное поле)
                     if (personRecord.get(RF_BIRTH_DATE).value != null && !ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Дата рождения не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Налогоплательщик.Дата рождения", ndflPerson.birthDay ?(ndflPerson.birthDay?.format("dd.MM.yyyy")): "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "Дата рождения", ndflPerson.birthDay ?(ndflPerson.birthDay?.format("dd.MM.yyyy")): "", R_PERSON))
                     }
 
                     // Спр14 Гражданство (Обязательное поле)
                     def citizenship = citizenshipCodeMap.get(personRecord.get(RF_CITIZENSHIP).value)
                     if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Код гражданства не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Гражданство (код страны)", ndflPerson.citizenship ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "Гражданство (код страны)", ndflPerson.citizenship ?: "", R_PERSON))
                     }
 
                     // Спр15 ИНН.В Российской федерации (Необязательное поле)
                     if (ndflPerson.innNp != null && !ndflPerson.innNp.equals(personRecord.get(RF_INN).value)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.%s. %s.", "ИНН в РФ не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.ИНН.В Российской федерации", ndflPerson.innNp ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "ИНН в РФ", ndflPerson.innNp ?: "", R_PERSON))
                     }
 
                     // Спр16 ИНН.В стране гражданства (Необязательное поле)
                     if (ndflPerson.innForeign != null && !ndflPerson.innForeign.equals(personRecord.get(RF_INN_FOREIGN).value)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "ИНН в ИНО не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.ИНН.В стране гражданства", ndflPerson.innForeign ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "ИНН в ИНО", ndflPerson.innForeign ?: "", R_PERSON))
                     }
 
                     if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
@@ -3012,14 +3024,14 @@ class NdflPersonFL {
                             personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
                         }
                         if (ndflPerson.idDocType != null && !personDocTypeList.contains(ndflPerson.idDocType)) {
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
-                                    String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Документ удостоверяющий личность.Код", ndflPerson.idDocType ?: "", R_PERSON))
+                                    String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код", ndflPerson.idDocType ?: "", R_PERSON))
                         }
                         if (ndflPerson.idDocNumber != null && !personDocNumberList.contains(ndflPerson.idDocNumber)) {
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
-                                    String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Документ удостоверяющий личность.Номер", ndflPerson.idDocNumber ?: "", R_PERSON))
+                                    String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Номер", ndflPerson.idDocNumber ?: "", R_PERSON))
                         }
                     } else {
                         def allDocList = dulMap.get(ndflPerson.personId)
@@ -3031,15 +3043,15 @@ class NdflPersonFL {
                         }
 
                         if (dulRecordValues == null) {
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
-                                    String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Документ удостоверяющий личность.Код\" (\"${ndflPerson.idDocType ?: ""}\"), \"Форма.Реквизиты.Документ удостоверяющий личность.Номер", ndflPerson.idDocNumber ?: "", R_PERSON))
+                                    String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код\" (\"${ndflPerson.idDocType ?: ""}\"), \"ДУЛ Номер", ndflPerson.idDocNumber ?: "", R_PERSON))
                         } else {
                             int incRep = dulRecordValues.get(RF_INC_REP).getNumberValue().intValue()
                             if (incRep != 1) {
-                                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                                 logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
-                                        "'Форма.Реквизиты.Документ удостоверяющий личность.Номер' не включается в отчетность")
+                                        "\"ДУЛ Номер\" не включается в отчетность")
                             }
                         }
                     }
@@ -3047,7 +3059,7 @@ class NdflPersonFL {
                     // Спр18 Статус налогоплательщика (Обязательное поле)
                     def taxpayerStatus = taxpayerStatusMap.get(personRecord.get(RF_TAXPAYER_STATE).value)
                     if (ndflPerson.status!= null && !ndflPerson.status.equals(taxpayerStatus)) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Статус (код)", ndflPerson.status ?: "", R_PERSON))
                     }
@@ -3116,7 +3128,7 @@ class NdflPersonFL {
                         ndflPersonAddress.add("Квартира='${ndflPerson.flat ?: ""}'")
                     }
                     if (!ndflPersonAddress.isEmpty()) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Адрес не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Адрес регистрации в Российской Федерации", ndflPersonAddress.join(", "), R_PERSON))
 
@@ -3124,7 +3136,7 @@ class NdflPersonFL {
                 }
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
 
         logForDebug("Проверки на соответствие справочникам / Проверка существования адреса (" + timeIsExistsAddress + " мс)");
 
@@ -3143,10 +3155,10 @@ class NdflPersonFL {
                         ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
             }) {
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                        "Доход.Вид.Код", ndflPersonIncome.incomeCode ?: "",
+                        C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
                         R_INCOME_CODE
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError, errMsg)
             }
 
@@ -3164,10 +3176,10 @@ class NdflPersonFL {
                 List<Long> incomeTypeIdList = incomeTypeMap.get(ndflPersonIncome.incomeType)
                 if (incomeTypeIdList == null || incomeTypeIdList.isEmpty()) {
                     String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                            "Доход.Вид.Признак", ndflPersonIncome.incomeType ?: "",
+                            C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
                             R_INCOME_TYPE
                     )
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError, errMsg)
                 } else {
                     if (!ScriptUtils.isEmpty(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeAccruedDate != null) {
@@ -3183,19 +3195,19 @@ class NdflPersonFL {
                         }
                         if (!incomeCodeRef) {
                             String errMsg = String.format("Не найдено соответствие между гр. \"%s\" (\"%s\") и \"%s\" (\"%s\") в справочнике \"%s\"",
-                                    "Доход.Вид.Код", ndflPersonIncome.incomeCode ?: "",
-                                    "Доход.Вид.Признак", ndflPersonIncome.incomeType ?: "",
+                                    C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
+                                    C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
                                     R_INCOME_CODE
                             )
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError,
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError,
                                     errMsg)
                         }
                     }
                 }
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_INCOME}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_INCOME_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
@@ -3211,7 +3223,7 @@ class NdflPersonFL {
                         "Форма.Сведения о вычетах.Код вычета", ndflPersonDeduction.typeCode ?: "",
                         R_TYPE_CODE
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_TYPE_CODE), fioAndInp, pathError, errMsg)
             }
 
@@ -3219,14 +3231,14 @@ class NdflPersonFL {
             if (ndflPersonDeduction.notifSource != null && !taxInspectionList.contains(ndflPersonDeduction.notifSource)) {
                 //TODO turn_to_error
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG,
-                        "Документ о праве на налоговый вычет.Код источника", ndflPersonDeduction.notifSource ?: "",
+                        C_NOTIF_SOURCE, ndflPersonDeduction.notifSource ?: "",
                         R_NOTIF_SOURCE
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_NOTIF_SOURCE), fioAndInp, pathError, errMsg)
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_DEDUCTION_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
         for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
@@ -3243,20 +3255,20 @@ class NdflPersonFL {
                         "Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи. Код налогового органа, выдавшего уведомление", ndflPersonPrepayment.notifSource ?: "",
                         R_NOTIF_SOURCE
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum ?: "")
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_NOTIF_SOURCE), fioAndInp, pathError, errMsg)
             }
         }
-        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Проверки на соответствие справочникам / '${T_PERSON_PREPAYMENT_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
     }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФЛ КЛАДР"), fioAndInp, pathError,
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
             "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"КЛАДР\"")
 }
 
 void logFiasIndexError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФЛ КЛАДР"), fioAndInp, pathError,
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
                     "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") не соответствует требуемому формату")
 }
 
@@ -3294,13 +3306,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             // Общ1 Корректность ИНН
             if (ndflPerson.citizenship == "643") {
                 if (ndflPerson.innNp == null) {
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "ИНН не указан", fioAndInp, pathError,
                             "Значение гр. \"ИНН в РФ\" не указано. Прием налоговым органом обеспечивается, может быть предупреждение")
                 } else {
                     String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
                     if (checkInn != null) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.errorExp("%s. %s.", "ИНН не соответствует формату", fioAndInp, pathError,
                                 checkInn)
                     }
@@ -3308,12 +3320,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             //Общ2 Наличие обязательных реквизитов для формирования отчетности
-            boolean checkLastName = checkRequiredAttribute(ndflPerson, fioAndInp, "lastName", "Налогоплательщик.Фамилия")
-            boolean checkFirstName = checkRequiredAttribute(ndflPerson, fioAndInp, "firstName", "Налогоплательщик.Имя")
-            checkRequiredAttribute(ndflPerson, fioAndInp, "birthDay", "Налогоплательщик.Дата рождения")
+            boolean checkLastName = checkRequiredAttribute(ndflPerson, fioAndInp, "lastName", "Фамилия")
+            boolean checkFirstName = checkRequiredAttribute(ndflPerson, fioAndInp, "firstName", "Имя")
+            checkRequiredAttribute(ndflPerson, fioAndInp, "birthDay", "Дата рождения")
             boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", "Гражданство (код страны)")
-            boolean checkIdDocType = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "Документ удостоверяющий личность.Код")
-            boolean checkIdDocNumber = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "Документ удостоверяющий личность.Номер")
+            boolean checkIdDocType = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "ДУЛ Код")
+            boolean checkIdDocNumber = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "ДУЛ Номер")
             checkRequiredAttribute(ndflPerson, fioAndInp, "status", "Статус (Код)")
             if (checkCitizenship) {
                 if (ndflPerson.citizenship == "643") {
@@ -3328,7 +3340,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (checkLastName) {
                     String checkName = ScriptUtils.checkName(ndflPerson.lastName, "Фамилия")
                     if (checkName != null) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
                                 checkName)
                     }
@@ -3336,16 +3348,16 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (checkFirstName) {
                     String checkName = ScriptUtils.checkName(ndflPerson.firstName, "Имя")
                     if (checkName != null) {
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
                                 checkName)
                     }
                 }
             }
             if (checkIdDocType && checkIdDocNumber) {
-                String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "Документ удостоверяющий личность.Номер")
+                String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
                 if (checkDul != null) {
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "ДУЛ не соответствует формату", fioAndInp, pathError,
                             checkDul)
                 }
@@ -3356,12 +3368,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует формату",
                         "СНИЛС", ndflPerson.snils?:""
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.warnExp("%s. %s.", "СНИЛС не соответствует формату", fioAndInp, pathError,
                         errMsg)
             }
         }
-        logForDebug("Общие проверки / '${T_PERSON}' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Общие проверки / '${T_PERSON_NAME}' (" + (System.currentTimeMillis() - time) + " мс)");
 
         time = System.currentTimeMillis();
         Department department = departmentService.get(declarationData.departmentId)
@@ -3387,181 +3399,181 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column4Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            "Доход.Вид.Код",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_INCOME_CODE,
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
             )
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column5Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            "Доход.Вид.Код",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_INCOME_CODE,
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
             )
             //2 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column10Fill(),
                     new Column6Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Вид.Начисление",
-                            "Доход.Сумма.Начисление"
+                            C_INCOME_ACCRUED_SUMM,
+                            C_INCOME_ACCRUED_DATE
                     )
             )
             //3 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column11Fill(),
                     new Column7Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Дата.Выплата",
-                            "Доход.Сумма.Выплата"
+                            C_INCOME_PAYOUT_DATE,
+                            C_INCOME_PAYOUT_SUMM
                     )
             )
             //3 Раздел 2. Графа 8 Должна быть всегда заполнена
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column8Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Не заполнена гр. \"%s\"",
-                            "Доход.Источник выплаты.ОКТМО"
+                            C_OKTMO
                     )
             )
             //3 Раздел 2. Графа 9 Должна быть всегда заполнена
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column8Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Не заполнена гр. \"%s\"",
-                            "Доход.Источник выплаты.КПП"
+                            C_KPP
                     )
             )
             //4 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column6Fill(),
                     new Column10Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Сумма.Начисление",
-                            "Доход.Вид.Начисление"
+                            C_INCOME_ACCRUED_DATE,
+                            C_INCOME_ACCRUED_SUMM
                     )
             )
             //5 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7Fill(),
                     new Column11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Сумма.Выплата",
-                            "Доход.Дата.Выплата"
+                            C_INCOME_PAYOUT_SUMM,
+                            C_INCOME_PAYOUT_DATE
                     )
             )
             //6 Раздел 2. Графа 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24Fill(),
                     new Column12NotFill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            "Сумма вычета", ndflPersonIncome.totalDeductionsSumm ?:"",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?:"",
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
             )
             //7 Раздел 2. Графы 13 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column13Fill(applyTemporalySolution),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            "Налоговая база",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_TAX_BASE,
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
             )
             //7 Раздел 2. Графы 14 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column14Fill(applyTemporalySolution),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            "НДФЛ.Процентная ставка",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_TAX_RATE,
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
             )
             //7 Раздел 2. Графы 15 должны быть заполнены, если не заполнены Раздел 2. Графы 22, 23, 24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column15Fill(applyTemporalySolution),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            "НДФЛ.Расчет.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_TAX_DATE,
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
             )
             //8 Раздел 2. Графы 6 должны быть заполнены, если заполнена Раздел 2. Графа 16
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column16Fill(),
                     new Column6Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Дата.Начисление",
-                            "НДФЛ.Расчет.Сумма.Исчисленный"
+                            C_INCOME_ACCRUED_DATE,
+                            C_CALCULATED_TAX
                     )
             )
             //8 Раздел 2. Графы 10 должны быть заполнены, если заполнена Раздел 2. Графа 16
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column16Fill(),
                     new Column10Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Сумма.Начисление",
-                            "НДФЛ.Расчет.Сумма.Исчисленный"
+                            C_INCOME_ACCRUED_DATE,
+                            C_CALCULATED_TAX
                     )
             )
             //9 Раздел 2. Графы 6, 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column18Or19Fill(),
                     new Column6Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
-                            "Доход.Дата.Начисление",
-                            "НДФЛ.Расчет.Сумма.Не удержанный",
-                            "НДФЛ.Расчет.Сумма.Излишне удержанный"
+                            C_INCOME_ACCRUED_DATE,
+                            C_NOT_HOLDING_TAX,
+                            C_OVERHOLDING_TAX
                     )
             )
             //9 Раздел 2. Графы 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column18Or19Fill(),
                     new Column10Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
-                            "Доход.Сумма.Начисление",
-                            "НДФЛ.Расчет.Сумма.Не удержанный",
-                            "НДФЛ.Расчет.Сумма.Излишне удержанный"
+                            C_INCOME_ACCRUED_SUMM,
+                            C_NOT_HOLDING_TAX,
+                            C_OVERHOLDING_TAX
                     )
             )
             //10 Раздел 2. Графы 7 должны быть заполнены, если заполнена Раздел 2. Графа 17
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column7Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Дата.Выплата",
-                            "НДФЛ.Расчет.Сумма.Удержанный"
+                            C_INCOME_PAYOUT_DATE,
+                            C_WITHHOLDING_TAX
                     )
 
             )
@@ -3569,20 +3581,20 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Сумма.Выплата",
-                            "НДФЛ.Расчет.Сумма.Удержанный"
+                            C_INCOME_PAYOUT_SUMM,
+                            C_WITHHOLDING_TAX
                     )
             )
             //11 Раздел 2. Графы 7 должны быть заполнены, если заполнена Раздел 2. Графа 20
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column20Fill(),
                     new Column7Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Дата.Выплата",
-                            "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику"
+                            C_INCOME_PAYOUT_DATE,
+                            C_REFOUND_TAX
                     )
 
             )
@@ -3590,21 +3602,21 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column17Fill(),
                     new Column11Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            "Доход.Сумма.Выплата",
-                            "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику"
+                            C_INCOME_PAYOUT_SUMM,
+                            C_REFOUND_TAX
                     )
             )
             //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7, 11
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7And11Fill(),
                     new Column21Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
-                            "НДФЛ.Перечисление в бюджет.Срок",
-                            "Доход.Дата.Выплата",
-                            "Доход.Сумма.Выплата"
+                            C_TAX_TRANSFER_DATE,
+                            C_INCOME_PAYOUT_DATE,
+                            C_INCOME_PAYOUT_SUMM
                     )
 
             )
@@ -3612,12 +3624,12 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24Fill(),
                     new Column21Fill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\", \"%s\"",
-                            "НДФЛ.Перечисление в бюджет.Срок",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_TAX_TRANSFER_DATE,
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
 
             )
@@ -3625,14 +3637,14 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column7And11And22And23And24NotFill(),
                     new Column21NotFill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как заполнены гр. \"%s\", гр. \"%s\", и не заполнены гр. \"%s\", гр. \"%s\", гр. \"%s\"",
-                            "НДФЛ.Перечисление в бюджет.Срок", ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
-                            "Доход.Дата.Выплата",
-                            "Доход.Сумма.Выплата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
+                            C_INCOME_PAYOUT_DATE,
+                            C_INCOME_PAYOUT_SUMM,
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
 
             )
@@ -3640,34 +3652,33 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             columnFillConditionDataList << new ColumnFillConditionData(
                     new ColumnTrueFillOrNotFill(),
                     new Column22And23And24FillOrColumn22And23And24NotFill(),
-                    "Раздел '${T_PERSON_INCOME}'. Строка '${ndflPersonIncome.rowNum ?: ""}'",
+                    String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\", гр. \"%s\", гр. \"%s\" должны быть заполнены одновременно или не заполнена ни одна из них",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Дата",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Номер",
-                            "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма"
+                            C_PAYMENT_DATE,
+                            C_PAYMENT_NUMBER,
+                            C_TAX_SUMM
                     )
 
             )
             columnFillConditionDataList.each { columnFillConditionData ->
                 if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
                         !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
-                    logger.warnExp("%s. %s.", "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
+                    logger.errorExp("%s. %s.", "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
                             fioAndInp, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
-                    //                println(String.format("%s. %s.", columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage))
                 }
             }
         }
 
         ScriptUtils.checkInterrupted();
 
-        logForDebug("Общие проверки / '$T_PERSON_INCOME' (" + (System.currentTimeMillis() - time) + " мс)");
+        logForDebug("Общие проверки / '$T_PERSON_INCOME_NAME' (" + (System.currentTimeMillis() - time) + " мс)");
 
         logForDebug("Общие проверки всего (" + (System.currentTimeMillis() - timeTotal) + " мс)");
     }
 
 boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, String attributeName) {
     if (ndflPerson[alias] == null || (ndflPerson[alias]) instanceof String && (org.apache.commons.lang3.StringUtils.isBlank(ndflPerson[alias]) || ndflPerson[alias] == "0")) {
-        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON, ndflPerson.rowNum ?: "")
+        String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
         String msg
         if (ndflPerson[alias] == "0") {
             msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
@@ -4163,9 +4174,9 @@ class ColumnFillConditionData {
                         if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format(dateConditionData.conditionMessage,
-                                    "Доход.Дата.Начисление", ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""
+                                    C_INCOME_ACCRUED_DATE, ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""
                             )
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.warnExp("%s. %s.", LOG_TYPE_2_6, fioAndInp, pathError, errMsg)
                         }
                     }
@@ -4178,17 +4189,17 @@ class ColumnFillConditionData {
                 if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
-                            "Сумма вычета", ndflPersonIncome.totalDeductionsSumm ?: 0,
-                            "Сумма вычета", sumNdflDeduction ?: 0)
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
+                            C_TOTAL_DEDUCTIONS_SUMM, sumNdflDeduction ?: 0)
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
                 }
                 if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\") раздела 3",
-                            "Сумма вычета", ndflPersonIncome.totalDeductionsSumm ?: 0,
+                            C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
                             "Начисление", ndflPersonIncome.incomeAccruedSumm ?: 0)
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
                 }
             }
@@ -4261,7 +4272,7 @@ class ColumnFillConditionData {
                             ndflPersonIncomingCodeInOperation, ndflPerson.status,
                             ndflPersonIncomingTaxRates.join(", ")
                     )
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_14, fioAndInp, pathError, errMsg)
                 }
             }
@@ -4277,8 +4288,8 @@ class ColumnFillConditionData {
                     // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
                     if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                         checkTaxDate = false
-                        log_type = "\"Дата исчисленного налога\" рассчитана некорректно"
-                        errMsg = "Значение гр. \"НДФЛ.Расчет.Дата\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"Доход.Дата.Начисление\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}\")"
+                        log_type = "\"${"Дата исчисленного налога"}\" рассчитана некорректно"
+                        errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}\")"
                     }
                 }
                 // СведДох5.2
@@ -4287,8 +4298,8 @@ class ColumnFillConditionData {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
-                            log_type = "\"Дата удержанного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"НДФЛ.Расчет.Дата\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"Доход.Дата.Выплата\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
+                            log_type = "\"${"Дата удержанного налога"}\" рассчитана некорректно"
+                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
                         }
                     }
                 }
@@ -4302,7 +4313,7 @@ class ColumnFillConditionData {
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
                             log_type = "\"Дата не удержаннного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"НДФЛ.Расчет.Дата\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"Доход.Дата.Выплата\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
+                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
                         }
                     }
                 }
@@ -4316,7 +4327,7 @@ class ColumnFillConditionData {
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                             checkTaxDate = false
                             log_type = "\"Дата не удержаннного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"НДФЛ.Расчет.Дата\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"Доход.Дата.Начисление\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}\")"
+                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}\")"
                         }
                     }
                 }
@@ -4334,7 +4345,7 @@ class ColumnFillConditionData {
                         if (!(dayOfMonth == 31 && month == 12)) {
                             checkTaxDate = false
                             log_type = "\"Дата не удержаннного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"НДФЛ.Расчет.Дата\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно \"31.12.20**\""
+                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно \"31.12.20**\""
                         }
                     }
                 }
@@ -4347,7 +4358,7 @@ class ColumnFillConditionData {
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
                             log_type = "\"Дата излишне удержанного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"НДФЛ.Расчет.Дата\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"Доход.Дата.Выплата\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
+                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
                         }
                     }
                 }
@@ -4361,13 +4372,13 @@ class ColumnFillConditionData {
                         if (!(ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate)) {
                             checkTaxDate = false
                             log_type = "\"Дата расчета возвращенного налогоплательщику налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"НДФЛ.Расчет.Дата\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"Доход.Дата.Выплата\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
+                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
                         }
                     }
                 }
                 if (!checkTaxDate) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", log_type, fioAndInp, pathError, errMsg)
                 }
             }
@@ -4379,11 +4390,11 @@ class ColumnFillConditionData {
                     if ((ndflPersonIncome.calculatedTax ?: 0) != ScriptUtils.round(((ndflPersonIncome.taxBase ?: 0) * (ndflPersonIncome.taxRate ?: 0))/100, 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно произведению значений гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\") с округлением до целого числа",
-                                "Расчет.Сумма.Исчисленный", ndflPersonIncome.calculatedTax ?: 0,
-                                "Налоговая база", ndflPersonIncome.taxBase ?: 0,
+                                C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
                                 "Процентная ставка", (ndflPersonIncome.taxRate ?: 0)
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_16, fioAndInp, pathError, errMsg)
                     }
                 }
@@ -4426,11 +4437,11 @@ class ColumnFillConditionData {
                     if (ndflPersonIncome.calculatedTax != ScriptUtils.round((S1 * 0.13 - S2), 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно выражению: Сумма значений гр. \"%s\" с начала периода на отчетную дату х 13%% - сумма значений гр. \"%s\" за предыдущие отчетные периоды",
-                                "Расчет.Сумма.Исчисленный", ndflPersonIncome.calculatedTax ?: 0,
-                                "Налоговая база",
-                                "Расчет.Сумма.Исчисленный"
+                                C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                C_TAX_BASE,
+                                C_CALCULATED_TAX
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_16, fioAndInp, pathError, errMsg)
                     }
                 }
@@ -4445,11 +4456,11 @@ class ColumnFillConditionData {
                         ) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно выражению: гр. \"%s\" (\"%s\") х 13%%%% - \"%s\" (\"%s\")",
-                                    "Расчет.Сумма.Исчисленный", ndflPersonIncome.calculatedTax ?: 0,
-                                    "Налоговая база", ndflPersonIncome.taxBase ?: 0,
+                                    C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                    C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
                                     "Сумма фиксированного авансового платежа", ndflPersonPrepaymentSum
                             )
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.warnExp("%s. %s.", LOG_TYPE_2_16, fioAndInp, pathError, errMsg)
                         }
                     }
@@ -4469,11 +4480,11 @@ class ColumnFillConditionData {
                             && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значениям гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
-                                "Расчет.Сумма.Удержанный", ndflPersonIncome.withholdingTax ?: 0,
-                                "Расчет.Сумма.Исчисленный", ndflPersonIncome.calculatedTax ?: 0,
-                                "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма", ndflPersonIncome.taxSumm ?: 0
+                                C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInp, pathError, errMsg)
                     }
                 } else if (((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
@@ -4493,30 +4504,30 @@ class ColumnFillConditionData {
                     if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax ?: 0 + ndflPersonIncomePreview.calculatedTax ?: 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме значений гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\") предыдущей записи",
-                                "Расчет.Сумма.Удержанный", ndflPersonIncome.withholdingTax ?: 0,
-                                "Расчет.Сумма.Исчисленный", ndflPersonIncome.calculatedTax ?: 0,
-                                "Расчет.Сумма.Исчисленный", ndflPersonIncomePreview.calculatedTax ?: 0
+                                C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
+                                C_CALCULATED_TAX, ndflPersonIncomePreview.calculatedTax ?: 0
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInp, pathError, errMsg)
                     }
                     if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\")",
-                                "Расчет.Сумма.Удержанный", ndflPersonIncome.withholdingTax ?: 0,
-                                "НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма", ndflPersonIncome.taxSumm ?: 0
+                                C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInp, pathError, errMsg)
                     }
                     if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
-                                "Расчет.Сумма.Удержанный", ndflPersonIncome.withholdingTax ?: 0,
-                                "Налоговая база", ndflPersonIncome.taxBase ?: 0,
-                                "Расчет.Сумма.Исчисленный", ndflPersonIncome.calculatedTax ?: 0
+                                C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
+                                C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInp, pathError, errMsg)
                     }
                 } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
@@ -4526,19 +4537,19 @@ class ColumnFillConditionData {
                     if (!(ndflPersonIncome.withholdingTax == 0 || ndflPersonIncome.withholdingTax == null)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно \"0\"",
-                                "Расчет.Сумма.Удержанный", ndflPersonIncome.withholdingTax ?: 0
+                                C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInp, pathError, errMsg)
                     }
                 } else if (!(ndflPersonIncome.incomeCode != null)) {
                     if (!(ndflPersonIncome.withholdingTax != ndflPersonIncome.taxSumm ?: 0)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\")",
-                                "Расчет.Сумма.Удержанный", ndflPersonIncome.withholdingTax ?: 0,
-                                "Расчет.Перечисление в бюджет.Платежное поручение.Сумма", ndflPersonIncome.taxSumm ?: 0
+                                C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
+                                C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
                         )
-                        String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInp, pathError, errMsg)
                     }
                 }
@@ -4562,11 +4573,11 @@ class ColumnFillConditionData {
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции.",
-                            "НДФЛ.Расчет.Сумма.Не удержанный", notHoldingTaxSum ?: "",
-                            "НДФЛ.Расчет.Сумма.Исчисленный", calculatedTaxSum ?: "",
-                            "НДФЛ.Расчет.Сумма.Удержанный", withholdingTaxSum ?: ""
+                            C_NOT_HOLDING_TAX, notHoldingTaxSum ?: "",
+                            C_CALCULATED_TAX, calculatedTaxSum ?: "",
+                            C_WITHHOLDING_TAX, withholdingTaxSum ?: ""
                     )
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_18, fioAndInp, pathError, errMsg)
                 }
             }
@@ -4576,11 +4587,11 @@ class ColumnFillConditionData {
                 if (!(overholdingTaxSum == withholdingTaxSum - calculatedTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
-                            "НДФЛ.Расчет.Сумма.Излишне удержанный", overholdingTaxSum ?: "",
-                            "НДФЛ.Расчет.Сумма.Удержанный", withholdingTaxSum ?: "",
-                            "НДФЛ.Расчет.Сумма.Исчисленный", calculatedTaxSum ?: ""
+                            C_OVERHOLDING_TAX, overholdingTaxSum ?: "",
+                            C_WITHHOLDING_TAX, withholdingTaxSum ?: "",
+                            C_CALCULATED_TAX, calculatedTaxSum ?: ""
                     )
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_19, fioAndInp, pathError, errMsg)
                 }
             }
@@ -4590,10 +4601,10 @@ class ColumnFillConditionData {
                 if (!(refoundTaxSum <= overholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") не должна превышать сумму значений гр.\"%s\" (\"%s\") для всех строк одной операции",
-                            "НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику ", refoundTaxSum ?: "",
-                            "НДФЛ.Расчет.Сумма.Излишне", overholdingTaxSum ?: ""
+                            C_REFOUND_TAX, refoundTaxSum ?: "",
+                            C_OVERHOLDING_TAX, overholdingTaxSum ?: ""
                     )
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_20, fioAndInp, pathError, errMsg)
                 }
             }
@@ -4607,10 +4618,10 @@ class ColumnFillConditionData {
                         if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format(dateConditionData.conditionMessage,
-                                    "НДФЛ.Перечисление в бюджет.Срок", ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
-                                    "Доход.Дата.Выплата", ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""
+                                    C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
+                                    C_INCOME_PAYOUT_DATE, ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""
                             )
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInp, pathError, errMsg)
                         }
                     }
@@ -4656,19 +4667,19 @@ class ColumnFillConditionData {
                         if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день",
-                                    "НДФЛ.Перечисление в бюджет.Срок", ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
-                                    "Доход.Дата.Выплата", ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""
+                                    C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
+                                    C_INCOME_PAYOUT_DATE, ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""
                             )
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInp, pathError, errMsg)
                         }
                     } else {
                         // ToDo https://jira.aplana.com/browse/SBRFNDFL-1448
                         if (false) {
                             String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно \"00.00.0000\"",
-                                    "НДФЛ.Перечисление в бюджет.Срок", ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT) : ""
+                                    C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT) : ""
                             )
-                            String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                            String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInp, pathError, errMsg)
                         }
                     }
@@ -5016,10 +5027,10 @@ class ColumnFillConditionData {
             if (ndflPersonDeduction.typeCode == "1" && ndflPersonDeduction.notifSource != "0000") {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует значению гр. \"%s\" (\"%s\")",
-                       "Документ о праве на налоговый вычет.Код источника", ndflPersonDeduction.notifSource ?: "",
-                       "Код вычета", ndflPersonDeduction.typeCode ?:""
+                       C_NOTIF_SOURCE, ndflPersonDeduction.notifSource ?: "",
+                       C_TYPE_CODE, ndflPersonDeduction.typeCode ?:""
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.warnExp("%s. %s.", LOG_TYPE_3_7, fioAndInp, pathError, errMsg)
             }
 
@@ -5030,20 +5041,20 @@ class ColumnFillConditionData {
             if (ndflPersonIncome == null) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует значению гр. \"%s\" (\"%s\")",
-                        "Начисленный доход.Дата", ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued) : "",
-                        "Документ о праве на налоговый вычет.Номер", ndflPersonDeduction.notifNum ?:""
+                        C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued) : "",
+                        C_NOTIF_NUMBER, ndflPersonDeduction.notifNum ?:""
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.warnExp("%s. %s.", LOG_TYPE_3_10, fioAndInp, pathError, errMsg)
             } else {
                 // Выч17 Начисленный доход.Код дохода (Графы 11)
                 if (ndflPersonDeduction.incomeCode != ndflPersonIncome.incomeCode) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Обнаружены расхождения между значением гр. \"%s\", к которому был применен вычет (\"%s\"), указанным в Разделе 2, и значением гр. \"%s\" (\"%s\"), указанным в Разделе 3",
-                            "Доход.Вид.Код", ndflPersonIncome.incomeCode ?: "",
-                            "Начисленный доход.Код дохода", ndflPersonDeduction.incomeCode ?:""
+                            C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
+                            C_INCOME_ACCRUED_CODE, ndflPersonDeduction.incomeCode ?:""
                     )
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_3_11, fioAndInp, pathError, errMsg)
                 }
 
@@ -5051,10 +5062,10 @@ class ColumnFillConditionData {
                 if (!comparNumbEquals(ndflPersonDeduction.incomeSumm, ndflPersonIncome.incomeAccruedSumm)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Обнаружены расхождения между значением гр. \"%s\", к которому был применен вычет (\"%s\"), указанным в Разделе 2, и значением гр. \"%s\" (\"%s\"), указанным в Разделе 3",
-                            "Доход.Сумма.Начисление", ndflPersonIncome.incomeAccruedSumm ?: "",
-                            "Начисленный доход.Сумма", ndflPersonDeduction.incomeSumm ?:""
+                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: "",
+                            C_INCOME_ACCRUED_P_SUMM, ndflPersonDeduction.incomeSumm ?:""
                     )
-                    String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_3_12, fioAndInp, pathError, errMsg)
                 }
             }
@@ -5063,10 +5074,10 @@ class ColumnFillConditionData {
             if (ndflPersonDeduction.periodCurrDate != ndflPersonDeduction.incomeAccrued) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\")\" не соответствует значению гр. \"%s\" (\"%s\")",
-                        "Применение вычета.Текущий период.Дата", ndflPersonDeduction.periodCurrDate ? formatDate(ndflPersonDeduction.periodCurrDate): "",
-                        "Начисленный доход.Дата", ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued): ""
+                        C_PERIOD_CURR_DATE, ndflPersonDeduction.periodCurrDate ? formatDate(ndflPersonDeduction.periodCurrDate): "",
+                        C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued): ""
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.warnExp("%s. %s.", LOG_TYPE_3_10_2, fioAndInp, pathError, errMsg)
             }
 
@@ -5074,10 +5085,10 @@ class ColumnFillConditionData {
             if (comparNumbGreater(ndflPersonDeduction.periodCurrSumm ?: 0, ndflPersonDeduction.notifSumm ?: 0)) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String errMsg = String.format("Значение гр. \"%s\" (%s) не должно превышать значение гр. \"%s\" (%s) согласно подтверждающему документу",
-                        "Применение вычета.Текущий период.Сумма", ndflPersonDeduction.periodCurrSumm ?: "",
-                        "Документ о праве на налоговый вычет.Сумма", ndflPersonDeduction.notifSumm ?:""
+                        C_PERIOD_CURR_SUMM, ndflPersonDeduction.periodCurrSumm ?: "",
+                        C_NOTIF_SUMM, ndflPersonDeduction.notifSumm ?:""
                 )
-                String pathError = String.format("Раздел '%s'. Строка '%s'", T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.warnExp("%s. %s.", LOG_TYPE_3_16, fioAndInp, pathError, errMsg)
             }
         }
@@ -5184,50 +5195,6 @@ class ColumnFillConditionData {
                                 ScriptUtils.isEmpty(ndflPerson.building) &&  ScriptUtils.isEmpty(ndflPerson.flat);
         return emptyAddress;
     }
-
-    /**
-     * Преобразование массива имен полей в строку с помещением каждого имени в кавычки
-     * @param fieldNameList
-     */
-    def getQuotedFields(def fieldNameList) {
-        def result = ""
-        fieldNameList.each { fieldName ->
-            if (result != "") {
-                result += ", "
-            }
-            result += "\"" + fieldName + "\""
-        }
-        return result
-    }
-
-    /**
-     * Формирование сообщения с повторяющимися номерами
-     * @param inputList
-     * @param tableName
-     * @return
-     */
-    def getErrorMsgDubl(def inputList, def tableName) {
-        def resultMsg = ""
-        if (inputList != null && inputList.size() > 0) {
-            resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
-        }
-        return resultMsg
-    }
-
-    /**
-     * Формирование сообщения с пропущенными номерами
-     * @param inputList
-     * @param tableName
-     * @return
-     */
-    def getErrorMsgAbsent(def inputList, def tableName) {
-        def resultMsg = ""
-        if (inputList != null && inputList.size() > 0) {
-            resultMsg = " Раздел \"" + tableName + "\" № " + inputList.join(", ") + "."
-        }
-        return resultMsg
-    }
-
 
     //TODO вынес handler в скрипт, чтобы не обновлять ядро на нексте
 
