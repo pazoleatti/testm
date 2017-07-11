@@ -435,4 +435,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     public void removeEnterNativePreviewHandler() {
         nativePreviewHandler.removeHandler();
     }
+
+    @Override
+    public void setEnableDuplicateButton(boolean enable) {
+        duplicate.setEnabled(enable);
+    }
 }

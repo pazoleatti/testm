@@ -69,6 +69,7 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
 
             RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(action.getRecordId());
             List<Long> deleteList = new ArrayList<Long>();
+            List<Long> deleteSlaveList = new ArrayList<Long>();
             deleteList.add(recordVersion.getRecordId());
 
             RefBookDataProvider providerSlave = rbFactory.getDataProvider(action.getSlaveRefBookId());
@@ -82,12 +83,14 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
             PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(period.getCalendarStartDate(), null, filterSlave, null);
 
             for (Map<String, RefBookValue> r : paramsSlave) {
-                deleteList.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+                deleteSlaveList.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
             }
 
             if (period.getCalendarStartDate().equals(recordVersion.getVersionStart())) {
+                providerSlave.deleteRecordVersions(logger, deleteSlaveList, false);
                 provider.deleteRecordVersions(logger, deleteList, false);
             } else {
+                providerSlave.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteSlaveList);
                 provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteList);
             }
 

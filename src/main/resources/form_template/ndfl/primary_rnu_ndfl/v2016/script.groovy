@@ -998,16 +998,16 @@ import java.text.SimpleDateFormat
 
             if (value != null && !attrEquator(type, refBookValue.getValue(), value)) {
                 //значения не равны, обновление
-                refBookValue.setValue(value);
                 changeEvent.setType(AttributeChangeEventType.REFRESHED);
+                attributeChangedListener.processAttr(changeEvent);
+                refBookValue.setValue(value);
             }
         } else {
             //создание новой записи
             valuesMap.put(attrName, new RefBookValue(type, value));
             changeEvent.setType(AttributeChangeEventType.CREATED);
+            refBookValue.setValue(value);
         }
-
-        attributeChangedListener.processAttr(changeEvent);
     }
 
     def isAttrEquals(RefBookAttributeType type, Object valueA, Object valueB) {
