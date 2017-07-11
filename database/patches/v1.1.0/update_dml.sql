@@ -42,5 +42,9 @@ insert into ref_book_asnu (id,code,name,type) values (15,'9000','АС "ЕКС"',
 prompt update and alter ref_books
 @upd_ref_books.sql;
 
+-- UPDATE declaration_subreport_params
+prompt UPDATE declaration_subreport_params
+@@update_decl_subrep_params.sql
+
 commit;
 exit;
