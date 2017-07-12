@@ -273,4 +273,12 @@ public interface DepartmentService {
      * @return Список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
      */
     List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
+
+    /**
+     * Получить списиок ТБ подразделений, для которых подразделение из ТБ пользователя является исполнителем макетов
+     * @param userTBDepId подразделения-исполнителя
+     * @param declarationType макет
+     * @return
+     */
+    List<Integer> getAllTBPerformers(int userTBDepId, DeclarationType declarationType);
 }

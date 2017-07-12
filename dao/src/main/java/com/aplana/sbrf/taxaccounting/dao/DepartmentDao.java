@@ -200,7 +200,21 @@ public interface DepartmentDao {
 
     int getHierarchyLevel(int departmentId);
 
-    List<Integer> getAllPerformers(int departmentId, int declarationTypeId);
+    /**
+     * Получить списиок подразделений, для которых подразделение пользователя(или его дочернее подразделение) является исполнителем макетов
+     * @param userDepId подразделения-исполнителя
+     * @param declarationTypeId id макета
+     * @return
+     */
+    List<Integer> getAllPerformers(int userDepId, int declarationTypeId);
+
+    /**
+     * Получить списиок ТБ подразделений, для которых подразделение из ТБ пользователя является исполнителем макетов
+     * @param userTBDepId подразделения-исполнителя
+     * @param declarationTypeId id макета
+     * @return
+     */
+    List<Integer> getAllTBPerformers(int userTBDepId, int declarationTypeId);
 
     List<Integer> getAllPerformers(int userDepId, List<TaxType> taxTypes);
 
