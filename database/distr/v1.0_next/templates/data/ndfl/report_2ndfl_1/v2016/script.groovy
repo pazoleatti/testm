@@ -1,5 +1,10 @@
 package form_template.ndfl.report_2ndfl_1.v2016
 
+import com.aplana.sbrf.taxaccounting.model.Column
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
+import com.aplana.sbrf.taxaccounting.model.StringColumn
+import groovy.transform.CompileStatic
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.service.script.*
@@ -690,60 +695,62 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
 boolean checkMandatoryFields(List<NdflPerson> ndflPersonList) {
     boolean toReturn = true
     for (NdflPerson ndflPerson : ndflPersonList) {
-        List<String> mandatoryFields = new LinkedList<>();
-        if (ndflPerson.rowNum == null) mandatoryFields << "'№пп'"
-        if (ndflPerson.inp == null || ndflPerson.inp.isEmpty()) mandatoryFields << "'Налогоплательщик.ИНП'"
-        if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty() || ndflPerson.lastName == "0") mandatoryFields << "'Налогоплательщик.Фамилия'"
-        if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty() || ndflPerson.firstName == "0") mandatoryFields << "'Налогоплательщик.Имя'"
-        if (ndflPerson.birthDay == null) mandatoryFields << "'Налогоплательщик.Дата рождения'"
-        boolean checkCitizenship = true
-        if (ndflPerson.citizenship == null || ndflPerson.citizenship.isEmpty()) {
-            mandatoryFields << "'Гражданство (код страны)'"
-            checkCitizenship = false
-        }
-        if (ndflPerson.idDocType == null || ndflPerson.idDocType.isEmpty()) mandatoryFields << "'Документ удостоверяющий личность.Код'"
-        if (ndflPerson.idDocNumber == null || ndflPerson.idDocNumber.isEmpty()) mandatoryFields << "'Документ удостоверяющий личность.Номер'"
-        if (ndflPerson.status == null || ndflPerson.status.isEmpty()) mandatoryFields << "'Статус (Код)'"
-        if (checkCitizenship) {
-            if (ndflPerson.citizenship == "643") {
-                if (StringUtils.isBlank(ndflPerson.regionCode)) {
-                    mandatoryFields << "'Код субъекта'"
-                }
-            } else {
-                if (StringUtils.isBlank(ndflPerson.countryCode)) {
-                    mandatoryFields << "'Код страны проживания вне РФ'"
-                }
-                if (StringUtils.isBlank(ndflPerson.address)) {
-                    mandatoryFields << "'Адрес проживания вне РФ'"
+        MANDATORY_FIELDS: {
+            List<String> mandatoryFields = new LinkedList<>();
+            if (ndflPerson.rowNum == null) mandatoryFields << "'№пп'"
+            if (ndflPerson.inp == null || ndflPerson.inp.isEmpty()) mandatoryFields << "'Налогоплательщик.ИНП'"
+            if (ndflPerson.lastName == null || ndflPerson.lastName.isEmpty() || ndflPerson.lastName == "0") mandatoryFields << "'Налогоплательщик.Фамилия'"
+            if (ndflPerson.firstName == null || ndflPerson.firstName.isEmpty() || ndflPerson.firstName == "0") mandatoryFields << "'Налогоплательщик.Имя'"
+            if (ndflPerson.birthDay == null) mandatoryFields << "'Налогоплательщик.Дата рождения'"
+            boolean checkCitizenship = true
+            if (ndflPerson.citizenship == null || ndflPerson.citizenship.isEmpty()) {
+                mandatoryFields << "'Гражданство (код страны)'"
+                checkCitizenship = false
+            }
+            if (ndflPerson.idDocType == null || ndflPerson.idDocType.isEmpty()) mandatoryFields << "'Документ удостоверяющий личность.Код'"
+            if (ndflPerson.idDocNumber == null || ndflPerson.idDocNumber.isEmpty()) mandatoryFields << "'Документ удостоверяющий личность.Номер'"
+            if (ndflPerson.status == null || ndflPerson.status.isEmpty()) mandatoryFields << "'Статус (Код)'"
+            if (checkCitizenship) {
+                if (ndflPerson.citizenship == "643") {
+                    if (StringUtils.isBlank(ndflPerson.regionCode)) {
+                        mandatoryFields << "'Код субъекта'"
+                    }
+                } else {
+                    if (StringUtils.isBlank(ndflPerson.countryCode)) {
+                        mandatoryFields << "'Код страны проживания вне РФ'"
+                    }
+                    if (StringUtils.isBlank(ndflPerson.address)) {
+                        mandatoryFields << "'Адрес проживания вне РФ'"
+                    }
                 }
             }
-        }
-        if (!mandatoryFields.isEmpty()) {
-            def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-            def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-            String strCorrPeriod = ""
-            if (departmentReportPeriod.getCorrectionDate() != null) {
-                strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
-            }
-            Department department = departmentService.get(departmentReportPeriod.departmentId)
-            String lastname = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
-            String firstname = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
-            String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
-            String fio = lastname + firstname + middlename
+            if (!mandatoryFields.isEmpty()) {
+                def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+                def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+                String strCorrPeriod = ""
+                if (departmentReportPeriod.getCorrectionDate() != null) {
+                    strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+                }
+                Department department = departmentService.get(departmentReportPeriod.departmentId)
+                String lastname = ndflPerson.lastName != null ? ndflPerson.lastName + " " : ""
+                String firstname = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
+                String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
+                String fio = lastname + firstname + middlename
 
-            String msg = String.format("Не удалось создать форму \"%s\" за период \"%s\", подразделение: \"%s\", КПП: \"%s\", ОКТМО: \"%s\". Не заполнены или равны \"0\" обязательные параметры %s для ФЛ: %s, ИНП: %s в форме РНУ НДФЛ (консолидированная) № %s",
-                    currDeclarationTemplate.getName(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                    department.getName(),
-                    declarationData.kpp,
-                    declarationData.oktmo,
-                    mandatoryFields.join(', '),
-                    fio,
-                    ndflPerson.inp,
-                    ndflPerson.declarationDataId
-            )
-            logger.warn(msg)
-            toReturn = false
+                String msg = String.format("Не удалось создать форму \"%s\" за период \"%s\", подразделение: \"%s\", КПП: \"%s\", ОКТМО: \"%s\". Не заполнены или равны \"0\" обязательные параметры %s для ФЛ: %s, ИНП: %s в форме РНУ НДФЛ (консолидированная) № %s",
+                        currDeclarationTemplate.getName(),
+                        departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                        department.getName(),
+                        declarationData.kpp,
+                        declarationData.oktmo,
+                        mandatoryFields.join(', '),
+                        fio,
+                        ndflPerson.inp,
+                        ndflPerson.declarationDataId
+                )
+                logger.warn(msg)
+                toReturn = false
+            }
         }
     }
     return toReturn
@@ -2217,7 +2224,7 @@ def prepareSpecificReport() {
     def resultReportParameters = [:]
     reportParameters.each { key, value ->
         if (value != null) {
-            if (key == "birthDay") {
+            if (key == "toBirthDay" || key == "fromBirthDay") {
                 resultReportParameters.put(key, ScriptUtils.formatDate(value, "dd.MM.yyyy"))
             } else {
                 resultReportParameters.put(key, value)
@@ -2229,7 +2236,7 @@ def prepareSpecificReport() {
     int pageSize = 10
 
     // Поиск данных по фильтру
-    def docs = searchData(resultReportParameters, pageSize)
+    def docs = searchData(resultReportParameters, pageSize, result)
 
     // Формирование списка данных для вывода в таблицу
     docs.each() { doc ->
@@ -2243,15 +2250,8 @@ def prepareSpecificReport() {
         dataRows.add(row)
     }
 
-    int countOfAvailableNdflPerson = docs.size()
-
-    if (countOfAvailableNdflPerson >= pageSize) {
-        countOfAvailableNdflPerson = counter;
-    }
-
     result.setTableColumns(tableColumns);
     result.setDataRows(dataRows);
-    result.setCountAvailableDataRows(countOfAvailableNdflPerson)
     scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
     scriptSpecificReportHolder.setSubreportParamValues(params)
 }
@@ -2346,18 +2346,23 @@ def createRowColumns() {
 @Field
 int counter = 0
 
-def searchData(def params, pageSize) {
+def searchData(def params, pageSize, PrepareSpecificReportResult prepareSpecificReportResult) {
     def xmlStr = declarationService.getXmlData(declarationData.id)
     def Файл = new XmlSlurper().parseText(xmlStr)
-    def docs = Файл.Документ.findAll { doc ->
-        (params['pNumSpravka'] ? StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka']) : true) &&
-                (params['lastName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName']) : true) &&
-                (params['firstName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName']) : true) &&
-                (params['middleName'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName']) : true) &&
-                (params['birthDay'] ? StringUtils.containsIgnoreCase(doc.ПолучДох.@ДатаРожд.text(), params['birthDay']) : true) &&
-                (params['idDocNumber'] ? (StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) ||
-                        StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s,.-]", ""), params['idDocNumber'])) : true)
+    def docs = []
+    Файл.Документ.each { doc ->
+        boolean passed = true
+        if (params['pNumSpravka'] != null && !StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka'])) passed = false
+        if (params['lastName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName'])) passed = false
+        if (params['firstName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName'])) passed = false
+        if (params['middleName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName'])) passed = false
+        if (params['inn'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.@ИННФЛ.text(), params['inn'])) passed = false
+        if (searchBirthDay(params, doc.ПолучДох.@ДатаРожд.text())) passed = false
+        if (params['idDocNumber'] != null && !((StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) ||
+                StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s,.-]", ""), params['idDocNumber'])))) passed = false
+        if (passed) docs << doc
     }
+    prepareSpecificReportResult.countAvailableDataRows = docs.size()
     // ограничиваем размер выборки
     def result = []
     docs.each {
@@ -2367,6 +2372,25 @@ def searchData(def params, pageSize) {
         counter++
     }
     result
+}
+
+def searchBirthDay(def params, String birthDate) {
+    Date date = ScriptUtils.parseDate(DATE_FORMAT_DOTTED, birthDate)
+    if (params['fromBirthDay'] != null && params ['toBirthDay'] != null) {
+        if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['fromBirthDay']) && date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['toBirthDay'])) {
+            return false
+        }
+    } else if (params['fromBirthDay'] != null) {
+        if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['fromBirthDay'])) {
+            return false
+        }
+    } else if (params['toBirthDay'] != null) {
+        if (date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, params['toBirthDay'])) {
+            return false
+        }
+    }
+
+    return true
 }
 
 /**
@@ -2762,6 +2786,14 @@ final String MIDDLE_NAME = "Отчество"
 @Field
 final String NUM_SPR = "НомСпр"
 @Field
+final String INN_SPR = "ИННФЛ"
+@Field
+final String CITIZENSHIP_CODE = "Гражд"
+@Field
+final String ID_DOC_TYPE = "КодУдЛичн"
+@Field
+final String ID_DOC_NUMBER = "СерНомДок"
+@Field
 final String TAX_RATE = "Ставка"
 @Field
 final String CALCULATED_TAX = "НалИсчисл"
@@ -2807,10 +2839,18 @@ def check() {
         Ndfl2Leaf<String> firstNameLeaf = new Ndfl2Leaf<>(FIRST_NAME, docNodeItem.ПолучДох.ФИО.@Имя.text(), String.class)
         Ndfl2Leaf<String> middleNameLeaf = new Ndfl2Leaf<>(MIDDLE_NAME, docNodeItem.ПолучДох.ФИО.@Отчество.text(), String.class)
         Ndfl2Leaf<String> numSprLeaf = new Ndfl2Leaf<>(NUM_SPR, docNodeItem.@НомСпр.text(), Integer.class)
+        Ndfl2Leaf<String> innLeaf = new Ndfl2Leaf<>(INN_SPR, docNodeItem.ПолучДох.@ИННФЛ.text(), String.class)
+        Ndfl2Leaf<String> citizenshipLeaf = new Ndfl2Leaf<>(CITIZENSHIP_CODE, docNodeItem.ПолучДох.@Гражд.text(), String.class)
+        Ndfl2Leaf<String> idDocTypeLeaf = new Ndfl2Leaf<>(ID_DOC_TYPE, docNodeItem.ПолучДох.УдЛичнФЛ.@КодУдЛичн.text(), String.class)
+        Ndfl2Leaf<String> idDocNumberLeaf = new Ndfl2Leaf<>(ID_DOC_NUMBER, docNodeItem.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), String.class)
         documentNdfl2Node.addLeaf(lastNameLeaf)
         documentNdfl2Node.addLeaf(firstNameLeaf)
         documentNdfl2Node.addLeaf(middleNameLeaf)
         documentNdfl2Node.addLeaf(numSprLeaf)
+        documentNdfl2Node.addLeaf(innLeaf)
+        documentNdfl2Node.addLeaf(citizenshipLeaf)
+        documentNdfl2Node.addLeaf(idDocTypeLeaf)
+        documentNdfl2Node.addLeaf(idDocNumberLeaf)
         def svedDohNodes = docNodeItem.depthFirst().grep {
             it.name() == SVEDDOH_NODE
         }
@@ -2868,6 +2908,10 @@ def check() {
         }
         fileNdfl2Node.addChild(documentNdfl2Node)
     }
+    // Общие проверки
+    Checker commonChecker = new CommonChecker(fileNdfl2Node)
+    commonChecker.check(logger)
+
     // Внутридокументарные проверки инкапсулированы в классы реализующие интерфейс Checker, в конструктор передается корневой узел созданного дерева
     Checker calculatedTaxChecker = new CalculatedTaxChecker(fileNdfl2Node)
     calculatedTaxChecker.check(logger)
@@ -3019,6 +3063,10 @@ abstract class AbstractChecker implements Checker {
     final String FIRST_NAME = "Имя"
     final String MIDDLE_NAME = "Отчество"
     final String NUM_SPR = "НомСпр"
+    final String INN_FL = "ИННФЛ"
+    final String CITIZENSHIP_CODE = "Гражд"
+    final String ID_DOC_TYPE = "КодУдЛичн"
+    final String ID_DOC_NUMBER = "СерНомДок"
     final String TAX_RATE = "Ставка"
     final String SVEDDOH_NODE = "СведДох"
     final String SV_SUM_DOH = "СвСумДох"
@@ -3076,6 +3124,68 @@ abstract class AbstractChecker implements Checker {
                 .append(", Номер справки: ")
                 .append(numSprAttribute.getValue()?.toString())
         logger.errorExp(message, type, fioAndNumSpr.toString())
+    }
+
+    void createWarnMessage(Logger logger, Ndfl2Node documentNode, String type, String message) {
+        Ndfl2Leaf<String> lastNameAttribute = extractAttribute(LAST_NAME, documentNode)
+        Ndfl2Leaf<String> firstNameAttribute = extractAttribute(FIRST_NAME, documentNode)
+        Ndfl2Leaf<String> middleNameAttribute = extractAttribute(MIDDLE_NAME, documentNode)
+        Ndfl2Leaf<String> numSprAttribute = extractAttribute(NUM_SPR, documentNode)
+        StringBuilder fioAndNumSpr = new StringBuilder(lastNameAttribute.getValue() ? (String) lastNameAttribute.getValue() : "")
+                .append(" ")
+                .append(firstNameAttribute.getValue() ? (String) firstNameAttribute.getValue() : "")
+                .append(" ")
+                .append(middleNameAttribute.getValue() ? (String) middleNameAttribute.getValue() : "")
+                .append(", Номер справки: ")
+                .append(numSprAttribute.getValue()?.toString())
+        logger.warnExp(message, type, fioAndNumSpr.toString())
+    }
+}
+
+/**
+ * Общие проверки
+ */
+@CompileStatic
+class CommonChecker extends AbstractChecker {
+
+    CommonChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    void check(Logger logger) {
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            String citizenship = extractAttribute(CITIZENSHIP_CODE, documentNode).getValue()
+            if (citizenship == "643") {
+                String inn = extractAttribute(INN_FL, documentNode).getValue()
+                String lastName = extractAttribute(LAST_NAME, documentNode).getValue()
+                String firstName = extractAttribute(FIRST_NAME, documentNode).getValue()
+                if (inn == null || inn.trim() == "") {
+                    createWarnMessage(logger, documentNode, "Проверка заполнения поля ИНН в РФ у гражданина РФ", "Значение гр. \"ИНН в РФ\" не указано. Прием налоговым органом обеспечивается, может быть предупреждение.")
+                } else {
+                    String checkInn = ScriptUtils.checkInn(inn)
+                    if (checkInn != null) {
+                        createErrorMessage(logger, documentNode, "Проверка корректности ИНН ФЛ", checkInn)
+                    }
+                }
+                String checkName = ScriptUtils.checkName(lastName, "Фамилия")
+                if (checkName != null) {
+                    createErrorMessage(logger, documentNode, "Фамилия, Имя не соответствует формату", checkName)
+                }
+                checkName = ScriptUtils.checkName(firstName, "Имя")
+                if (checkName != null) {
+                    createErrorMessage(logger, documentNode, "Фамилия, Имя не соответствует формату", checkName)
+                }
+            }
+            ID_DOC_CHECK: {
+                String idDocType = extractAttribute(ID_DOC_TYPE, documentNode).getValue()
+                String idDocNumber = extractAttribute(ID_DOC_NUMBER, documentNode).getValue()
+                String checkDul = ScriptUtils.checkDul(idDocType, idDocNumber, "Документ удостоверяющий личность.Номер")
+                if (checkDul != null) {
+                    createErrorMessage(logger, documentNode, "Проверка соответствия Серии и Номера ДУЛ формату", checkDul)
+                }
+            }
+        }
     }
 }
 
