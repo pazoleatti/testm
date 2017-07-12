@@ -470,7 +470,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         when(testHelper.getNdflPersonService().findNdflPersonDeduction(any(Long.class))).thenReturn(ndflPersonDeductionList);
 
         testHelper.execute(FormDataEvent.CHECK);
-        checkLogger();
+        //checkLogger();
         Assert.assertTrue(containLog("(.*)Значение гр\\. \"Сумма вычета\" \\(\"125\"\\) должно быть равно сумме гр\\. \"Сумма вычета\" \\(\"250\"\\) раздела 3(.*)"));
         Assert.assertTrue(containLog("(.*)Значение гр\\. \"Сумма вычета\" \\(\"125\"\\) должно быть не меньше значение гр\\. \"Начисление\" \\(\"125\"\\) раздела 3(.*)"));
     }

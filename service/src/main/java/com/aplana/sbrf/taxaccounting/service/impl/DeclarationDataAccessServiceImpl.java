@@ -79,18 +79,16 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS)) {
             //ТБ формы
             int declarationTB = departmentService.getParentTB(declDepartment.getId()).getId();
-
             //Подразделение и ТБ пользователя
             int userTB = departmentService.getParentTB(userInfo.getUser().getDepartmentId()).getId();
 
             //Подразделение формы и подразделение пользователя должны относиться к одному ТБ или
             if (userTB == declarationTB) {
                 return;
-
             }
 
             //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
-            List<Integer> tbDepartments = departmentService.getTBDepartmentIdsByDeclarationPerformer(userInfo.getUser().getDepartmentId());
+            List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
 
             //Подразделение формы относится к одному из ТБ подразделений, для которых подразделение пользователя является исполнителем
             if (tbDepartments.contains(declarationTB)) {
