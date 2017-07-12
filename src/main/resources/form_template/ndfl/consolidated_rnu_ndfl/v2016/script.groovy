@@ -1736,7 +1736,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String C_CITIZENSHIP = "Гражданство (код страны)"
 @Field final String C_ID_DOC = "Документ удостоверяющий личность.Номер"
 @Field final String C_ID_DOC_TYPE = "Документ удостоверяющий личность.Код"
-@Field final String C_STATUS = "Статус"
+@Field final String C_STATUS = "Статус (код)"
 @Field final String C_RATE = "Ставка"
 @Field final String C_TYPE_CODE = "Код вычета" // "Код вычета"
 @Field final String C_NOTIF_SOURCE = "Подтверждающий документ. Код источника" //"Документ о праве на налоговый вычет.Код источника"
@@ -2038,7 +2038,7 @@ def checkDataReference(
         if (ndflPerson.citizenship != null && !citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
             //TODO turn_to_error
             String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                    "Форма.Реквизиты.Гражданство (код страны)", ndflPerson.citizenship ?: "",
+                    C_CITIZENSHIP, ndflPerson.citizenship ?: "",
                     R_CITIZENSHIP
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
@@ -2058,7 +2058,7 @@ def checkDataReference(
         if (ndflPerson.status != "0" && !taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
             //TODO turn_to_error
             String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                    "Форма.Реквизиты.Статус (Код)", ndflPerson.status ?: "",
+                    C_STATUS, ndflPerson.status ?: "",
                     R_STATUS
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
@@ -2132,7 +2132,7 @@ def checkDataReference(
                 if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "Код гражданства не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                            String.format(LOG_TYPE_PERSON_MSG, "Гражданство (код страны)", ndflPerson.citizenship ?: "", R_PERSON))
+                            String.format(LOG_TYPE_PERSON_MSG, C_CITIZENSHIP, ndflPerson.citizenship ?: "", R_PERSON))
                 }
 
                 // Спр15 ИНН.В Российской федерации (Необязательное поле)
@@ -2334,10 +2334,10 @@ def checkDataReference(
                         String errMsg = String.format("Не найдено соответствие между гр. \"%s\" (\"%s\") и \"%s\" (\"%s\") в справочнике \"%s\"",
                                 C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
                                 C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
-                                R_INCOME_CODE
+                                R_INCOME_TYPE
                         )
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError,
                                 errMsg)
                     }
                 }
@@ -2476,10 +2476,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         boolean checkLastName = checkRequiredAttribute(ndflPerson, fioAndInp, "lastName", "Фамилия")
         boolean checkFirstName = checkRequiredAttribute(ndflPerson, fioAndInp, "firstName", "Имя")
         checkRequiredAttribute(ndflPerson, fioAndInp, "birthDay", "Дата рождения")
-        boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", "Гражданство (код страны)")
+        boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", C_CITIZENSHIP)
         boolean checkIdDocType = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "ДУЛ Код")
         boolean checkIdDocNumber = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "ДУЛ Номер")
-        checkRequiredAttribute(ndflPerson, fioAndInp, "status", "Статус (код)")
+        checkRequiredAttribute(ndflPerson, fioAndInp, "status", C_STATUS)
         if (checkCitizenship) {
             if (ndflPerson.citizenship == "643") {
                 checkRequiredAttribute(ndflPerson, fioAndInp, "regionCode", "Код субъекта")
