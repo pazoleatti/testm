@@ -4349,7 +4349,7 @@ class ColumnFillConditionData {
                 String log_type = null
                 String errMsg = null
                 // СведДох5.1
-                if (ndflPersonIncome.calculatedTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                if ((ndflPersonIncome.calculatedTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                     // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
                     if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                         checkTaxDate = false
@@ -4359,7 +4359,7 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.2
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.withholdingTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                    if ((ndflPersonIncome.withholdingTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
@@ -4370,8 +4370,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.3
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
                             ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null &&
                             !["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode)) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
@@ -4384,8 +4384,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.4
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
                             ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode) &&
                             ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate()) {
                         // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
@@ -4398,8 +4398,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.5
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
                             ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542"].contains(ndflPersonIncome.incomeCode) &&
                             (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
                         // «Графа 15 Раздел 2"» = "31.12.20**"
@@ -4416,8 +4416,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.6
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.overholdingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.overholdingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
                             ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
@@ -4429,9 +4429,9 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.7
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.refoundTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
-                            ndflPersonIncome.overholdingTax ?: 0 &&
+                    if ((ndflPersonIncome.refoundTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
+                            (ndflPersonIncome.overholdingTax ?: 0) &&
                             ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (!(ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate)) {
@@ -4718,7 +4718,7 @@ class ColumnFillConditionData {
                     List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
                     NdflPersonIncome ndflPersonIncomeFind = null;
                     ndflPersonIncomeCurrentList.each {
-                        if (it.incomeAccruedSumm ?: 0 > 0 && !["02", "14"].contains(it.incomeType)
+                        if ((it.incomeAccruedSumm ?: 0 > 0) && !["02", "14"].contains(it.incomeType)
                                 && (ndflPersonIncomeFind == null || ndflPersonIncomeFind.incomePayoutDate > it.incomePayoutDate)
                                 && ndflPersonIncome.incomePayoutDate <= it.incomePayoutDate
                                 && ndflPersonIncome.operationId < it.operationId) {
