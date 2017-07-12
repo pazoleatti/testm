@@ -971,9 +971,12 @@ def prepareSpecificReport() {
         row.firstName = ndflPerson.firstName
         row.middleName = ndflPerson.middleName
         row.snils = ndflPerson.snils
-        row.innNp = ndflPerson.innNp?:ndflPerson.innForeign
+        row.innNp = ndflPerson.innNp
+        row.inp = ndflPerson.inp
         row.birthDay = ndflPerson.birthDay
         row.idDocNumber = ndflPerson.idDocNumber
+        row.statusNp = getPersonStatusName(ndflPerson.status)
+        row.innForeign = ndflPerson.innForeign
         dataRows.add(row)
     }
 
@@ -988,6 +991,12 @@ def prepareSpecificReport() {
     result.setCountAvailableDataRows(countOfAvailableNdflPerson)
     scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
     scriptSpecificReportHolder.setSubreportParamValues(params)
+}
+
+String getPersonStatusName(String statusCode) {
+    RefBookDataProvider provider = getProvider(RefBook.Id.TAXPAYER_STATUS.getId())
+    PagingResult<Long, Map<String, RefBookValue>> record = provider.getRecords(getReportPeriodEndDate(), null, "CODE = '$statusCode'", null)
+    return record.get(0).get("NAME").getValue()
 }
 
 def createTableColumns() {
@@ -1019,21 +1028,39 @@ def createTableColumns() {
 
     Column column5 = new StringColumn()
     column5.setAlias("innNp")
-    column5.setName("ИНН")
+    column5.setName("ИНН РФ")
     column5.setWidth(10)
     tableColumns.add(column5)
 
-    Column column6 = new DateColumn()
-    column6.setAlias("birthDay")
-    column6.setName("Дата рождения")
+    Column column6 = new StringColumn()
+    column6.setAlias("inp")
+    column6.setName("ИНП")
     column6.setWidth(10)
     tableColumns.add(column6)
 
-    Column column7 = new StringColumn()
-    column7.setAlias("idDocNumber")
-    column7.setName("ДУЛ")
+    Column column7 = new DateColumn()
+    column7.setAlias("birthDay")
+    column7.setName("Дата рождения")
     column7.setWidth(10)
     tableColumns.add(column7)
+
+    Column column8 = new StringColumn()
+    column8.setAlias("idDocNumber")
+    column8.setName("№ ДУЛ")
+    column8.setWidth(10)
+    tableColumns.add(column8)
+
+    Column column9 = new StringColumn()
+    column9.setAlias("statusNp")
+    column9.setName("Статус налогоплательщика")
+    column9.setWidth(30)
+    tableColumns.add(column9)
+
+    Column column10 = new StringColumn()
+    column10.setAlias("innForeign")
+    column10.setName("ИНН Страны гражданства")
+    column10.setWidth(10)
+    tableColumns.add(column10)
 
     return tableColumns;
 }
@@ -1073,21 +1100,39 @@ def createRowColumns() {
 
     Column column5 = new StringColumn()
     column5.setAlias("innNp")
-    column5.setName("ИНН")
+    column5.setName("ИНН РФ")
     column5.setWidth(10)
     tableColumns.add(column5)
 
-    Column column6 = new DateColumn()
-    column6.setAlias("birthDay")
-    column6.setName("Дата рождения")
+    Column column6 = new StringColumn()
+    column6.setAlias("inp")
+    column6.setName("ИНП")
     column6.setWidth(10)
     tableColumns.add(column6)
 
-    Column column7 = new StringColumn()
-    column7.setAlias("idDocNumber")
-    column7.setName("ДУЛ")
+    Column column7 = new DateColumn()
+    column7.setAlias("birthDay")
+    column7.setName("Дата рождения")
     column7.setWidth(10)
     tableColumns.add(column7)
+
+    Column column8 = new StringColumn()
+    column8.setAlias("idDocNumber")
+    column8.setName("№ ДУЛ")
+    column8.setWidth(10)
+    tableColumns.add(column8)
+
+    Column column9 = new StringColumn()
+    column9.setAlias("statusNp")
+    column9.setName("Статус налогоплательщика")
+    column9.setWidth(30)
+    tableColumns.add(column9)
+
+    Column column10 = new StringColumn()
+    column10.setAlias("innForeign")
+    column10.setName("ИНН Страны гражданства")
+    column10.setWidth(10)
+    tableColumns.add(column10)
 
     return tableColumns;
 }
