@@ -46,7 +46,7 @@ public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
 		DeclarationListPresenter.MyView {
 
-    public static final String DECLARATION_HEADER = "Формы";
+    public static final String DECLARATION_HEADER = "Список налоговых форм";
     public static final String DECLARATION_HEADER_R = "Отчетность";
     public static final String DECLARATION_CREATE = "Создать налоговую форму...";
     public static final String DECLARATION_CREATE_D = "Создать уведомление...";
