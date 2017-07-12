@@ -4175,7 +4175,7 @@ class ColumnFillConditionData {
     dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
                                                              "1541", "1542", "1543", "1544", "1545", "1546", "1547",
                                                              "1548", "1549", "1551", "1552", "1553", "1554"], ["01", "02", "03", "04"],
-            new Column21EqualsColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
+            new Column21EqualsColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 30 календарных дней")
 
     // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
     dateConditionDataListForBudget << new DateConditionData(["2000"], ["05", "06", "07", "08", "09", "10", "11", "12"],
