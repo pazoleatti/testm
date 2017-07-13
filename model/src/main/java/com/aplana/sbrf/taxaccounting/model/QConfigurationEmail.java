@@ -35,7 +35,7 @@ public class QConfigurationEmail extends com.querydsl.sql.RelationalPathBase<QCo
     public final com.querydsl.sql.PrimaryKey<QConfigurationEmail> configurationEmailPk = createPrimaryKey(id);
 
     public QConfigurationEmail(String variable) {
-        super(QConfigurationEmail.class, forVariable(variable), "NDFL_1_0", "CONFIGURATION_EMAIL");
+        super(QConfigurationEmail.class, forVariable(variable), "NDFL_UNSTABLE", "CONFIGURATION_EMAIL");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QConfigurationEmail extends com.querydsl.sql.RelationalPathBase<QCo
     }
 
     public QConfigurationEmail(Path<? extends QConfigurationEmail> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "CONFIGURATION_EMAIL");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "CONFIGURATION_EMAIL");
         addMetadata();
     }
 
     public QConfigurationEmail(PathMetadata metadata) {
-        super(QConfigurationEmail.class, metadata, "NDFL_1_0", "CONFIGURATION_EMAIL");
+        super(QConfigurationEmail.class, metadata, "NDFL_UNSTABLE", "CONFIGURATION_EMAIL");
         addMetadata();
     }
 

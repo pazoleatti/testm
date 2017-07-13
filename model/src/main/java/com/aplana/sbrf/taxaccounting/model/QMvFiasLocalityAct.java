@@ -79,7 +79,7 @@ public class QMvFiasLocalityAct extends com.querydsl.sql.RelationalPathBase<QMvF
     public final com.querydsl.sql.PrimaryKey<QMvFiasLocalityAct> mvFiasLocalityActPk = createPrimaryKey(id);
 
     public QMvFiasLocalityAct(String variable) {
-        super(QMvFiasLocalityAct.class, forVariable(variable), "NDFL_1_0", "MV_FIAS_LOCALITY_ACT");
+        super(QMvFiasLocalityAct.class, forVariable(variable), "NDFL_UNSTABLE", "MV_FIAS_LOCALITY_ACT");
         addMetadata();
     }
 
@@ -89,12 +89,12 @@ public class QMvFiasLocalityAct extends com.querydsl.sql.RelationalPathBase<QMvF
     }
 
     public QMvFiasLocalityAct(Path<? extends QMvFiasLocalityAct> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "MV_FIAS_LOCALITY_ACT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "MV_FIAS_LOCALITY_ACT");
         addMetadata();
     }
 
     public QMvFiasLocalityAct(PathMetadata metadata) {
-        super(QMvFiasLocalityAct.class, metadata, "NDFL_1_0", "MV_FIAS_LOCALITY_ACT");
+        super(QMvFiasLocalityAct.class, metadata, "NDFL_UNSTABLE", "MV_FIAS_LOCALITY_ACT");
         addMetadata();
     }
 

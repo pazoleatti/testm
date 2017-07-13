@@ -170,5 +170,13 @@
   "title.previousDeductionAmount": "Сумма предыдущего вычета",
   "title.currentPeriod": "Текущий период",
   "title.currentDeductionDate": "Дата текущего вычета",
-  "title.currentDeductionAmount": "Сумма текущего вычета"
+  "title.currentDeductionAmount": "Сумма текущего вычета",
+
+  "notifications.title.listNotifications": "Список оповещений",
+  "notifications.title.createDate": "Дата оповещения",
+  "notifications.title.content": "Содержание",
+  "notifications.title.link": "Ссылка",
+  "notifications.title.delete": "Подтверждение удаления оповещений",
+  "notifications.title.deleteText": "Вы действительно хотите удалить выбранные оповещения?",
+  "notifications.title.deleteLink": "Удалить оповещение"
 }

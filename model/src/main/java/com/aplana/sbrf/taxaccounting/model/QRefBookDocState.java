@@ -35,7 +35,7 @@ public class QRefBookDocState extends com.querydsl.sql.RelationalPathBase<QRefBo
     public final com.querydsl.sql.ForeignKey<QDeclarationData> _declDataDocStateFk = createInvForeignKey(id, "DOC_STATE_ID");
 
     public QRefBookDocState(String variable) {
-        super(QRefBookDocState.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_DOC_STATE");
+        super(QRefBookDocState.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_DOC_STATE");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QRefBookDocState extends com.querydsl.sql.RelationalPathBase<QRefBo
     }
 
     public QRefBookDocState(Path<? extends QRefBookDocState> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_DOC_STATE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_DOC_STATE");
         addMetadata();
     }
 
     public QRefBookDocState(PathMetadata metadata) {
-        super(QRefBookDocState.class, metadata, "NDFL_1_0", "REF_BOOK_DOC_STATE");
+        super(QRefBookDocState.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_DOC_STATE");
         addMetadata();
     }
 

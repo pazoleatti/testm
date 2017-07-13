@@ -28,13 +28,13 @@ public class QConfigurationScheduler extends com.querydsl.sql.RelationalPathBase
 
     public final NumberPath<Integer> id = createNumber("id", Integer.class);
 
-    public final DateTimePath<org.joda.time.DateTime> lastFireDate = createDateTime("lastFireDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> lastFireDate = createDateTime("lastFireDate", java.sql.Timestamp.class);
 
-    public final DateTimePath<org.joda.time.DateTime> modificationDate = createDateTime("modificationDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> modificationDate = createDateTime("modificationDate", java.sql.Timestamp.class);
 
     public final StringPath schedule = createString("schedule");
 
-    public final DateTimePath<org.joda.time.DateTime> startDate = createDateTime("startDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> startDate = createDateTime("startDate", java.sql.Timestamp.class);
 
     public final StringPath taskName = createString("taskName");
 
@@ -43,7 +43,7 @@ public class QConfigurationScheduler extends com.querydsl.sql.RelationalPathBase
     public final com.querydsl.sql.ForeignKey<QConfigurationSchedulerParam> _confSchedulerParamFkConf = createInvForeignKey(id, "TASK_ID");
 
     public QConfigurationScheduler(String variable) {
-        super(QConfigurationScheduler.class, forVariable(variable), "NDFL_1_0", "CONFIGURATION_SCHEDULER");
+        super(QConfigurationScheduler.class, forVariable(variable), "NDFL_UNSTABLE", "CONFIGURATION_SCHEDULER");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QConfigurationScheduler extends com.querydsl.sql.RelationalPathBase
     }
 
     public QConfigurationScheduler(Path<? extends QConfigurationScheduler> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "CONFIGURATION_SCHEDULER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "CONFIGURATION_SCHEDULER");
         addMetadata();
     }
 
     public QConfigurationScheduler(PathMetadata metadata) {
-        super(QConfigurationScheduler.class, metadata, "NDFL_1_0", "CONFIGURATION_SCHEDULER");
+        super(QConfigurationScheduler.class, metadata, "NDFL_UNSTABLE", "CONFIGURATION_SCHEDULER");
         addMetadata();
     }
 

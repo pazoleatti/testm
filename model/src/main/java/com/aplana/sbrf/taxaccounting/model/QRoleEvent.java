@@ -35,7 +35,7 @@ public class QRoleEvent extends com.querydsl.sql.RelationalPathBase<QRoleEvent> 
     public final com.querydsl.sql.ForeignKey<QSecRole> roleEventFkRoleId = createForeignKey(roleId, "ID");
 
     public QRoleEvent(String variable) {
-        super(QRoleEvent.class, forVariable(variable), "NDFL_1_0", "ROLE_EVENT");
+        super(QRoleEvent.class, forVariable(variable), "NDFL_UNSTABLE", "ROLE_EVENT");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QRoleEvent extends com.querydsl.sql.RelationalPathBase<QRoleEvent> 
     }
 
     public QRoleEvent(Path<? extends QRoleEvent> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "ROLE_EVENT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "ROLE_EVENT");
         addMetadata();
     }
 
     public QRoleEvent(PathMetadata metadata) {
-        super(QRoleEvent.class, metadata, "NDFL_1_0", "ROLE_EVENT");
+        super(QRoleEvent.class, metadata, "NDFL_UNSTABLE", "ROLE_EVENT");
         addMetadata();
     }
 

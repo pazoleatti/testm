@@ -37,7 +37,7 @@ public class QState extends com.querydsl.sql.RelationalPathBase<QState> {
     public final com.querydsl.sql.ForeignKey<QDeclarationData> _declarationDataStateFk = createInvForeignKey(id, "STATE");
 
     public QState(String variable) {
-        super(QState.class, forVariable(variable), "NDFL_1_0", "STATE");
+        super(QState.class, forVariable(variable), "NDFL_UNSTABLE", "STATE");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QState extends com.querydsl.sql.RelationalPathBase<QState> {
     }
 
     public QState(Path<? extends QState> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "STATE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "STATE");
         addMetadata();
     }
 
     public QState(PathMetadata metadata) {
-        super(QState.class, metadata, "NDFL_1_0", "STATE");
+        super(QState.class, metadata, "NDFL_UNSTABLE", "STATE");
         addMetadata();
     }
 

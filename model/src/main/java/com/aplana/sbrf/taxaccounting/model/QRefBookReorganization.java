@@ -34,7 +34,7 @@ public class QRefBookReorganization extends com.querydsl.sql.RelationalPathBase<
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookReorganization> refBookReorganizationPk = createPrimaryKey(id);
 
@@ -43,7 +43,7 @@ public class QRefBookReorganization extends com.querydsl.sql.RelationalPathBase<
     public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetReCodeFk = createInvForeignKey(id, "REORG_FORM_CODE");
 
     public QRefBookReorganization(String variable) {
-        super(QRefBookReorganization.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_REORGANIZATION");
+        super(QRefBookReorganization.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_REORGANIZATION");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QRefBookReorganization extends com.querydsl.sql.RelationalPathBase<
     }
 
     public QRefBookReorganization(Path<? extends QRefBookReorganization> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_REORGANIZATION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_REORGANIZATION");
         addMetadata();
     }
 
     public QRefBookReorganization(PathMetadata metadata) {
-        super(QRefBookReorganization.class, metadata, "NDFL_1_0", "REF_BOOK_REORGANIZATION");
+        super(QRefBookReorganization.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_REORGANIZATION");
         addMetadata();
     }
 

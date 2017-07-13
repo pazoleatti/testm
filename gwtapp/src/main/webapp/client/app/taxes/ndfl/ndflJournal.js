@@ -19,11 +19,12 @@
         .controller('ndflJournalCtrl', [
             '$scope', '$timeout', '$state', 'dialogs', 'ShowToDoDialog',
             function ($scope, $timeout, $state, dialogs, $showToDoDialog) {
+                $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
                 /**
                  * @description Обновление грида
                  * @param page
                  */
-                $scope.refreshGrid = function(page) {
+                $scope.refreshGrid = function (page) {
                     $scope.ctrlMyGrid.refreshGrid(page);
                 };
                 $scope.searchFilter = {
@@ -87,7 +88,10 @@
                             id: 5,
                             formType: {id: 1, name: "Первичная"},
                             formKind: {id: 1, name: "РНУ НДФЛ (первичная)"},
-                            department: {id: 4, name: "ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара)"},
+                            department: {
+                                id: 4,
+                                name: "ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр \"Ладья\" (ПВБ, г.Самара)"
+                            },
                             asnu: {id: 2, name: 'АС \"Депозитарий\"'},
                             period: {id: 3, name: "2017; 3 квартал"},
                             state: {id: 1, name: "Создана"},
@@ -119,14 +123,20 @@
                         'Создал'],
                     colModel: [
                         {name: 'id', index: 'id', width: 135, key: true},
-                        {name: 'formType.name', index: 'formType.name', width: 175, formatter:linkformatter},
+                        {name: 'formType.name', index: 'formType.name', width: 175, formatter: linkformatter},
                         {name: 'formKind.name', index: 'formKind.name', width: 175},
                         {name: 'department.name', index: 'department.name', width: 150},
                         {name: 'asnu.name', index: 'asnu.name', width: 180},
                         {name: 'period.name', index: 'period.name', width: 110},
                         {name: 'state.name', index: 'state.name', width: 100},
                         {name: 'fileTF', index: 'fileTF', width: 400},
-                        {name: 'creationDate', index: 'creationDate', width: 230, formatter: 'date', formatoptions: { newformat: 'd.m.Y H:m:s'}},
+                        {
+                            name: 'creationDate',
+                            index: 'creationDate',
+                            width: 230,
+                            formatter: 'date',
+                            formatoptions: {newformat: 'd.m.Y H:m:s'}
+                        },
                         {name: 'creator', index: 'creator', width: 175}
                     ],
                     rowNum: 10,
@@ -143,7 +153,7 @@
                     }
                 };
 
-                function linkformatter(cellValue, options){
+                function linkformatter(cellValue, options) {
                     return "<a href='index.html#/taxes/ndfl/" + options.rowId + "'>" + cellValue + "</a>";
                 }
 
@@ -281,7 +291,7 @@
                  */
                 $scope.searchClick = function () {
                     $scope.searchFilter.fillFilterParams();
-                    if ($scope.searchFilter.ajaxFilter.length !== 0){
+                    if ($scope.searchFilter.ajaxFilter.length !== 0) {
                         $scope.searchFilter.isClear = true;
                     }
                     fetchData();
@@ -383,7 +393,10 @@
                                     {id: 1, name: 'Иркутское отделение №8586 ПАО Сбербанк'},
                                     {id: 2, name: 'Читинское отделение №8600 ПАО Сбербанк'},
                                     {id: 3, name: 'Якутское отделение №8603 ПАО Сбербанк'},
-                                    {id: 4, name: 'ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара)'}
+                                    {
+                                        id: 4,
+                                        name: 'ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара) ПЦП Многофункциональный сервисный центр "Ладья" (ПВБ, г.Самара)'
+                                    }
                                 ]
                             }
                         }
@@ -463,6 +476,7 @@
                         }
                     };
                 }
+
                 initPage();
             }]);
 }());

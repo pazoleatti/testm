@@ -34,14 +34,14 @@ public class QRefBookDeductionMark extends com.querydsl.sql.RelationalPathBase<Q
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookDeductionMark> refBookDeductionMarkPk = createPrimaryKey(id);
 
     public final com.querydsl.sql.ForeignKey<QRefBookDeductionType> _refBookDeducTypeMarkFk = createInvForeignKey(id, "DEDUCTION_MARK");
 
     public QRefBookDeductionMark(String variable) {
-        super(QRefBookDeductionMark.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_DEDUCTION_MARK");
+        super(QRefBookDeductionMark.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_DEDUCTION_MARK");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QRefBookDeductionMark extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QRefBookDeductionMark(Path<? extends QRefBookDeductionMark> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_DEDUCTION_MARK");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_DEDUCTION_MARK");
         addMetadata();
     }
 
     public QRefBookDeductionMark(PathMetadata metadata) {
-        super(QRefBookDeductionMark.class, metadata, "NDFL_1_0", "REF_BOOK_DEDUCTION_MARK");
+        super(QRefBookDeductionMark.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_DEDUCTION_MARK");
         addMetadata();
     }
 

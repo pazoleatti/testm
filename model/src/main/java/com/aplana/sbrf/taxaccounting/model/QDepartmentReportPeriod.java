@@ -24,7 +24,7 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
 
     public static final QDepartmentReportPeriod departmentReportPeriod = new QDepartmentReportPeriod("DEPARTMENT_REPORT_PERIOD");
 
-    public final DateTimePath<org.joda.time.DateTime> correctionDate = createDateTime("correctionDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> correctionDate = createDateTime("correctionDate", java.sql.Timestamp.class);
 
     public final NumberPath<Integer> departmentId = createNumber("departmentId", Integer.class);
 
@@ -49,7 +49,7 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
     public final com.querydsl.sql.ForeignKey<QFormData> _formDataFkCoDepRepPerId = createInvForeignKey(id, "COMPARATIVE_DEP_REP_PER_ID");
 
     public QDepartmentReportPeriod(String variable) {
-        super(QDepartmentReportPeriod.class, forVariable(variable), "NDFL_1_0", "DEPARTMENT_REPORT_PERIOD");
+        super(QDepartmentReportPeriod.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_REPORT_PERIOD");
         addMetadata();
     }
 
@@ -59,12 +59,12 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
     }
 
     public QDepartmentReportPeriod(Path<? extends QDepartmentReportPeriod> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DEPARTMENT_REPORT_PERIOD");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DEPARTMENT_REPORT_PERIOD");
         addMetadata();
     }
 
     public QDepartmentReportPeriod(PathMetadata metadata) {
-        super(QDepartmentReportPeriod.class, metadata, "NDFL_1_0", "DEPARTMENT_REPORT_PERIOD");
+        super(QDepartmentReportPeriod.class, metadata, "NDFL_UNSTABLE", "DEPARTMENT_REPORT_PERIOD");
         addMetadata();
     }
 

@@ -37,7 +37,7 @@ public class QFormSearchDataResult extends com.querydsl.sql.RelationalPathBase<Q
     public final NumberPath<Long> sessionId = createNumber("sessionId", Long.class);
 
     public QFormSearchDataResult(String variable) {
-        super(QFormSearchDataResult.class, forVariable(variable), "NDFL_1_0", "FORM_SEARCH_DATA_RESULT");
+        super(QFormSearchDataResult.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_SEARCH_DATA_RESULT");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QFormSearchDataResult extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QFormSearchDataResult(Path<? extends QFormSearchDataResult> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_SEARCH_DATA_RESULT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_SEARCH_DATA_RESULT");
         addMetadata();
     }
 
     public QFormSearchDataResult(PathMetadata metadata) {
-        super(QFormSearchDataResult.class, metadata, "NDFL_1_0", "FORM_SEARCH_DATA_RESULT");
+        super(QFormSearchDataResult.class, metadata, "NDFL_UNSTABLE", "FORM_SEARCH_DATA_RESULT");
         addMetadata();
     }
 

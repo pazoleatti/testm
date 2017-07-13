@@ -35,7 +35,7 @@ public class QRefBookAttachFileType extends com.querydsl.sql.RelationalPathBase<
     public final com.querydsl.sql.ForeignKey<QDeclarationDataFile> _declDataFileTypeIdFk = createInvForeignKey(id, "FILE_TYPE_ID");
 
     public QRefBookAttachFileType(String variable) {
-        super(QRefBookAttachFileType.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_ATTACH_FILE_TYPE");
+        super(QRefBookAttachFileType.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_ATTACH_FILE_TYPE");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QRefBookAttachFileType extends com.querydsl.sql.RelationalPathBase<
     }
 
     public QRefBookAttachFileType(Path<? extends QRefBookAttachFileType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_ATTACH_FILE_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_ATTACH_FILE_TYPE");
         addMetadata();
     }
 
     public QRefBookAttachFileType(PathMetadata metadata) {
-        super(QRefBookAttachFileType.class, metadata, "NDFL_1_0", "REF_BOOK_ATTACH_FILE_TYPE");
+        super(QRefBookAttachFileType.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_ATTACH_FILE_TYPE");
         addMetadata();
     }
 

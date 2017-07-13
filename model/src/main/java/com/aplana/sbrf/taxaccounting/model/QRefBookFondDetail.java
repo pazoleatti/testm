@@ -76,7 +76,7 @@ public class QRefBookFondDetail extends com.querydsl.sql.RelationalPathBase<QRef
 
     public final NumberPath<Long> type = createNumber("type", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookFondDetail> refBookFondDetailPk = createPrimaryKey(id);
 
@@ -101,7 +101,7 @@ public class QRefBookFondDetail extends com.querydsl.sql.RelationalPathBase<QRef
     public final com.querydsl.sql.ForeignKey<QRefBookPresentPlace> refBookFondDetPresPlFk = createForeignKey(presentPlace, "ID");
 
     public QRefBookFondDetail(String variable) {
-        super(QRefBookFondDetail.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_FOND_DETAIL");
+        super(QRefBookFondDetail.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_FOND_DETAIL");
         addMetadata();
     }
 
@@ -111,12 +111,12 @@ public class QRefBookFondDetail extends com.querydsl.sql.RelationalPathBase<QRef
     }
 
     public QRefBookFondDetail(Path<? extends QRefBookFondDetail> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_FOND_DETAIL");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_FOND_DETAIL");
         addMetadata();
     }
 
     public QRefBookFondDetail(PathMetadata metadata) {
-        super(QRefBookFondDetail.class, metadata, "NDFL_1_0", "REF_BOOK_FOND_DETAIL");
+        super(QRefBookFondDetail.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_FOND_DETAIL");
         addMetadata();
     }
 

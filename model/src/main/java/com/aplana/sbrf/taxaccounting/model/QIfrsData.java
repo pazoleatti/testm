@@ -35,7 +35,7 @@ public class QIfrsData extends com.querydsl.sql.RelationalPathBase<QIfrsData> {
     public final com.querydsl.sql.ForeignKey<QBlobData> ifrsDataFkBlobData = createForeignKey(blobDataId, "ID");
 
     public QIfrsData(String variable) {
-        super(QIfrsData.class, forVariable(variable), "NDFL_1_0", "IFRS_DATA");
+        super(QIfrsData.class, forVariable(variable), "NDFL_UNSTABLE", "IFRS_DATA");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QIfrsData extends com.querydsl.sql.RelationalPathBase<QIfrsData> {
     }
 
     public QIfrsData(Path<? extends QIfrsData> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "IFRS_DATA");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "IFRS_DATA");
         addMetadata();
     }
 
     public QIfrsData(PathMetadata metadata) {
-        super(QIfrsData.class, metadata, "NDFL_1_0", "IFRS_DATA");
+        super(QIfrsData.class, metadata, "NDFL_UNSTABLE", "IFRS_DATA");
         addMetadata();
     }
 

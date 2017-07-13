@@ -33,7 +33,7 @@ public class QDeclarationKind extends com.querydsl.sql.RelationalPathBase<QDecla
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> _declarationTemplateFkindFk = createInvForeignKey(id, "FORM_KIND");
 
     public QDeclarationKind(String variable) {
-        super(QDeclarationKind.class, forVariable(variable), "NDFL_1_0", "DECLARATION_KIND");
+        super(QDeclarationKind.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_KIND");
         addMetadata();
     }
 
@@ -43,12 +43,12 @@ public class QDeclarationKind extends com.querydsl.sql.RelationalPathBase<QDecla
     }
 
     public QDeclarationKind(Path<? extends QDeclarationKind> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_KIND");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_KIND");
         addMetadata();
     }
 
     public QDeclarationKind(PathMetadata metadata) {
-        super(QDeclarationKind.class, metadata, "NDFL_1_0", "DECLARATION_KIND");
+        super(QDeclarationKind.class, metadata, "NDFL_UNSTABLE", "DECLARATION_KIND");
         addMetadata();
     }
 

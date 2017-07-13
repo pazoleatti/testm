@@ -43,7 +43,7 @@ public class QRefBookAsnu extends com.querydsl.sql.RelationalPathBase<QRefBookAs
     public final com.querydsl.sql.ForeignKey<QSecUserAsnu> _secUserAsnuAsnuFk = createInvForeignKey(id, "ASNU_ID");
 
     public QRefBookAsnu(String variable) {
-        super(QRefBookAsnu.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_ASNU");
+        super(QRefBookAsnu.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_ASNU");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QRefBookAsnu extends com.querydsl.sql.RelationalPathBase<QRefBookAs
     }
 
     public QRefBookAsnu(Path<? extends QRefBookAsnu> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_ASNU");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_ASNU");
         addMetadata();
     }
 
     public QRefBookAsnu(PathMetadata metadata) {
-        super(QRefBookAsnu.class, metadata, "NDFL_1_0", "REF_BOOK_ASNU");
+        super(QRefBookAsnu.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_ASNU");
         addMetadata();
     }
 

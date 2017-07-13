@@ -37,7 +37,7 @@ public class QRaschsvSvPrimTarif13422 extends com.querydsl.sql.RelationalPathBas
     public final com.querydsl.sql.ForeignKey<QRaschsvSvedObuch> _raschsvSvedObTarif1422Fk = createInvForeignKey(id, "RASCHSV_SV_PRIM_TARIF1_422_ID");
 
     public QRaschsvSvPrimTarif13422(String variable) {
-        super(QRaschsvSvPrimTarif13422.class, forVariable(variable), "NDFL_1_0", "RASCHSV_SV_PRIM_TARIF1_3_422");
+        super(QRaschsvSvPrimTarif13422.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_SV_PRIM_TARIF1_3_422");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QRaschsvSvPrimTarif13422 extends com.querydsl.sql.RelationalPathBas
     }
 
     public QRaschsvSvPrimTarif13422(Path<? extends QRaschsvSvPrimTarif13422> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_SV_PRIM_TARIF1_3_422");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_SV_PRIM_TARIF1_3_422");
         addMetadata();
     }
 
     public QRaschsvSvPrimTarif13422(PathMetadata metadata) {
-        super(QRaschsvSvPrimTarif13422.class, metadata, "NDFL_1_0", "RASCHSV_SV_PRIM_TARIF1_3_422");
+        super(QRaschsvSvPrimTarif13422.class, metadata, "NDFL_UNSTABLE", "RASCHSV_SV_PRIM_TARIF1_3_422");
         addMetadata();
     }
 

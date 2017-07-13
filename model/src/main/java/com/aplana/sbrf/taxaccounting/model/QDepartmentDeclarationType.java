@@ -41,7 +41,7 @@ public class QDepartmentDeclarationType extends com.querydsl.sql.RelationalPathB
     public final com.querydsl.sql.ForeignKey<QDeclarationSource> _declSourceFkDeptDecltype = createInvForeignKey(id, "DEPARTMENT_DECLARATION_TYPE_ID");
 
     public QDepartmentDeclarationType(String variable) {
-        super(QDepartmentDeclarationType.class, forVariable(variable), "NDFL_1_0", "DEPARTMENT_DECLARATION_TYPE");
+        super(QDepartmentDeclarationType.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_DECLARATION_TYPE");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QDepartmentDeclarationType extends com.querydsl.sql.RelationalPathB
     }
 
     public QDepartmentDeclarationType(Path<? extends QDepartmentDeclarationType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DEPARTMENT_DECLARATION_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DEPARTMENT_DECLARATION_TYPE");
         addMetadata();
     }
 
     public QDepartmentDeclarationType(PathMetadata metadata) {
-        super(QDepartmentDeclarationType.class, metadata, "NDFL_1_0", "DEPARTMENT_DECLARATION_TYPE");
+        super(QDepartmentDeclarationType.class, metadata, "NDFL_UNSTABLE", "DEPARTMENT_DECLARATION_TYPE");
         addMetadata();
     }
 

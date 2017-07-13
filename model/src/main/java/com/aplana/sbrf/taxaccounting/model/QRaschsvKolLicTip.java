@@ -43,7 +43,7 @@ public class QRaschsvKolLicTip extends com.querydsl.sql.RelationalPathBase<QRasc
     public final com.querydsl.sql.ForeignKey<QRaschsvOpsOmsRaschKol> _raschsvSvPMKolTipFk = createInvForeignKey(id, "RASCHSV_KOL_LIC_TIP_ID");
 
     public QRaschsvKolLicTip(String variable) {
-        super(QRaschsvKolLicTip.class, forVariable(variable), "NDFL_1_0", "RASCHSV_KOL_LIC_TIP");
+        super(QRaschsvKolLicTip.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_KOL_LIC_TIP");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QRaschsvKolLicTip extends com.querydsl.sql.RelationalPathBase<QRasc
     }
 
     public QRaschsvKolLicTip(Path<? extends QRaschsvKolLicTip> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_KOL_LIC_TIP");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_KOL_LIC_TIP");
         addMetadata();
     }
 
     public QRaschsvKolLicTip(PathMetadata metadata) {
-        super(QRaschsvKolLicTip.class, metadata, "NDFL_1_0", "RASCHSV_KOL_LIC_TIP");
+        super(QRaschsvKolLicTip.class, metadata, "NDFL_UNSTABLE", "RASCHSV_KOL_LIC_TIP");
         addMetadata();
     }
 

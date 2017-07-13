@@ -41,7 +41,7 @@ public class QFormDataPerformer extends com.querydsl.sql.RelationalPathBase<QFor
     public final com.querydsl.sql.ForeignKey<QDepartment> formdataPerformerFkDept = createForeignKey(printDepartmentId, "ID");
 
     public QFormDataPerformer(String variable) {
-        super(QFormDataPerformer.class, forVariable(variable), "NDFL_1_0", "FORM_DATA_PERFORMER");
+        super(QFormDataPerformer.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_DATA_PERFORMER");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QFormDataPerformer extends com.querydsl.sql.RelationalPathBase<QFor
     }
 
     public QFormDataPerformer(Path<? extends QFormDataPerformer> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_DATA_PERFORMER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_DATA_PERFORMER");
         addMetadata();
     }
 
     public QFormDataPerformer(PathMetadata metadata) {
-        super(QFormDataPerformer.class, metadata, "NDFL_1_0", "FORM_DATA_PERFORMER");
+        super(QFormDataPerformer.class, metadata, "NDFL_UNSTABLE", "FORM_DATA_PERFORMER");
         addMetadata();
     }
 

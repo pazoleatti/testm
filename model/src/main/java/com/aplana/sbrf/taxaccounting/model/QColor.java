@@ -43,7 +43,7 @@ public class QColor extends com.querydsl.sql.RelationalPathBase<QColor> {
     public final com.querydsl.sql.ForeignKey<QFormStyle> _formStyleFkFontColor = createInvForeignKey(id, "FONT_COLOR");
 
     public QColor(String variable) {
-        super(QColor.class, forVariable(variable), "NDFL_1_0", "COLOR");
+        super(QColor.class, forVariable(variable), "NDFL_UNSTABLE", "COLOR");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QColor extends com.querydsl.sql.RelationalPathBase<QColor> {
     }
 
     public QColor(Path<? extends QColor> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "COLOR");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "COLOR");
         addMetadata();
     }
 
     public QColor(PathMetadata metadata) {
-        super(QColor.class, metadata, "NDFL_1_0", "COLOR");
+        super(QColor.class, metadata, "NDFL_UNSTABLE", "COLOR");
         addMetadata();
     }
 

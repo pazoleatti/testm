@@ -29,7 +29,10 @@
             'angularFileUpload',
             'ui.bootstrap',
             'ngMessages',
-            'ui.select2'
+            'ui.select2',
+            'aplana.link',
+            'sbrfNdfl.rest',
+            'app.formatters'
         ])
 
         // Отображение диалогового окна с сообщением .
@@ -38,7 +41,7 @@
                 var opts = {
                     size: 'md'
                 };
-                dialogs.message($filter('translate')('messageDialog.toDo.title'),$filter('translate')('messageDialog.toDo.message'), opts);
+                dialogs.message($filter('translate')('messageDialog.toDo.title'), $filter('translate')('messageDialog.toDo.message'), opts);
             };
         }])
 
@@ -82,15 +85,15 @@
     /**
      * @description Поиск по нажатию на enter
      */
-    window.addEventListener("keydown", function(event) {
-        if (event.keyCode === 13){
+    window.addEventListener("keydown", function (event) {
+        if (event.keyCode === 13) {
             event.preventDefault();
             event.stopPropagation();
             var doc = $(event.target).closest(".grid-filter");
 
-            if (doc){
+            if (doc) {
                 var buttonSearch = doc.find("#searchButton");
-                if (buttonSearch){
+                if (buttonSearch) {
                     buttonSearch.click();
                 }
             }

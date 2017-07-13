@@ -34,7 +34,7 @@ public class QTmpPersonDubles extends com.querydsl.sql.RelationalPathBase<QTmpPe
 
     public final NumberPath<Long> asnuRefId = createNumber("asnuRefId", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> birthDate = createDateTime("birthDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> birthDate = createDateTime("birthDate", java.sql.Timestamp.class);
 
     public final StringPath build = createString("build");
 
@@ -96,10 +96,10 @@ public class QTmpPersonDubles extends com.querydsl.sql.RelationalPathBase<QTmpPe
 
     public final StringPath street = createString("street");
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public QTmpPersonDubles(String variable) {
-        super(QTmpPersonDubles.class, forVariable(variable), "NDFL_1_0", "TMP_PERSON_DUBLES");
+        super(QTmpPersonDubles.class, forVariable(variable), "NDFL_UNSTABLE", "TMP_PERSON_DUBLES");
         addMetadata();
     }
 
@@ -109,12 +109,12 @@ public class QTmpPersonDubles extends com.querydsl.sql.RelationalPathBase<QTmpPe
     }
 
     public QTmpPersonDubles(Path<? extends QTmpPersonDubles> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TMP_PERSON_DUBLES");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TMP_PERSON_DUBLES");
         addMetadata();
     }
 
     public QTmpPersonDubles(PathMetadata metadata) {
-        super(QTmpPersonDubles.class, metadata, "NDFL_1_0", "TMP_PERSON_DUBLES");
+        super(QTmpPersonDubles.class, metadata, "NDFL_UNSTABLE", "TMP_PERSON_DUBLES");
         addMetadata();
     }
 

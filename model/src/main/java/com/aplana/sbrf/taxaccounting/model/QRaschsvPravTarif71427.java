@@ -53,7 +53,7 @@ public class QRaschsvPravTarif71427 extends com.querydsl.sql.RelationalPathBase<
     public final com.querydsl.sql.ForeignKey<QRaschsvObyazPlatSv> raschsvTarif7427ObPlFk = createForeignKey(raschsvObyazPlatSvId, "ID");
 
     public QRaschsvPravTarif71427(String variable) {
-        super(QRaschsvPravTarif71427.class, forVariable(variable), "NDFL_1_0", "RASCHSV_PRAV_TARIF7_1_427");
+        super(QRaschsvPravTarif71427.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_PRAV_TARIF7_1_427");
         addMetadata();
     }
 
@@ -63,12 +63,12 @@ public class QRaschsvPravTarif71427 extends com.querydsl.sql.RelationalPathBase<
     }
 
     public QRaschsvPravTarif71427(Path<? extends QRaschsvPravTarif71427> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_PRAV_TARIF7_1_427");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_PRAV_TARIF7_1_427");
         addMetadata();
     }
 
     public QRaschsvPravTarif71427(PathMetadata metadata) {
-        super(QRaschsvPravTarif71427.class, metadata, "NDFL_1_0", "RASCHSV_PRAV_TARIF7_1_427");
+        super(QRaschsvPravTarif71427.class, metadata, "NDFL_UNSTABLE", "RASCHSV_PRAV_TARIF7_1_427");
         addMetadata();
     }
 

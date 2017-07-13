@@ -24,9 +24,9 @@ public class QRaschsvSvedPatent extends com.querydsl.sql.RelationalPathBase<QRas
 
     public static final QRaschsvSvedPatent raschsvSvedPatent = new QRaschsvSvedPatent("RASCHSV_SVED_PATENT");
 
-    public final DateTimePath<org.joda.time.DateTime> dataKonDeyst = createDateTime("dataKonDeyst", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> dataKonDeyst = createDateTime("dataKonDeyst", java.sql.Timestamp.class);
 
-    public final DateTimePath<org.joda.time.DateTime> dataNachDeyst = createDateTime("dataNachDeyst", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> dataNachDeyst = createDateTime("dataNachDeyst", java.sql.Timestamp.class);
 
     public final StringPath nomPatent = createString("nomPatent");
 
@@ -43,7 +43,7 @@ public class QRaschsvSvedPatent extends com.querydsl.sql.RelationalPathBase<QRas
     public final com.querydsl.sql.ForeignKey<QRaschsvSvPrimTarif91427> raschsvSvedPTarif9427Fk = createForeignKey(raschsvSvPrimTarif9427Id, "ID");
 
     public QRaschsvSvedPatent(String variable) {
-        super(QRaschsvSvedPatent.class, forVariable(variable), "NDFL_1_0", "RASCHSV_SVED_PATENT");
+        super(QRaschsvSvedPatent.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_SVED_PATENT");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QRaschsvSvedPatent extends com.querydsl.sql.RelationalPathBase<QRas
     }
 
     public QRaschsvSvedPatent(Path<? extends QRaschsvSvedPatent> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_SVED_PATENT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_SVED_PATENT");
         addMetadata();
     }
 
     public QRaschsvSvedPatent(PathMetadata metadata) {
-        super(QRaschsvSvedPatent.class, metadata, "NDFL_1_0", "RASCHSV_SVED_PATENT");
+        super(QRaschsvSvedPatent.class, metadata, "NDFL_UNSTABLE", "RASCHSV_SVED_PATENT");
         addMetadata();
     }
 

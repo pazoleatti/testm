@@ -34,10 +34,10 @@ public class QGetRecordsTest extends com.querydsl.sql.RelationalPathBase<QGetRec
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public QGetRecordsTest(String variable) {
-        super(QGetRecordsTest.class, forVariable(variable), "NDFL_1_0", "GET_RECORDS_TEST");
+        super(QGetRecordsTest.class, forVariable(variable), "NDFL_UNSTABLE", "GET_RECORDS_TEST");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QGetRecordsTest extends com.querydsl.sql.RelationalPathBase<QGetRec
     }
 
     public QGetRecordsTest(Path<? extends QGetRecordsTest> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "GET_RECORDS_TEST");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "GET_RECORDS_TEST");
         addMetadata();
     }
 
     public QGetRecordsTest(PathMetadata metadata) {
-        super(QGetRecordsTest.class, metadata, "NDFL_1_0", "GET_RECORDS_TEST");
+        super(QGetRecordsTest.class, metadata, "NDFL_UNSTABLE", "GET_RECORDS_TEST");
         addMetadata();
     }
 

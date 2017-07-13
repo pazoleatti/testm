@@ -37,7 +37,7 @@ public class QSecUserAsnu extends com.querydsl.sql.RelationalPathBase<QSecUserAs
     public final com.querydsl.sql.ForeignKey<QRefBookAsnu> secUserAsnuAsnuFk = createForeignKey(asnuId, "ID");
 
     public QSecUserAsnu(String variable) {
-        super(QSecUserAsnu.class, forVariable(variable), "NDFL_1_0", "SEC_USER_ASNU");
+        super(QSecUserAsnu.class, forVariable(variable), "NDFL_UNSTABLE", "SEC_USER_ASNU");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QSecUserAsnu extends com.querydsl.sql.RelationalPathBase<QSecUserAs
     }
 
     public QSecUserAsnu(Path<? extends QSecUserAsnu> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "SEC_USER_ASNU");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "SEC_USER_ASNU");
         addMetadata();
     }
 
     public QSecUserAsnu(PathMetadata metadata) {
-        super(QSecUserAsnu.class, metadata, "NDFL_1_0", "SEC_USER_ASNU");
+        super(QSecUserAsnu.class, metadata, "NDFL_UNSTABLE", "SEC_USER_ASNU");
         addMetadata();
     }
 

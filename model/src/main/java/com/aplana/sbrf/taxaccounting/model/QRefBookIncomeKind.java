@@ -37,7 +37,7 @@ public class QRefBookIncomeKind extends com.querydsl.sql.RelationalPathBase<QRef
     public final com.querydsl.sql.ForeignKey<QRefBookIncomeType> refBookInckindInctypeFk = createForeignKey(incomeTypeId, "ID");
 
     public QRefBookIncomeKind(String variable) {
-        super(QRefBookIncomeKind.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_INCOME_KIND");
+        super(QRefBookIncomeKind.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_INCOME_KIND");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QRefBookIncomeKind extends com.querydsl.sql.RelationalPathBase<QRef
     }
 
     public QRefBookIncomeKind(Path<? extends QRefBookIncomeKind> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_INCOME_KIND");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_INCOME_KIND");
         addMetadata();
     }
 
     public QRefBookIncomeKind(PathMetadata metadata) {
-        super(QRefBookIncomeKind.class, metadata, "NDFL_1_0", "REF_BOOK_INCOME_KIND");
+        super(QRefBookIncomeKind.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_INCOME_KIND");
         addMetadata();
     }
 

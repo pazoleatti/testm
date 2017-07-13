@@ -49,7 +49,7 @@ public class QDepartmentFormType extends com.querydsl.sql.RelationalPathBase<QDe
     public final com.querydsl.sql.ForeignKey<QDeclarationSource> _declSourceFkDeptFormtype = createInvForeignKey(id, "SRC_DEPARTMENT_FORM_TYPE_ID");
 
     public QDepartmentFormType(String variable) {
-        super(QDepartmentFormType.class, forVariable(variable), "NDFL_1_0", "DEPARTMENT_FORM_TYPE");
+        super(QDepartmentFormType.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_FORM_TYPE");
         addMetadata();
     }
 
@@ -59,12 +59,12 @@ public class QDepartmentFormType extends com.querydsl.sql.RelationalPathBase<QDe
     }
 
     public QDepartmentFormType(Path<? extends QDepartmentFormType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DEPARTMENT_FORM_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DEPARTMENT_FORM_TYPE");
         addMetadata();
     }
 
     public QDepartmentFormType(PathMetadata metadata) {
-        super(QDepartmentFormType.class, metadata, "NDFL_1_0", "DEPARTMENT_FORM_TYPE");
+        super(QDepartmentFormType.class, metadata, "NDFL_UNSTABLE", "DEPARTMENT_FORM_TYPE");
         addMetadata();
     }
 

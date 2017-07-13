@@ -35,7 +35,7 @@ public class QLockDataSubscribers extends com.querydsl.sql.RelationalPathBase<QL
     public final com.querydsl.sql.ForeignKey<QLockData> lockDataSubscrFkLockData = createForeignKey(lockKey, "KEY");
 
     public QLockDataSubscribers(String variable) {
-        super(QLockDataSubscribers.class, forVariable(variable), "NDFL_1_0", "LOCK_DATA_SUBSCRIBERS");
+        super(QLockDataSubscribers.class, forVariable(variable), "NDFL_UNSTABLE", "LOCK_DATA_SUBSCRIBERS");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QLockDataSubscribers extends com.querydsl.sql.RelationalPathBase<QL
     }
 
     public QLockDataSubscribers(Path<? extends QLockDataSubscribers> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "LOCK_DATA_SUBSCRIBERS");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "LOCK_DATA_SUBSCRIBERS");
         addMetadata();
     }
 
     public QLockDataSubscribers(PathMetadata metadata) {
-        super(QLockDataSubscribers.class, metadata, "NDFL_1_0", "LOCK_DATA_SUBSCRIBERS");
+        super(QLockDataSubscribers.class, metadata, "NDFL_UNSTABLE", "LOCK_DATA_SUBSCRIBERS");
         addMetadata();
     }
 

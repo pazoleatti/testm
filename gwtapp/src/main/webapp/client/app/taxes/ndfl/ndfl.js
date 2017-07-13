@@ -20,11 +20,14 @@
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$state', '$stateParams', 'dialogs', 'ShowToDoDialog',
             function ($scope, $timeout, $state, $stateParams, dialogs, $showToDoDialog) {
+
+                $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
+
                 /**
                  * @description Обновление грида
                  * @param page
                  */
-                $scope.refreshGrid = function(page) {
+                $scope.refreshGrid = function (page) {
                     $scope.ctrlMyGrid.refreshGrid(page);
                 };
                 $scope.searchFilter = {
@@ -203,7 +206,13 @@
                         {name: 'surname', index: 'surname', width: 200},
                         {name: 'name', index: 'name', width: 175},
                         {name: 'patronymic', index: 'patronymic', width: 200},
-                        {name: 'dateOfBirth', index: 'dateOfBirth', width: 240, formatter: 'date', formatoptions: { newformat: 'd.m.Y H:m:s'}},
+                        {
+                            name: 'dateOfBirth',
+                            index: 'dateOfBirth',
+                            width: 240,
+                            formatter: 'date',
+                            formatoptions: {newformat: 'd.m.Y H:m:s'}
+                        },
                         {name: 'snils', index: 'snils', width: 190, sortable: false},
                         {name: 'citizenship.code', index: 'citizenship', width: 185},
                         {name: 'innRF', index: 'innRF', width: 95},
@@ -391,7 +400,7 @@
                  */
                 $scope.searchClick = function () {
                     $scope.searchFilter.fillFilterParams();
-                    if ($scope.searchFilter.ajaxFilter.length !== 0){
+                    if ($scope.searchFilter.ajaxFilter.length !== 0) {
                         $scope.searchFilter.isClear = true;
                     }
                     fetchData();
@@ -483,5 +492,5 @@
 
                 initPage();
             }])
- ;
+    ;
 }());

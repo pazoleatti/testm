@@ -57,7 +57,7 @@ public class QTmpDepParams extends com.querydsl.sql.RelationalPathBase<QTmpDepPa
     public final StringPath titname = createString("titname");
 
     public QTmpDepParams(String variable) {
-        super(QTmpDepParams.class, forVariable(variable), "NDFL_1_0", "TMP_DEP_PARAMS");
+        super(QTmpDepParams.class, forVariable(variable), "NDFL_UNSTABLE", "TMP_DEP_PARAMS");
         addMetadata();
     }
 
@@ -67,12 +67,12 @@ public class QTmpDepParams extends com.querydsl.sql.RelationalPathBase<QTmpDepPa
     }
 
     public QTmpDepParams(Path<? extends QTmpDepParams> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TMP_DEP_PARAMS");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TMP_DEP_PARAMS");
         addMetadata();
     }
 
     public QTmpDepParams(PathMetadata metadata) {
-        super(QTmpDepParams.class, metadata, "NDFL_1_0", "TMP_DEP_PARAMS");
+        super(QTmpDepParams.class, metadata, "NDFL_UNSTABLE", "TMP_DEP_PARAMS");
         addMetadata();
     }
 

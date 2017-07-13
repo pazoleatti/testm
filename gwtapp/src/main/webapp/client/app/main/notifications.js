@@ -1,0 +1,99 @@
+(function () {
+    'use strict';
+
+    /**
+     * @description Модуль для работы со формами ндфл
+     */
+    angular.module('sbrfNdfl.notifications', [])
+        /**
+         * @description Контроллер формы создания/редактирования ФЛ
+         */
+        .controller('notificationsFormCtrl', ["$scope", "$http", "$uibModalInstance", "NotificationResource", "$filter", 'dialogs',
+            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, dialogs) {
+                $http({
+                    method: "PUT",
+                    url: "controller/actions/notification/markAsRead"
+                }).success(function () {
+                    $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
+                });
+
+                $scope.notificationsGrid =
+                {
+                    ctrl: {},
+                    value: [],
+                    options: {
+                        datatype: "angularResource",
+                        angularResource: NotificationResource,
+                        requestParameters: function () {
+                            return {
+                                projection: 'get'
+                            };
+                        },
+                        height: 250,
+                        colNames: [
+                            '',
+                            $filter('translate')('notifications.title.createDate'),
+                            $filter('translate')('notifications.title.content'),
+                            $filter('translate')('notifications.title.link')],
+                        colModel: [
+                            {name: 'id', index: 'id', width: 176, key: true, hidden: true},
+                            {name: 'createDate', index: 'createDate', width: 135, formatter: $filter('dateFormatter')},
+                            {name: 'text', index: 'text', width: 520},
+                            {name: 'reportId', index: 'reportId', width: 175, sortable: false}
+                        ],
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
+                        viewrecords: true,
+                        sortname: 'id',
+                        sortorder: "asc",
+                        hidegrid: false,
+                        multiselect: true
+                    }
+                };
+
+                /**
+                 * @description Удаление оповещения
+                 */
+                $scope.deleteNotification = function () {
+                    var buttons = {
+                        labelYes: $filter('translate')('common.button.yes'),
+                        labelNo: $filter('translate')('common.button.no')
+                    };
+
+                    var opts = {
+                        size: 'md'
+                    };
+
+                    if ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length != 0) {
+                        var dlg = dialogs.confirm($filter('translate')('notifications.title.delete'), $filter('translate')('notifications.title.deleteText'), buttons, opts);
+                        dlg.result.then(
+                            function () {
+                                var ids = [];
+                                _.each($scope.notificationsGrid.value, function (element) {
+                                    ids.push(element.id);
+                                });
+
+                                $http({
+                                    method: "POST",
+                                    url: "controller/actions/notification/delete",
+                                    params: {
+                                        ids: ids
+                                    }
+                                }).success(function () {
+                                    $scope.notificationsGrid.ctrl.refreshGrid();
+                                });
+                            },
+                            function () {
+
+                            });
+                    }
+                };
+
+                /**
+                 * @description Закрытие окна
+                 */
+                $scope.close = function () {
+                    $uibModalInstance.dismiss('Canceled');
+                };
+            }]);
+}());

@@ -37,7 +37,7 @@ public class QRaschsvOssVnmSum extends com.querydsl.sql.RelationalPathBase<QRasc
     public final com.querydsl.sql.ForeignKey<QRaschsvOssVnm> raschsvOssVnmSumOssFk = createForeignKey(raschsvOssVnmId, "ID");
 
     public QRaschsvOssVnmSum(String variable) {
-        super(QRaschsvOssVnmSum.class, forVariable(variable), "NDFL_1_0", "RASCHSV_OSS_VNM_SUM");
+        super(QRaschsvOssVnmSum.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_OSS_VNM_SUM");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QRaschsvOssVnmSum extends com.querydsl.sql.RelationalPathBase<QRasc
     }
 
     public QRaschsvOssVnmSum(Path<? extends QRaschsvOssVnmSum> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_OSS_VNM_SUM");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_OSS_VNM_SUM");
         addMetadata();
     }
 
     public QRaschsvOssVnmSum(PathMetadata metadata) {
-        super(QRaschsvOssVnmSum.class, metadata, "NDFL_1_0", "RASCHSV_OSS_VNM_SUM");
+        super(QRaschsvOssVnmSum.class, metadata, "NDFL_UNSTABLE", "RASCHSV_OSS_VNM_SUM");
         addMetadata();
     }
 

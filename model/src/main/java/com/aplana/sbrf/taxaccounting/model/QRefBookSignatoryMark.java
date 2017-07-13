@@ -34,7 +34,7 @@ public class QRefBookSignatoryMark extends com.querydsl.sql.RelationalPathBase<Q
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookSignatoryMark> refBookSignatoryMarkPk = createPrimaryKey(id);
 
@@ -43,7 +43,7 @@ public class QRefBookSignatoryMark extends com.querydsl.sql.RelationalPathBase<Q
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetSignatoryFk = createInvForeignKey(id, "SIGNATORY_ID");
 
     public QRefBookSignatoryMark(String variable) {
-        super(QRefBookSignatoryMark.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_SIGNATORY_MARK");
+        super(QRefBookSignatoryMark.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_SIGNATORY_MARK");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QRefBookSignatoryMark extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QRefBookSignatoryMark(Path<? extends QRefBookSignatoryMark> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_SIGNATORY_MARK");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_SIGNATORY_MARK");
         addMetadata();
     }
 
     public QRefBookSignatoryMark(PathMetadata metadata) {
-        super(QRefBookSignatoryMark.class, metadata, "NDFL_1_0", "REF_BOOK_SIGNATORY_MARK");
+        super(QRefBookSignatoryMark.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_SIGNATORY_MARK");
         addMetadata();
     }
 

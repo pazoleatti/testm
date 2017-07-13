@@ -52,7 +52,7 @@ public class QFormTemplate extends com.querydsl.sql.RelationalPathBase<QFormTemp
 
     public final NumberPath<Byte> updating = createNumber("updating", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QFormTemplate> formTemplatePk = createPrimaryKey(id);
 
@@ -65,7 +65,7 @@ public class QFormTemplate extends com.querydsl.sql.RelationalPathBase<QFormTemp
     public final com.querydsl.sql.ForeignKey<QFormData> _formDataFkFormTemplId = createInvForeignKey(id, "FORM_TEMPLATE_ID");
 
     public QFormTemplate(String variable) {
-        super(QFormTemplate.class, forVariable(variable), "NDFL_1_0", "FORM_TEMPLATE");
+        super(QFormTemplate.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_TEMPLATE");
         addMetadata();
     }
 
@@ -75,12 +75,12 @@ public class QFormTemplate extends com.querydsl.sql.RelationalPathBase<QFormTemp
     }
 
     public QFormTemplate(Path<? extends QFormTemplate> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_TEMPLATE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_TEMPLATE");
         addMetadata();
     }
 
     public QFormTemplate(PathMetadata metadata) {
-        super(QFormTemplate.class, metadata, "NDFL_1_0", "FORM_TEMPLATE");
+        super(QFormTemplate.class, metadata, "NDFL_UNSTABLE", "FORM_TEMPLATE");
         addMetadata();
     }
 

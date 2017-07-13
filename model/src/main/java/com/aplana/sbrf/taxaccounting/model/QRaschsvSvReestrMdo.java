@@ -24,7 +24,7 @@ public class QRaschsvSvReestrMdo extends com.querydsl.sql.RelationalPathBase<QRa
 
     public static final QRaschsvSvReestrMdo raschsvSvReestrMdo = new QRaschsvSvReestrMdo("RASCHSV_SV_REESTR_MDO");
 
-    public final DateTimePath<org.joda.time.DateTime> dataZapis = createDateTime("dataZapis", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> dataZapis = createDateTime("dataZapis", java.sql.Timestamp.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -39,7 +39,7 @@ public class QRaschsvSvReestrMdo extends com.querydsl.sql.RelationalPathBase<QRa
     public final com.querydsl.sql.ForeignKey<QRaschsvSvedObuch> raschsvSvReestrMdoObFk = createForeignKey(raschsvSvedObuchId, "ID");
 
     public QRaschsvSvReestrMdo(String variable) {
-        super(QRaschsvSvReestrMdo.class, forVariable(variable), "NDFL_1_0", "RASCHSV_SV_REESTR_MDO");
+        super(QRaschsvSvReestrMdo.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_SV_REESTR_MDO");
         addMetadata();
     }
 
@@ -49,12 +49,12 @@ public class QRaschsvSvReestrMdo extends com.querydsl.sql.RelationalPathBase<QRa
     }
 
     public QRaschsvSvReestrMdo(Path<? extends QRaschsvSvReestrMdo> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_SV_REESTR_MDO");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_SV_REESTR_MDO");
         addMetadata();
     }
 
     public QRaschsvSvReestrMdo(PathMetadata metadata) {
-        super(QRaschsvSvReestrMdo.class, metadata, "NDFL_1_0", "RASCHSV_SV_REESTR_MDO");
+        super(QRaschsvSvReestrMdo.class, metadata, "NDFL_UNSTABLE", "RASCHSV_SV_REESTR_MDO");
         addMetadata();
     }
 

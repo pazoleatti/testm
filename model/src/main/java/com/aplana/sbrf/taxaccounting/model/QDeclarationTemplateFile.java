@@ -35,7 +35,7 @@ public class QDeclarationTemplateFile extends com.querydsl.sql.RelationalPathBas
     public final com.querydsl.sql.ForeignKey<QBlobData> declTemplFileBlobFk = createForeignKey(blobDataId, "ID");
 
     public QDeclarationTemplateFile(String variable) {
-        super(QDeclarationTemplateFile.class, forVariable(variable), "NDFL_1_0", "DECLARATION_TEMPLATE_FILE");
+        super(QDeclarationTemplateFile.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_TEMPLATE_FILE");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QDeclarationTemplateFile extends com.querydsl.sql.RelationalPathBas
     }
 
     public QDeclarationTemplateFile(Path<? extends QDeclarationTemplateFile> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_TEMPLATE_FILE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_TEMPLATE_FILE");
         addMetadata();
     }
 
     public QDeclarationTemplateFile(PathMetadata metadata) {
-        super(QDeclarationTemplateFile.class, metadata, "NDFL_1_0", "DECLARATION_TEMPLATE_FILE");
+        super(QDeclarationTemplateFile.class, metadata, "NDFL_UNSTABLE", "DECLARATION_TEMPLATE_FILE");
         addMetadata();
     }
 

@@ -39,10 +39,6 @@
                     <jdbcUser>ndfl_unstable</jdbcUser>
                     <jdbcPassword>ndfl_unstable</jdbcPassword>
                     <schemaPattern>NDFL_UNSTABLE</schemaPattern>
-                    <customTypes>
-                        <customType>com.querydsl.sql.types.DateTimeType</customType>
-                        <customType>com.querydsl.sql.types.LocalDateType</customType>
-                    </customTypes>
                     <packageName>com.aplana.sbrf.taxaccounting.model</packageName>
                     <sourceFolder></sourceFolder>
                     <targetFolder>model/src/main/java</targetFolder>

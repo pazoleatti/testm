@@ -33,7 +33,7 @@ public class QRefBookTaxInspection extends com.querydsl.sql.RelationalPathBase<Q
     public final com.querydsl.sql.PrimaryKey<QRefBookTaxInspection> refBookTaxInspectionPk = createPrimaryKey(id);
 
     public QRefBookTaxInspection(String variable) {
-        super(QRefBookTaxInspection.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_TAX_INSPECTION");
+        super(QRefBookTaxInspection.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_TAX_INSPECTION");
         addMetadata();
     }
 
@@ -43,12 +43,12 @@ public class QRefBookTaxInspection extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QRefBookTaxInspection(Path<? extends QRefBookTaxInspection> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_TAX_INSPECTION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_TAX_INSPECTION");
         addMetadata();
     }
 
     public QRefBookTaxInspection(PathMetadata metadata) {
-        super(QRefBookTaxInspection.class, metadata, "NDFL_1_0", "REF_BOOK_TAX_INSPECTION");
+        super(QRefBookTaxInspection.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_TAX_INSPECTION");
         addMetadata();
     }
 

@@ -33,7 +33,7 @@ public class QFormDataConsolidation extends com.querydsl.sql.RelationalPathBase<
     public final com.querydsl.sql.ForeignKey<QFormData> formDataConsolidationFkSrc = createForeignKey(sourceFormDataId, "ID");
 
     public QFormDataConsolidation(String variable) {
-        super(QFormDataConsolidation.class, forVariable(variable), "NDFL_1_0", "FORM_DATA_CONSOLIDATION");
+        super(QFormDataConsolidation.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_DATA_CONSOLIDATION");
         addMetadata();
     }
 
@@ -43,12 +43,12 @@ public class QFormDataConsolidation extends com.querydsl.sql.RelationalPathBase<
     }
 
     public QFormDataConsolidation(Path<? extends QFormDataConsolidation> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_DATA_CONSOLIDATION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_DATA_CONSOLIDATION");
         addMetadata();
     }
 
     public QFormDataConsolidation(PathMetadata metadata) {
-        super(QFormDataConsolidation.class, metadata, "NDFL_1_0", "FORM_DATA_CONSOLIDATION");
+        super(QFormDataConsolidation.class, metadata, "NDFL_UNSTABLE", "FORM_DATA_CONSOLIDATION");
         addMetadata();
     }
 

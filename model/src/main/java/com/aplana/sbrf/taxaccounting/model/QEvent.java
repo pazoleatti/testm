@@ -39,7 +39,7 @@ public class QEvent extends com.querydsl.sql.RelationalPathBase<QEvent> {
     public final com.querydsl.sql.ForeignKey<QTemplateChanges> _templateChangesFkEvent = createInvForeignKey(id, "EVENT");
 
     public QEvent(String variable) {
-        super(QEvent.class, forVariable(variable), "NDFL_1_0", "EVENT");
+        super(QEvent.class, forVariable(variable), "NDFL_UNSTABLE", "EVENT");
         addMetadata();
     }
 
@@ -49,12 +49,12 @@ public class QEvent extends com.querydsl.sql.RelationalPathBase<QEvent> {
     }
 
     public QEvent(Path<? extends QEvent> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "EVENT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "EVENT");
         addMetadata();
     }
 
     public QEvent(PathMetadata metadata) {
-        super(QEvent.class, metadata, "NDFL_1_0", "EVENT");
+        super(QEvent.class, metadata, "NDFL_UNSTABLE", "EVENT");
         addMetadata();
     }
 

@@ -5,13 +5,14 @@ import static com.querydsl.core.types.PathMetadataFactory.*;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;
+
 import javax.annotation.Generated;
+
 import com.querydsl.core.types.Path;
 
 import com.querydsl.sql.ColumnMetadata;
+
 import java.sql.Types;
-
-
 
 
 /**
@@ -24,11 +25,11 @@ public class QNotification extends com.querydsl.sql.RelationalPathBase<QNotifica
 
     public static final QNotification notification = new QNotification("NOTIFICATION");
 
-    public final DateTimePath<org.joda.time.DateTime> createDate = createDateTime("createDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
 
-    public final DateTimePath<org.joda.time.DateTime> deadline = createDateTime("deadline", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> deadline = createDateTime("deadline", java.sql.Timestamp.class);
 
-    public final NumberPath<Integer> id = createNumber("id", Integer.class);
+    public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final NumberPath<Byte> isRead = createNumber("isRead", Byte.class);
 
@@ -67,7 +68,7 @@ public class QNotification extends com.querydsl.sql.RelationalPathBase<QNotifica
     public final com.querydsl.sql.ForeignKey<QBlobData> notificationFkReportId = createForeignKey(reportId, "ID");
 
     public QNotification(String variable) {
-        super(QNotification.class, forVariable(variable), "NDFL_1_0", "NOTIFICATION");
+        super(QNotification.class, forVariable(variable), "NDFL_UNSTABLE", "NOTIFICATION");
         addMetadata();
     }
 
@@ -77,19 +78,19 @@ public class QNotification extends com.querydsl.sql.RelationalPathBase<QNotifica
     }
 
     public QNotification(Path<? extends QNotification> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "NOTIFICATION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "NOTIFICATION");
         addMetadata();
     }
 
     public QNotification(PathMetadata metadata) {
-        super(QNotification.class, metadata, "NDFL_1_0", "NOTIFICATION");
+        super(QNotification.class, metadata, "NDFL_UNSTABLE", "NOTIFICATION");
         addMetadata();
     }
 
     public void addMetadata() {
         addMetadata(createDate, ColumnMetadata.named("CREATE_DATE").withIndex(6).ofType(Types.TIMESTAMP).withSize(7).notNull());
         addMetadata(deadline, ColumnMetadata.named("DEADLINE").withIndex(7).ofType(Types.TIMESTAMP).withSize(7));
-        addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(isRead, ColumnMetadata.named("IS_READ").withIndex(10).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(logId, ColumnMetadata.named("LOG_ID").withIndex(13).ofType(Types.VARCHAR).withSize(36));
         addMetadata(receiverDepartmentId, ColumnMetadata.named("RECEIVER_DEPARTMENT_ID").withIndex(4).ofType(Types.DECIMAL).withSize(9));

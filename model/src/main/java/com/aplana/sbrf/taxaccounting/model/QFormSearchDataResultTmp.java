@@ -31,7 +31,7 @@ public class QFormSearchDataResultTmp extends com.querydsl.sql.RelationalPathBas
     public final NumberPath<Integer> rowIndex = createNumber("rowIndex", Integer.class);
 
     public QFormSearchDataResultTmp(String variable) {
-        super(QFormSearchDataResultTmp.class, forVariable(variable), "NDFL_1_0", "FORM_SEARCH_DATA_RESULT_TMP");
+        super(QFormSearchDataResultTmp.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_SEARCH_DATA_RESULT_TMP");
         addMetadata();
     }
 
@@ -41,12 +41,12 @@ public class QFormSearchDataResultTmp extends com.querydsl.sql.RelationalPathBas
     }
 
     public QFormSearchDataResultTmp(Path<? extends QFormSearchDataResultTmp> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_SEARCH_DATA_RESULT_TMP");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_SEARCH_DATA_RESULT_TMP");
         addMetadata();
     }
 
     public QFormSearchDataResultTmp(PathMetadata metadata) {
-        super(QFormSearchDataResultTmp.class, metadata, "NDFL_1_0", "FORM_SEARCH_DATA_RESULT_TMP");
+        super(QFormSearchDataResultTmp.class, metadata, "NDFL_UNSTABLE", "FORM_SEARCH_DATA_RESULT_TMP");
         addMetadata();
     }
 

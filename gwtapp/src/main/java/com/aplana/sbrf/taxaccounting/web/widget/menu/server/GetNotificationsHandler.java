@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -56,7 +53,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 		for (Notification notification : result) {
 			NotificationTableRow row = new NotificationTableRow();
             row.setId(notification.getId());
-			row.setDate(notification.getCreateDate());
+			row.setDate(new Date(notification.getCreateDate().getTime()));
 			row.setMsg(notification.getText());
             row.setLogId(notification.getLogId());
             row.setCanDelete(canDelete(notification, user));

@@ -37,7 +37,7 @@ public class QRaschsvItogStrahLic extends com.querydsl.sql.RelationalPathBase<QR
     public final com.querydsl.sql.ForeignKey<QRaschsvItogVypl> _raschsvItogVyplStrahFk = createInvForeignKey(id, "RASCHSV_ITOG_STRAH_LIC_ID");
 
     public QRaschsvItogStrahLic(String variable) {
-        super(QRaschsvItogStrahLic.class, forVariable(variable), "NDFL_1_0", "RASCHSV_ITOG_STRAH_LIC");
+        super(QRaschsvItogStrahLic.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_ITOG_STRAH_LIC");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QRaschsvItogStrahLic extends com.querydsl.sql.RelationalPathBase<QR
     }
 
     public QRaschsvItogStrahLic(Path<? extends QRaschsvItogStrahLic> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_ITOG_STRAH_LIC");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_ITOG_STRAH_LIC");
         addMetadata();
     }
 
     public QRaschsvItogStrahLic(PathMetadata metadata) {
-        super(QRaschsvItogStrahLic.class, metadata, "NDFL_1_0", "RASCHSV_ITOG_STRAH_LIC");
+        super(QRaschsvItogStrahLic.class, metadata, "NDFL_UNSTABLE", "RASCHSV_ITOG_STRAH_LIC");
         addMetadata();
     }
 

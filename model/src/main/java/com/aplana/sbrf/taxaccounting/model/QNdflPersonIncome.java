@@ -28,13 +28,13 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> incomeAccruedDate = createDateTime("incomeAccruedDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> incomeAccruedDate = createDateTime("incomeAccruedDate", java.sql.Timestamp.class);
 
     public final NumberPath<java.math.BigDecimal> incomeAccruedSumm = createNumber("incomeAccruedSumm", java.math.BigDecimal.class);
 
     public final StringPath incomeCode = createString("incomeCode");
 
-    public final DateTimePath<org.joda.time.DateTime> incomePayoutDate = createDateTime("incomePayoutDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> incomePayoutDate = createDateTime("incomePayoutDate", java.sql.Timestamp.class);
 
     public final NumberPath<java.math.BigDecimal> incomePayoutSumm = createNumber("incomePayoutSumm", java.math.BigDecimal.class);
 
@@ -52,7 +52,7 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<java.math.BigInteger> overholdingTax = createNumber("overholdingTax", java.math.BigInteger.class);
 
-    public final DateTimePath<org.joda.time.DateTime> paymentDate = createDateTime("paymentDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> paymentDate = createDateTime("paymentDate", java.sql.Timestamp.class);
 
     public final StringPath paymentNumber = createString("paymentNumber");
 
@@ -64,13 +64,13 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<java.math.BigDecimal> taxBase = createNumber("taxBase", java.math.BigDecimal.class);
 
-    public final DateTimePath<org.joda.time.DateTime> taxDate = createDateTime("taxDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> taxDate = createDateTime("taxDate", java.sql.Timestamp.class);
 
     public final NumberPath<Byte> taxRate = createNumber("taxRate", Byte.class);
 
     public final NumberPath<Long> taxSumm = createNumber("taxSumm", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> taxTransferDate = createDateTime("taxTransferDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> taxTransferDate = createDateTime("taxTransferDate", java.sql.Timestamp.class);
 
     public final NumberPath<java.math.BigDecimal> totalDeductionsSumm = createNumber("totalDeductionsSumm", java.math.BigDecimal.class);
 
@@ -85,7 +85,7 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
     public final com.querydsl.sql.ForeignKey<QNdflPersonIncome> _ndflPersonIFkS = createInvForeignKey(id, "SOURCE_ID");
 
     public QNdflPersonIncome(String variable) {
-        super(QNdflPersonIncome.class, forVariable(variable), "NDFL_1_0", "NDFL_PERSON_INCOME");
+        super(QNdflPersonIncome.class, forVariable(variable), "NDFL_UNSTABLE", "NDFL_PERSON_INCOME");
         addMetadata();
     }
 
@@ -95,12 +95,12 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
     }
 
     public QNdflPersonIncome(Path<? extends QNdflPersonIncome> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "NDFL_PERSON_INCOME");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "NDFL_PERSON_INCOME");
         addMetadata();
     }
 
     public QNdflPersonIncome(PathMetadata metadata) {
-        super(QNdflPersonIncome.class, metadata, "NDFL_1_0", "NDFL_PERSON_INCOME");
+        super(QNdflPersonIncome.class, metadata, "NDFL_UNSTABLE", "NDFL_PERSON_INCOME");
         addMetadata();
     }
 

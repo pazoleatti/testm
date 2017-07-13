@@ -43,7 +43,7 @@ public class QRaschsvItogVyplDop extends com.querydsl.sql.RelationalPathBase<QRa
     public final com.querydsl.sql.ForeignKey<QRaschsvItogStrahLic> raschsvItogVyplDopStrahFk = createForeignKey(raschsvItogStrahLicId, "ID");
 
     public QRaschsvItogVyplDop(String variable) {
-        super(QRaschsvItogVyplDop.class, forVariable(variable), "NDFL_1_0", "RASCHSV_ITOG_VYPL_DOP");
+        super(QRaschsvItogVyplDop.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_ITOG_VYPL_DOP");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QRaschsvItogVyplDop extends com.querydsl.sql.RelationalPathBase<QRa
     }
 
     public QRaschsvItogVyplDop(Path<? extends QRaschsvItogVyplDop> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_ITOG_VYPL_DOP");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_ITOG_VYPL_DOP");
         addMetadata();
     }
 
     public QRaschsvItogVyplDop(PathMetadata metadata) {
-        super(QRaschsvItogVyplDop.class, metadata, "NDFL_1_0", "RASCHSV_ITOG_VYPL_DOP");
+        super(QRaschsvItogVyplDop.class, metadata, "NDFL_UNSTABLE", "RASCHSV_ITOG_VYPL_DOP");
         addMetadata();
     }
 

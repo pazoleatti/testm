@@ -36,7 +36,7 @@ public class QRaschsvSvedObuch extends com.querydsl.sql.RelationalPathBase<QRasc
 
     public final NumberPath<Long> raschsvSvSum1TipId = createNumber("raschsvSvSum1TipId", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> spravData = createDateTime("spravData", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> spravData = createDateTime("spravData", java.sql.Timestamp.class);
 
     public final StringPath spravNodeName = createString("spravNodeName");
 
@@ -53,7 +53,7 @@ public class QRaschsvSvedObuch extends com.querydsl.sql.RelationalPathBase<QRasc
     public final com.querydsl.sql.ForeignKey<QRaschsvSvReestrMdo> _raschsvSvReestrMdoObFk = createInvForeignKey(id, "RASCHSV_SVED_OBUCH_ID");
 
     public QRaschsvSvedObuch(String variable) {
-        super(QRaschsvSvedObuch.class, forVariable(variable), "NDFL_1_0", "RASCHSV_SVED_OBUCH");
+        super(QRaschsvSvedObuch.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_SVED_OBUCH");
         addMetadata();
     }
 
@@ -63,12 +63,12 @@ public class QRaschsvSvedObuch extends com.querydsl.sql.RelationalPathBase<QRasc
     }
 
     public QRaschsvSvedObuch(Path<? extends QRaschsvSvedObuch> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_SVED_OBUCH");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_SVED_OBUCH");
         addMetadata();
     }
 
     public QRaschsvSvedObuch(PathMetadata metadata) {
-        super(QRaschsvSvedObuch.class, metadata, "NDFL_1_0", "RASCHSV_SVED_OBUCH");
+        super(QRaschsvSvedObuch.class, metadata, "NDFL_UNSTABLE", "RASCHSV_SVED_OBUCH");
         addMetadata();
     }
 

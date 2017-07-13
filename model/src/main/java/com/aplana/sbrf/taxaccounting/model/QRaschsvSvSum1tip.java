@@ -55,7 +55,7 @@ public class QRaschsvSvSum1tip extends com.querydsl.sql.RelationalPathBase<QRasc
     public final com.querydsl.sql.ForeignKey<QRaschsvVyplatIt425> _raschsvVyplatIt425SumFk = createInvForeignKey(id, "RASCHSV_SV_SUM1_TIP_ID");
 
     public QRaschsvSvSum1tip(String variable) {
-        super(QRaschsvSvSum1tip.class, forVariable(variable), "NDFL_1_0", "RASCHSV_SV_SUM_1TIP");
+        super(QRaschsvSvSum1tip.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_SV_SUM_1TIP");
         addMetadata();
     }
 
@@ -65,12 +65,12 @@ public class QRaschsvSvSum1tip extends com.querydsl.sql.RelationalPathBase<QRasc
     }
 
     public QRaschsvSvSum1tip(Path<? extends QRaschsvSvSum1tip> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_SV_SUM_1TIP");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_SV_SUM_1TIP");
         addMetadata();
     }
 
     public QRaschsvSvSum1tip(PathMetadata metadata) {
-        super(QRaschsvSvSum1tip.class, metadata, "NDFL_1_0", "RASCHSV_SV_SUM_1TIP");
+        super(QRaschsvSvSum1tip.class, metadata, "NDFL_UNSTABLE", "RASCHSV_SV_SUM_1TIP");
         addMetadata();
     }
 

@@ -38,12 +38,12 @@ public class QRefBookTariffPayer extends com.querydsl.sql.RelationalPathBase<QRe
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookTariffPayer> refBookTariffPayerPk = createPrimaryKey(id);
 
     public QRefBookTariffPayer(String variable) {
-        super(QRefBookTariffPayer.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_TARIFF_PAYER");
+        super(QRefBookTariffPayer.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_TARIFF_PAYER");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QRefBookTariffPayer extends com.querydsl.sql.RelationalPathBase<QRe
     }
 
     public QRefBookTariffPayer(Path<? extends QRefBookTariffPayer> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_TARIFF_PAYER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_TARIFF_PAYER");
         addMetadata();
     }
 
     public QRefBookTariffPayer(PathMetadata metadata) {
-        super(QRefBookTariffPayer.class, metadata, "NDFL_1_0", "REF_BOOK_TARIFF_PAYER");
+        super(QRefBookTariffPayer.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_TARIFF_PAYER");
         addMetadata();
     }
 

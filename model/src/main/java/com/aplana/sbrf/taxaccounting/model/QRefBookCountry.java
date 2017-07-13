@@ -40,7 +40,7 @@ public class QRefBookCountry extends com.querydsl.sql.RelationalPathBase<QRefBoo
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookCountry> refBookCountryPk = createPrimaryKey(id);
 
@@ -49,7 +49,7 @@ public class QRefBookCountry extends com.querydsl.sql.RelationalPathBase<QRefBoo
     public final com.querydsl.sql.ForeignKey<QRefBookAddress> _refBookAddressCountryFk = createInvForeignKey(id, "COUNTRY_ID");
 
     public QRefBookCountry(String variable) {
-        super(QRefBookCountry.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_COUNTRY");
+        super(QRefBookCountry.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_COUNTRY");
         addMetadata();
     }
 
@@ -59,12 +59,12 @@ public class QRefBookCountry extends com.querydsl.sql.RelationalPathBase<QRefBoo
     }
 
     public QRefBookCountry(Path<? extends QRefBookCountry> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_COUNTRY");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_COUNTRY");
         addMetadata();
     }
 
     public QRefBookCountry(PathMetadata metadata) {
-        super(QRefBookCountry.class, metadata, "NDFL_1_0", "REF_BOOK_COUNTRY");
+        super(QRefBookCountry.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_COUNTRY");
         addMetadata();
     }
 

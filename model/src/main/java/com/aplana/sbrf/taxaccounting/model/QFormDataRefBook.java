@@ -37,7 +37,7 @@ public class QFormDataRefBook extends com.querydsl.sql.RelationalPathBase<QFormD
     public final com.querydsl.sql.ForeignKey<QRefBook> formDataRefBookFkRefbook = createForeignKey(refBookId, "ID");
 
     public QFormDataRefBook(String variable) {
-        super(QFormDataRefBook.class, forVariable(variable), "NDFL_1_0", "FORM_DATA_REF_BOOK");
+        super(QFormDataRefBook.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_DATA_REF_BOOK");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QFormDataRefBook extends com.querydsl.sql.RelationalPathBase<QFormD
     }
 
     public QFormDataRefBook(Path<? extends QFormDataRefBook> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_DATA_REF_BOOK");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_DATA_REF_BOOK");
         addMetadata();
     }
 
     public QFormDataRefBook(PathMetadata metadata) {
-        super(QFormDataRefBook.class, metadata, "NDFL_1_0", "FORM_DATA_REF_BOOK");
+        super(QFormDataRefBook.class, metadata, "NDFL_UNSTABLE", "FORM_DATA_REF_BOOK");
         addMetadata();
     }
 

@@ -24,7 +24,7 @@ public class QFormSearchResult extends com.querydsl.sql.RelationalPathBase<QForm
 
     public static final QFormSearchResult formSearchResult = new QFormSearchResult("FORM_SEARCH_RESULT");
 
-    public final DateTimePath<org.joda.time.DateTime> date = createDateTime("date", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> date = createDateTime("date", java.sql.Timestamp.class);
 
     public final NumberPath<Long> formDataId = createNumber("formDataId", Long.class);
 
@@ -41,7 +41,7 @@ public class QFormSearchResult extends com.querydsl.sql.RelationalPathBase<QForm
     public final com.querydsl.sql.ForeignKey<QFormData> formSearchResultFkFormdata = createForeignKey(formDataId, "ID");
 
     public QFormSearchResult(String variable) {
-        super(QFormSearchResult.class, forVariable(variable), "NDFL_1_0", "FORM_SEARCH_RESULT");
+        super(QFormSearchResult.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_SEARCH_RESULT");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QFormSearchResult extends com.querydsl.sql.RelationalPathBase<QForm
     }
 
     public QFormSearchResult(Path<? extends QFormSearchResult> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_SEARCH_RESULT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_SEARCH_RESULT");
         addMetadata();
     }
 
     public QFormSearchResult(PathMetadata metadata) {
-        super(QFormSearchResult.class, metadata, "NDFL_1_0", "FORM_SEARCH_RESULT");
+        super(QFormSearchResult.class, metadata, "NDFL_UNSTABLE", "FORM_SEARCH_RESULT");
         addMetadata();
     }
 

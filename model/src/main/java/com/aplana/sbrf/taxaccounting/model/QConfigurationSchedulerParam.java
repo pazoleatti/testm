@@ -41,7 +41,7 @@ public class QConfigurationSchedulerParam extends com.querydsl.sql.RelationalPat
     public final com.querydsl.sql.ForeignKey<QConfigurationScheduler> confSchedulerParamFkConf = createForeignKey(taskId, "ID");
 
     public QConfigurationSchedulerParam(String variable) {
-        super(QConfigurationSchedulerParam.class, forVariable(variable), "NDFL_1_0", "CONFIGURATION_SCHEDULER_PARAM");
+        super(QConfigurationSchedulerParam.class, forVariable(variable), "NDFL_UNSTABLE", "CONFIGURATION_SCHEDULER_PARAM");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QConfigurationSchedulerParam extends com.querydsl.sql.RelationalPat
     }
 
     public QConfigurationSchedulerParam(Path<? extends QConfigurationSchedulerParam> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "CONFIGURATION_SCHEDULER_PARAM");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "CONFIGURATION_SCHEDULER_PARAM");
         addMetadata();
     }
 
     public QConfigurationSchedulerParam(PathMetadata metadata) {
-        super(QConfigurationSchedulerParam.class, metadata, "NDFL_1_0", "CONFIGURATION_SCHEDULER_PARAM");
+        super(QConfigurationSchedulerParam.class, metadata, "NDFL_UNSTABLE", "CONFIGURATION_SCHEDULER_PARAM");
         addMetadata();
     }
 

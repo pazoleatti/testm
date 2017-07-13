@@ -31,7 +31,7 @@ public class QRefBookNdflRate extends com.querydsl.sql.RelationalPathBase<QRefBo
     public final com.querydsl.sql.PrimaryKey<QRefBookNdflRate> refBookNdflRatePk = createPrimaryKey(id);
 
     public QRefBookNdflRate(String variable) {
-        super(QRefBookNdflRate.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_NDFL_RATE");
+        super(QRefBookNdflRate.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_NDFL_RATE");
         addMetadata();
     }
 
@@ -41,12 +41,12 @@ public class QRefBookNdflRate extends com.querydsl.sql.RelationalPathBase<QRefBo
     }
 
     public QRefBookNdflRate(Path<? extends QRefBookNdflRate> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_NDFL_RATE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_NDFL_RATE");
         addMetadata();
     }
 
     public QRefBookNdflRate(PathMetadata metadata) {
-        super(QRefBookNdflRate.class, metadata, "NDFL_1_0", "REF_BOOK_NDFL_RATE");
+        super(QRefBookNdflRate.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_NDFL_RATE");
         addMetadata();
     }
 

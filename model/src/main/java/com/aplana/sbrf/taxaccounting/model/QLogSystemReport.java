@@ -35,7 +35,7 @@ public class QLogSystemReport extends com.querydsl.sql.RelationalPathBase<QLogSy
     public final com.querydsl.sql.ForeignKey<QSecUser> logSystemReportFkSecUser = createForeignKey(secUserId, "ID");
 
     public QLogSystemReport(String variable) {
-        super(QLogSystemReport.class, forVariable(variable), "NDFL_1_0", "LOG_SYSTEM_REPORT");
+        super(QLogSystemReport.class, forVariable(variable), "NDFL_UNSTABLE", "LOG_SYSTEM_REPORT");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QLogSystemReport extends com.querydsl.sql.RelationalPathBase<QLogSy
     }
 
     public QLogSystemReport(Path<? extends QLogSystemReport> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "LOG_SYSTEM_REPORT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "LOG_SYSTEM_REPORT");
         addMetadata();
     }
 
     public QLogSystemReport(PathMetadata metadata) {
-        super(QLogSystemReport.class, metadata, "NDFL_1_0", "LOG_SYSTEM_REPORT");
+        super(QLogSystemReport.class, metadata, "NDFL_UNSTABLE", "LOG_SYSTEM_REPORT");
         addMetadata();
     }
 

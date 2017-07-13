@@ -28,7 +28,7 @@ public class QNdflPersonPrepayment extends com.querydsl.sql.RelationalPathBase<Q
 
     public final NumberPath<Long> ndflPersonId = createNumber("ndflPersonId", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> notifDate = createDateTime("notifDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> notifDate = createDateTime("notifDate", java.sql.Timestamp.class);
 
     public final StringPath notifNum = createString("notifNum");
 
@@ -51,7 +51,7 @@ public class QNdflPersonPrepayment extends com.querydsl.sql.RelationalPathBase<Q
     public final com.querydsl.sql.ForeignKey<QNdflPersonPrepayment> _ndflPpFkS = createInvForeignKey(id, "SOURCE_ID");
 
     public QNdflPersonPrepayment(String variable) {
-        super(QNdflPersonPrepayment.class, forVariable(variable), "NDFL_1_0", "NDFL_PERSON_PREPAYMENT");
+        super(QNdflPersonPrepayment.class, forVariable(variable), "NDFL_UNSTABLE", "NDFL_PERSON_PREPAYMENT");
         addMetadata();
     }
 
@@ -61,12 +61,12 @@ public class QNdflPersonPrepayment extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QNdflPersonPrepayment(Path<? extends QNdflPersonPrepayment> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "NDFL_PERSON_PREPAYMENT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "NDFL_PERSON_PREPAYMENT");
         addMetadata();
     }
 
     public QNdflPersonPrepayment(PathMetadata metadata) {
-        super(QNdflPersonPrepayment.class, metadata, "NDFL_1_0", "NDFL_PERSON_PREPAYMENT");
+        super(QNdflPersonPrepayment.class, metadata, "NDFL_UNSTABLE", "NDFL_PERSON_PREPAYMENT");
         addMetadata();
     }
 

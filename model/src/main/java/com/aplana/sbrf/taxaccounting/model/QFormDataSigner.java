@@ -39,7 +39,7 @@ public class QFormDataSigner extends com.querydsl.sql.RelationalPathBase<QFormDa
     public final com.querydsl.sql.ForeignKey<QFormData> formDataSignerFkFormdata = createForeignKey(formDataId, "ID");
 
     public QFormDataSigner(String variable) {
-        super(QFormDataSigner.class, forVariable(variable), "NDFL_1_0", "FORM_DATA_SIGNER");
+        super(QFormDataSigner.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_DATA_SIGNER");
         addMetadata();
     }
 
@@ -49,12 +49,12 @@ public class QFormDataSigner extends com.querydsl.sql.RelationalPathBase<QFormDa
     }
 
     public QFormDataSigner(Path<? extends QFormDataSigner> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_DATA_SIGNER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_DATA_SIGNER");
         addMetadata();
     }
 
     public QFormDataSigner(PathMetadata metadata) {
-        super(QFormDataSigner.class, metadata, "NDFL_1_0", "FORM_DATA_SIGNER");
+        super(QFormDataSigner.class, metadata, "NDFL_UNSTABLE", "FORM_DATA_SIGNER");
         addMetadata();
     }
 

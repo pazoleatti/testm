@@ -28,7 +28,7 @@ public class QTaskContext extends com.querydsl.sql.RelationalPathBase<QTaskConte
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> modificationDate = createDateTime("modificationDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> modificationDate = createDateTime("modificationDate", java.sql.Timestamp.class);
 
     public final SimplePath<java.sql.Blob> serializedParams = createSimple("serializedParams", java.sql.Blob.class);
 
@@ -45,7 +45,7 @@ public class QTaskContext extends com.querydsl.sql.RelationalPathBase<QTaskConte
     public final com.querydsl.sql.ForeignKey<QSecUser> taskContextFkUserId = createForeignKey(userId, "ID");
 
     public QTaskContext(String variable) {
-        super(QTaskContext.class, forVariable(variable), "NDFL_1_0", "TASK_CONTEXT");
+        super(QTaskContext.class, forVariable(variable), "NDFL_UNSTABLE", "TASK_CONTEXT");
         addMetadata();
     }
 
@@ -55,12 +55,12 @@ public class QTaskContext extends com.querydsl.sql.RelationalPathBase<QTaskConte
     }
 
     public QTaskContext(Path<? extends QTaskContext> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TASK_CONTEXT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TASK_CONTEXT");
         addMetadata();
     }
 
     public QTaskContext(PathMetadata metadata) {
-        super(QTaskContext.class, metadata, "NDFL_1_0", "TASK_CONTEXT");
+        super(QTaskContext.class, metadata, "NDFL_UNSTABLE", "TASK_CONTEXT");
         addMetadata();
     }
 

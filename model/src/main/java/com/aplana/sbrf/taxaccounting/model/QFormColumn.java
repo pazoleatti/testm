@@ -71,7 +71,7 @@ public class QFormColumn extends com.querydsl.sql.RelationalPathBase<QFormColumn
     public final com.querydsl.sql.ForeignKey<QFormColumn> _formColumnFkParentId = createInvForeignKey(id, "PARENT_COLUMN_ID");
 
     public QFormColumn(String variable) {
-        super(QFormColumn.class, forVariable(variable), "NDFL_1_0", "FORM_COLUMN");
+        super(QFormColumn.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_COLUMN");
         addMetadata();
     }
 
@@ -81,12 +81,12 @@ public class QFormColumn extends com.querydsl.sql.RelationalPathBase<QFormColumn
     }
 
     public QFormColumn(Path<? extends QFormColumn> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_COLUMN");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_COLUMN");
         addMetadata();
     }
 
     public QFormColumn(PathMetadata metadata) {
-        super(QFormColumn.class, metadata, "NDFL_1_0", "FORM_COLUMN");
+        super(QFormColumn.class, metadata, "NDFL_UNSTABLE", "FORM_COLUMN");
         addMetadata();
     }
 

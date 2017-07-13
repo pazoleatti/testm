@@ -24,7 +24,7 @@ public class QLockData extends com.querydsl.sql.RelationalPathBase<QLockData> {
 
     public static final QLockData lockData = new QLockData("LOCK_DATA");
 
-    public final DateTimePath<org.joda.time.DateTime> dateLock = createDateTime("dateLock", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> dateLock = createDateTime("dateLock", java.sql.Timestamp.class);
 
     public final StringPath description = createString("description");
 
@@ -36,7 +36,7 @@ public class QLockData extends com.querydsl.sql.RelationalPathBase<QLockData> {
 
     public final StringPath state = createString("state");
 
-    public final DateTimePath<org.joda.time.DateTime> stateDate = createDateTime("stateDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> stateDate = createDateTime("stateDate", java.sql.Timestamp.class);
 
     public final NumberPath<Integer> userId = createNumber("userId", Integer.class);
 
@@ -47,7 +47,7 @@ public class QLockData extends com.querydsl.sql.RelationalPathBase<QLockData> {
     public final com.querydsl.sql.ForeignKey<QLockDataSubscribers> _lockDataSubscrFkLockData = createInvForeignKey(key, "LOCK_KEY");
 
     public QLockData(String variable) {
-        super(QLockData.class, forVariable(variable), "NDFL_1_0", "LOCK_DATA");
+        super(QLockData.class, forVariable(variable), "NDFL_UNSTABLE", "LOCK_DATA");
         addMetadata();
     }
 
@@ -57,12 +57,12 @@ public class QLockData extends com.querydsl.sql.RelationalPathBase<QLockData> {
     }
 
     public QLockData(Path<? extends QLockData> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "LOCK_DATA");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "LOCK_DATA");
         addMetadata();
     }
 
     public QLockData(PathMetadata metadata) {
-        super(QLockData.class, metadata, "NDFL_1_0", "LOCK_DATA");
+        super(QLockData.class, metadata, "NDFL_UNSTABLE", "LOCK_DATA");
         addMetadata();
     }
 

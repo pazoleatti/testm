@@ -3,27 +3,28 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:jee="http://www.springframework.org/schema/jee"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:mvc="http://www.springframework.org/schema/mvc"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <import resource="classpath:com/aplana/sbrf/taxaccounting/version-info.xml"/>
 
-	<context:annotation-config />
-	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.web.main.api.server"/>
-	<bean class="com.aplana.sbrf.taxaccounting.web.main.entry.server.MainServerModule" />
+    <context:annotation-config/>
+    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.web.main.api.server"/>
+    <bean class="com.aplana.sbrf.taxaccounting.web.main.entry.server.MainServerModule"/>
 
-	<bean id="logger" class="com.gwtplatform.dispatch.server.spring.LoggerFactoryBean">
-		<constructor-arg>
-			<bean class="java.util.logging.Logger" factory-method="getAnonymousLogger">
-				<property name="level">
-					<value>FINEST</value>
-				</property>
-			</bean>
-		</constructor-arg>
-	</bean>
+    <bean id="logger" class="com.gwtplatform.dispatch.server.spring.LoggerFactoryBean">
+        <constructor-arg>
+            <bean class="java.util.logging.Logger" factory-method="getAnonymousLogger">
+                <property name="level">
+                    <value>FINEST</value>
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
 
     <!--Спринговая реализация для запросов на загрузку файлов.
     Получает файловый ресурс из запроса, позволяя инъктить его в метод-->
@@ -31,7 +32,41 @@
         <property name="defaultEncoding" value="UTF-8"/>
     </bean>
 
-    <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
+    <!--Настройки сортировки по умолчанию-->
+    <bean id="sortResolver" class="com.aplana.sbrf.taxaccounting.web.paging.DefaultSortHandlerMethodArgumentResolver"/>
+
+    <mvc:annotation-driven>
+        <mvc:argument-resolvers>
+            <!--Настройки Pageable для JqGrid-->
+            <bean class="org.springframework.data.web.PageableHandlerMethodArgumentResolver">
+                <property name="sizeParameterName" value="rows"/>
+                <property name="pageParameterName" value="page"/>
+                <property name="maxPageSize" value="1000"/>
+                <property name="oneIndexedParameters" value="true"/>
+                <constructor-arg ref="sortResolver"/>
+            </bean>
+            <!--Настройки сортировки для JqGrid-->
+            <bean class="org.springframework.data.web.SortHandlerMethodArgumentResolver">
+                <property name="sortParameter" value="sidx"/>
+            </bean>
+        </mvc:argument-resolvers>
+    </mvc:annotation-driven>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/rest/**"/>
+            <mvc:mapping path="/actions/**"/>
+            <bean class="org.springframework.web.servlet.mvc.WebContentInterceptor">
+                <property name="cacheSeconds" value="0"/>
+                <property name="cacheControl">
+                    <bean class="com.aplana.sbrf.taxaccounting.web.spring.CacheControlFactory"
+                          factory-method="buildDefaultCacheControl"/>
+                </property>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS"/>
 
     <aop:config proxy-target-class="true"/>
 

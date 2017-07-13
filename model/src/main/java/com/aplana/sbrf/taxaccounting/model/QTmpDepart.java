@@ -31,7 +31,7 @@ public class QTmpDepart extends com.querydsl.sql.RelationalPathBase<QTmpDepart> 
     public final StringPath name = createString("name");
 
     public QTmpDepart(String variable) {
-        super(QTmpDepart.class, forVariable(variable), "NDFL_1_0", "TMP_DEPART");
+        super(QTmpDepart.class, forVariable(variable), "NDFL_UNSTABLE", "TMP_DEPART");
         addMetadata();
     }
 
@@ -41,12 +41,12 @@ public class QTmpDepart extends com.querydsl.sql.RelationalPathBase<QTmpDepart> 
     }
 
     public QTmpDepart(Path<? extends QTmpDepart> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TMP_DEPART");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TMP_DEPART");
         addMetadata();
     }
 
     public QTmpDepart(PathMetadata metadata) {
-        super(QTmpDepart.class, metadata, "NDFL_1_0", "TMP_DEPART");
+        super(QTmpDepart.class, metadata, "NDFL_UNSTABLE", "TMP_DEPART");
         addMetadata();
     }
 

@@ -24,14 +24,14 @@ public class QTmpVersion extends com.querydsl.sql.RelationalPathBase<QTmpVersion
 
     public static final QTmpVersion tmpVersion = new QTmpVersion("TMP_VERSION");
 
-    public final DateTimePath<org.joda.time.DateTime> calcDate = createDateTime("calcDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> calcDate = createDateTime("calcDate", java.sql.Timestamp.class);
 
     public final NumberPath<Long> recordId = createNumber("recordId", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public QTmpVersion(String variable) {
-        super(QTmpVersion.class, forVariable(variable), "NDFL_1_0", "TMP_VERSION");
+        super(QTmpVersion.class, forVariable(variable), "NDFL_UNSTABLE", "TMP_VERSION");
         addMetadata();
     }
 
@@ -41,12 +41,12 @@ public class QTmpVersion extends com.querydsl.sql.RelationalPathBase<QTmpVersion
     }
 
     public QTmpVersion(Path<? extends QTmpVersion> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TMP_VERSION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TMP_VERSION");
         addMetadata();
     }
 
     public QTmpVersion(PathMetadata metadata) {
-        super(QTmpVersion.class, metadata, "NDFL_1_0", "TMP_VERSION");
+        super(QTmpVersion.class, metadata, "NDFL_UNSTABLE", "TMP_VERSION");
         addMetadata();
     }
 

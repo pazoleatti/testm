@@ -26,7 +26,7 @@ public class QRefBookPerson extends com.querydsl.sql.RelationalPathBase<QRefBook
 
     public final NumberPath<Long> address = createNumber("address", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> birthDate = createDateTime("birthDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> birthDate = createDateTime("birthDate", java.sql.Timestamp.class);
 
     public final StringPath birthPlace = createString("birthPlace");
 
@@ -68,7 +68,7 @@ public class QRefBookPerson extends com.querydsl.sql.RelationalPathBase<QRefBook
 
     public final NumberPath<Long> taxpayerState = createNumber("taxpayerState", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookPerson> refBookPersonPk = createPrimaryKey(id);
 
@@ -91,7 +91,7 @@ public class QRefBookPerson extends com.querydsl.sql.RelationalPathBase<QRefBook
     public final com.querydsl.sql.ForeignKey<QRefBookIdTaxPayer> _refBookIdTaxPayerPersFk = createInvForeignKey(id, "PERSON_ID");
 
     public QRefBookPerson(String variable) {
-        super(QRefBookPerson.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_PERSON");
+        super(QRefBookPerson.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_PERSON");
         addMetadata();
     }
 
@@ -101,12 +101,12 @@ public class QRefBookPerson extends com.querydsl.sql.RelationalPathBase<QRefBook
     }
 
     public QRefBookPerson(Path<? extends QRefBookPerson> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_PERSON");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_PERSON");
         addMetadata();
     }
 
     public QRefBookPerson(PathMetadata metadata) {
-        super(QRefBookPerson.class, metadata, "NDFL_1_0", "REF_BOOK_PERSON");
+        super(QRefBookPerson.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_PERSON");
         addMetadata();
     }
 

@@ -37,7 +37,7 @@ public class QStateChange extends com.querydsl.sql.RelationalPathBase<QStateChan
     public final com.querydsl.sql.ForeignKey<QState> stateChangeToFk = createForeignKey(toId, "ID");
 
     public QStateChange(String variable) {
-        super(QStateChange.class, forVariable(variable), "NDFL_1_0", "STATE_CHANGE");
+        super(QStateChange.class, forVariable(variable), "NDFL_UNSTABLE", "STATE_CHANGE");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QStateChange extends com.querydsl.sql.RelationalPathBase<QStateChan
     }
 
     public QStateChange(Path<? extends QStateChange> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "STATE_CHANGE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "STATE_CHANGE");
         addMetadata();
     }
 
     public QStateChange(PathMetadata metadata) {
-        super(QStateChange.class, metadata, "NDFL_1_0", "STATE_CHANGE");
+        super(QStateChange.class, metadata, "NDFL_UNSTABLE", "STATE_CHANGE");
         addMetadata();
     }
 

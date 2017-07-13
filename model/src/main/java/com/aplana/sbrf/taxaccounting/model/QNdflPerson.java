@@ -30,7 +30,7 @@ public class QNdflPerson extends com.querydsl.sql.RelationalPathBase<QNdflPerson
 
     public final StringPath area = createString("area");
 
-    public final DateTimePath<org.joda.time.DateTime> birthDay = createDateTime("birthDay", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> birthDay = createDateTime("birthDay", java.sql.Timestamp.class);
 
     public final StringPath building = createString("building");
 
@@ -95,7 +95,7 @@ public class QNdflPerson extends com.querydsl.sql.RelationalPathBase<QNdflPerson
     public final com.querydsl.sql.ForeignKey<QNdflReferences> _ndflPersonIdFk = createInvForeignKey(id, "NDFL_PERSON_ID");
 
     public QNdflPerson(String variable) {
-        super(QNdflPerson.class, forVariable(variable), "NDFL_1_0", "NDFL_PERSON");
+        super(QNdflPerson.class, forVariable(variable), "NDFL_UNSTABLE", "NDFL_PERSON");
         addMetadata();
     }
 
@@ -105,12 +105,12 @@ public class QNdflPerson extends com.querydsl.sql.RelationalPathBase<QNdflPerson
     }
 
     public QNdflPerson(Path<? extends QNdflPerson> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "NDFL_PERSON");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "NDFL_PERSON");
         addMetadata();
     }
 
     public QNdflPerson(PathMetadata metadata) {
-        super(QNdflPerson.class, metadata, "NDFL_1_0", "NDFL_PERSON");
+        super(QNdflPerson.class, metadata, "NDFL_UNSTABLE", "NDFL_PERSON");
         addMetadata();
     }
 

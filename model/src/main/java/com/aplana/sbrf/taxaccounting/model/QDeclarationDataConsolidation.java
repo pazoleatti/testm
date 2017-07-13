@@ -33,7 +33,7 @@ public class QDeclarationDataConsolidation extends com.querydsl.sql.RelationalPa
     public final com.querydsl.sql.ForeignKey<QDeclarationData> declDataConsolidationFkTgt = createForeignKey(targetDeclarationDataId, "ID");
 
     public QDeclarationDataConsolidation(String variable) {
-        super(QDeclarationDataConsolidation.class, forVariable(variable), "NDFL_1_0", "DECLARATION_DATA_CONSOLIDATION");
+        super(QDeclarationDataConsolidation.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_DATA_CONSOLIDATION");
         addMetadata();
     }
 
@@ -43,12 +43,12 @@ public class QDeclarationDataConsolidation extends com.querydsl.sql.RelationalPa
     }
 
     public QDeclarationDataConsolidation(Path<? extends QDeclarationDataConsolidation> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_DATA_CONSOLIDATION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_DATA_CONSOLIDATION");
         addMetadata();
     }
 
     public QDeclarationDataConsolidation(PathMetadata metadata) {
-        super(QDeclarationDataConsolidation.class, metadata, "NDFL_1_0", "DECLARATION_DATA_CONSOLIDATION");
+        super(QDeclarationDataConsolidation.class, metadata, "NDFL_UNSTABLE", "DECLARATION_DATA_CONSOLIDATION");
         addMetadata();
     }
 

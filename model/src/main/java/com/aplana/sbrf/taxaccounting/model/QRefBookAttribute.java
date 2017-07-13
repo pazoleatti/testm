@@ -79,7 +79,7 @@ public class QRefBookAttribute extends com.querydsl.sql.RelationalPathBase<QRefB
     public final com.querydsl.sql.ForeignKey<QRefBookAttribute> _refBookAttrFkAttributeId = createInvForeignKey(id, "ATTRIBUTE_ID");
 
     public QRefBookAttribute(String variable) {
-        super(QRefBookAttribute.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_ATTRIBUTE");
+        super(QRefBookAttribute.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_ATTRIBUTE");
         addMetadata();
     }
 
@@ -89,12 +89,12 @@ public class QRefBookAttribute extends com.querydsl.sql.RelationalPathBase<QRefB
     }
 
     public QRefBookAttribute(Path<? extends QRefBookAttribute> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_ATTRIBUTE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_ATTRIBUTE");
         addMetadata();
     }
 
     public QRefBookAttribute(PathMetadata metadata) {
-        super(QRefBookAttribute.class, metadata, "NDFL_1_0", "REF_BOOK_ATTRIBUTE");
+        super(QRefBookAttribute.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_ATTRIBUTE");
         addMetadata();
     }
 

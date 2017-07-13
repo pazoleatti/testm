@@ -63,7 +63,7 @@ public class QRaschsvSvnpPodpisant extends com.querydsl.sql.RelationalPathBase<Q
     public final com.querydsl.sql.ForeignKey<QDeclarationData> raschsvSvnpPodpDeclaratFk = createForeignKey(declarationDataId, "ID");
 
     public QRaschsvSvnpPodpisant(String variable) {
-        super(QRaschsvSvnpPodpisant.class, forVariable(variable), "NDFL_1_0", "RASCHSV_SVNP_PODPISANT");
+        super(QRaschsvSvnpPodpisant.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_SVNP_PODPISANT");
         addMetadata();
     }
 
@@ -73,12 +73,12 @@ public class QRaschsvSvnpPodpisant extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QRaschsvSvnpPodpisant(Path<? extends QRaschsvSvnpPodpisant> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_SVNP_PODPISANT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_SVNP_PODPISANT");
         addMetadata();
     }
 
     public QRaschsvSvnpPodpisant(PathMetadata metadata) {
-        super(QRaschsvSvnpPodpisant.class, metadata, "NDFL_1_0", "RASCHSV_SVNP_PODPISANT");
+        super(QRaschsvSvnpPodpisant.class, metadata, "NDFL_UNSTABLE", "RASCHSV_SVNP_PODPISANT");
         addMetadata();
     }
 

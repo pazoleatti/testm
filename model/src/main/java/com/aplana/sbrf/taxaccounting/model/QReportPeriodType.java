@@ -24,11 +24,11 @@ public class QReportPeriodType extends com.querydsl.sql.RelationalPathBase<QRepo
 
     public static final QReportPeriodType reportPeriodType = new QReportPeriodType("REPORT_PERIOD_TYPE");
 
-    public final DateTimePath<org.joda.time.DateTime> calendarStartDate = createDateTime("calendarStartDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> calendarStartDate = createDateTime("calendarStartDate", java.sql.Timestamp.class);
 
     public final StringPath code = createString("code");
 
-    public final DateTimePath<org.joda.time.DateTime> endDate = createDateTime("endDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> endDate = createDateTime("endDate", java.sql.Timestamp.class);
 
     public final NumberPath<Byte> f = createNumber("f", Byte.class);
 
@@ -38,14 +38,14 @@ public class QReportPeriodType extends com.querydsl.sql.RelationalPathBase<QRepo
 
     public final StringPath name = createString("name");
 
-    public final DateTimePath<org.joda.time.DateTime> startDate = createDateTime("startDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> startDate = createDateTime("startDate", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QReportPeriodType> reportPeriodTypePk = createPrimaryKey(id);
 
     public final com.querydsl.sql.ForeignKey<QReportPeriod> _reportPeriodFkDtpId = createInvForeignKey(id, "DICT_TAX_PERIOD_ID");
 
     public QReportPeriodType(String variable) {
-        super(QReportPeriodType.class, forVariable(variable), "NDFL_1_0", "REPORT_PERIOD_TYPE");
+        super(QReportPeriodType.class, forVariable(variable), "NDFL_UNSTABLE", "REPORT_PERIOD_TYPE");
         addMetadata();
     }
 
@@ -55,12 +55,12 @@ public class QReportPeriodType extends com.querydsl.sql.RelationalPathBase<QRepo
     }
 
     public QReportPeriodType(Path<? extends QReportPeriodType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REPORT_PERIOD_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REPORT_PERIOD_TYPE");
         addMetadata();
     }
 
     public QReportPeriodType(PathMetadata metadata) {
-        super(QReportPeriodType.class, metadata, "NDFL_1_0", "REPORT_PERIOD_TYPE");
+        super(QReportPeriodType.class, metadata, "NDFL_UNSTABLE", "REPORT_PERIOD_TYPE");
         addMetadata();
     }
 

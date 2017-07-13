@@ -47,7 +47,7 @@ public class QFormType extends com.querydsl.sql.RelationalPathBase<QFormType> {
     public final com.querydsl.sql.ForeignKey<QFormTemplate> _formTemplateFkTypeId = createInvForeignKey(id, "TYPE_ID");
 
     public QFormType(String variable) {
-        super(QFormType.class, forVariable(variable), "NDFL_1_0", "FORM_TYPE");
+        super(QFormType.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_TYPE");
         addMetadata();
     }
 
@@ -57,12 +57,12 @@ public class QFormType extends com.querydsl.sql.RelationalPathBase<QFormType> {
     }
 
     public QFormType(Path<? extends QFormType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_TYPE");
         addMetadata();
     }
 
     public QFormType(PathMetadata metadata) {
-        super(QFormType.class, metadata, "NDFL_1_0", "FORM_TYPE");
+        super(QFormType.class, metadata, "NDFL_UNSTABLE", "FORM_TYPE");
         addMetadata();
     }
 

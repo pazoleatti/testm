@@ -34,7 +34,7 @@ public class QDepartmentChange extends com.querydsl.sql.RelationalPathBase<QDepa
 
     public final NumberPath<Byte> isActive = createNumber("isActive", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> logDate = createDateTime("logDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> logDate = createDateTime("logDate", java.sql.Timestamp.class);
 
     public final StringPath name = createString("name");
 
@@ -57,7 +57,7 @@ public class QDepartmentChange extends com.querydsl.sql.RelationalPathBase<QDepa
     public final com.querydsl.sql.PrimaryKey<QDepartmentChange> depChangePk = createPrimaryKey(departmentId, logDate);
 
     public QDepartmentChange(String variable) {
-        super(QDepartmentChange.class, forVariable(variable), "NDFL_1_0", "DEPARTMENT_CHANGE");
+        super(QDepartmentChange.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_CHANGE");
         addMetadata();
     }
 
@@ -67,12 +67,12 @@ public class QDepartmentChange extends com.querydsl.sql.RelationalPathBase<QDepa
     }
 
     public QDepartmentChange(Path<? extends QDepartmentChange> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DEPARTMENT_CHANGE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DEPARTMENT_CHANGE");
         addMetadata();
     }
 
     public QDepartmentChange(PathMetadata metadata) {
-        super(QDepartmentChange.class, metadata, "NDFL_1_0", "DEPARTMENT_CHANGE");
+        super(QDepartmentChange.class, metadata, "NDFL_UNSTABLE", "DEPARTMENT_CHANGE");
         addMetadata();
     }
 

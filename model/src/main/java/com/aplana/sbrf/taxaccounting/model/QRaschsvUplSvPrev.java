@@ -39,7 +39,7 @@ public class QRaschsvUplSvPrev extends com.querydsl.sql.RelationalPathBase<QRasc
     public final com.querydsl.sql.ForeignKey<QRaschsvOssVnm> raschsvUplSvPrevOssFk = createForeignKey(raschsvOssVnmId, "ID");
 
     public QRaschsvUplSvPrev(String variable) {
-        super(QRaschsvUplSvPrev.class, forVariable(variable), "NDFL_1_0", "RASCHSV_UPL_SV_PREV");
+        super(QRaschsvUplSvPrev.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_UPL_SV_PREV");
         addMetadata();
     }
 
@@ -49,12 +49,12 @@ public class QRaschsvUplSvPrev extends com.querydsl.sql.RelationalPathBase<QRasc
     }
 
     public QRaschsvUplSvPrev(Path<? extends QRaschsvUplSvPrev> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_UPL_SV_PREV");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_UPL_SV_PREV");
         addMetadata();
     }
 
     public QRaschsvUplSvPrev(PathMetadata metadata) {
-        super(QRaschsvUplSvPrev.class, metadata, "NDFL_1_0", "RASCHSV_UPL_SV_PREV");
+        super(QRaschsvUplSvPrev.class, metadata, "NDFL_UNSTABLE", "RASCHSV_UPL_SV_PREV");
         addMetadata();
     }
 

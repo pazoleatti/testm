@@ -24,7 +24,7 @@ public class QBlobData extends com.querydsl.sql.RelationalPathBase<QBlobData> {
 
     public static final QBlobData blobData = new QBlobData("BLOB_DATA");
 
-    public final DateTimePath<org.joda.time.DateTime> creationDate = createDateTime("creationDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> creationDate = createDateTime("creationDate", java.sql.Timestamp.class);
 
     public final SimplePath<java.sql.Blob> data = createSimple("data", java.sql.Blob.class);
 
@@ -59,7 +59,7 @@ public class QBlobData extends com.querydsl.sql.RelationalPathBase<QBlobData> {
     public final com.querydsl.sql.ForeignKey<QRefBook> _refBookFkScriptId = createInvForeignKey(id, "SCRIPT_ID");
 
     public QBlobData(String variable) {
-        super(QBlobData.class, forVariable(variable), "NDFL_1_0", "BLOB_DATA");
+        super(QBlobData.class, forVariable(variable), "NDFL_UNSTABLE", "BLOB_DATA");
         addMetadata();
     }
 
@@ -69,12 +69,12 @@ public class QBlobData extends com.querydsl.sql.RelationalPathBase<QBlobData> {
     }
 
     public QBlobData(Path<? extends QBlobData> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "BLOB_DATA");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "BLOB_DATA");
         addMetadata();
     }
 
     public QBlobData(PathMetadata metadata) {
-        super(QBlobData.class, metadata, "NDFL_1_0", "BLOB_DATA");
+        super(QBlobData.class, metadata, "NDFL_UNSTABLE", "BLOB_DATA");
         addMetadata();
     }
 

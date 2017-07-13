@@ -37,7 +37,7 @@ public class QFormKind extends com.querydsl.sql.RelationalPathBase<QFormKind> {
     public final com.querydsl.sql.ForeignKey<QLogSystem> _logSystemFkKind = createInvForeignKey(id, "FORM_KIND_ID");
 
     public QFormKind(String variable) {
-        super(QFormKind.class, forVariable(variable), "NDFL_1_0", "FORM_KIND");
+        super(QFormKind.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_KIND");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QFormKind extends com.querydsl.sql.RelationalPathBase<QFormKind> {
     }
 
     public QFormKind(Path<? extends QFormKind> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_KIND");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_KIND");
         addMetadata();
     }
 
     public QFormKind(PathMetadata metadata) {
-        super(QFormKind.class, metadata, "NDFL_1_0", "FORM_KIND");
+        super(QFormKind.class, metadata, "NDFL_UNSTABLE", "FORM_KIND");
         addMetadata();
     }
 

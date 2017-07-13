@@ -35,7 +35,7 @@ public class QDepartmentFormTypePerformer extends com.querydsl.sql.RelationalPat
     public final com.querydsl.sql.ForeignKey<QDepartment> deptFormTypePerfFkPerf = createForeignKey(performerDepId, "ID");
 
     public QDepartmentFormTypePerformer(String variable) {
-        super(QDepartmentFormTypePerformer.class, forVariable(variable), "NDFL_1_0", "DEPARTMENT_FORM_TYPE_PERFORMER");
+        super(QDepartmentFormTypePerformer.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_FORM_TYPE_PERFORMER");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QDepartmentFormTypePerformer extends com.querydsl.sql.RelationalPat
     }
 
     public QDepartmentFormTypePerformer(Path<? extends QDepartmentFormTypePerformer> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DEPARTMENT_FORM_TYPE_PERFORMER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DEPARTMENT_FORM_TYPE_PERFORMER");
         addMetadata();
     }
 
     public QDepartmentFormTypePerformer(PathMetadata metadata) {
-        super(QDepartmentFormTypePerformer.class, metadata, "NDFL_1_0", "DEPARTMENT_FORM_TYPE_PERFORMER");
+        super(QDepartmentFormTypePerformer.class, metadata, "NDFL_UNSTABLE", "DEPARTMENT_FORM_TYPE_PERFORMER");
         addMetadata();
     }
 

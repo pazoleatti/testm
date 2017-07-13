@@ -24,7 +24,7 @@ public class QLogEntry extends com.querydsl.sql.RelationalPathBase<QLogEntry> {
 
     public static final QLogEntry logEntry = new QLogEntry("LOG_ENTRY");
 
-    public final DateTimePath<org.joda.time.DateTime> creationDate = createDateTime("creationDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> creationDate = createDateTime("creationDate", java.sql.Timestamp.class);
 
     public final StringPath logId = createString("logId");
 
@@ -43,7 +43,7 @@ public class QLogEntry extends com.querydsl.sql.RelationalPathBase<QLogEntry> {
     public final com.querydsl.sql.ForeignKey<QLog> logEntryLogFk = createForeignKey(logId, "ID");
 
     public QLogEntry(String variable) {
-        super(QLogEntry.class, forVariable(variable), "NDFL_1_0", "LOG_ENTRY");
+        super(QLogEntry.class, forVariable(variable), "NDFL_UNSTABLE", "LOG_ENTRY");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QLogEntry extends com.querydsl.sql.RelationalPathBase<QLogEntry> {
     }
 
     public QLogEntry(Path<? extends QLogEntry> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "LOG_ENTRY");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "LOG_ENTRY");
         addMetadata();
     }
 
     public QLogEntry(PathMetadata metadata) {
-        super(QLogEntry.class, metadata, "NDFL_1_0", "LOG_ENTRY");
+        super(QLogEntry.class, metadata, "NDFL_UNSTABLE", "LOG_ENTRY");
         addMetadata();
     }
 

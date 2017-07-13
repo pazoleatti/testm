@@ -37,7 +37,7 @@ public class QRefBookFormType extends com.querydsl.sql.RelationalPathBase<QRefBo
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> _declarationTemplateFtypeFk = createInvForeignKey(id, "FORM_TYPE");
 
     public QRefBookFormType(String variable) {
-        super(QRefBookFormType.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_FORM_TYPE");
+        super(QRefBookFormType.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_FORM_TYPE");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QRefBookFormType extends com.querydsl.sql.RelationalPathBase<QRefBo
     }
 
     public QRefBookFormType(Path<? extends QRefBookFormType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_FORM_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_FORM_TYPE");
         addMetadata();
     }
 
     public QRefBookFormType(PathMetadata metadata) {
-        super(QRefBookFormType.class, metadata, "NDFL_1_0", "REF_BOOK_FORM_TYPE");
+        super(QRefBookFormType.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_FORM_TYPE");
         addMetadata();
     }
 

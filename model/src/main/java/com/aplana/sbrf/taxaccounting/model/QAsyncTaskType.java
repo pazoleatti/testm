@@ -41,7 +41,7 @@ public class QAsyncTaskType extends com.querydsl.sql.RelationalPathBase<QAsyncTa
     public final com.querydsl.sql.PrimaryKey<QAsyncTaskType> asyncTaskTypePk = createPrimaryKey(id);
 
     public QAsyncTaskType(String variable) {
-        super(QAsyncTaskType.class, forVariable(variable), "NDFL_1_0", "ASYNC_TASK_TYPE");
+        super(QAsyncTaskType.class, forVariable(variable), "NDFL_UNSTABLE", "ASYNC_TASK_TYPE");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QAsyncTaskType extends com.querydsl.sql.RelationalPathBase<QAsyncTa
     }
 
     public QAsyncTaskType(Path<? extends QAsyncTaskType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "ASYNC_TASK_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "ASYNC_TASK_TYPE");
         addMetadata();
     }
 
     public QAsyncTaskType(PathMetadata metadata) {
-        super(QAsyncTaskType.class, metadata, "NDFL_1_0", "ASYNC_TASK_TYPE");
+        super(QAsyncTaskType.class, metadata, "NDFL_UNSTABLE", "ASYNC_TASK_TYPE");
         addMetadata();
     }
 

@@ -35,7 +35,7 @@ public class QDepartmentDeclTypePerformer extends com.querydsl.sql.RelationalPat
     public final com.querydsl.sql.ForeignKey<QDepartment> deptDeclTypePerfPerfFk = createForeignKey(performerDepId, "ID");
 
     public QDepartmentDeclTypePerformer(String variable) {
-        super(QDepartmentDeclTypePerformer.class, forVariable(variable), "NDFL_1_0", "DEPARTMENT_DECL_TYPE_PERFORMER");
+        super(QDepartmentDeclTypePerformer.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_DECL_TYPE_PERFORMER");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QDepartmentDeclTypePerformer extends com.querydsl.sql.RelationalPat
     }
 
     public QDepartmentDeclTypePerformer(Path<? extends QDepartmentDeclTypePerformer> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DEPARTMENT_DECL_TYPE_PERFORMER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DEPARTMENT_DECL_TYPE_PERFORMER");
         addMetadata();
     }
 
     public QDepartmentDeclTypePerformer(PathMetadata metadata) {
-        super(QDepartmentDeclTypePerformer.class, metadata, "NDFL_1_0", "DEPARTMENT_DECL_TYPE_PERFORMER");
+        super(QDepartmentDeclTypePerformer.class, metadata, "NDFL_UNSTABLE", "DEPARTMENT_DECL_TYPE_PERFORMER");
         addMetadata();
     }
 

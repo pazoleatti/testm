@@ -40,7 +40,7 @@ public class QRefBookRegion extends com.querydsl.sql.RelationalPathBase<QRefBook
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookRegion> refBookRegionPk = createPrimaryKey(id);
 
@@ -53,7 +53,7 @@ public class QRefBookRegion extends com.querydsl.sql.RelationalPathBase<QRefBook
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetRegionFk = createInvForeignKey(id, "REGION");
 
     public QRefBookRegion(String variable) {
-        super(QRefBookRegion.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_REGION");
+        super(QRefBookRegion.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_REGION");
         addMetadata();
     }
 
@@ -63,12 +63,12 @@ public class QRefBookRegion extends com.querydsl.sql.RelationalPathBase<QRefBook
     }
 
     public QRefBookRegion(Path<? extends QRefBookRegion> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_REGION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_REGION");
         addMetadata();
     }
 
     public QRefBookRegion(PathMetadata metadata) {
-        super(QRefBookRegion.class, metadata, "NDFL_1_0", "REF_BOOK_REGION");
+        super(QRefBookRegion.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_REGION");
         addMetadata();
     }
 

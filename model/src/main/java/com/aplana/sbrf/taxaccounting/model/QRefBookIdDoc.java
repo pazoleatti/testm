@@ -36,7 +36,7 @@ public class QRefBookIdDoc extends com.querydsl.sql.RelationalPathBase<QRefBookI
 
     public final StringPath issuedBy = createString("issuedBy");
 
-    public final DateTimePath<org.joda.time.DateTime> issuedDate = createDateTime("issuedDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> issuedDate = createDateTime("issuedDate", java.sql.Timestamp.class);
 
     public final NumberPath<Long> personId = createNumber("personId", Long.class);
 
@@ -44,7 +44,7 @@ public class QRefBookIdDoc extends com.querydsl.sql.RelationalPathBase<QRefBookI
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookIdDoc> refBookIdDocPk = createPrimaryKey(id);
 
@@ -53,7 +53,7 @@ public class QRefBookIdDoc extends com.querydsl.sql.RelationalPathBase<QRefBookI
     public final com.querydsl.sql.ForeignKey<QRefBookPerson> refBookIdDocPersonFk = createForeignKey(personId, "ID");
 
     public QRefBookIdDoc(String variable) {
-        super(QRefBookIdDoc.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_ID_DOC");
+        super(QRefBookIdDoc.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_ID_DOC");
         addMetadata();
     }
 
@@ -63,12 +63,12 @@ public class QRefBookIdDoc extends com.querydsl.sql.RelationalPathBase<QRefBookI
     }
 
     public QRefBookIdDoc(Path<? extends QRefBookIdDoc> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_ID_DOC");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_ID_DOC");
         addMetadata();
     }
 
     public QRefBookIdDoc(PathMetadata metadata) {
-        super(QRefBookIdDoc.class, metadata, "NDFL_1_0", "REF_BOOK_ID_DOC");
+        super(QRefBookIdDoc.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_ID_DOC");
         addMetadata();
     }
 

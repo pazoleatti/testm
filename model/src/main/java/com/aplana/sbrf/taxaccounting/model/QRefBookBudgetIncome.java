@@ -36,12 +36,12 @@ public class QRefBookBudgetIncome extends com.querydsl.sql.RelationalPathBase<QR
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookBudgetIncome> refBookBudgetIncomePk = createPrimaryKey(id);
 
     public QRefBookBudgetIncome(String variable) {
-        super(QRefBookBudgetIncome.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_BUDGET_INCOME");
+        super(QRefBookBudgetIncome.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_BUDGET_INCOME");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QRefBookBudgetIncome extends com.querydsl.sql.RelationalPathBase<QR
     }
 
     public QRefBookBudgetIncome(Path<? extends QRefBookBudgetIncome> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_BUDGET_INCOME");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_BUDGET_INCOME");
         addMetadata();
     }
 
     public QRefBookBudgetIncome(PathMetadata metadata) {
-        super(QRefBookBudgetIncome.class, metadata, "NDFL_1_0", "REF_BOOK_BUDGET_INCOME");
+        super(QRefBookBudgetIncome.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_BUDGET_INCOME");
         addMetadata();
     }
 

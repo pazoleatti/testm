@@ -30,7 +30,7 @@ public class QLogClobQuery extends com.querydsl.sql.RelationalPathBase<QLogClobQ
 
     public final NumberPath<Integer> id = createNumber("id", Integer.class);
 
-    public final DateTimePath<org.joda.time.DateTime> logDate = createDateTime("logDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> logDate = createDateTime("logDate", java.sql.Timestamp.class);
 
     public final NumberPath<Long> sessionId = createNumber("sessionId", Long.class);
 
@@ -41,7 +41,7 @@ public class QLogClobQuery extends com.querydsl.sql.RelationalPathBase<QLogClobQ
     public final com.querydsl.sql.PrimaryKey<QLogClobQuery> logClobQueryPk = createPrimaryKey(id);
 
     public QLogClobQuery(String variable) {
-        super(QLogClobQuery.class, forVariable(variable), "NDFL_1_0", "LOG_CLOB_QUERY");
+        super(QLogClobQuery.class, forVariable(variable), "NDFL_UNSTABLE", "LOG_CLOB_QUERY");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QLogClobQuery extends com.querydsl.sql.RelationalPathBase<QLogClobQ
     }
 
     public QLogClobQuery(Path<? extends QLogClobQuery> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "LOG_CLOB_QUERY");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "LOG_CLOB_QUERY");
         addMetadata();
     }
 
     public QLogClobQuery(PathMetadata metadata) {
-        super(QLogClobQuery.class, metadata, "NDFL_1_0", "LOG_CLOB_QUERY");
+        super(QLogClobQuery.class, metadata, "NDFL_UNSTABLE", "LOG_CLOB_QUERY");
         addMetadata();
     }
 

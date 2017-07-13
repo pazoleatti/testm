@@ -37,7 +37,7 @@ public class QTaxType extends com.querydsl.sql.RelationalPathBase<QTaxType> {
     public final com.querydsl.sql.ForeignKey<QFormType> _formTypeFkTaxtype = createInvForeignKey(id, "TAX_TYPE");
 
     public QTaxType(String variable) {
-        super(QTaxType.class, forVariable(variable), "NDFL_1_0", "TAX_TYPE");
+        super(QTaxType.class, forVariable(variable), "NDFL_UNSTABLE", "TAX_TYPE");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QTaxType extends com.querydsl.sql.RelationalPathBase<QTaxType> {
     }
 
     public QTaxType(Path<? extends QTaxType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TAX_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TAX_TYPE");
         addMetadata();
     }
 
     public QTaxType(PathMetadata metadata) {
-        super(QTaxType.class, metadata, "NDFL_1_0", "TAX_TYPE");
+        super(QTaxType.class, metadata, "NDFL_UNSTABLE", "TAX_TYPE");
         addMetadata();
     }
 

@@ -35,7 +35,7 @@ public class QRaschsvVyplFinFb extends com.querydsl.sql.RelationalPathBase<QRasc
     public final com.querydsl.sql.ForeignKey<QRaschsvVyplPrichina> _raschsvVyplFinFbFk = createInvForeignKey(id, "RASCHSV_VYPL_FIN_FB_ID");
 
     public QRaschsvVyplFinFb(String variable) {
-        super(QRaschsvVyplFinFb.class, forVariable(variable), "NDFL_1_0", "RASCHSV_VYPL_FIN_FB");
+        super(QRaschsvVyplFinFb.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_VYPL_FIN_FB");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QRaschsvVyplFinFb extends com.querydsl.sql.RelationalPathBase<QRasc
     }
 
     public QRaschsvVyplFinFb(Path<? extends QRaschsvVyplFinFb> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_VYPL_FIN_FB");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_VYPL_FIN_FB");
         addMetadata();
     }
 
     public QRaschsvVyplFinFb(PathMetadata metadata) {
-        super(QRaschsvVyplFinFb.class, metadata, "NDFL_1_0", "RASCHSV_VYPL_FIN_FB");
+        super(QRaschsvVyplFinFb.class, metadata, "NDFL_UNSTABLE", "RASCHSV_VYPL_FIN_FB");
         addMetadata();
     }
 

@@ -45,7 +45,7 @@ public class QDeclarationDataFile extends com.querydsl.sql.RelationalPathBase<QD
     public final com.querydsl.sql.ForeignKey<QDeclarationData> declDataFileFkDeclData = createForeignKey(declarationDataId, "ID");
 
     public QDeclarationDataFile(String variable) {
-        super(QDeclarationDataFile.class, forVariable(variable), "NDFL_1_0", "DECLARATION_DATA_FILE");
+        super(QDeclarationDataFile.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_DATA_FILE");
         addMetadata();
     }
 
@@ -55,12 +55,12 @@ public class QDeclarationDataFile extends com.querydsl.sql.RelationalPathBase<QD
     }
 
     public QDeclarationDataFile(Path<? extends QDeclarationDataFile> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_DATA_FILE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_DATA_FILE");
         addMetadata();
     }
 
     public QDeclarationDataFile(PathMetadata metadata) {
-        super(QDeclarationDataFile.class, metadata, "NDFL_1_0", "DECLARATION_DATA_FILE");
+        super(QDeclarationDataFile.class, metadata, "NDFL_UNSTABLE", "DECLARATION_DATA_FILE");
         addMetadata();
     }
 

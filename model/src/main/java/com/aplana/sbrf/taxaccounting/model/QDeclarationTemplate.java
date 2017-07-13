@@ -40,7 +40,7 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final StringPath xsd = createString("xsd");
 
@@ -65,7 +65,7 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
     public final com.querydsl.sql.ForeignKey<QTemplateChanges> _templateChangesFkDecT = createInvForeignKey(id, "DECLARATION_TEMPLATE_ID");
 
     public QDeclarationTemplate(String variable) {
-        super(QDeclarationTemplate.class, forVariable(variable), "NDFL_1_0", "DECLARATION_TEMPLATE");
+        super(QDeclarationTemplate.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_TEMPLATE");
         addMetadata();
     }
 
@@ -75,12 +75,12 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
     }
 
     public QDeclarationTemplate(Path<? extends QDeclarationTemplate> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_TEMPLATE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_TEMPLATE");
         addMetadata();
     }
 
     public QDeclarationTemplate(PathMetadata metadata) {
-        super(QDeclarationTemplate.class, metadata, "NDFL_1_0", "DECLARATION_TEMPLATE");
+        super(QDeclarationTemplate.class, metadata, "NDFL_UNSTABLE", "DECLARATION_TEMPLATE");
         addMetadata();
     }
 

@@ -24,14 +24,14 @@ public class QRefBookCalendar extends com.querydsl.sql.RelationalPathBase<QRefBo
 
     public static final QRefBookCalendar refBookCalendar = new QRefBookCalendar("REF_BOOK_CALENDAR");
 
-    public final DateTimePath<org.joda.time.DateTime> cdate = createDateTime("cdate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> cdate = createDateTime("cdate", java.sql.Timestamp.class);
 
     public final NumberPath<Byte> ctype = createNumber("ctype", Byte.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookCalendar> refBookCalendarPk = createPrimaryKey(cdate);
 
     public QRefBookCalendar(String variable) {
-        super(QRefBookCalendar.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_CALENDAR");
+        super(QRefBookCalendar.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_CALENDAR");
         addMetadata();
     }
 
@@ -41,12 +41,12 @@ public class QRefBookCalendar extends com.querydsl.sql.RelationalPathBase<QRefBo
     }
 
     public QRefBookCalendar(Path<? extends QRefBookCalendar> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_CALENDAR");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_CALENDAR");
         addMetadata();
     }
 
     public QRefBookCalendar(PathMetadata metadata) {
-        super(QRefBookCalendar.class, metadata, "NDFL_1_0", "REF_BOOK_CALENDAR");
+        super(QRefBookCalendar.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_CALENDAR");
         addMetadata();
     }
 

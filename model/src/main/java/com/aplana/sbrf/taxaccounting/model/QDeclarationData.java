@@ -79,7 +79,7 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
     public final com.querydsl.sql.ForeignKey<QRaschsvObyazPlatSv> _raschsvObyazPlatDeclaratFk = createInvForeignKey(id, "DECLARATION_DATA_ID");
 
     public QDeclarationData(String variable) {
-        super(QDeclarationData.class, forVariable(variable), "NDFL_1_0", "DECLARATION_DATA");
+        super(QDeclarationData.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_DATA");
         addMetadata();
     }
 
@@ -89,12 +89,12 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
     }
 
     public QDeclarationData(Path<? extends QDeclarationData> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_DATA");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_DATA");
         addMetadata();
     }
 
     public QDeclarationData(PathMetadata metadata) {
-        super(QDeclarationData.class, metadata, "NDFL_1_0", "DECLARATION_DATA");
+        super(QDeclarationData.class, metadata, "NDFL_UNSTABLE", "DECLARATION_DATA");
         addMetadata();
     }
 

@@ -37,7 +37,7 @@ public class QTaxPeriod extends com.querydsl.sql.RelationalPathBase<QTaxPeriod> 
     public final com.querydsl.sql.ForeignKey<QReportPeriod> _reportPeriodFkTaxperiod = createInvForeignKey(id, "TAX_PERIOD_ID");
 
     public QTaxPeriod(String variable) {
-        super(QTaxPeriod.class, forVariable(variable), "NDFL_1_0", "TAX_PERIOD");
+        super(QTaxPeriod.class, forVariable(variable), "NDFL_UNSTABLE", "TAX_PERIOD");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QTaxPeriod extends com.querydsl.sql.RelationalPathBase<QTaxPeriod> 
     }
 
     public QTaxPeriod(Path<? extends QTaxPeriod> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TAX_PERIOD");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TAX_PERIOD");
         addMetadata();
     }
 
     public QTaxPeriod(PathMetadata metadata) {
-        super(QTaxPeriod.class, metadata, "NDFL_1_0", "TAX_PERIOD");
+        super(QTaxPeriod.class, metadata, "NDFL_UNSTABLE", "TAX_PERIOD");
         addMetadata();
     }
 

@@ -24,7 +24,7 @@ public class QRaschsvPravTarif31427 extends com.querydsl.sql.RelationalPathBase<
 
     public static final QRaschsvPravTarif31427 raschsvPravTarif31427 = new QRaschsvPravTarif31427("RASCHSV_PRAV_TARIF3_1_427");
 
-    public final DateTimePath<org.joda.time.DateTime> dataZapAkOrg = createDateTime("dataZapAkOrg", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> dataZapAkOrg = createDateTime("dataZapAkOrg", java.sql.Timestamp.class);
 
     public final NumberPath<Long> doh2489mpr = createNumber("doh2489mpr", Long.class);
 
@@ -53,7 +53,7 @@ public class QRaschsvPravTarif31427 extends com.querydsl.sql.RelationalPathBase<
     public final com.querydsl.sql.ForeignKey<QRaschsvObyazPlatSv> raschsvTarif3427ObPlFk = createForeignKey(raschsvObyazPlatSvId, "ID");
 
     public QRaschsvPravTarif31427(String variable) {
-        super(QRaschsvPravTarif31427.class, forVariable(variable), "NDFL_1_0", "RASCHSV_PRAV_TARIF3_1_427");
+        super(QRaschsvPravTarif31427.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_PRAV_TARIF3_1_427");
         addMetadata();
     }
 
@@ -63,12 +63,12 @@ public class QRaschsvPravTarif31427 extends com.querydsl.sql.RelationalPathBase<
     }
 
     public QRaschsvPravTarif31427(Path<? extends QRaschsvPravTarif31427> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_PRAV_TARIF3_1_427");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_PRAV_TARIF3_1_427");
         addMetadata();
     }
 
     public QRaschsvPravTarif31427(PathMetadata metadata) {
-        super(QRaschsvPravTarif31427.class, metadata, "NDFL_1_0", "RASCHSV_PRAV_TARIF3_1_427");
+        super(QRaschsvPravTarif31427.class, metadata, "NDFL_UNSTABLE", "RASCHSV_PRAV_TARIF3_1_427");
         addMetadata();
     }
 

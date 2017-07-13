@@ -43,7 +43,7 @@ public class QFormDataReport extends com.querydsl.sql.RelationalPathBase<QFormDa
     public final com.querydsl.sql.ForeignKey<QBlobData> formDataRepFkBlobDataId = createForeignKey(blobDataId, "ID");
 
     public QFormDataReport(String variable) {
-        super(QFormDataReport.class, forVariable(variable), "NDFL_1_0", "FORM_DATA_REPORT");
+        super(QFormDataReport.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_DATA_REPORT");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QFormDataReport extends com.querydsl.sql.RelationalPathBase<QFormDa
     }
 
     public QFormDataReport(Path<? extends QFormDataReport> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_DATA_REPORT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_DATA_REPORT");
         addMetadata();
     }
 
     public QFormDataReport(PathMetadata metadata) {
-        super(QFormDataReport.class, metadata, "NDFL_1_0", "FORM_DATA_REPORT");
+        super(QFormDataReport.class, metadata, "NDFL_UNSTABLE", "FORM_DATA_REPORT");
         addMetadata();
     }
 

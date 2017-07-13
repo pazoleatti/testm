@@ -59,7 +59,7 @@ public class QSecUser extends com.querydsl.sql.RelationalPathBase<QSecUser> {
     public final com.querydsl.sql.ForeignKey<QLogSystemReport> _logSystemReportFkSecUser = createInvForeignKey(id, "SEC_USER_ID");
 
     public QSecUser(String variable) {
-        super(QSecUser.class, forVariable(variable), "NDFL_1_0", "SEC_USER");
+        super(QSecUser.class, forVariable(variable), "NDFL_UNSTABLE", "SEC_USER");
         addMetadata();
     }
 
@@ -69,12 +69,12 @@ public class QSecUser extends com.querydsl.sql.RelationalPathBase<QSecUser> {
     }
 
     public QSecUser(Path<? extends QSecUser> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "SEC_USER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "SEC_USER");
         addMetadata();
     }
 
     public QSecUser(PathMetadata metadata) {
-        super(QSecUser.class, metadata, "NDFL_1_0", "SEC_USER");
+        super(QSecUser.class, metadata, "NDFL_UNSTABLE", "SEC_USER");
         addMetadata();
     }
 

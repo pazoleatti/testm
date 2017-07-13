@@ -32,7 +32,7 @@ public class QLogBusiness extends com.querydsl.sql.RelationalPathBase<QLogBusine
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> logDate = createDateTime("logDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> logDate = createDateTime("logDate", java.sql.Timestamp.class);
 
     public final StringPath note = createString("note");
 
@@ -51,7 +51,7 @@ public class QLogBusiness extends com.querydsl.sql.RelationalPathBase<QLogBusine
     public final com.querydsl.sql.ForeignKey<QEvent> logBusinessFkEventId = createForeignKey(eventId, "ID");
 
     public QLogBusiness(String variable) {
-        super(QLogBusiness.class, forVariable(variable), "NDFL_1_0", "LOG_BUSINESS");
+        super(QLogBusiness.class, forVariable(variable), "NDFL_UNSTABLE", "LOG_BUSINESS");
         addMetadata();
     }
 
@@ -61,12 +61,12 @@ public class QLogBusiness extends com.querydsl.sql.RelationalPathBase<QLogBusine
     }
 
     public QLogBusiness(Path<? extends QLogBusiness> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "LOG_BUSINESS");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "LOG_BUSINESS");
         addMetadata();
     }
 
     public QLogBusiness(PathMetadata metadata) {
-        super(QLogBusiness.class, metadata, "NDFL_1_0", "LOG_BUSINESS");
+        super(QLogBusiness.class, metadata, "NDFL_UNSTABLE", "LOG_BUSINESS");
         addMetadata();
     }
 

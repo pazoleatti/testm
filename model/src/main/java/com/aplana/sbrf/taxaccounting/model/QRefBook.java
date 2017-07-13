@@ -57,7 +57,7 @@ public class QRefBook extends com.querydsl.sql.RelationalPathBase<QRefBook> {
     public final com.querydsl.sql.ForeignKey<QRefBookRecord> _refBookRecordFkRefBookId = createInvForeignKey(id, "REF_BOOK_ID");
 
     public QRefBook(String variable) {
-        super(QRefBook.class, forVariable(variable), "NDFL_1_0", "REF_BOOK");
+        super(QRefBook.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK");
         addMetadata();
     }
 
@@ -67,12 +67,12 @@ public class QRefBook extends com.querydsl.sql.RelationalPathBase<QRefBook> {
     }
 
     public QRefBook(Path<? extends QRefBook> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK");
         addMetadata();
     }
 
     public QRefBook(PathMetadata metadata) {
-        super(QRefBook.class, metadata, "NDFL_1_0", "REF_BOOK");
+        super(QRefBook.class, metadata, "NDFL_UNSTABLE", "REF_BOOK");
         addMetadata();
     }
 

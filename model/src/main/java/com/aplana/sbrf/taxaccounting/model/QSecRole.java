@@ -41,7 +41,7 @@ public class QSecRole extends com.querydsl.sql.RelationalPathBase<QSecRole> {
     public final com.querydsl.sql.ForeignKey<QSecUserRole> _secUserRoleFkRoleId = createInvForeignKey(id, "ROLE_ID");
 
     public QSecRole(String variable) {
-        super(QSecRole.class, forVariable(variable), "NDFL_1_0", "SEC_ROLE");
+        super(QSecRole.class, forVariable(variable), "NDFL_UNSTABLE", "SEC_ROLE");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QSecRole extends com.querydsl.sql.RelationalPathBase<QSecRole> {
     }
 
     public QSecRole(Path<? extends QSecRole> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "SEC_ROLE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "SEC_ROLE");
         addMetadata();
     }
 
     public QSecRole(PathMetadata metadata) {
-        super(QSecRole.class, metadata, "NDFL_1_0", "SEC_ROLE");
+        super(QSecRole.class, metadata, "NDFL_UNSTABLE", "SEC_ROLE");
         addMetadata();
     }
 

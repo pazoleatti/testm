@@ -59,7 +59,7 @@ public class QRaschsvObyazPlatSv extends com.querydsl.sql.RelationalPathBase<QRa
     public final com.querydsl.sql.ForeignKey<QRaschsvPravTarif51427> _raschsvTarif5427ObPlFk = createInvForeignKey(id, "RASCHSV_OBYAZ_PLAT_SV_ID");
 
     public QRaschsvObyazPlatSv(String variable) {
-        super(QRaschsvObyazPlatSv.class, forVariable(variable), "NDFL_1_0", "RASCHSV_OBYAZ_PLAT_SV");
+        super(QRaschsvObyazPlatSv.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_OBYAZ_PLAT_SV");
         addMetadata();
     }
 
@@ -69,12 +69,12 @@ public class QRaschsvObyazPlatSv extends com.querydsl.sql.RelationalPathBase<QRa
     }
 
     public QRaschsvObyazPlatSv(Path<? extends QRaschsvObyazPlatSv> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_OBYAZ_PLAT_SV");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_OBYAZ_PLAT_SV");
         addMetadata();
     }
 
     public QRaschsvObyazPlatSv(PathMetadata metadata) {
-        super(QRaschsvObyazPlatSv.class, metadata, "NDFL_1_0", "RASCHSV_OBYAZ_PLAT_SV");
+        super(QRaschsvObyazPlatSv.class, metadata, "NDFL_UNSTABLE", "RASCHSV_OBYAZ_PLAT_SV");
         addMetadata();
     }
 

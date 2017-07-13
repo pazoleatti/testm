@@ -46,7 +46,7 @@ public class QLogSystem extends com.querydsl.sql.RelationalPathBase<QLogSystem> 
 
     public final NumberPath<Byte> isError = createNumber("isError", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> logDate = createDateTime("logDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> logDate = createDateTime("logDate", java.sql.Timestamp.class);
 
     public final StringPath logId = createString("logId");
 
@@ -73,7 +73,7 @@ public class QLogSystem extends com.querydsl.sql.RelationalPathBase<QLogSystem> 
     public final com.querydsl.sql.ForeignKey<QEvent> logSystemFkEventId = createForeignKey(eventId, "ID");
 
     public QLogSystem(String variable) {
-        super(QLogSystem.class, forVariable(variable), "NDFL_1_0", "LOG_SYSTEM");
+        super(QLogSystem.class, forVariable(variable), "NDFL_UNSTABLE", "LOG_SYSTEM");
         addMetadata();
     }
 
@@ -83,12 +83,12 @@ public class QLogSystem extends com.querydsl.sql.RelationalPathBase<QLogSystem> 
     }
 
     public QLogSystem(Path<? extends QLogSystem> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "LOG_SYSTEM");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "LOG_SYSTEM");
         addMetadata();
     }
 
     public QLogSystem(PathMetadata metadata) {
-        super(QLogSystem.class, metadata, "NDFL_1_0", "LOG_SYSTEM");
+        super(QLogSystem.class, metadata, "NDFL_UNSTABLE", "LOG_SYSTEM");
         addMetadata();
     }
 

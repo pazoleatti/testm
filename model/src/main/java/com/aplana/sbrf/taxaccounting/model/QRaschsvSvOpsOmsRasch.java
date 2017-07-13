@@ -49,7 +49,7 @@ public class QRaschsvSvOpsOmsRasch extends com.querydsl.sql.RelationalPathBase<Q
     public final com.querydsl.sql.ForeignKey<QRaschsvOpsOmsRaschSum> _raschsvSvOpsOmsSumFk = createInvForeignKey(id, "RASCHSV_OPS_OMS_RASCH_SUM_ID");
 
     public QRaschsvSvOpsOmsRasch(String variable) {
-        super(QRaschsvSvOpsOmsRasch.class, forVariable(variable), "NDFL_1_0", "RASCHSV_SV_OPS_OMS_RASCH");
+        super(QRaschsvSvOpsOmsRasch.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_SV_OPS_OMS_RASCH");
         addMetadata();
     }
 
@@ -59,12 +59,12 @@ public class QRaschsvSvOpsOmsRasch extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QRaschsvSvOpsOmsRasch(Path<? extends QRaschsvSvOpsOmsRasch> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_SV_OPS_OMS_RASCH");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_SV_OPS_OMS_RASCH");
         addMetadata();
     }
 
     public QRaschsvSvOpsOmsRasch(PathMetadata metadata) {
-        super(QRaschsvSvOpsOmsRasch.class, metadata, "NDFL_1_0", "RASCHSV_SV_OPS_OMS_RASCH");
+        super(QRaschsvSvOpsOmsRasch.class, metadata, "NDFL_UNSTABLE", "RASCHSV_SV_OPS_OMS_RASCH");
         addMetadata();
     }
 

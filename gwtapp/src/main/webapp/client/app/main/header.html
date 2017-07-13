@@ -126,19 +126,21 @@
         </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-        <li class="border-none">
-           <div class="message" style="padding-top: 13px;">{{::'main.menu.notifications' | translate}}</div>
+        <li type="button" id="btnNotif" class="btn btn-link" data-toggle="button"
+            data-ng-click="showNotificationClick()" style="color: white; font-size: 11pt;">
+            {{notificationsCount}}
         </li>
         <li>
             <a href="{{aboutHref}}"><i class="glyphicon glyphicon-info-sign"></i></a>
-            <li class="border-none">
-                <ul class="nav navbar-nav">
-                    <li class="dropdown">
-                        <a data-toggle="dropdown" style="margin-top: -5px;"><b class='glyphicon glyphicon-question-sign'></b></a>
-                        <tree tree='treeManual'></tree>
-                    </li>
-                </ul>
-            </li>
+        <li class="border-none">
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a data-toggle="dropdown" style="margin-top: -5px;"><b
+                            class='glyphicon glyphicon-question-sign'></b></a>
+                    <tree tree='treeManual'></tree>
+                </li>
+            </ul>
+        </li>
         <li class="app-header-user-info" style="padding-top: 4px;">
             <div>{{security.userDep}}</div>
             <div style="text-align: center;">{{security.userTitle}}</div>
@@ -147,6 +149,9 @@
     </ul>
 
     <div class="build_info">
-        <div>{{::'main.footer.version' | translate}}: {{version}}; {{::'main.footer.revision' | translate}}: {{revision}}; {{::'main.footer.server' | translate}}: {{serverName}}; {{::'main.footer.browser' | translate}}: {{browser}}</div>
+        <div>{{::'main.footer.version' | translate}}: {{version}}; {{::'main.footer.revision' | translate}}:
+            {{revision}}; {{::'main.footer.server' | translate}}: {{serverName}}; {{::'main.footer.browser' |
+            translate}}: {{browser}}
+        </div>
     </div>
 </nav>

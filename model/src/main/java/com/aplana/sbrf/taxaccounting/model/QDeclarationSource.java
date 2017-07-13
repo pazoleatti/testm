@@ -26,9 +26,9 @@ public class QDeclarationSource extends com.querydsl.sql.RelationalPathBase<QDec
 
     public final NumberPath<Integer> departmentDeclarationTypeId = createNumber("departmentDeclarationTypeId", Integer.class);
 
-    public final DateTimePath<org.joda.time.DateTime> periodEnd = createDateTime("periodEnd", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> periodEnd = createDateTime("periodEnd", java.sql.Timestamp.class);
 
-    public final DateTimePath<org.joda.time.DateTime> periodStart = createDateTime("periodStart", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> periodStart = createDateTime("periodStart", java.sql.Timestamp.class);
 
     public final NumberPath<Integer> srcDepartmentFormTypeId = createNumber("srcDepartmentFormTypeId", Integer.class);
 
@@ -39,7 +39,7 @@ public class QDeclarationSource extends com.querydsl.sql.RelationalPathBase<QDec
     public final com.querydsl.sql.ForeignKey<QDepartmentFormType> declSourceFkDeptFormtype = createForeignKey(srcDepartmentFormTypeId, "ID");
 
     public QDeclarationSource(String variable) {
-        super(QDeclarationSource.class, forVariable(variable), "NDFL_1_0", "DECLARATION_SOURCE");
+        super(QDeclarationSource.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_SOURCE");
         addMetadata();
     }
 
@@ -49,12 +49,12 @@ public class QDeclarationSource extends com.querydsl.sql.RelationalPathBase<QDec
     }
 
     public QDeclarationSource(Path<? extends QDeclarationSource> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_SOURCE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_SOURCE");
         addMetadata();
     }
 
     public QDeclarationSource(PathMetadata metadata) {
-        super(QDeclarationSource.class, metadata, "NDFL_1_0", "DECLARATION_SOURCE");
+        super(QDeclarationSource.class, metadata, "NDFL_UNSTABLE", "DECLARATION_SOURCE");
         addMetadata();
     }
 

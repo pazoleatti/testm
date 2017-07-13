@@ -35,7 +35,7 @@ public class QConfiguration extends com.querydsl.sql.RelationalPathBase<QConfigu
     public final com.querydsl.sql.ForeignKey<QDepartment> configurationFk = createForeignKey(departmentId, "ID");
 
     public QConfiguration(String variable) {
-        super(QConfiguration.class, forVariable(variable), "NDFL_1_0", "CONFIGURATION");
+        super(QConfiguration.class, forVariable(variable), "NDFL_UNSTABLE", "CONFIGURATION");
         addMetadata();
     }
 
@@ -45,12 +45,12 @@ public class QConfiguration extends com.querydsl.sql.RelationalPathBase<QConfigu
     }
 
     public QConfiguration(Path<? extends QConfiguration> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "CONFIGURATION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "CONFIGURATION");
         addMetadata();
     }
 
     public QConfiguration(PathMetadata metadata) {
-        super(QConfiguration.class, metadata, "NDFL_1_0", "CONFIGURATION");
+        super(QConfiguration.class, metadata, "NDFL_UNSTABLE", "CONFIGURATION");
         addMetadata();
     }
 

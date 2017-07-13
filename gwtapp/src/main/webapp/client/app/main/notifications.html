@@ -1,0 +1,26 @@
+<div class="modal-header">
+    <button type="button" class="close" data-ng-click="close()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-star-empty"></span>&nbsp;{{::'notifications.title.listNotifications' |
+        translate}}
+    </h4>
+</div>
+<div class="modal-body" style="height: 370px;">
+    <div class="row" style="margin-left: 0px;">
+        <i class="glyphicon glyphicon-remove" style="color: red;"></i>
+        <a class="aplanaLink" data-aplana-link-click="deleteNotification()"
+           data-aplana-link="'notifications.title.deleteLink' | translate">
+        </a>
+    </div>
+    <div data-aplana-grid
+         data-grid-options="notificationsGrid.options"
+         data-grid-ctrl="notificationsGrid.ctrl"
+         data-ng-model="notificationsGrid.value"
+         id="notificationsTable"
+         style="float: left; width: 100%;"></div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" id="closeButton" data-ng-click="close()">
+        <span data-translate-once="button.close"></span>
+    </button>
+</div>

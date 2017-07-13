@@ -49,7 +49,7 @@ public class QDeclarationSubreportParams extends com.querydsl.sql.RelationalPath
     public final com.querydsl.sql.ForeignKey<QDeclarationSubreport> declSubrepParsSubrepIdFk = createForeignKey(declarationSubreportId, "ID");
 
     public QDeclarationSubreportParams(String variable) {
-        super(QDeclarationSubreportParams.class, forVariable(variable), "NDFL_1_0", "DECLARATION_SUBREPORT_PARAMS");
+        super(QDeclarationSubreportParams.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_SUBREPORT_PARAMS");
         addMetadata();
     }
 
@@ -59,12 +59,12 @@ public class QDeclarationSubreportParams extends com.querydsl.sql.RelationalPath
     }
 
     public QDeclarationSubreportParams(Path<? extends QDeclarationSubreportParams> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_SUBREPORT_PARAMS");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_SUBREPORT_PARAMS");
         addMetadata();
     }
 
     public QDeclarationSubreportParams(PathMetadata metadata) {
-        super(QDeclarationSubreportParams.class, metadata, "NDFL_1_0", "DECLARATION_SUBREPORT_PARAMS");
+        super(QDeclarationSubreportParams.class, metadata, "NDFL_UNSTABLE", "DECLARATION_SUBREPORT_PARAMS");
         addMetadata();
     }
 

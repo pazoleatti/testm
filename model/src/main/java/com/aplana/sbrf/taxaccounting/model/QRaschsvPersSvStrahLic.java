@@ -24,7 +24,7 @@ public class QRaschsvPersSvStrahLic extends com.querydsl.sql.RelationalPathBase<
 
     public static final QRaschsvPersSvStrahLic raschsvPersSvStrahLic = new QRaschsvPersSvStrahLic("RASCHSV_PERS_SV_STRAH_LIC");
 
-    public final DateTimePath<org.joda.time.DateTime> dataRozd = createDateTime("dataRozd", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> dataRozd = createDateTime("dataRozd", java.sql.Timestamp.class);
 
     public final NumberPath<Long> declarationDataId = createNumber("declarationDataId", Long.class);
 
@@ -64,7 +64,7 @@ public class QRaschsvPersSvStrahLic extends com.querydsl.sql.RelationalPathBase<
 
     public final StringPath snils = createString("snils");
 
-    public final DateTimePath<org.joda.time.DateTime> svData = createDateTime("svData", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> svData = createDateTime("svData", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRaschsvPersSvStrahLic> persSvStrahFacePk = createPrimaryKey(id);
 
@@ -77,7 +77,7 @@ public class QRaschsvPersSvStrahLic extends com.querydsl.sql.RelationalPathBase<
     public final com.querydsl.sql.ForeignKey<QRaschsvSvVypl> _raschsvSvVyplStrahLicFk = createInvForeignKey(id, "RASCHSV_PERS_SV_STRAH_LIC_ID");
 
     public QRaschsvPersSvStrahLic(String variable) {
-        super(QRaschsvPersSvStrahLic.class, forVariable(variable), "NDFL_1_0", "RASCHSV_PERS_SV_STRAH_LIC");
+        super(QRaschsvPersSvStrahLic.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_PERS_SV_STRAH_LIC");
         addMetadata();
     }
 
@@ -87,12 +87,12 @@ public class QRaschsvPersSvStrahLic extends com.querydsl.sql.RelationalPathBase<
     }
 
     public QRaschsvPersSvStrahLic(Path<? extends QRaschsvPersSvStrahLic> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_PERS_SV_STRAH_LIC");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_PERS_SV_STRAH_LIC");
         addMetadata();
     }
 
     public QRaschsvPersSvStrahLic(PathMetadata metadata) {
-        super(QRaschsvPersSvStrahLic.class, metadata, "NDFL_1_0", "RASCHSV_PERS_SV_STRAH_LIC");
+        super(QRaschsvPersSvStrahLic.class, metadata, "NDFL_UNSTABLE", "RASCHSV_PERS_SV_STRAH_LIC");
         addMetadata();
     }
 

@@ -26,7 +26,7 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> incomeAccrued = createDateTime("incomeAccrued", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> incomeAccrued = createDateTime("incomeAccrued", java.sql.Timestamp.class);
 
     public final StringPath incomeCode = createString("incomeCode");
 
@@ -34,7 +34,7 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
 
     public final NumberPath<Long> ndflPersonId = createNumber("ndflPersonId", Long.class);
 
-    public final DateTimePath<org.joda.time.DateTime> notifDate = createDateTime("notifDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> notifDate = createDateTime("notifDate", java.sql.Timestamp.class);
 
     public final StringPath notifNum = createString("notifNum");
 
@@ -46,11 +46,11 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
 
     public final StringPath operationId = createString("operationId");
 
-    public final DateTimePath<org.joda.time.DateTime> periodCurrDate = createDateTime("periodCurrDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> periodCurrDate = createDateTime("periodCurrDate", java.sql.Timestamp.class);
 
     public final NumberPath<java.math.BigDecimal> periodCurrSumm = createNumber("periodCurrSumm", java.math.BigDecimal.class);
 
-    public final DateTimePath<org.joda.time.DateTime> periodPrevDate = createDateTime("periodPrevDate", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> periodPrevDate = createDateTime("periodPrevDate", java.sql.Timestamp.class);
 
     public final NumberPath<java.math.BigDecimal> periodPrevSumm = createNumber("periodPrevSumm", java.math.BigDecimal.class);
 
@@ -69,7 +69,7 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
     public final com.querydsl.sql.ForeignKey<QNdflPersonDeduction> _ndflPdFkS = createInvForeignKey(id, "SOURCE_ID");
 
     public QNdflPersonDeduction(String variable) {
-        super(QNdflPersonDeduction.class, forVariable(variable), "NDFL_1_0", "NDFL_PERSON_DEDUCTION");
+        super(QNdflPersonDeduction.class, forVariable(variable), "NDFL_UNSTABLE", "NDFL_PERSON_DEDUCTION");
         addMetadata();
     }
 
@@ -79,12 +79,12 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
     }
 
     public QNdflPersonDeduction(Path<? extends QNdflPersonDeduction> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "NDFL_PERSON_DEDUCTION");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "NDFL_PERSON_DEDUCTION");
         addMetadata();
     }
 
     public QNdflPersonDeduction(PathMetadata metadata) {
-        super(QNdflPersonDeduction.class, metadata, "NDFL_1_0", "NDFL_PERSON_DEDUCTION");
+        super(QNdflPersonDeduction.class, metadata, "NDFL_UNSTABLE", "NDFL_PERSON_DEDUCTION");
         addMetadata();
     }
 

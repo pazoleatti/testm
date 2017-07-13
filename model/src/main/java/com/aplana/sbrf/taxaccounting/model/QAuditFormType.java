@@ -33,7 +33,7 @@ public class QAuditFormType extends com.querydsl.sql.RelationalPathBase<QAuditFo
     public final com.querydsl.sql.ForeignKey<QLogSystem> _logSystemFkAuditFormType = createInvForeignKey(id, "AUDIT_FORM_TYPE_ID");
 
     public QAuditFormType(String variable) {
-        super(QAuditFormType.class, forVariable(variable), "NDFL_1_0", "AUDIT_FORM_TYPE");
+        super(QAuditFormType.class, forVariable(variable), "NDFL_UNSTABLE", "AUDIT_FORM_TYPE");
         addMetadata();
     }
 
@@ -43,12 +43,12 @@ public class QAuditFormType extends com.querydsl.sql.RelationalPathBase<QAuditFo
     }
 
     public QAuditFormType(Path<? extends QAuditFormType> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "AUDIT_FORM_TYPE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "AUDIT_FORM_TYPE");
         addMetadata();
     }
 
     public QAuditFormType(PathMetadata metadata) {
-        super(QAuditFormType.class, metadata, "NDFL_1_0", "AUDIT_FORM_TYPE");
+        super(QAuditFormType.class, metadata, "NDFL_UNSTABLE", "AUDIT_FORM_TYPE");
         addMetadata();
     }
 

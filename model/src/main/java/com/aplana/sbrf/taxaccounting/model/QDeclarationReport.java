@@ -39,7 +39,7 @@ public class QDeclarationReport extends com.querydsl.sql.RelationalPathBase<QDec
     public final com.querydsl.sql.ForeignKey<QBlobData> declReportFkBlobData = createForeignKey(blobDataId, "ID");
 
     public QDeclarationReport(String variable) {
-        super(QDeclarationReport.class, forVariable(variable), "NDFL_1_0", "DECLARATION_REPORT");
+        super(QDeclarationReport.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_REPORT");
         addMetadata();
     }
 
@@ -49,12 +49,12 @@ public class QDeclarationReport extends com.querydsl.sql.RelationalPathBase<QDec
     }
 
     public QDeclarationReport(Path<? extends QDeclarationReport> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_REPORT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_REPORT");
         addMetadata();
     }
 
     public QDeclarationReport(PathMetadata metadata) {
-        super(QDeclarationReport.class, metadata, "NDFL_1_0", "DECLARATION_REPORT");
+        super(QDeclarationReport.class, metadata, "NDFL_UNSTABLE", "DECLARATION_REPORT");
         addMetadata();
     }
 

@@ -37,7 +37,7 @@ public class QRaschsvOpsOmsRaschKol extends com.querydsl.sql.RelationalPathBase<
     public final com.querydsl.sql.ForeignKey<QRaschsvKolLicTip> raschsvSvPMKolTipFk = createForeignKey(raschsvKolLicTipId, "ID");
 
     public QRaschsvOpsOmsRaschKol(String variable) {
-        super(QRaschsvOpsOmsRaschKol.class, forVariable(variable), "NDFL_1_0", "RASCHSV_OPS_OMS_RASCH_KOL");
+        super(QRaschsvOpsOmsRaschKol.class, forVariable(variable), "NDFL_UNSTABLE", "RASCHSV_OPS_OMS_RASCH_KOL");
         addMetadata();
     }
 
@@ -47,12 +47,12 @@ public class QRaschsvOpsOmsRaschKol extends com.querydsl.sql.RelationalPathBase<
     }
 
     public QRaschsvOpsOmsRaschKol(Path<? extends QRaschsvOpsOmsRaschKol> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "RASCHSV_OPS_OMS_RASCH_KOL");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "RASCHSV_OPS_OMS_RASCH_KOL");
         addMetadata();
     }
 
     public QRaschsvOpsOmsRaschKol(PathMetadata metadata) {
-        super(QRaschsvOpsOmsRaschKol.class, metadata, "NDFL_1_0", "RASCHSV_OPS_OMS_RASCH_KOL");
+        super(QRaschsvOpsOmsRaschKol.class, metadata, "NDFL_UNSTABLE", "RASCHSV_OPS_OMS_RASCH_KOL");
         addMetadata();
     }
 

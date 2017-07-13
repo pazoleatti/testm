@@ -24,7 +24,7 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
 
     public static final QNdflReferences ndflReferences = new QNdflReferences("NDFL_REFERENCES");
 
-    public final DateTimePath<org.joda.time.DateTime> birthday = createDateTime("birthday", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> birthday = createDateTime("birthday", java.sql.Timestamp.class);
 
     public final NumberPath<Long> declarationDataId = createNumber("declarationDataId", Long.class);
 
@@ -48,7 +48,7 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
 
     public final StringPath surname = createString("surname");
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QNdflReferences> ndflReferencesPk = createPrimaryKey(id);
 
@@ -59,7 +59,7 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
     public final com.querydsl.sql.ForeignKey<QDeclarationData> ndflRefersDeclDataFk = createForeignKey(declarationDataId, "ID");
 
     public QNdflReferences(String variable) {
-        super(QNdflReferences.class, forVariable(variable), "NDFL_1_0", "NDFL_REFERENCES");
+        super(QNdflReferences.class, forVariable(variable), "NDFL_UNSTABLE", "NDFL_REFERENCES");
         addMetadata();
     }
 
@@ -69,12 +69,12 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
     }
 
     public QNdflReferences(Path<? extends QNdflReferences> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "NDFL_REFERENCES");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "NDFL_REFERENCES");
         addMetadata();
     }
 
     public QNdflReferences(PathMetadata metadata) {
-        super(QNdflReferences.class, metadata, "NDFL_1_0", "NDFL_REFERENCES");
+        super(QNdflReferences.class, metadata, "NDFL_UNSTABLE", "NDFL_REFERENCES");
         addMetadata();
     }
 

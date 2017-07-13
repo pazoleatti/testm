@@ -41,7 +41,7 @@ public class QFormDataFile extends com.querydsl.sql.RelationalPathBase<QFormData
     public final com.querydsl.sql.ForeignKey<QBlobData> formDataFileFkBlobData = createForeignKey(blobDataId, "ID");
 
     public QFormDataFile(String variable) {
-        super(QFormDataFile.class, forVariable(variable), "NDFL_1_0", "FORM_DATA_FILE");
+        super(QFormDataFile.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_DATA_FILE");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QFormDataFile extends com.querydsl.sql.RelationalPathBase<QFormData
     }
 
     public QFormDataFile(Path<? extends QFormDataFile> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_DATA_FILE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_DATA_FILE");
         addMetadata();
     }
 
     public QFormDataFile(PathMetadata metadata) {
-        super(QFormDataFile.class, metadata, "NDFL_1_0", "FORM_DATA_FILE");
+        super(QFormDataFile.class, metadata, "NDFL_UNSTABLE", "FORM_DATA_FILE");
         addMetadata();
     }
 

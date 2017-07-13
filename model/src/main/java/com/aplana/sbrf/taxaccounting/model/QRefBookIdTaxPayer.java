@@ -36,7 +36,7 @@ public class QRefBookIdTaxPayer extends com.querydsl.sql.RelationalPathBase<QRef
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<org.joda.time.DateTime> version = createDateTime("version", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookIdTaxPayer> refBookIdTaxPayerPk = createPrimaryKey(id);
 
@@ -45,7 +45,7 @@ public class QRefBookIdTaxPayer extends com.querydsl.sql.RelationalPathBase<QRef
     public final com.querydsl.sql.ForeignKey<QRefBookPerson> refBookIdTaxPayerPersFk = createForeignKey(personId, "ID");
 
     public QRefBookIdTaxPayer(String variable) {
-        super(QRefBookIdTaxPayer.class, forVariable(variable), "NDFL_1_0", "REF_BOOK_ID_TAX_PAYER");
+        super(QRefBookIdTaxPayer.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_ID_TAX_PAYER");
         addMetadata();
     }
 
@@ -55,12 +55,12 @@ public class QRefBookIdTaxPayer extends com.querydsl.sql.RelationalPathBase<QRef
     }
 
     public QRefBookIdTaxPayer(Path<? extends QRefBookIdTaxPayer> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "REF_BOOK_ID_TAX_PAYER");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "REF_BOOK_ID_TAX_PAYER");
         addMetadata();
     }
 
     public QRefBookIdTaxPayer(PathMetadata metadata) {
-        super(QRefBookIdTaxPayer.class, metadata, "NDFL_1_0", "REF_BOOK_ID_TAX_PAYER");
+        super(QRefBookIdTaxPayer.class, metadata, "NDFL_UNSTABLE", "REF_BOOK_ID_TAX_PAYER");
         addMetadata();
     }
 

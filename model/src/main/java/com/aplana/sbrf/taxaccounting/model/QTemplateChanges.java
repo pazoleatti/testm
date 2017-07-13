@@ -26,7 +26,7 @@ public class QTemplateChanges extends com.querydsl.sql.RelationalPathBase<QTempl
 
     public final NumberPath<Integer> author = createNumber("author", Integer.class);
 
-    public final DateTimePath<org.joda.time.DateTime> dateEvent = createDateTime("dateEvent", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> dateEvent = createDateTime("dateEvent", java.sql.Timestamp.class);
 
     public final NumberPath<Integer> declarationTemplateId = createNumber("declarationTemplateId", Integer.class);
 
@@ -47,7 +47,7 @@ public class QTemplateChanges extends com.querydsl.sql.RelationalPathBase<QTempl
     public final com.querydsl.sql.ForeignKey<QEvent> templateChangesFkEvent = createForeignKey(event, "ID");
 
     public QTemplateChanges(String variable) {
-        super(QTemplateChanges.class, forVariable(variable), "NDFL_1_0", "TEMPLATE_CHANGES");
+        super(QTemplateChanges.class, forVariable(variable), "NDFL_UNSTABLE", "TEMPLATE_CHANGES");
         addMetadata();
     }
 
@@ -57,12 +57,12 @@ public class QTemplateChanges extends com.querydsl.sql.RelationalPathBase<QTempl
     }
 
     public QTemplateChanges(Path<? extends QTemplateChanges> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "TEMPLATE_CHANGES");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "TEMPLATE_CHANGES");
         addMetadata();
     }
 
     public QTemplateChanges(PathMetadata metadata) {
-        super(QTemplateChanges.class, metadata, "NDFL_1_0", "TEMPLATE_CHANGES");
+        super(QTemplateChanges.class, metadata, "NDFL_UNSTABLE", "TEMPLATE_CHANGES");
         addMetadata();
     }
 

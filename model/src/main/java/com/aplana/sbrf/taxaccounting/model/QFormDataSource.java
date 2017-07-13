@@ -26,9 +26,9 @@ public class QFormDataSource extends com.querydsl.sql.RelationalPathBase<QFormDa
 
     public final NumberPath<Integer> departmentFormTypeId = createNumber("departmentFormTypeId", Integer.class);
 
-    public final DateTimePath<org.joda.time.DateTime> periodEnd = createDateTime("periodEnd", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> periodEnd = createDateTime("periodEnd", java.sql.Timestamp.class);
 
-    public final DateTimePath<org.joda.time.DateTime> periodStart = createDateTime("periodStart", org.joda.time.DateTime.class);
+    public final DateTimePath<java.sql.Timestamp> periodStart = createDateTime("periodStart", java.sql.Timestamp.class);
 
     public final NumberPath<Integer> srcDepartmentFormTypeId = createNumber("srcDepartmentFormTypeId", Integer.class);
 
@@ -39,7 +39,7 @@ public class QFormDataSource extends com.querydsl.sql.RelationalPathBase<QFormDa
     public final com.querydsl.sql.ForeignKey<QDepartmentFormType> formDataSourceFkDepId = createForeignKey(departmentFormTypeId, "ID");
 
     public QFormDataSource(String variable) {
-        super(QFormDataSource.class, forVariable(variable), "NDFL_1_0", "FORM_DATA_SOURCE");
+        super(QFormDataSource.class, forVariable(variable), "NDFL_UNSTABLE", "FORM_DATA_SOURCE");
         addMetadata();
     }
 
@@ -49,12 +49,12 @@ public class QFormDataSource extends com.querydsl.sql.RelationalPathBase<QFormDa
     }
 
     public QFormDataSource(Path<? extends QFormDataSource> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FORM_DATA_SOURCE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FORM_DATA_SOURCE");
         addMetadata();
     }
 
     public QFormDataSource(PathMetadata metadata) {
-        super(QFormDataSource.class, metadata, "NDFL_1_0", "FORM_DATA_SOURCE");
+        super(QFormDataSource.class, metadata, "NDFL_UNSTABLE", "FORM_DATA_SOURCE");
         addMetadata();
     }
 

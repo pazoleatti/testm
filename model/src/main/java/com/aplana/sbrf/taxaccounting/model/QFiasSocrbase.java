@@ -33,7 +33,7 @@ public class QFiasSocrbase extends com.querydsl.sql.RelationalPathBase<QFiasSocr
     public final StringPath socrname = createString("socrname");
 
     public QFiasSocrbase(String variable) {
-        super(QFiasSocrbase.class, forVariable(variable), "NDFL_1_0", "FIAS_SOCRBASE");
+        super(QFiasSocrbase.class, forVariable(variable), "NDFL_UNSTABLE", "FIAS_SOCRBASE");
         addMetadata();
     }
 
@@ -43,12 +43,12 @@ public class QFiasSocrbase extends com.querydsl.sql.RelationalPathBase<QFiasSocr
     }
 
     public QFiasSocrbase(Path<? extends QFiasSocrbase> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "FIAS_SOCRBASE");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "FIAS_SOCRBASE");
         addMetadata();
     }
 
     public QFiasSocrbase(PathMetadata metadata) {
-        super(QFiasSocrbase.class, metadata, "NDFL_1_0", "FIAS_SOCRBASE");
+        super(QFiasSocrbase.class, metadata, "NDFL_UNSTABLE", "FIAS_SOCRBASE");
         addMetadata();
     }
 

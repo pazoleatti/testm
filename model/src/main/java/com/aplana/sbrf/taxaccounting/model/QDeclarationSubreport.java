@@ -49,7 +49,7 @@ public class QDeclarationSubreport extends com.querydsl.sql.RelationalPathBase<Q
     public final com.querydsl.sql.ForeignKey<QDeclarationReport> _declReportFkDeclSubreport = createInvForeignKey(id, "SUBREPORT_ID");
 
     public QDeclarationSubreport(String variable) {
-        super(QDeclarationSubreport.class, forVariable(variable), "NDFL_1_0", "DECLARATION_SUBREPORT");
+        super(QDeclarationSubreport.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_SUBREPORT");
         addMetadata();
     }
 
@@ -59,12 +59,12 @@ public class QDeclarationSubreport extends com.querydsl.sql.RelationalPathBase<Q
     }
 
     public QDeclarationSubreport(Path<? extends QDeclarationSubreport> path) {
-        super(path.getType(), path.getMetadata(), "NDFL_1_0", "DECLARATION_SUBREPORT");
+        super(path.getType(), path.getMetadata(), "NDFL_UNSTABLE", "DECLARATION_SUBREPORT");
         addMetadata();
     }
 
     public QDeclarationSubreport(PathMetadata metadata) {
-        super(QDeclarationSubreport.class, metadata, "NDFL_1_0", "DECLARATION_SUBREPORT");
+        super(QDeclarationSubreport.class, metadata, "NDFL_UNSTABLE", "DECLARATION_SUBREPORT");
         addMetadata();
     }
 
