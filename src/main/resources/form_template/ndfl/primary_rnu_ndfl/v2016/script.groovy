@@ -2670,7 +2670,7 @@ class NdflPersonFL {
     @Field final String R_ID_DOC_TYPE = "Коды документов"
     @Field final String R_STATUS = "Статусы налогоплательщика"
     @Field final String R_INCOME_CODE = "Коды видов доходов"
-    @Field final String R_INCOME_TYPE = "Виды доходов"
+    @Field final String R_INCOME_TYPE = "Виды дохода"
     @Field final String R_RATE = "Ставки"
     @Field final String R_TYPE_CODE = "Коды видов вычетов"
     @Field final String R_NOTIF_SOURCE = "Коды налоговых органов"
@@ -2770,7 +2770,7 @@ class NdflPersonFL {
     //>------------------< CHECK DATA >----------------------<
 
 
-    @Field final String LOG_TYPE_REFERENCES = "Значение не соответствует справочнику %s"
+    @Field final String LOG_TYPE_REFERENCES = "Значение не соответствует справочнику \"%s\""
     @Field final String LOG_TYPE_PERSON_MSG = "Значение гр. \"%s\" (\"%s\") не соответствует справочнику \"%s\""
     @Field final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
 
@@ -3263,7 +3263,7 @@ class NdflPersonFL {
                                     ndflPersonIncome.incomeAccruedDate <= it.record_version_to?.dateValue
                         }
                         if (!incomeCodeRef) {
-                            String errMsg = String.format("Не найдено соответствие между гр. \"%s\" (\"%s\") и \"%s\" (\"%s\") в справочнике \"%s\"",
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\"",
                                     C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
                                     C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
                                     R_INCOME_TYPE
@@ -5082,8 +5082,11 @@ class ColumnFillConditionData {
 
         def mapNdflPersonIncome = [:]
         for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
-            String operationIdNdflPersonIdDate = "${ndflPersonIncome.operationId}_${ndflPersonIncome.ndflPersonId}_${ndflPersonIncome.incomeAccruedDate ? formatDate(ndflPersonIncome.incomeAccruedDate): ""}"
-            mapNdflPersonIncome.put(operationIdNdflPersonIdDate, ndflPersonIncome)
+            String operationIdNdflPersonId = "${ndflPersonIncome.operationId}_${ndflPersonIncome.ndflPersonId}"
+            if (!mapNdflPersonIncome.containsKey(operationIdNdflPersonId)) {
+                mapNdflPersonIncome.put(operationIdNdflPersonId, [:])
+            }
+            mapNdflPersonIncome.get(operationIdNdflPersonId).put(ndflPersonIncome.incomeAccruedDate ? formatDate(ndflPersonIncome.incomeAccruedDate): "", ndflPersonIncome)
         }
 
         for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
@@ -5106,37 +5109,58 @@ class ColumnFillConditionData {
 
             // Выч15 (Графы 9)
             // Выч16 (Графы 10)
-            String operationIdNdflPersonIdDate = "${ndflPersonDeduction.operationId}_${ndflPersonDeduction.ndflPersonId}_${formatDate(ndflPersonDeduction.incomeAccrued)}"
-            NdflPersonIncome ndflPersonIncome = mapNdflPersonIncome.get(operationIdNdflPersonIdDate)
-            if (ndflPersonIncome == null) {
+            String operationIdNdflPersonIdDate = "${ndflPersonDeduction.operationId}_${ndflPersonDeduction.ndflPersonId}"
+            Map<String, NdflPersonIncome> mapNdflPersonIncomeDate = mapNdflPersonIncome.get(operationIdNdflPersonIdDate)
+            if (mapNdflPersonIncomeDate == null) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует значению гр. \"%s\" (\"%s\")",
-                        C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued) : "",
-                        C_NOTIF_NUMBER, ndflPersonDeduction.notifNum ?:""
+                String errMsg = String.format("Для гр. \"%s\" (\"%s\") отсутствуют операция или физическое лицо в разделе 2",
+                        C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued) : ""
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.warnExp("%s. %s.", LOG_TYPE_3_10, fioAndInp, pathError, errMsg)
             } else {
-                // Выч17 Начисленный доход.Код дохода (Графы 11)
-                if (ndflPersonDeduction.incomeCode != ndflPersonIncome.incomeCode) {
+                NdflPersonIncome ndflPersonIncome = mapNdflPersonIncomeDate.get(ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued) : "")
+                if (ndflPersonIncome == null) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Обнаружены расхождения между значением гр. \"%s\", к которому был применен вычет (\"%s\"), указанным в Разделе 2, и значением гр. \"%s\" (\"%s\"), указанным в Разделе 3",
-                            C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
-                            C_INCOME_ACCRUED_CODE, ndflPersonDeduction.incomeCode ?:""
-                    )
+                    ndflPersonIncome = mapNdflPersonIncomeDate.values().find{
+                        it.incomeAccruedDate != null
+                    }
+                    String errMsg
+                    if (ndflPersonIncome != null) {
+                        errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует значению гр. \"%s\" (\"%s\")",
+                                C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued) : "",
+                                C_INCOME_ACCRUED_DATE, formatDate(ndflPersonIncome.incomeAccruedDate)
+                        )
+                    } else {
+                        errMsg = String.format("Для гр. \"%s\" (\"%s\") не найдено заполненных гр. \"%s\" Раздела 2",
+                                C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? formatDate(ndflPersonDeduction.incomeAccrued) : "",
+                                C_INCOME_ACCRUED_DATE
+                        )
+                    }
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                    logger.warnExp("%s. %s.", LOG_TYPE_3_11, fioAndInp, pathError, errMsg)
-                }
+                    logger.warnExp("%s. %s.", LOG_TYPE_3_10, fioAndInp, pathError, errMsg)
+                } else {
+                    // Выч17 Начисленный доход.Код дохода (Графы 11)
+                    if (ndflPersonDeduction.incomeCode != ndflPersonIncome.incomeCode) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String errMsg = String.format("Обнаружены расхождения между значением гр. \"%s\", к которому был применен вычет (\"%s\"), указанным в Разделе 2, и значением гр. \"%s\" (\"%s\"), указанным в Разделе 3",
+                                C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
+                                C_INCOME_ACCRUED_CODE, ndflPersonDeduction.incomeCode ?: ""
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                        logger.warnExp("%s. %s.", LOG_TYPE_3_11, fioAndInp, pathError, errMsg)
+                    }
 
-                // Выч18 Начисленный доход.Сумма (Графы 12)
-                if (!comparNumbEquals(ndflPersonDeduction.incomeSumm, ndflPersonIncome.incomeAccruedSumm)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Обнаружены расхождения между значением гр. \"%s\", к которому был применен вычет (\"%s\"), указанным в Разделе 2, и значением гр. \"%s\" (\"%s\"), указанным в Разделе 3",
-                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: "",
-                            C_INCOME_ACCRUED_P_SUMM, ndflPersonDeduction.incomeSumm ?:""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                    logger.warnExp("%s. %s.", LOG_TYPE_3_12, fioAndInp, pathError, errMsg)
+                    // Выч18 Начисленный доход.Сумма (Графы 12)
+                    if (!comparNumbEquals(ndflPersonDeduction.incomeSumm, ndflPersonIncome.incomeAccruedSumm)) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String errMsg = String.format("Обнаружены расхождения между значением гр. \"%s\", к которому был применен вычет (\"%s\"), указанным в Разделе 2, и значением гр. \"%s\" (\"%s\"), указанным в Разделе 3",
+                                C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: "",
+                                C_INCOME_ACCRUED_P_SUMM, ndflPersonDeduction.incomeSumm ?: ""
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
+                        logger.warnExp("%s. %s.", LOG_TYPE_3_12, fioAndInp, pathError, errMsg)
+                    }
                 }
             }
 
