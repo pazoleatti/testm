@@ -1865,7 +1865,7 @@ RefBookDataProvider getProvider(def long providerId) {
 
 //>------------------< CHECK DATA >----------------------<
 
-@Field final String LOG_TYPE_REFERENCES = "Значение не соответствует справочнику %s"
+@Field final String LOG_TYPE_REFERENCES = "Значение не соответствует справочнику \"%s\""
 @Field final String LOG_TYPE_PERSON_MSG = "Значение гр. \"%s\" (\"%s\") не соответствует справочнику \"%s\""
 @Field final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
 
