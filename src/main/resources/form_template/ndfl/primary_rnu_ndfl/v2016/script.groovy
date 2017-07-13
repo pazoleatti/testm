@@ -4274,7 +4274,7 @@ class ColumnFillConditionData {
             }
 
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)
-            CHECK_NDFL_PERSON_INCOMING_TAX_RATE: {
+            if ((ndflPersonIncome.taxRate?:0) > 0) {
                 boolean checkNdflPersonIncomingTaxRate = false;
                 def ndflPersonIncomingTaxRates = []
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_13: {
