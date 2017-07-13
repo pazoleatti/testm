@@ -22,7 +22,7 @@ public class LogAreaView extends ViewWithUiHandlers<LogAreaUiHandlers> implement
 		LogAreaPresenter.MyView {
 	
 	interface Templates extends SafeHtmlTemplates {
-		@SafeHtmlTemplates.Template("<span>Оповещения (всего: {0}; фатальных ошибок: {1})</span>")
+		@SafeHtmlTemplates.Template("<span>Уведомления (всего: {0}; фатальных ошибок: {1})</span>")
 		SafeHtml title(int full, int error);
 	} 
 	
