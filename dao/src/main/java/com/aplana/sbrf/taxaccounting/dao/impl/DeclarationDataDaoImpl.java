@@ -728,24 +728,22 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         String sql =
                 "select " +
-                    "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                    "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
-                    "drp.report_period_id, drp.department_id, dd.note " +
-                "from " +
-                    "DECLARATION_DATA dd " +
-                    "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
-                    "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
-                    "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
-                "where " +
-                    "lower(bd.name) = lower(:fileName) " +
-                    (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId ");
+                        "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                        "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                        "drp.report_period_id, drp.department_id, dd.note " +
+                        "from " +
+                        "DECLARATION_DATA dd " +
+                        "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
+                        "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
+                        "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
+                        "where " +
+                        "lower(bd.name) LIKE  lower('%"+fileName+"%') " +
+                        (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId");
 
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("fileName", fileName);
         if (fileTypeId != null) {
             params.addValue("fileTypeId", fileTypeId);
         }
-
         return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
 
     }
@@ -804,7 +802,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
                 "drp.report_period_id, drp.department_id, dd.note " +
-             "from declaration_data dd join department_report_period drp on drp.ID = dd.department_report_period_id " +
+                "from declaration_data dd join department_report_period drp on drp.ID = dd.department_report_period_id " +
                 "where dd.declaration_template_id = :declarationTypeId " +
                 "and drp.report_period_id = :reportPeriodId " +
                 "and drp.is_active = 1 ";

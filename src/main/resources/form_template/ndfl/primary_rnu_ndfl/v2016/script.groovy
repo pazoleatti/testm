@@ -1956,29 +1956,33 @@ def createXlsxReport() {
     boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
                                               String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         // Доход.Дата.Начисление
-        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохНач", incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
+        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(C_INCOME_ACCRUED_DATE, incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
         // Доход.Дата.Выплата
-        boolean incomePayoutDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаДохВыпл", incomePayoutDate, kpp, oktmo, inp, fio, ndflPersonIncome)
+        boolean incomePayoutDateOk = dateRelateToCurrentPeriod(C_INCOME_PAYOUT_DATE, incomePayoutDate, kpp, oktmo, inp, fio, ndflPersonIncome)
         // НДФЛ.Расчет.Дата
-        boolean taxDateOk = dateRelateToCurrentPeriod("Файл/ИнфЧасть/СведОпер/СведДохНал/ДатаНалог", taxDate, kpp, oktmo, inp, fio, ndflPersonIncome)
+        boolean taxDateOk = dateRelateToCurrentPeriod(C_TAX_DATE, taxDate, kpp, oktmo, inp, fio, ndflPersonIncome)
         if (incomeAccruedDateOk && incomePayoutDateOk && taxDateOk) {
             return false
         }
         return true
     }
 
-    boolean dateRelateToCurrentPeriod(def paramName, def date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+    @TypeChecked
+    boolean dateRelateToCurrentPeriod(String paramName, Date date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
         if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
             return true
         }
-        logger.warn("У параметра ТФ $paramName недопустимое значение: ${date ? date.format(DATE_FORMAT): ""}: дата операции не входит в отчетный период ТФ. " +
-                "КПП = $kpp, " +
-                "ОКТМО = $oktmo, " +
-                "ФЛ ИНП = $inp, " +
-                "ФИО = $fio, " +
-                "ИдОперации = ${ndflPersonIncome.operationId}, " +
-                "Номер строки = ${ndflPersonIncome.rowNum}.")
+        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, (ndflPersonIncome.rowNum ?ndflPersonIncome.rowNum.longValue(): ""))
+        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+        String errMsg = String.format("Значение гр. %s (\"%s\") не входит в отчетный период налоговой формы (%s), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s",
+                paramName, formatDate(date),
+                departmentReportPeriod.reportPeriod.taxPeriod.year + ", " + departmentReportPeriod.reportPeriod.name,
+                ndflPersonIncome.operationId,
+                fio, inp
+        )
+        logger.warnExp("%s. %s.", "Проверка соответствия дат операций РНУ НДФЛ отчетному периоду", "", pathError,
+                errMsg)
         return false
     }
 
@@ -2229,8 +2233,8 @@ def createXlsxReport() {
 
 // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
 @Field def ndflPersonFLMap = [:]
-@Field final TEMPLATE_PERSON_FL = "%s, ИНП: %s"
-@Field final SECTION_LINE_MSG = "Раздел %s. Строка %s"
+@Field final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
+@Field final String SECTION_LINE_MSG = "Раздел %s. Строка %s"
 
 @CompileStatic
 class NdflPersonFL {
@@ -2332,7 +2336,7 @@ class NdflPersonFL {
     }
 
 
-    def getDepartmentReportPeriodById(def id) {
+    DepartmentReportPeriod getDepartmentReportPeriodById(int id) {
         if (id != null && departmentReportPeriodMap[id] == null) {
             departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
         }
@@ -2351,7 +2355,7 @@ class NdflPersonFL {
      * Получить дату начала отчетного периода
      * @return
      */
-    def getReportPeriodStartDate() {
+    Date getReportPeriodStartDate() {
         if (reportPeriodStartDate == null) {
             reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
         }
@@ -2362,7 +2366,7 @@ class NdflPersonFL {
      * Получить календарную дату начала отчетного периода
      * @return
      */
-    def getReportPeriodCalendarStartDate() {
+    Date getReportPeriodCalendarStartDate() {
         if (reportPeriodStartDate == null) {
             reportPeriodStartDate = reportPeriodService.getCalendarStartDate(declarationData.reportPeriodId)?.time
         }
@@ -4631,7 +4635,8 @@ class ColumnFillConditionData {
             // "Сумма Граф 20"
             Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
             // "Сумма Граф 24"
-            Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
+            // Отменил изменения https://jira.aplana.com/browse/SBRFNDFL-1307, поскольку они привели к https://jira.aplana.com/browse/SBRFNDFL-1483
+            //Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
 
             // СведДох8 НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
             if (calculatedTaxSum > withholdingTaxSum) {
@@ -4675,8 +4680,8 @@ class ColumnFillConditionData {
             }
 
             // СведДох11 НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
-            if (taxSumm != null) {
-
+            // Заменил проверку заполненности 2.24, на проверку заполненности 2.21
+            if (ndflPersonIncome.taxTransferDate != null) {
                 dateConditionDataListForBudget.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         // Все подпункты, кроме 11-го
