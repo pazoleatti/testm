@@ -1385,9 +1385,12 @@ import java.text.SimpleDateFormat
             row.firstName = ndflPerson.firstName
             row.middleName = ndflPerson.middleName
             row.snils = ndflPerson.snils
-            row.innNp = ndflPerson.innNp?:ndflPerson.innForeign
+            row.innNp = ndflPerson.innNp
+            row.inp = ndflPerson.inp
             row.birthDay = ndflPerson.birthDay
             row.idDocNumber = ndflPerson.idDocNumber
+            row.statusNp = getPersonStatusName(ndflPerson.status)
+            row.innForeign = ndflPerson.innForeign
             dataRows.add(row)
         }
 
@@ -1402,6 +1405,12 @@ import java.text.SimpleDateFormat
         result.setCountAvailableDataRows(countOfAvailableNdflPerson)
         scriptSpecificReportHolder.setPrepareSpecificReportResult(result)
         scriptSpecificReportHolder.setSubreportParamValues(params)
+    }
+
+    String getPersonStatusName(String statusCode) {
+        RefBookDataProvider provider = getProvider(RefBook.Id.TAXPAYER_STATUS.getId())
+        PagingResult<Long, Map<String, RefBookValue>> record = provider.getRecords(getReportPeriodEndDate(), null, "CODE = '$statusCode'", null)
+        return record.get(0).get("NAME").getValue()
     }
 
     def createTableColumns() {
@@ -1433,21 +1442,39 @@ import java.text.SimpleDateFormat
 
         Column column5 = new StringColumn()
         column5.setAlias("innNp")
-        column5.setName("ИНН")
+        column5.setName("ИНН РФ")
         column5.setWidth(10)
         tableColumns.add(column5)
 
-        Column column6 = new DateColumn()
-        column6.setAlias("birthDay")
-        column6.setName("Дата рождения")
+        Column column6 = new StringColumn()
+        column6.setAlias("inp")
+        column6.setName("ИНП")
         column6.setWidth(10)
         tableColumns.add(column6)
 
-        Column column7 = new StringColumn()
-        column7.setAlias("idDocNumber")
-        column7.setName("ДУЛ")
+        Column column7 = new DateColumn()
+        column7.setAlias("birthDay")
+        column7.setName("Дата рождения")
         column7.setWidth(10)
         tableColumns.add(column7)
+
+        Column column8 = new StringColumn()
+        column8.setAlias("idDocNumber")
+        column8.setName("№ ДУЛ")
+        column8.setWidth(10)
+        tableColumns.add(column8)
+
+        Column column9 = new StringColumn()
+        column9.setAlias("statusNp")
+        column9.setName("Статус налогоплательщика")
+        column9.setWidth(30)
+        tableColumns.add(column9)
+
+        Column column10 = new StringColumn()
+        column10.setAlias("innForeign")
+        column10.setName("ИНН Страны гражданства")
+        column10.setWidth(10)
+        tableColumns.add(column10)
 
         return tableColumns;
     }
@@ -1487,21 +1514,39 @@ import java.text.SimpleDateFormat
 
         Column column5 = new StringColumn()
         column5.setAlias("innNp")
-        column5.setName("ИНН")
+        column5.setName("ИНН РФ")
         column5.setWidth(10)
         tableColumns.add(column5)
 
-        Column column6 = new DateColumn()
-        column6.setAlias("birthDay")
-        column6.setName("Дата рождения")
+        Column column6 = new StringColumn()
+        column6.setAlias("inp")
+        column6.setName("ИНП")
         column6.setWidth(10)
         tableColumns.add(column6)
 
-        Column column7 = new StringColumn()
-        column7.setAlias("idDocNumber")
-        column7.setName("ДУЛ")
+        Column column7 = new DateColumn()
+        column7.setAlias("birthDay")
+        column7.setName("Дата рождения")
         column7.setWidth(10)
         tableColumns.add(column7)
+
+        Column column8 = new StringColumn()
+        column8.setAlias("idDocNumber")
+        column8.setName("№ ДУЛ")
+        column8.setWidth(10)
+        tableColumns.add(column8)
+
+        Column column9 = new StringColumn()
+        column9.setAlias("statusNp")
+        column9.setName("Статус налогоплательщика")
+        column9.setWidth(30)
+        tableColumns.add(column9)
+
+        Column column10 = new StringColumn()
+        column10.setAlias("innForeign")
+        column10.setName("ИНН Страны гражданства")
+        column10.setWidth(10)
+        tableColumns.add(column10)
 
         return tableColumns;
     }
@@ -2635,7 +2680,7 @@ class NdflPersonFL {
     @Field final String C_CITIZENSHIP = "Гражданство (код страны)"
     @Field final String C_ID_DOC = "Документ удостоверяющий личность.Номер"
     @Field final String C_ID_DOC_TYPE = "Документ удостоверяющий личность.Код"
-    @Field final String C_STATUS = "Статус"
+@Field final String C_STATUS = "Статус (код)"
     @Field final String C_RATE = "Ставка"
 @Field final String C_TYPE_CODE = "Код вычета" //" Код вычета"
 @Field final String C_NOTIF_SOURCE = "Подтверждающий документ. Код источника" //" Документ о праве на налоговый вычет.Код источника"
@@ -2930,7 +2975,7 @@ class NdflPersonFL {
             if (ndflPerson.citizenship != null && !citizenshipCodeMap.find { key, value -> value == ndflPerson.citizenship }) {
                 //TODO turn_to_error
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                        "Форма.Реквизиты.Гражданство (код страны)", ndflPerson.citizenship ?: "",
+                        C_CITIZENSHIP, ndflPerson.citizenship ?: "",
                         R_CITIZENSHIP
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
@@ -2941,7 +2986,7 @@ class NdflPersonFL {
             if (ndflPerson.status != "0" && !taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
                 //TODO turn_to_error
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
-                        "Форма.Реквизиты.Статус (Код)", ndflPerson.status ?: "",
+                        C_STATUS, ndflPerson.status ?: "",
                         R_STATUS
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
@@ -3015,7 +3060,7 @@ class NdflPersonFL {
                     if (ndflPerson.citizenship != null && !ndflPerson.citizenship.equals(citizenship)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Код гражданства не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Гражданство (код страны)", ndflPerson.citizenship ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, C_CITIZENSHIP, ndflPerson.citizenship ?: "", R_PERSON))
                     }
 
                     // Спр15 ИНН.В Российской федерации (Необязательное поле)
@@ -3217,10 +3262,10 @@ class NdflPersonFL {
                             String errMsg = String.format("Не найдено соответствие между гр. \"%s\" (\"%s\") и \"%s\" (\"%s\") в справочнике \"%s\"",
                                     C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
                                     C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
-                                    R_INCOME_CODE
+                                    R_INCOME_TYPE
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError,
+                            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_TYPE), fioAndInp, pathError,
                                     errMsg)
                         }
                     }
@@ -3343,7 +3388,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             boolean checkLastName = checkRequiredAttribute(ndflPerson, fioAndInp, "lastName", "Фамилия")
             boolean checkFirstName = checkRequiredAttribute(ndflPerson, fioAndInp, "firstName", "Имя")
             checkRequiredAttribute(ndflPerson, fioAndInp, "birthDay", "Дата рождения")
-            boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", "Гражданство (код страны)")
+            boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", C_CITIZENSHIP)
             boolean checkIdDocType = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "ДУЛ Код")
             boolean checkIdDocNumber = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "ДУЛ Номер")
             checkRequiredAttribute(ndflPerson, fioAndInp, "status", "Статус (Код)")
@@ -4130,7 +4175,7 @@ class ColumnFillConditionData {
     dateConditionDataListForBudget << new DateConditionData(["1530", "1531", "1533", "1535", "1536", "1537", "1539",
                                                              "1541", "1542", "1543", "1544", "1545", "1546", "1547",
                                                              "1548", "1549", "1551", "1552", "1553", "1554"], ["01", "02", "03", "04"],
-            new Column21EqualsColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
+            new Column21EqualsColumn7Plus30WorkingDays(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 30 календарных дней")
 
     // 6 "Графа 21" = "Графа 7" + "1 рабочий день"
     dateConditionDataListForBudget << new DateConditionData(["2000"], ["05", "06", "07", "08", "09", "10", "11", "12"],
@@ -4304,7 +4349,7 @@ class ColumnFillConditionData {
                 String log_type = null
                 String errMsg = null
                 // СведДох5.1
-                if (ndflPersonIncome.calculatedTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                if ((ndflPersonIncome.calculatedTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                     // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
                     if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                         checkTaxDate = false
@@ -4314,7 +4359,7 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.2
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.withholdingTax ?: 0 > 0 && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                    if ((ndflPersonIncome.withholdingTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
@@ -4325,8 +4370,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.3
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
                             ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null &&
                             !["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode)) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
@@ -4339,8 +4384,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.4
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
                             ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode) &&
                             ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate()) {
                         // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
@@ -4353,8 +4398,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.5
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.notHoldingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 < ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
                             ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542"].contains(ndflPersonIncome.incomeCode) &&
                             (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
                         // «Графа 15 Раздел 2"» = "31.12.20**"
@@ -4371,8 +4416,8 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.6
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.overholdingTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
+                    if ((ndflPersonIncome.overholdingTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
                             ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
@@ -4384,9 +4429,9 @@ class ColumnFillConditionData {
                 }
                 // СведДох5.7
                 if (!checkTaxDate) {
-                    if (ndflPersonIncome.refoundTax ?: 0 > 0 &&
-                            ndflPersonIncome.withholdingTax ?: 0 > ndflPersonIncome.calculatedTax ?: 0 &&
-                            ndflPersonIncome.overholdingTax ?: 0 &&
+                    if ((ndflPersonIncome.refoundTax ?: 0 > 0) &&
+                            (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
+                            (ndflPersonIncome.overholdingTax ?: 0) &&
                             ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (!(ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate)) {
@@ -4673,7 +4718,7 @@ class ColumnFillConditionData {
                     List<NdflPersonIncome> ndflPersonIncomeCurrentList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
                     NdflPersonIncome ndflPersonIncomeFind = null;
                     ndflPersonIncomeCurrentList.each {
-                        if (it.incomeAccruedSumm ?: 0 > 0 && !["02", "14"].contains(it.incomeType)
+                        if ((it.incomeAccruedSumm ?: 0 > 0) && !["02", "14"].contains(it.incomeType)
                                 && (ndflPersonIncomeFind == null || ndflPersonIncomeFind.incomePayoutDate > it.incomePayoutDate)
                                 && ndflPersonIncome.incomePayoutDate <= it.incomePayoutDate
                                 && ndflPersonIncome.operationId < it.operationId) {
