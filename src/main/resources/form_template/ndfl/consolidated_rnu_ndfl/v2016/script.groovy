@@ -342,14 +342,24 @@ String buildRefBookPersonId(Map<String, RefBookValue> refBookPersonRecord) {
  * @return
  */
 Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String, RefBookValue>> personMap) {
-    Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>();
-    def addressIds = [];
+    Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>()
+    def addressIds = []
+    def count = 0
     personMap.each { recordId, person ->
         if (person.get("ADDRESS").value != null) {
-            Long addressId = person.get("ADDRESS")?.getReferenceValue();
-            //адрес может быть не задан
+            Long addressId = person.get("ADDRESS")?.getReferenceValue()
+            // Адрес может быть не задан
             if (addressId != null) {
-                addressIds.add(addressId);
+                addressIds.add(addressId)
+                count++
+                if (count >= 1000) {
+                    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(RefBook.Id.PERSON_ADDRESS.getId()).getRecordData(addressIds)
+                    refBookMap.each { id, address ->
+                        result.put(id, address)
+                    }
+                    addressIds.clear()
+                    count = 0
+                }
             }
         }
     }
@@ -360,7 +370,8 @@ Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String
             result.put(addressId, address)
         }
     }
-    return result;
+
+    return result
 }
 
 /**
