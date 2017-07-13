@@ -4635,7 +4635,8 @@ class ColumnFillConditionData {
             // "Сумма Граф 20"
             Long refoundTaxSum = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum { it.refoundTax ?: 0 } ?: 0
             // "Сумма Граф 24"
-            Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
+            // Отменил изменения https://jira.aplana.com/browse/SBRFNDFL-1307, поскольку они привели к https://jira.aplana.com/browse/SBRFNDFL-1483
+            //Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
 
             // СведДох8 НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
             if (calculatedTaxSum > withholdingTaxSum) {
@@ -4679,8 +4680,8 @@ class ColumnFillConditionData {
             }
 
             // СведДох11 НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
-            if (taxSumm != null) {
-
+            // Заменил проверку заполненности 2.24, на проверку заполненности 2.21
+            if (ndflPersonIncome.taxTransferDate != null) {
                 dateConditionDataListForBudget.each { dateConditionData ->
                     if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                         // Все подпункты, кроме 11-го
