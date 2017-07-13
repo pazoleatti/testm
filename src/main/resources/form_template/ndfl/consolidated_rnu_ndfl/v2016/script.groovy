@@ -1767,7 +1767,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String R_ID_DOC_TYPE = "Коды документов"
 @Field final String R_STATUS = "Статусы налогоплательщика"
 @Field final String R_INCOME_CODE = "Коды видов доходов"
-@Field final String R_INCOME_TYPE = "Виды доходов"
+@Field final String R_INCOME_TYPE = "Виды дохода"
 @Field final String R_RATE = "Ставки"
 @Field final String R_TYPE_CODE = "Коды видов вычетов"
 @Field final String R_NOTIF_SOURCE = "Коды налоговых органов"
@@ -2376,7 +2376,7 @@ def checkDataReference(
                                 ndflPersonIncome.incomeAccruedDate <= it.record_version_to?.dateValue
                     }
                     if (!incomeCodeRef) {
-                        String errMsg = String.format("Не найдено соответствие между гр. \"%s\" (\"%s\") и \"%s\" (\"%s\") в справочнике \"%s\"",
+                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\"",
                                 C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
                                 C_INCOME_TYPE, ndflPersonIncome.incomeType ?: "",
                                 R_INCOME_TYPE
