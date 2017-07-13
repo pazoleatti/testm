@@ -1747,7 +1747,12 @@ def getRefBookByRecordWhere(def long refBookId, def whereClause) {
  * @return - возвращает мапу
  */
 def getRefBookByRecordIds(def long refBookId, def recordIds) {
-    Map<Long, Map<String, RefBookValue>> refBookMap = getProvider(refBookId).getRecordData(recordIds)
+    Map<Long, Map<String, RefBookValue>> refBookMap = [:]
+    recordIds.collate(1000).each {
+        if (it.size() != 0) {
+            refBookMap.putAll(getProvider(refBookId).getRecordData(it))
+        }
+    }
     if (refBookMap == null || refBookMap.size() == 0) {
         throw new ScriptException("Ошибка при получении записей справочника " + refBookId)
     }
