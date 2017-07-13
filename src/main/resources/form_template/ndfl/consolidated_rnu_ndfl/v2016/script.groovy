@@ -1481,7 +1481,7 @@ Map<Long, Map<String, RefBookValue>> getActualRefPersonsByDeclarationDataId(decl
  */
 def getRefCountryCode() {
     if (countryCodeCache.size() == 0) {
-        def refBookMap = getRefBook(RefBook.Id.COUNTRY.getId())
+        def refBookMap = getRefBookAll(RefBook.Id.COUNTRY.getId())
         refBookMap.each { refBook ->
             countryCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
         }
@@ -1494,7 +1494,7 @@ def getRefCountryCode() {
  */
 def getRefDocumentType() {
     if (documentTypeCache.size() == 0) {
-        def refBookList = getRefBook(RefBook.Id.DOCUMENT_CODES.getId())
+        def refBookList = getRefBookAll(RefBook.Id.DOCUMENT_CODES.getId())
         refBookList.each { refBook ->
             documentTypeCache.put(refBook?.id?.numberValue, refBook)
         }
@@ -1538,7 +1538,7 @@ Map<Long, Map<String, RefBookValue>> getActualRefInpMapByDeclarationDataId() {
  */
 def getRefTaxpayerStatusCode() {
     if (taxpayerStatusCodeCache.size() == 0) {
-        def refBookMap = getRefBook(RefBook.Id.TAXPAYER_STATUS.getId())
+        def refBookMap = getRefBookAll(RefBook.Id.TAXPAYER_STATUS.getId())
         refBookMap.each { refBook ->
             taxpayerStatusCodeCache.put(refBook?.id?.numberValue, refBook?.CODE?.stringValue)
         }
@@ -1664,14 +1664,34 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
 }
 
 /**
- * Получить все записи справочника по его идентификатору
+ * Получить записи справочника по его идентификатору в отчётном периоде
  * @param refBookId - идентификатор справочника
- * @return - возвращает лист
+ * @return - список записей справочника
  */
 def getRefBook(def long refBookId) {
     // Передаем как аргумент только срок действия версии справочника
     def refBookList = getProvider(refBookId).getRecordsVersion(getReportPeriodStartDate(), getReportPeriodEndDate(), null, null)
     if (refBookList == null || refBookList.size() == 0) {
+        throw new Exception("Ошибка при получении записей справочника " + refBookId)
+    }
+    return refBookList
+}
+
+/**
+ * Получить все записи справочника по его идентификатору
+ * @param refBookId - идентификатор справочника
+ * @return - список всех версий всех записей справочника
+ */
+def getRefBookAll(long refBookId) {
+    def recordData = getProvider(refBookId).getRecordDataWhere("1 = 1")
+    def refBookList = []
+    if (recordData != null) {
+        recordData.each { key, value ->
+            refBookList.add(value)
+        }
+    }
+
+    if (refBookList.size() == 0) {
         throw new Exception("Ошибка при получении записей справочника " + refBookId)
     }
     return refBookList
