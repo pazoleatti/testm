@@ -1279,6 +1279,9 @@ String capitalize(String str) {
             .toString();
 }
 
+def formatDate(date) {
+    return ScriptUtils.formatDate(date, DATE_FORMAT)
+}
 
 
 //Далее и до конца файла идет часть проверок общая для первичной и консолидированно,
