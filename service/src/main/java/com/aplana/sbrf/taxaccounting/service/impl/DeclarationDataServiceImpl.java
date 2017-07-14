@@ -1439,7 +1439,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     try {
                         List<Relation> relationList = sourceService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger);
                         for(Relation relation: relationList) {
-                            if (relation.getDeclarationDataId() != null && State.ACCEPTED.equals(relation.getState())) {
+                            if (relation.getDeclarationDataId() != null && State.ACCEPTED.equals(relation.getDeclarationState())) {
                                 personCount += ndflPersonDao.getNdflPersonCount(relation.getDeclarationDataId());
                             }
                         }
