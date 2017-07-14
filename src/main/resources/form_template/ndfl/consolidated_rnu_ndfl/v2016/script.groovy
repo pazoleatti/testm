@@ -205,6 +205,7 @@ void consolidation() {
     def prepaymentRowNum = 1;
 
     for (Map.Entry<Long, NdflPerson> entry : ndflPersonMap.entrySet()) {
+        ScriptUtils.checkInterrupted()
 
         Long refBookPersonRecordId = entry.getKey();
 
