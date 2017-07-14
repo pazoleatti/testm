@@ -144,25 +144,24 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                         if (!receiversIdList.isEmpty()) {
                             message = getCheckReceiversErrorMessage(receiversIdList);
                             logger.error(message);
+                            sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                            logger.clear();
                             continue;
                         }
                         declarationDataService.cancel(logger, declarationId, action.getReasonForReturn(), securityService.currentUserInfo());
                         message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", declarationId, State.CREATED.getTitle()).toString();
                         logger.info(message);
-
+                        sendNotifications("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                        logger.clear();
                     } catch (Exception e) {
                         logger.error(e);
                     } finally {
-                        uuid = logEntryService.save(logger.getEntries());
                         lockDataService.unlock(declarationDataService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
                     }
                 }
             } else {
                 logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
             }
-        }
-        if (!action.isAccepted()) {
-            sendNotifications("Выполнена операция \"Возврат в Создана\"", uuid, userInfo.getUser().getId(), NotificationType.DEFAULT, null);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
