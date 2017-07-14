@@ -4259,7 +4259,7 @@ class ColumnFillConditionData {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
                             C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
-                            C_TOTAL_DEDUCTIONS_SUMM, sumNdflDeduction ?: 0)
+                            C_PERIOD_CURR_SUMM, sumNdflDeduction ?: 0)
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
                 }
