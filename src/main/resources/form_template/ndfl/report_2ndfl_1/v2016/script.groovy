@@ -638,12 +638,13 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                             }
                             // Доходы отобранные по датам для поля tax_date(Дата НДФЛ)
                             def incomesByTaxDate = ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, startDate, endDate)
+                            List<NdflPersonIncome> incomesByPayoutDate = ndflPersonService.findIncomesByPayoutDate(np.id, startDate, endDate)
                             Date firstDateOfMarchOfNextPeriod = getFirstMarchOfNextPeriod(endDate)
                             СумИтНалПер(СумДохОбщ: priznakF == "1" ? ScriptUtils.round(getSumDohod(priznakF, ndflPersonIncomesAll), 2) : ScriptUtils.round(sumDohodAll, 2),
                                     НалБаза: priznakF == "1" ? ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2) : ScriptUtils.round(sumDohodAll - sumVichAll, 2),
                                     НалИсчисл: getNalIschisl(priznakF, ndflPersonIncomesAll),
                                     АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
-                                    НалУдерж: getNalUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
+                                    НалУдерж: getNalUderzh(priznakF, incomesByPayoutDate, startDate, firstDateOfMarchOfNextPeriod),
                                     НалПеречисл: getNalPerechisl(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
                                     НалУдержЛиш: getNalUderzhLish(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
                                     НалНеУдерж: getNalNeUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod)) {
@@ -1187,12 +1188,24 @@ def getDeductionCurrPeriodSum(def deductions) {
 }
 
 //Вычислить сумму для НалУдерж
-def getNalUderzh(def priznakF, def incomes, startDate, endDate) {
+Long getNalUderzh(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
-        incomes.each {
-            if (it.withholdingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.withholdingTax
+        Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+        // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (correctDate) {
+                v.each {
+                    if (it.withholdingTax != null) {
+                        toReturn += it.withholdingTax
+                    }
+                }
             }
         }
         return toReturn
@@ -1205,9 +1218,21 @@ def getNalUderzh(def priznakF, def incomes, startDate, endDate) {
 def getNalPerechisl(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
-        incomes.each {
-            if (it.taxSumm != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.taxSumm
+        Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+        // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (correctDate) {
+                v.each {
+                    if (it.taxSumm != null) {
+                        toReturn += it.taxSumm
+                    }
+                }
             }
         }
         return toReturn
@@ -1220,9 +1245,21 @@ def getNalPerechisl(def priznakF, def incomes, startDate, endDate) {
 def getNalUderzhLish(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
-        incomes.each {
-            if (it.overholdingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.overholdingTax
+        Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+        // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (correctDate) {
+                v.each {
+                    if (it.overholdingTax != null) {
+                        toReturn += it.overholdingTax
+                    }
+                }
             }
         }
         return toReturn
@@ -1234,20 +1271,38 @@ def getNalUderzhLish(def priznakF, def incomes, startDate, endDate) {
 //Вычислить сумму для НалНеУдерж
 def getNalNeUderzh(priznakF, incomes, startDate, endDate) {
     def toReturn = 0L
-    if (priznakF == "1") {
-        incomes.each {
-            if (it.notHoldingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.notHoldingTax
-            }
-        }
-    } else if (priznakF == "2") {
-        incomes.each {
-            if (it.notHoldingTax != null && it.calculatedTax > 0 && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.notHoldingTax
-            }
-        }
-    }
+    Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+    // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
 
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (priznakF == "1" && correctDate) {
+                v.each {
+                    if (it.notHoldingTax != null) {
+                        toReturn += it.notHoldingTax
+                    }
+                }
+            } else if (priznakF == "2" && correctDate) {
+                boolean calculatedTaxGreaterZero = false
+                v.each {
+                    if (it.calculatedTax > 0) {
+                        calculatedTaxGreaterZero = true
+                    }
+                }
+                if (calculatedTaxGreaterZero) {
+                    v.each {
+                        if (it.notHoldingTax != null) {
+                            toReturn += it.notHoldingTax
+                        }
+                    }
+                }
+            }
+        }
     return toReturn
 }
 
