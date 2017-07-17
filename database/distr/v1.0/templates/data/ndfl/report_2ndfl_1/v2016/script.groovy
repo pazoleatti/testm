@@ -638,12 +638,13 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                             }
                             // Доходы отобранные по датам для поля tax_date(Дата НДФЛ)
                             def incomesByTaxDate = ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, startDate, endDate)
+                            List<NdflPersonIncome> incomesByPayoutDate = ndflPersonService.findIncomesByPayoutDate(np.id, startDate, endDate)
                             Date firstDateOfMarchOfNextPeriod = getFirstMarchOfNextPeriod(endDate)
                             СумИтНалПер(СумДохОбщ: priznakF == "1" ? ScriptUtils.round(getSumDohod(priznakF, ndflPersonIncomesAll), 2) : ScriptUtils.round(sumDohodAll, 2),
                                     НалБаза: priznakF == "1" ? ScriptUtils.round(getNalBaza(ndflPersonIncomesAll), 2) : ScriptUtils.round(sumDohodAll - sumVichAll, 2),
                                     НалИсчисл: getNalIschisl(priznakF, ndflPersonIncomesAll),
                                     АвансПлатФикс: getAvansPlatFix(ndflPersonPrepayments),
-                                    НалУдерж: getNalUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
+                                    НалУдерж: getNalUderzh(priznakF, incomesByPayoutDate, startDate, firstDateOfMarchOfNextPeriod),
                                     НалПеречисл: getNalPerechisl(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
                                     НалУдержЛиш: getNalUderzhLish(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod),
                                     НалНеУдерж: getNalNeUderzh(priznakF, incomesByTaxDate, startDate, firstDateOfMarchOfNextPeriod)) {
@@ -1187,12 +1188,24 @@ def getDeductionCurrPeriodSum(def deductions) {
 }
 
 //Вычислить сумму для НалУдерж
-def getNalUderzh(def priznakF, def incomes, startDate, endDate) {
+Long getNalUderzh(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
-        incomes.each {
-            if (it.withholdingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.withholdingTax
+        Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+        // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (correctDate) {
+                v.each {
+                    if (it.withholdingTax != null) {
+                        toReturn += it.withholdingTax
+                    }
+                }
             }
         }
         return toReturn
@@ -1205,9 +1218,21 @@ def getNalUderzh(def priznakF, def incomes, startDate, endDate) {
 def getNalPerechisl(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
-        incomes.each {
-            if (it.taxSumm != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.taxSumm
+        Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+        // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (correctDate) {
+                v.each {
+                    if (it.taxSumm != null) {
+                        toReturn += it.taxSumm
+                    }
+                }
             }
         }
         return toReturn
@@ -1220,9 +1245,21 @@ def getNalPerechisl(def priznakF, def incomes, startDate, endDate) {
 def getNalUderzhLish(def priznakF, def incomes, startDate, endDate) {
     def toReturn = 0L
     if (priznakF == "1") {
-        incomes.each {
-            if (it.overholdingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.overholdingTax
+        Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+        // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (correctDate) {
+                v.each {
+                    if (it.overholdingTax != null) {
+                        toReturn += it.overholdingTax
+                    }
+                }
             }
         }
         return toReturn
@@ -1234,20 +1271,38 @@ def getNalUderzhLish(def priznakF, def incomes, startDate, endDate) {
 //Вычислить сумму для НалНеУдерж
 def getNalNeUderzh(priznakF, incomes, startDate, endDate) {
     def toReturn = 0L
-    if (priznakF == "1") {
-        incomes.each {
-            if (it.notHoldingTax != null && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.notHoldingTax
-            }
-        }
-    } else if (priznakF == "2") {
-        incomes.each {
-            if (it.notHoldingTax != null && it.calculatedTax > 0 && it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
-                toReturn += it.notHoldingTax
-            }
-        }
-    }
+    Map<Long, List<NdflPersonIncome>> incomesGroupedByOperationId = incomes.groupBy {income -> income.operationId}
+    // начисление дохода производится в рамках текущего отчетного периода, а дата удержания налога не превышает последний день февраля следующего периода
 
+        incomesGroupedByOperationId.each { k, v ->
+            boolean correctDate = false
+            v.each {
+                if (it.incomeAccruedDate >= startDate && it.incomePayoutDate < endDate) {
+                    correctDate = true
+                }
+            }
+            if (priznakF == "1" && correctDate) {
+                v.each {
+                    if (it.notHoldingTax != null) {
+                        toReturn += it.notHoldingTax
+                    }
+                }
+            } else if (priznakF == "2" && correctDate) {
+                boolean calculatedTaxGreaterZero = false
+                v.each {
+                    if (it.calculatedTax > 0) {
+                        calculatedTaxGreaterZero = true
+                    }
+                }
+                if (calculatedTaxGreaterZero) {
+                    v.each {
+                        if (it.notHoldingTax != null) {
+                            toReturn += it.notHoldingTax
+                        }
+                    }
+                }
+            }
+        }
     return toReturn
 }
 
@@ -1692,7 +1747,10 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
             if (dep.OKTMO?.value != null) {
                 def oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
                 if (oktmo != null) {
-                    pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
+                    def pairKppOktmo = new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
+                    if (!pairKppOktmoList.contains(pairKppOktmo)) {
+                        pairKppOktmoList << pairKppOktmo
+                    }
                 }
             }
         }
@@ -3263,7 +3321,7 @@ class CalculatedTaxChecker extends AbstractChecker {
                             BigDecimal deductionSumValue = new BigDecimal(0)
                             for (Ndfl2Node svSumVich : svSumVichNodeList) {
                                 Ndfl2Leaf<BigDecimal> sumVichAttribute = extractAttribute(DEDUCTION_SUM, svSumVich)
-                                deductionSumValue.add(sumVichAttribute.getValue())
+                                deductionSumValue = deductionSumValue.add(sumVichAttribute.getValue())
                             }
                             //Разность между доходом и вычетом
                             BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
@@ -3275,7 +3333,7 @@ class CalculatedTaxChecker extends AbstractChecker {
                             BigDecimal deductionSumValue = new BigDecimal(0)
                             for (Ndfl2Node svSumVich : svSumVichNodeList) {
                                 Ndfl2Leaf<BigDecimal> sumVichAttribute = extractAttribute(DEDUCTION_SUM, svSumVich)
-                                deductionSumValue.add(sumVichAttribute.getValue())
+                                deductionSumValue = deductionSumValue.add(sumVichAttribute.getValue())
                             }
                             //Разность между доходом и вычетом
                             BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
@@ -3298,14 +3356,16 @@ class CalculatedTaxChecker extends AbstractChecker {
                     //Результат для п.4 Проверка расчета суммы исчисленного налога I.3
                     BigDecimal calculatedTaxCheckSum = calclulateTaxCheckValueForIncomeCode1010.add(calclulateTaxCheckValueForIncomeCodeNot1010)
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
-                    if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheckSum, 0)) {
+                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(ScriptUtils.round(calculatedTaxCheckSum, 0))
+                    if (differenceCalculatedTaxAndCalculatedTaxCheckSum.abs() > 1) {
                         createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${extractAttribute(TAX_BASE, svedDohNode).getValue()}.")
                     }
                 } else if (taxRateAttribute != null && taxRateAttribute.getValue() == 30) {
                     Ndfl2Leaf<BigDecimal> taxBaseAttribute = extractAttribute(TAX_BASE, svedDohNode)
-                    BigDecimal calculatedTaxCheck = taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    BigDecimal calculatedTaxCheckSum = taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
-                    if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheck, 0)) {
+                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(ScriptUtils.round(calculatedTaxCheckSum, 0))
+                    if (differenceCalculatedTaxAndCalculatedTaxCheckSum.abs() > 1) {
                         createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${taxBaseAttribute.getValue()}.")
                     }
                 } else {
@@ -3326,7 +3386,8 @@ class CalculatedTaxChecker extends AbstractChecker {
                     }
                     BigDecimal calculatedTaxCheckSum = differenceTotalSumDohSumVich.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
-                    if (calculatedTaxAttribute.getValue() != ScriptUtils.round(calculatedTaxCheckSum, 0)) {
+                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(ScriptUtils.round(calculatedTaxCheckSum, 0))
+                    if (differenceCalculatedTaxAndCalculatedTaxCheckSum.abs() > 1) {
                         createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${extractAttribute(TAX_BASE, svedDohNode).getValue()}.")
                     }
                 }
@@ -3465,7 +3526,7 @@ class NotHoldingTaxChecker extends AbstractChecker {
             List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
             for (Ndfl2Node svedDohNode : svedDohNodeList) {
                 Ndfl2Leaf<BigDecimal> notHoldingTaxAttribute = extractAttribute(NOT_HOLDING_TAX, svedDohNode)
-                if (notHoldingTaxAttribute <= 0) {
+                if (notHoldingTaxAttribute.value <= new BigDecimal(0)) {
                     createErrorMessage(logger, documentNode, "«Сумма налога, не удержанная налоговым агентом» заполнена некорректно", "В соответствии с п.5 ст.226 НК РФ должна быть больше «0» «Сумма налога, не удержанная налоговым агентом» в \"Разделе 5. \"Общие суммы дохода и налога\"")
                 }
             }

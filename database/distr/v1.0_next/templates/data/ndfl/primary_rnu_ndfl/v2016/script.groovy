@@ -3289,7 +3289,7 @@ class NdflPersonFL {
             // Спр8 Код вычета (Обязательное поле)
             if (ndflPersonDeduction.typeCode != "000" && ndflPersonDeduction.typeCode != null && !deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG,
-                        "Форма.Сведения о вычетах.Код вычета", ndflPersonDeduction.typeCode ?: "",
+                        C_TYPE_CODE, ndflPersonDeduction.typeCode ?: "",
                         R_TYPE_CODE
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
@@ -4524,7 +4524,7 @@ class ColumnFillConditionData {
                                 ScriptUtils.round(((ndflPersonIncome.taxBase ?: 0) * 0.13 - ndflPersonPrepaymentSum ?: 0), 0))
                         ) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно выражению: гр. \"%s\" (\"%s\") х 13%%%% - \"%s\" (\"%s\")",
+                            String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно выражению: гр. \"%s\" (\"%s\") х 13%% - \"%s\" (\"%s\")",
                                     C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0,
                                     C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
                                     "Сумма фиксированного авансового платежа", ndflPersonPrepaymentSum
