@@ -7,13 +7,14 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckDeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckDeclarationListResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,10 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDeclarationListAction, CheckDeclarationListResult> {
-	@Autowired
+
+    private static final Log LOG = LogFactory.getLog(CheckDeclarationListHandler.class);
+
+    @Autowired
 	private DeclarationDataService declarationDataService;
 
 	@Autowired
@@ -67,7 +71,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
         for (Long id: action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
-                logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s", taskName, declarationDataService.getDeclarationFullName(declarationId, null));
+                final String prefix = String.format("Постановка операции \"%s\" для формы № %d в очередь на исполнение: ", taskName, declarationId);
                 try {
                     LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.ACCEPT_DEC));
                     if (lockDataAccept == null) {
@@ -76,7 +80,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
                             String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
                             Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
                             if (restartStatus != null && restartStatus.getFirst()) {
-                                logger.warn("Данная операция уже запущена");
+                                logger.warn(prefix + "Данная операция уже запущена");
                             } else if (restartStatus != null && !restartStatus.getFirst()) {
                                 // задача уже была создана, добавляем пользователя в получатели
                             } else {
@@ -110,7 +114,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
                                 });
                             }
                         } else {
-                            logger.error("Экземпляр налоговой формы не заполнен данными.");
+                            logger.error(prefix + "Экземпляр налоговой формы не заполнен данными.");
                         }
                     } else {
                         try {
@@ -124,10 +128,11 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
                                         userService.getUser(lockDataAccept.getUserId()).getName(),
                                         declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, action.getTaxType()))
                         );
-                        logger.error("Запущена операция, при которой выполнение данной операции невозможно");
+                        logger.error(prefix + "Запущена операция, при которой выполнение данной операции невозможно");
                     }
                 } catch (Exception e) {
-                    logger.error(e);
+                    LOG.error(e.getMessage(), e);
+                    logger.error(prefix + e.getMessage());
                 }
             } else {
                 logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
