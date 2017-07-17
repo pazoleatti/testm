@@ -3523,7 +3523,7 @@ class NotHoldingTaxChecker extends AbstractChecker {
             List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
             for (Ndfl2Node svedDohNode : svedDohNodeList) {
                 Ndfl2Leaf<BigDecimal> notHoldingTaxAttribute = extractAttribute(NOT_HOLDING_TAX, svedDohNode)
-                if (notHoldingTaxAttribute <= 0) {
+                if (notHoldingTaxAttribute.value <= new BigDecimal(0)) {
                     createErrorMessage(logger, documentNode, "«Сумма налога, не удержанная налоговым агентом» заполнена некорректно", "В соответствии с п.5 ст.226 НК РФ должна быть больше «0» «Сумма налога, не удержанная налоговым агентом» в \"Разделе 5. \"Общие суммы дохода и налога\"")
                 }
             }
