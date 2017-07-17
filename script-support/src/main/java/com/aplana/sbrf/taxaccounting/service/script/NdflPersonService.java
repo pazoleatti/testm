@@ -181,6 +181,15 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate);
 
     /**
+     * Найти данные о доходах ФЛ по идентификатору ФЛ и интервалу. Отбор происходит по дате выплаты дохода
+     * @param ndflPersonId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, Date startDate, Date endDate);
+
+    /**
      * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
      *
      * @param ndflPersonId

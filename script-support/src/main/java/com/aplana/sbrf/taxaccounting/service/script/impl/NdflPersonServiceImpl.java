@@ -42,6 +42,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, Date startDate, Date endDate) {
+        return ndflPersonDao.findIncomesByPayoutDate(ndflPersonId, startDate, endDate);
+    }
+
+    @Override
     public List<NdflPersonDeduction> findDeductionsWithDeductionsMarkOstalnie(long ndflPersonId, Date startDate, Date endDate) {
         return ndflPersonDao.findDeductionsWithDeductionsMarkOstalnie(ndflPersonId, startDate, endDate);
     }
