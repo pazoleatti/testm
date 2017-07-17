@@ -3289,7 +3289,7 @@ class NdflPersonFL {
             // Спр8 Код вычета (Обязательное поле)
             if (ndflPersonDeduction.typeCode != "000" && ndflPersonDeduction.typeCode != null && !deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG,
-                        "Форма.Сведения о вычетах.Код вычета", ndflPersonDeduction.typeCode ?: "",
+                        C_TYPE_CODE, ndflPersonDeduction.typeCode ?: "",
                         R_TYPE_CODE
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
