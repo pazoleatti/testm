@@ -1544,7 +1544,7 @@ def getRelation(DeclarationData tmpDeclarationData, Department department, Repor
         /** полное название подразделения */
         relation.fullDepartmentName = getDepartmentFullName(department.id)
         /** Дата корректировки */
-        relation.correctionDate = new Date()
+        relation.correctionDate = departmentReportPeriod?.correctionDate
         /** Вид нф */
         relation.declarationTypeName = declarationTemplate?.name
         /** Год налогового периода */
