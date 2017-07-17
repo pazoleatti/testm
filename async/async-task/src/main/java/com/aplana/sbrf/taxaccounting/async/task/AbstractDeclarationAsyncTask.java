@@ -38,7 +38,6 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
         TAUserInfo userInfo = getUserInfo(params);
         DeclarationData declarationData = getDeclaration(params);
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationDataReportType ddReportType = getDeclarationDataReportType(params);
 
         Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), ddReportType);
@@ -51,7 +50,6 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     }
 
     protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(getDeclaration(params).getDeclarationTemplateId());
         return String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!", TaxType.NDFL.getDeclarationShortName(), value);
     }
 
