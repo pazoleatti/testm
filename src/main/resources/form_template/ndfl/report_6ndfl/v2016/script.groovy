@@ -1057,7 +1057,10 @@ List<PairKppOktmo> getPairKppOktmoList() {
         }
 
         declarations.each { declaration ->
-            pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
+            def pairKppOktmo = new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
+            if (!pairKppOktmoList.contains(pairKppOktmo)) {
+                pairKppOktmoList << pairKppOktmo
+            }
         }
         // Поиск КПП и ОКТМО для некорр периода
     } else {
@@ -1081,7 +1084,10 @@ List<PairKppOktmo> getPairKppOktmoList() {
             if (dep.OKTMO?.value != null) {
                 def oktmo = oktmoForDepartment.get(dep.OKTMO?.value)
                 if (oktmo != null) {
-                    pairKppOktmoList << new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
+                    def pairKppOktmo = new PairKppOktmo(dep.KPP?.value, oktmo.CODE.value, dep?.TAX_ORGAN_CODE?.value)
+                    if (!pairKppOktmoList.contains(pairKppOktmo)) {
+                        pairKppOktmoList << pairKppOktmo
+                    }
                 }
             }
         }
