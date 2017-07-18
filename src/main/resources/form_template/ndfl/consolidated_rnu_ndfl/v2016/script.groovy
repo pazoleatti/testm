@@ -2285,7 +2285,7 @@ def checkDataReference(
                 if (ndflPerson.status!= null && !ndflPerson.status.equals(taxpayerStatus)) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                            String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Статус (код)", ndflPerson.status ?: "", R_PERSON))
+                            String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: "", R_PERSON))
                 }
 
                 // Спр19 Адрес (Необязательное поле)
