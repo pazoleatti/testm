@@ -3755,7 +3755,7 @@ boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, S
         if (ndflPerson[alias] == "0") {
             msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
         } else {
-            msg = "Не заполнена гр. \"$attributeName\""
+            msg = "Значение гр. \"$attributeName\" не указано"
         }
         logger.warnExp("%s. %s.", "Не указан обязательный реквизит ФЛ", fioAndInp, pathError, msg)
         return false
