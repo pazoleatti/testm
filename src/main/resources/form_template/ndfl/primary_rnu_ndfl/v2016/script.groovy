@@ -2673,7 +2673,7 @@ class NdflPersonFL {
     @Field final String R_INCOME_TYPE = "Виды дохода"
     @Field final String R_RATE = "Ставки"
     @Field final String R_TYPE_CODE = "Коды видов вычетов"
-    @Field final String R_NOTIF_SOURCE = "Коды налоговых органов"
+    @Field final String R_NOTIF_SOURCE = "Налоговые инспекции"
     @Field final String R_ADDRESS = "Адреса"
     @Field final String R_INP = "Идентификаторы налогоплательщиков"
     @Field final String R_DUL = "Документы, удостоверяющие личность"
@@ -2737,6 +2737,9 @@ class NdflPersonFL {
 @Field final String C_PERIOD_PREV_DATE = "Вычет. Предыдущий период. Дата" //" Применение вычета.Предыдущий период.Дата"
 @Field final String C_PERIOD_CURR_DATE = "Вычет. Текущий период. Дата" //" Применение вычета.Текущий период.Дата"
 @Field final String C_PERIOD_CURR_SUMM = "Вычет. Текущий период. Сумма" //" Применение вычета.Текущий период.Сумма"
+
+// Сведения о доходах в виде авансовых платежей
+@Field final String P_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление" //"Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление"
 
     // Поля справочника Физические лица
     @Field final String RF_LAST_NAME = "LAST_NAME"
@@ -3329,7 +3332,7 @@ class NdflPersonFL {
             if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
                 //TODO turn_to_error
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG,
-                        "Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи. Код налогового органа, выдавшего уведомление", ndflPersonPrepayment.notifSource ?: "",
+                        P_NOTIF_SOURCE, ndflPersonPrepayment.notifSource ?: "",
                         R_NOTIF_SOURCE
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum ?: "")
