@@ -2986,6 +2986,14 @@ class NdflPersonFL {
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_CITIZENSHIP), fioAndInp, pathError, errMsg)
             }
 
+            // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
+            if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
+                //TODO turn_to_error
+                String errMsg = String.format(LOG_TYPE_PERSON_MSG_2, "Код", ndflPerson.idDocType ?: "", R_ID_DOC_TYPE)
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+                logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_ID_DOC_TYPE), fioAndInp, pathError, errMsg)
+            }
+
             // Спр4 Статус (Обязательное поле)
             if (ndflPerson.status != "0" && !taxpayerStatusMap.find { key, value -> value == ndflPerson.status }) {
                 //TODO turn_to_error

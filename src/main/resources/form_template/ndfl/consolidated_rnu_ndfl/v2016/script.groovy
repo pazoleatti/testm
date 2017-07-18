@@ -2133,10 +2133,9 @@ def checkDataReference(
         // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
         if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
             //TODO turn_to_error
-            String pathError = String.format(SECTION_LINE_MSG + ". %s", T_PERSON, ndflPerson.rowNum ?: "",
-                    "ДУЛ Код='${ndflPerson.idDocType ?: ""}'")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
-                    "\"ДУЛ Код\" не соответствует справочнику '$R_ID_DOC_TYPE'")
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2, "Код", ndflPerson.idDocType ?: "", R_ID_DOC_TYPE)
+            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_ID_DOC_TYPE), fioAndInp, pathError, errMsg)
         }
 
         // Спр4 Статус (Обязательное поле)
