@@ -3153,6 +3153,12 @@ class Ndfl2Leaf<T> {
     void setValue(T value) {
         this.value = value
     }
+
+
+    @Override
+    public String toString() {
+        return value.toString()
+    }
 }
 
 /**
@@ -3507,7 +3513,7 @@ class IncomeSumAndDeductionChecker extends AbstractChecker {
                         }
                         BigDecimal deduction = deductionSumAttribute? deductionSumAttribute.getValue(): new BigDecimal(0)
                         if (income < deduction) {
-                            createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Разделе 3. \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %%\" «Сумма вычета» $deduction по коду ${extractAttribute(DEDUCTION_CODE, svSumVich)} превышает «Сумму полученного дохода» $income, к которому он применен.")
+                            createErrorMessage(logger, documentNode, "«Сумма вычета» заполнена некорректно", "В \"Разделе 3. \"Доходы, облагаемые по ставке ${extractAttribute(TAX_RATE, svedDohNode).getValue()} %%\" «Сумма вычета» $deduction. по коду ${extractAttribute(DEDUCTION_CODE, svSumVich).value} превышает «Сумму полученного дохода» $income, к которому он применен.")
                         }
                     }
                 }
