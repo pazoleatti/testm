@@ -2455,14 +2455,18 @@ def searchData(def params, pageSize, PrepareSpecificReportResult prepareSpecific
     def docs = []
     Файл.Документ.each { doc ->
         boolean passed = true
+        String idDoc = null
+        if (params['idDocNumber'] != null) {
+            idDoc = params['idDocNumber'].replaceAll("[\\s-]", "")
+        }
         if (params['pNumSpravka'] != null && !StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka'])) passed = false
         if (params['lastName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName'])) passed = false
         if (params['firstName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName'])) passed = false
         if (params['middleName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName'])) passed = false
         if (params['inn'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.@ИННФЛ.text(), params['inn'])) passed = false
         if ((params['fromBirthDay'] != null || params['toBirthDay'] != null) && searchBirthDay(params, doc.ПолучДох.@ДатаРожд.text())) passed = false
-        if (params['idDocNumber'] != null && !((StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), params['idDocNumber']) ||
-                StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s,.-]", ""), params['idDocNumber'])))) passed = false
+        if (params['idDocNumber'] != null && !((StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), idDoc) ||
+                StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s-]", ""), idDoc)))) passed = false
         if (passed) docs << doc
     }
     prepareSpecificReportResult.countAvailableDataRows = docs.size()
