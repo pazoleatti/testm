@@ -2285,7 +2285,7 @@ def checkDataReference(
                 if (ndflPerson.status!= null && !ndflPerson.status.equals(taxpayerStatus)) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                            String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Статус (код)", ndflPerson.status ?: "", R_PERSON))
+                            String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: "", R_PERSON))
                 }
 
                 // Спр19 Адрес (Необязательное поле)
@@ -2953,7 +2953,7 @@ boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, S
         if (ndflPerson[alias] == "0") {
             msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
         } else {
-            msg = "Не заполнена гр. \"$attributeName\""
+            msg = "Значение гр. \"$attributeName\" не указано"
         }
         logger.warnExp("%s. %s.", "Не указан обязательный реквизит ФЛ", fioAndInp, pathError, msg)
         return false

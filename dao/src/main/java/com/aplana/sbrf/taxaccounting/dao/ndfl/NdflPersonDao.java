@@ -368,4 +368,10 @@ public interface NdflPersonDao {
      */
     int getNdflPersonReferencesCount(Long declarationDataId);
 
+    /**
+     * Получить число ФЛ в 6НДФЛ
+     * @param declarationDataId
+     * @return
+     */
+    int get6NdflPersonCount(Long declarationDataId);
 }

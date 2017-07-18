@@ -3141,7 +3141,7 @@ class NdflPersonFL {
                     if (ndflPerson.status!= null && !ndflPerson.status.equals(taxpayerStatus)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Статус (код)", ndflPerson.status ?: "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: "", R_PERSON))
                     }
 
                     // Спр19 Адрес (Необязательное поле)
@@ -3406,7 +3406,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             boolean checkCitizenship = checkRequiredAttribute(ndflPerson, fioAndInp, "citizenship", C_CITIZENSHIP)
             boolean checkIdDocType = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocType", "ДУЛ Код")
             boolean checkIdDocNumber = checkRequiredAttribute(ndflPerson, fioAndInp, "idDocNumber", "ДУЛ Номер")
-            checkRequiredAttribute(ndflPerson, fioAndInp, "status", "Статус (Код)")
+            checkRequiredAttribute(ndflPerson, fioAndInp, "status", C_STATUS)
             if (checkCitizenship) {
                 if (ndflPerson.citizenship == "643") {
                     checkRequiredAttribute(ndflPerson, fioAndInp, "regionCode", "Код субъекта")
@@ -3763,7 +3763,7 @@ boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, S
         if (ndflPerson[alias] == "0") {
             msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
         } else {
-            msg = "Не заполнена гр. \"$attributeName\""
+            msg = "Значение гр. \"$attributeName\" не указано"
         }
         logger.warnExp("%s. %s.", "Не указан обязательный реквизит ФЛ", fioAndInp, pathError, msg)
         return false
