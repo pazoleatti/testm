@@ -3113,7 +3113,7 @@ class Ndfl2Node {
 
 /**
  * Компонент дерева представляющий атрибут
- * @param < T >  - Класс значения атрибута из xml, с которым будем работать
+ * @param < T >   - Класс значения атрибута из xml, с которым будем работать
  */
 class Ndfl2Leaf<T> {
     String name;
@@ -3333,7 +3333,10 @@ class CalculatedTaxChecker extends AbstractChecker {
                                 deductionSumValue = deductionSumValue.add(sumVichAttribute.getValue())
                             }
                             //Разность между доходом и вычетом
-                            BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
+                            BigDecimal differenceSumDohSumVich = incomeSumAttribute?.getValue().subtract(deductionSumValue)
+                            if (differenceSumDohSumVich < new BigDecimal(0)) {
+                                differenceSumDohSumVich = new BigDecimal(0)
+                            }
                             differenceTotalSumDohSumVichForCode1010 = differenceTotalSumDohSumVichForCode1010.add(differenceSumDohSumVich)
                         } else {
                             Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
@@ -3346,6 +3349,9 @@ class CalculatedTaxChecker extends AbstractChecker {
                             }
                             //Разность между доходом и вычетом
                             BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
+                            if (differenceSumDohSumVich < new BigDecimal(0)) {
+                                differenceSumDohSumVich = new BigDecimal(0)
+                            }
                             differenceTotalSumDohSumVichForCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.add(differenceSumDohSumVich)
                             List<Ndfl2Node> predVichSSINodeList = extractNdfl2Nodes(PRED_VICH_SSI, svedDohNode)
                             // Сумма Файл.Документ.СведДох.НалВычССИ.ПредВычССИ.СумВычет
@@ -3391,6 +3397,9 @@ class CalculatedTaxChecker extends AbstractChecker {
                         }
                         //Разность между доходом и вычетом
                         BigDecimal differenceSumDohSumVich = incomeSumAttribute.getValue().subtract(deductionSumValue)
+                        if (differenceSumDohSumVich < new BigDecimal(0)) {
+                            differenceSumDohSumVich = new BigDecimal(0)
+                        }
                         differenceTotalSumDohSumVich = differenceTotalSumDohSumVich.add(differenceSumDohSumVich)
                     }
                     BigDecimal calculatedTaxCheckSum = differenceTotalSumDohSumVich.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
