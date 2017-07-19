@@ -1850,7 +1850,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String C_INCOME_PAYOUT_SUMM = "Сумма выплаченного дохода" //"Доход.Сумма.Выплата"
 @Field final String C_TOTAL_DEDUCTIONS_SUMM = "Сумма вычета" //"Сумма вычета"
 @Field final String C_TAX_BASE = "Налоговая база" //"Налоговая база"
-@Field final String C_TAX_RATE = "Процентная ставка (%%)" //"НДФЛ.Процентная ставка"
+@Field final String C_TAX_RATE = "Процентная ставка (%)" //"НДФЛ.Процентная ставка"
 @Field final String C_TAX_DATE = "Дата НДФЛ" //"НДФЛ.Расчет.Дата"
 @Field final String C_CALCULATED_TAX = "НДФЛ исчисленный" //"НДФЛ.Расчет.Сумма.Исчисленный"
 @Field final String C_WITHHOLDING_TAX = "НДФЛ удержанный" //"НДФЛ.Расчет.Сумма.Удержанный"
