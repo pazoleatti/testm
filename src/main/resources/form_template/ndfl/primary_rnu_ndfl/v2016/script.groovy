@@ -3620,7 +3620,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column10Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE,
+                            C_INCOME_ACCRUED_SUMM,
                             C_CALCULATED_TAX
                     )
             )
