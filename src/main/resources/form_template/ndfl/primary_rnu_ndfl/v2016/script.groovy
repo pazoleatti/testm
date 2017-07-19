@@ -3504,8 +3504,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column6Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_SUMM,
-                            C_INCOME_ACCRUED_DATE
+                            C_INCOME_ACCRUED_DATE,
+                            C_INCOME_ACCRUED_SUMM
                     )
             )
             //3 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
@@ -3542,8 +3542,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column10Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE,
-                            C_INCOME_ACCRUED_SUMM
+                            C_INCOME_ACCRUED_SUMM,
+                            C_INCOME_ACCRUED_DATE
                     )
             )
             //5 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
