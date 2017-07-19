@@ -37,13 +37,13 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate) {
-        return ndflPersonDao.findIncomesByPeriodAndNdflPersonIdAndTaxDate(ndflPersonId, startDate, endDate);
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
+        return ndflPersonDao.findIncomesByPeriodAndNdflPersonIdAndTaxDate(ndflPersonId, taxRate, startDate, endDate);
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, Date startDate, Date endDate) {
-        return ndflPersonDao.findIncomesByPayoutDate(ndflPersonId, startDate, endDate);
+    public List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
+        return ndflPersonDao.findIncomesByPayoutDate(ndflPersonId, taxRate, startDate, endDate);
     }
 
     @Override
@@ -70,8 +70,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
-        return ndflPersonDao.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, startDate, endDate, prFequals1);
+    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1) {
+        return ndflPersonDao.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, taxRate, startDate, endDate, prFequals1);
     }
 
     @Override

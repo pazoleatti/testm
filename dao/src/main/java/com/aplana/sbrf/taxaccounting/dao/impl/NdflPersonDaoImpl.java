@@ -231,16 +231,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate) {
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 "WHERE npi.operation_id in " +
                 "(select npi.operation_id " +
                 "from ndfl_person_income npi " +
                 "where npi.ndfl_person_id = :ndflPersonId " +
+                "AND npi.tax_rate = :taxRate " +
                 "AND npi.tax_date between :startDate AND :endDate) " +
                 "AND npi.ndfl_person_id = :ndflPersonId";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
+                .addValue("taxRate", taxRate)
                 .addValue("startDate", startDate)
                 .addValue("endDate", endDate);
         try {
@@ -251,16 +253,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, Date startDate, Date endDate) {
+    public List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
                 "WHERE npi.operation_id in " +
                 "(select npi.operation_id " +
                 "from ndfl_person_income npi " +
                 "where npi.ndfl_person_id = :ndflPersonId " +
+                "AND npi.tax_rate = :taxRate " +
                 "AND npi.income_payout_date between :startDate AND :endDate) " +
                 "AND npi.ndfl_person_id = :ndflPersonId";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
+                .addValue("taxRate", taxRate)
                 .addValue("startDate", startDate)
                 .addValue("endDate", endDate);
         try {
@@ -313,17 +317,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1) {
         String priznakFClause = "";
         if (!prFequals1) {
             priznakFClause = " AND npi.not_holding_tax > 0";
         }
         String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp WHERE npp.ndfl_person_id = :ndflPersonId " +
                 "AND npp.operation_id IN (SELECT npi.operation_id FROM ndfl_person_income npi " +
-                "WHERE npi.ndfl_person_id = :ndflPersonId AND npi.tax_date BETWEEN :startDate AND :endDate" + priznakFClause + ")";
+                "WHERE npi.ndfl_person_id = :ndflPersonId " +
+                "AND npi.tax_rate = :taxRate " +
+                "AND npi.tax_date BETWEEN :startDate AND :endDate" + priznakFClause + ")";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
+                .addValue("taxRate", taxRate)
                 .addValue("startDate", startDate)
                 .addValue("endDate", endDate);
         try {

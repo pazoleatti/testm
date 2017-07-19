@@ -143,7 +143,7 @@ public interface NdflPersonDao {
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
 
     /**
      * Найти данные о доходах ФЛ по идентификатору ФЛ и интервалу. Отбор происходит по дате выплаты дохода
@@ -152,7 +152,7 @@ public interface NdflPersonDao {
      * @param endDate
      * @return
      */
-    List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
 
     /**
      * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
@@ -184,7 +184,7 @@ public interface NdflPersonDao {
      * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
+    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1);
 
     /**
      * Найти все NdflPerson по заданным параметрам
