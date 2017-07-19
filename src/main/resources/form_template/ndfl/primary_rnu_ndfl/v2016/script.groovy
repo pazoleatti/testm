@@ -3629,7 +3629,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column18Or19Fill(),
                     new Column6Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
                             C_INCOME_ACCRUED_DATE,
                             C_NOT_HOLDING_TAX,
                             C_OVERHOLDING_TAX
@@ -3640,7 +3640,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column18Or19Fill(),
                     new Column10Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
                             C_INCOME_ACCRUED_SUMM,
                             C_NOT_HOLDING_TAX,
                             C_OVERHOLDING_TAX
@@ -3693,7 +3693,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column7And11Fill(),
                     new Column21Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
                             C_TAX_TRANSFER_DATE,
                             C_INCOME_PAYOUT_DATE,
                             C_INCOME_PAYOUT_SUMM
@@ -3705,7 +3705,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column22And23And24Fill(),
                     new Column21Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
                             C_TAX_TRANSFER_DATE,
                             C_PAYMENT_DATE,
                             C_PAYMENT_NUMBER,
