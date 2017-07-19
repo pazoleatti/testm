@@ -2713,7 +2713,7 @@ class NdflPersonFL {
 @Field final String C_INCOME_PAYOUT_SUMM = "Сумма выплаченного дохода" //"Доход.Сумма.Выплата"
 @Field final String C_TOTAL_DEDUCTIONS_SUMM = "Сумма вычета" //"Сумма вычета"
 @Field final String C_TAX_BASE = "Налоговая база" //"Налоговая база"
-@Field final String C_TAX_RATE = "Процентная ставка (%%)" //"НДФЛ.Процентная ставка"
+@Field final String C_TAX_RATE = "Процентная ставка (%)" //"НДФЛ.Процентная ставка"
 @Field final String C_TAX_DATE = "Дата НДФЛ" //"НДФЛ.Расчет.Дата"
 @Field final String C_CALCULATED_TAX = "НДФЛ исчисленный" //" НДФЛ.Расчет.Сумма.Исчисленный"
 @Field final String C_WITHHOLDING_TAX = "НДФЛ удержанный" //"НДФЛ.Расчет.Сумма.Удержанный"
@@ -3504,8 +3504,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column6Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_SUMM,
-                            C_INCOME_ACCRUED_DATE
+                            C_INCOME_ACCRUED_DATE,
+                            C_INCOME_ACCRUED_SUMM
                     )
             )
             //3 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
@@ -3542,8 +3542,8 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column10Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE,
-                            C_INCOME_ACCRUED_SUMM
+                            C_INCOME_ACCRUED_SUMM,
+                            C_INCOME_ACCRUED_DATE
                     )
             )
             //5 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
@@ -3620,7 +3620,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column10Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
-                            C_INCOME_ACCRUED_DATE,
+                            C_INCOME_ACCRUED_SUMM,
                             C_CALCULATED_TAX
                     )
             )
@@ -3629,7 +3629,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column18Or19Fill(),
                     new Column6Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
                             C_INCOME_ACCRUED_DATE,
                             C_NOT_HOLDING_TAX,
                             C_OVERHOLDING_TAX
@@ -3640,7 +3640,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column18Or19Fill(),
                     new Column10Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
                             C_INCOME_ACCRUED_SUMM,
                             C_NOT_HOLDING_TAX,
                             C_OVERHOLDING_TAX
@@ -3693,7 +3693,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column7And11Fill(),
                     new Column21Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
                             C_TAX_TRANSFER_DATE,
                             C_INCOME_PAYOUT_DATE,
                             C_INCOME_PAYOUT_SUMM
@@ -3705,7 +3705,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column22And23And24Fill(),
                     new Column21Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\", \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
                             C_TAX_TRANSFER_DATE,
                             C_PAYMENT_DATE,
                             C_PAYMENT_NUMBER,
@@ -4276,9 +4276,10 @@ class ColumnFillConditionData {
                 }
                 if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\") раздела 3",
-                            C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
-                            "Начисление", ndflPersonIncome.incomeAccruedSumm ?: 0)
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\")",
+                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: 0,
+                            C_PERIOD_CURR_SUMM, sumNdflDeduction
+                    )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
                 }
