@@ -4436,10 +4436,12 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
  * Сравнение чисел с плавающей точкой через эпсилон-окрестности
  */
 boolean comparNumbEquals(def d1, def d2) {
+    if (d1 == null || d2 == null) return false
     return (Math.abs(d1 - d2) < 0.001)
 }
 
 boolean comparNumbGreater(double d1, double d2) {
+    if (d1 == null || d2 == null) return false
     return (d1 - d2 > 0.001)
 }
 
