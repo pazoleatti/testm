@@ -1810,7 +1810,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String R_INCOME_TYPE = "Виды дохода"
 @Field final String R_RATE = "Ставки"
 @Field final String R_TYPE_CODE = "Коды видов вычетов"
-@Field final String R_NOTIF_SOURCE = "Коды налоговых органов"
+@Field final String R_NOTIF_SOURCE = "Налоговые инспекции"
 @Field final String R_ADDRESS = "Адреса"
 @Field final String R_INP = "Идентификаторы налогоплательщиков"
 @Field final String R_DUL = "Документы, удостоверяющие личность"
@@ -1874,6 +1874,9 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String C_PERIOD_PREV_DATE = "Вычет. Предыдущий период. Дата" //"Применение вычета.Предыдущий период.Дата"
 @Field final String C_PERIOD_CURR_DATE = "Вычет. Текущий период. Дата" //"Применение вычета.Текущий период.Дата"
 @Field final String C_PERIOD_CURR_SUMM = "Вычет. Текущий период. Сумма" //" Применение вычета.Текущий период.Сумма"
+
+// Сведения о доходах в виде авансовых платежей
+@Field final String P_NOTIF_SOURCE = "Код налогового органа, выдавшего уведомление" //"Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление"
 
 // Поля справочника Физические лица
 @Field final String RF_LAST_NAME = "LAST_NAME"
@@ -2133,10 +2136,9 @@ def checkDataReference(
         // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
         if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
             //TODO turn_to_error
-            String pathError = String.format(SECTION_LINE_MSG + ". %s", T_PERSON, ndflPerson.rowNum ?: "",
-                    "ДУЛ Код='${ndflPerson.idDocType ?: ""}'")
-            logger.warnExp("Ошибка в значении: %s. Текст ошибки: %s.", "Соответствие кода документа, удостоверяющего личность справочнику", fioAndInp, pathError,
-                    "\"ДУЛ Код\" не соответствует справочнику '$R_ID_DOC_TYPE'")
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2, "Код", ndflPerson.idDocType ?: "", R_ID_DOC_TYPE)
+            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_ID_DOC_TYPE), fioAndInp, pathError, errMsg)
         }
 
         // Спр4 Статус (Обязательное поле)
@@ -2283,7 +2285,7 @@ def checkDataReference(
                 if (ndflPerson.status!= null && !ndflPerson.status.equals(taxpayerStatus)) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                     logger.warnExp("%s. %s.", "Статус налогоплательщица не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                            String.format(LOG_TYPE_PERSON_MSG, "Форма.Реквизиты.Статус (код)", ndflPerson.status ?: "", R_PERSON))
+                            String.format(LOG_TYPE_PERSON_MSG, C_STATUS, ndflPerson.status ?: "", R_PERSON))
                 }
 
                 // Спр19 Адрес (Необязательное поле)
@@ -2474,7 +2476,7 @@ def checkDataReference(
         if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
             //TODO turn_to_error
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
-                    "Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи. Код налогового органа, выдавшего уведомление", ndflPersonPrepayment.notifSource ?: "",
+                    P_NOTIF_SOURCE, ndflPersonPrepayment.notifSource ?: "",
                     R_NOTIF_SOURCE
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_PREPAYMENT, ndflPersonPrepayment.rowNum ?: "")
@@ -2951,7 +2953,7 @@ boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, S
         if (ndflPerson[alias] == "0") {
             msg = "Значение гр. \"$attributeName\" не может быть равно \"0\""
         } else {
-            msg = "Не заполнена гр. \"$attributeName\""
+            msg = "Значение гр. \"$attributeName\" не указано"
         }
         logger.warnExp("%s. %s.", "Не указан обязательный реквизит ФЛ", fioAndInp, pathError, msg)
         return false
