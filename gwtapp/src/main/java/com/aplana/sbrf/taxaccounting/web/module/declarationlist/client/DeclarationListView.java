@@ -141,7 +141,7 @@ public class DeclarationListView extends
     @Inject
     public DeclarationListView(final MyBinder uiBinder, final EventBus eventBus) {
         initWidget(uiBinder.createAndBindUi(this));
-
+        pager.setEventBus(eventBus);
         selectionModel = new MultiSelectionModel<DeclarationDataSearchResultItem>();
         declarationTable.setSelectionModel(selectionModel);
         declarationTable.addHandler(new FocusHandler() {
