@@ -31,7 +31,7 @@ public class AttributeChangeEvent {
     /**
      * Текущее значение атрибута
      */
-    private RefBookValue currentValue;
+    private Object currentValue;
 
     /**
      * Новое значение атрибута
@@ -47,11 +47,11 @@ public class AttributeChangeEvent {
         this.attrName = attrName;
     }
 
-    public RefBookValue getCurrentValue() {
+    public Object getCurrentValue() {
         return currentValue;
     }
 
-    public void setCurrentValue(RefBookValue refBookValue) {
+    public void setCurrentValue(Object refBookValue) {
         this.currentValue = refBookValue;
     }
 

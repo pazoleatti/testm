@@ -852,18 +852,18 @@ import java.text.SimpleDateFormat
     }
 
     def updateAddressAttr(Map<String, RefBookValue> values, Address address, AttributeChangeListener attributeChangeListener) {
-        putOrUpdate(values, "ADDRESS_TYPE", RefBookAttributeType.NUMBER, address.getAddressType(), attributeChangeListener);
-        putOrUpdate(values, "COUNTRY_ID", RefBookAttributeType.REFERENCE, address.getCountry()?.getId(), attributeChangeListener);
-        putOrUpdate(values, "REGION_CODE", RefBookAttributeType.STRING, address.getRegionCode(), attributeChangeListener);
-        putOrUpdate(values, "DISTRICT", RefBookAttributeType.STRING, address.getDistrict(), attributeChangeListener);
-        putOrUpdate(values, "CITY", RefBookAttributeType.STRING, address.getCity(), attributeChangeListener);
-        putOrUpdate(values, "LOCALITY", RefBookAttributeType.STRING, address.getLocality(), attributeChangeListener);
-        putOrUpdate(values, "STREET", RefBookAttributeType.STRING, address.getStreet(), attributeChangeListener);
-        putOrUpdate(values, "HOUSE", RefBookAttributeType.STRING, address.getHouse(), attributeChangeListener);
-        putOrUpdate(values, "BUILD", RefBookAttributeType.STRING, address.getBuild(), attributeChangeListener);
-        putOrUpdate(values, "APPARTMENT", RefBookAttributeType.STRING, address.getAppartment(), attributeChangeListener);
-        putOrUpdate(values, "POSTAL_CODE", RefBookAttributeType.STRING, address.getPostalCode(), attributeChangeListener);
-        putOrUpdate(values, "ADDRESS", RefBookAttributeType.STRING, address.getAddressIno(), attributeChangeListener);
+        putOrUpdate(values, "ADDRESS_TYPE", RefBookAttributeType.NUMBER, address.getAddressType(), null, attributeChangeListener);
+        putOrUpdate(values, "COUNTRY_ID", RefBookAttributeType.REFERENCE, address.getCountry()?.getId(), {val -> findCountryRecordId(val)}, attributeChangeListener);
+        putOrUpdate(values, "REGION_CODE", RefBookAttributeType.STRING, address.getRegionCode(), null, attributeChangeListener);
+        putOrUpdate(values, "DISTRICT", RefBookAttributeType.STRING, address.getDistrict(), null, attributeChangeListener);
+        putOrUpdate(values, "CITY", RefBookAttributeType.STRING, address.getCity(), null, attributeChangeListener);
+        putOrUpdate(values, "LOCALITY", RefBookAttributeType.STRING, address.getLocality(), null, attributeChangeListener);
+        putOrUpdate(values, "STREET", RefBookAttributeType.STRING, address.getStreet(), null, attributeChangeListener);
+        putOrUpdate(values, "HOUSE", RefBookAttributeType.STRING, address.getHouse(), null, attributeChangeListener);
+        putOrUpdate(values, "BUILD", RefBookAttributeType.STRING, address.getBuild(), null, attributeChangeListener);
+        putOrUpdate(values, "APPARTMENT", RefBookAttributeType.STRING, address.getAppartment(), null, attributeChangeListener);
+        putOrUpdate(values, "POSTAL_CODE", RefBookAttributeType.STRING, address.getPostalCode(), null, attributeChangeListener);
+        putOrUpdate(values, "ADDRESS", RefBookAttributeType.STRING, address.getAddressIno(), null, attributeChangeListener);
     }
 
     def mapAddressAttr(Address address) {
@@ -885,21 +885,21 @@ import java.text.SimpleDateFormat
 
 
     def updatePersonAttr(Map<String, RefBookValue> values, NaturalPerson person, AttributeChangeListener attributeChangeListener) {
-        putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), attributeChangeListener);
-        putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), attributeChangeListener);
-        putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), attributeChangeListener);
-        putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), attributeChangeListener);
-        putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), attributeChangeListener);
-        putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(), attributeChangeListener);
-        putOrUpdate(values, "RECORD_ID", RefBookAttributeType.NUMBER, person.getRecordId(), attributeChangeListener);
-        putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), attributeChangeListener);
-        putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, attributeChangeListener);
-        putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId(), attributeChangeListener);
-        putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee(), attributeChangeListener);
-        putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId(), attributeChangeListener);
-        putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), attributeChangeListener);
-        putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId, attributeChangeListener);
-        putOrUpdate(values, "OLD_ID", RefBookAttributeType.REFERENCE, null, attributeChangeListener);
+        putOrUpdate(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName(), null, attributeChangeListener);
+        putOrUpdate(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName(), null, attributeChangeListener);
+        putOrUpdate(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName(), null, attributeChangeListener);
+        putOrUpdate(values, "INN", RefBookAttributeType.STRING, person.getInn(), null, attributeChangeListener);
+        putOrUpdate(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign(), null, attributeChangeListener);
+        putOrUpdate(values, "SNILS", RefBookAttributeType.STRING, person.getSnils(),null, attributeChangeListener);
+        putOrUpdate(values, "RECORD_ID", RefBookAttributeType.NUMBER, person.getRecordId(), null, attributeChangeListener);
+        putOrUpdate(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate(), null, attributeChangeListener);
+        putOrUpdate(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null, null, attributeChangeListener);
+        putOrUpdate(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId(), null, attributeChangeListener);
+        putOrUpdate(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee(), null, attributeChangeListener);
+        putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId(), {val -> findCountryRecordId(val)}, attributeChangeListener);
+        putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), {val -> findTaxpayerStatusById(val)}, attributeChangeListener);
+        putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId, {val -> findAsnuCodeById(val)}, attributeChangeListener);
+        putOrUpdate(values, "OLD_ID", RefBookAttributeType.REFERENCE, null, null, attributeChangeListener);
     }
 
     def mapPersonAttr(NaturalPerson person) {
@@ -981,20 +981,20 @@ import java.text.SimpleDateFormat
      * Если не заполнен входной параметр, то никаких изменений в соответствующий атрибут записи справочника не вносится
      */
 
-    def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value, AttributeChangeListener attributeChangedListener) {
-        putOrUpdate(valuesMap, attrName, type, value, attributeChangedListener, { attrType, valueA, valueB ->
+    def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value, getValue, AttributeChangeListener attributeChangedListener) {
+        putOrUpdate(valuesMap, attrName, type, value, getValue != null ? getValue: ({val -> val?.toString()}), attributeChangedListener, { attrType, valueA, valueB ->
             isAttrEquals(attrType, valueA, valueB);
         });
     }
 
-    def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value, AttributeChangeListener attributeChangedListener, attrEquator) {
+    def putOrUpdate(Map<String, RefBookValue> valuesMap, String attrName, RefBookAttributeType type, Object value, getValue, AttributeChangeListener attributeChangedListener, attrEquator) {
 
-        AttributeChangeEvent changeEvent = new AttributeChangeEvent(attrName, value);
+        AttributeChangeEvent changeEvent = new AttributeChangeEvent(attrName, getValue(value));
 
         RefBookValue refBookValue = valuesMap.get(attrName);
         if (refBookValue != null) {
             //обновление записи, если новое значение задано и отличается от существующего
-            changeEvent.setCurrentValue(refBookValue);
+            changeEvent.setCurrentValue(getValue(refBookValue.getValue()));
 
             if (value != null && !attrEquator(type, refBookValue.getValue(), value)) {
                 //значения не равны, обновление
@@ -1179,8 +1179,16 @@ import java.text.SimpleDateFormat
             logger.warn("В справочнике 'Статусы налогоплательщика' не найдена запись, статус с кодом " + code);
         }
         return result;
+    }
 
-
+    /**
+     * По id статуса налогоплательщика найти код статуса в кэше справочника
+     * @param String code
+     * @return Long id
+     */
+    def findTaxpayerStatusById(Long id) {
+        def taxpayerStatusMap = getRefTaxpayerStatusCode()
+        return id != null ? (taxpayerStatusMap.get(id)?:"") : ""
     }
 
     /**
@@ -1223,6 +1231,25 @@ import java.text.SimpleDateFormat
         return result;
     }
 
+    /**
+     * По id страны найти код записи в кэше справочника
+     * @param String code
+     * @return Long id
+     */
+    def findCountryRecordId(Long id) {
+        def citizenshipCodeMap = getRefCountryCode()
+        return id != null ? (citizenshipCodeMap.get(id)?:"") : ""
+    }
+
+    /**
+     * По id АСНУ найти код записи в кэше справочника
+     * @param String code
+     * @return Long id
+     */
+    def findAsnuCodeById(Long id) {
+        def asnuCodeMap = getRefAsnu()
+        return id != null ? (asnuCodeMap.get(id)?:"") : ""
+    }
     //------------------ GET_SOURCES ----------------------
 
     List<Relation> getDestinationInfo(boolean isLight){
