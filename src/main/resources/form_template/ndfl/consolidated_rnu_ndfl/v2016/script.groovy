@@ -3542,7 +3542,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (calculatedTaxSum > withholdingTaxSum) {
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции.",
+                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
                             C_NOT_HOLDING_TAX, notHoldingTaxSum ?: "",
                             C_CALCULATED_TAX, calculatedTaxSum ?: "",
                             C_WITHHOLDING_TAX, withholdingTaxSum ?: ""

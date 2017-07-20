@@ -4290,16 +4290,6 @@ class ColumnFillConditionData {
             List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
             List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
 
-            //Графа 4 Раздел 2
-            String ndflPersonIncomingCodeInOperation = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.find {
-                    it.incomeCode
-                }?.incomeCode?: ""
-                //Графа 14 Раздел 2
-            Integer ndflPersonIncomingTaxRate = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.find {
-                    it.taxRate
-                }?.taxRate?: 0
-
-
             // СведДох1 Доход.Дата.Начисление (Графа 6)
             if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
                 dateConditionDataList.each { dateConditionData ->
@@ -4412,7 +4402,7 @@ class ColumnFillConditionData {
                 }
                 if (!checkNdflPersonIncomingTaxRateTotal && !ndflPersonIncomingTaxRates.isEmpty()) {
                     String errMsg = String.format(LOG_TYPE_2_14_MSG, "Процентная ставка (%)", ndflPersonIncome.taxRate ?: "",
-                            ndflPersonIncomingCodeInOperation, ndflPerson.status,
+                            ndflPersonIncome.incomeCode, ndflPerson.status,
                             ndflPersonIncomingTaxRates.join(", ")
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
@@ -4716,7 +4706,7 @@ class ColumnFillConditionData {
             if (calculatedTaxSum > withholdingTaxSum) {
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции.",
+                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
                             C_NOT_HOLDING_TAX, notHoldingTaxSum ?: "",
                             C_CALCULATED_TAX, calculatedTaxSum ?: "",
                             C_WITHHOLDING_TAX, withholdingTaxSum ?: ""
