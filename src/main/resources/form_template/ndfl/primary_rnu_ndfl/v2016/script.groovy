@@ -4343,9 +4343,9 @@ class ColumnFillConditionData {
                 boolean checkNdflPersonIncomingTaxRate = false;
                 def ndflPersonIncomingTaxRates = []
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_13: {
-                    Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncomingTaxRate != "1010" && ndflPerson.status != "2"
-                    Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncomingCodeInOperation) && ndflPerson.status == "1"
-                    Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncomingCodeInOperation) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
+                    Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
+                    Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status == "1"
+                    Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
                     if (conditionA || conditionB || conditionC) {
                         if (ndflPersonIncomingTaxRate == 13) {
                             checkNdflPersonIncomingTaxRate = true
