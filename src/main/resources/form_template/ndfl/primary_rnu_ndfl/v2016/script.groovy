@@ -3019,7 +3019,7 @@ class NdflPersonFL {
             // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
             if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
                 //TODO turn_to_error
-                String errMsg = String.format(LOG_TYPE_PERSON_MSG_2, "Код", ndflPerson.idDocType ?: "", R_ID_DOC_TYPE)
+                String errMsg = String.format(LOG_TYPE_PERSON_MSG_2, "ДУЛ Код", ndflPerson.idDocType ?: "", R_ID_DOC_TYPE)
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_ID_DOC_TYPE), fioAndInp, pathError, errMsg)
             }
