@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
+import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
@@ -4288,7 +4289,9 @@ class ColumnFillConditionData {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdList = ndflPersonIncomeCache.get(ndflPersonIncome.ndflPersonId) ?: []
-            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll { it.operationId == ndflPersonIncome.operationId } ?: []
+            List<NdflPersonIncome> ndflPersonIncomeCurrentByPersonIdAndOperationIdList = ndflPersonIncomeCurrentByPersonIdList.findAll {
+                it.operationId == ndflPersonIncome.operationId
+            } ?: []
 
             // СведДох1 Доход.Дата.Начисление (Графа 6)
             if (dateConditionDataList != null && !(ndflPersonIncome.incomeAccruedSumm == null || ndflPersonIncome.incomeAccruedSumm == 0)) {
@@ -4297,7 +4300,7 @@ class ColumnFillConditionData {
                         if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                             String errMsg = String.format(dateConditionData.conditionMessage,
-                                    C_INCOME_ACCRUED_DATE, ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""
+                                    C_INCOME_ACCRUED_DATE, ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT) : ""
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.warnExp("%s. %s.", LOG_TYPE_2_6, fioAndInp, pathError, errMsg)
@@ -4329,7 +4332,7 @@ class ColumnFillConditionData {
             }
 
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)
-            if ((ndflPersonIncome.taxRate?:0) > 0) {
+            if ((ndflPersonIncome.taxRate ?: 0) > 0) {
                 boolean checkNdflPersonIncomingTaxRateTotal = false;
 
                 boolean presentCitizenship = ndflPerson.citizenship != null && ndflPerson.citizenship != "0"
@@ -4337,7 +4340,8 @@ class ColumnFillConditionData {
                 boolean presentStatus = ndflPerson.status != null && ndflPerson.status != "0"
                 boolean presentTaxRate = ndflPersonIncome.taxRate != null && ndflPersonIncome.taxRate != 0
                 def ndflPersonIncomingTaxRates = []
-                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_13: {
+                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_13:
+                {
                     if (presentCitizenship && presentIncomeCode && presentStatus && presentTaxRate) {
                         Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
                         Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status == "1"
@@ -4351,7 +4355,8 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_15: {
+                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_15:
+                {
                     if ((presentIncomeCode && presentStatus && presentTaxRate) && (ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
                         if (ndflPersonIncome.taxRate == 15) {
                             checkNdflPersonIncomingTaxRateTotal = true
@@ -4360,7 +4365,8 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_35: {
+                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_35:
+                {
                     if ((presentIncomeCode && presentStatus && presentTaxRate) && (["2740", "3020", "2610"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status != "2")) {
                         if (ndflPersonIncome.taxRate == 35) {
                             checkNdflPersonIncomingTaxRateTotal = true
@@ -4369,7 +4375,8 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_30: {
+                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_30:
+                {
                     if (presentIncomeCode && presentStatus && presentTaxRate) {
                         def conditionA = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && ndflPersonIncome.incomeCode != "1010"
                         def conditionB = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
@@ -4382,7 +4389,8 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_9: {
+                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_9:
+                {
                     if ((presentCitizenship && presentIncomeCode && presentStatus && presentTaxRate) && (ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1110" && ndflPerson.status == "1")) {
                         if (ndflPersonIncome.taxRate == 9) {
                             checkNdflPersonIncomingTaxRateTotal = true
@@ -4391,7 +4399,8 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_OTHER: {
+                CHECK_NDFL_PERSON_INCOMING_TAX_RATE_OTHER:
+                {
                     if ((presentCitizenship && presentIncomeCode && presentStatus && presentTaxRate) && (ndflPerson.citizenship != "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
                         if (![13, 15, 35, 30, 9].contains(ndflPersonIncome.taxRate)) {
                             checkNdflPersonIncomingTaxRateTotal = true
@@ -4412,107 +4421,93 @@ class ColumnFillConditionData {
 
             // СведДох5 НДФЛ.Расчет.Дата (Графа 15)
             if (ndflPersonIncome.taxDate != null) {
-                // Должна быть выполнена хотя бы одна проверка
+
                 boolean checkTaxDate = true
-                String log_type = null
-                String errMsg = null
+                List<Pair<String, String>> logTypeMessagePairList = []
+                boolean calculatedTaxPresented = isPresentedByTempSolution(ndflPersonIncome.calculatedTax, ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.totalDeductionsSumm)
+                boolean withholdingTaxPresented = isPresentedByTempSolution(ndflPersonIncome.withholdingTax, ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.totalDeductionsSumm)
                 // СведДох5.1
-                if ((ndflPersonIncome.calculatedTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                if (calculatedTaxPresented && (ndflPersonIncome.calculatedTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                     // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
-                    if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
+                    if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomeAccruedDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                         checkTaxDate = false
-                        log_type = "\"${"Дата исчисленного налога"}\" рассчитана некорректно"
-                        errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}\")"
+                        logTypeMessagePairList.add(new Pair("\"${"Дата исчисленного налога"}\" рассчитана некорректно", "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT) : ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT) : ""}\")"))
                     }
                 }
                 // СведДох5.2
-                if (!checkTaxDate) {
-                    if ((ndflPersonIncome.withholdingTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
-                        if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                            checkTaxDate = false
-                            log_type = "\"${"Дата удержанного налога"}\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
-                        }
+                if (withholdingTaxPresented && (ndflPersonIncome.withholdingTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                    // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                    if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
+                        checkTaxDate = false
+                        logTypeMessagePairList.add(new Pair("\"${"Дата удержанного налога"}\" рассчитана некорректно", "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT) : ""}\")"))
                     }
                 }
                 // СведДох5.3
-                if (!checkTaxDate) {
-                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
-                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
-                            ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null &&
-                            !["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode)) {
-                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
-                        if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                            checkTaxDate = false
-                            log_type = "\"Дата не удержаннного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
-                        }
+                if (ndflPersonIncome.notHoldingTax != null && withholdingTaxPresented && (ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                        (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
+                        ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null &&
+                        !["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode)) {
+                    // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                    if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
+                        checkTaxDate = false
+                        logTypeMessagePairList.add(new Pair("\"Дата не удержаннного налога\" рассчитана некорректно", "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT) : ""}\")"))
                     }
                 }
                 // СведДох5.4
-                if (!checkTaxDate) {
-                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
-                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
-                            ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode) &&
-                            ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate()) {
-                        // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
-                        if (ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
-                            checkTaxDate = false
-                            log_type = "\"Дата не удержаннного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT): ""}\")"
-                        }
+                if (ndflPersonIncome.notHoldingTax != null && withholdingTaxPresented && calculatedTaxPresented && (ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                        (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
+                        ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543"].contains(ndflPersonIncome.incomeCode) &&
+                        ndflPersonIncome.incomePayoutDate >= getReportPeriodStartDate() && ndflPersonIncome.incomePayoutDate <= getReportPeriodEndDate()) {
+                    // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
+                    if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomeAccruedDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
+                        checkTaxDate = false
+                        logTypeMessagePairList.add(new Pair("\"Дата не удержаннного налога\" рассчитана некорректно", "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT) : ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ndflPersonIncome.incomeAccruedDate.format(DATE_FORMAT) : ""}\")"))
                     }
                 }
                 // СведДох5.5
-                if (!checkTaxDate) {
-                    if ((ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
-                            (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
-                            ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542"].contains(ndflPersonIncome.incomeCode) &&
-                            (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
-                        // «Графа 15 Раздел 2"» = "31.12.20**"
+                if (ndflPersonIncome.notHoldingTax != null && withholdingTaxPresented && calculatedTaxPresented && (ndflPersonIncome.notHoldingTax ?: 0 > 0) &&
+                        (ndflPersonIncome.withholdingTax ?: 0) < (ndflPersonIncome.calculatedTax ?: 0) &&
+                        ["1530", "1531", "1533", "1535", "1536", "1537", "1539", "1541", "1542"].contains(ndflPersonIncome.incomeCode) &&
+                        (ndflPersonIncome.incomeAccruedDate < getReportPeriodStartDate() || ndflPersonIncome.incomeAccruedDate > getReportPeriodEndDate())) {
+                    // «Графа 15 Раздел 2"» = "31.12.20**"
+                    if (ndflPersonIncome.taxDate != null) {
                         Calendar calendarPayout = Calendar.getInstance()
                         calendarPayout.setTime(ndflPersonIncome.taxDate)
                         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
                         int month = calendarPayout.get(Calendar.MONTH)
                         if (!(dayOfMonth == 31 && month == 12)) {
                             checkTaxDate = false
-                            log_type = "\"Дата не удержаннного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно \"31.12.20**\""
+                            logTypeMessagePairList.add(new Pair("\"Дата не удержаннного налога\" рассчитана некорректно", "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT) : ""}\") должно быть равно \"31.12.20**\""))
                         }
                     }
                 }
                 // СведДох5.6
-                if (!checkTaxDate) {
-                    if ((ndflPersonIncome.overholdingTax ?: 0 > 0) &&
-                            (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
-                            ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
-                        if (ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
-                            checkTaxDate = false
-                            log_type = "\"Дата излишне удержанного налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
-                        }
+                if (ndflPersonIncome.overholdingTax != null && withholdingTaxPresented && calculatedTaxPresented && (ndflPersonIncome.overholdingTax ?: 0 > 0) &&
+                        (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
+                        ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                    // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                    if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
+                        checkTaxDate = false
+                        logTypeMessagePairList.add(new Pair("\"Дата излишне удержанного налога\" рассчитана некорректно", "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT) : ""}\")"))
                     }
                 }
                 // СведДох5.7
-                if (!checkTaxDate) {
-                    if ((ndflPersonIncome.refoundTax ?: 0 > 0) &&
-                            (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
-                            (ndflPersonIncome.overholdingTax ?: 0) &&
-                            ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
-                        // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
-                        if (!(ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate)) {
-                            checkTaxDate = false
-                            log_type = "\"Дата расчета возвращенного налогоплательщику налога\" рассчитана некорректно"
-                            errMsg = "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"
-                        }
+                if (ndflPersonIncome.refoundTax != null && ndflPersonIncome.overholdingTax != null && withholdingTaxPresented && calculatedTaxPresented && (ndflPersonIncome.refoundTax ?: 0 > 0) &&
+                        (ndflPersonIncome.withholdingTax ?: 0) > (ndflPersonIncome.calculatedTax ?: 0) &&
+                        (ndflPersonIncome.overholdingTax ?: 0) &&
+                        ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
+                    // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
+                    if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
+                        checkTaxDate = false
+                        logTypeMessagePairList.add(new Pair("\"Дата расчета возвращенного налогоплательщику налога\" рассчитана некорректно", "Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ndflPersonIncome.taxDate.format(DATE_FORMAT): ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ndflPersonIncome.incomePayoutDate.format(DATE_FORMAT): ""}\")"))
                     }
                 }
-                if (!checkTaxDate) {
+                if (!checkTaxDate && logTypeMessagePairList.size() != 7) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", log_type, fioAndInp, pathError, errMsg)
+                    for (Pair<String, String> logTypeMessagePair : logTypeMessagePairList) {
+                        logger.warnExp("%s. %s.", logTypeMessagePair.getFirst(), fioAndInp, pathError, logTypeMessagePair.getSecond())
+                    }
                 }
             }
 
@@ -4825,6 +4820,26 @@ class ColumnFillConditionData {
     logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
 }
 
+/**
+ * Проверяется заполненность согласно временному решению
+ * Если сумма начисленного дохода равна сумме вычетов, будет ноль в графах:
+    Раздел 2. Графа 13. Налоговая база
+    Раздел 2. Графа 16. Сумма исчисленного налога
+    Раздел 2. Графа 17. Сумма удержанного налога
+ * @param checkingValue
+ * @param incomeAccruedSum
+ * @param totalDeductionSum
+ * @return true - заполнен, false - не заполнен
+ */
+boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAccruedSum, BigDecimal totalDeductionSum) {
+    if (checkingValue == null) {
+        return false
+    }
+    if (incomeAccruedSum != totalDeductionSum && checkingValue == new BigDecimal(0)) {
+        return false
+    }
+    return true
+}
     /**
      * Возвращает "Сумму применения вычета в текущем периоде"
      * @param ndflPersonIncome
