@@ -25,9 +25,15 @@ update ref_book_income_kind
        name = 'Суммы вознаграждений, выплачиваемых за счет средств прибыли организации, средств специального назначения или целевых поступлений'
 where income_type_id in (select id from ref_book_income_type t where t.code='2003' and t.status=0);
 
+-- delete async_task_type
+prompt delete async_task_type
+delete from async_task_type where id in (3, 4);
+
 -- update async_task_type
 prompt update async_task_type
 update async_task_type set limit_kind='Количество ФЛ в НФ' where id in (5, 6, 7, 14, 15);
+update async_task_type set limit_kind='Количество ФЛ в НФ' where id = 26;
+update async_task_type set short_queue_limit=3000 where id in (5, 6, 7, 14, 15);
 
 -- update ref_book_tariff_payer
 prompt update ref_book_tariff_payer
