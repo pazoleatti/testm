@@ -224,6 +224,7 @@
                         <webAppSourceDirectory>${webappDirectory}</webAppSourceDirectory>
                         <jettyEnvXml>src/main/webapp/WEB-INF/jetty-web.xml</jettyEnvXml>
                         <webXml>src/main/profiles/development/jetty/web.xml</webXml>
+                        <webDefaultXml>src/main/profiles/development/jetty/webdefault.xml</webDefaultXml>
                     </configuration>
                 </plugin>
             </plugins>
