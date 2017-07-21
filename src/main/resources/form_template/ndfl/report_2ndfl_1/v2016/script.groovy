@@ -2922,6 +2922,21 @@ final String DEDUCTION_SUM = "СумВычет"
 final String TAX_BASE = "НалБаза"
 @Field
 final String NOT_HOLDING_TAX = "НалНеУдерж"
+@Field
+final String NODE_NAME_SUM_IT_NAL_PER2 = "СумИтНалПер"
+
+// Узлы 6 НДФЛ
+@Field final NODE_NAME_SUM_STAVKA6 = "СумСтавка"
+@Field final NODE_NAME_OBOBSH_POKAZ6 = "ОбобщПоказ"
+@Field final NODE_NAME_SUM_DATA6 = "СумДата"
+// Атрибуты 6 НДФЛ
+@Field final ATTR_NACHISL_DOH6 = "НачислДох"
+@Field final ATTR_NACHISL_DOH_DIV6 = "НачислДохДив"
+@Field final ATTR_VICHET_NAL6 = "ВычетНал"
+@Field final ATTR_ISCHISL_NAL6 = "ИсчислНал"
+@Field final ATTR_NE_UDERZ_NAL_IT6 = "НеУдержНалИт"
+@Field final ATTR_KOL_FL_DOHOD6 = "КолФЛДоход"
+@Field final ATTR_AVANS_PLAT6 = "АвансПлат"
 
 def check() {
     //List<DeclarationData> declarationDataList = declarationService.find(declarationData.declarationTemplateId, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
@@ -3036,45 +3051,7 @@ def check() {
     }
     // Междокументарные проверки
     if (declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE) {
-        List<DeclarationData> declarationDataNdfl_2_1_List = declarationService.find(declarationData.declarationTemplateId, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
-        List<DeclarationData> declarationDataNdfl_2_2_List = declarationService.find(NDFL_2_2_DECLARATION_TYPE, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
-        if (declarationDataNdfl_2_2_List.isEmpty()) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-            Department department = departmentService.get(departmentReportPeriod.departmentId)
-            ReportPeriod reportPeriod = departmentReportPeriod.reportPeriod
-            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-            def periodCode = period?.CODE?.stringValue
-            def periodName = period?.NAME?.stringValue
-            def calendarStartDate = reportPeriod?.calendarStartDate
-            String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format(DATE_FORMAT_DOTTED)},"
-            logger.warnExp("Сравнение физических лиц форм 2-НДФЛ (2) и 2-НДФЛ (1) не выполнено. Не найдена форма 2-НДФЛ (2) со следующими параметрами: КПП: \"%s\", ОКТМО: \"%s\", КодНо: \"%s\", Период: \"%s\", Подразделение: \"%s\"", "Не найдено физическое лицо из 2-НДФЛ (2) в 2-НДФЛ (1)", "", declarationData.kpp, declarationData.oktmo, declarationData.taxOrganCode, "$periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" + " года" + correctionDateExpression, department.getName())
-        }
-        PagingResult<Map<String, RefBookValue>> ndfl_2_2ReferencesList = new PagingResult<>()
-        PagingResult<Map<String, RefBookValue>> ndfl_2_1ReferencesList = new PagingResult<>()
-        for (DeclarationData declarationData1Ndfl_2_2 : declarationDataNdfl_2_2_List) {
-            ndfl_2_2ReferencesList.addAll(getProvider(NDFL_REFERENCES).getRecords(null, null, "DECLARATION_DATA_ID = ${declarationData1Ndfl_2_2.id}", null))
-        }
-        for (DeclarationData declarationData1Ndfl_2_1 : declarationDataNdfl_2_1_List) {
-            ndfl_2_1ReferencesList.addAll(getProvider(NDFL_REFERENCES).getRecords(null, null, "DECLARATION_DATA_ID = ${declarationData1Ndfl_2_1.id}", null))
-        }
-        List<Long> ndfl2_1PersonIdList = new ArrayList<>()
-        for (Map<String, RefBookValue> ndfl_2_1Reference : ndfl_2_1ReferencesList) {
-            ndfl2_1PersonIdList.add(ndfl_2_1Reference.get("PERSON_ID").value)
-        }
-        for (Map<String, RefBookValue> ndfl_2_2Reference : ndfl_2_2ReferencesList) {
-            if (!ndfl2_1PersonIdList.contains(ndfl_2_2Reference.get("PERSON_ID").value)) {
-                Long numSpr = ndfl_2_2Reference.get("NUM").value
-                Long ddId = ndfl_2_2Reference.get("DECLARATION_DATA_ID").value
-                StringBuilder fio = new StringBuilder(ndfl_2_2Reference.get("SURNAME").value ?: "")
-                        .append(" ")
-                        .append(ndfl_2_2Reference.get("NAME").value ?: "")
-                        .append(" ")
-                        .append(ndfl_2_2Reference.get("LASTNAME").value ?: "")
-                StringBuilder fioAndNumSpr = fio.append(", Номер справки: ")
-                        .append(numSpr.toString())
-                logger.warnExp("Ошибка сравнения физических лиц форм 2-НДФЛ (2) и 2-НДФЛ (1). В форме 2-НДФЛ (1) не найдено физическое лицо \"%s\" формы 2-НДФЛ (2) со следующими параметрами: «Номер формы»: \"%d\", «Номер справки»: \"%d\"", "Не найдено физическое лицо из 2-НДФЛ (2) в 2-НДФЛ (1)", fioAndNumSpr.toString(), fio.toString(), ddId, numSpr)
-            }
-        }
+        interdocumentaryCheckData()
     }
 }
 
@@ -3573,5 +3550,218 @@ class WithHoldingTaxChecker extends AbstractChecker {
                 }
             }
         }
+    }
+}
+
+def interdocumentaryCheckData() {
+    interdocumentary2ndflCheckData()
+    interdocumentary6ndflCheckData()
+}
+
+def interdocumentary2ndflCheckData() {
+    List<DeclarationData> declarationDataNdfl_2_1_List = declarationService.find(declarationData.declarationTemplateId, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
+    List<DeclarationData> declarationDataNdfl_2_2_List = declarationService.find(NDFL_2_2_DECLARATION_TYPE, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
+    if (declarationDataNdfl_2_2_List.isEmpty()) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        Department department = departmentService.get(departmentReportPeriod.departmentId)
+        ReportPeriod reportPeriod = departmentReportPeriod.reportPeriod
+        def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
+        def periodCode = period?.CODE?.stringValue
+        def periodName = period?.NAME?.stringValue
+        def calendarStartDate = reportPeriod?.calendarStartDate
+        String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format(DATE_FORMAT_DOTTED)},"
+        logger.warnExp("Сравнение физических лиц форм 2-НДФЛ (2) и 2-НДФЛ (1) не выполнено. Не найдена форма 2-НДФЛ (2) со следующими параметрами: КПП: \"%s\", ОКТМО: \"%s\", КодНо: \"%s\", Период: \"%s\", Подразделение: \"%s\"", "Не найдено физическое лицо из 2-НДФЛ (2) в 2-НДФЛ (1)", "", declarationData.kpp, declarationData.oktmo, declarationData.taxOrganCode, "$periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" + " года" + correctionDateExpression, department.getName())
+    }
+    PagingResult<Map<String, RefBookValue>> ndfl_2_2ReferencesList = new PagingResult<>()
+    PagingResult<Map<String, RefBookValue>> ndfl_2_1ReferencesList = new PagingResult<>()
+    for (DeclarationData declarationData1Ndfl_2_2 : declarationDataNdfl_2_2_List) {
+        ndfl_2_2ReferencesList.addAll(getProvider(NDFL_REFERENCES).getRecords(null, null, "DECLARATION_DATA_ID = ${declarationData1Ndfl_2_2.id}", null))
+    }
+    for (DeclarationData declarationData1Ndfl_2_1 : declarationDataNdfl_2_1_List) {
+        ndfl_2_1ReferencesList.addAll(getProvider(NDFL_REFERENCES).getRecords(null, null, "DECLARATION_DATA_ID = ${declarationData1Ndfl_2_1.id}", null))
+    }
+    List<Long> ndfl2_1PersonIdList = new ArrayList<>()
+    for (Map<String, RefBookValue> ndfl_2_1Reference : ndfl_2_1ReferencesList) {
+        ndfl2_1PersonIdList.add(ndfl_2_1Reference.get("PERSON_ID").value)
+    }
+    for (Map<String, RefBookValue> ndfl_2_2Reference : ndfl_2_2ReferencesList) {
+        if (!ndfl2_1PersonIdList.contains(ndfl_2_2Reference.get("PERSON_ID").value)) {
+            Long numSpr = ndfl_2_2Reference.get("NUM").value
+            Long ddId = ndfl_2_2Reference.get("DECLARATION_DATA_ID").value
+            StringBuilder fio = new StringBuilder(ndfl_2_2Reference.get("SURNAME").value ?: "")
+                    .append(" ")
+                    .append(ndfl_2_2Reference.get("NAME").value ?: "")
+                    .append(" ")
+                    .append(ndfl_2_2Reference.get("LASTNAME").value ?: "")
+            StringBuilder fioAndNumSpr = fio.append(", Номер справки: ")
+                    .append(numSpr.toString())
+            logger.warnExp("Ошибка сравнения физических лиц форм 2-НДФЛ (2) и 2-НДФЛ (1). В форме 2-НДФЛ (1) не найдено физическое лицо \"%s\" формы 2-НДФЛ (2) со следующими параметрами: «Номер формы»: \"%d\", «Номер справки»: \"%d\"", "Не найдено физическое лицо из 2-НДФЛ (2) в 2-НДФЛ (1)", fioAndNumSpr.toString(), fio.toString(), ddId, numSpr)
+        }
+    }
+}
+
+def interdocumentary6ndflCheckData() {
+
+    List<DeclarationData> ndfl6declarationDataList = declarationService.find(DECLARATION_TYPE_NDFL6_ID, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo)
+    if (ndfl6declarationDataList.isEmpty()) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        Department department = departmentService.get(departmentReportPeriod.departmentId)
+        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED): ""}")
+        return
+    }
+    if (ndfl6declarationDataList.size() > 1) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        Department department = departmentService.get(departmentReportPeriod.departmentId)
+        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. В Системе должна быть только одна форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED): ""}")
+        return
+    }
+    DeclarationData ndfl6declarationData = ndfl6declarationDataList.get(0)
+    List<DeclarationData> ndfl2declarationDataList = declarationService.find(NDFL_2_1_DECLARATION_TYPE, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo)
+
+    String msgError = "6-НДФЛ КПП: \"%s\" ОКТМО: \"%s\" не соответствуют форме 2-НДФЛ (1) КПП: \"%s\" ОКТМО: \"%s\""
+    msgError = "Контрольные соотношения по %s формы " + sprintf(msgError, declarationData.kpp, declarationData.oktmo, declarationData.kpp, declarationData.oktmo)
+
+    // МежДок4
+    // Мапа <Ставка, НачислДох>
+    def mapNachislDoh6 = [:]
+    // Мапа <Ставка, Сумма(СумИтНалПер.СумДохОбщ)>
+    def mapSumDohObch2 = [:]
+
+    // МежДок5
+    // НачислДохДив
+    def nachislDohDiv6 = 0.0
+    // Сумма(СвСумДох.СумДоход)
+    def sumDohDivObch2 = 0.0
+
+    // МежДок6
+    // Мапа <Ставка, ИсчислНал>
+    def mapIschislNal6 = [:]
+    // Мапа <Ставка, Сумма(СумИтНалПер.НалИсчисл)>
+    def mapNalIschisl2 = [:]
+
+    // МежДок7
+    // НеУдержНалИт
+    def neUderzNalIt6 = 0
+    // Сумма(СумИтНалПер.НалНеУдерж)
+    def nalNeUderz2 = 0
+
+    // МежДок8
+    def kolFl6 = 0
+    def kolFl2 = 0
+
+    def ndfl6Stream = declarationService.getXmlStream(ndfl6declarationData.id)
+    def fileNode6Ndfl = new XmlSlurper().parse(ndfl6Stream);
+    def sumStavkaNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
+    sumStavkaNodes6.each { sumStavkaNode6 ->
+        ScriptUtils.checkInterrupted()
+        def stavka6 = Integer.valueOf(sumStavkaNode6.attributes()[TAX_RATE]) ?: 0
+
+        // МежДок4
+        def nachislDoh6 = ScriptUtils.round(Double.valueOf(sumStavkaNode6.attributes()[ATTR_NACHISL_DOH6]), 2) ?: 0
+        mapNachislDoh6.put(stavka6, nachislDoh6)
+
+        // МежДок5
+        if (stavka6 == 13) {
+            nachislDohDiv6 = ScriptUtils.round(Double.valueOf(sumStavkaNode6.attributes()[ATTR_NACHISL_DOH_DIV6]), 2) ?: 0
+        }
+
+        // МежДок6
+        def ischislNal6 = Long.valueOf(sumStavkaNode6.attributes()[ATTR_ISCHISL_NAL6]) ?: 0
+        mapIschislNal6.put(stavka6, ischislNal6)
+    }
+
+    def obobshPokazNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_OBOBSH_POKAZ6 }
+    obobshPokazNodes6.each { obobshPokazNode6 ->
+        ScriptUtils.checkInterrupted()
+        // МежДок7
+        neUderzNalIt6 = Long.valueOf(obobshPokazNode6.attributes()[ATTR_NE_UDERZ_NAL_IT6]) ?: 0
+
+        // МежДок8
+        kolFl6 = Integer.valueOf(obobshPokazNode6.attributes()[ATTR_KOL_FL_DOHOD6]) ?: 0
+    }
+
+    // Суммы значений всех 2-НДФЛ сравниваются с одним 6-НДФЛ
+    ndfl2declarationDataList.id.each { ndfl2DeclarationDataId ->
+        ScriptUtils.checkInterrupted()
+        def ndfl2Stream = declarationService.getXmlStream(ndfl2DeclarationDataId)
+        def fileNode2Ndfl = new XmlSlurper().parse(ndfl2Stream);
+
+        // МежДок8
+        def documentNodes = fileNode2Ndfl.depthFirst().findAll { it.name() == DOCUMENT_NODE}
+        kolFl2 += documentNodes.size()
+
+        def svedDohNodes = fileNode2Ndfl.depthFirst().grep { it.name() == SVEDDOH_NODE }
+        svedDohNodes.each { svedDohNode ->
+            ScriptUtils.checkInterrupted()
+            def stavka2 = Integer.valueOf(svedDohNode.attributes()[TAX_RATE]) ?: 0
+
+            // МежДок4
+            def sumDohObch2 = mapSumDohObch2.get(stavka2)
+            sumDohObch2 = sumDohObch2 == null ? 0 : sumDohObch2
+
+            // МежДок6
+            def nalIschisl2 = mapNalIschisl2.get(stavka2)
+            nalIschisl2 = nalIschisl2 == null ? 0 : nalIschisl2
+
+            def sumItNalPerNodes = svedDohNode.depthFirst().grep { it.name() == NODE_NAME_SUM_IT_NAL_PER2 }
+            sumItNalPerNodes.each { sumItNalPerNode ->
+                sumDohObch2 += ScriptUtils.round(Double.valueOf(sumItNalPerNode.attributes()[INCOME_SUM_COMMON]), 2) ?: 0
+                nalIschisl2 += Long.valueOf(sumItNalPerNode.attributes()[CALCULATED_TAX]) ?: 0
+
+                // МежДок7
+                nalNeUderz2 += Long.valueOf(sumItNalPerNode.attributes()[NOT_HOLDING_TAX]) ?: 0
+            }
+            mapSumDohObch2.put(stavka2, sumDohObch2)
+            mapNalIschisl2.put(stavka2, nalIschisl2)
+
+            // МежДок5
+            if (stavka2 == 13) {
+                def svSumDohNodes = svedDohNode.depthFirst().grep { it.name() == SV_SUM_DOH }
+                svSumDohNodes.each { svSumDohNode ->
+                    if (svSumDohNode.attributes()[INCOME_CODE].toString() == "1010") {
+                        sumDohDivObch2 += Double.valueOf(svSumDohNode.attributes()[SUM_DOHOD] ?: 0)
+                    }
+                }
+            }
+        }
+    }
+
+    // МежДок4
+    mapNachislDoh6.each { stavka6, nachislDoh6 ->
+        ScriptUtils.checkInterrupted()
+        def sumDohObch2 = mapSumDohObch2.get(stavka6)
+
+        if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
+            def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по «Ставке» " + stavka6
+            logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
+        }
+    }
+
+    // МежДок5
+    if (ScriptUtils.round(nachislDohDiv6, 2) != ScriptUtils.round(sumDohDivObch2, 2)) {
+        def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода» в виде дивидендов")
+        logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
+    }
+
+    // МежДок6
+
+    mapIschislNal6.each { stavka6, ischislNal6 ->
+        def nalIschisl2 = mapNalIschisl2.get(stavka6)
+        if (ischislNal6 != nalIschisl2) {
+            def msgErrorRes = sprintf(msgError, "«Сумме налога исчисленного»") + " по «Ставке» " + stavka6
+            logger.errorExp(msgErrorRes, "«Сумма налога исчисленного» рассчитана некорректно", "")
+        }
+    }
+
+    // МежДок7
+    if (neUderzNalIt6 != nalNeUderz2) {
+        def msgErrorRes = sprintf(msgError, "«Сумме налога, не удержанной налоговым агентом»")
+        logger.errorExp(msgErrorRes, "«Сумма налога, не удержанная налоговым агентом» рассчитана некорректно", "")
+    }
+
+    // МежДок8
+    if (kolFl6 != kolFl2) {
+        def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
+        logger.errorExp(msgErrorRes, "«Количество физических лиц, получивших доход» рассчитано некорректно", "")
     }
 }

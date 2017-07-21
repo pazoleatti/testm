@@ -4415,7 +4415,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Выч14 Документ о праве на налоговый вычет.Код источника (Графа 7)
-        if (ndflPersonDeduction.typeCode == "1" && ndflPersonDeduction.notifSource != "0000") {
+        if (ndflPersonDeduction.notifType == "1" && ndflPersonDeduction.notifSource != "0000") {
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует значению гр. \"%s\" (\"%s\")",
                     C_NOTIF_SOURCE, ndflPersonDeduction.notifSource ?: "",
