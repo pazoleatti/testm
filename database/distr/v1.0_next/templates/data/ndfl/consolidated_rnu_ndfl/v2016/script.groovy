@@ -2136,7 +2136,7 @@ def checkDataReference(
         // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
         if (ndflPerson.idDocType != null && !documentTypeMap.find { key, value -> value == ndflPerson.idDocType }) {
             //TODO turn_to_error
-            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2, "Код", ndflPerson.idDocType ?: "", R_ID_DOC_TYPE)
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2, "ДУЛ Код", ndflPerson.idDocType ?: "", R_ID_DOC_TYPE)
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
             logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_ID_DOC_TYPE), fioAndInp, pathError, errMsg)
         }
@@ -3155,68 +3155,77 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // СведДох4 НДФЛ.Процентная ставка (Графа 14)
             if ((ndflPersonIncome.taxRate?:0) > 0) {
-                boolean checkNdflPersonIncomingTaxRate = false;
+                boolean checkNdflPersonIncomingTaxRateTotal = false;
+
+                boolean presentCitizenship = ndflPerson.citizenship != null && ndflPerson.citizenship != "0"
+                boolean presentIncomeCode = ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeCode != "0"
+                boolean presentStatus = ndflPerson.status != null && ndflPerson.status != "0"
+                boolean presentTaxRate = ndflPersonIncome.taxRate != null && ndflPersonIncome.taxRate != 0
                 def ndflPersonIncomingTaxRates = []
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_13: {
-                    Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
-                    Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status == "1"
-                    Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
-                    if (conditionA || conditionB || conditionC) {
-                        if (ndflPersonIncome.taxRate == 13) {
-                            checkNdflPersonIncomingTaxRate = true
-                        } else {
-                            ndflPersonIncomingTaxRates << "\"13\""
+                    if (presentCitizenship && presentIncomeCode && presentStatus && presentTaxRate) {
+                        Boolean conditionA = ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode != "1010" && ndflPerson.status != "2"
+                        Boolean conditionB = ndflPerson.citizenship == "643" && ["1010", "1011"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status == "1"
+                        Boolean conditionC = ndflPerson.citizenship != "643" && ["2000", "2001", "2010", "2002", "2003"].contains(ndflPersonIncome.incomeCode) && Integer.parseInt(ndflPerson.status ?: 0) >= 3
+                        if (conditionA || conditionB || conditionC) {
+                            if (ndflPersonIncome.taxRate == 13) {
+                                checkNdflPersonIncomingTaxRateTotal = true
+                            } else {
+                                ndflPersonIncomingTaxRates << "\"13\""
+                            }
                         }
                     }
                 }
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_15: {
-                    if (ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1") {
+                    if ((presentIncomeCode && presentStatus && presentTaxRate) && (ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
                         if (ndflPersonIncome.taxRate == 15) {
-                            checkNdflPersonIncomingTaxRate = true
+                            checkNdflPersonIncomingTaxRateTotal = true
                         } else {
                             ndflPersonIncomingTaxRates << "\"15\""
                         }
                     }
                 }
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_35: {
-                    if (["2740", "3020", "2610"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status != "2") {
+                    if ((presentIncomeCode && presentStatus && presentTaxRate) && (["2740", "3020", "2610"].contains(ndflPersonIncome.incomeCode) && ndflPerson.status != "2")) {
                         if (ndflPersonIncome.taxRate == 35) {
-                            checkNdflPersonIncomingTaxRate = true
+                            checkNdflPersonIncomingTaxRateTotal = true
                         } else {
                             ndflPersonIncomingTaxRates << "\"35\""
                         }
                     }
                 }
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_30: {
-                    def conditionA = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && ndflPersonIncome.incomeCode != "1010"
-                    def conditionB = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
-                    if (conditionA || conditionB) {
-                        if (ndflPersonIncome.taxRate == 30) {
-                            checkNdflPersonIncomingTaxRate = true
-                        } else {
-                            ndflPersonIncomingTaxRates << "\"30\""
+                    if (presentIncomeCode && presentStatus && presentTaxRate) {
+                        def conditionA = Integer.parseInt(ndflPerson.status ?: 0) >= 2 && ndflPersonIncome.incomeCode != "1010"
+                        def conditionB = Integer.parseInt(ndflPerson.status ?: 0) > 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
+                        if (conditionA || conditionB) {
+                            if (ndflPersonIncome.taxRate == 30) {
+                                checkNdflPersonIncomingTaxRateTotal = true
+                            } else {
+                                ndflPersonIncomingTaxRates << "\"30\""
+                            }
                         }
                     }
                 }
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_9: {
-                    if (ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1110" && ndflPerson.status == "1") {
+                    if ((presentCitizenship && presentIncomeCode && presentStatus && presentTaxRate) && (ndflPerson.citizenship == "643" && ndflPersonIncome.incomeCode == "1110" && ndflPerson.status == "1")) {
                         if (ndflPersonIncome.taxRate == 9) {
-                            checkNdflPersonIncomingTaxRate = true
+                            checkNdflPersonIncomingTaxRateTotal = true
                         } else {
                             ndflPersonIncomingTaxRates << "\"9\""
                         }
                     }
                 }
                 CHECK_NDFL_PERSON_INCOMING_TAX_RATE_OTHER: {
-                    if (ndflPerson.citizenship != "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1") {
+                    if ((presentCitizenship && presentIncomeCode && presentStatus && presentTaxRate) && (ndflPerson.citizenship != "643" && ndflPersonIncome.incomeCode == "1010" && ndflPerson.status != "1")) {
                         if (![13, 15, 35, 30, 9].contains(ndflPersonIncome.taxRate)) {
-                            checkNdflPersonIncomingTaxRate = true
+                            checkNdflPersonIncomingTaxRateTotal = true
                         } else {
                             ndflPersonIncomingTaxRates << "\"Специальная ставка\""
                         }
                     }
                 }
-                if (!checkNdflPersonIncomingTaxRate) {
+                if (!checkNdflPersonIncomingTaxRateTotal && !ndflPersonIncomingTaxRates.isEmpty()) {
                     String errMsg = String.format(LOG_TYPE_2_14_MSG, "Процентная ставка (%)", ndflPersonIncome.taxRate ?: "",
                             ndflPersonIncome.incomeCode ?: "", ndflPerson.status?:"",
                             ndflPersonIncomingTaxRates.join(", ")
@@ -3533,7 +3542,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (calculatedTaxSum > withholdingTaxSum) {
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции.",
+                    String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
                             C_NOT_HOLDING_TAX, notHoldingTaxSum ?: "",
                             C_CALCULATED_TAX, calculatedTaxSum ?: "",
                             C_WITHHOLDING_TAX, withholdingTaxSum ?: ""
