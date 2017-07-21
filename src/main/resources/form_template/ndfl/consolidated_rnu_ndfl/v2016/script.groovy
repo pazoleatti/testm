@@ -3648,6 +3648,27 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 }
 
 /**
+ * Проверяется заполненность согласно временному решению
+ * Если сумма начисленного дохода равна сумме вычетов, будет ноль в графах:
+ Раздел 2. Графа 13. Налоговая база
+ Раздел 2. Графа 16. Сумма исчисленного налога
+ Раздел 2. Графа 17. Сумма удержанного налога
+ * @param checkingValue
+ * @param incomeAccruedSum
+ * @param totalDeductionSum
+ * @return true - заполнен, false - не заполнен
+ */
+boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAccruedSum, BigDecimal totalDeductionSum) {
+    if (checkingValue == null) {
+        return false
+    }
+    if (incomeAccruedSum != totalDeductionSum && checkingValue == new BigDecimal(0)) {
+        return false
+    }
+    return true
+}
+
+/**
  * Класс для проверки заполненности полей
  */
 @CompileStatic
