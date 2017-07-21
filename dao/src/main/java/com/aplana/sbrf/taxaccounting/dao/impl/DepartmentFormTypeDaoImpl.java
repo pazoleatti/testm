@@ -192,7 +192,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
 
-    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select distinct dest_ddt.*, ds.period_start, ds.period_end, dt.tax_type from department_declaration_type dest_ddt \n" +
+    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select distinct dest_ddt.*, ds.period_start, ds.period_end from department_declaration_type dest_ddt \n" +
             "join declaration_source ds on ds.department_declaration_type_id=dest_ddt.id\n" +
             "join department_form_type dft on ds.src_department_form_type_id=dft.id  \n" +
             "join declaration_type dt on dt.id = dest_ddt.declaration_type_id \n" +
@@ -549,8 +549,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private static final String GET_DECLARATION_ASSIGNED_SQL =
             " select ddt.id, dt.name, dt.id as typeId, ddt.department_id " +
                     "    from declaration_type dt" +
-                    "    join department_declaration_type ddt on ddt.department_id = ? and ddt.declaration_type_id = dt.id" +
-                    "    where dt.tax_type = ?";
+                    "    join department_declaration_type ddt on ddt.department_id = ? and ddt.declaration_type_id = dt.id";
 
     @Override
     public List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType) {

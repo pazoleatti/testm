@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.pager;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
@@ -18,6 +19,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.Range;
+import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * A pager for controlling a {@link HasRows} that only supports simple page
@@ -226,6 +228,7 @@ public class FlexiblePager extends AbstractPager {
     /* количество строк на страницу по умолчанию */
     private Integer defaultPageSize = DEFAULT_PAGE_SIZE;
     private HorizontalPanel layout;
+    private EventBus eventBus;
 
 	private final ImageButton lastPage;
 	private final ImageButton nextPage;
@@ -413,6 +416,23 @@ public class FlexiblePager extends AbstractPager {
 		if (showLastPageButton) {
 			lastPage.getElement().addClassName(style.button());
 		}
+
+		pageNumber.addFocusHandler(new FocusHandler() {
+			@Override
+			public void onFocus(com.google.gwt.event.dom.client.FocusEvent event) {
+				if (eventBus != null) {
+					eventBus.fireEvent(new FocusActionEvent(true));
+				}
+			}
+		});
+		pageNumber.addBlurHandler(new BlurHandler() {
+			@Override
+			public void onBlur(BlurEvent event) {
+				if (eventBus != null) {
+					eventBus.fireEvent(new FocusActionEvent(false));
+				}
+			}
+		});
 
 		pageNumber.addKeyUpHandler(new KeyUpHandler() {
 			@Override
@@ -718,4 +738,12 @@ public class FlexiblePager extends AbstractPager {
     public void setType(String type) {
         this.type = type;
     }
+
+	public EventBus getEventBus() {
+		return eventBus;
+	}
+
+	public void setEventBus(EventBus eventBus) {
+		this.eventBus = eventBus;
+	}
 }

@@ -40,7 +40,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @Inject
     public EditFormView(Binder uiBinder, MyDriver driver) {
         initWidget(uiBinder.createAndBindUi(this));
-
+        checkIfrsPanel.setVisible(false);
         this.driver = driver;
         this.driver.initialize(this);
         driver.edit(new DeclarationType());

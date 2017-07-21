@@ -354,12 +354,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                                 "))");
             } else {
                 sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
-                        .append(" OR :userDepId IN (\n" +
-                                "SELECT dep.ID \n" +
-                                "FROM department dep \n" +
-                                "WHERE dep.parent_id = 0 and dep.type = 2 \n" +
-                                "CONNECT BY PRIOR dep.parent_id = dep.ID \n" +
-                                "START WITH dep.id in ( \n" +
+                        .append(" OR EXISTS (\n" +
                                 "   SELECT ddtp.performer_dep_id \n" +
                                 "   FROM department_decl_type_performer ddtp \n" +
                                 "   INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
@@ -376,7 +371,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                                 "                      START WITH dep.id = drp.department_id \n" +
                                 "                ) \n" +
                                 "   ) \n" +
-                                "))) \n");
+                                "INTERSECT \n " +
+                                "   SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId) \n" +
+                                ") \n");
             }
             values.put("userDepId", filter.getUserDepartmentId());
         }
