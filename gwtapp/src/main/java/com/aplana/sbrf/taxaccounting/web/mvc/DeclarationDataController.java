@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
@@ -14,10 +16,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/actions/declarationData")
@@ -38,7 +45,29 @@ public class DeclarationDataController {
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
 
+    @Autowired
+    private LogBusinessService logBusinessService;
+
+    @Autowired
+    private TAUserService userService;
+
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
+    @Autowired
+    private RefBookFactory rbFactory;
+
     private static final String ENCODING = "UTF-8";
+
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 
 
     @RequestMapping(value = "/xlsx/{id}", method = RequestMethod.GET)
@@ -135,5 +164,42 @@ public class DeclarationDataController {
 		} finally {
         	IOUtils.closeQuietly(xmlDataIn);
 		}
+    }
+
+    @RequestMapping(value = "/getDeclarationData/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> fetchDeclarationData(@PathVariable long id) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        if (!declarationService.existDeclarationData(id)) {
+            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id), null);
+        }
+
+        DeclarationData declaration = declarationService.get(id, userInfo);
+        result.put("department",departmentService.getParentsHierarchy(
+                declaration.getDepartmentId()));
+
+        String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
+        if (userLogin != null && !userLogin.isEmpty()) {
+            result.put("creator_user_name", userService.getUser(userLogin).getName());
+        }
+
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        result.put("form_kind", declarationTemplate.getDeclarationFormKind().getTitle());
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
+                declaration.getDepartmentReportPeriodId());
+        result.put("report_period", departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " +departmentReportPeriod.getReportPeriod().getName());
+
+        result.put("state", declaration.getState().getTitle());
+
+        if (declaration.getAsnuId() != null) {
+            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
+            result.put("asnu_name", asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
+        }
+
+        result.put("date_and_time_create", sdf.get().format(logBusinessService.getFormCreationDate(declaration.getId())));
+        return result;
     }
 }

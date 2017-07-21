@@ -9,6 +9,9 @@ import java.util.Date;
  */
 public class NdflPersonDeduction extends NdflPersonOperation {
 
+    //ИНП (Графа 2)
+    private String inp;
+
     // Код вычета (Графа 3)
     private String typeCode;
 
@@ -80,6 +83,14 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     @Override
     public String[] getFields() {
         return FIELDS;
+    }
+
+    public String getInp() {
+        return inp;
+    }
+
+    public void setInp(String inp) {
+        this.inp = inp;
     }
 
     public String getTypeCode() {
@@ -189,7 +200,8 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     @Override
     public String toString() {
         return "NdflPersonDeduction{" +
-                "typeCode='" + typeCode + '\'' +
+                "inp='" + inp + '\'' +
+                ", typeCode='" + typeCode + '\'' +
                 ", notifType='" + notifType + '\'' +
                 ", notifDate=" + notifDate +
                 ", notifNum='" + notifNum + '\'' +

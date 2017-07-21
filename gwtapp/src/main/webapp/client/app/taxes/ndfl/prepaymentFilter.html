@@ -1,0 +1,89 @@
+<div data-ng-controller="CommonFilterCtrl">
+    <div class="grid-filter"
+         style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
+        <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
+             data-label="'filterPanelLabel' | translate">
+            <form class="form-horizontal" role="form" novalidate>
+                <div class="row">
+                    <div class="filter-col w400">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{::'title.inp' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input data-ng-model="searchFilter.params.inp"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{searchFilter.params.inp}}"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{::'title.idOperation' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input data-ng-model="searchFilter.params.operationId"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{searchFilter.params.operationId}}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-col w400">
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{::'title.prepayment.notifNum' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input data-ng-model="searchFilter.params.notifNum"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{searchFilter.params.notifNum}}"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <label class="control-label">{{::'title.prepayment.filter.notifSource' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input data-ng-model="searchFilter.params.notifSource"
+                                       placeholder="{{'filter.placeholder.search' | translate}}"
+                                       type="text" class="form-control"
+                                       title="{{searchFilter.params.notifSource}}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-col w500" style="margin-left: 100px;">
+                        <div class="form-group">
+                            <date-from-to-filter
+                                    data-label-width="3"
+                                    ng-from-model="searchFilter.params.notifDateFrom"
+                                    ng-to-model="searchFilter.params.notifDateTo"
+                                    ng-label="title.prepayment.notifDateFrom"></date-from-to-filter>
+                        </div>
+                    </div>
+                    <div class="filter-col">
+                        <!--Кнопка Найти-->
+                        <button type="button"
+                                class="btn btn-danger"
+                                id="searchButton"
+                                data-ng-click="submitSearch()">
+                            <span data-translate-once="common.button.search"></span>
+                        </button>
+                        <!--Кнопка Сбросить-->
+                        <button type="button" data-ng-show="searchFilter.isClear"
+                                class="btn btn-default"
+                                id="clearButton"
+                                data-ng-click="resetFilter()">
+                            <span data-translate-once="common.button.clear"></span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -32,12 +32,14 @@ public class NotificationRestController {
     /**
      * Возвращает список оповещений
      *
-     * @param pageable объект {@code Pageable}, полученный из {@code pageableResolver}
+     * @param rows параметр для пагинации
+     * @param page параметр для пагинации
      * @return список оповещений
      */
     @RequestMapping(value = "/rest/notification", method = RequestMethod.GET, params = "projection=get")
     @ResponseBody
-    public JqgridPagedList<Notification> fetchNotifications(Pageable pageable) {
+    public JqgridPagedList<Notification> fetchNotifications(@RequestParam int page,
+                                                            @RequestParam int rows) {
         TAUser user = securityService.currentUserInfo().getUser();
         List<Integer> userRoles = new ArrayList<Integer>();
         for (TARole role : user.getRoles()) {
@@ -55,7 +57,7 @@ public class NotificationRestController {
         return JqgridPagedResourceAssembler.buildPagedList(
                 notifications,
                 notifications.getTotalCount(),
-                pageable
+                page, rows
         );
     }
 

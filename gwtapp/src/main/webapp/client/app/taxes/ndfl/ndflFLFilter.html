@@ -20,38 +20,26 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-3">
-                                <label class="control-label">{{::'title.idOperation' |
+                                <label class="control-label">{{::'title.innNp' |
                                     translate}}:</label>
                             </div>
                             <div class="col-md-9">
-                                <input data-ng-model="searchFilter.params.idOperation"
+                                <input data-ng-model="searchFilter.params.innNp"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"
-                                       title="{{searchFilter.params.idOperation}}"/>
+                                       title="{{searchFilter.params.innNp}}"/>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-3">
-                                <label class="control-label">{{::'title.kpp' |
+                                <label class="control-label">{{::'title.innForeign' |
                                     translate}}:</label>
                             </div>
                             <div class="col-md-9">
-                                <input data-ng-model="searchFilter.params.kpp"
+                                <input data-ng-model="searchFilter.params.innForeign"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"
-                                       title="{{searchFilter.params.kpp}}"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                <label class="control-label">{{::'title.oktmo' |
-                                    translate}}:</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input data-ng-model="searchFilter.params.oktmo"
-                                       placeholder="{{'filter.placeholder.search' | translate}}"
-                                       type="text" class="form-control"
-                                       title="{{searchFilter.params.oktmo}}"/>
+                                       title="{{searchFilter.params.innForeign}}"/>
                             </div>
                         </div>
                     </div>
@@ -70,64 +58,52 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-2">
-                                <label class="control-label">{{::'title.inn' |
+                                <label class="control-label">{{::'title.idDocNumber' |
                                     translate}}:</label>
                             </div>
                             <div class="col-md-10">
-                                <input data-ng-model="searchFilter.params.inn"
+                                <input data-ng-model="searchFilter.params.idDocNumber"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"
-                                       title="{{searchFilter.params.inn}}"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-md-2">
-                                <label class="control-label">{{::'title.numberDul' |
-                                    translate}}:</label>
-                            </div>
-                            <div class="col-md-10">
-                                <input data-ng-model="searchFilter.params.numberDul"
-                                       placeholder="{{'filter.placeholder.search' | translate}}"
-                                       type="text" class="form-control"
-                                       title="{{searchFilter.params.numberDul}}"/>
+                                       title="{{searchFilter.params.idDocNumber}}"/>
                             </div>
                         </div>
                     </div>
                     <div class="filter-col w400">
                         <div class="form-group">
                             <div class="col-md-3">
-                                <label class="control-label">{{::'title.surname' |
+                                <label class="control-label">{{::'title.lastName' |
                                     translate}}:</label>
                             </div>
                             <div class="col-md-9">
-                                <input data-ng-model="searchFilter.params.surname"
+                                <input data-ng-model="searchFilter.params.lastName"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"
-                                       title="{{searchFilter.params.surname}}"/>
+                                       title="{{searchFilter.params.lastName}}"/>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-3">
-                                <label class="control-label">{{::'title.name' |
+                                <label class="control-label">{{::'title.firstName' |
                                     translate}}:</label>
                             </div>
                             <div class="col-md-9">
-                                <input data-ng-model="searchFilter.params.name"
+                                <input data-ng-model="searchFilter.params.firstName"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"
-                                       title="{{searchFilter.params.name}}"/>
+                                       title="{{searchFilter.params.firstName}}"/>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-3">
-                                <label class="control-label">{{::'title.patronymic' |
+                                <label class="control-label">{{::'title.middleName' |
                                     translate}}:</label>
                             </div>
                             <div class="col-md-9">
-                                <input data-ng-model="searchFilter.params.patronymic"
+                                <input data-ng-model="searchFilter.params.middleName"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"
-                                       title="{{searchFilter.params.patronymic}}"/>
+                                       title="{{searchFilter.params.middleName}}"/>
                             </div>
                         </div>
                         <div class="form-group">
@@ -143,7 +119,7 @@
                         <button type="button"
                                 class="btn btn-danger"
                                 id="searchButton"
-                                data-ng-click="searchClick()">
+                                data-ng-click="submitSearch()">
                             <span data-translate-once="common.button.search"></span>
                         </button>
                         <!--Кнопка Сбросить-->

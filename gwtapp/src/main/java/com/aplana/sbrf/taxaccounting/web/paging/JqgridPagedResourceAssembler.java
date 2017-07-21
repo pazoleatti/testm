@@ -11,33 +11,17 @@ public class JqgridPagedResourceAssembler {
      *
      * @param collection объект {@code Collection}, содержащий ограниченный набор данных для запрошенной страницы
      * @param size       общее количество записей
-     * @param pageable   объект {@code Pageable}, полученный из {@code pageableResolver}
+     * @param page номер страницы
+     * @param rows количество записей на одной странице
      * @return {@code JqgridPagedList} подготовленный для JSON сериализации объект с данными в формате, ожидаемом JqGrid.JsonReader
      */
-    public static <T> JqgridPagedList<T> buildPagedList(Collection<T> collection, Integer size, Pageable pageable) {
+    public static <T> JqgridPagedList<T> buildPagedList(Collection<T> collection, Integer size, int page, int rows) {
         JqgridPagedList<T> pagedList = new JqgridPagedList<T>();
         pagedList.getRows().addAll(collection);
 
-        pagedList.setPage(pageable.getPageNumber());
+        pagedList.setPage(page);
         pagedList.setRecords(size);
-        pagedList.setTotal(new Double(Math.ceil((double) size / pageable.getPageSize())).intValue());
-
-        return pagedList;
-    }
-
-    /**
-     * Формирует объект {@code JqgridPagedList} для отправки коллекции целиком на сторону клиента в JqGrid
-     *
-     * @param collection объект {@code Collection}, содержащий весь набор данных
-     * @return {@code JqgridPagedList} подготовленный для JSON сериализации объект с данными в формате, ожидаемом JqGrid.JsonReader
-     */
-    public static <T> JqgridPagedList<T> buildPagedList(Collection<T> collection) {
-        JqgridPagedList<T> pagedList = new JqgridPagedList<T>();
-        pagedList.getRows().addAll(collection);
-
-        pagedList.setPage(1);
-        pagedList.setRecords(collection.size());
-        pagedList.setTotal(1);
+        pagedList.setTotal(new Double(Math.ceil((double) size / rows)).intValue());
 
         return pagedList;
     }

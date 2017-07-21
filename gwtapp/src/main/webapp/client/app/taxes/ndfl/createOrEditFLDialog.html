@@ -28,13 +28,13 @@
             </div>
             <div>
                 <div>
-                    <label class="control-label">{{::'title.surname' | translate}}</label>
+                    <label class="control-label">{{::'title.lastName' | translate}}</label>
                 </div>
                 <div data-aplana-field>
                     <input style="margin-left: -180px;width: 168px;"
-                           data-ng-model="entity.surname" required
+                           data-ng-model="entity.lastName" required
                            type="text" class="form-control"
-                           title="{{entity.surname}}"/>
+                           title="{{entity.lastName}}"/>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
                     </div>
@@ -42,13 +42,13 @@
             </div>
             <div>
                 <div>
-                    <label class="control-label">{{::'title.name' | translate}}</label>
+                    <label class="control-label">{{::'title.firstName' | translate}}</label>
                 </div>
                 <div data-aplana-field>
                     <input style="margin-left: -180px;width: 168px;"
-                           data-ng-model="entity.name" required
+                           data-ng-model="entity.firstName" required
                            type="text" class="form-control"
-                           title="{{entity.name}}"/>
+                           title="{{entity.firstName}}"/>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
                     </div>
@@ -56,13 +56,13 @@
             </div>
             <div>
                 <div>
-                    <label class="control-label">{{::'title.patronymic' | translate}}</label>
+                    <label class="control-label">{{::'title.middleName' | translate}}</label>
                 </div>
                 <div data-aplana-field>
                     <input style="margin-left: -180px;width: 168px;"
-                           data-ng-model="entity.patronymic" required
+                           data-ng-model="entity.middleName" required
                            type="text" class="form-control"
-                           title="{{entity.patronymic}}"/>
+                           title="{{entity.middleName}}"/>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
                     </div>
@@ -158,13 +158,13 @@
                 <legend>{{::'title.document' | translate}}</legend>
                 <div>
                     <div>
-                        <label class="control-label">{{::'title.innRF' | translate}}</label>
+                        <label class="control-label">{{::'title.innNp' | translate}}</label>
                     </div>
                     <div data-aplana-field>
                         <input style="margin-left: -180px;width: 168px;"
-                               data-ng-model="entity.innRF" required
+                               data-ng-model="entity.innNp" required
                                type="text" class="form-control"
-                               title="{{entity.innRF}}"/>
+                               title="{{entity.innNp}}"/>
                         <div data-aplana-validator data-key="required">
                             {{::'field.ndfl.requiredField' | translate}}
                         </div>
@@ -172,13 +172,13 @@
                 </div>
                 <div>
                     <div>
-                        <label class="control-label">{{::'title.innINO' | translate}}</label>
+                        <label class="control-label">{{::'title.innForeign' | translate}}</label>
                     </div>
                     <div data-aplana-field>
                         <input style="margin-left: -180px;width: 168px;"
-                               data-ng-model="entity.innINO" required
+                               data-ng-model="entity.innForeign" required
                                type="text" class="form-control"
-                               title="{{entity.innINO}}"/>
+                               title="{{entity.innForeign}}"/>
                         <div data-aplana-validator data-key="required">
                             {{::'field.ndfl.requiredField' | translate}}
                         </div>
@@ -286,13 +286,13 @@
             </div>
             <div style="width: 80px;display: inline-block;vertical-align: top;">
                 <div>
-                    <label class="control-label" style="width: 65px;">{{::'title.building' | translate}}</label>
+                    <label class="control-label" style="width: 65px;">{{::'title.house' | translate}}</label>
                 </div>
                 <div data-aplana-field>
                     <input style="margin-left: -180px;width: 80px;"
-                           data-ng-model="entity.building" required
+                           data-ng-model="entity.house" required
                            type="text" class="form-control"
-                           title="{{entity.building}}"/>
+                           title="{{entity.house}}"/>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
                     </div>
@@ -300,23 +300,23 @@
             </div>
             <div style="width: 80px;display: inline-block;vertical-align: top; margin: 0 10px;">
                 <div>
-                    <label class="control-label" style="width: 65px;">{{::'title.housing' | translate}}</label>
+                    <label class="control-label" style="width: 65px;">{{::'title.building' | translate}}</label>
                 </div>
                 <div>
-                    <input data-ng-model="entity.housing"
+                    <input data-ng-model="entity.building"
                            type="text" class="form-control"
-                           title="{{entity.housing}}"/>
+                           title="{{entity.building}}"/>
                 </div>
             </div>
             <div style="width: 80px;display: inline-block;vertical-align: top;">
                 <div>
-                    <label class="control-label" style="width: 65px;">{{::'title.apartment' | translate}}</label>
+                    <label class="control-label" style="width: 65px;">{{::'title.flat' | translate}}</label>
                 </div>
                 <div data-aplana-field>
                     <input style="margin-left: -180px;width: 80px;"
-                           data-ng-model="entity.apartment" required
+                           data-ng-model="entity.flat" required
                            type="text" class="form-control"
-                           title="{{entity.apartment}}"/>
+                           title="{{entity.flat}}"/>
                     <div data-aplana-validator data-key="required">
                         {{::'field.ndfl.requiredField' | translate}}
                     </div>

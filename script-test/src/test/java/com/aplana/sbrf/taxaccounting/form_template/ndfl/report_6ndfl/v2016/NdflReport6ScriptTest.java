@@ -110,13 +110,13 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
 
         // Данные о доходах ФЛ по идентификатору декларации
         /*when(testHelper.getNdflPersonService().findIncomesByPeriodAndDeclarationDataId(any(Long.class), any(Date.class), any(Date.class), any(String.class), any(String.class)))
-                .thenAnswer(new Answer<List<NdflPersonIncome>>() {
+                .thenAnswer(new Answer<List<NdflPersonIncomeFilter>>() {
                     @Override
-                    public List<NdflPersonIncome> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                    public List<NdflPersonIncomeFilter> answer(InvocationOnMock invocationOnMock) throws Throwable {
                         DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
 
                         // Ставка 13 Идентификато операции 1
-                        NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncome();
+                        NdflPersonIncomeFilter ndflPersonIncome1 = new NdflPersonIncomeFilter();
                         ndflPersonIncome1.setNdflPersonId(1L);
                         ndflPersonIncome1.setOperationId(1L);
                         ndflPersonIncome1.setWithholdingTax(1L);
@@ -133,7 +133,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                         ndflPersonIncome1.setIncomePayoutSumm(new BigDecimal(1.1));
 
                         // Ставка 13 Идентификато операции 2
-                        NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncome();
+                        NdflPersonIncomeFilter ndflPersonIncome2 = new NdflPersonIncomeFilter();
                         ndflPersonIncome2.setNdflPersonId(2L);
                         ndflPersonIncome2.setOperationId(2L);
                         ndflPersonIncome2.setWithholdingTax(1L);
@@ -150,7 +150,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                         ndflPersonIncome2.setIncomePayoutSumm(new BigDecimal(1.1));
 
                         // Ставка 20 Идентификато операции 3
-                        NdflPersonIncome ndflPersonIncome3 = new NdflPersonIncome();
+                        NdflPersonIncomeFilter ndflPersonIncome3 = new NdflPersonIncomeFilter();
                         ndflPersonIncome2.setNdflPersonId(2L);
                         ndflPersonIncome3.setOperationId(3L);
                         ndflPersonIncome3.setWithholdingTax(1L);
@@ -166,7 +166,7 @@ public class NdflReport6ScriptTest extends DeclarationScriptTestBase {
                         ndflPersonIncome3.setTaxTransferDate(format.parse("03.03.2003"));
                         ndflPersonIncome3.setIncomePayoutSumm(new BigDecimal(1.1));
 
-                        List<NdflPersonIncome> ndflPersonIncomeList = new ArrayList<NdflPersonIncome>();
+                        List<NdflPersonIncomeFilter> ndflPersonIncomeList = new ArrayList<NdflPersonIncomeFilter>();
                         ndflPersonIncomeList.add(ndflPersonIncome1);
                         ndflPersonIncomeList.add(ndflPersonIncome2);
                         ndflPersonIncomeList.add(ndflPersonIncome3);

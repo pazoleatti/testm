@@ -16,7 +16,13 @@
         // Оповещения
         .factory('NotificationResource', ['$resource', function ($resource) {
             return $resource('/controller/rest/notification?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false},
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+        // ФЛ
+        .factory('NdflPersonResource', ['$resource', function ($resource) {
+            return $resource('/controller/rest/ndflPerson/get?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
             });
         }])
     ;

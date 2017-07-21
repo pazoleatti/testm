@@ -60,6 +60,16 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findPersonIncome(long declarationDataId);
 
     /**
+     * Найти все NdflPersonIncomeFilter по заданным параметрам
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param parameters        карта наименований параметров и значений
+     * @param pagingParams      параметры вывода результата
+     * @return результат запроса
+     */
+    public PagingResult<NdflPersonIncome> findPersonIncomeByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
+
+    /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
      *
      * @param declarationDataId идентификатор декларации
@@ -67,11 +77,31 @@ public interface NdflPersonDao {
     List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId);
 
     /**
+     * Найти все NdflPersonDeduction по заданным параметрам
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param parameters        карта наименований параметров и значений
+     * @param pagingParams      параметры вывода результата
+     * @return результат запроса
+     */
+    public PagingResult<NdflPersonDeduction> findPersonDeductionByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
+
+    /**
      * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
      *
      * @param declarationDataId идентификатор декларации
      */
     List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId);
+
+    /**
+     * Найти все NdflPersonDeduction по заданным параметрам
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param parameters        карта наименований параметров и значений
+     * @param pagingParams      параметры вывода результата
+     * @return результат запроса
+     */
+    public PagingResult<NdflPersonPrepayment> findPersonPrepaymentByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
 
     /**
      * Найти данные о доходах ФЛ

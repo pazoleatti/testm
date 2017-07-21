@@ -80,7 +80,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonIncome> findPersonIncome(long declarationDataId) {
         try {
-            return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " from ndfl_person_income npi "
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", np.inp from ndfl_person_income npi "
                     + " inner join ndfl_person np on npi.ndfl_person_id = np.id"
                     + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -89,9 +89,83 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public PagingResult<NdflPersonIncome> findPersonIncomeByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
+        parameters.put("declarationDataId", declarationDataId);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ").append(createColumns(NdflPersonIncome.COLUMNS, "npi")).append(", np.inp ").append(" \n");
+        sb.append("FROM ndfl_person_income npi \n");
+        sb.append("INNER JOIN ndfl_person np on npi.ndfl_person_id = np.id \n");
+        sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
+
+        if (parameters != null && !parameters.isEmpty()) {
+            if (contains(parameters, "inp")) {
+                sb.append("AND lower(np.inp) like lower(:inp) \n");
+            }
+            if (contains(parameters, "operationId")) {
+                sb.append("AND lower(npi.operation_id) like lower(:operationId) \n");
+            }
+            if (contains(parameters, "kpp")) {
+                sb.append("AND lower(npi.kpp) like lower(:kpp) \n");
+            }
+            if (contains(parameters, "oktmo")) {
+                sb.append("AND lower(npi.oktmo) like lower(:oktmo) \n");
+            }
+            if (contains(parameters, "incomeCode")) {
+                sb.append("AND lower(npi.income_code) like lower(:incomeCode) \n");
+            }
+            if (contains(parameters, "incomeAttr")) {
+                sb.append("AND lower(npi.income_type) like lower(:incomeAttr) \n");
+            }
+            if (contains(parameters, "taxRate")) {
+                sb.append("AND lower(npi.tax_rate) like lower(:taxRate) \n");
+            }
+            if (contains(parameters, "numberPaymentOrder")) {
+                sb.append("AND lower(npi.payment_number) like lower(:numberPaymentOrder) \n");
+            }
+            if (contains(parameters, "transferDateFrom")) {
+                sb.append("AND (npi.tax_transfer_date is null OR npi.tax_transfer_date >= :transferDateFrom) \n");
+            }
+
+            if (contains(parameters, "transferDateTo")) {
+                sb.append("AND (npi.tax_transfer_date is null OR npi.tax_transfer_date <= :transferDdateTo) \n");
+            }
+            if (contains(parameters, "calculationDateFrom")) {
+                sb.append("AND (npi.tax_date is null OR npi.tax_date >= :calculationDateFrom) \n");
+            }
+
+            if (contains(parameters, "calculationDateTo")) {
+                sb.append("AND (npi.tax_date is null OR npi.tax_date <= :calculationDateTo) \n");
+            }
+            if (contains(parameters, "paymentDateFrom")) {
+                sb.append("AND (npi.payment_date is null OR npi.payment_date >= :paymentDateFrom) \n");
+            }
+
+            if (contains(parameters, "paymentDateTo")) {
+                sb.append("AND (npi.payment_date is null OR npi.payment_date <= :paymentDateTo) \n");
+            }
+        }
+        sb.append("ORDER BY np.row_num \n");
+
+        String query = sb.toString();
+        String totalQuery = query;
+        if (pagingParams != null) {
+            long lastIndex = pagingParams.getStartIndex() + pagingParams.getCount();
+            totalQuery = "select * from \n (" +
+                    "select rating.*, rownum rnum from \n (" +
+                    query + ") rating where rownum < " +
+                    lastIndex +
+                    ") where rnum >= " +
+                    pagingParams.getStartIndex();
+        }
+        List<NdflPersonIncome> result = getNamedParameterJdbcTemplate().query(totalQuery, parameters, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        return new PagingResult<NdflPersonIncome>(result, getCount(totalQuery, parameters));
+    }
+
+    @Override
     public List<NdflPersonDeduction> findNdflPersonDeduction(long declarationDataId) {
         try {
-            return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + " from ndfl_person_deduction npd "
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonDeduction.COLUMNS, "npd") + ", np.inp from ndfl_person_deduction npd "
                     + " inner join ndfl_person np on npd.ndfl_person_id = np.id"
                     + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -100,14 +174,115 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public PagingResult<NdflPersonDeduction> findPersonDeductionByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
+        parameters.put("declarationDataId", declarationDataId);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ").append(createColumns(NdflPersonDeduction.COLUMNS, "npd")).append(", np.inp ").append(" \n");
+        sb.append("FROM ndfl_person_deduction npd \n");
+        sb.append("INNER JOIN ndfl_person np on npd.ndfl_person_id = np.id \n");
+        sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
+
+        if (parameters != null && !parameters.isEmpty()) {
+            if (contains(parameters, "inp")) {
+                sb.append("AND lower(np.inp) like lower(:inp) \n");
+            }
+            if (contains(parameters, "operationId")) {
+                sb.append("AND lower(npd.operation_id) like lower(:operationId) \n");
+            }
+            if (contains(parameters, "deductionCode")) {
+                sb.append("AND lower(npd.type_code) like lower(:deductionCode) \n");
+            }
+            if (contains(parameters, "incomeCode")) {
+                sb.append("AND lower(npd.income_code) like lower(:incomeCode) \n");
+            }
+            if (contains(parameters, "calculationDateFrom")) {
+                sb.append("AND (npd.income_accrued is null OR npd.income_accrued >= :calculationDateFrom) \n");
+            }
+            if (contains(parameters, "calculationDateTo")) {
+                sb.append("AND (npd.income_accrued is null OR npd.income_accrued <= :calculationDateTo) \n");
+            }
+            if (contains(parameters, "deductionDateFrom")) {
+                sb.append("AND (npd.period_curr_date is null OR npd.period_curr_date >= :deductionDateFrom) \n");
+            }
+
+            if (contains(parameters, "deductionDateTo")) {
+                sb.append("AND (npd.period_curr_date is null OR npd.period_curr_date <= :deductionDateTo) \n");
+            }
+        }
+        sb.append("ORDER BY np.row_num \n");
+
+        String query = sb.toString();
+        String totalQuery = query;
+        if (pagingParams != null) {
+            long lastIndex = pagingParams.getStartIndex() + pagingParams.getCount();
+            totalQuery = "select * from \n (" +
+                    "select rating.*, rownum rnum from \n (" +
+                    query + ") rating where rownum < " +
+                    lastIndex +
+                    ") where rnum >= " +
+                    pagingParams.getStartIndex();
+        }
+        List<NdflPersonDeduction> result = getNamedParameterJdbcTemplate().query(totalQuery, parameters, new NdflPersonDaoImpl.NdflPersonDeductionRowMapper());
+        return new PagingResult<NdflPersonDeduction>(result, getCount(totalQuery, parameters));
+    }
+
+    @Override
     public List<NdflPersonPrepayment> findNdflPersonPrepayment(long declarationDataId) {
         try {
-            return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " from ndfl_person_prepayment npp "
+            return getJdbcTemplate().query("select " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + ", np.inp from ndfl_person_prepayment npp "
                     + " inner join ndfl_person np on npp.ndfl_person_id = np.id"
                     + " where np.declaration_data_id = ?", new Object[]{declarationDataId}, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<NdflPersonPrepayment>();
         }
+    }
+
+    @Override
+    public PagingResult<NdflPersonPrepayment> findPersonPrepaymentByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
+        parameters.put("declarationDataId", declarationDataId);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ").append(createColumns(NdflPersonPrepayment.COLUMNS, "npp")).append(", np.inp ").append(" \n");
+        sb.append("FROM ndfl_person_prepayment npp \n");
+        sb.append("INNER JOIN ndfl_person np on npp.ndfl_person_id = np.id \n");
+        sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
+
+        if (parameters != null && !parameters.isEmpty()) {
+            if (contains(parameters, "inp")) {
+                sb.append("AND lower(np.inp) like lower(:inp) \n");
+            }
+            if (contains(parameters, "operationId")) {
+                sb.append("AND lower(npp.operation_id) like lower(:operationId) \n");
+            }
+            if (contains(parameters, "notifNum")) {
+                sb.append("AND lower(npp.notif_num) like lower(:notifNum) \n");
+            }
+            if (contains(parameters, "notifSource")) {
+                sb.append("AND lower(npp.notif_source) like lower(:notifSource) \n");
+            }
+            if (contains(parameters, "notifDateFrom")) {
+                sb.append("AND (npp.notif_date is null OR npp.notif_date >= :notifDateFrom) \n");
+            }
+            if (contains(parameters, "notifDateTo")) {
+                sb.append("AND (npp.notif_date is null OR npp.notif_date <= :notifDateTo) \n");
+            }
+        }
+        sb.append("ORDER BY np.row_num \n");
+
+        String query = sb.toString();
+        String totalQuery = query;
+        if (pagingParams != null) {
+            long lastIndex = pagingParams.getStartIndex() + pagingParams.getCount();
+            totalQuery = "select * from \n (" +
+                    "select rating.*, rownum rnum from \n (" +
+                    query + ") rating where rownum < " +
+                    lastIndex +
+                    ") where rnum >= " +
+                    pagingParams.getStartIndex();
+        }
+        List<NdflPersonPrepayment> result = getNamedParameterJdbcTemplate().query(totalQuery, parameters, new NdflPersonDaoImpl.NdflPersonPrepaymentRowMapper());
+        return new PagingResult<NdflPersonPrepayment>(result, getCount(totalQuery, parameters));
     }
 
     @Override
@@ -354,8 +529,16 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                         "translate(lower(np.inn_foreign), '0-, ', '0') like translate(lower(:inn), '0-, ', '0')) \n");
             }
 
+            //добавляю для страницы РНУ НДФЛ на angular
+            if (contains(parameters, "innNp")) {
+                sb.append("AND (translate(lower(np.inn_np), '0-, ', '0') like translate(lower(:innNp), '0-, ', '0')) \n");
+            }
+            if (contains(parameters, "innForeign")) {
+                sb.append("AND (translate(lower(np.inn_foreign), '0-, ', '0') like translate(lower(:innForeign), '0-, ', '0')) \n");
+            }
+
             if (contains(parameters, "inp")) {
-                sb.append("AND lower(np.inp) like lower(:inp)) \n");
+                sb.append("AND lower(np.inp) like lower(:inp) \n");
             }
 
             if (contains(parameters, "fromBirthDay")) {
@@ -869,6 +1052,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setPaymentNumber(rs.getString("payment_number"));
             personIncome.setTaxSumm(SqlUtils.getInteger(rs, "tax_summ"));
             personIncome.setSourceId(SqlUtils.getLong(rs, "source_id"));
+            personIncome.setInp(rs.getString("inp"));
             return personIncome;
         }
     }
@@ -901,6 +1085,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setPeriodCurrDate(rs.getDate("period_curr_date"));
             personDeduction.setPeriodCurrSumm(rs.getBigDecimal("period_curr_summ"));
             personDeduction.setSourceId(SqlUtils.getLong(rs, "source_id"));
+            personDeduction.setInp(rs.getString("inp"));
 
             return personDeduction;
         }
@@ -922,6 +1107,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setNotifDate(rs.getDate("notif_date"));
             personPrepayment.setNotifSource(rs.getString("notif_source"));
             personPrepayment.setSourceId(SqlUtils.getLong(rs, "source_id"));
+            personPrepayment.setInp(rs.getString("inp"));
 
             return personPrepayment;
         }

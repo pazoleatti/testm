@@ -338,7 +338,7 @@
                         };
 
                         scope.$on('$destroy', function () {
-                            scope.grid.jqGrid('GridUnload');
+                            scope.grid.jqGrid('gridUnload');
 
                             $gridStack.unRegisterAdjustWidthGrid(scope.grid);
                             scope.gridCtrl.unRegisterGridElement();
@@ -1393,7 +1393,7 @@
 
                         // Перестраивает грид
                         scope.gridCtrl.rebuildGrid = function () {
-                            scope.grid.GridUnload();
+                            scope.grid.gridUnload();
 
                             angular.extend(gridConfig, {
                                 colNames: scope.gridOptions.colNames,

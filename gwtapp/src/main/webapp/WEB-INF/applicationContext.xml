@@ -32,26 +32,6 @@
         <property name="defaultEncoding" value="UTF-8"/>
     </bean>
 
-    <!--Настройки сортировки по умолчанию-->
-    <bean id="sortResolver" class="com.aplana.sbrf.taxaccounting.web.paging.DefaultSortHandlerMethodArgumentResolver"/>
-
-    <mvc:annotation-driven>
-        <mvc:argument-resolvers>
-            <!--Настройки Pageable для JqGrid-->
-            <bean class="org.springframework.data.web.PageableHandlerMethodArgumentResolver">
-                <property name="sizeParameterName" value="rows"/>
-                <property name="pageParameterName" value="page"/>
-                <property name="maxPageSize" value="1000"/>
-                <property name="oneIndexedParameters" value="true"/>
-                <constructor-arg ref="sortResolver"/>
-            </bean>
-            <!--Настройки сортировки для JqGrid-->
-            <bean class="org.springframework.data.web.SortHandlerMethodArgumentResolver">
-                <property name="sortParameter" value="sidx"/>
-            </bean>
-        </mvc:argument-resolvers>
-    </mvc:annotation-driven>
-
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/rest/**"/>

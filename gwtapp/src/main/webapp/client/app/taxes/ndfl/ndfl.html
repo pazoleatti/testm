@@ -47,6 +47,10 @@
                             <label>{{::'title.nameAsnu' | translate}}:</label>
                             <label class="font-normal">{{nameAsnu}}</label>
                         </div>
+                        <div>
+                            <label>{{::'title.dateAndTimeCreate' | translate}}:</label>
+                            <label class="font-normal">{{dateAndTimeCreate}}</label>
+                        </div>
                     </div>
                     <div class="header-col w200" style="float: right;">
                         <div>
@@ -64,55 +68,39 @@
             <!--Панель кнопок -->
             <div class="button_panel">
                 <div class="btn-toolbar" role="toolbar">
-                    <!--Проверить -->
-                    <span>
-                        <button type="button" class="btn btn-default" data-ng-disabled="!checkButtonEnabled"
-                                data-ng-click="checkButtonClick()">
-                            <img ng-src="client/img/button/{{checkButtonEnabled ? 'enable' : 'disable'}}/check.png"
-                                 width="32px" height="22px"
-                                 alt="{{'button.check' | translate}}"/>
-                            <span data-translate-once="button.check"></span>
-                        </button>
-                    </span>
                     <!--Рассчитать -->
                     <span>
-                        <button type="button" class="btn btn-default" data-ng-disabled="!calculateButtonEnabled"
+                        <button type="button" class="btn btn-danger" data-ng-disabled="!calculateButtonEnabled"
                                 data-ng-click="calculateButtonClick()">
-                            <img ng-src="client/img/button/{{calculateButtonEnabled ? 'enable' : 'disable'}}/calculate.png"
-                                 width="32px" height="22px"
-                                 alt="{{'button.calculate' | translate}}"/>
                             <span data-translate-once="button.calculate"></span>
                         </button>
                     </span>
                     <!--Принять -->
                     <span>
-                        <button type="button" class="btn btn-default" data-ng-disabled="!acceptButtonEnabled"
+                        <button type="button" class="btn btn-danger" data-ng-disabled="!acceptButtonEnabled"
                                 data-ng-click="acceptButtonClick()">
-                            <img ng-src="client/img/button/{{acceptButtonEnabled ? 'enable' : 'disable'}}/accept.png"
-                                 width="32px" height="22px"
-                                 alt="{{'button.accept' | translate}}"/>
-                            <!--<img ng-src="/client/img/button/{{ acceptButtonEnable ? 'enable' : 'disable' }}/accept.png">-->
                             <span data-translate-once="button.accept"></span>
+                        </button>
+                    </span>
+                    <!--Проверить -->
+                    <span>
+                        <button type="button" class="btn btn-danger" data-ng-disabled="!checkButtonEnabled"
+                                data-ng-click="checkButtonClick()">
+                            <span data-translate-once="button.check"></span>
                         </button>
                     </span>
                     <!--Вернуть в Создана -->
                     <span>
-                        <button type="button" class="btn btn-default" data-ng-disabled="!returnButtonEnabled"
+                        <button type="button" class="btn btn-danger" data-ng-disabled="!returnButtonEnabled"
                                 data-ng-click="returnButtonClick()">
-                            <img ng-src="client/img/button/{{returnButtonEnabled ? 'enable' : 'disable'}}/return.png"
-                                 width="32px" height="22px"
-                                 alt="{{'button.return' | translate}}"/>
                             <span data-translate-once="button.return"></span>
                         </button>
                     </span>
-                    <!--Редактировать-->
+                    <!--Удалить-->
                     <span>
-                        <button type="button" class="btn btn-default" data-ng-disabled="!editButtonEnabled"
-                                data-ng-click="editRecordClick()">
-                            <img ng-src="client/img/button/{{editButtonEnabled ? 'enable' : 'disable'}}/edit.png" width="32px"
-                                 height="22px"
-                                 alt="{{'button.edit' | translate}}"/>
-                            <span data-translate-once="button.edit"></span>
+                        <button type="button" class="btn btn-danger" data-ng-disabled="!deleteButtonEnabled"
+                                data-ng-click="deleteRecordClick()">
+                            <span data-translate-once="button.delete"></span>
                         </button>
                     </span>
                 </div>
@@ -123,45 +111,23 @@
 
     <uib-tabset active="activeForm" class="form100" style="height:66%;">
         <uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('requisites')">
-            <div data-ng-controller="ndflCtrl">
+            <div data-ng-controller="ndflFLCtrl">
                 <div class="container-grid" style="height: 100%">
                     <div class='container-grid-top'>
-                        <span data-ng-include="'client/app/taxes/ndfl/ndflFilter.html'"></span>
-                        <div class="button_panel" style="float: right;">
-                            <div class="btn-toolbar" role="toolbar">
-                                <!--Редактировать запись в таблице-->
-                                    <span>
-                                <button type="button" class="btn btn-default" data-ng-disabled="!editReqsEnabled"
-                                        data-ng-click="editFLClick()">
-                                    <img src="client/img/button/enable/edit_entry.png" width="15px" height="15px"/>
-                                </button>
-                            </span>
-                                <!--Создать запись в таблице-->
-                                    <span>
-                                <button type="button" class="btn btn-default"
-                                        data-ng-click="createFLClick()">
-                                    <img src="client/img/button/enable/create_entry.png" width="15px"
-                                         height="15px"/>
-                                </button>
-                            </span>
-                                <!--Удалить запись из таблицы-->
-                                    <span>
-                                <button type="button" class="btn btn-default" data-ng-disabled="!deleteReqsEnabled"
-                                        data-ng-click="deleteFLClick()">
-                                    <img src="client/img/button/enable/delete_entry.png" width="15px"
-                                         height="15px"/>
-                                </button>
-                            </span>
-                            </div>
+                        <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
+                        <div>
+                            <a class="aplanaLink" data-aplana-link-click="showToDoDialog()"
+                               data-aplana-link="'title.updateFLData' | translate">
+                            </a>
                         </div>
                         <div data-aplana-grid
                              data-grid-fill-space="true"
                              data-grid-fill-space-container-selector=".form100"
                              data-grid-fill-space-container-selector-top=".container-grid-top"
-                             data-grid-options="requisitesGridOptions"
-                             data-grid-ctrl="ourGrid2"
-                             data-init-grid="initOurGrid(ctrl)"
-                             id="requisitesTable"
+                             data-grid-options="ndflPersonGrid.options"
+                             data-grid-ctrl="ndflPersonGrid.ctrl"
+                             data-ng-model="ndflPersonGrid.value"
+                             id="ndflPersonTable"
                              style="float: left; width: 100%;"></div>
                     </div>
                 </div>
@@ -169,15 +135,68 @@
         </uib-tab>
 
         <uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
-                 select="selectTab('incomesAndNdfl')">
+                 select="selectTab('incomesAndTax')">
+            <div data-ng-controller="incomesAndTaxCtrl">
+                <div class="container-grid" style="height: 100%">
+                    <div class='container-grid-top'>
+                        <span data-ng-include="'client/app/taxes/ndfl/incomesAndTaxFilter.html'"></span>
+                        <div class="row" style="margin: 0;">
+                            <a class="aplanaLink" data-aplana-link-click="showToDoDialog()"
+                               data-aplana-link="'title.fillTransferTerm' | translate">
+                            </a>
+                            <a class="aplanaLink" data-aplana-link-click="showToDoDialog()" style="margin: 0 0 0 10px"
+                               data-aplana-link="'title.fillIncomeAttr' | translate">
+                            </a>
+                        </div>
+                        <div data-aplana-grid
+                             data-grid-fill-space="true"
+                             data-grid-fill-space-container-selector=".form100"
+                             data-grid-fill-space-container-selector-top=".container-grid-top"
+                             data-grid-options="incomesAndTaxGrid.options"
+                             data-grid-ctrl="incomesAndTaxGrid.ctrl"
+                             data-ng-model="incomesAndTaxGrid.value"
+                             id="incomesAndTaxTable"></div>
+                    </div>
+                </div>
+            </div>
         </uib-tab>
 
         <uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
                  select="selectTab('deductions')">
+            <div data-ng-controller="deductionCtrl">
+                <div class="container-grid" style="height: 100%">
+                    <div class='container-grid-top'>
+                        <span data-ng-include="'client/app/taxes/ndfl/deductionFilter.html'"></span>
+                        <div data-aplana-grid
+                             data-grid-fill-space="true"
+                             data-grid-fill-space-container-selector=".form100"
+                             data-grid-fill-space-container-selector-top=".container-grid-top"
+                             data-grid-options="deductionGrid.options"
+                             data-grid-ctrl="deductionGrid.ctrl"
+                             data-ng-model="deductionGrid.value"
+                             id="deductionTable"></div>
+                    </div>
+                </div>
+            </div>
         </uib-tab>
 
         <uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
                  select="selectTab('advancePayments')">
+            <div data-ng-controller="prepaymentCtrl">
+                <div class="container-grid" style="height: 100%">
+                    <div class='container-grid-top'>
+                        <span data-ng-include="'client/app/taxes/ndfl/prepaymentFilter.html'"></span>
+                        <div data-aplana-grid
+                             data-grid-fill-space="true"
+                             data-grid-fill-space-container-selector=".form100"
+                             data-grid-fill-space-container-selector-top=".container-grid-top"
+                             data-grid-options="prepaymentGrid.options"
+                             data-grid-ctrl="prepaymentGrid.ctrl"
+                             data-ng-model="prepaymentGrid.value"
+                             id="prepaymentTable"></div>
+                    </div>
+                </div>
+            </div>
         </uib-tab>
 
     </uib-tabset>

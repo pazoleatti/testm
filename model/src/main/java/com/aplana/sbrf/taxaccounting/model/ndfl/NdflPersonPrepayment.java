@@ -8,6 +8,9 @@ import java.util.Date;
  */
 public class NdflPersonPrepayment extends NdflPersonOperation {
 
+    //ИНП (Графа 2)
+    private String inp;
+
     // Сумма фиксированного авансового платежа (Графа 4)
     private Long summ;
 
@@ -45,6 +48,14 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
         return FIELDS;
     }
 
+    public String getInp() {
+        return inp;
+    }
+
+    public void setInp(String inp) {
+        this.inp = inp;
+    }
+
     public Long getSumm() {
         return summ;
     }
@@ -80,6 +91,7 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     public String toString() {
         return "NdflPersonPrepayment{" +
                 "summ=" + summ +
+                ", inp='" + inp + '\'' +
                 ", notifNum='" + notifNum + '\'' +
                 ", notifDate=" + notifDate +
                 ", notifSource='" + notifSource + '\'' +
