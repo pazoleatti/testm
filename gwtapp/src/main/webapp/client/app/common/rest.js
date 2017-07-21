@@ -25,5 +25,12 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        // Уведомления
+        .factory('LogEntryResource', ['$resource', function ($resource) {
+            return $resource('/controller/rest/logEntry/:uuid?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

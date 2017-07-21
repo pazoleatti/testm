@@ -6,6 +6,7 @@
     angular
         .module('sbrfNdfl', [
             'app.header',
+            'app.logPanel',
             'sbrfNdfl.ndflJournal',
             'sbrfNdfl.ndfl',
             'app.filterUtils',

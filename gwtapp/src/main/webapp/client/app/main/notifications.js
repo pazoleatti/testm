@@ -8,8 +8,8 @@
         /**
          * @description Контроллер формы создания/редактирования ФЛ
          */
-        .controller('notificationsFormCtrl', ["$scope", "$http", "$uibModalInstance", "NotificationResource", "$filter", 'dialogs',
-            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, dialogs) {
+        .controller('notificationsFormCtrl', ["$scope", "$http", "$uibModalInstance", "NotificationResource", "$filter", 'dialogs', '$logPanel',
+            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, dialogs, $logPanel) {
                 $http({
                     method: "PUT",
                     url: "controller/actions/notification/markAsRead"
@@ -38,7 +38,7 @@
                         colModel: [
                             {name: 'id', index: 'id', width: 176, key: true, hidden: true},
                             {name: 'createDate', index: 'createDate', width: 135, formatter: $filter('dateFormatter')},
-                            {name: 'text', index: 'text', width: 520},
+                            {name: 'text', index: 'text', width: 520, formatter: $filter('notificationTextFormatter')},
                             {name: 'reportId', index: 'reportId', width: 175, sortable: false}
                         ],
                         rowNum: 10,
@@ -64,7 +64,7 @@
                         size: 'md'
                     };
 
-                    if ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length != 0) {
+                    if ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length !== 0) {
                         var dlg = dialogs.confirm($filter('translate')('notifications.title.delete'), $filter('translate')('notifications.title.deleteText'), buttons, opts);
                         dlg.result.then(
                             function () {
@@ -95,5 +95,17 @@
                 $scope.close = function () {
                     $uibModalInstance.dismiss('Canceled');
                 };
-            }]);
+
+                $(document).undelegate('#notificationsTable .notification-link', 'click');
+                $(document).delegate('#notificationsTable .notification-link', 'click', function() {
+                    var logId = $(this).attr('log-id');
+                    $logPanel.open('log-panel-container', logId);
+                });
+            }])
+
+        .filter('notificationTextFormatter', ['$filter', function ($filter) {
+            return function (value, row, notificationObject) {
+                return '<a class="notification-link" log-id="' + notificationObject.logId + '">' + value + '</a>';
+            };
+        }]);
 }());

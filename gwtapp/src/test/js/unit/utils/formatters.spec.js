@@ -28,4 +28,21 @@ describe('formatters', function () {
             });
         });
     });
+
+    /**
+     * Дата пустая - выводим ''
+     * В другом случае преобразуем дату в формат 'dd.MM.yyyy HH:mm:ss'
+     */
+    describe("dateTimeFormatter", function () {
+        var value = [null, new Date(2017, 4, 30), new Date(2017, 4, 30, 1, 2, 3)];
+        var result = ['', '30.05.2017 00:00:00', '30.05.2017 01:02:03'];
+
+        using(value, result, function (value, result) {
+            it("Formatters. Test2. Проверка dateTimeFormatter", function () {
+                inject(function (dateTimeFormatterFilter) {
+                    expect(dateTimeFormatterFilter(value)).toBe(result);
+                });
+            });
+        });
+    });
 });
