@@ -2786,25 +2786,41 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         C_CALCULATED_TAX
                 )
         )
-        //9 Раздел 2. Графы 6, 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
+        //9 Раздел 2. Графа 6 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
         columnFillConditionDataList << new ColumnFillConditionData(
-                new Column18Or19Fill(),
+                new Column18Fill(),
                 new Column6Fill(),
                 String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
                         C_INCOME_ACCRUED_DATE,
-                        C_NOT_HOLDING_TAX,
+                        C_NOT_HOLDING_TAX
+                )
+        )
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column19Fill(),
+                new Column6Fill(),
+                String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_ACCRUED_DATE,
                         C_OVERHOLDING_TAX
                 )
         )
-        //9 Раздел 2. Графы 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
+        //9 Раздел 2. Графа 10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
         columnFillConditionDataList << new ColumnFillConditionData(
-                new Column18Or19Fill(),
+                new Column18Fill(),
                 new Column10Fill(),
                 String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                String.format("Гр. \"%s\" должна быть заполнена, так как заполнены гр. \"%s\", \"%s\"",
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
                         C_INCOME_ACCRUED_SUMM,
-                        C_NOT_HOLDING_TAX,
+                        C_NOT_HOLDING_TAX
+                )
+        )
+        columnFillConditionDataList << new ColumnFillConditionData(
+                new Column19Fill(),
+                new Column10Fill(),
+                String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
+                String.format("Гр. \"%s\" должна быть заполнена, так как заполнена гр. \"%s\"",
+                        C_INCOME_ACCRUED_SUMM,
                         C_OVERHOLDING_TAX
                 )
         )
@@ -3880,13 +3896,23 @@ class Column17Fill implements ColumnFillConditionChecker {
     }
 }
 /**
- * Проверка: "Раздел 2. Графа 18 или 19 заполнена"
+ * Проверка: "Раздел 2. Графа 18 заполнена"
  */
 @TypeChecked
-class Column18Or19Fill implements ColumnFillConditionChecker {
+class Column18Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return !ScriptUtils.isEmpty(ndflPersonIncome.notHoldingTax) || !ScriptUtils.isEmpty(ndflPersonIncome.overholdingTax)
+        return !ScriptUtils.isEmpty(ndflPersonIncome.notHoldingTax)
+    }
+}
+/**
+ * Проверка: "Раздел 2. Графа 19 заполнена"
+ */
+@TypeChecked
+class Column19Fill implements ColumnFillConditionChecker {
+    @Override
+    boolean check(NdflPersonIncome ndflPersonIncome) {
+        return !ScriptUtils.isEmpty(ndflPersonIncome.overholdingTax)
     }
 }
 /**
