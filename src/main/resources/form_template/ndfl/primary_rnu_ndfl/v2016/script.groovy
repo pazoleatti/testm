@@ -4650,7 +4650,7 @@ class ColumnFillConditionData {
                     }
                     if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
+                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50%% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
                                 C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
                                 C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0
