@@ -4814,6 +4814,38 @@ class ColumnFillConditionData {
                     }
                 }
             }
+
+            //СведДох12	 Отсутствие нулевых значений
+            LOG_TYPE_NOT_ZERO_CHECK: {
+                if (ndflPersonIncome.incomeAccruedSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.incomePayoutSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_INCOME_PAYOUT_SUMM, ndflPersonIncome.incomePayoutSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.taxRate != null && ScriptUtils.isEmpty(ndflPersonIncome.taxRate)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_TAX_RATE, ndflPersonIncome.taxRate
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.taxSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_TAX_SUMM, ndflPersonIncome.taxSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+            }
         }
     }
 

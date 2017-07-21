@@ -281,7 +281,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 " AND npd.OPERATION_ID in i_data.operation_id AND npd.INCOME_ACCRUED in i_data.INCOME_ACCRUED_DATE" +
                 " AND npd.INCOME_CODE in i_data.INCOME_CODE AND npd.TYPE_CODE in " +
                 "(SELECT CODE FROM REF_BOOK_DEDUCTION_TYPE WHERE DEDUCTION_MARK in " +
-                "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME = 'Остальные')) AND npd.PERIOD_CURR_DATE between :startDate AND :endDate";
+                "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME = 'Остальные' AND STATUS = 0)  AND STATUS = 0) AND npd.PERIOD_CURR_DATE between :startDate AND :endDate";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
                 .addValue("startDate", startDate)
@@ -303,7 +303,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 " INNER JOIN ndfl_person_income npi ON npi.ndfl_person_id = npd.ndfl_person_id AND npi.operation_id = npd.operation_id" +
                 " WHERE npd.ndfl_person_id = :ndflPersonId" +
                 " AND npd.TYPE_CODE in (SELECT CODE FROM REF_BOOK_DEDUCTION_TYPE WHERE DEDUCTION_MARK in " +
-                "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME in ('Стандартный', 'Социальный', 'Инвестиционный', 'Имущественный')))" +
+                "(SELECT ID FROM REF_BOOK_DEDUCTION_MARK WHERE NAME in ('Стандартный', 'Социальный', 'Инвестиционный', 'Имущественный') AND STATUS = 0)  AND STATUS = 0)" +
                 " AND npd.PERIOD_CURR_DATE between :startDate AND :endDate " + priznakFClause;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)

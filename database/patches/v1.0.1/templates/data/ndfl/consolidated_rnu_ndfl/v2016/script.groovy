@@ -3485,7 +3485,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     }
                     if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
+                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50%% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
                                 C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
                                 C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0
@@ -3661,6 +3661,27 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         }
     }
     logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
+}
+
+/**
+ * Проверяется заполненность согласно временному решению
+ * Если сумма начисленного дохода равна сумме вычетов, будет ноль в графах:
+ Раздел 2. Графа 13. Налоговая база
+ Раздел 2. Графа 16. Сумма исчисленного налога
+ Раздел 2. Графа 17. Сумма удержанного налога
+ * @param checkingValue
+ * @param incomeAccruedSum
+ * @param totalDeductionSum
+ * @return true - заполнен, false - не заполнен
+ */
+boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAccruedSum, BigDecimal totalDeductionSum) {
+    if (checkingValue == null) {
+        return false
+    }
+    if (incomeAccruedSum != totalDeductionSum && checkingValue == new BigDecimal(0)) {
+        return false
+    }
+    return true
 }
 
 /**
