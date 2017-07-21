@@ -3732,7 +3732,7 @@ def interdocumentary6ndflCheckData() {
         def sumDohObch2 = mapSumDohObch2.get(stavka6)
 
         if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
-            def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по «Ставке» " + stavka6
+            def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода»") + " по «Ставке» " + stavka6
             logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
         }
     }
