@@ -1631,7 +1631,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId, boolean throwIfEmpt
                 return null
             }
         }
-        departmentCache.put(departmentId, departmentParamList?.get(0))
+        departmentCache.put(departmentId, departmentParamList?.get(departmentParamList.size() - 1))
     }
     return departmentCache.get(departmentId)
 }
@@ -1646,7 +1646,7 @@ def getDepartmentParam(def departmentId) {
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
             departmentParamException(departmentId, declarationData.reportPeriodId)
         }
-        departmentParam = departmentParamList?.get(0)
+        departmentParam = departmentParamList?.get(departmentParamList.size() - 1)
     }
     return departmentParam
 }
@@ -1687,11 +1687,13 @@ def getDepartmentParamTable(def departmentParamId) {
  */
 def getDepartmentParamDetails(String kpp, String oktmo) {
     def departmentParamRow
-    def oktmoReference = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "CODE = '$oktmo'", null).get(0).id.value
-    departmentParamRow = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null).get(0)
-    if (departmentParamRow == null) {
+    def oktmoReferenceList = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "CODE = '$oktmo'", null)
+    def oktmoReference = oktmoReferenceList.get(oktmoReferenceList.size() - 1).id.value
+    def departmentParamRowList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null)
+    if (departmentParamRowList == null || departmentParamRowList.isEmpty()) {
         departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
     }
+    departmentParamRow = departmentParamRowList.get(departmentParamRowList.size() - 1)
 
     return departmentParamRow
 }
