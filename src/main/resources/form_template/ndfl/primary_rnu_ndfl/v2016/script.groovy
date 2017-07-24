@@ -4629,7 +4629,7 @@ class ColumnFillConditionData {
                                     (ndflPersonIncomePreview == null || ndflPersonIncomePreview.incomeAccruedDate < it.incomeAccruedDate)
                         }
                     }
-                    if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax ?: 0 + ndflPersonIncomePreview.calculatedTax ?: 0)) {
+                    if (!(ndflPersonIncome.withholdingTax == (ndflPersonIncome.calculatedTax ?: 0) + (ndflPersonIncomePreview.calculatedTax ?: 0))) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме значений гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\") предыдущей записи",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,

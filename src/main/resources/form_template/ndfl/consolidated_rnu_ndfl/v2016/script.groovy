@@ -213,12 +213,16 @@ void consolidation() {
         Map<String, RefBookValue> refBookPersonRecord = refBookPersonMap.get(refBookPersonRecordId);
 
         Long refBookPersonId = refBookPersonRecord?.get(RefBook.RECORD_ID_ALIAS)?.getNumberValue()?.longValue();
+        NdflPerson ndflPerson = entry.getValue();
 
         if (refBookPersonId == null) {
-            throw new ServiceException("Ошибка при получение записи справочника 'Физические лица'. Не найдена запись номер: " + refBookPersonRecordId);
+            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
+            String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
+            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+            logger.errorExp("%s. %s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp, pathError,
+                    "Не удалось установить связь со справочником \"$R_PERSON\"")
+            continue
         }
-
-        NdflPerson ndflPerson = entry.getValue();
 
         def incomes = ndflPerson.incomes;
         def deductions = ndflPerson.deductions;
@@ -576,10 +580,13 @@ Map<Long, NdflPerson> consolidateNdflPerson(List<NdflPerson> ndflPersonList, Lis
 
         //Консолидируем данные о доходах ФЛ, должны быть в одном разделе
         if (consNdflPerson == null) {
-            consNdflPerson = new NdflPerson();
+            consNdflPerson = new NdflPerson()
             consNdflPerson.recordId = personRecordId;
-            result.put(personRecordId, consNdflPerson);
-
+            consNdflPerson.inp = ndflPerson.inp
+            consNdflPerson.lastName = ndflPerson.lastName
+            consNdflPerson.firstName = ndflPerson.firstName
+            consNdflPerson.middleName = ndflPerson.middleName
+            result.put(personRecordId, consNdflPerson)
         }
         consNdflPerson.incomes.addAll(ndflPerson.incomes);
         consNdflPerson.deductions.addAll(ndflPerson.deductions);
@@ -2084,13 +2091,13 @@ def checkDataReference(
 
         NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPerson.id)
         if (ndflPersonFL == null) {
-            if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
+            // РНУ-НДФЛ консолидированная
+            def personRecord = personMap.get(ndflPerson.recordId)
+            if (personRecord == null) {
                 // РНУ-НДФЛ первичная
                 String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.inp)
             } else {
-                // РНУ-НДФЛ консолидированная
-                def personRecord = personMap.get(ndflPerson.recordId)
                 String fio = (personRecord.get(RF_LAST_NAME).value?:"") + " " + (personRecord.get(RF_FIRST_NAME).value?:"") + " " + (personRecord.get(RF_MIDDLE_NAME).value ?: "")
                 ndflPersonFL = new NdflPersonFL(fio, ndflPerson.recordId.toString())
             }
@@ -3440,7 +3447,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 ) {
                     // «Графа 17 Раздел 2» = «Графа 16 Раздел 2» = «Графа 24 Раздел 2»
                     if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax
-                            && ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
+                            && (ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0))) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значениям гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
@@ -3464,7 +3471,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                                     (ndflPersonIncomePreview == null || ndflPersonIncomePreview.incomeAccruedDate < it.incomeAccruedDate)
                         }
                     }
-                    if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax ?: 0 + ndflPersonIncomePreview.calculatedTax ?: 0)) {
+                    if (!(ndflPersonIncome.withholdingTax == (ndflPersonIncome.calculatedTax ?: 0) + (ndflPersonIncomePreview.calculatedTax ?: 0))) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме значений гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\") предыдущей записи",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
@@ -3474,7 +3481,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInp, pathError, errMsg)
                     }
-                    if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
+                    if (!(ndflPersonIncome.withholdingTax == (ndflPersonIncome.taxSumm ?: 0))) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\")",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
