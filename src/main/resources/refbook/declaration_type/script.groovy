@@ -1109,7 +1109,7 @@ def importNdflResponse() {
     def fileDate = null
 
     if (isNdfl6Response(UploadFileName)) {
-        fileDate = Date.parse("yyyyMMdd", UploadFileName.substring(52, 60))
+        fileDate = Date.parse("yyyyMMdd", UploadFileName.substring(56, 64))
     } else if (isNdfl2ResponseReestr(UploadFileName)) {
         fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
     } else if (isNdfl2ResponseProt(UploadFileName)) {

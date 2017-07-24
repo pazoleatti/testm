@@ -291,7 +291,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
     @Test
     @SuppressWarnings("unchecked")
     public void testNdfl6IV() throws ParseException {
-        String fileName = "IV_NONDFL6_7707083893997950001_7707083893997950001_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
+        String fileName = "IV_NONDFL6_7707083893997950001_7707083893997950001_7763_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
         InputStream inputStream = Ndfl62Test.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/refbook/declaration_type/" + fileName);
 
         testHelper.setImportInputStream(inputStream);
@@ -373,7 +373,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
     @Test
     public void testNdfl6KV() throws ParseException {
 
-        String fileName = "KV_NONDFL6_7707083893997950001_7707083893997950001_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
+        String fileName = "KV_NONDFL6_7707083893997950001_7707083893997950001_7763_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
         InputStream inputStream = Ndfl62Test.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/refbook/declaration_type/" + fileName);
 
         testHelper.setImportInputStream(inputStream);
