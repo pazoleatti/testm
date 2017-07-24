@@ -3658,6 +3658,38 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     }
                 }
             }
+
+            //СведДох12	 Отсутствие нулевых значений
+            LOG_TYPE_NOT_ZERO_CHECK: {
+                if (ndflPersonIncome.incomeAccruedSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.incomePayoutSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_INCOME_PAYOUT_SUMM, ndflPersonIncome.incomePayoutSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.taxRate != null && ScriptUtils.isEmpty(ndflPersonIncome.taxRate)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_TAX_RATE, ndflPersonIncome.taxRate
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.taxSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_TAX_SUMM, ndflPersonIncome.taxSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+            }
         }
     }
     logForDebug("Проверки сведений о доходах (" + (System.currentTimeMillis() - time) + " мс)");
@@ -4383,7 +4415,7 @@ def checkDataDeduction(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> n
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Выч14 Документ о праве на налоговый вычет.Код источника (Графа 7)
-        if (ndflPersonDeduction.typeCode == "1" && ndflPersonDeduction.notifSource != "0000") {
+        if (ndflPersonDeduction.notifType == "1" && ndflPersonDeduction.notifSource != "0000") {
             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
             String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует значению гр. \"%s\" (\"%s\")",
                     C_NOTIF_SOURCE, ndflPersonDeduction.notifSource ?: "",
