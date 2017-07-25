@@ -3902,17 +3902,7 @@ class ColumnFillConditionData {
     class Column10Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
-        }
-    }
-    /**
-     * Проверка: "Раздел 2. Графы 6, 10 заполнены"
-     */
-    @TypeChecked
-    class Column6And10Fill implements ColumnFillConditionChecker {
-        @Override
-        boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.incomeAccruedDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
+            return ndflPersonIncome.incomeAccruedSumm != null
         }
     }
     /**
@@ -3922,7 +3912,7 @@ class ColumnFillConditionData {
     class Column11Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+            return ndflPersonIncome.incomePayoutSumm != null
         }
     }
     /**
@@ -3932,7 +3922,7 @@ class ColumnFillConditionData {
     class Column7And11Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+            return ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.incomePayoutSumm != null
         }
     }
     /**
@@ -3986,9 +3976,9 @@ class ColumnFillConditionData {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             if (temporalySolution) {
-                return !ScriptUtils.isEmpty(ndflPersonIncome.taxRate)
+                return ndflPersonIncome.taxRate != null
             }
-            return !ScriptUtils.isEmpty(ndflPersonIncome.taxRate)
+            return ndflPersonIncome.taxRate != null
         }
     }
     /**
@@ -4112,7 +4102,7 @@ class ColumnFillConditionData {
     class Column22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+            return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm == null
         }
     }
     /**
@@ -4122,7 +4112,7 @@ class ColumnFillConditionData {
     class Column22And23And24Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+            return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm != null
         }
     }
     /**
