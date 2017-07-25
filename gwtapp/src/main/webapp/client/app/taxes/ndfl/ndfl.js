@@ -11,7 +11,8 @@
         'sbrfNdfl.ndflFL',
         'sbrfNdfl.incomesAndTax',
         'sbrfNdfl.deduction',
-        'sbrfNdfl.prepayment'])
+        'sbrfNdfl.prepayment',
+        'sbrfNdfl.formSources'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{formId}',
@@ -74,6 +75,15 @@
                 };
 
                 /**
+                 * @description Обработка события, которое возникает при нажании на ссылку "Источники"
+                 */
+                $scope.showSourcesClick = function () {
+                    var dlg = dialogs.create('client/app/taxes/ndfl/formSources.html', 'sourcesFormCtrl');
+                    return dlg.result.then(function () {
+                    });
+                };
+
+                /**
                  * @description Инициализация первичных данных на странице
                  */
                 function initPage() {
@@ -98,6 +108,5 @@
                 }
 
                 initPage();
-            }])
-    ;
+            }]);
 }());

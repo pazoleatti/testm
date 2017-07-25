@@ -237,5 +237,21 @@
   "logPanel.title.dateTime": "Время",
   "logPanel.title.message": "Сообщение",
   "logPanel.header.message": "Сообщения (всего: {0}; фатальных ошибок: {1})",
-  "logPanel.header.print": "Печать"
+  "logPanel.header.print": "Печать",
+
+  "sources.title.sourcesList": "Источники и приемники формы",
+  "sources.checkbox.sources": "Источники",
+  "sources.checkbox.destinations": "Приемники",
+  "sources.checkbox.uncreated": "Несозданные",
+  "sources.tableColumn.index": "№",
+  "sources.tableColumn.tax": "Налог",
+  "sources.tableColumn.srcOrDest": "Источник / Приёмник",
+  "sources.tableColumn.declarationId": "Номер формы",
+  "sources.tableColumn.department": "Подразделение",
+  "sources.tableColumn.correctionDate": "Дата сдачи корректировки",
+  "sources.tableColumn.declarationKind": "Тип формы",
+  "sources.tableColumn.declarationType": "Вид формы",
+  "sources.tableColumn.year": "Год",
+  "sources.tableColumn.period": "Период",
+  "sources.tableColumn.declarationState": "Состояние формы"
 }

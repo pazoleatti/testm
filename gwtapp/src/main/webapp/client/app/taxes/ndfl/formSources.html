@@ -1,0 +1,35 @@
+<div class="modal-header">
+    <button type="button" class="close" data-ng-click="close()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-transfer"></span>&nbsp;{{::'sources.title.sourcesList' |
+        translate}}
+    </h4>
+</div>
+<div class="modal-body" style="height: 370px;">
+    <div>
+        <label style="margin-bottom: 0;">
+            <input class="cbox" type="checkbox" data-ng-model="gridFilter.showSources" data-ng-change="updateGridData()"/>
+            <span>{{::'sources.checkbox.sources' | translate}}</span>
+        </label>
+        <label style="margin-bottom: 0;">
+            <input class="cbox" type="checkbox" data-ng-model="gridFilter.showDestinations" data-ng-change="updateGridData()"/>
+            <span>{{::'sources.checkbox.destinations' | translate}}</span>
+        </label>
+        <label style="margin-bottom: 0;">
+            <input class="cbox" type="checkbox" data-ng-model="gridFilter.showUncreated" data-ng-change="updateGridData()"/>
+            <span>{{::'sources.checkbox.uncreated' | translate}}</span>
+        </label>
+    </div>
+    <div data-aplana-grid
+         data-grid-options="sourcesGrid.options"
+         data-grid-ctrl="sourcesGrid.ctrl"
+         data-ng-model="sourcesGrid.value"
+         data-grid-hide-legend="false"
+         id="sourcesTable"
+         style="float: left; width: 100%;"></div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" id="closeButton" data-ng-click="close()">
+        <span data-translate-once="button.close"></span>
+    </button>
+</div>
