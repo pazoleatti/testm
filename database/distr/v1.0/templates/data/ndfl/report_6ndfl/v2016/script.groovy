@@ -113,7 +113,7 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field final int REPORT_PERIOD_TYPE_ID = 8
 
 @Field final FORM_NAME_NDFL6 = "6-НДФЛ"
-@Field final FORM_NAME_NDFL2 = "2-НДФЛ(1)"
+@Field final FORM_NAME_NDFL2 = "2-НДФЛ (1)"
 @Field final int DECLARATION_TYPE_RNU_NDFL_ID = 101
 @Field final int DECLARATION_TYPE_NDFL2_1_ID = 102
 @Field final int DECLARATION_TYPE_NDFL2_2_ID = 104
@@ -880,7 +880,7 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
         def sumDohObch2 = mapSumDohObch2.get(stavka6)
 
         if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
-            def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по «Ставке» " + stavka6
+            def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода»") + " по «Ставке» " + stavka6
             logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
         }
     }
