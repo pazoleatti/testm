@@ -1,25 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
-
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,8 +35,12 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 @Controller
-@EnableSpringDataWebSupport
 public class LogEntryController {
+
+    @InitBinder
+    public void init(ServletRequestDataBinder binder) {
+        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+    }
 
     private static final Log LOG = LogFactory.getLog(LogEntryController.class);
 
@@ -51,11 +53,11 @@ public class LogEntryController {
 
     @RequestMapping(value = "/rest/logEntry/{uuid}", method = RequestMethod.GET)
     @ResponseBody
-    public JqgridPagedList<LogEntry> fetchLogEntries(@PathVariable String uuid, Pageable pageable) {
-        int start = (pageable.getPageNumber() - 1) * pageable.getPageSize();
-        int length = pageable.getPageSize();
+    public JqgridPagedList<LogEntry> fetchLogEntries(@PathVariable String uuid, @RequestParam PagingParams pagingParams) {
+        int start = (pagingParams.getPage() - 1) * pagingParams.getCount();
+        int length = pagingParams.getCount();
         PagingResult<LogEntry> logEntries = logEntryService.get(uuid, start, length);
-        return JqgridPagedResourceAssembler.buildPagedList(logEntries, logEntries.getTotalCount(), pageable.getPageNumber(), pageable.getPageSize());
+        return JqgridPagedResourceAssembler.buildPagedList(logEntries, logEntries.getTotalCount(), pagingParams);
     }
 
     @RequestMapping(value = "/rest/logEntry/{uuid}", method = RequestMethod.GET, params = "projection=count")

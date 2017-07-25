@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -21,6 +23,11 @@ import java.util.*;
 @Controller
 @EnableSpringDataWebSupport
 public class NotificationRestController {
+
+    @InitBinder
+    public void init(ServletRequestDataBinder binder) {
+        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+    }
 
     @Autowired
     SecurityService securityService;
