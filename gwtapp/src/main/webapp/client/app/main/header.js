@@ -182,26 +182,15 @@
                     updateNotificationCount();
                 });
 
-                var img = null;
-                var button = document.getElementById('btnNotif');
-
                 function updateNotificationCount() {
                     NotificationResource.query({
                         projection: 'count'
                     }, function (data) {
                         if (parseInt(data.notifications_count) !== 0) {
-                            if (img === null) {
-                                img = new Image();
-                                button.appendChild(img);
-                                img.src = "resources/img/attention_on_20.png";
-                                img.style.cssFloat = "left";
-                            }
+                            $scope.showImage = true;
                             decline(parseInt(data.notifications_count), "оповещение", "оповещения", "оповещений");
                         } else {
-                            if (img !== null) {
-                                button.removeChild(img);
-                                img = null;
-                            }
+                            $scope.showImage = false;
                             $scope.notificationsCount = "Нет оповещений";
                         }
                     });
