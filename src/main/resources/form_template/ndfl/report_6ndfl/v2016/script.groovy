@@ -1078,6 +1078,10 @@ List<PairKppOktmo> getPairKppOktmoList() {
             }
         }
         referencesOktmoList.removeAll([null])
+        if (referencesOktmoList.isEmpty()) {
+            logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", FORM_NAME_NDFL6, depName, "$otchetGod ${reportPeriod.name}")
+            return
+        }
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
         departmentParamTableList.each { dep ->
             ScriptUtils.checkInterrupted()

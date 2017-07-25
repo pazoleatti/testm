@@ -458,14 +458,31 @@ public class FlexiblePager extends AbstractPager {
         layout.add(rowsCountOnPage);
 
         rowsCountOnPage.getElement().getStyle().setWidth(3, com.google.gwt.dom.client.Style.Unit.EM);
-        rowsCountOnPage.addKeyPressHandler(new KeyPressHandler() {
+		rowsCountOnPage.addFocusHandler(new FocusHandler() {
+			@Override
+			public void onFocus(com.google.gwt.event.dom.client.FocusEvent event) {
+				if (eventBus != null) {
+					eventBus.fireEvent(new FocusActionEvent(true));
+				}
+			}
+		});
+		rowsCountOnPage.addBlurHandler(new BlurHandler() {
+			@Override
+			public void onBlur(BlurEvent event) {
+				if (eventBus != null) {
+					eventBus.fireEvent(new FocusActionEvent(false));
+				}
+			}
+		});
+        rowsCountOnPage.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyPress(KeyPressEvent event) {
-                if (event.getUnicodeCharCode() == 13) {
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeEvent().getKeyCode()==KeyCodes.KEY_ENTER) {
+					rowsCountOnPage.setValue(Integer.valueOf(rowsCountOnPage.getText()));
                     updateRowsCountOnPage();
                 } else {
                     // запретить символы кроме цифр, цифры в таблице кодировки 48..57
-                    if (event.getUnicodeCharCode() < 48 || 57 < event.getUnicodeCharCode()) {
+                    if (event.getNativeKeyCode() < 48 || 57 < event.getNativeKeyCode()) {
                         event.preventDefault();
                     }
                 }
@@ -726,6 +743,7 @@ public class FlexiblePager extends AbstractPager {
     /**  Обновить количество строк на странице в локальном хранилище браузера. */
     private void updateRowsCountOnPage() {
         if (rowsCountOnPage.getValue() != null && rowsCountOnPage.getValue() > 0) {
+			int i = rowsCountOnPage.getValue();
             getDisplay().setVisibleRange(new Range(0, rowsCountOnPage.getValue()));
             setPageSize(rowsCountOnPage.getValue());
         }

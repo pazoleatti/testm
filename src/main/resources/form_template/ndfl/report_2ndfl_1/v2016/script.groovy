@@ -1754,6 +1754,10 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
             }
         }
         referencesOktmoList.removeAll([null])
+        if (referencesOktmoList.isEmpty()) {
+            logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", reportType, depName, "$otchetGod ${reportPeriod.name}")
+            return
+        }
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
         departmentParamTableList.each { dep ->
             ScriptUtils.checkInterrupted();
