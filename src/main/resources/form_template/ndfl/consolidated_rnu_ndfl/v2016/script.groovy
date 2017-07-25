@@ -2640,8 +2640,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
-        operationNotRelateToCurrentPeriod(ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.taxDate,
-                ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPersonFL.inp, ndflPersonFL.fio, ndflPersonIncome)
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         List<ColumnFillConditionData> columnFillConditionDataList = []
