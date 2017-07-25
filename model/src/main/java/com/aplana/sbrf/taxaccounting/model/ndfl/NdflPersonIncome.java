@@ -49,16 +49,16 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Date taxDate;
 
     // НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
-    private Long calculatedTax;
+    private BigDecimal calculatedTax;
 
     // НДФЛ.Расчет.Сумма.Удержанный (Графа 17) (НУ)
-    private Long withholdingTax;
+    private BigDecimal withholdingTax;
 
     // НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
-    private Long notHoldingTax;
+    private BigDecimal notHoldingTax;
 
     // НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)
-    private Long overholdingTax;
+    private BigDecimal overholdingTax;
 
     // НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)
     private Long refoundTax;
@@ -73,7 +73,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private String paymentNumber;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Сумма (Графа 24)
-    private Integer taxSumm;
+    private Long taxSumm;
 
     public static final String TABLE_NAME = "ndfl_person_income";
     public static final String SEQ = "seq_ndfl_person_income";
@@ -212,35 +212,35 @@ public class NdflPersonIncome extends NdflPersonOperation {
         this.taxDate = taxDate;
     }
 
-    public Long getCalculatedTax() {
+    public BigDecimal getCalculatedTax() {
         return calculatedTax;
     }
 
-    public void setCalculatedTax(Long calculatedTax) {
+    public void setCalculatedTax(BigDecimal calculatedTax) {
         this.calculatedTax = calculatedTax;
     }
 
-    public Long getWithholdingTax() {
+    public BigDecimal getWithholdingTax() {
         return withholdingTax;
     }
 
-    public void setWithholdingTax(Long withholdingTax) {
+    public void setWithholdingTax(BigDecimal withholdingTax) {
         this.withholdingTax = withholdingTax;
     }
 
-    public Long getNotHoldingTax() {
+    public BigDecimal getNotHoldingTax() {
         return notHoldingTax;
     }
 
-    public void setNotHoldingTax(Long notHoldingTax) {
+    public void setNotHoldingTax(BigDecimal notHoldingTax) {
         this.notHoldingTax = notHoldingTax;
     }
 
-    public Long getOverholdingTax() {
+    public BigDecimal getOverholdingTax() {
         return overholdingTax;
     }
 
-    public void setOverholdingTax(Long overholdingTax) {
+    public void setOverholdingTax(BigDecimal overholdingTax) {
         this.overholdingTax = overholdingTax;
     }
 
@@ -276,11 +276,11 @@ public class NdflPersonIncome extends NdflPersonOperation {
         this.paymentNumber = paymentNumber;
     }
 
-    public Integer getTaxSumm() {
+    public Long getTaxSumm() {
         return taxSumm;
     }
 
-    public void setTaxSumm(Integer taxSumm) {
+    public void setTaxSumm(Long taxSumm) {
         this.taxSumm = taxSumm;
     }
 

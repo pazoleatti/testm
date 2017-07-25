@@ -54,7 +54,7 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
 
     public final NumberPath<java.math.BigDecimal> periodPrevSumm = createNumber("periodPrevSumm", java.math.BigDecimal.class);
 
-    public final NumberPath<java.math.BigInteger> rowNum = createNumber("rowNum", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> rowNum = createNumber("rowNum", java.math.BigDecimal.class);
 
     public final NumberPath<Long> sourceId = createNumber("sourceId", Long.class);
 

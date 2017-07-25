@@ -34,7 +34,7 @@ public class QFormColumn extends com.querydsl.sql.RelationalPathBase<QFormColumn
 
     public final StringPath filter = createString("filter");
 
-    public final NumberPath<Byte> format = createNumber("format", Byte.class);
+    public final NumberPath<Integer> format = createNumber("format", Integer.class);
 
     public final NumberPath<Integer> formTemplateId = createNumber("formTemplateId", Integer.class);
 

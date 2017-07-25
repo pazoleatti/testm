@@ -36,11 +36,11 @@ public class QNdflPersonPrepayment extends com.querydsl.sql.RelationalPathBase<Q
 
     public final StringPath operationId = createString("operationId");
 
-    public final NumberPath<java.math.BigInteger> rowNum = createNumber("rowNum", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> rowNum = createNumber("rowNum", java.math.BigDecimal.class);
 
     public final NumberPath<Long> sourceId = createNumber("sourceId", Long.class);
 
-    public final NumberPath<java.math.BigInteger> summ = createNumber("summ", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> summ = createNumber("summ", java.math.BigDecimal.class);
 
     public final com.querydsl.sql.PrimaryKey<QNdflPersonPrepayment> ndflPpPk = createPrimaryKey(id);
 

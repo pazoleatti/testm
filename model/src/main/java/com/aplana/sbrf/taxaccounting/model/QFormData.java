@@ -46,7 +46,7 @@ public class QFormData extends com.querydsl.sql.RelationalPathBase<QFormData> {
 
     public final NumberPath<Integer> numberPreviousRow = createNumber("numberPreviousRow", Integer.class);
 
-    public final NumberPath<Byte> periodOrder = createNumber("periodOrder", Byte.class);
+    public final NumberPath<Integer> periodOrder = createNumber("periodOrder", Integer.class);
 
     public final NumberPath<Byte> returnSign = createNumber("returnSign", Byte.class);
 

@@ -24,8 +24,8 @@
          * @description Контроллер страницы РНУ НДФЛ и вкладки "Реквизиты"
          */
         .controller('ndflCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', 'dialogs', 'ShowToDoDialog', '$http',
-            function ($scope, $timeout, $state, $stateParams, dialogs, $showToDoDialog, $http) {
+            '$scope', '$timeout', '$state', '$stateParams', 'dialogs', 'ShowToDoDialog', '$http', 'DeclarationDataResource',
+            function ($scope, $timeout, $state, $stateParams, dialogs, $showToDoDialog, $http, DeclarationDataResource) {
 
                 $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
 
@@ -77,20 +77,23 @@
                  * @description Инициализация первичных данных на странице
                  */
                 function initPage() {
-
-                    $http.get('controller/actions/declarationData/getDeclarationData/' + $stateParams.formId)
-                        .then(
-                            function (response) {
-                                $scope.department = response.data.department;
+                    DeclarationDataResource.query({
+                            id: $stateParams.formId,
+                            projection: "getDeclarationData"
+                        },
+                        function (data) {
+                            if (data) {
+                                $scope.department = data.department;
                                 $scope.formNumber = $stateParams.formId;
-                                $scope.creator = response.data.creator_user_name;
-                                $scope.formType = response.data.form_kind;
-                                $scope.period = response.data.report_period;
-                                $scope.state = response.data.state;
-                                $scope.nameAsnu = response.data.asnu_name;
-                                $scope.dateAndTimeCreate = response.data.date_and_time_create;
+                                $scope.creator = data.creationUserName;
+                                $scope.formType = data.declarationFormKind;
+                                $scope.period = data.reportPeriodYear + ", " + data.reportPeriod;
+                                $scope.state = data.state;
+                                $scope.nameAsnu = data.asnuName;
+                                $scope.dateAndTimeCreate = data.creationDate;
                             }
-                        );
+                        }
+                    );
                     setButtonsEnabled();
                 }
 

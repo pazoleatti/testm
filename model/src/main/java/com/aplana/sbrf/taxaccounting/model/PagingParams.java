@@ -8,6 +8,8 @@ import java.io.Serializable;
 public class PagingParams implements Serializable{
 	private static final long serialVersionUID = 5113425251692266554L;
 
+	private int page = 1;
+
 	/**
 	 * Начальный номер строки, с которой должен быть возвращен результат. По умолчанию = 0
 	 */
@@ -57,6 +59,14 @@ public class PagingParams implements Serializable{
 		this.count = count;
 	}
 
+	public int getPage() {
+		return page;
+	}
+
+	public void setPage(int page) {
+		this.page = page;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -64,9 +74,9 @@ public class PagingParams implements Serializable{
 		builder.append(startIndex);
 		builder.append(", count=");
 		builder.append(count);
+		builder.append(", page=");
+		builder.append(page);
 		builder.append("]");
 		return builder.toString();
 	}
-	
-	
 }

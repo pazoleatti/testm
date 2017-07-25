@@ -206,14 +206,14 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         Integer column14NotEmpty = 1;
         Date column15Empty = null;
         Date column15NotEmpty = new Date();
-        Long column16Empty = null;
-        Long column16NotEmpty = 1L;
-        Long column17Empty = null;
-        Long column17NotEmpty = 1L;
-        Long column18Empty = null;
-        Long column18NotEmpty = 1L;
-        Long column19Empty = null;
-        Long column19NotEmpty = 1L;
+        BigDecimal column16Empty = null;
+        BigDecimal column16NotEmpty = BigDecimal.valueOf(1L);
+        BigDecimal column17Empty = null;
+        BigDecimal column17NotEmpty = BigDecimal.valueOf(1L);
+        BigDecimal column18Empty = null;
+        BigDecimal column18NotEmpty = BigDecimal.valueOf(1L);
+        BigDecimal column19Empty = null;
+        BigDecimal column19NotEmpty = BigDecimal.valueOf(1L);
         Long column20Empty = null;
         Long column20NotEmpty = 1L;
         Date column21Empty = null;
@@ -222,139 +222,139 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         Date column22NotEmpty = new Date();
         String column23Empty = null;
         String column23NotEmpty = "1";
-        Integer column24Empty = null;
-        Integer column24NotEmpty = 1;
+        Long column24Empty = null;
+        Long column24NotEmpty = 1L;
 
         //1 Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
-        final NdflPersonIncome ndflPersonIncome1 = createNdflPersonIncome(ndflPerson1.getId(), 1, column4Empty,
+        final NdflPersonIncome ndflPersonIncome1 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(1), column4Empty,
                 column5Empty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22Empty, column23Empty, column24Empty);
-        final NdflPersonIncome ndflPersonIncome2 = createNdflPersonIncome(ndflPerson1.getId(), 2, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome2 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(2), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22Empty, column23Empty, column24Empty);
 
         //2 Раздел 2. Графа 6 должна быть заполнена, если заполнена Раздел 2. Графа 10
-        final NdflPersonIncome ndflPersonIncome3 = createNdflPersonIncome(ndflPerson1.getId(), 3, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome3 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(3), column4NotEmpty,
                 column5NotEmpty, column6Empty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12Empty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16Empty, column17NotEmpty, column18Empty,
                 column19Empty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome4 = createNdflPersonIncome(ndflPerson1.getId(), 4, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome4 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(4), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12Empty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //3 Раздел 2. Графа 7 должна быть заполнена, если заполнена Раздел 2. Графа 11
-        final NdflPersonIncome ndflPersonIncome5 = createNdflPersonIncome(ndflPerson1.getId(), 5, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome5 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(5), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7Empty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome6 = createNdflPersonIncome(ndflPerson1.getId(), 6, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome6 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(6), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //4 Раздел 2. Графа 10 должна быть заполнена, если заполнена Раздел 2. Графа 6
-        final NdflPersonIncome ndflPersonIncome7 = createNdflPersonIncome(ndflPerson1.getId(), 7, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome7 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(7), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10Empty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome8 = createNdflPersonIncome(ndflPerson1.getId(), 8, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome8 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(8), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //5 Раздел 2. Графа 11 должна быть заполнена, если заполнена Раздел 2. Графа 7
-        final NdflPersonIncome ndflPersonIncome9 = createNdflPersonIncome(ndflPerson1.getId(), 9, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome9 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(9), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11Empty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome10 = createNdflPersonIncome(ndflPerson1.getId(), 10, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome10 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(10), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //6 Раздел 2. Графа 12 должна быть не заполнена, если заполнены Раздел 2. Графы 22,23,24
-        final NdflPersonIncome ndflPersonIncome11 = createNdflPersonIncome(ndflPerson1.getId(), 11, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome11 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(11), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13Empty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome12 = createNdflPersonIncome(ndflPerson1.getId(), 12, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome12 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(12), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12Empty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //7 Раздел 2. Графы 13,14,15 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
-        final NdflPersonIncome ndflPersonIncome13 = createNdflPersonIncome(ndflPerson1.getId(), 13, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome13 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(13), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13Empty, column14Empty, column15Empty, column16Empty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22Empty, column23Empty, column24Empty);
-        final NdflPersonIncome ndflPersonIncome14 = createNdflPersonIncome(ndflPerson1.getId(), 14, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome14 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(14), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22Empty, column23Empty, column24Empty);
 
         //8 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 16
-        final NdflPersonIncome ndflPersonIncome15 = createNdflPersonIncome(ndflPerson1.getId(), 15, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome15 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(15), column4NotEmpty,
                 column5NotEmpty, column6Empty, column7NotEmpty, column10Empty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18Empty,
                 column19Empty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome16 = createNdflPersonIncome(ndflPerson1.getId(), 16, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome16 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(16), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //9 Раздел 2. Графы 6,10 должны быть заполнены, если заполнена Раздел 2. Графа 18 или 19
-        final NdflPersonIncome ndflPersonIncome17 = createNdflPersonIncome(ndflPerson1.getId(), 17, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome17 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(17), column4NotEmpty,
                 column5NotEmpty, column6Empty, column7NotEmpty, column10Empty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16Empty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome18 = createNdflPersonIncome(ndflPerson1.getId(), 18, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome18 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(18), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //10 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 17
-        final NdflPersonIncome ndflPersonIncome19 = createNdflPersonIncome(ndflPerson1.getId(), 19, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome19 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(19), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7Empty, column10NotEmpty, column11Empty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20Empty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome20 = createNdflPersonIncome(ndflPerson1.getId(), 20, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome20 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(20), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //11 Раздел 2. Графы 7,11 должны быть заполнены, если заполнена Раздел 2. Графа 20
-        final NdflPersonIncome ndflPersonIncome21 = createNdflPersonIncome(ndflPerson1.getId(), 21, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome21 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(21), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7Empty, column10NotEmpty, column11Empty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17Empty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome22 = createNdflPersonIncome(ndflPerson1.getId(), 22, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome22 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(22), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
 
         //12 Раздел 2. Графа 21 должна быть заполнена, если заполнены Раздел 2. Графы 7,11 или 22,23,24
-        final NdflPersonIncome ndflPersonIncome23 = createNdflPersonIncome(ndflPerson1.getId(), 23, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome23 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(23), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7Empty, column10NotEmpty, column11Empty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21Empty, column22NotEmpty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome24 = createNdflPersonIncome(ndflPerson1.getId(), 24, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome24 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(24), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7Empty, column10NotEmpty, column11Empty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22Empty, column23Empty, column24Empty);
 
         //13 Должны быть либо заполнены все 3 Графы 22,23,24, либо ни одна их них
-        final NdflPersonIncome ndflPersonIncome25 = createNdflPersonIncome(ndflPerson1.getId(), 25, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome25 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(25), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22Empty, column23NotEmpty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome26 = createNdflPersonIncome(ndflPerson1.getId(), 26, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome26 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(26), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23Empty, column24NotEmpty);
-        final NdflPersonIncome ndflPersonIncome27 = createNdflPersonIncome(ndflPerson1.getId(), 27, column4NotEmpty,
+        final NdflPersonIncome ndflPersonIncome27 = createNdflPersonIncome(ndflPerson1.getId(), new BigDecimal(27), column4NotEmpty,
                 column5NotEmpty, column6NotEmpty, column7NotEmpty, column10NotEmpty, column11NotEmpty, column12NotEmpty,
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24Empty);
@@ -507,7 +507,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .build();
         Date d=new Date( 2015,12,12);
         final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(1)
+                .rowNum(new BigDecimal(1))
                 .ndflPersonId(ndflPerson1.getId())
                 .operationId("1234")
                 .taxRate(13)
@@ -526,7 +526,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
         final NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeductionBuilder.Builder()
 
-                .rowNum(1)
+                .rowNum(new BigDecimal(1))
                 .operationId("1234")
                 .ndflPersonId(ndflPerson1.getId())
                 .typeCode("1010")
@@ -554,7 +554,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .build();
 
         final NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(1)
+                .rowNum(new BigDecimal(1))
                 .ndflPersonId(ndflPerson1.getId())
                 .operationId("1234")
                 .taxRate(13)
@@ -573,7 +573,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
         final NdflPersonDeduction ndflPersonDeduction2 = new NdflPersonDeductionBuilder.Builder()
 
-                .rowNum(1)
+                .rowNum(new BigDecimal(1))
                 .operationId("1234")
                 .ndflPersonId(ndflPerson1.getId())
                 .typeCode("1010")
@@ -636,19 +636,19 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .build();
 
         final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(1)
+                .rowNum(new BigDecimal(1))
                 .id(new Long(12))
                 .ndflPersonId(ndflPerson1.getId())
                 .taxRate(13)
                 .incomeCode("1010")
                 .incomeAccruedDate(new Date(2015,12,12))
-                .calculatedTax(new Long(12))
+                .calculatedTax(new BigDecimal(12))
                 .incomePayoutDate(new Date(2015,12,12))
                 .paymentDate(new Date(2015,12,12))
                 .taxDate(new Date(2015,12,12))
                 .incomeAccruedSumm(new BigDecimal(125))
                 .totalDeductionsSumm( new BigDecimal(6 )  )
-                .calculatedTax(new Long(12))
+                .calculatedTax(new BigDecimal(12))
 
                 .build();
         ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
@@ -701,7 +701,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .status("2")
                 .build();
         final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(1)
+                .rowNum(new BigDecimal(1))
                 .ndflPersonId(ndflPerson1.getId())
                 .taxRate(13)
                 .incomeCode("1010")
@@ -721,7 +721,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .status("1")
                 .build();
         final NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(2)
+                .rowNum(new BigDecimal(2))
                 .ndflPersonId(ndflPerson2.getId())
                 .taxRate(15)
                 .incomeCode("1010")
@@ -741,7 +741,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .status("2")
                 .build();
         final NdflPersonIncome ndflPersonIncome3 = new NdflPersonIncomeBuilder.Builder()
-                .rowNum(3)
+                .rowNum(new BigDecimal(3))
                 .ndflPersonId(ndflPerson3.getId())
                 .taxRate(35)
                 .incomeCode("2740")
@@ -810,7 +810,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         public static class Builder {
             private Long id;
             private String operationId;
-            private Integer rowNum;
+            private BigDecimal rowNum;
             protected Long ndflPersonId;
             private String incomeCode;
             private String incomeType;
@@ -824,17 +824,17 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private BigDecimal taxBase;
             private Integer taxRate;
             private Date taxDate;
-            private Long calculatedTax;
-            private Long withholdingTax;
-            private Long notHoldingTax;
-            private Long overholdingTax;
+            private BigDecimal calculatedTax;
+            private BigDecimal withholdingTax;
+            private BigDecimal notHoldingTax;
+            private BigDecimal overholdingTax;
             private Long refoundTax;
             private Date taxTransferDate;
             private Date paymentDate;
             private String paymentNumber;
-            private Integer taxSumm;
+            private Long taxSumm;
             public Builder id(Long id) {this.id = id; return this;}
-            public Builder rowNum(Integer rowNum) {this.rowNum = rowNum; return this;}
+            public Builder rowNum(BigDecimal rowNum) {this.rowNum = rowNum; return this;}
             public Builder ndflPersonId(Long ndflPersonId) {this.ndflPersonId = ndflPersonId; return this;}
             public Builder incomeCode(String incomeCode) {this.incomeCode = incomeCode; return this;}
             public Builder incomeType(String incomeType) {this.incomeType = incomeType; return this;}
@@ -850,15 +850,15 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             public Builder taxBase(BigDecimal taxBase) {this.taxBase = taxBase; return this;}
             public Builder taxRate(Integer taxRate) {this.taxRate = taxRate; return this;}
             public Builder taxDate(Date taxDate) {this.taxDate = taxDate; return this;}
-            public Builder calculatedTax(Long calculatedTax) {this.calculatedTax = calculatedTax; return this;}
-            public Builder withholdingTax(Long withholdingTax) {this.withholdingTax = withholdingTax; return this;}
-            public Builder notHoldingTax(Long notHoldingTax) {this.notHoldingTax = notHoldingTax; return this;}
-            public Builder overholdingTax(Long overholdingTax) {this.overholdingTax = overholdingTax; return this;}
+            public Builder calculatedTax(BigDecimal calculatedTax) {this.calculatedTax = calculatedTax; return this;}
+            public Builder withholdingTax(BigDecimal withholdingTax) {this.withholdingTax = withholdingTax; return this;}
+            public Builder notHoldingTax(BigDecimal notHoldingTax) {this.notHoldingTax = notHoldingTax; return this;}
+            public Builder overholdingTax(BigDecimal overholdingTax) {this.overholdingTax = overholdingTax; return this;}
             public Builder refoundTax(Long refoundTax) {this.refoundTax = refoundTax; return this;}
             public Builder taxTransferDate(Date taxTransferDate) {this.taxTransferDate = taxTransferDate; return this;}
             public Builder paymentDate(Date paymentDate) {this.paymentDate = paymentDate; return this;}
             public Builder paymentNumber(String paymentNumber) {this.paymentNumber = paymentNumber; return this;}
-            public Builder taxSumm(Integer taxSumm) {this.taxSumm = taxSumm; return this;}
+            public Builder taxSumm(Long taxSumm) {this.taxSumm = taxSumm; return this;}
             public NdflPersonIncome build() {
                 return new NdflPersonIncomeBuilder(this).ndflPersonIncome;
             }
@@ -907,7 +907,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         public static class Builder {
             private Long ndflPersonId;
             private Long id;
-            private Integer rowNum;
+            private BigDecimal rowNum;
             private String typeCode;
             private String notifType;
             private Date notifDate;
@@ -941,7 +941,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             public NdflPersonDeduction build() {
                 return new NdflPersonDeductionBuilder(this).ndflPersonDeduction;
             }
-            public Builder rowNum(Integer rowNum) {this.rowNum = rowNum; return this;}
+            public Builder rowNum(BigDecimal rowNum) {this.rowNum = rowNum; return this;}
 
         }
         private NdflPersonDeductionBuilder(Builder b) {
@@ -1162,12 +1162,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      * Сведения о доходах и НДФЛ
      * @return
      */
-    private NdflPersonIncome createNdflPersonIncome(Long ndflPersonId, Integer rowNum,
+    private NdflPersonIncome createNdflPersonIncome(Long ndflPersonId, BigDecimal rowNum,
                                                     String column4, String column5,
                                                     Date column6, Date column7, BigDecimal column10, BigDecimal column11,
                                                     BigDecimal column12, BigDecimal column13, Integer column14, Date column15,
-                                                    Long column16, Long column17, Long column18, Long column19, Long column20,
-                                                    Date column21, Date column22, String column23, Integer column24
+                                                    BigDecimal column16, BigDecimal column17, BigDecimal column18, BigDecimal column19, Long column20,
+                                                    Date column21, Date column22, String column23, Long column24
     ) {
         NdflPersonIncome ndflPersonIncome = new NdflPersonIncome();
 

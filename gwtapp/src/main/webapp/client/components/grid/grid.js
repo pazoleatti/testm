@@ -1092,6 +1092,11 @@
                                 var requestParameters = (_.isFunction(gridConfig.requestParameters) ?
                                         gridConfig.requestParameters() : gridConfig.requestParameters) || {};
                                 requestParameters = angular.extend($pagingBuilder(postdata), requestParameters);
+                                requestParameters.pagingParams = JSON.stringify({
+                                    page: requestParameters.page,
+                                    count: requestParameters.rows,
+                                    startIndex: requestParameters.page === 1 ? 0 : requestParameters.rows * (requestParameters.page - 1)
+                                });
 
                                 var gridLoadData = function () {
                                     gridConfig.angularResource.query(requestParameters, function (data) {

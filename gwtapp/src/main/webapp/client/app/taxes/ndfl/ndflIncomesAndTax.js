@@ -232,7 +232,8 @@
                             value: $scope.searchFilter.params.paymentDateTo
                         });
                     }
-                }
+                };
+                
             }])
 
 }());

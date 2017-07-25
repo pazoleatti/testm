@@ -32,13 +32,13 @@ public class QMvFiasAreaAct extends com.querydsl.sql.RelationalPathBase<QMvFiasA
 
     public final StringPath autocode = createString("autocode");
 
-    public final NumberPath<Byte> centstatus = createNumber("centstatus", Byte.class);
+    public final NumberPath<Integer> centstatus = createNumber("centstatus", Integer.class);
 
     public final StringPath citycode = createString("citycode");
 
     public final StringPath ctarcode = createString("ctarcode");
 
-    public final NumberPath<Byte> currstatus = createNumber("currstatus", Byte.class);
+    public final NumberPath<Integer> currstatus = createNumber("currstatus", Integer.class);
 
     public final NumberPath<Byte> divtype = createNumber("divtype", Byte.class);
 
@@ -58,7 +58,7 @@ public class QMvFiasAreaAct extends com.querydsl.sql.RelationalPathBase<QMvFiasA
 
     public final StringPath offname = createString("offname");
 
-    public final NumberPath<Byte> operstatus = createNumber("operstatus", Byte.class);
+    public final NumberPath<Integer> operstatus = createNumber("operstatus", Integer.class);
 
     public final NumberPath<Long> parentguid = createNumber("parentguid", Long.class);
 

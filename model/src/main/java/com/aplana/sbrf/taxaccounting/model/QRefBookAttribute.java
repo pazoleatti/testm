@@ -28,7 +28,7 @@ public class QRefBookAttribute extends com.querydsl.sql.RelationalPathBase<QRefB
 
     public final NumberPath<Long> attributeId = createNumber("attributeId", Long.class);
 
-    public final NumberPath<Byte> format = createNumber("format", Byte.class);
+    public final NumberPath<Integer> format = createNumber("format", Integer.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -40,7 +40,7 @@ public class QRefBookAttribute extends com.querydsl.sql.RelationalPathBase<QRefB
 
     public final NumberPath<Integer> ord = createNumber("ord", Integer.class);
 
-    public final NumberPath<Byte> precision = createNumber("precision", Byte.class);
+    public final NumberPath<Integer> precision = createNumber("precision", Integer.class);
 
     public final NumberPath<Byte> readOnly = createNumber("readOnly", Byte.class);
 

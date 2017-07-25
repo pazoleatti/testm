@@ -21,7 +21,13 @@
         }])
         // ФЛ
         .factory('NdflPersonResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/ndflPerson/get?projection=:projection', {}, {
+            return $resource('/controller/rest/ndflPerson?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+        // Данные для формы
+        .factory('DeclarationDataResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])

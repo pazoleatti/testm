@@ -13,21 +13,14 @@ import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
-@RequestMapping(value = "/actions/declarationData")
 public class DeclarationDataController {
 
     @Autowired
@@ -70,7 +63,7 @@ public class DeclarationDataController {
     };
 
 
-    @RequestMapping(value = "/xlsx/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/actions/declarationData/xlsx/{id}", method = RequestMethod.GET)
     public void xlsx(@PathVariable long id, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
@@ -100,7 +93,7 @@ public class DeclarationDataController {
         }
     }
 
-    @RequestMapping(value = "/specific/{alias}/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/actions/declarationData/specific/{alias}/{id}", method = RequestMethod.GET)
     public void specific(@PathVariable String alias, @PathVariable long id, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
@@ -149,7 +142,7 @@ public class DeclarationDataController {
     }
 
 
-    @RequestMapping(value = "/xml/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/actions/declarationData/xml/{id}", method = RequestMethod.GET)
     public void xml(@PathVariable int id, HttpServletResponse response)
             throws IOException {
 
@@ -166,40 +159,42 @@ public class DeclarationDataController {
 		}
     }
 
-    @RequestMapping(value = "/getDeclarationData/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/rest/declarationData", method = RequestMethod.GET, params="projection=getDeclarationData")
     @ResponseBody
-    public Map<String, Object> fetchDeclarationData(@PathVariable long id) {
-        Map<String, Object> result = new HashMap<String, Object>();
+    public DeclarationResult fetchDeclarationData(@RequestParam long id) {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
         if (!declarationService.existDeclarationData(id)) {
             throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id), null);
         }
 
+        DeclarationResult result = new DeclarationResult();
+
         DeclarationData declaration = declarationService.get(id, userInfo);
-        result.put("department",departmentService.getParentsHierarchy(
+        result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
+
+        result.setState(declaration.getState().getTitle());
 
         String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {
-            result.put("creator_user_name", userService.getUser(userLogin).getName());
+            result.setCreationUserName(userService.getUser(userLogin).getName());
         }
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        result.put("form_kind", declarationTemplate.getDeclarationFormKind().getTitle());
+        result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
                 declaration.getDepartmentReportPeriodId());
-        result.put("report_period", departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " +departmentReportPeriod.getReportPeriod().getName());
-
-        result.put("state", declaration.getState().getTitle());
+        result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
+        result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
 
         if (declaration.getAsnuId() != null) {
             RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
-            result.put("asnu_name", asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
+            result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
         }
 
-        result.put("date_and_time_create", sdf.get().format(logBusinessService.getFormCreationDate(declaration.getId())));
+        result.setCreationDate(sdf.get().format(logBusinessService.getFormCreationDate(declaration.getId())));
         return result;
     }
 }

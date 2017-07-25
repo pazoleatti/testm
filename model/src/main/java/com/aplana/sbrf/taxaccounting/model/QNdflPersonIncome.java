@@ -24,7 +24,7 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public static final QNdflPersonIncome ndflPersonIncome = new QNdflPersonIncome("NDFL_PERSON_INCOME");
 
-    public final NumberPath<java.math.BigInteger> calculatedTax = createNumber("calculatedTax", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> calculatedTax = createNumber("calculatedTax", java.math.BigDecimal.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -44,13 +44,13 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<Long> ndflPersonId = createNumber("ndflPersonId", Long.class);
 
-    public final NumberPath<java.math.BigInteger> notHoldingTax = createNumber("notHoldingTax", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> notHoldingTax = createNumber("notHoldingTax", java.math.BigDecimal.class);
 
     public final StringPath oktmo = createString("oktmo");
 
     public final StringPath operationId = createString("operationId");
 
-    public final NumberPath<java.math.BigInteger> overholdingTax = createNumber("overholdingTax", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> overholdingTax = createNumber("overholdingTax", java.math.BigDecimal.class);
 
     public final DateTimePath<java.sql.Timestamp> paymentDate = createDateTime("paymentDate", java.sql.Timestamp.class);
 
@@ -58,7 +58,7 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<Long> refoundTax = createNumber("refoundTax", Long.class);
 
-    public final NumberPath<java.math.BigInteger> rowNum = createNumber("rowNum", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> rowNum = createNumber("rowNum", java.math.BigDecimal.class);
 
     public final NumberPath<Long> sourceId = createNumber("sourceId", Long.class);
 
@@ -66,7 +66,7 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final DateTimePath<java.sql.Timestamp> taxDate = createDateTime("taxDate", java.sql.Timestamp.class);
 
-    public final NumberPath<Byte> taxRate = createNumber("taxRate", Byte.class);
+    public final NumberPath<Integer> taxRate = createNumber("taxRate", Integer.class);
 
     public final NumberPath<Long> taxSumm = createNumber("taxSumm", Long.class);
 
@@ -74,7 +74,7 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<java.math.BigDecimal> totalDeductionsSumm = createNumber("totalDeductionsSumm", java.math.BigDecimal.class);
 
-    public final NumberPath<java.math.BigInteger> withholdingTax = createNumber("withholdingTax", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> withholdingTax = createNumber("withholdingTax", java.math.BigDecimal.class);
 
     public final com.querydsl.sql.PrimaryKey<QNdflPersonIncome> ndflPersonIPk = createPrimaryKey(id);
 

@@ -43,6 +43,18 @@
                     <sourceFolder></sourceFolder>
                     <targetFolder>model/src/main/java</targetFolder>
                     <exportViews>false</exportViews>
+                    <numericMappings>
+                        <numericMapping>
+                            <total>2</total>
+                            <decimal>0</decimal>
+                            <javaType>java.lang.Integer</javaType>
+                        </numericMapping>
+                        <numericMapping>
+                            <total>20</total>
+                            <decimal>0</decimal>
+                            <javaType>java.math.BigDecimal</javaType>
+                        </numericMapping>
+                    </numericMappings>
                 </configuration>
                 <dependencies>
                     <dependency>

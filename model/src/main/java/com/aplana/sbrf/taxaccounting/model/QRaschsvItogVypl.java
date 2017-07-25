@@ -28,7 +28,7 @@ public class QRaschsvItogVypl extends com.querydsl.sql.RelationalPathBase<QRasch
 
     public final StringPath kodKatLic = createString("kodKatLic");
 
-    public final NumberPath<java.math.BigInteger> kolFl = createNumber("kolFl", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> kolFl = createNumber("kolFl", java.math.BigDecimal.class);
 
     public final StringPath mesyac = createString("mesyac");
 

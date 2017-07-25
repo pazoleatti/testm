@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -12,7 +13,7 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     private String inp;
 
     // Сумма фиксированного авансового платежа (Графа 4)
-    private Long summ;
+    private BigDecimal summ;
 
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Номер уведомления
     private String notifNum;
@@ -56,10 +57,10 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
         this.inp = inp;
     }
 
-    public Long getSumm() {
+    public BigDecimal getSumm() {
         return summ;
     }
-    public void setSumm(Long summ) {
+    public void setSumm(BigDecimal summ) {
         this.summ = summ;
     }
 

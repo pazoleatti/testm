@@ -30,7 +30,7 @@ public class QRefBookDocType extends com.querydsl.sql.RelationalPathBase<QRefBoo
 
     public final StringPath name = createString("name");
 
-    public final NumberPath<Byte> priority = createNumber("priority", Byte.class);
+    public final NumberPath<Integer> priority = createNumber("priority", Integer.class);
 
     public final NumberPath<Long> recordId = createNumber("recordId", Long.class);
 

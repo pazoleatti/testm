@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.paging;
 
 import java.util.Collection;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import org.springframework.data.domain.Pageable;
 
 public class JqgridPagedResourceAssembler {
@@ -11,17 +12,16 @@ public class JqgridPagedResourceAssembler {
      *
      * @param collection объект {@code Collection}, содержащий ограниченный набор данных для запрошенной страницы
      * @param size       общее количество записей
-     * @param page номер страницы
-     * @param rows количество записей на одной странице
+     * @param pagingParams параметры для пагинации
      * @return {@code JqgridPagedList} подготовленный для JSON сериализации объект с данными в формате, ожидаемом JqGrid.JsonReader
      */
-    public static <T> JqgridPagedList<T> buildPagedList(Collection<T> collection, Integer size, int page, int rows) {
+    public static <T> JqgridPagedList<T> buildPagedList(Collection<T> collection, Integer size, PagingParams pagingParams) {
         JqgridPagedList<T> pagedList = new JqgridPagedList<T>();
         pagedList.getRows().addAll(collection);
 
-        pagedList.setPage(page);
+        pagedList.setPage(pagingParams.getPage());
         pagedList.setRecords(size);
-        pagedList.setTotal(new Double(Math.ceil((double) size / rows)).intValue());
+        pagedList.setTotal(new Double(Math.ceil((double) size / pagingParams.getCount())).intValue());
 
         return pagedList;
     }

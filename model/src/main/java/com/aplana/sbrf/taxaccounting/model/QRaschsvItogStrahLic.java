@@ -28,7 +28,7 @@ public class QRaschsvItogStrahLic extends com.querydsl.sql.RelationalPathBase<QR
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final NumberPath<java.math.BigInteger> kolLic = createNumber("kolLic", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> kolLic = createNumber("kolLic", java.math.BigDecimal.class);
 
     public final com.querydsl.sql.PrimaryKey<QRaschsvItogStrahLic> raschsvItogStrahLicPk = createPrimaryKey(id);
 

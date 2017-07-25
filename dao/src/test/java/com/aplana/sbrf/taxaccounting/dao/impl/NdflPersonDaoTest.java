@@ -220,22 +220,22 @@ public class NdflPersonDaoTest {
 
 
         List<NdflPersonIncome> ndflPersonIncomes = new ArrayList<NdflPersonIncome>();
-        ndflPersonIncomes.add(createNdflPersonIncomes(1));
-        ndflPersonIncomes.add(createNdflPersonIncomes(2));
-        ndflPersonIncomes.add(createNdflPersonIncomes(3));
+        ndflPersonIncomes.add(createNdflPersonIncomes(new BigDecimal(1)));
+        ndflPersonIncomes.add(createNdflPersonIncomes(new BigDecimal(2)));
+        ndflPersonIncomes.add(createNdflPersonIncomes(new BigDecimal(3)));
         person.setIncomes(ndflPersonIncomes);
 
         List<NdflPersonDeduction> ndflPersonDeductions = new ArrayList<NdflPersonDeduction>();
-        ndflPersonDeductions.add(createNdflPersonDeduction(1));
-        ndflPersonDeductions.add(createNdflPersonDeduction(2));
+        ndflPersonDeductions.add(createNdflPersonDeduction(new BigDecimal(1)));
+        ndflPersonDeductions.add(createNdflPersonDeduction(new BigDecimal(2)));
         person.setDeductions(ndflPersonDeductions);
 
         List<NdflPersonPrepayment> ndflPersonPrepayments = new ArrayList<NdflPersonPrepayment>();
-        ndflPersonPrepayments.add(createNdflPersonPrepayment(1));
-        ndflPersonPrepayments.add(createNdflPersonPrepayment(2));
-        ndflPersonPrepayments.add(createNdflPersonPrepayment(3));
-        ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
-        ndflPersonPrepayments.add(createNdflPersonPrepayment(5));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(new BigDecimal(1)));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(new BigDecimal(2)));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(new BigDecimal(3)));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(new BigDecimal(5)));
+        ndflPersonPrepayments.add(createNdflPersonPrepayment(new BigDecimal(5)));
 
         person.setPrepayments(ndflPersonPrepayments);
 
@@ -244,7 +244,7 @@ public class NdflPersonDaoTest {
     }
 
 
-    private NdflPersonIncome createNdflPersonIncomes(int row) {
+    private NdflPersonIncome createNdflPersonIncomes(BigDecimal row) {
         NdflPersonIncome personIncome = new NdflPersonIncome();
         personIncome.setRowNum(row);
         personIncome.setOperationId("11111");
@@ -254,7 +254,7 @@ public class NdflPersonDaoTest {
         return personIncome;
     }
 
-    private NdflPersonDeduction createNdflPersonDeduction(int row) {
+    private NdflPersonDeduction createNdflPersonDeduction(BigDecimal row) {
         NdflPersonDeduction personDeduction = new NdflPersonDeduction();
         personDeduction.setRowNum(row);
         personDeduction.setOperationId("11111");
@@ -279,12 +279,12 @@ public class NdflPersonDaoTest {
         return personDeduction;
     }
 
-    private NdflPersonPrepayment createNdflPersonPrepayment(int row) {
+    private NdflPersonPrepayment createNdflPersonPrepayment(BigDecimal row) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
         personPrepayment.setRowNum(row);
         personPrepayment.setOperationId("11111");
 
-        personPrepayment.setSumm(1999999L);
+        personPrepayment.setSumm(new BigDecimal(1999999));
         personPrepayment.setNotifNum("123-456-000");
         personPrepayment.setNotifDate(toDate("01.01.2016"));
         personPrepayment.setNotifSource("AAA");

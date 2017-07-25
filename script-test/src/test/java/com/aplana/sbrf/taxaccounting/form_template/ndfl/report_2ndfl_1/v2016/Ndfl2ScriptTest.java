@@ -324,14 +324,14 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncome();
             ndflPersonIncome1.setTaxRate(13);
             ndflPersonIncome1.setIncomeAccruedSumm(BigDecimal.valueOf(100000L));
-            ndflPersonIncome1.setNotHoldingTax(50000L);
+            ndflPersonIncome1.setNotHoldingTax(BigDecimal.valueOf(50000L));
             ndflPersonIncome1.setOperationId("1");
             ndflPersonIncome1.setTaxBase(BigDecimal.valueOf(5000L));
-            ndflPersonIncome1.setCalculatedTax(6000L);
-            ndflPersonIncome1.setWithholdingTax(7000L);
-            ndflPersonIncome1.setTaxSumm(8000);
-            ndflPersonIncome1.setOverholdingTax(9000L);
-            ndflPersonIncome1.setNotHoldingTax(4000L);
+            ndflPersonIncome1.setCalculatedTax(BigDecimal.valueOf(6000L));
+            ndflPersonIncome1.setWithholdingTax(BigDecimal.valueOf(7000L));
+            ndflPersonIncome1.setTaxSumm(8000L);
+            ndflPersonIncome1.setOverholdingTax(BigDecimal.valueOf(9000L));
+            ndflPersonIncome1.setNotHoldingTax(BigDecimal.valueOf(4000L));
 
             Calendar calAccrued = Calendar.getInstance();
             calAccrued.set(2014, 4, 1);
@@ -345,14 +345,14 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             NdflPersonIncome ndflPersonIncome2 = new NdflPersonIncome();
             ndflPersonIncome2.setTaxRate(taxrate);
             ndflPersonIncome2.setIncomeAccruedSumm(BigDecimal.valueOf(100000L));
-            ndflPersonIncome2.setNotHoldingTax(50000L);
+            ndflPersonIncome2.setNotHoldingTax(BigDecimal.valueOf(50000L));
             ndflPersonIncome2.setOperationId("1");
             ndflPersonIncome2.setTaxBase(BigDecimal.valueOf(5000L));
-            ndflPersonIncome2.setCalculatedTax(6000L);
-            ndflPersonIncome2.setWithholdingTax(7000L);
-            ndflPersonIncome2.setTaxSumm(8000);
-            ndflPersonIncome2.setOverholdingTax(9000L);
-            ndflPersonIncome2.setNotHoldingTax(4000L);
+            ndflPersonIncome2.setCalculatedTax(BigDecimal.valueOf(6000L));
+            ndflPersonIncome2.setWithholdingTax(BigDecimal.valueOf(7000L));
+            ndflPersonIncome2.setTaxSumm(8000L);
+            ndflPersonIncome2.setOverholdingTax(BigDecimal.valueOf(9000L));
+            ndflPersonIncome2.setNotHoldingTax(BigDecimal.valueOf(4000L));
 
             Calendar calAccrued2 = Calendar.getInstance();
             calAccrued2.set(2014, 5, 1);
@@ -393,7 +393,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonPrepayment.setNotifNum("123");
             ndflPersonPrepayment.setNotifDate(ndflPersonIncome1.getTaxDate());
             ndflPersonPrepayment.setNotifSource("1684");
-            ndflPersonPrepayment.setSumm(1000L);
+            ndflPersonPrepayment.setSumm(BigDecimal.valueOf(1000L));
             ndflPersonPrepayment.setOperationId("1");
 
             ndflPerson.getPrepayments().add(ndflPersonPrepayment);

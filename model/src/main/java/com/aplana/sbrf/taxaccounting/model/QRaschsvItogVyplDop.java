@@ -26,7 +26,7 @@ public class QRaschsvItogVyplDop extends com.querydsl.sql.RelationalPathBase<QRa
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final NumberPath<java.math.BigInteger> kolFl = createNumber("kolFl", java.math.BigInteger.class);
+    public final NumberPath<java.math.BigDecimal> kolFl = createNumber("kolFl", java.math.BigDecimal.class);
 
     public final StringPath mesyac = createString("mesyac");
 
