@@ -1367,7 +1367,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId, boolean throwIfEmpt
                 return null
             }
         }
-        departmentCache.put(departmentId, departmentParamList?.get(0))
+        departmentCache.put(departmentId, departmentParamList?.get(departmentParamList.size() - 1))
     }
     return departmentCache.get(departmentId)
 }
@@ -1408,11 +1408,13 @@ def getDepartmentParamDetails(def departmentParamId, def departmentId, def repor
  */
 def getDepartmentParamDetails(String kpp, String oktmo) {
     if (departmentParamRow == null) {
-        def oktmoReference = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "CODE = '$oktmo'", null).get(0).id.value
-        departmentParamRow = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null).get(0)
-        if (departmentParamRow == null) {
+        def oktmoReferenceList = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "CODE = '$oktmo'", null)
+        def oktmoReference = oktmoReferenceList.get(oktmoReferenceList.size() - 1).id.value
+        def departmentParamRowList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null)
+        if (departmentParamRowList == null || departmentParamRowList.isEmpty()) {
             departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
         }
+        departmentParamRow = departmentParamRowList.get(departmentParamRowList.size() - 1)
     }
     return departmentParamRow
 }
@@ -1428,6 +1430,14 @@ RefBookDataProvider getProvider(def long providerId) {
         providerCache.put(providerId, provider)
     }
     return providerCache.get(providerId)
+}
+
+/**
+ * Получить дату начала отчетного периода
+ * @return
+ */
+Date getReportPeriodStartDate() {
+    return reportPeriodStartDate = reportPeriodService.getStartDate(declarationData.reportPeriodId)?.time
 }
 
 /**
@@ -1475,7 +1485,7 @@ def getDeductionType(def code) {
     if (deductionTypeList == null || deductionTypeList.size() == 0 || deductionTypeList.get(0) == null) {
         throw new Exception("Ошибка при получении кодов вычета. Коды вычета заполнены не полностью")
     }
-    return deductionTypeList.get(0).DEDUCTION_MARK?.value
+    return deductionTypeList.get(deductionTypeList.size() - 1).DEDUCTION_MARK?.value
 }
 
 /**
@@ -2924,6 +2934,14 @@ final String TAX_BASE = "НалБаза"
 final String NOT_HOLDING_TAX = "НалНеУдерж"
 @Field
 final String NODE_NAME_SUM_IT_NAL_PER2 = "СумИтНалПер"
+@Field
+final String TAX_ORGAN_CODE = "КодНО"
+@Field
+final String UVED_SOTS_VICH = "УведСоцВыч"
+@Field
+final String UVED_IMUSCH_VICH = "УведИмущВыч"
+@Field
+final String IFNS_UVED = "ИФНСУвед"
 
 // Узлы 6 НДФЛ
 @Field final NODE_NAME_SUM_STAVKA6 = "СумСтавка"
@@ -2937,6 +2955,16 @@ final String NODE_NAME_SUM_IT_NAL_PER2 = "СумИтНалПер"
 @Field final ATTR_NE_UDERZ_NAL_IT6 = "НеУдержНалИт"
 @Field final ATTR_KOL_FL_DOHOD6 = "КолФЛДоход"
 @Field final ATTR_AVANS_PLAT6 = "АвансПлат"
+
+/**
+ * Получить "Коды налоговых органов"
+ * @return
+ */
+def getRefNotifSource() {
+    def refBookList = getProvider(RefBook.Id.TAX_INSPECTION.id).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, null, null)
+    return refBookList.CODE?.stringValue
+}
+
 
 def check() {
     //List<DeclarationData> declarationDataList = declarationService.find(declarationData.declarationTemplateId, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
@@ -2963,6 +2991,7 @@ def check() {
         Ndfl2Leaf<String> citizenshipLeaf = new Ndfl2Leaf<>(CITIZENSHIP_CODE, docNodeItem.ПолучДох.@Гражд.text(), String.class)
         Ndfl2Leaf<String> idDocTypeLeaf = new Ndfl2Leaf<>(ID_DOC_TYPE, docNodeItem.ПолучДох.УдЛичнФЛ.@КодУдЛичн.text(), String.class)
         Ndfl2Leaf<String> idDocNumberLeaf = new Ndfl2Leaf<>(ID_DOC_NUMBER, docNodeItem.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), String.class)
+        Ndfl2Leaf<String> taxOrganCodeLeaf = new Ndfl2Leaf<>(TAX_ORGAN_CODE, docNodeItem.@КодНО.text(), String.class)
         documentNdfl2Node.addLeaf(lastNameLeaf)
         documentNdfl2Node.addLeaf(firstNameLeaf)
         documentNdfl2Node.addLeaf(middleNameLeaf)
@@ -2971,6 +3000,7 @@ def check() {
         documentNdfl2Node.addLeaf(citizenshipLeaf)
         documentNdfl2Node.addLeaf(idDocTypeLeaf)
         documentNdfl2Node.addLeaf(idDocNumberLeaf)
+        documentNdfl2Node.addLeaf(taxOrganCodeLeaf)
         def svedDohNodes = docNodeItem.depthFirst().grep {
             it.name() == SVEDDOH_NODE
         }
@@ -2984,6 +3014,7 @@ def check() {
             Ndfl2Leaf<BigDecimal> incomeSumCommonLeaf = new Ndfl2Leaf<>(INCOME_SUM_COMMON, svedDohNodeItem.СумИтНалПер.@СумДохОбщ.text(), BigDecimal.class)
             Ndfl2Leaf<BigDecimal> taxBaseLeaf = new Ndfl2Leaf<>(TAX_BASE, svedDohNodeItem.СумИтНалПер.@НалБаза.text(), BigDecimal.class)
             Ndfl2Leaf<BigDecimal> notHoldingTaxLeaf = new Ndfl2Leaf<>(NOT_HOLDING_TAX, svedDohNodeItem.СумИтНалПер.@НалНеУдерж.text(), BigDecimal.class)
+            Ndfl2Leaf<String> uvedFixPlatTaxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, svedDohNodeItem.СумИтНалПер.УведФиксПлат.@ИФНСУвед.text(), String.class)
             svedDohNdfl2Node.addLeaf(taxRateLeaf)
             svedDohNdfl2Node.addLeaf(calculatedTaxLeaf)
             svedDohNdfl2Node.addLeaf(taxSummLeaf)
@@ -2992,6 +3023,7 @@ def check() {
             svedDohNdfl2Node.addLeaf(incomeSumCommonLeaf)
             svedDohNdfl2Node.addLeaf(taxBaseLeaf)
             svedDohNdfl2Node.addLeaf(notHoldingTaxLeaf)
+            svedDohNdfl2Node.addLeaf(uvedFixPlatTaxOrganCode)
             def svSumDoh = svedDohNodeItem.ДохВыч.depthFirst().grep {
                 it.name() == SV_SUM_DOH
             }
@@ -3018,11 +3050,29 @@ def check() {
             def predVichSSI = svedDohNodeItem.НалВычССИ.depthFirst().grep {
                 it.name() == PRED_VICH_SSI
             }
+            def uvedSotsVich = svedDohNodeItem.НалВычССИ.depthFirst().grep {
+                it.name() == UVED_SOTS_VICH
+            }
+            def uvedImuschVich = svedDohNodeItem.НалВычССИ.depthFirst().grep {
+                it.name() == UVED_IMUSCH_VICH
+            }
             predVichSSI.each { predVichSSIItem ->
                 Ndfl2Node predVichSSINdfl2Node = new Ndfl2Node(PRED_VICH_SSI)
                 Ndfl2Leaf<BigDecimal> predVichSSIDeductionSumLeaf = new Ndfl2Leaf<>(DEDUCTION_SUM, predVichSSIItem.@СумВычет.text(), BigDecimal.class)
                 predVichSSINdfl2Node.addLeaf(predVichSSIDeductionSumLeaf)
                 svedDohNdfl2Node.addChild(predVichSSINdfl2Node)
+            }
+            uvedSotsVich.each { uvedSotsVichItem ->
+                Ndfl2Node uvedSotsVichNdfl2Node = new Ndfl2Node(UVED_SOTS_VICH)
+                Ndfl2Leaf<String> taxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, uvedSotsVichItem.@ИФНСУвед.text(), String.class)
+                uvedSotsVichNdfl2Node.addLeaf(taxOrganCode)
+                svedDohNdfl2Node.addChild(uvedSotsVichNdfl2Node)
+            }
+            uvedImuschVich.each { uvedImuschVichItem ->
+                Ndfl2Node uvedImuschVichNdfl2Node = new Ndfl2Node(UVED_IMUSCH_VICH)
+                Ndfl2Leaf<String> taxOrganCode = new Ndfl2Leaf<>(IFNS_UVED, uvedImuschVichItem.@ИФНСУвед.text(), String.class)
+                uvedImuschVichNdfl2Node.addLeaf(taxOrganCode)
+                svedDohNdfl2Node.addChild(uvedImuschVichNdfl2Node)
             }
             documentNdfl2Node.addChild(svedDohNdfl2Node)
         }
@@ -3043,6 +3093,8 @@ def check() {
     commonIncomeSumChecker.check(logger)
     Checker incomeSumAndDeductionChecker = new IncomeSumAndDeductionChecker(fileNdfl2Node)
     incomeSumAndDeductionChecker.check(logger)
+    Checker taxOrganChecker = new TaxOrganChecker(fileNdfl2Node, getRefNotifSource())
+    taxOrganChecker.check(logger)
     if (declarationData.declarationTemplateId == NDFL_2_2_DECLARATION_TYPE) {
         Checker notHoldingTaxChecker = new NotHoldingTaxChecker(fileNdfl2Node)
         notHoldingTaxChecker.check(logger)
@@ -3090,7 +3142,7 @@ class Ndfl2Node {
 
 /**
  * Компонент дерева представляющий атрибут
- * @param < T >   - Класс значения атрибута из xml, с которым будем работать
+ * @param < T >      - Класс значения атрибута из xml, с которым будем работать
  */
 class Ndfl2Leaf<T> {
     String name;
@@ -3172,13 +3224,23 @@ abstract class AbstractChecker implements Checker {
     final String PREPAYMENT_SUM = "АвансПлатФикс"
     final String INCOME_SUM_COMMON = "СумДохОбщ"
     final String NOT_HOLDING_TAX = "НалНеУдерж"
+    final String TAX_ORGAN_CODE = "КодНО"
+    final String UVED_SOTS_VICH = "УведСоцВыч"
+    final String UVED_IMUSCH_VICH = "УведИмущВыч"
+    final String IFNS_UVED = "ИФНСУвед"
 
     Ndfl2Node headNode;
+
+    List<String> taxOrganCodeList;
 
     AbstractChecker(Ndfl2Node headNode) {
         this.headNode = headNode
     }
 
+    AbstractChecker(Ndfl2Node headNode, List<String> taxOrganCodeList) {
+        this.headNode = headNode
+        this.taxOrganCodeList = taxOrganCodeList
+    }
 
     List<Ndfl2Node> extractNdfl2Nodes(String name, Ndfl2Node parentNode) {
         List<Ndfl2Node> toReturn = new ArrayList<>()
@@ -3227,6 +3289,53 @@ abstract class AbstractChecker implements Checker {
                 .append(", Номер справки: ")
                 .append(numSprAttribute.getValue()?.toString())
         logger.warnExp(message, type, fioAndNumSpr.toString())
+    }
+
+}
+
+/**
+ *  Справочник Налоговые инспекции
+ */
+class TaxOrganChecker extends AbstractChecker {
+
+    TaxOrganChecker(Ndfl2Node headNode) {
+        super(headNode)
+    }
+
+    TaxOrganChecker(Ndfl2Node headNode, List<String> taxOrganCodeList) {
+        super(headNode, taxOrganCodeList)
+    }
+
+    void check(Logger logger) {
+        def taxInspectionList = taxOrganCodeList
+        List<Ndfl2Node> documentNodeList = extractNdfl2Nodes(DOCUMENT_NODE, headNode)
+        for (Ndfl2Node documentNode : documentNodeList) {
+            String documentIfns = extractAttribute(TAX_ORGAN_CODE, documentNode)?.getValue()
+            if (documentIfns != null && documentIfns != "" && !taxInspectionList.contains(documentIfns)) {
+                createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.КодНО\" (\"$documentIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+            }
+            List<Ndfl2Node> svedDohNodeList = extractNdfl2Nodes(SVEDDOH_NODE, documentNode)
+            for (Ndfl2Node svedDohNode : svedDohNodeList) {
+                String uvedFixPlatIfns = extractAttribute(IFNS_UVED, svedDohNode)?.getValue()
+                if (uvedFixPlatIfns != null && uvedFixPlatIfns != "" && !taxInspectionList.contains(uvedFixPlatIfns)) {
+                    createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.СведДох.СумИтНалПер.УведФиксПлат.ИФНСУвед\" (\"$uvedFixPlatIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+                }
+                def uvedSotsVichNodeList = extractNdfl2Nodes(UVED_SOTS_VICH, svedDohNode)
+                def uvedImuschVichNodeList = extractNdfl2Nodes(UVED_IMUSCH_VICH, svedDohNode)
+                for (Ndfl2Node uvedSotsVichNode : uvedSotsVichNodeList) {
+                    String uvedSotsVichIfns = extractAttribute(IFNS_UVED, uvedSotsVichNode)?.getValue()
+                    if (uvedSotsVichIfns != null && uvedSotsVichIfns != "" && !taxInspectionList.contains(uvedSotsVichIfns)) {
+                        createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.СведДох.НалВычССИ.УведСоцВыч.ИФНСУвед\" (\"$uvedSotsVichIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+                    }
+                }
+                for (Ndfl2Node uvedImuschVichNode : uvedImuschVichNodeList) {
+                    String uvedImuschVichIfns = extractAttribute(IFNS_UVED, uvedImuschVichNode)?.getValue()
+                    if (uvedImuschVichIfns != null && uvedImuschVichIfns != "" && !taxInspectionList.contains(uvedImuschVichIfns)) {
+                        createErrorMessage(logger, documentNode, "Значение не соответствует справочнику \"Налоговые инспекции\"", "Значение параметра \"Файл.Документ.СведДох.НалВычССИ.УведИмущВыч.ИФНСУвед\" (\"$uvedImuschVichIfns\") отсутствует в справочнике \"Налоговые инспекции\".")
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -3606,13 +3715,13 @@ def interdocumentary6ndflCheckData() {
     if (ndfl6declarationDataList.isEmpty()) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
         Department department = departmentService.get(departmentReportPeriod.departmentId)
-        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED): ""}")
+        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
         return
     }
     if (ndfl6declarationDataList.size() > 1) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
         Department department = departmentService.get(departmentReportPeriod.departmentId)
-        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. В Системе должна быть только одна форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED): ""}")
+        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. В Системе должна быть только одна форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
         return
     }
     DeclarationData ndfl6declarationData = ndfl6declarationDataList.get(0)
@@ -3687,7 +3796,7 @@ def interdocumentary6ndflCheckData() {
         def fileNode2Ndfl = new XmlSlurper().parse(ndfl2Stream);
 
         // МежДок8
-        def documentNodes = fileNode2Ndfl.depthFirst().findAll { it.name() == DOCUMENT_NODE}
+        def documentNodes = fileNode2Ndfl.depthFirst().findAll { it.name() == DOCUMENT_NODE }
         kolFl2 += documentNodes.size()
 
         def svedDohNodes = fileNode2Ndfl.depthFirst().grep { it.name() == SVEDDOH_NODE }
