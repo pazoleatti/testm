@@ -29,6 +29,7 @@ import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
@@ -54,7 +55,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
 
     @Inject
     @UiConstructor
-    public RefBookLinearView(final Binder uiBinder) {
+    public RefBookLinearView(EventBus eventBus, final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
         refBookDataTable.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -68,6 +69,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
         });
         pager.setDisplay(refBookDataTable);
         pager.setPageSize(500);
+        pager.setEventBus(eventBus);
         refBookDataTable.setPageSize(pager.getPageSize());
         refBookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         refBookDataTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(refBookDataTable));
