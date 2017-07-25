@@ -749,7 +749,7 @@ boolean checkMandatoryFields(List<NdflPerson> ndflPersonList) {
                         ndflPerson.inp,
                         ndflPerson.declarationDataId
                 )
-                logger.warn(msg)
+                logger.error(msg)
                 toReturn = false
             }
         }
