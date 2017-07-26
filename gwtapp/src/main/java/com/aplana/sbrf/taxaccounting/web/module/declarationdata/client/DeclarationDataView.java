@@ -27,6 +27,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     public static final String DATE_BOX_TITLE = "Дата и время создания формы";
     public static final String DATE_BOX_TITLE_D = "Дата и время создания формы";
+    public static final String CONSOLIDATED_DECLARATION_TYPE_NAME = "РНУ_НДФЛ (консолидированная)";
     private static final int TABLE_TOP3 = 107;
     private static final int TABLE_TOP4 = 124;
 
@@ -122,6 +123,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 }
             }
         });
+        printToXml.setVisible(false);
 
         LinkButton printToExcel = new LinkButton("Сформировать в XLSX");
         printToExcel.setHeight("20px");
@@ -677,5 +679,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public Button getAddErrorButton() {
         return addErrorButton;
+    }
+
+    @Override
+    public void showPrintToXml(boolean show) {
+        printToXml.setVisible(show);
     }
 }
