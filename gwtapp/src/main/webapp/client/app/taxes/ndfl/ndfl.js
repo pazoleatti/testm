@@ -61,6 +61,15 @@
                 };
 
                 /**
+                 * @description Обработка события, которое возникает при нажании на ссылку "Источники"
+                 */
+                $scope.showSourcesClick = function () {
+                    var dlg = dialogs.create('client/app/taxes/ndfl/formSources.html', 'sourcesFormCtrl');
+                    return dlg.result.then(function () {
+                    });
+                };
+
+                /**
                  * @description Инициализация первичных данных на странице
                  */
                 function initPage() {
@@ -84,6 +93,5 @@
                 }
 
                 initPage();
-            }])
-    ;
+            }]);
 }());
