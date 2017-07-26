@@ -35,6 +35,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Контроллер для работы с ТФ
+ */
 @Controller
 @RequestMapping(value = "/actions")
 public class TransportDataController {
@@ -58,6 +61,14 @@ public class TransportDataController {
     public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
 
 
+    /**
+     * Загрузка ТФ
+     * @param file ТФ
+     * @param request запрос
+     * @param response ответ
+     * @throws FileUploadException
+     * @throws IOException
+     */
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(@RequestParam(value = "uploader", required = true) MultipartFile file,
                        HttpServletRequest request, HttpServletResponse response)
@@ -123,12 +134,23 @@ public class TransportDataController {
         }
     }
 
+    /**
+     * Обработка исключений, связанных с тем, что скрипт выполнился с ошибками
+     * @param e исключение
+     * @param response ответ
+     * @throws IOException
+     */
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response)
             throws IOException {
         response.getWriter().printf("error uuid %s", e.getUuid());
     }
 
+    /**
+     * Обработка стандартных исключений
+     * @param e исключение
+     * @param response ответ
+     */
     @ExceptionHandler(Exception.class)
     public void exceptionHandler(Exception e, final HttpServletResponse response) {
         response.setContentType("text/html");

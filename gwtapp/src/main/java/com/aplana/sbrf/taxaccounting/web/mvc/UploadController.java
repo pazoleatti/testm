@@ -38,6 +38,14 @@ public class UploadController {
     @Autowired
     LogEntryService logEntryService;
 
+    /**
+     * Загрузка файла в формате xls
+     * @param file файл
+     * @param request запрос
+     * @param response ответ
+     * @throws FileUploadException
+     * @throws IOException
+     */
     @RequestMapping(value = "/pattern", method = RequestMethod.POST)
     public void processUploadXls(@RequestParam("uploader") MultipartFile file,
                                  HttpServletRequest request, HttpServletResponse response)
@@ -47,6 +55,15 @@ public class UploadController {
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
 
+    /**
+     * Загрузка нескольких файлов налоговых форм
+     * @param files файлы
+     * @param request запрос
+     * @param response ответ
+     * @throws FileUploadException
+     * @throws IOException
+     * @throws JSONException
+     */
     @RequestMapping(value = "/formDataFiles", method = RequestMethod.POST)
     public void processUploadFormDataFiles(@RequestParam("uploader") List<MultipartFile> files,
                                           HttpServletRequest request, HttpServletResponse response)

@@ -37,6 +37,10 @@ import java.util.Map;
 @Controller
 public class LogEntryController {
 
+    /**
+     * Привязка данных из параметров запроса
+     * @param binder спец. DataBinder для привязки
+     */
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));

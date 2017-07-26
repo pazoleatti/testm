@@ -20,6 +20,9 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 
+/**
+ * Контроллер для работы с формами ПНФ/КНФ
+ */
 @Controller
 public class DeclarationDataController {
 
@@ -63,6 +66,12 @@ public class DeclarationDataController {
     };
 
 
+    /**
+     * Формирование отчета для НФ/декларации в формате xlsx
+     * @param id идентификатор формы
+     * @param response ответ
+     * @throws IOException
+     */
     @RequestMapping(value = "/actions/declarationData/xlsx/{id}", method = RequestMethod.GET)
     public void xlsx(@PathVariable long id, HttpServletResponse response)
             throws IOException {
@@ -93,6 +102,13 @@ public class DeclarationDataController {
         }
     }
 
+    /**
+     * Формирование специфичного отчета для НФ/декларации
+     * @param alias тип специфичного отчета
+     * @param id идентификатор формы
+     * @param response ответ
+     * @throws IOException
+     */
     @RequestMapping(value = "/actions/declarationData/specific/{alias}/{id}", method = RequestMethod.GET)
     public void specific(@PathVariable String alias, @PathVariable long id, HttpServletResponse response)
             throws IOException {
@@ -130,7 +146,14 @@ public class DeclarationDataController {
     }
 
 
-    @RequestMapping(value = "/pageImage/{id}/{pageId}/*", method = RequestMethod.GET)
+    /**
+     * Формирует изображение для модели для PDFViewer
+     * @param id идентификатор формы
+     * @param pageId идентификатор страницы
+     * @param response ответ
+     * @throws IOException
+     */
+    @RequestMapping(value = "/actions/declarationData/pageImage/{id}/{pageId}/*", method = RequestMethod.GET)
     public void pageImage(@PathVariable int id, @PathVariable int pageId,
                           HttpServletResponse response) throws IOException {
 
@@ -142,6 +165,12 @@ public class DeclarationDataController {
     }
 
 
+    /**
+     * Формирование отчета для НФ/декларации в формате xml
+     * @param id идентификатор формы
+     * @param response ответ
+     * @throws IOException
+     */
     @RequestMapping(value = "/actions/declarationData/xml/{id}", method = RequestMethod.GET)
     public void xml(@PathVariable int id, HttpServletResponse response)
             throws IOException {
@@ -159,6 +188,11 @@ public class DeclarationDataController {
 		}
     }
 
+    /**
+     * Формирует DeclarationResult
+     * @param id идентификатор формы
+     * @return модель DeclarationResult, в которой содержаться данные о форме
+     */
     @RequestMapping(value = "/rest/declarationData", method = RequestMethod.GET, params="projection=getDeclarationData")
     @ResponseBody
     public DeclarationResult fetchDeclarationData(@RequestParam long id) {

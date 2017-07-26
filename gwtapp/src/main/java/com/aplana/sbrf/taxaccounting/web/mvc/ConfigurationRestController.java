@@ -17,6 +17,9 @@ import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
+/**
+ * Контроллер для получения основных данных для главного меню на AngularJs
+ */
 @RestController
 @RequestMapping(value = "/rest/configService", method = RequestMethod.GET, produces = "application/json")
 @EnableWebMvc
@@ -30,9 +33,13 @@ public class ConfigurationRestController {
     @Autowired
     private DepartmentService departmentService;
 
+    /**
+     * Формирует Map с основными данными для главного меню
+     * @return Map с основными данными
+     */
     @RequestMapping("/getConfig")
     @ResponseBody
-    public Map<String, Object> getConfig(HttpServletRequest request) {
+    public Map<String, Object> getConfig() {
         Map<String, Object> result = new HashMap<String, Object>();
 
         result.put("gwtMode", PropertyLoader.isProductionMode()?"":"?gwt.codesvr=127.0.0.1:9997");

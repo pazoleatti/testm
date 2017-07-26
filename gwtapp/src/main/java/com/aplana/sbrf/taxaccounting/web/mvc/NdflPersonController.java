@@ -28,6 +28,10 @@ import java.util.Map;
 @Controller
 public class NdflPersonController {
 
+    /**
+     * Привязка данных из параметров запроса
+     * @param binder спец. DataBinder для привязки
+     */
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

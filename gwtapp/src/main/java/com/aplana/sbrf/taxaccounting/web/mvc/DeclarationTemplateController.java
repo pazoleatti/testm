@@ -26,6 +26,9 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.util.Date;
 
+/**
+ * Контроллер для работы с шаблоном декларации
+ */
 @Controller
 @RequestMapping(value = "/actions")
 public class DeclarationTemplateController {
@@ -47,6 +50,13 @@ public class DeclarationTemplateController {
     @Autowired
     LogEntryService logEntryService;
 
+    /**
+     * Выгрузка шаблона декларации
+     * @param declarationTemplateId идентификатор шаблона декларации
+     * @param req запрос
+     * @param resp ответ
+     * @throws IOException
+     */
     @RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
 	public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
@@ -63,7 +73,16 @@ public class DeclarationTemplateController {
         }
 	}
 
-	@RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
+    /**
+     * Загрузка шаблона декларации
+     * @param file файл шаблона декларации
+     * @param declarationTemplateId идентификатор шаблона декларации
+     * @param req запрос
+     * @param resp ответ
+     * @throws FileUploadException
+     * @throws IOException
+     */
+    @RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
 	public void uploadDect(@RequestParam(value = "uploader", required = true) MultipartFile file,
                            @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, IOException {
@@ -130,6 +149,15 @@ public class DeclarationTemplateController {
         }
 	}
 
+    /**
+     * Загрузка файла в формате jrxml
+     * @param file файл шаблона декларации
+     * @param declarationTemplateId идентификатор шаблона декларации
+     * @param req запрос
+     * @param resp ответ
+     * @throws FileUploadException
+     * @throws IOException
+     */
     @RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
     @Transactional
     public void processUpload(@RequestParam(value = "uploader", required = true) MultipartFile file,
@@ -203,6 +231,15 @@ public class DeclarationTemplateController {
         }
     }
 
+    /**
+     * Загрузка файла в формате xsd
+     * @param file файл шаблона декларации
+     * @param declarationTemplateId идентификатор шаблона декларации
+     * @param req запрос
+     * @param resp ответ
+     * @throws FileUploadException
+     * @throws IOException
+     */
     @RequestMapping(value = "uploadXsd/{declarationTemplateId}",method = RequestMethod.POST)
     @Transactional
     public void processUploadXsd(@RequestParam(value = "uploader", required = true) MultipartFile file,
@@ -246,7 +283,14 @@ public class DeclarationTemplateController {
         }
     }
 
-	@RequestMapping(value = "/downloadByUuid/{uuid}",method = RequestMethod.GET)
+    /**
+     * Выгрузка файла по uuid
+     * @param uuid уникальный идентификатор файла
+     * @param req запрос
+     * @param resp ответ
+     * @throws IOException
+     */
+    @RequestMapping(value = "/downloadByUuid/{uuid}",method = RequestMethod.GET)
 	public void processDownload(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
@@ -255,6 +299,13 @@ public class DeclarationTemplateController {
         }
     }
 
+    /**
+     * Обработка исключений, связанных с тем, что скрипт выполнился с ошибками
+     * @param e исключение
+     * @param response ответ
+     * @throws IOException
+     * @throws JSONException
+     */
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException, JSONException {
         JSONObject errors = new JSONObject();
@@ -263,7 +314,13 @@ public class DeclarationTemplateController {
         response.getWriter().printf(errors.toString());
     }
 
-	@ExceptionHandler(Exception.class)
+    /**
+     * Обработка стандартных исключений
+     * @param e исключение
+     * @param response ответ
+     * @throws JSONException
+     */
+    @ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) throws JSONException {
 		response.setCharacterEncoding("UTF-8");
 		LOG.error(e.getLocalizedMessage(), e);
@@ -278,12 +335,24 @@ public class DeclarationTemplateController {
 		}
 	}
 
+    /**
+     * Проверка logger на наличие ошибок
+     * @param logger
+     * @throws IOException
+     */
     private void checkErrors(Logger logger) throws IOException {
         if (logger.containsLevel(LogLevel.ERROR)){
            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 
+    /**
+     * Создание заголовка ответа
+     * @param req запрос
+     * @param response ответ
+     * @param blobData файловое хранилище
+     * @throws IOException
+     */
     private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final BlobData blobData) throws IOException{
         String fileName = blobData.getName();
         setCorrectFileName(req, response, fileName);
@@ -300,6 +369,13 @@ public class DeclarationTemplateController {
         response.setContentLength(count);
     }
 
+    /**
+     * Приведение названия файла к корректному виду
+     * @param request запрос
+     * @param response ответ
+     * @param originalFileName название файла
+     * @throws UnsupportedEncodingException
+     */
     private void setCorrectFileName(HttpServletRequest request, HttpServletResponse response, String originalFileName) throws UnsupportedEncodingException {
         String userAgent = request.getHeader("User-Agent").toLowerCase();
         String fileName = URLEncoder.encode(originalFileName, ENCODING).replaceAll("\\+", "%20");
@@ -312,6 +388,13 @@ public class DeclarationTemplateController {
         response.setHeader("Content-Disposition", "attachment;" + fileNameAttr + fileName);
     }
 
+    /**
+     * Проверка пользователя на наличие необходимых прав
+     * @param response ответ
+     * @param userInfo данные пользователя
+     * @return
+     * @throws IOException
+     */
     private boolean checkRole(HttpServletResponse response, TAUserInfo userInfo) throws IOException {
         if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
             response.setContentType("text/plain");

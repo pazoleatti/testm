@@ -38,6 +38,11 @@ public class DeclarationSourcesRestController {
     @Autowired
     DeclarationDataScriptingService scriptingService;
 
+    /**
+     * Получение источников и приемников формы
+     * @param declarationId идентификатор формы
+     * @return источники и приемники формы
+     */
     @RequestMapping(value = "/rest/sources/{declarationId}", method = RequestMethod.GET)
     public List<Relation> getDeclarationSourcesAndDestinations(@PathVariable Long declarationId) {
         if (declarationDataService.existDeclarationData(declarationId)) {

@@ -16,6 +16,9 @@ import java.io.IOException;
 
 import static com.aplana.sbrf.taxaccounting.web.handlers.SUDIRRedirectLogoutSuccessHandler.WEBSEAL_HEADER_NAME;
 
+/**
+ * Контроллер для работы с кэшем
+ */
 @Controller
 @RequestMapping(value = "/actions/")
 public class CacheController {
@@ -23,14 +26,25 @@ public class CacheController {
 	@Autowired
 	CacheManagerDecorator cacheManagerDecorator;
 
+	/**
+	 * Сбрасывает кэш
+	 * @param resp ответ
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/cache/clear-cache",method = RequestMethod.GET)
 	public void clearCache(HttpServletResponse resp) throws IOException {
 		cacheManagerDecorator.clearAll();
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("UTF-8");
+		resp.setContentType("text/plain");
+		resp.setCharacterEncoding("UTF-8");
         resp.getWriter().printf("Кэш сброшен");
 	}
 
+	/**
+	 * Сброс кэша аутентификации
+	 * @param request запрос
+	 * @param response ответ
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/clearAuthenticationCache", method = RequestMethod.GET)
 	@ResponseBody
 	public void logout401(HttpServletRequest request, HttpServletResponse response) throws IOException {

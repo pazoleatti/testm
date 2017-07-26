@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Контроллер для выгрузки макетов форм
+ */
 @Controller
 @RequestMapping(value = "/actions")
 public class FormTemplateController {
@@ -23,7 +26,12 @@ public class FormTemplateController {
 	@Autowired
 	FormTemplateImpexService formTemplateImpexService;
 
-    @RequestMapping(value = "formTemplate/downloadAll")
+	/**
+	 * Выгрузка макетов форм
+	 * @param response ответ
+	 * @throws IOException
+	 */
+	@RequestMapping(value = "formTemplate/downloadAll")
     public void downloadAll(HttpServletResponse response) throws IOException {
         response.setHeader("Content-Disposition",
                 String.format("attachment; filename=\"Templates(%s).zip\"",
@@ -37,13 +45,24 @@ public class FormTemplateController {
 		}
     }
 
-    @ExceptionHandler(ServiceLoggerException.class)
+	/**
+	 * Обработка исключений, связанных с тем, что скрипт выполнился с ошибками
+	 * @param e исключение
+	 * @param response ответ
+	 * @throws IOException
+	 */
+	@ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().printf("errorUuid %s", e.getUuid());
     }
 
+	/**
+	 * Обработка стандартных исключений
+	 * @param e исключение
+	 * @param response ответ
+	 */
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
 		response.setContentType("text/plain");

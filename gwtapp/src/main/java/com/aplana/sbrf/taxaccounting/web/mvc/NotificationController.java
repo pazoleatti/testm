@@ -22,8 +22,12 @@ import java.util.*;
 
 @Controller
 @EnableSpringDataWebSupport
-public class NotificationRestController {
+public class NotificationController {
 
+    /**
+     * Привязка данных из параметров запроса
+     * @param binder спец. DataBinder для привязки
+     */
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
