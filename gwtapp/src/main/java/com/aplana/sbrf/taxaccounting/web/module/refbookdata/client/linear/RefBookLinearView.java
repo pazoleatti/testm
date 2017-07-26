@@ -318,6 +318,8 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
         selectionModel.clear();
         Range range = new Range(pager.getPageStart(), pager.getPageSize());
         refBookDataTable.setVisibleRangeAndClearData(range, true);
+        // Отображение индикатора загрузки даже у незаполненной таблицы
+        refBookDataTable.setRowCount(1);
     }
 
     @Override
