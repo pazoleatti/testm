@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с вкладкой "Сведения о доходах в виде авансовых платежей"
      */
-    angular.module('sbrfNdfl.prepayment', [])
+    angular.module('app.prepayment', [])
 
         /**
          * @description Контроллер вкладки "Сведения о доходах в виде авансовых платежей"

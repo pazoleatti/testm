@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы со формами ндфл
      */
-    angular.module('sbrfNdfl.createFormDialog', [])
+    angular.module('app.createFormDialog', [])
         /**
          * @description Контроллер формы создания/редактирования ФЛ
          */

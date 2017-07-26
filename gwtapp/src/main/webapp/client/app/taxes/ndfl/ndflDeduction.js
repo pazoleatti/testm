@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с вкладкой "Сведения о вычетах"
      */
-    angular.module('sbrfNdfl.deduction', [])
+    angular.module('app.deduction', [])
 
         /**
          * @description Контроллер вкладки "Сведения о вычетах"

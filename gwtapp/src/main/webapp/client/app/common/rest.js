@@ -12,7 +12,7 @@
      *  'remove': {method:'DELETE'},
      *  'delete': {method:'DELETE'} };
      */
-    angular.module('sbrfNdfl.rest', ['ngResource'])
+    angular.module('app.rest', ['ngResource'])
         // Оповещения
         .factory('NotificationResource', ['$resource', function ($resource) {
             return $resource('/controller/rest/notification?projection=:projection', {}, {

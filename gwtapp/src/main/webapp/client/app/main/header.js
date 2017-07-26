@@ -7,9 +7,8 @@
 
     angular.module('app.header', [
             'ui.router',
-            'userData',
             'ng.deviceDetector',
-            'sbrfNdfl.notifications'
+            'app.notifications'
         ])
         .directive('appHeader', function () {
             return {
@@ -18,16 +17,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$translate', '$http', 'USER_DATA', '$rootScope', 'deviceDetector', '$filter', 'dialogs', 'NotificationResource',
-            function ($scope, $translate, $http, USER_DATA, $rootScope, deviceDetector, $filter, dialogs, NotificationResource) {
-                /**
-                 * @description Обновляет информацию о текущем пользователе
-                 */
-                var updateCurrentUserInfo = function () {
-                    // Формируем строку ФИО
-                    $scope.security.userTitle = USER_DATA.name;
-                };
-
+            '$scope', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'dialogs', 'NotificationResource',
+            function ($scope, $translate, $http, $rootScope, deviceDetector, $filter, dialogs, NotificationResource) {
                 /**
                  * @description Получаем необходимые настройки с сервера
                  * @param {{project_properties}} response
@@ -39,8 +30,13 @@
                         $scope.revision = response.data.project_properties.revision;
                         $scope.serverName = response.data.project_properties.serverName;
                         $scope.browser = deviceDetector.browser + " " + deviceDetector.browser_version;
-                        $scope.security.userDep = response.data.department;
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
+                        $scope.security = {
+                            user: {
+                                name: response.data.user_data.user.name,
+                                department: response.data.department
+                            }
+                        };
 
                         //Задаем ссылки для главного меню
                         $scope.treeTaxes = [{
@@ -121,11 +117,6 @@
                         }];
                     }
                 );
-
-                $scope.security = {};
-
-                $scope.security.userTitle = '';
-                updateCurrentUserInfo();
 
                 //noinspection JSValidateJSDoc
                 /**

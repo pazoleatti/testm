@@ -5,7 +5,7 @@
      * @description Модуль для для работы со страницей РНУ НДФЛ
      */
 
-    angular.module('sbrfNdfl.createOrEditFLDialog', [])
+    angular.module('app.createOrEditFLDialog', [])
 
     /**
      * @description Контроллер формы создания/редактирования ФЛ

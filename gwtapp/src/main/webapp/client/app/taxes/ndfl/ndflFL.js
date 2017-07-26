@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с вкладкой "Реквизиты"
      */
-    angular.module('sbrfNdfl.ndflFL', [])
+    angular.module('app.ndflFL', [])
 
         /**
          * @description Контроллер вкладки "Реквизиты"

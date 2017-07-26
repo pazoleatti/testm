@@ -5,13 +5,13 @@
      * @description Модуль для для работы со страницей РНУ НДФЛ
      */
 
-    angular.module('sbrfNdfl.ndfl',
+    angular.module('app.ndfl',
         ['ui.router',
-        'sbrfNdfl.createOrEditFLDialog',
-        'sbrfNdfl.ndflFL',
-        'sbrfNdfl.incomesAndTax',
-        'sbrfNdfl.deduction',
-        'sbrfNdfl.prepayment'])
+        'app.createOrEditFLDialog',
+        'app.ndflFL',
+        'app.incomesAndTax',
+        'app.deduction',
+        'app.prepayment'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{formId}',
@@ -28,19 +28,6 @@
             function ($scope, $timeout, $state, $stateParams, dialogs, $showToDoDialog, $http, DeclarationDataResource) {
 
                 $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
-
-                /**
-                 * @description Инициализация кнопок
-                 */
-                function setButtonsEnabled() {
-                    //Доступности кнопок над вкладками
-                    $scope.checkButtonEnabled = true;
-                    $scope.calculateButtonEnabled = true;
-                    $scope.acceptButtonEnabled = $scope.state === "Создана";
-                    $scope.returnButtonEnabled = $scope.state !== "Создана";
-                    $scope.deleteButtonEnabled = true;
-                }
-
 
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Проверить"
@@ -94,7 +81,6 @@
                             }
                         }
                     );
-                    setButtonsEnabled();
                 }
 
                 initPage();

@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы со формами ндфл
      */
-    angular.module('sbrfNdfl.notifications', [])
+    angular.module('app.notifications', [])
         /**
          * @description Контроллер формы создания/редактирования ФЛ
          */

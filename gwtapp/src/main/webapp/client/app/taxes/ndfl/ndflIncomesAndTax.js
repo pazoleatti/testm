@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы с вкладкой "Сведения о доходах и НДФЛ"
      */
-    angular.module('sbrfNdfl.incomesAndTax', [])
+    angular.module('app.incomesAndTax', [])
 
         /**
          * @description Контроллер вкладки "Сведения о доходах и НДФЛ"

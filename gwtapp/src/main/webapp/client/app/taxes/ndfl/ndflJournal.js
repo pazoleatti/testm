@@ -4,7 +4,7 @@
     /**
      * @description Модуль для работы со формами ндфл
      */
-    angular.module('sbrfNdfl.ndflJournal', ['ui.router', 'sbrfNdfl.createFormDialog'])
+    angular.module('app.ndflJournal', ['ui.router', 'app.createFormDialog'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflJournal', {
                 url: '/taxes/ndflJournal',

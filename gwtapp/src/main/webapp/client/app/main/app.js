@@ -4,12 +4,21 @@
      * @description Основной модуль приложения
      */
     angular
-        .module('sbrfNdfl', [
+        .module('app', [
             'app.header',
             'app.logPanel',
-            'sbrfNdfl.ndflJournal',
-            'sbrfNdfl.ndfl',
+            'app.ndflJournal',
+            'app.ndfl',
             'app.filterUtils',
+            'app.rest',
+            'app.formatters',
+            'ui.router',
+            'ui.validate',
+            'ui.select2',
+            'ui.bootstrap',
+            'dialogs.main',
+            'ngMessages',
+            'angularFileUpload',
             'ngCookies',
             'pascalprecht.translate',
             'aplana.overlay',
@@ -23,17 +32,7 @@
             'aplana.datePicker',
             'aplana.dropdown',
             'aplana.formLeaveConfirmer',
-            'ui.router',
-            'ui.validate',
-            'dialogs.main',
-            'ngMessages',
-            'angularFileUpload',
-            'ui.bootstrap',
-            'ngMessages',
-            'ui.select2',
-            'aplana.link',
-            'sbrfNdfl.rest',
-            'app.formatters'
+            'aplana.link'
         ])
 
         // Отображение диалогового окна с сообщением .
@@ -68,21 +67,10 @@
             }
         ]);
 
-    /**
-     *
-     * @description Получение информации о текущем пользователе и запуск приложения
-     * @param {{user_data}} response
-     */
-    var initInjector = angular.injector(['ng']);
-    var $http = initInjector.get('$http');
-    $http.get('controller/rest/configService/getConfig').then(
-        function (response) {
-            angular.module('userData', []).constant('USER_DATA', response.data.user_data.user);
-            angular.element(document).ready(function () {
-                angular.bootstrap(document, ['sbrfNdfl']);
-            });
-        }
-    );
+    angular.element(document).ready(function () {
+        angular.bootstrap(document, ['app']);
+    });
+
     /**
      * @description Поиск по нажатию на enter
      */
