@@ -176,6 +176,8 @@ void consolidation() {
 
     time = System.currentTimeMillis();
 
+    Map<Long, List<Long>> deletedPersonMap = getDeletedPersonMap(declarationDataIdList)
+
     //record_id, Map<String, RefBookValue>
     Map<Long, Map<String, RefBookValue>> refBookPersonMap = getActualRefPersonsByDeclarationDataIdList(declarationDataIdList);
     logForDebug("Выгрузка справочника Физические лица (" + refBookPersonMap.size() + " записей, " + calcTimeMillis(time));
@@ -216,11 +218,12 @@ void consolidation() {
         NdflPerson ndflPerson = entry.getValue();
 
         if (refBookPersonId == null) {
-            String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
             String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
-            logger.errorExp("%s. %s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp, pathError,
-                    "Не удалось установить связь со справочником \"$R_PERSON\"")
+            deletedPersonMap.get(refBookPersonRecordId).each { def personDeclarationDataId ->
+                logger.errorExp("%s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp,
+                        "В налоговой форме № ${personDeclarationDataId} не удалось установить связь со справочником \"$R_PERSON\"")
+            }
             continue
         }
 
@@ -398,6 +401,27 @@ Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdLis
                 result.put(refBookPersonId, dulList);
             }
             dulList.add(refBookValues);
+        }
+    }
+    return result
+}
+
+/**
+ * Получение списка удаленных ФЛ в виде мапы personId: List<declarationDataId>
+ * @param declarationDataIdList
+ */
+@TypeChecked
+Map<Long, List<Long>> getDeletedPersonMap(List<Long> declarationDataIdList) {
+    Map<Long, List<Long>> result = [:]
+    declarationDataIdList.each { Long it ->
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_person.id = np.person_id) and status <> 0"
+        Map<Long, Map<String, RefBookValue>> refPersonMap = getProvider(RefBook.Id.PERSON.id).getRecordDataWhere(whereClause)
+        refPersonMap.each { Long k, Map<String, RefBookValue> v ->
+            Long personId = v.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue().longValue()
+            if (!result.containsKey(personId)) {
+                result.put(personId, new ArrayList<Long>())
+            }
+            result.get(personId).add(it)
         }
     }
     return result
@@ -2640,8 +2664,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
         // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
-        operationNotRelateToCurrentPeriod(ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.taxDate,
-                ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPersonFL.inp, ndflPersonFL.fio, ndflPersonIncome)
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         List<ColumnFillConditionData> columnFillConditionDataList = []
@@ -2904,7 +2926,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 new Column7And11And22And23And24NotFill(),
                 new Column21NotFill(),
                 String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как заполнены гр. \"%s\", гр. \"%s\", и не заполнены гр. \"%s\", гр. \"%s\", гр. \"%s\"",
+                String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как не заполнены гр. \"%s\", гр. \"%s\", и не заполнены гр. \"%s\", гр. \"%s\", гр. \"%s\"",
                         C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
                         C_INCOME_PAYOUT_DATE,
                         C_INCOME_PAYOUT_SUMM,
@@ -3811,19 +3833,10 @@ class Column9Fill implements ColumnFillConditionChecker {
 class Column10Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
+        return ndflPersonIncome.incomeAccruedSumm != null
     }
 }
-/**
- * Проверка: "Раздел 2. Графы 6, 10 заполнены"
- */
-@TypeChecked
-class Column6And10Fill implements ColumnFillConditionChecker {
-    @Override
-    boolean check(NdflPersonIncome ndflPersonIncome) {
-        return ndflPersonIncome.incomeAccruedDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
-    }
-}
+
 /**
  * Проверка: "Раздел 2. Графа 11 заполнена"
  */
@@ -3831,7 +3844,7 @@ class Column6And10Fill implements ColumnFillConditionChecker {
 class Column11Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+        return ndflPersonIncome.incomePayoutSumm != null
     }
 }
 /**
@@ -3841,7 +3854,7 @@ class Column11Fill implements ColumnFillConditionChecker {
 class Column7And11Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+        return ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.incomePayoutSumm != null
     }
 }
 /**
@@ -3895,9 +3908,9 @@ class Column14Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
         if (temporalySolution) {
-            return !ScriptUtils.isEmpty(ndflPersonIncome.taxRate)
+            return ndflPersonIncome.taxRate != null
         }
-        return !ScriptUtils.isEmpty(ndflPersonIncome.taxRate)
+        return ndflPersonIncome.taxRate != null
     }
 }
 /**
@@ -4010,8 +4023,7 @@ class Column7And11Or22And23And24Fill implements ColumnFillConditionChecker {
 class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return (ndflPersonIncome.incomePayoutDate == null && ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) &&
-                (ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm))
+        return !(new Column7And11Fill().check(ndflPersonIncome)) && (new Column22And23And24NotFill().check(ndflPersonIncome))
     }
 }
 /**
@@ -4021,7 +4033,7 @@ class Column7And11And22And23And24NotFill implements ColumnFillConditionChecker {
 class Column22And23And24NotFill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+        return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm == null
     }
 }
 /**
@@ -4031,7 +4043,7 @@ class Column22And23And24NotFill implements ColumnFillConditionChecker {
 class Column22And23And24Fill implements ColumnFillConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome) {
-        return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+        return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm != null
     }
 }
 /**

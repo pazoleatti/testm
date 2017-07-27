@@ -3460,23 +3460,29 @@ class CalculatedTaxChecker extends AbstractChecker {
                         }
                     }
                     //Результат для п.4 Проверка расчета суммы исчисленного налога I.1
-                    BigDecimal calclulateTaxCheckValueForIncomeCode1010 = differenceTotalSumDohSumVichForCode1010.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    BigDecimal calclulateTaxCheckValueForIncomeCode1010 = differenceTotalSumDohSumVichForCode1010
                     //Результат для п.4 Проверка расчета суммы исчисленного налога I.2
-                    BigDecimal calclulateTaxCheckValueForIncomeCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    BigDecimal calclulateTaxCheckValueForIncomeCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010
                     //Результат для п.4 Проверка расчета суммы исчисленного налога I.3
-                    BigDecimal calculatedTaxCheckSum = calclulateTaxCheckValueForIncomeCode1010.add(calclulateTaxCheckValueForIncomeCodeNot1010)
+                    BigDecimal calculatedTaxCheckBase = calclulateTaxCheckValueForIncomeCode1010.add(calclulateTaxCheckValueForIncomeCodeNot1010)
+                    Ndfl2Leaf<BigDecimal> taxBaseAttribute = extractAttribute(TAX_BASE, svedDohNode)
+                    BigDecimal differenceTaxBaseAndCalculatedTaxCheckSum = taxBaseAttribute.getValue().subtract(calculatedTaxCheckBase)
+                    if (differenceTaxBaseAndCalculatedTaxCheckSum.abs() > 1) {
+                        createErrorMessage(logger, documentNode, "«Налоговая база» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" для «Ставки» (\"${taxRateAttribute.getValue()}\") «Налоговой базы» (\"${taxBaseAttribute.getValue()}\") должна быть равна \"${calculatedTaxCheckBase}\".")
+                    }
+                    BigDecimal calculatedTaxCheckSum = ScriptUtils.round(calclulateTaxCheckValueForIncomeCode1010.add(calclulateTaxCheckValueForIncomeCodeNot1010).multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100)), 0)
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
-                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(ScriptUtils.round(calculatedTaxCheckSum, 0))
+                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(calculatedTaxCheckSum)
                     if (differenceCalculatedTaxAndCalculatedTaxCheckSum.abs() > 1) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${extractAttribute(TAX_BASE, svedDohNode).getValue()}.")
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" для «Ставки» (\"${taxRateAttribute.getValue()}\") «Сумма налога исчисленная» (\"${calculatedTaxAttribute.getValue()}\") должна быть равна \"${calculatedTaxCheckSum}\".")
                     }
                 } else if (taxRateAttribute != null && taxRateAttribute.getValue() == 30) {
                     Ndfl2Leaf<BigDecimal> taxBaseAttribute = extractAttribute(TAX_BASE, svedDohNode)
-                    BigDecimal calculatedTaxCheckSum = taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    BigDecimal calculatedTaxCheckSum = ScriptUtils.round(taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100)))
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
-                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(ScriptUtils.round(calculatedTaxCheckSum, 0))
+                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(calculatedTaxCheckSum)
                     if (differenceCalculatedTaxAndCalculatedTaxCheckSum.abs() > 1) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${taxBaseAttribute.getValue()}.")
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" для «Ставки» (\"${taxRateAttribute.getValue()}\") «Сумма налога исчисленная» (\"${calculatedTaxAttribute.getValue()}\") должна быть равна \"${calculatedTaxCheckSum}\".")
                     }
                 } else {
                     List<Ndfl2Node> svSumDohList = extractNdfl2Nodes(SV_SUM_DOH, svedDohNode)
@@ -3497,11 +3503,17 @@ class CalculatedTaxChecker extends AbstractChecker {
                         }
                         differenceTotalSumDohSumVich = differenceTotalSumDohSumVich.add(differenceSumDohSumVich)
                     }
-                    BigDecimal calculatedTaxCheckSum = differenceTotalSumDohSumVich.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100))
+                    BigDecimal calculatedTaxCheckBase = differenceTotalSumDohSumVich
+                    BigDecimal calculatedTaxCheckSum = ScriptUtils.round(calculatedTaxCheckBase.multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100)), 0)
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
-                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(ScriptUtils.round(calculatedTaxCheckSum, 0))
+                    Ndfl2Leaf<BigDecimal> taxBaseAttribute = extractAttribute(TAX_BASE, svedDohNode)
+                    BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(calculatedTaxCheckSum)
+                    BigDecimal differenceTaxBaseAndCalculatedTaxCheckSum = taxBaseAttribute.getValue().subtract(calculatedTaxCheckBase)
+                    if (differenceTaxBaseAndCalculatedTaxCheckSum.abs() > 1) {
+                        createErrorMessage(logger, documentNode, "«Налоговая база» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" для «Ставки» (\"${taxRateAttribute.getValue()}\") «Налоговой базы» (\"${taxBaseAttribute.getValue()}\") должна быть равна \"${calculatedTaxCheckBase}\".")
+                    }
                     if (differenceCalculatedTaxAndCalculatedTaxCheckSum.abs() > 1) {
-                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" «Сумма налога исчисленная» ${calculatedTaxAttribute.getValue()} должна быть равна произведению «Ставки» ${taxRateAttribute.getValue()} и «Налоговой базы» ${extractAttribute(TAX_BASE, svedDohNode).getValue()}.")
+                        createErrorMessage(logger, documentNode, "«Сумма налога исчисленная» рассчитана некорректно", "В \"Разделе 5. \"Общие суммы дохода и налога\" для «Ставки» (\"${taxRateAttribute.getValue()}\") «Сумма налога исчисленная» (\"${calculatedTaxAttribute.getValue()}\") должна быть равна \"${calculatedTaxCheckSum}\".")
                     }
                 }
             }
