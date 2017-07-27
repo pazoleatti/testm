@@ -64,12 +64,11 @@ public class TransportDataController {
      *
      * @param file ТФ
      * @return uuid группы сообщений
-     * @throws FileUploadException
      * @throws IOException
      */
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
-    public ActionResult upload(@RequestParam(value = "uploader", required = true) MultipartFile file) throws FileUploadException, IOException {
+    public ActionResult upload(@RequestParam(value = "uploader", required = true) MultipartFile file) throws IOException {
         Logger logger = new Logger();
 
         if (file == null || file.isEmpty()) {
@@ -138,11 +137,10 @@ public class TransportDataController {
      * Загрузка всех файлов из каталога загрузки
      *
      * @return uuid группы сообщений
-     * @throws IOException
      */
     @RequestMapping(value = "/loadAll", method = RequestMethod.POST)
     @ResponseBody
-    public ActionResult loadAll() throws IOException {
+    public ActionResult loadAll() {
         Logger logger = new Logger();
 
         TAUserInfo userInfo = securityService.currentUserInfo();

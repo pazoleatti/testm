@@ -42,14 +42,12 @@ public class UploadController {
     /**
      * Загрузка файла в формате xls
      * @param file файл
-     * @param request запрос
      * @throws FileUploadException
      * @throws IOException
      */
     @ResponseBody
     @RequestMapping(value = "/pattern", method = RequestMethod.POST, produces = "text/html; charset=UTF-8")
-    public String processUploadXls(@RequestParam("uploader") MultipartFile file,
-                                 HttpServletRequest request) throws FileUploadException, IOException{
+    public String processUploadXls(@RequestParam("uploader") MultipartFile file) throws FileUploadException, IOException{
         String uuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
         return "{uuid : \"" + uuid + "\"}";
     }
@@ -58,7 +56,6 @@ public class UploadController {
      * Загрузка нескольких файлов налоговых форм
      * @param files файлы
      * @param request запрос
-     * @throws FileUploadException
      * @throws IOException
      * @throws JSONException
      */
@@ -66,7 +63,7 @@ public class UploadController {
     @RequestMapping(value = "/formDataFiles", method = RequestMethod.POST, produces = "text/html; charset=UTF-8")
     public String processUploadFormDataFiles(@RequestParam("uploader") List<MultipartFile> files,
                                           HttpServletRequest request)
-            throws FileUploadException, IOException, JSONException {
+            throws IOException, JSONException {
         request.setCharacterEncoding("UTF-8");
         List<String> uuidList = new ArrayList<String>();
         for(MultipartFile file: files) {

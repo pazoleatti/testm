@@ -79,13 +79,12 @@ public class DeclarationTemplateController {
      * @param declarationTemplateId идентификатор шаблона декларации
      * @param req запрос
      * @param resp ответ
-     * @throws FileUploadException
      * @throws IOException
      */
     @RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
     public void uploadDect(@RequestParam(value = "uploader", required = true) MultipartFile file,
                            @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws FileUploadException, IOException {
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             if (declarationTemplateId == 0)
                 throw new ServiceException("Сначала сохраните шаблон.");
@@ -155,14 +154,13 @@ public class DeclarationTemplateController {
      * @param declarationTemplateId идентификатор шаблона декларации
      * @param req запрос
      * @param resp ответ
-     * @throws FileUploadException
      * @throws IOException
      */
     @RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
     @Transactional
     public void processUpload(@RequestParam(value = "uploader", required = true) MultipartFile file,
                               @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws FileUploadException, IOException {
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             if (declarationTemplateId == 0)
                 throw new ServiceException("Сначала сохраните шаблон.");
@@ -237,14 +235,13 @@ public class DeclarationTemplateController {
      * @param declarationTemplateId идентификатор шаблона декларации
      * @param req запрос
      * @param resp ответ
-     * @throws FileUploadException
      * @throws IOException
      */
     @RequestMapping(value = "uploadXsd/{declarationTemplateId}",method = RequestMethod.POST)
     @Transactional
     public void processUploadXsd(@RequestParam(value = "uploader", required = true) MultipartFile file,
                                  @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws FileUploadException, IOException {
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             if (declarationTemplateId == 0)
                 throw new ServiceException("Сначала сохраните шаблон.");
@@ -338,9 +335,8 @@ public class DeclarationTemplateController {
     /**
      * Проверка logger на наличие ошибок
      * @param logger
-     * @throws IOException
      */
-    private void checkErrors(Logger logger) throws IOException {
+    private void checkErrors(Logger logger) {
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }

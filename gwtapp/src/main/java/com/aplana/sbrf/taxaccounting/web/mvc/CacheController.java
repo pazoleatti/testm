@@ -30,11 +30,10 @@ public class CacheController {
 
 	/**
 	 * Сбрасывает кэш
-	 * @throws IOException
 	 */
 	@RequestMapping(value = "/cache/clear-cache",method = RequestMethod.GET, produces = "text/html; charset=UTF-8")
 	@ResponseBody
-	public String clearCache() throws IOException {
+	public String clearCache() {
 		cacheManagerDecorator.clearAll();
 		return "Кэш сброшен";
 	}
@@ -43,12 +42,11 @@ public class CacheController {
 	 * Сброс кэша аутентификации
 	 * @param request запрос
 	 * @param response ответ
-	 * @throws IOException
 	 */
 	@RequestMapping(value = "/clearAuthenticationCache", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	public String logout401(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public String logout401(HttpServletRequest request, HttpServletResponse response) {
 		response.setHeader("WWW-Authenticate", "Basic realm=\"defaultWIMFileBasedRealm\"");
 		JSONObject jsonObject = new JSONObject();
 		try {
