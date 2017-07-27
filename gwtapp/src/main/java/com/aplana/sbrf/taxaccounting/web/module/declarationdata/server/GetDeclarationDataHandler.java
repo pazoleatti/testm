@@ -96,6 +96,7 @@ public class GetDeclarationDataHandler
 
         result.setDeclarationType(declarationTemplate.getType().getName());
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind());
+        result.setShowPrintToXml(!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED));
         result.setSubreports(declarationTemplate.getSubreports());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));

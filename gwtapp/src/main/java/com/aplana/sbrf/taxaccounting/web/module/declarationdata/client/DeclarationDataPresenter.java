@@ -140,6 +140,8 @@ public class DeclarationDataPresenter
         boolean isVisiblePDF();
 
         Button getAddErrorButton();
+
+        void showPrintToXml(boolean show);
     }
 
     private final DispatchAsync dispatcher;
@@ -298,6 +300,7 @@ public class DeclarationDataPresenter
                                 getView().showDelete(result.isCanDelete());
                                 getView().showRecalculateButton(result.isCanRecalculate() && !isReports);
                                 getView().showChangeStatusEDButton(result.isCanChangeStatusED());
+                                getView().showPrintToXml(result.isShowPrintToXml());
                                 if (declarationData.getDeclarationTemplateId() == 102 || declarationData.getDeclarationTemplateId() == 104) {
                                     getView().getAddErrorButton().setVisible(true);
                                 } else {
@@ -338,7 +341,9 @@ public class DeclarationDataPresenter
                                 revealPlaceRequest();
                                 return;
                             }
-                            getView().updatePrintReportButtonName(type, true, result.getExistReport().getCreateDate());
+                            if (!(declarationFormKind.equals(DeclarationFormKind.CONSOLIDATED) && DeclarationDataReportType.XML_DEC.equals(type))) {
+                                getView().updatePrintReportButtonName(type, true, result.getExistReport().getCreateDate());
+                            }
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 onTimerReport(DeclarationDataReportType.PDF_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);

@@ -38,6 +38,7 @@ public class GetDeclarationDataResult implements Result {
     private boolean canDelete;
     private boolean canRecalculate;
     private boolean canChangeStatusED;
+    private boolean showPrintToXml;
 
     public boolean isCanRecalculate() {
         return canRecalculate;
@@ -189,6 +190,14 @@ public class GetDeclarationDataResult implements Result {
 
     public void setVisiblePDF(boolean isVisiblePDF) {
         this.isVisiblePDF = isVisiblePDF;
+    }
+
+    public boolean isShowPrintToXml() {
+        return showPrintToXml;
+    }
+
+    public void setShowPrintToXml(boolean showPrintToXml) {
+        this.showPrintToXml = showPrintToXml;
     }
 
     public DeclarationData getDeclarationData() {
