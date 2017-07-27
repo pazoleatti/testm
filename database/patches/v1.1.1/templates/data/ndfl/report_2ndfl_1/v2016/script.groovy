@@ -372,7 +372,8 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
 
             boolean includeNdflPersonToReport = false
             // Данные для Файл.Документ.СведДох-(Сведения о доходах физического лица)
-            def ndflPersonIncomesAll = findAllIncomes(np.id, startDate, endDate, priznakF)
+            List<NdflPersonIncome> ndflPersonIncomesAll = filterIncomesByKppOktmp(findAllIncomes(np.id, startDate, endDate, priznakF))
+            Set<String> ndflPersonIncomesOperationIds = ndflPersonIncomesAll.collect { it.operationId }.toSet()
 
             if (priznakF == "1") {
                 includeNdflPersonToReport = true
@@ -483,16 +484,16 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                     def ndflPersonIncomesGroupedByTaxRate = groupByTaxRate(ndflPersonIncomesAll)
 
                     // Сведения о вычетах с признаком "Остальные"
-                    def deductionsSelectedForDeductionsInfo = ndflPersonService.findDeductionsWithDeductionsMarkOstalnie(np.id, startDate, endDate)
+                    def deductionsSelectedForDeductionsInfo = filterDeductionsByKppOktmp(ndflPersonService.findDeductionsWithDeductionsMarkOstalnie(np.id, startDate, endDate), ndflPersonIncomesOperationIds)
                     // Сведения о вычетах с признаком "Социльный;Стандартный;Имущественный;Инвестиционный"
-                    def deductionsSelectedForDeductionsSum = ndflPersonService.findDeductionsWithDeductionsMarkNotOstalnie(np.id, startDate, endDate, (priznakF == "1"))
+                    def deductionsSelectedForDeductionsSum = filterDeductionsByKppOktmp(ndflPersonService.findDeductionsWithDeductionsMarkNotOstalnie(np.id, startDate, endDate, (priznakF == "1")), ndflPersonIncomesOperationIds)
                     def deductionsSelectedGroupedByDeductionTypeCode = groupByDeductionTypeCode(deductionsSelectedForDeductionsSum)
                     // Объединенные строки сведений об уведомлении, подтверждающие право на вычет
                     def unionDeductions = unionDeductionsForDeductionType(deductionsSelectedGroupedByDeductionTypeCode)
 
                     ndflPersonIncomesGroupedByTaxRate.keySet().each { taxRateKey ->
                         ScriptUtils.checkInterrupted();
-                        def ndflPersonPrepayments = findPrepayments(np.id, taxRateKey, startDate, endDate, priznakF)
+                        def ndflPersonPrepayments = findPrepayments(np.id, taxRateKey, startDate, endDate, priznakF, ndflPersonIncomesOperationIds)
                         СведДох(Ставка: taxRateKey) {
 
                             def sumDohodAll = new BigDecimal(0)
@@ -636,8 +637,8 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
                                 }
                             }
                             // Доходы отобранные по датам для поля tax_date(Дата НДФЛ)
-                            def incomesByTaxDate = ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, taxRateKey, startDate, endDate)
-                            List<NdflPersonIncome> incomesByPayoutDate = ndflPersonService.findIncomesByPayoutDate(np.id, taxRateKey, startDate, endDate)
+                            List<NdflPersonIncome> incomesByTaxDate = filterIncomesByKppOktmp(ndflPersonService.findIncomesByPeriodAndNdflPersonIdAndTaxDate(np.id, taxRateKey, startDate, endDate))
+                            List<NdflPersonIncome> incomesByPayoutDate = filterIncomesByKppOktmp(ndflPersonService.findIncomesByPayoutDate(np.id, taxRateKey, startDate, endDate))
                             Date firstDateOfMarchOfNextPeriod = getFirstMarchOfNextPeriod(endDate)
                             СумИтНалПер(СумДохОбщ: priznakF == "1" ? ScriptUtils.round(getSumDohod(priznakF, ndflPersonIncomesAll, taxRateKey), 2) : ScriptUtils.round(sumDohodAll, 2),
                                     НалБаза: priznakF == "1" ? ScriptUtils.round(getNalBaza(ndflPersonIncomesAll, taxRateKey), 2) : ScriptUtils.round(sumDohodAll - sumVichAll, 2),
@@ -984,12 +985,15 @@ def filterDeductions(ndflPersonIncomes, def ndflPersonDeductions) {
  *
  * @return
  */
-def findPrepayments(def ndflPersonId, def taxRate, def startDate, def endDate, priznakF) {
+List<NdflPersonPrepayment> findPrepayments(def ndflPersonId, def taxRate, def startDate, def endDate, priznakF, Set<String> ndflPersonIncomesIds) {
     def toReturn = []
     if (priznakF == "1") {
-        return ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, taxRate, startDate, endDate, true)
+        toReturn = ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, taxRate, startDate, endDate, true)
     } else {
-        return ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, taxRate, startDate, endDate, false)
+        toReturn = ndflPersonService.findPrepaymentsByPeriodAndNdflPersonId(ndflPersonId, taxRate, startDate, endDate, false)
+    }
+    return toReturn.findAll() { NdflPersonPrepayment it ->
+        ndflPersonIncomesIds.contains(it.operationId)
     }
 }
 
@@ -3893,5 +3897,30 @@ def interdocumentary6ndflCheckData() {
     if (kolFl6 != kolFl2) {
         def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
         logger.errorExp(msgErrorRes, "«Количество физических лиц, получивших доход» рассчитано некорректно", "")
+    }
+}
+
+/**
+ * Фильтрация операци по КПП/ОКТМО
+ * @param ndflPersonIncomes
+ * @return
+ */
+@TypeChecked
+List<NdflPersonIncome> filterIncomesByKppOktmp(List<NdflPersonIncome> ndflPersonIncomes) {
+    return ndflPersonIncomes.findAll() { NdflPersonIncome it ->
+        it.kpp == declarationData.kpp && it.oktmo == declarationData.oktmo
+    }
+}
+
+/**
+ * Фильтрация вычетов по operationId
+ * @param ndflPersonDeductions
+ * @param ndflPersonIncomesAllIds
+ * @return
+ */
+@TypeChecked
+List<NdflPersonDeduction> filterDeductionsByKppOktmp(List<NdflPersonDeduction> ndflPersonDeductions, Set<String> ndflPersonIncomesIds) {
+    return ndflPersonDeductions.findAll() { NdflPersonDeduction it ->
+        ndflPersonIncomesIds.contains(it.operationId)
     }
 }
