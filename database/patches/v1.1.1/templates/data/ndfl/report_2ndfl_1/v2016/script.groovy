@@ -3482,7 +3482,7 @@ class CalculatedTaxChecker extends AbstractChecker {
                     }
                 } else if (taxRateAttribute != null && taxRateAttribute.getValue() == 30) {
                     Ndfl2Leaf<BigDecimal> taxBaseAttribute = extractAttribute(TAX_BASE, svedDohNode)
-                    BigDecimal calculatedTaxCheckSum = ScriptUtils.round(taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100)))
+                    BigDecimal calculatedTaxCheckSum = ScriptUtils.round(taxBaseAttribute.getValue().multiply(new BigDecimal(taxRateAttribute.getValue())).divide(new BigDecimal(100)), 2)
                     Ndfl2Leaf<BigDecimal> calculatedTaxAttribute = extractAttribute(CALCULATED_TAX, svedDohNode)
                     BigDecimal differenceCalculatedTaxAndCalculatedTaxCheckSum = calculatedTaxAttribute.getValue().subtract(calculatedTaxCheckSum)
                     if (differenceCalculatedTaxAndCalculatedTaxCheckSum.abs() > 1) {
