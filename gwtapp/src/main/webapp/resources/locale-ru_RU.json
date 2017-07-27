@@ -253,5 +253,11 @@
   "sources.tableColumn.declarationType": "Вид формы",
   "sources.tableColumn.year": "Год",
   "sources.tableColumn.period": "Период",
-  "sources.tableColumn.declarationState": "Состояние формы"
+  "sources.tableColumn.declarationState": "Состояние формы",
+
+  "uploadTransportData.title": "Загрузка файлов",
+  "uploadTransportData.button.upload": "Загрузить файл",
+  "uploadTransportData.button.loadAll": "Обработать файлы из каталога загрузки",
+  "uploadTransportData.description.upload": "Загружаются только те файлы, которые пользователь предоставляет системе по нажатию этой кнопки.",
+  "uploadTransportData.description.loadAll": "Загружаются файлы из каталогов загруки."
 }

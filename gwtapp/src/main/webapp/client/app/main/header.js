@@ -8,7 +8,8 @@
     angular.module('app.header', [
             'ui.router',
             'ng.deviceDetector',
-            'app.notifications'
+            'app.notifications',
+            'app.uploadTransportData'
         ])
         .directive('appHeader', function () {
             return {
@@ -17,8 +18,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'dialogs', 'NotificationResource',
-            function ($scope, $translate, $http, $rootScope, deviceDetector, $filter, dialogs, NotificationResource) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'dialogs', 'NotificationResource',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, dialogs, NotificationResource) {
                 /**
                  * @description Получаем необходимые настройки с сервера
                  * @param {{project_properties}} response
@@ -61,7 +62,9 @@
                             name: $filter('translate')('menu.taxes.service'),
                             subtree: [{
                                 name: $filter('translate')('menu.taxes.service.loadFiles'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!uploadTransportData"
+                                onClick: function () {
+                                    $state.go('uploadTransportData');
+                                }
                             }]
                         }, {
                             name: $filter('translate')('menu.taxes.commonParameters'),
@@ -152,7 +155,9 @@
 
                 function decline(num, nominative, singular, plural) {
                     var text;
-                    if (num > 10 && ((num % 100) / 10) == 1) return num + " " + plural;
+                    if (num > 10 && ((num % 100) / 10) === 1) {
+                        return num + " " + plural;
+                    }
 
                     switch (num % 10) {
                         case 1:
@@ -169,10 +174,6 @@
                     $scope.notificationsCount = num + " " + text;
                 }
 
-                $scope.$on("UPDATE_NOTIF_COUNT", function () {
-                    updateNotificationCount();
-                });
-
                 function updateNotificationCount() {
                     NotificationResource.query({
                         projection: 'count'
@@ -187,10 +188,14 @@
                     });
                 }
 
+                $scope.$on("UPDATE_NOTIF_COUNT", function () {
+                    updateNotificationCount();
+                });
+
                 updateNotificationCount();
 
                 setInterval(function () {
                     updateNotificationCount();
-                }, 30000)
+                }, 30000);
             }]);
 }());
