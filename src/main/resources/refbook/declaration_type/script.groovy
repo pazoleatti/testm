@@ -222,7 +222,7 @@ def importTF() {
     ) {
         importAnswer1151111()
     } else {
-        throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName))
+        logger.error("Не удалось определить тип файла ответа \"%s\"", UploadFileName)
     }
 }
 
@@ -698,9 +698,12 @@ def readNdfl2ResponseContent() {
         String line = ""
         while (line != null) {
             if (line.contains(NDFL2_TO_FILE)) {
-                result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_FILE_NAME_PATTERN, "\$2"))
+                if (line ==~ NDFL2_FILE_NAME_PATTERN) {
+                    result.put(NDFL2_TO_FILE, line.replaceAll(NDFL2_FILE_NAME_PATTERN, "\$2"))
+                } else {
+                    result.put(NDFL2_TO_FILE, null)
+                }
             }
-
             if (line.contains(NDFL2_PROTOCOL_DATE)) {
                 result.put(NDFL2_PROTOCOL_DATE, line.replaceAll(NDFL2_PROTOCOL_DATE_PATTERN, "\$1"))
             }
@@ -923,7 +926,6 @@ def importNdflResponse() {
     def ndfl2ContentReestrMap = [:]
     def reportFileName
     def docWeight = getDocWeight(UploadFileName)
-    boolean isNdfl2 = true
     if (isNdfl2Response(UploadFileName)) {
         if (isNdfl2ResponseProt(UploadFileName)) {
             ndfl2ContentMap = readNdfl2ResponseContent()
@@ -939,7 +941,6 @@ def importNdflResponse() {
             reportFileName = ndfl2ContentReestrMap.get(NDFL2_TO_FILE)
         }
     } else {
-        isNdfl2 = false
         def ndfl6Content = readNdfl6ResponseContent()
 
         if (ndfl6Content == null) {
@@ -949,9 +950,7 @@ def importNdflResponse() {
         reportFileName = getFileName(ndfl6Content, UploadFileName)
     }
 
-    //проверка что в строке есть имя файла происходит по наличию расширения файла для NDFL 2 и не пустой строке для NDFL 6
-    reportEndFile = reportFileName.substring(reportFileName.length() - 4)
-    if (reportFileName == null || (isNdfl2 && !(reportEndFile.contains(".xml") || (reportEndFile.contains(".txt")) || (reportEndFile.contains(".XML")) || (reportEndFile.contains(".TXT"))))) {
+    if (reportFileName == null || reportFileName == "") {
         logger.error("Не найдено имя отчетного файла в файле ответа  \"%s\"", UploadFileName)
         return
     }
