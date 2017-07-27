@@ -11,7 +11,8 @@
         'app.ndflFL',
         'app.incomesAndTax',
         'app.deduction',
-        'app.prepayment'])
+        'app.prepayment',
+        'app.formSources'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{formId}',
