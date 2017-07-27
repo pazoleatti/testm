@@ -32,18 +32,18 @@ public class FormTemplateController {
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "formTemplate/downloadAll")
-    public void downloadAll(HttpServletResponse response) throws IOException {
-        response.setHeader("Content-Disposition",
-                String.format("attachment; filename=\"Templates(%s).zip\"",
-                        new SimpleDateFormat("yyyy-MM-dd").format(new Date()))
-        );
-        response.setCharacterEncoding("UTF-8");
+	public void downloadAll(HttpServletResponse response) throws IOException {
+		response.setHeader("Content-Disposition",
+				String.format("attachment; filename=\"Templates(%s).zip\"",
+						new SimpleDateFormat("yyyy-MM-dd").format(new Date()))
+		);
+		response.setCharacterEncoding("UTF-8");
 		try {
-        	formTemplateImpexService.exportAllTemplates(response.getOutputStream());
+			formTemplateImpexService.exportAllTemplates(response.getOutputStream());
 		} finally {
-        	IOUtils.closeQuietly(response.getOutputStream());
+			IOUtils.closeQuietly(response.getOutputStream());
 		}
-    }
+	}
 
 	/**
 	 * Обработка исключений, связанных с тем, что скрипт выполнился с ошибками
@@ -52,11 +52,11 @@ public class FormTemplateController {
 	 * @throws IOException
 	 */
 	@ExceptionHandler(ServiceLoggerException.class)
-    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
-        response.setContentType("text/plain");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().printf("errorUuid %s", e.getUuid());
-    }
+	public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
+		response.setContentType("text/plain");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().printf("errorUuid %s", e.getUuid());
+	}
 
 	/**
 	 * Обработка стандартных исключений
@@ -69,7 +69,7 @@ public class FormTemplateController {
 		response.setCharacterEncoding("UTF-8");
 		LOG.warn(e.getLocalizedMessage(), e);
 		try {
-            response.getWriter().printf("error %s", e.getMessage());
+			response.getWriter().printf("error %s", e.getMessage());
 		} catch (IOException ioException) {
 			LOG.error(ioException.getMessage(), ioException);
 		}

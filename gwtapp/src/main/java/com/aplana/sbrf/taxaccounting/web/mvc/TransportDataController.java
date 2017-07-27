@@ -21,10 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,8 +60,9 @@ public class TransportDataController {
 
     /**
      * Загрузка ТФ
-     * @param file ТФ
-     * @param request запрос
+     *
+     * @param file     ТФ
+     * @param request  запрос
      * @param response ответ
      * @throws FileUploadException
      * @throws IOException

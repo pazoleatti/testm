@@ -70,7 +70,7 @@ public class LogEntryController {
         return logEntryService.getLogCount(uuid);
     }
 
-    @RequestMapping(value = "/actions/logEntry/{uuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/actions/logEntry/{uuid}", method = RequestMethod.GET, produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8")
     public void download(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (uuid == null || uuid.isEmpty()) {
             LOG.error("Ошибка получения сообщений. Не задан параметр uuid.");
@@ -91,9 +91,6 @@ public class LogEntryController {
         // Получение файла
         InputStream fis = blobDataService.get(fileUuid).getInputStream();
         // Выдача файла
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
-        //resp.setContentLength((int) file.length());
 
         resp.setHeader("Content-Disposition", createHeader(logEntryList != null && !logEntryList.isEmpty() ? logEntryList.get(0).getMessage() : ""));
         OutputStream out = resp.getOutputStream();
@@ -108,7 +105,7 @@ public class LogEntryController {
      * Формирует заголовок с именем файла для выгрузки журнала сообщений
      *
      * @param headerMsg заглавное сообщение
-     * @return
+     * @return заголовок с именем файла для выгрузки журнала сообщений
      */
     public static String createHeader(String headerMsg) {
         //Журнал_сообщений_yyyy-mm-dd_hh-mm-ss.xlsx
