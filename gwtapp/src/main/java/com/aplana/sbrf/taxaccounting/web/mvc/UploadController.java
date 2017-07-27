@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,31 +43,29 @@ public class UploadController {
      * Загрузка файла в формате xls
      * @param file файл
      * @param request запрос
-     * @param response ответ
      * @throws FileUploadException
      * @throws IOException
      */
-    @RequestMapping(value = "/pattern", method = RequestMethod.POST)
-    public void processUploadXls(@RequestParam("uploader") MultipartFile file,
-                                 HttpServletRequest request, HttpServletResponse response)
-            throws FileUploadException, IOException {
-        request.setCharacterEncoding("UTF-8");
+    @ResponseBody
+    @RequestMapping(value = "/pattern", method = RequestMethod.POST, produces = "text/html; charset=UTF-8")
+    public String processUploadXls(@RequestParam("uploader") MultipartFile file,
+                                 HttpServletRequest request) throws FileUploadException, IOException{
         String uuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
-        response.getWriter().printf("{uuid : \"%s\"}", uuid);
+        return "{uuid : \"" + uuid + "\"}";
     }
 
     /**
      * Загрузка нескольких файлов налоговых форм
      * @param files файлы
      * @param request запрос
-     * @param response ответ
      * @throws FileUploadException
      * @throws IOException
      * @throws JSONException
      */
-    @RequestMapping(value = "/formDataFiles", method = RequestMethod.POST)
-    public void processUploadFormDataFiles(@RequestParam("uploader") List<MultipartFile> files,
-                                          HttpServletRequest request, HttpServletResponse response)
+    @ResponseBody
+    @RequestMapping(value = "/formDataFiles", method = RequestMethod.POST, produces = "text/html; charset=UTF-8")
+    public String processUploadFormDataFiles(@RequestParam("uploader") List<MultipartFile> files,
+                                          HttpServletRequest request)
             throws FileUploadException, IOException, JSONException {
         request.setCharacterEncoding("UTF-8");
         List<String> uuidList = new ArrayList<String>();
@@ -78,20 +77,20 @@ public class UploadController {
         if (uuidList.size() == files.size()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(UuidEnum.UUID.toString(), StringUtils.join(uuidList.toArray(), ','));
-            response.getWriter().printf(jsonObject.toString());
+            return jsonObject.toString();
         } else if (!uuidList.isEmpty()) {
             Logger log = new Logger();
             log.error("Часть выбранных файлов имеет размер более 5 МБайт, данные файлы не добавлены. Для добавления доступны файлы размером меньшим или равным 5 МБайт.");
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(UuidEnum.UUID.toString(), StringUtils.join(uuidList.toArray(), ','));
             jsonObject.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(log.getEntries()));
-            response.getWriter().printf(jsonObject.toString());
+            return jsonObject.toString();
         } else {
             Logger log = new Logger();
             log.error("Выбранные файлы (файл) имеют размер более 5 МБайт. Для добавления доступны файлы размером менее 5 МБайт.");
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(log.getEntries()));
-            response.getWriter().printf(jsonObject.toString());
+            return jsonObject.toString();
         }
 
     }

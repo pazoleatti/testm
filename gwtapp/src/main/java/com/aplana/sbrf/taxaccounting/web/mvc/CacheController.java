@@ -5,10 +5,12 @@ import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,15 +30,13 @@ public class CacheController {
 
 	/**
 	 * Сбрасывает кэш
-	 * @param resp ответ
 	 * @throws IOException
 	 */
-	@RequestMapping(value = "/cache/clear-cache",method = RequestMethod.GET)
-	public void clearCache(HttpServletResponse resp) throws IOException {
+	@RequestMapping(value = "/cache/clear-cache",method = RequestMethod.GET, produces = "text/html; charset=UTF-8")
+	@ResponseBody
+	public String clearCache() throws IOException {
 		cacheManagerDecorator.clearAll();
-		resp.setContentType("text/plain");
-		resp.setCharacterEncoding("UTF-8");
-        resp.getWriter().printf("Кэш сброшен");
+		return "Кэш сброшен";
 	}
 
 	/**
@@ -47,15 +47,15 @@ public class CacheController {
 	 */
 	@RequestMapping(value = "/clearAuthenticationCache", method = RequestMethod.GET)
 	@ResponseBody
-	public void logout401(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public String logout401(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.setHeader("WWW-Authenticate", "Basic realm=\"defaultWIMFileBasedRealm\"");
-		response.setStatus(401);
 		JSONObject jsonObject = new JSONObject();
 		try {
 			jsonObject.put(UuidEnum.IS_WEBSEAL.name(), isWebsealUsed(request));
-			response.getWriter().printf(jsonObject.toString());
+			return jsonObject.toString();
 		} catch (JSONException e) {
-
+			return null;
 		}
 	}
 

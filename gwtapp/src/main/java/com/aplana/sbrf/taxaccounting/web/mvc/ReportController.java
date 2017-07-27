@@ -88,7 +88,8 @@ public class ReportController {
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");response.setStatus(HttpServletResponse.SC_NOT_FOUND, "Отчет не найден");
+            response.setCharacterEncoding("UTF-8");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND, "Отчет не найден");
             response.getWriter().printf("Отчет не найден");
         }
     }

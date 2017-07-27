@@ -72,7 +72,7 @@ public class DeclarationDataController {
      * @param response ответ
      * @throws IOException
      */
-    @RequestMapping(value = "/actions/declarationData/xlsx/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/actions/declarationData/xlsx/{id}", method = RequestMethod.GET, produces = "application/octet-stream")
     public void xlsx(@PathVariable long id, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
@@ -83,7 +83,6 @@ public class DeclarationDataController {
             fileName = URLEncoder.encode(xmlDataFileName.replace("zip", "xlsx"), ENCODING);
         }
 
-        response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
         String uuid = reportService.getDec(userInfo, id, DeclarationDataReportType.EXCEL_DEC);
@@ -153,14 +152,13 @@ public class DeclarationDataController {
      * @param response ответ
      * @throws IOException
      */
-    @RequestMapping(value = "/actions/declarationData/pageImage/{id}/{pageId}/*", method = RequestMethod.GET)
+    @RequestMapping(value = "/actions/declarationData/pageImage/{id}/{pageId}/*", method = RequestMethod.GET, produces = "image/png")
     public void pageImage(@PathVariable int id, @PathVariable int pageId,
                           HttpServletResponse response) throws IOException {
 
         InputStream pdfData = declarationService.getPdfDataAsStream(id, securityService.currentUserInfo());
         PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
                 pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
-        response.setContentType("image/png");
         pdfData.close();
     }
 
@@ -171,14 +169,13 @@ public class DeclarationDataController {
      * @param response ответ
      * @throws IOException
      */
-    @RequestMapping(value = "/actions/declarationData/xml/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/actions/declarationData/xml/{id}", method = RequestMethod.GET, produces = "application/octet-stream")
     public void xml(@PathVariable int id, HttpServletResponse response)
             throws IOException {
 
         InputStream xmlDataIn = declarationService.getXmlDataAsStream(id, securityService.currentUserInfo());
         String fileName = URLEncoder.encode(declarationService.getXmlDataFileName(id, securityService.currentUserInfo()), ENCODING);
 
-        response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
 		try {
@@ -230,5 +227,17 @@ public class DeclarationDataController {
 
         result.setCreationDate(sdf.get().format(logBusinessService.getFormCreationDate(declaration.getId())));
         return result;
+    }
+
+    /**
+     * Удаление формы
+     * @param declarationDataId идентификатор формы
+     */
+    @RequestMapping(value = "/actions/declarationData/delete", method = RequestMethod.POST)
+    @ResponseBody
+    public void delete(@RequestParam int declarationDataId){
+        if (declarationService.existDeclarationData(declarationDataId)) {
+            declarationService.delete(declarationDataId, securityService.currentUserInfo());
+        }
     }
 }
