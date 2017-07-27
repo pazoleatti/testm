@@ -1,0 +1,23 @@
+<div id="ndfl" style="height: 90%;">
+    <!--Заголовок-->
+    <div class="row">
+        <div class="header-col" style="margin-left: 15px;">
+            <h1>{{::'uploadTransportData.title' | translate}}</h1>
+        </div>
+    </div>
+
+    <div style="padding-bottom: 15px;">
+        <button type="file" class="btn btn-danger w250" ngf-select="uploadButtonClick($file)">
+            <span data-translate-once="uploadTransportData.button.upload"></span>
+        </button>
+        <label class="font-normal">{{::'uploadTransportData.description.upload' | translate}}</label>
+
+    </div>
+
+    <div>
+        <button type="button" class="btn btn-danger w250" data-ng-click="loadAllButtonClick()">
+            <span data-translate-once="uploadTransportData.button.loadAll"></span>
+        </button>
+        <label class="font-normal">{{::'uploadTransportData.description.loadAll' | translate}}</label>
+    </div>
+</div>
