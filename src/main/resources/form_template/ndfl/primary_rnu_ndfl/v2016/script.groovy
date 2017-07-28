@@ -2805,8 +2805,8 @@ class NdflPersonFL {
     @Field final String LOG_TYPE_PERSON_MSG = "Значение гр. \"%s\" (\"%s\") не соответствует справочнику \"%s\""
     @Field final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
 
-    @Field final String LOG_TYPE_2_6 = "Дата начисления дохода указана некорректно"
-    @Field final String LOG_TYPE_2_12 = "Сумма вычета указана некорректно"
+    @Field final String LOG_TYPE_2_6 = "\"Дата начисления дохода\" указана некорректно"
+    @Field final String LOG_TYPE_2_12 = "\"Сумма вычета\" указана некорректно"
     @Field final String LOG_TYPE_2_14 = "\"Налоговая ставка\" указана некорректно"
     @Field final String LOG_TYPE_2_14_MSG = "Значение гр. \"%s\" (\"%s\") указано некорректно. Для \"Кода дохода\" (\"%s\") и \"Статуса НП\" (\"%s\") предусмотрены ставки: %s"
     @Field final String LOG_TYPE_2_16 = "\"НДФЛ исчисленный\" рассчитан некорректно"
@@ -3415,13 +3415,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (ndflPerson.citizenship == "643") {
                 if (ndflPerson.innNp == null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "ИНН не указан", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
                             "Значение гр. \"ИНН в РФ\" не указано. Прием налоговым органом обеспечивается, может быть предупреждение")
                 } else {
                     String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
                     if (checkInn != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.errorExp("%s. %s.", "ИНН не соответствует формату", fioAndInp, pathError,
+                        logger.errorExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
                                 checkInn)
                     }
                 }
@@ -3449,7 +3449,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String checkName = ScriptUtils.checkName(ndflPerson.lastName, "Фамилия")
                     if (checkName != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
                                 checkName)
                     }
                 }
@@ -3457,7 +3457,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String checkName = ScriptUtils.checkName(ndflPerson.firstName, "Имя")
                     if (checkName != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
                                 checkName)
                     }
                 }
@@ -3466,7 +3466,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
                 if (checkDul != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "ДУЛ не соответствует формату", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError,
                             checkDul)
                 }
             }
@@ -3477,7 +3477,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         "СНИЛС", ndflPerson.snils?:""
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.warnExp("%s. %s.", "СНИЛС не соответствует формату", fioAndInp, pathError,
+                logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
                         errMsg)
             }
         }
