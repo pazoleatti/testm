@@ -12,7 +12,8 @@
         'app.incomesAndTax',
         'app.deduction',
         'app.prepayment',
-        'sbrfNdfl.logBusines'])
+            'app.formSources',
+            'app.logBusines'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationId}',

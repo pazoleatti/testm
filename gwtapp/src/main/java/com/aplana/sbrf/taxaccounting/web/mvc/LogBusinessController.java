@@ -5,41 +5,40 @@ import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.web.widget.history.shared.LogBusinessClient;
-import com.aplana.sbrf.taxaccounting.web.widget.history.shared.SortFilter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by AFateev on 28.06.2017.
+ * Контроллер для отображения информации по налоговой форме
  */
-@Controller
+@RestController
 public class LogBusinessController {
 
-    @Autowired
-    LogBusinessService logBusinessService;
+    private LogBusinessService logBusinessService;
 
-    @Autowired
-    TAUserService taUserService;
-    @RequestMapping(value = "/rest/logBusines/{declarationId}", method = RequestMethod.GET)
-    @ResponseBody
-    public List<LogBusinessClient> getMessagesLog(@PathVariable long declarationId) {
-        ArrayList<LogBusinessClient> resultListBusines=new ArrayList<LogBusinessClient>() {};
+    private TAUserService taUserService;
+
+    public LogBusinessController(LogBusinessService logBusinessService, TAUserService taUserService) {
+        this.logBusinessService = logBusinessService;
+        this.taUserService = taUserService;
+    }
+
+    /**
+     * Возвращает список измений по налоговой форме
+     *
+     * @param declarationId идентификатор формы
+     */
+    @GetMapping(value = "/rest/logBusines/{declarationId}")
+    public List<LogBusinessModel> getMessagesLog(@PathVariable long declarationId) {
+        ArrayList<LogBusinessModel> resultListBusines = new ArrayList<LogBusinessModel>();
         for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationId, HistoryBusinessSearchOrdering.DATE, true)) {
-            LogBusinessClient logBusinessClient=new LogBusinessClient(logBusiness);
-            logBusinessClient.setEventName((FormDataEvent.getByCode(logBusiness.getEventId())).getTitle());
-            logBusinessClient.setUserFullName(taUserService.getUser(logBusiness.getUserLogin()).getName());
-            resultListBusines.add(logBusinessClient);
+            LogBusinessModel logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
+                    taUserService.getUser(logBusiness.getUserLogin()).getName());
+            resultListBusines.add(logBusinessModel);
         }
-        return  resultListBusines;
+        return resultListBusines;
     }
 }
