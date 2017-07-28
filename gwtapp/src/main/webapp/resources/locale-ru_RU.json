@@ -227,6 +227,7 @@
   "title.prepayment.filter.notifSource": "Код НО, выдавшего уведомление",
 
   "notifications.title.listNotifications": "Список оповещений",
+  "logBusiness.title": "Информация по налоговой форме",
   "notifications.title.createDate": "Дата оповещения",
   "notifications.title.content": "Содержание",
   "notifications.title.link": "Ссылка",

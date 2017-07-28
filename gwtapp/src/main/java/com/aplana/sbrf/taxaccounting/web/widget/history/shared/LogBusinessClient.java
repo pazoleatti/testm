@@ -18,6 +18,25 @@ public class LogBusinessClient implements Serializable {
     private String departmentName;
     private String note;
 
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
+
+    public String getUserFullName() {
+        return userFullName;
+    }
+
+    public void setUserFullName(String userFullName) {
+        this.userFullName = userFullName;
+    }
+
+    private String eventName;
+    private String userFullName;
+
     public LogBusinessClient() {
     }
 
@@ -27,6 +46,8 @@ public class LogBusinessClient implements Serializable {
         declarationId = logBusiness.getDeclarationId();
         note = logBusiness.getNote();
         logDate = logBusiness.getLogDate();
+        userName = logBusiness.getUserLogin();
+        departmentName = logBusiness.getDepartmentName();
     }
 
     public String getUserName() {

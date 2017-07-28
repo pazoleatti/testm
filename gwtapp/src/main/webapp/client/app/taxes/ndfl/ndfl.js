@@ -12,7 +12,7 @@
         'app.incomesAndTax',
         'app.deduction',
         'app.prepayment',
-        'app.formSources'])
+        'sbrfNdfl.logBusines'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{formId}',
@@ -29,6 +29,13 @@
             function ($scope, $timeout, $state, $stateParams, dialogs, $showToDoDialog, $http, DeclarationDataResource) {
 
                 $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
+
+                $scope.openHistoryOfChange = function () {
+
+                    var dlg = dialogs.create('client/app/taxes/ndfl/logBusines.html', 'logBusinesFormCtrl', {declarationId: $scope.formNumber});
+                    return dlg.result.then(function () {
+                    });
+                };
 
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Проверить"

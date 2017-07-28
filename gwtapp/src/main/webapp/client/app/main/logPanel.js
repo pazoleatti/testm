@@ -10,6 +10,7 @@
             function ($compile, $rootScope, $filter, LogEntryResource) {
                 var logPanel = {};
 
+                //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
                         "<div id='log-panel'>" +
@@ -46,6 +47,7 @@
 
                 function updateLogPanelHeaderMessage(total, errors) {
                     var messageText = $filter("translate")('logPanel.header.message');
+                    //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                     $('#log-panel-header-message').text(messageText.replace('{0}', total).replace('{1}', errors));
                 }
 
@@ -57,6 +59,7 @@
                 logPanel.open = function (rootElementId, logId) {
                     logPanel.close();
                     if (rootElementId) {
+                        //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                         $rootScope.logEntryGrid = {
                             ctrl: {},
                             value: [],
