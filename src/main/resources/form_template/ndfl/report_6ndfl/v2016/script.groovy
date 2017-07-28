@@ -1693,16 +1693,25 @@ def getDepartmentParamTable(def departmentParamId) {
  * @return
  */
 def getDepartmentParamDetails(String kpp, String oktmo) {
-    def departmentParamRow
+    def departmentParamRowList = []
     def oktmoReferenceList = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "CODE = '$oktmo'", null)
     def oktmoReference = oktmoReferenceList.get(oktmoReferenceList.size() - 1).id.value
-    def departmentParamRowList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null)
+    List<Department> deps = departmentService.getAllChildren(declarationData.departmentId)
+    deps.each {
+        def departmentParamList = getProvider(REF_BOOK_NDFL_ID).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = ${it.id}", null)
+        if (departmentParamList != null && departmentParamList.size() > 0) {
+            def departmentParamRow = departmentParamList.get(0)
+            if (departmentParamRow != null) {
+                departmentParamRowList.addAll(getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "REF_BOOK_NDFL_ID = ${departmentParamRow.id} and OKTMO = $oktmoReference AND KPP = '$kpp'", null))
+            }
+        }
+    }
+
     if (departmentParamRowList == null || departmentParamRowList.isEmpty()) {
         departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
     }
-    departmentParamRow = departmentParamRowList.get(departmentParamRowList.size() - 1)
 
-    return departmentParamRow
+    return departmentParamRowList.get(0)
 }
 
 def getOktmoById(id) {
