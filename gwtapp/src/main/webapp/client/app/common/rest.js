@@ -27,7 +27,7 @@
         }])
         // Данные для формы
         .factory('DeclarationDataResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/declarationData?projection=:projection', {}, {
+            return $resource('/controller/rest/declarationData?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])

@@ -148,7 +148,7 @@
                     multiselect: true,
                     ondblClickRow: function (rowId) {
                         $state.go("ndfl", {
-                            formId: rowId
+                            declarationId: rowId
                         })
                     }
                 };
