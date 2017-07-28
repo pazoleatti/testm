@@ -50,11 +50,19 @@ public interface NotificationService {
     Map<Integer, Notification> mapByDepartments(int senderDepartmentId, Integer receiverDepartmentId);
 
 	/**
-	 * Получить оповещения по фильтру
+	 * Получить оповещения по фильтру (без пагинации)
 	 * @param filter фильтр
 	 * @return страница с оповещениями
 	 */
 	PagingResult<Notification> getByFilter(NotificationsFilterData filter);
+
+    /**
+     * Получить оповещения по фильтру (с пагинацией для angularJs)
+     * @param filter фильтр
+     * @param pagingParams параметры пагинации
+     * @return страница с оповещениями
+     */
+    PagingResult<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams);
 
 	/**
 	 * Получить количество оповещений по фильтру

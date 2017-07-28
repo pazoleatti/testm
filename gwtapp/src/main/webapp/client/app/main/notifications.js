@@ -26,7 +26,7 @@
                         angularResource: NotificationResource,
                         requestParameters: function () {
                             return {
-                                projection: 'get'
+                                projection: 'notifications'
                             };
                         },
                         height: 250,
@@ -45,7 +45,7 @@
                         rowList: [10, 20, 30],
                         viewrecords: true,
                         sortname: 'id',
-                        sortorder: "asc",
+                        sortorder: "desc",
                         hidegrid: false,
                         multiselect: true
                     }
