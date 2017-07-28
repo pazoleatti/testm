@@ -3575,9 +3575,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
-                            C_NOT_HOLDING_TAX, notHoldingTaxSum ?: "",
-                            C_CALCULATED_TAX, calculatedTaxSum ?: "",
-                            C_WITHHOLDING_TAX, withholdingTaxSum ?: ""
+                            C_NOT_HOLDING_TAX, notHoldingTaxSum ?: "0",
+                            C_CALCULATED_TAX, calculatedTaxSum ?: "0",
+                            C_WITHHOLDING_TAX, withholdingTaxSum ?: "0"
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_18, fioAndInp, pathError, errMsg)
@@ -3589,9 +3589,9 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (!(overholdingTaxSum == withholdingTaxSum - calculatedTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
-                            C_OVERHOLDING_TAX, overholdingTaxSum ?: "",
-                            C_WITHHOLDING_TAX, withholdingTaxSum ?: "",
-                            C_CALCULATED_TAX, calculatedTaxSum ?: ""
+                            C_OVERHOLDING_TAX, overholdingTaxSum ?: "0",
+                            C_WITHHOLDING_TAX, withholdingTaxSum ?: "0",
+                            C_CALCULATED_TAX, calculatedTaxSum ?: "0"
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_19, fioAndInp, pathError, errMsg)
@@ -3603,8 +3603,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 if (!(refoundTaxSum <= overholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") не должна превышать сумму значений гр.\"%s\" (\"%s\") для всех строк одной операции",
-                            C_REFOUND_TAX, refoundTaxSum ?: "",
-                            C_OVERHOLDING_TAX, overholdingTaxSum ?: ""
+                            C_REFOUND_TAX, refoundTaxSum ?: "0",
+                            C_OVERHOLDING_TAX, overholdingTaxSum ?: "0"
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", LOG_TYPE_2_20, fioAndInp, pathError, errMsg)
