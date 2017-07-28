@@ -32,19 +32,21 @@ import org.springframework.jdbc.core.RowMapper
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
-    import javax.script.ScriptException
-    import javax.xml.namespace.QName
-    import javax.xml.stream.XMLEventReader
-    import javax.xml.stream.XMLInputFactory
-    import javax.xml.stream.events.*
+import javax.script.ScriptException
+import javax.xml.namespace.QName
+import javax.xml.stream.XMLEventReader
+import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.events.*
 import javax.xml.ws.LogicalMessage
 import java.sql.ResultSet
-    import java.sql.SQLException
+import java.sql.SQLException
+import java.sql.SQLSyntaxErrorException
 import java.text.ParseException
 import java.text.SimpleDateFormat
-    import java.util.regex.Matcher
-    import java.util.regex.Pattern
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
     /**
      * Скрипт макета декларации РНУ-НДФЛ(первичная)
@@ -82,7 +84,9 @@ import java.text.SimpleDateFormat
             checkData()
             break
         case FormDataEvent.CALCULATE:
-            calculate()
+            updateAndCheckException({
+                calculate()
+            })
             // Формирование pdf-отчета формы
             declarationService.createPdfReport(logger, declarationData, userInfo)
             break
@@ -5682,3 +5686,19 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
         ) as Throwable
     }
+
+@TypeChecked
+void updateAndCheckException(Closure<Object> update) {
+    try {
+        update()
+    } catch (ServiceException e) {
+        int i = ExceptionUtils.indexOfThrowable(e, SQLSyntaxErrorException.class);
+        if (i != -1) {
+            SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException)ExceptionUtils.getThrowableList(e).get(i)
+            if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049")) {
+                throw new ServiceException("", e)
+            }
+        }
+        throw e;
+    }
+}
