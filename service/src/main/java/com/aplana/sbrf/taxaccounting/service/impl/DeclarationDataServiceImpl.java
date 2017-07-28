@@ -1755,8 +1755,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                     logEntry.getMessage()));
                         }
                     }
-                    logger.error("Произошла непредвиденная ошибка при расчете для объекта: " + getDeclarationFullName(entry.getKey(), null));
-                    logger.getEntries().addAll(scriptLogger.getEntries());
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
