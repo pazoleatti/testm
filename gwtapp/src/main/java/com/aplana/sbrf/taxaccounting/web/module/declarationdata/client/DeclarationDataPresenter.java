@@ -299,10 +299,10 @@ public class DeclarationDataPresenter
                                 getView().showReject(result.isCanReject());
                                 getView().showDelete(result.isCanDelete());
                                 getView().showRecalculateButton(result.isCanRecalculate() && !isReports);
-                                getView().showChangeStatusEDButton(result.isCanChangeStatusED());
+                                getView().showChangeStatusEDButton(false);//result.isCanChangeStatusED());
                                 getView().showPrintToXml(result.isShowPrintToXml());
                                 if (declarationData.getDeclarationTemplateId() == 102 || declarationData.getDeclarationTemplateId() == 104) {
-                                    getView().getAddErrorButton().setVisible(true);
+                                    getView().getAddErrorButton().setVisible(false);
                                 } else {
                                     getView().getAddErrorButton().setVisible(false);
                                 }

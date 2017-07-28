@@ -182,7 +182,7 @@ public class DeclarationListView extends
             createReports.setVisible(true);
             downloadReports.setVisible(true);
             recalculateButton.setVisible(false);
-            changeStatusEDButton.setVisible(true);
+            changeStatusEDButton.setVisible(false);
         } else {
             create.setVisible(true);
             createReports.setVisible(false);

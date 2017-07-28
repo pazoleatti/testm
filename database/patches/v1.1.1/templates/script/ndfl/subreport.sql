@@ -12,12 +12,12 @@ INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blo
 	(1021,102,'2-НДФЛ (1) по физическому лицу',1,'report_2ndfl','047f207c-113e-488d-8390-9afc248a3bc8',1);
 INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
 	(1041,104,'2-НДФЛ (2) по физическому лицу',1,'report_2ndfl','04d9b114-1782-4d09-ad88-729e5605c6ff',1);
-INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1022,102,'Первичные РНУ с ошибками',2,'primary_rnu_w_errors','9a7a519a-83ea-4ddf-bee0-b7af67ba5f78',0);
-INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 
-	(1042,104,'Первичные РНУ с ошибками',2,'primary_rnu_w_errors','93d1fa12-6e72-4933-ba61-d4128a1103d8',0);
-INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES 	
-	(1031,103,'Первичные РНУ с ошибками',1,'primary_rnu_w_errors','00fb3c21-09d8-477b-b8c7-80cb84e664ca',0);
+-- INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES
+-- 	(1022,102,'Первичные РНУ с ошибками',2,'primary_rnu_w_errors','9a7a519a-83ea-4ddf-bee0-b7af67ba5f78',0);
+-- INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES
+-- 	(1042,104,'Первичные РНУ с ошибками',2,'primary_rnu_w_errors','93d1fa12-6e72-4933-ba61-d4128a1103d8',0);
+-- INSERT INTO declaration_subreport (id,declaration_template_id,name,ord,alias,blob_data_id,select_record) VALUES
+-- 	(1031,103,'Первичные РНУ с ошибками',1,'primary_rnu_w_errors','00fb3c21-09d8-477b-b8c7-80cb84e664ca',0);
 
 -- РНУ первичная	
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
