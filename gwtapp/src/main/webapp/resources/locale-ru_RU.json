@@ -226,6 +226,13 @@
   "title.prepayment.notifSource": "Код налогового органа, выдавшего уведомление",
   "title.prepayment.filter.notifSource": "Код НО, выдавшего уведомление",
 
+  "logBusiness.title": "Информация по налоговой форме",
+  "logBusiness.title.event": "Событие",
+  "logBusiness.title.logDate": "Дата-время",
+  "logBusiness.title.user": "Пользователь",
+  "logBusiness.title.rolesUser": "Роли пользователя",
+  "logBusiness.title.departmentUser": "Подразделение пользователя",
+  "logBusiness.title.note": "Текст события",
   "notifications.title.listNotifications": "Список оповещений",
   "notifications.title.createDate": "Дата оповещения",
   "notifications.title.content": "Содержание",
@@ -253,5 +260,11 @@
   "sources.tableColumn.declarationType": "Вид формы",
   "sources.tableColumn.year": "Год",
   "sources.tableColumn.period": "Период",
-  "sources.tableColumn.declarationState": "Состояние формы"
+  "sources.tableColumn.declarationState": "Состояние формы",
+
+  "uploadTransportData.title": "Загрузка файлов",
+  "uploadTransportData.button.upload": "Загрузить файл",
+  "uploadTransportData.button.loadAll": "Обработать файлы из каталога загрузки",
+  "uploadTransportData.description.upload": "Загружаются только те файлы, которые пользователь предоставляет системе по нажатию этой кнопки.",
+  "uploadTransportData.description.loadAll": "Загружаются файлы из каталогов загруки."
 }

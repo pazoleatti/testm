@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <button type="button" class="close" data-ng-click="close()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-star-empty"></span>&nbsp;{{::'logBusiness.title' |
+        translate}}
+    </h4>
+</div>
+<div class="modal-body" style="height: 370px;">
+    <div data-aplana-grid
+         data-grid-options="logBusinesGrid.options"
+         data-grid-ctrl="logBusinesGrid.ctrl"
+         data-ng-model="logBusinesGrid.value"
+         id="logBusinesGrid"
+         style="float: left; width: 100%;"></div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" id="closeButton" data-ng-click="close()">
+        <span data-translate-once="button.close"></span>
+    </button>
+</div>

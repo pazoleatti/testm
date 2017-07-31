@@ -5,13 +5,13 @@
      * @description Модуль для для работы с приемниками и источниками формы
      */
 
-    angular.module('sbrfNdfl.formSources', ['ui.router'])
+    angular.module('app.formSources', ['ui.router', 'app.rest'])
 
     /**
      * @description Контроллер модального окна, в котором выводятся источники и приемники формы
      */
-        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter",
-            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter) {
+        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'SourcesResource',
+            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, SourcesResource) {
                 $scope.sourcesGridData = [];
 
                 //Чекбоксы
@@ -22,13 +22,12 @@
                 };
 
                 //Получение списка приемников и источников
-                $http.get('controller/rest/sources/' + $stateParams.formId)
-                    .then(
-                        function (response) {
-                            $scope.sourcesGridData = response.data;
-                            $scope.updateGridData();
-                        }
-                    );
+                SourcesResource.query({
+                    formId: $stateParams.formId
+                }, function (response) {
+                    $scope.sourcesGridData = response;
+                    $scope.updateGridData();
+                });
 
                 //Таблица
                 $scope.sourcesGrid = {

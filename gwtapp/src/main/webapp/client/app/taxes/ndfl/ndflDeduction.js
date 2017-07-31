@@ -36,9 +36,9 @@
                         angularResource: NdflPersonResource,
                         requestParameters: function () {
                             return {
-                                projection: "getPersonsDeduction",
+                                projection: "personsDeduction",
                                 ndflPersonDeductionFilter: JSON.stringify({
-                                    declarationDataId: $stateParams.formId,
+                                    declarationDataId: $stateParams.declarationId,
                                     inp: $scope.searchFilter.params.inp,
                                     operationId: $scope.searchFilter.params.operationId,
                                     deductionCode: $scope.searchFilter.params.deductionCode,

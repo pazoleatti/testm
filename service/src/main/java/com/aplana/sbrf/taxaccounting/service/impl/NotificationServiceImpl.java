@@ -63,6 +63,12 @@ public class NotificationServiceImpl implements NotificationService {
 		return new PagingResult<Notification>(notifications, getCountByFilter(filter));
 	}
 
+    @Override
+    public PagingResult<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
+        List<Notification> notifications = notificationDao.getByFilterWithPaging(filter, pagingParams);
+        return new PagingResult<Notification>(notifications, getCountByFilter(filter));
+    }
+
 	@Override
 	public int getCountByFilter(NotificationsFilterData filter) {
 		return notificationDao.getCountByFilter(filter);

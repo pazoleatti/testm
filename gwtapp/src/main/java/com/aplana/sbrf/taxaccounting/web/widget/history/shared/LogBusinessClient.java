@@ -27,6 +27,8 @@ public class LogBusinessClient implements Serializable {
         declarationId = logBusiness.getDeclarationId();
         note = logBusiness.getNote();
         logDate = logBusiness.getLogDate();
+        userName = logBusiness.getUserLogin();
+        departmentName = logBusiness.getDepartmentName();
     }
 
     public String getUserName() {

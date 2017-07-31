@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 
 import java.util.List;
 
@@ -54,12 +55,21 @@ public interface NotificationDao {
     Notification get(long id);
 
     /**
-     * Получить список оповещений по фильтру
+     * Получить список оповещений по фильтру (без пагинации)
      *
      * @param filter фильтр
      * @return список идентификаторов оповещений
      */
     List<Notification> getByFilter(NotificationsFilterData filter);
+
+    /**
+     * Получить список оповещений по фильтру (с пагинацией)
+     *
+     * @param filter фильтр
+     * @param pagingParams параметры пагинации
+     * @return список идентификаторов оповещений
+     */
+    List<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams);
 
     /**
      * Получить количество оповещений по фильтру

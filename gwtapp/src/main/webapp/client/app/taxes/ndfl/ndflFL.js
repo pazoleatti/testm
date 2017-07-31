@@ -40,9 +40,9 @@
                         angularResource: NdflPersonResource,
                         requestParameters: function () {
                             return {
-                                projection: "getPersons",
+                                projection: "ndflPersons",
                                 ndflPersonFilter: JSON.stringify({
-                                    declarationDataId: $stateParams.formId,
+                                    declarationDataId: $stateParams.declarationId,
                                     inp: $scope.searchFilter.params.inp,
                                     innNp: $scope.searchFilter.params.innNp,
                                     innForeign: $scope.searchFilter.params.innForeign,

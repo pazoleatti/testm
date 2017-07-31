@@ -33,15 +33,15 @@ import java.util.Date;
 @RequestMapping(value = "/actions")
 public class DeclarationTemplateController {
 
-	private static final Log LOG = LogFactory.getLog(DeclarationTemplateController.class);
+    private static final Log LOG = LogFactory.getLog(DeclarationTemplateController.class);
     private static final String ENCODING = "UTF-8";
 
-	@Autowired
-	SecurityService securityService;
-	@Autowired
-	DeclarationTemplateService declarationTemplateService;
-	@Autowired
-	DeclarationTemplateImpexService declarationTemplateImpexService;
+    @Autowired
+    SecurityService securityService;
+    @Autowired
+    DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    DeclarationTemplateImpexService declarationTemplateImpexService;
     @Autowired
     @Qualifier("declarationTemplateMainOperatingService")
     private MainOperatingService mainOperatingService;
@@ -58,8 +58,8 @@ public class DeclarationTemplateController {
      * @throws IOException
      */
     @RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
-	public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+    public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
             resp.setContentType("application/zip");
@@ -71,7 +71,7 @@ public class DeclarationTemplateController {
                 IOUtils.closeQuietly(resp.getOutputStream());
             }
         }
-	}
+    }
 
     /**
      * Загрузка шаблона декларации
@@ -79,13 +79,12 @@ public class DeclarationTemplateController {
      * @param declarationTemplateId идентификатор шаблона декларации
      * @param req запрос
      * @param resp ответ
-     * @throws FileUploadException
      * @throws IOException
      */
     @RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
-	public void uploadDect(@RequestParam(value = "uploader", required = true) MultipartFile file,
+    public void uploadDect(@RequestParam(value = "uploader", required = true) MultipartFile file,
                            @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-			throws FileUploadException, IOException {
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             if (declarationTemplateId == 0)
                 throw new ServiceException("Сначала сохраните шаблон.");
@@ -147,7 +146,7 @@ public class DeclarationTemplateController {
                 IOUtils.closeQuietly(file.getInputStream());
             }
         }
-	}
+    }
 
     /**
      * Загрузка файла в формате jrxml
@@ -155,14 +154,13 @@ public class DeclarationTemplateController {
      * @param declarationTemplateId идентификатор шаблона декларации
      * @param req запрос
      * @param resp ответ
-     * @throws FileUploadException
      * @throws IOException
      */
     @RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
     @Transactional
     public void processUpload(@RequestParam(value = "uploader", required = true) MultipartFile file,
                               @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws FileUploadException, IOException {
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             if (declarationTemplateId == 0)
                 throw new ServiceException("Сначала сохраните шаблон.");
@@ -237,14 +235,13 @@ public class DeclarationTemplateController {
      * @param declarationTemplateId идентификатор шаблона декларации
      * @param req запрос
      * @param resp ответ
-     * @throws FileUploadException
      * @throws IOException
      */
     @RequestMapping(value = "uploadXsd/{declarationTemplateId}",method = RequestMethod.POST)
     @Transactional
     public void processUploadXsd(@RequestParam(value = "uploader", required = true) MultipartFile file,
                                  @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws FileUploadException, IOException {
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             if (declarationTemplateId == 0)
                 throw new ServiceException("Сначала сохраните шаблон.");
@@ -291,8 +288,8 @@ public class DeclarationTemplateController {
      * @throws IOException
      */
     @RequestMapping(value = "/downloadByUuid/{uuid}",method = RequestMethod.GET)
-	public void processDownload(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+    public void processDownload(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             BlobData blobData = blobDataService.get(uuid);
             createResponse(req, resp, blobData);
@@ -321,28 +318,27 @@ public class DeclarationTemplateController {
      * @throws JSONException
      */
     @ExceptionHandler(Exception.class)
-	public void exceptionHandler(Exception e, final HttpServletResponse response) throws JSONException {
-		response.setCharacterEncoding("UTF-8");
-		LOG.error(e.getLocalizedMessage(), e);
+    public void exceptionHandler(Exception e, final HttpServletResponse response) throws JSONException {
+        response.setCharacterEncoding("UTF-8");
+        LOG.error(e.getLocalizedMessage(), e);
         JSONObject errors = new JSONObject();
-		try {
+        try {
             Logger log = new Logger();
             log.error(e.getMessage());
             errors.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(log.getEntries()));
-			response.getWriter().printf(errors.toString());
-		} catch (IOException ioException) {
-			LOG.error(ioException.getMessage(), ioException);
-		}
-	}
+            response.getWriter().printf(errors.toString());
+        } catch (IOException ioException) {
+            LOG.error(ioException.getMessage(), ioException);
+        }
+    }
 
     /**
      * Проверка logger на наличие ошибок
      * @param logger
-     * @throws IOException
      */
-    private void checkErrors(Logger logger) throws IOException {
+    private void checkErrors(Logger logger) {
         if (logger.containsLevel(LogLevel.ERROR)){
-           throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 

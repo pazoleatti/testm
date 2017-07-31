@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.OrderSpecifier;
@@ -177,6 +178,59 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
         return sqlQueryFactory.select(SQLExpressions.all).from(subQuery)
                 .where(whereOut)
+                .transform(GroupBy.groupBy(notification.id).list(notificationBean));
+    }
+
+    @Override
+    public List<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
+        StringPath rn = Expressions.stringPath("rn");
+        StringPath notificationTable = Expressions.stringPath("notification");
+        OrderSpecifier order;
+        switch (filter.getSortColumn()) {
+            case DATE:
+                order = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
+                break;
+            case TEXT:
+                order = filter.isAsc() ? notification.text.asc() : notification.text.desc();
+                break;
+            default:
+                order = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
+                break;
+        }
+
+        BooleanBuilder where = new BooleanBuilder();
+        if (filter.getSenderDepartmentId() != null) {
+            where.and(notification.senderDepartmentId.eq(filter.getSenderDepartmentId()));
+        }
+        if (filter.getUserId() != null) {
+            where.and(notification.userId.eq(filter.getUserId()));
+        }
+        if (!(filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty())) {
+            where.or(notification.receiverDepartmentId.in(filter.getReceiverDepartmentIds()));
+        }
+        if (!(filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty())) {
+            where.or(notification.roleId.in(filter.getUserRoleIds()));
+        }
+
+        if (filter.isRead() != null) {
+            where.and(notification.isRead.eq(filter.isRead() ? (byte) 1 : (byte) 0));
+        }
+
+        BooleanBuilder whereOut = new BooleanBuilder();
+        if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
+            whereOut.and(rn.between(filter.getStartIndex().toString(), String.valueOf(filter.getStartIndex() + filter.getCountOfRecords())));
+        }
+
+        SimpleExpression subQuery = sqlQueryFactory.select(notification.id, notification.reportPeriodId, notification.senderDepartmentId, notification.receiverDepartmentId, notification.isRead
+                , notification.text, notification.logId, notification.createDate, notification.deadline, notification.userId, notification.roleId, notification.reportId, notification.type
+                , isSupportOver() ? SQLExpressions.rowNumber().over().orderBy(order).as("rn") : SQLExpressions.rowNumber().over().as("rn"))
+                .from(notification)
+                .where(where).as(notificationTable);
+
+        return sqlQueryFactory.select(SQLExpressions.all).from(subQuery)
+                .where(whereOut)
+                .offset(pagingParams.getStartIndex())
+                .limit(pagingParams.getCount())
                 .transform(GroupBy.groupBy(notification.id).list(notificationBean));
     }
 

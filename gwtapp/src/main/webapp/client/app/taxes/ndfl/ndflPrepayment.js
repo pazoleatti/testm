@@ -36,9 +36,9 @@
                         angularResource: NdflPersonResource,
                         requestParameters: function () {
                             return {
-                                projection: "getPersonsPrepayment",
+                                projection: "personsPrepayment",
                                 ndflPersonPrepaymentFilter: JSON.stringify({
-                                    declarationDataId: $stateParams.formId,
+                                    declarationDataId: $stateParams.declarationId,
                                     inp: $scope.searchFilter.params.inp,
                                     operationId: $scope.searchFilter.params.operationId,
                                     notifNum: $scope.searchFilter.params.notifNum,
