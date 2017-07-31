@@ -3433,6 +3433,7 @@ class CalculatedTaxChecker extends AbstractChecker {
                     // Сумма разностей Файл.Документ.СведДох.ДохВыч.СвСумДох.СумДоход - Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет
                     BigDecimal differenceTotalSumDohSumVichForCode1010 = new BigDecimal(0)
                     BigDecimal differenceTotalSumDohSumVichForCodeNot1010 = new BigDecimal(0)
+                    boolean existCodeNot1010 = false
                     for (Ndfl2Node svSumDoh : svSumDohList) {
                         Ndfl2Leaf<String> incomeCodeAttribute = extractAttribute(INCOME_CODE, svSumDoh)
                         if (incomeCodeAttribute != null && incomeCodeAttribute.getValue() == "1010") {
@@ -3451,6 +3452,7 @@ class CalculatedTaxChecker extends AbstractChecker {
                             }
                             differenceTotalSumDohSumVichForCode1010 = differenceTotalSumDohSumVichForCode1010.add(differenceSumDohSumVich)
                         } else {
+                            existCodeNot1010 = true;
                             Ndfl2Leaf<BigDecimal> incomeSumAttribute = extractAttribute(SUM_DOHOD, svSumDoh)
                             List<Ndfl2Node> svSumVichNodeList = extractNdfl2Nodes(SV_SUM_VICH, svSumDoh)
                             // Сумма значений Файл.Документ.СведДох.ДохВыч.СвСумДох.СвСумВыч.СумВычет
@@ -3465,16 +3467,18 @@ class CalculatedTaxChecker extends AbstractChecker {
                                 differenceSumDohSumVich = new BigDecimal(0)
                             }
                             differenceTotalSumDohSumVichForCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.add(differenceSumDohSumVich)
-                            List<Ndfl2Node> predVichSSINodeList = extractNdfl2Nodes(PRED_VICH_SSI, svedDohNode)
-                            // Сумма Файл.Документ.СведДох.НалВычССИ.ПредВычССИ.СумВычет
-                            BigDecimal sumVich = new BigDecimal(0)
-                            for (Ndfl2Node predVichSSI : predVichSSINodeList) {
-                                Ndfl2Leaf<BigDecimal> vich = extractAttribute(DEDUCTION_SUM, predVichSSI)
-                                BigDecimal valueVich = (BigDecimal) vich.getValue()
-                                sumVich = sumVich.add(valueVich)
-                            }
-                            differenceTotalSumDohSumVichForCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.subtract(sumVich)
                         }
+                    }
+                    if (existCodeNot1010) {
+                        List<Ndfl2Node> predVichSSINodeList = extractNdfl2Nodes(PRED_VICH_SSI, svedDohNode)
+                        // Сумма Файл.Документ.СведДох.НалВычССИ.ПредВычССИ.СумВычет
+                        BigDecimal sumVich = new BigDecimal(0)
+                        for (Ndfl2Node predVichSSI : predVichSSINodeList) {
+                            Ndfl2Leaf<BigDecimal> vich = extractAttribute(DEDUCTION_SUM, predVichSSI)
+                            BigDecimal valueVich = (BigDecimal) vich.getValue()
+                            sumVich = sumVich.add(valueVich)
+                        }
+                        differenceTotalSumDohSumVichForCodeNot1010 = differenceTotalSumDohSumVichForCodeNot1010.subtract(sumVich)
                     }
                     //Результат для п.4 Проверка расчета суммы исчисленного налога I.1
                     BigDecimal calclulateTaxCheckValueForIncomeCode1010 = differenceTotalSumDohSumVichForCode1010
