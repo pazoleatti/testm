@@ -106,7 +106,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     private HorizontalPanel printToExcelPanel;
 
     private Timer timerExcel, timerXML, timerPDF, timerAccept, timerSpecific, timerCheck;
-    private boolean isVisiblePDF;
+    private boolean isVisiblePDF, showPrintToXml;
 
 	@Inject
 	@UiConstructor
@@ -287,7 +287,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public void showDownloadButtons(boolean show) {
         printToExcelPanel.setVisible(show);
-        printToXml.setVisible(show);
+        printToXml.setVisible(show && showPrintToXml);
     }
 
 	@Override
@@ -527,7 +527,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             printToExcelPanel.setVisible(false);
             if (isLoad) {
                 printToExcelPanel.setVisible(true);
-                printToXml.setVisible(true);
+                printToXml.setVisible(showPrintToXml);
                 printAnchor.setEnabled(true);
                 timerXML.cancel();
                 timerSpecific.scheduleRepeating(4000);
@@ -683,6 +683,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @Override
     public void showPrintToXml(boolean show) {
+        showPrintToXml = show;
         printToXml.setVisible(show);
     }
 }

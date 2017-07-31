@@ -341,9 +341,7 @@ public class DeclarationDataPresenter
                                 revealPlaceRequest();
                                 return;
                             }
-                            if (!(declarationFormKind.equals(DeclarationFormKind.CONSOLIDATED) && DeclarationDataReportType.XML_DEC.equals(type))) {
-                                getView().updatePrintReportButtonName(type, true, result.getExistReport().getCreateDate());
-                            }
+                            getView().updatePrintReportButtonName(type, true, result.getExistReport().getCreateDate());
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
                                 onTimerReport(DeclarationDataReportType.PDF_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
