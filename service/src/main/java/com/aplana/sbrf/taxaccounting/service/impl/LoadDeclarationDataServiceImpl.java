@@ -174,43 +174,52 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
 
     private boolean loadFile(InputStream inputStream, String fileName, TAUserInfo userInfo, Logger logger, String lock, List<String> msgList) throws IOException {
         File dataFile = null;
-        try {
-            dataFile = File.createTempFile("dataFile", ".original");
-            OutputStream dataFileOutputStream = new FileOutputStream(dataFile);
+        LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
+                userInfo.getUser().getId(),
+                String.format(LockData.DescriptionTemplate.FILE.getText(), fileName));
+        if (fileLock != null) {
+            logger.error("Файл %s пропущен, т.к. он уже обрабатывается системой", fileName);
+            return false;
+        } else {
             try {
-                IOUtils.copy(inputStream, dataFileOutputStream);
-            } finally {
-                IOUtils.closeQuietly(dataFileOutputStream);
-            }
-            try {
-                InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+                dataFile = File.createTempFile("dataFile", ".original");
+                OutputStream dataFileOutputStream = new FileOutputStream(dataFile);
                 try {
-                    Map<String, Object> additionalParameters = new HashMap<String, Object>();
-                    StringBuilder msgBuilder = new StringBuilder();
-                    additionalParameters.put("ImportInputStream", dataFileInputStream);
-                    additionalParameters.put("UploadFileName", fileName);
-                    additionalParameters.put("dataFile", dataFile);
-                    additionalParameters.put("msgBuilder", msgBuilder);
-                    refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
-                    if (logger.containsLevel(LogLevel.ERROR)) {
-                        throw new ServiceException("Есть критические ошибки при выполнении скрипта");
-                    }
-                    if (msgBuilder.length() > 0) {
-                        msgList.add(msgBuilder.toString());
-                    }
+                    IOUtils.copy(inputStream, dataFileOutputStream);
                 } finally {
-                    IOUtils.closeQuietly(dataFileInputStream);
+                    IOUtils.closeQuietly(dataFileOutputStream);
                 }
-            } catch (FileNotFoundException e) {
-                throw new ServiceException(e.getLocalizedMessage(), e);
+                try {
+                    InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+                    try {
+                        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                        StringBuilder msgBuilder = new StringBuilder();
+                        additionalParameters.put("ImportInputStream", dataFileInputStream);
+                        additionalParameters.put("UploadFileName", fileName);
+                        additionalParameters.put("dataFile", dataFile);
+                        additionalParameters.put("msgBuilder", msgBuilder);
+                        refBookScriptingService.executeScript(userInfo, RefBook.Id.DECLARATION_TEMPLATE.getId(), FormDataEvent.IMPORT_TRANSPORT_FILE, logger, additionalParameters);
+                        if (logger.containsLevel(LogLevel.ERROR)) {
+                            throw new ServiceException("Есть критические ошибки при выполнении скрипта");
+                        }
+                        if (msgBuilder.length() > 0) {
+                            msgList.add(msgBuilder.toString());
+                        }
+                    } finally {
+                        IOUtils.closeQuietly(dataFileInputStream);
+                    }
+                } catch (FileNotFoundException e) {
+                    throw new ServiceException(e.getLocalizedMessage(), e);
+                }
+            } finally {
+                if (dataFile != null) {
+                    dataFile.delete();
+                }
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId(), true);
             }
-        } finally {
-            if (dataFile != null) {
-                dataFile.delete();
-            }
+            logger.info("Завершена обработка файла \"%s\"", fileName);
+            return true;
         }
-        logger.info("Завершена обработка файла \"%s\"", fileName);
-        return true;
     }
 
     @Override
