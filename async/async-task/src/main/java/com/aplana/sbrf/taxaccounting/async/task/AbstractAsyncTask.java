@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -173,7 +174,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     checkLockHandler.checkLock();
                 }
             } catch (Exception e) {
-                if (thread.isAlive()) {
+                if (thread.isAlive() && !canceled) {
                     thread.interrupt();
                 }
             }
@@ -226,12 +227,23 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 }
                             });
                             Thread threadRunner = new Thread(Thread.currentThread().getThreadGroup(), runner);
-                            threadRunner.start();
-                            TaskStatus taskStatus = executeBusinessLogic(params, logger);
-							LOG.debug("business logic execution is complete");
-                            if (threadRunner.isAlive()) {
-                                runner.cancel();
-                                threadRunner.join(MAX_WAIT_TIMEOUT);
+                            TaskStatus taskStatus;
+                            try {
+                                threadRunner.start();
+                                taskStatus = executeBusinessLogic(params, logger);
+                                LOG.debug("business logic execution is complete");
+                            } finally {
+                                if (threadRunner.isAlive()) {
+                                    runner.cancel();
+                                    try {
+                                        threadRunner.join(MAX_WAIT_TIMEOUT);
+                                    } catch (InterruptedException e){
+                                        // nothing
+                                    }
+                                }
+                                if (Thread.interrupted()) {
+                                    throw new TAInterruptedException();
+                                }
                             }
                             Date endDate = new Date();
                             logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
