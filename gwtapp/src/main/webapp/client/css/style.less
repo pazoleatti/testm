@@ -910,19 +910,24 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 /*================панель уведомлений============*/
 #log-panel-header {
   position: relative;
-  top: 0px;
+  top: -18px;
   height: 20px;
+  text-align: center;
+  color: #fff;
 }
 
 #log-panel-header-message {
   text-align: center;
   display: inline-block;
+  margin: 0 0 0 69px;
 }
 
 #log-panel-header-print {
   display: inline-block;
 }
-
+#log-panel-header-print a{
+  color: #fff;
+}
 #log-panel-header-print img {
   border: none;
   vertical-align: middle;
@@ -939,4 +944,7 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 
 .log-normal-message {
   color: darkgreen;
+}
+.splitter-icon-chevron-up{
+  cursor: pointer;
 }

@@ -16,30 +16,32 @@
                         "<div id='log-panel'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
-                        "         data-splitter-thick='20'" +
+                        "         data-splitter-thick='30'" +
                         "         data-splitter-left-top='app-content'" +
                         "         data-splitter-right-bottom='log-entry-list'" +
-                        "         data-splitter-max='800'" +
-                        "         data-splitter-min='600'" +
-                        "         data-splitter-start='790'" +
+                        "         data-splitter-max='994' data-splitter-min='12'" +
+                        "         data-splitter-start='540'" +
                         "         data-splitter-resizing='true'" +
                         "    ></div>" +
                         "    <div id='log-entry-list'>" +
                         "        <div id='log-panel-header'>" +
                         "            <div id='log-panel-header-message'></div>" +
-                        "            <div id='log-panel-header-print'>" +
+                        "            <div style='float: right; margin: -7px 6px 0 4px;'>" +
+                        "                <button type='button' class='close' data-ng-click='closeLogPanel()'>×</button>" +
+                        "            </div>" +
+                        "            <div id='log-panel-header-print' style='float: right; margin: -4px 5px 0 0;'>" +
                         "                <img src='resources/img/printer-black-16.png'>" +
                         "                <a href='/controller/actions/logEntry/" + uuid + "'>{{'logPanel.header.print' | translate}}</a>" +
                         "            </div>" +
-                        "            <div style='float: right'>" +
-                        "                <button type='button' class='close' data-ng-click='closeLogPanel()'>×</button>" +
-                        "            </div>" +
                         "        </div>" +
-                        "        <div id='log-entry-grid' data-aplana-grid" +
-                        "             data-grid-options='logEntryGrid.options'" +
+                        "        <div data-aplana-grid" +
+                        "             data-grid-fill-space='true' " +
+                        "             data-grid-options='logEntryGrid.options' " +
+                        "              data-grid-fill-space-container-selector='.cbr-page-layout__view' " +
                         "             data-grid-ctrl='logEntryGrid.ctrl'" +
                         "             data-ng-model='logEntryGrid.value'" +
-                        "             style='float: left; width: 100%;'></div>" +
+                        "             style='float: left; width: 100%;'" +
+                        "             id='log-entry-grid' ></div>" +
                         "    </div>" +
                         "</div>"
                     )($rootScope);
@@ -85,12 +87,12 @@
                                         key: true,
                                         formatter: $filter('incrementFormatter')
                                     },
-                                    {name: 'date', index: 'date', width: 140, formatter: $filter('dateTimeFormatter')},
+                                    {name: 'date', index: 'date', width: 176, formatter: $filter('dateTimeFormatter')},
                                     {name: 'icon', index: 'icon', width: 30, formatter: $filter('iconFormatter')},
                                     {
                                         name: 'message',
                                         index: 'message',
-                                        width: 800,
+                                        width: 1658,
                                         formatter: $filter('textColorFormatter')
                                     }
                                 ],
@@ -124,6 +126,7 @@
                 logPanel.close = function () {
                     $rootScope.logEntryGrid = undefined;
                     angular.element(document.querySelector('#log-panel')).remove();
+                    angular.element(document.querySelector('#app-content')).css('height', '100%');
                 };
 
                 $rootScope.closeLogPanel = function () {
