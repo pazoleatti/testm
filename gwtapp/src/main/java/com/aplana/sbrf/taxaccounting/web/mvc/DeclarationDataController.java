@@ -1,60 +1,77 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Контроллер для работы с формами ПНФ/КНФ
  */
-@Controller
+@RestController
 public class DeclarationDataController {
+    private static final Log LOG = LogFactory.getLog(TransportDataController.class);
 
-    @Autowired
     private DeclarationDataService declarationService;
-
-    @Autowired
     private SecurityService securityService;
-
-    @Autowired
     private ReportService reportService;
-
-    @Autowired
     private BlobDataService blobDataService;
-
-    @Autowired
     private DeclarationTemplateService declarationTemplateService;
-
-    @Autowired
     private LogBusinessService logBusinessService;
-
-    @Autowired
     private TAUserService userService;
-
-    @Autowired
     private DepartmentService departmentService;
-
-    @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-
-    @Autowired
     private RefBookFactory rbFactory;
+    private AsyncTaskManagerService asyncTaskManagerService;
+    private LogEntryService logEntryService;
+    private LockDataService lockDataService;
+
+    public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
+                                     BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
+                                     TAUserService userService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
+                                     LogEntryService logEntryService, LockDataService lockDataService) {
+        this.declarationService = declarationService;
+        this.securityService = securityService;
+        this.reportService = reportService;
+        this.blobDataService = blobDataService;
+        this.declarationTemplateService = declarationTemplateService;
+        this.logBusinessService = logBusinessService;
+        this.userService = userService;
+        this.departmentService = departmentService;
+        this.departmentReportPeriodService = departmentReportPeriodService;
+        this.rbFactory = rbFactory;
+        this.asyncTaskManagerService = asyncTaskManagerService;
+        this.logEntryService = logEntryService;
+        this.lockDataService = lockDataService;
+    }
 
     private static final String ENCODING = "UTF-8";
 
@@ -68,11 +85,12 @@ public class DeclarationDataController {
 
     /**
      * Формирование отчета для НФ/декларации в формате xlsx
-     * @param id идентификатор формы
+     *
+     * @param id       идентификатор формы
      * @param response ответ
      * @throws IOException
      */
-    @RequestMapping(value = "/actions/declarationData/xlsx/{id}", method = RequestMethod.GET, produces = "application/octet-stream")
+    @GetMapping(value = "/actions/declarationData/xlsx/{id}", produces = "application/octet-stream")
     public void xlsx(@PathVariable long id, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
@@ -103,12 +121,13 @@ public class DeclarationDataController {
 
     /**
      * Формирование специфичного отчета для НФ/декларации
-     * @param alias тип специфичного отчета
-     * @param id идентификатор формы
+     *
+     * @param alias    тип специфичного отчета
+     * @param id       идентификатор формы
      * @param response ответ
      * @throws IOException
      */
-    @RequestMapping(value = "/actions/declarationData/specific/{alias}/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/actions/declarationData/specific/{alias}/{id}")
     public void specific(@PathVariable String alias, @PathVariable long id, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
@@ -147,12 +166,13 @@ public class DeclarationDataController {
 
     /**
      * Формирует изображение для модели для PDFViewer
-     * @param id идентификатор формы
-     * @param pageId идентификатор страницы
+     *
+     * @param id       идентификатор формы
+     * @param pageId   идентификатор страницы
      * @param response ответ
      * @throws IOException
      */
-    @RequestMapping(value = "/actions/declarationData/pageImage/{id}/{pageId}/*", method = RequestMethod.GET, produces = "image/png")
+    @GetMapping(value = "/actions/declarationData/pageImage/{id}/{pageId}/*", produces = "image/png")
     public void pageImage(@PathVariable int id, @PathVariable int pageId,
                           HttpServletResponse response) throws IOException {
 
@@ -165,11 +185,12 @@ public class DeclarationDataController {
 
     /**
      * Формирование отчета для НФ/декларации в формате xml
-     * @param id идентификатор формы
+     *
+     * @param id       идентификатор формы
      * @param response ответ
      * @throws IOException
      */
-    @RequestMapping(value = "/actions/declarationData/xml/{id}", method = RequestMethod.GET, produces = "application/octet-stream")
+    @GetMapping(value = "/actions/declarationData/xml/{id}", produces = "application/octet-stream")
     public void xml(@PathVariable int id, HttpServletResponse response)
             throws IOException {
 
@@ -178,20 +199,20 @@ public class DeclarationDataController {
 
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
-		try {
-        	IOUtils.copy(xmlDataIn, response.getOutputStream());
-		} finally {
-        	IOUtils.closeQuietly(xmlDataIn);
-		}
+        try {
+            IOUtils.copy(xmlDataIn, response.getOutputStream());
+        } finally {
+            IOUtils.closeQuietly(xmlDataIn);
+        }
     }
 
     /**
      * Формирует DeclarationResult
+     *
      * @param id идентификатор формы
      * @return модель DeclarationResult, в которой содержаться данные о форме
      */
-    @RequestMapping(value = "/rest/declarationData", method = RequestMethod.GET, params="projection=getDeclarationData")
-    @ResponseBody
+    @GetMapping(value = "/rest/declarationData", params = "projection=getDeclarationData")
     public DeclarationResult fetchDeclarationData(@RequestParam long id) {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
@@ -231,13 +252,264 @@ public class DeclarationDataController {
 
     /**
      * Удаление формы
+     *
      * @param declarationDataId идентификатор формы
      */
-    @RequestMapping(value = "/actions/declarationData/delete", method = RequestMethod.POST)
-    @ResponseBody
-    public void delete(@RequestParam int declarationDataId){
+    @PostMapping(value = "/actions/declarationData/delete")
+    public void deleteDeclaration(@RequestParam int declarationDataId) {
         if (declarationService.existDeclarationData(declarationDataId)) {
             declarationService.delete(declarationDataId, securityService.currentUserInfo());
         }
+    }
+
+    /**
+     * Вернуть в создана
+     *
+     * @param declarationDataId идентификатор формы
+     */
+    @PutMapping(value = "/actions/declarationData/returnToCreated")
+    public void returnToCreated(@RequestParam int declarationDataId) {
+        Logger logger = new Logger();
+        declarationService.cancel(logger, declarationDataId, securityService.currentUserInfo());
+    }
+
+    /**
+     * Рассчитать форму
+     *
+     * @param declarationDataId идентификатор формы
+     * @param force признак для перезапуска задачи
+     * @param cancelTask  признак для отмены задачи
+     */
+    @PutMapping(value = "/actions/declarationData/recalculate")
+    public RecalculateDeclarationDataResult recalculateDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
+        final RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
+        if (!declarationService.existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
+        final TaxType taxType = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getType().getTaxType();
+
+        Logger logger = new Logger();
+        try {
+            declarationService.preCalculationCheck(logger, declarationDataId, userInfo);
+        } catch (Exception e) {
+            String uuid;
+            if (e instanceof ServiceLoggerException) {
+                uuid = ((ServiceLoggerException) e).getUuid();
+            } else {
+                uuid = logEntryService.save(logger.getEntries());
+            }
+            throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(taxType) ? "Налоговая форма не может быть сформирована" : "Уведомление не может быть сформировано");
+        }
+
+        try {
+            String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
+            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
+            if (restartStatus != null && restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                result.setRestartMsg(restartStatus.getSecond());
+            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
+            } else {
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("declarationDataId", declarationDataId);
+                params.put("docDate", new Date());
+                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                    @Override
+                    public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                declarationService.getDeclarationFullName(declarationDataId, ddReportType),
+                                LockData.State.IN_QUEUE.getText());
+                    }
+
+                    @Override
+                    public void executePostCheck() {
+                        result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
+                    }
+
+                    @Override
+                    public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                        return declarationService.checkExistTask(declarationDataId, reportType, logger);
+                    }
+
+                    @Override
+                    public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                        declarationService.interruptTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
+                    }
+
+                    @Override
+                    public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                        return declarationService.getTaskName(ddReportType, taxType);
+                    }
+                });
+            }
+        } catch (Exception e) {
+        }
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    /**
+     * Проверить форму
+     *
+     * @param declarationDataId идентификатор формы
+     * @param force признак для перезапуска задачи
+     */
+    @PutMapping(value = "/actions/declarationData/check")
+    public CheckDeclarationDataResult checkDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force) {
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
+        final CheckDeclarationDataResult result = new CheckDeclarationDataResult();
+
+        if (!declarationService.existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
+        final TaxType taxType = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getType().getTaxType();
+        Logger logger = new Logger();
+        LockData lockDataAccept = lockDataService.getLock(declarationService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
+        if (lockDataAccept == null) {
+            String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+            if (uuidXml != null) {
+                String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                        @Override
+                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    declarationService.getDeclarationFullName(declarationDataId, ddReportType),
+                                    LockData.State.IN_QUEUE.getText());
+                        }
+
+                        @Override
+                        public void executePostCheck() {
+                        }
+
+                        @Override
+                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                            return false;
+                        }
+
+                        @Override
+                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                        }
+
+                        @Override
+                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                            return declarationService.getTaskName(ddReportType, taxType);
+                        }
+                    });
+                }
+            } else {
+                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+            }
+        } else {
+            try {
+                lockDataService.addUserWaitingForLock(lockDataAccept.getKey(), userInfo.getUser().getId());
+            } catch (Exception e) {
+            }
+            logger.error(
+                    String.format(
+                            LockData.LOCK_CURRENT,
+                            sdf.get().format(lockDataAccept.getDateLock()),
+                            userService.getUser(lockDataAccept.getUserId()).getName(),
+                            declarationService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, taxType))
+            );
+            throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), taxType.getDeclarationShortName());
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    /**
+     * Принять форму
+     *
+     * @param declarationDataId идентификатор формы
+     * @param force признак для перезапуска задачи
+     * @param cancelTask  признак для отмены задачи
+     */
+    @PutMapping(value = "/actions/declarationData/accept")
+    public AcceptDeclarationDataResult acceptDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
+        final AcceptDeclarationDataResult result = new AcceptDeclarationDataResult();
+        if (!declarationService.existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+        Logger logger = new Logger();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
+        final TaxType taxType = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getType().getTaxType();
+        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        if (uuidXml != null) {
+            DeclarationData declarationData = declarationService.get(declarationDataId, userInfo);
+            if (!declarationData.getState().equals(State.ACCEPTED)) {
+                String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                        @Override
+                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    declarationService.getDeclarationFullName(declarationDataId, ddReportType),
+                                    LockData.State.IN_QUEUE.getText());
+                        }
+
+                        @Override
+                        public void executePostCheck() {
+                            result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
+                        }
+
+                        @Override
+                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                            return declarationService.checkExistTask(declarationDataId, reportType, logger);
+                        }
+
+                        @Override
+                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                            declarationService.interruptTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
+                        }
+
+                        @Override
+                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                            return declarationService.getTaskName(ddReportType, taxType);
+                        }
+                    });
+                }
+            } else {
+                result.setStatus(CreateAsyncTaskStatus.EXIST);
+            }
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+        }
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 }
