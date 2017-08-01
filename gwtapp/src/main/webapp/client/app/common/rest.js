@@ -45,5 +45,12 @@
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
+
+        // Источники и приемники
+        .factory('SourcesResource', ['$resource', function ($resource) {
+            return $resource('/controller/rest/sources/:formId', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
     ;
 }());
