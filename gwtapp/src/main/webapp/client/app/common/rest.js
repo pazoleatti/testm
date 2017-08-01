@@ -39,9 +39,9 @@
             });
         }])
 
-        // Источники и приемники
-        .factory('SourcesResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/sources/:formId', {}, {
+        // Информация по изменению налоговой формы
+        .factory('LogBusinesResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/logBusines/:formId', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
