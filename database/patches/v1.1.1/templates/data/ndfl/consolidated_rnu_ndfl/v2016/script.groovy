@@ -414,7 +414,7 @@ Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdLis
 Map<Long, List<Long>> getDeletedPersonMap(List<Long> declarationDataIdList) {
     Map<Long, List<Long>> result = [:]
     declarationDataIdList.each { Long it ->
-        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_person.id = np.person_id) and status <> 0"
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_person.id = np.person_id)"
         Map<Long, Map<String, RefBookValue>> refPersonMap = getProvider(RefBook.Id.PERSON.id).getRecordDataWhere(whereClause)
         refPersonMap.each { Long k, Map<String, RefBookValue> v ->
             Long personId = v.get(RefBook.BUSINESS_ID_ALIAS).getNumberValue().longValue()
