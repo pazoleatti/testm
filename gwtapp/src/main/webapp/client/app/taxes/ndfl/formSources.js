@@ -23,7 +23,7 @@
 
                 //Получение списка приемников и источников
                 SourcesResource.query({
-                    formId: $stateParams.formId
+                    declarationId: $stateParams.declarationId
                 }, function (response) {
                     $scope.sourcesGridData = response;
                     $scope.updateGridData();
@@ -139,9 +139,9 @@
                 //Переход по ссылке на другую форму
                 $(document).undelegate('#sourcesTable .sources-link', 'click');
                 $(document).delegate('#sourcesTable .sources-link', 'click', function () {
-                    var formId = $(this).attr('form-id');
+                    var declarationId = $(this).attr('declaration-id');
                     $scope.close();
-                    $state.go('ndfl', {formId: formId});
+                    $state.go('ndfl', {declarationId: declarationId});
                 });
             }])
 
