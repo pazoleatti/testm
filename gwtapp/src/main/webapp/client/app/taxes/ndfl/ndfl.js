@@ -30,6 +30,10 @@
             '$scope', '$timeout', '$window', '$stateParams', 'dialogs', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel',
             function ($scope, $timeout, $window, $stateParams, dialogs, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel) {
 
+                $scope.showToDoDialog = function () {
+                    $showToDoDialog();
+                };
+
                 $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
 
                 $scope.openHistoryOfChange = function () {

@@ -6,7 +6,18 @@
                 translate}}:</a> - {{::'header.ndfl.forms' | translate}}:</h1>
         </div>
         <div class="header-col w200" style="float: right; margin-top: 20px;">
-            <label class="w200"><a href="#">{{::'link.ndfl.reporting' | translate}}</a></label>
+            <div class="btn-group" uib-dropdown>
+                <button id="single-button" type="button" class="btn btn-danger" uib-dropdown-toggle>
+                    <span data-translate-once="link.ndfl.reporting"></span>
+                </button>
+                <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button" style="margin-left: -180px;">
+                    <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a></li>
+                    <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a></li>
+                    <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formForFL' | translate}}</a></li>
+                    <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formForFLs' | translate}}</a></li>
+                    <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formExcel' | translate}}</a></li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class="grid-filter" style="min-width: 1400px;">
@@ -54,17 +65,18 @@
                     </div>
                     <div class="header-col w200" style="float: right;">
                         <!-- ссылка на модальное окно измениий по налоговой форме -->
-                        <div>
-                            <a class="aplanaLink" data-aplana-link-click="openHistoryOfChange()"
-                               data-aplana-link="'link.ndfl.historyOfChange' | translate">
-                            </a>
-                        </div>
-                        <div>
-                            <label class="w200"><a href="#">{{::'link.ndfl.filesAndComment' | translate}}</a></label>
-                        </div>
-                        <div>
-                            <label class="w200"><a data-ng-click="showSourcesClick()">{{::'link.ndfl.sources' | translate}}</a></label>
-                        </div>
+                        <button type="button" class="btn btn-danger" style="width: 145px;"
+                                data-ng-click="openHistoryOfChange()">
+                            <span data-translate-once="link.ndfl.historyOfChange"></span>
+                        </button>
+                        <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px;"
+                                data-ng-click="showToDoDialog()">
+                            <span data-translate-once="link.ndfl.filesAndComment"></span>
+                        </button>
+                        <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px;"
+                                data-ng-click="showSourcesClick()">
+                            <span data-translate-once="link.ndfl.sources"></span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -119,9 +131,10 @@
                     <div class='container-grid-top'>
                         <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
                         <div>
-                            <a class="aplanaLink" data-aplana-link-click="showToDoDialog()"
-                               data-aplana-link="'title.updateFLData' | translate">
-                            </a>
+                            <button type="button" class="btn btn-danger"
+                                    data-ng-click="showToDoDialog()">
+                                <span data-translate-once="button.updateFLData"></span>
+                            </button>
                         </div>
                         <div data-aplana-grid
                              data-grid-fill-space="true"
@@ -131,7 +144,7 @@
                              data-grid-ctrl="ndflPersonGrid.ctrl"
                              data-ng-model="ndflPersonGrid.value"
                              id="ndflPersonTable"
-                             style="float: left; width: 100%;"></div>
+                             style="float: left; width: 100%; margin-top: 5px;"></div>
                     </div>
                 </div>
             </div>
@@ -144,12 +157,14 @@
                     <div class='container-grid-top'>
                         <span data-ng-include="'client/app/taxes/ndfl/incomesAndTaxFilter.html'"></span>
                         <div class="row" style="margin: 0;">
-                            <a class="aplanaLink" data-aplana-link-click="showToDoDialog()"
-                               data-aplana-link="'title.fillTransferTerm' | translate">
-                            </a>
-                            <a class="aplanaLink" data-aplana-link-click="showToDoDialog()" style="margin: 0 0 0 10px"
-                               data-aplana-link="'title.fillIncomeAttr' | translate">
-                            </a>
+                            <button type="button" class="btn btn-danger"
+                                    data-ng-click="showToDoDialog()">
+                                <span data-translate-once="button.fillTransferTerm"></span>
+                            </button>
+                            <button type="button" class="btn btn-danger" style="margin: 0 0 0 10px"
+                                    data-ng-click="showToDoDialog()">
+                                <span data-translate-once="button.fillIncomeAttr"></span>
+                            </button>
                         </div>
                         <div data-aplana-grid
                              data-grid-fill-space="true"
@@ -158,7 +173,8 @@
                              data-grid-options="incomesAndTaxGrid.options"
                              data-grid-ctrl="incomesAndTaxGrid.ctrl"
                              data-ng-model="incomesAndTaxGrid.value"
-                             id="incomesAndTaxTable"></div>
+                             id="incomesAndTaxTable"
+                             style="margin-top: 5px;"></div>
                     </div>
                 </div>
             </div>
