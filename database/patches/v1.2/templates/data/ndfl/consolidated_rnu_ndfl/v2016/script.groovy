@@ -767,27 +767,27 @@ List<DeclarationData> findConsolidateDeclarationData(currDepartmentId, departmen
         }
         DepartmentReportPeriod depReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
-        //Разбивка НФ по АСНУ и отчетным периодам <АСНУ, <Период, <Список НФ созданных в данном периоде>>>
-        Map<Long, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<Long, HashMap<Integer, List<DeclarationData>>>();
+        //Разбивка НФ по АСНУ и отчетным периодам <АСНУ+Подразделение, <Период, <Список НФ созданных в данном периоде>>>
+        Map<String, Map<Integer, List<DeclarationData>>> asnuDataMap = new HashMap<String, HashMap<Integer, List<DeclarationData>>>();
         for (DeclarationData dD : allDeclarationDataList) {
             ScriptUtils.checkInterrupted();
             DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(dD?.departmentReportPeriodId) as DepartmentReportPeriod;
             // Период для того чтобы объединить первичные формы с разных подразделений для одного ТБ в рамках задачи https://jira.aplana.com/browse/SBRFNDFL-939
             DepartmentReportPeriod tempDepartmentReportPeriod = new DepartmentReportPeriod()
-            tempDepartmentReportPeriod.setId(declarationData.departmentReportPeriodId)
+            tempDepartmentReportPeriod.setId(dD.departmentReportPeriodId)
             tempDepartmentReportPeriod.setDepartmentId(dD.departmentId)
             tempDepartmentReportPeriod.setReportPeriod(departmentReportPeriod.reportPeriod)
             tempDepartmentReportPeriod.setCorrectionDate(departmentReportPeriod.correctionDate)
-            if (depReportPeriod.correctionDate != departmentReportPeriod.correctionDate) {
+            if (!(departmentReportPeriod.correctionDate == null || depReportPeriod.correctionDate != null && depReportPeriod.correctionDate >= departmentReportPeriod.correctionDate)) {
                 continue
             }
-            Long asnuId = dD.getAsnuId();
-            Integer departmentReportPeriodId = declarationData.departmentReportPeriodId;
+            String asnuId = dD.getAsnuId() + "_" + dD.getDepartmentId()
+            Integer departmentReportPeriodId = dD.departmentReportPeriodId;
             departmentReportPeriodList.add(tempDepartmentReportPeriod);
             if (asnuId != null) {
                 Map<Integer, List<DeclarationData>> asnuMap = asnuDataMap.get(asnuId);
                 if (asnuMap == null) {
-                    asnuMap = new HashMap<Long, DeclarationData>();
+                    asnuMap = new HashMap<String, DeclarationData>();
                     asnuDataMap.put(asnuId, asnuMap);
                 }
                 List<DeclarationData> declarationDataList = asnuMap.get(departmentReportPeriodId);
@@ -806,10 +806,9 @@ List<DeclarationData> findConsolidateDeclarationData(currDepartmentId, departmen
         departmentReportPeriodList.sort { a, b -> departmentReportPeriodComp(a, b) }
 
         //Включение в результат НФ с наиболее старшим периодом сдачи корректировки
-        List<DeclarationData> result = new ArrayList<DeclarationData>();
-        for (Map.Entry<Long, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
+        Set<DeclarationData> result = new HashSet<DeclarationData>();
+        for (Map.Entry<String, Map<Integer, List<DeclarationData>>> entry : asnuDataMap.entrySet()) {
             ScriptUtils.checkInterrupted();
-            //Long asnuId = entry.getKey();
             Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
             List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
             result.addAll(declarationDataList);
@@ -817,7 +816,7 @@ List<DeclarationData> findConsolidateDeclarationData(currDepartmentId, departmen
                 result.addAll(getUncorrectedPeriodDeclarationData(asnuDeclarationDataMap, departmentReportPeriodList))
             }
         }
-        return result;
+        return result.toList();
     } else {
         ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
@@ -864,7 +863,7 @@ List<DeclarationData> getLast(Map<Integer, List<DeclarationData>> declarationDat
  * @return
  */
 List<DeclarationData> getUncorrectedPeriodDeclarationData(Map<Integer, List<DeclarationData>> declarationDataMap, List<DepartmentReportPeriod> departmentReportPeriodList) {
-    List<DeclarationData> toReturn = []
+    Set<DeclarationData> toReturn = [].toSet()
 
     List<DepartmentReportPeriod> uncorrectedPeriodDrpList = departmentReportPeriodList.findAll {
         it.correctionDate == null
@@ -876,7 +875,7 @@ List<DeclarationData> getUncorrectedPeriodDeclarationData(Map<Integer, List<Decl
             toReturn.addAll(declarationDataMap.get(departmentReportPeriodId))
         }
     }
-    return toReturn
+    return toReturn.toList()
 }
 
 def departmentReportPeriodComp(DepartmentReportPeriod a, DepartmentReportPeriod b) {
