@@ -41,6 +41,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
             result.setDeclarationDataCreationDate(new Date(decl_data_creation_date.getTime()));
         }
         result.setDeclarationDataCreationUserName(rs.getString("import_decl_data_user_name"));
+        result.setActive(SqlUtils.getInteger(rs,"is_active") == 1);
         return result;
 	}
 }
