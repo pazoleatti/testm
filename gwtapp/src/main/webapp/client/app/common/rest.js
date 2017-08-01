@@ -48,7 +48,7 @@
 
         // Источники и приемники
         .factory('SourcesResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/sources/:formId', {}, {
+            return $resource('/controller/rest/sources/:declarationId', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
