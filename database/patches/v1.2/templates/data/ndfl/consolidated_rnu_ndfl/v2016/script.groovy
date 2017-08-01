@@ -812,9 +812,9 @@ List<DeclarationData> findConsolidateDeclarationData(currDepartmentId, departmen
             Map<Long, List<DeclarationData>> asnuDeclarationDataMap = entry.getValue();
             List<DeclarationData> declarationDataList = getLast(asnuDeclarationDataMap, departmentReportPeriodList)
             result.addAll(declarationDataList);
-            if (depReportPeriod.correctionDate != null) {
-                result.addAll(getUncorrectedPeriodDeclarationData(asnuDeclarationDataMap, departmentReportPeriodList))
-            }
+//            if (depReportPeriod.correctionDate != null) {
+//                result.addAll(getUncorrectedPeriodDeclarationData(asnuDeclarationDataMap, departmentReportPeriodList))
+//            }
         }
         return result.toList();
     } else {
