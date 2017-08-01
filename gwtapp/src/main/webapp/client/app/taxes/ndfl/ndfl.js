@@ -7,12 +7,13 @@
 
     angular.module('app.ndfl',
         ['ui.router',
-        'app.createOrEditFLDialog',
-        'app.ndflFL',
-        'app.incomesAndTax',
-        'app.deduction',
-        'app.prepayment',
-        'sbrfNdfl.logBusines'])
+            'app.createOrEditFLDialog',
+            'app.ndflFL',
+            'app.incomesAndTax',
+            'app.deduction',
+            'app.prepayment',
+            'sbrfNdfl.logBusines',
+            'app.logPanel'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationId}',
@@ -25,8 +26,8 @@
          * @description Контроллер страницы РНУ НДФЛ и вкладки "Реквизиты"
          */
         .controller('ndflCtrl', [
-            '$scope', '$timeout', '$window', '$stateParams', 'dialogs', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter',
-            function ($scope, $timeout, $window, $stateParams, dialogs, $showToDoDialog, $http, DeclarationDataResource, $filter) {
+            '$scope', '$timeout', '$window', '$stateParams', 'dialogs', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel',
+            function ($scope, $timeout, $window, $stateParams, dialogs, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel) {
 
                 $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
 
@@ -38,27 +39,145 @@
                 };
 
                 /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Проверить"
-                 */
-                $scope.checkButtonClick = function () {
-                    $showToDoDialog();
-                };
-                /**
                  * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
                  */
-                $scope.calculateButtonClick = function () {
-                    $showToDoDialog();
+                $scope.calculate = function (force, cancelTask) {
+                    $http({
+                        method: "PUT",
+                        url: "/controller/actions/declarationData/recalculate",
+                        params: {
+                            declarationDataId: $stateParams.declarationId,
+                            force: force ? force : false,
+                            cancelTask: cancelTask ? cancelTask : false
+                        }
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            // $logPanel.open('log-panel-container', response.data.uuid);
+                        } else {
+                            var buttons = {
+                                labelYes: $filter('translate')('common.button.yes'),
+                                labelNo: $filter('translate')('common.button.no')
+                            };
+
+                            var opts = {
+                                size: 'md'
+                            };
+                            var dlg;
+
+                            if (response.data.status === "LOCKED" && !force) {
+                                dlg = dialogs.confirm($filter('translate')('title.confirm'), response.data.restartMsg, buttons, opts);
+                                dlg.result.then(
+                                    function () {
+                                        $scope.calculate(true, cancelTask);
+                                    },
+                                    function () {
+                                    });
+                            } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
+                                dlg = dialogs.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnExistTask'), buttons, opts);
+                                dlg.result.then(
+                                    function () {
+                                        $scope.calculate(force, true);
+                                    },
+                                    function () {
+                                    });
+                            }
+                        }
+                    })
                 };
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
-                $scope.acceptButtonClick = function () {
-                    $showToDoDialog();
+                $scope.accept = function (force, cancelTask) {
+                    $http({
+                        method: "PUT",
+                        url: "/controller/actions/declarationData/accept",
+                        params: {
+                            declarationDataId: $stateParams.declarationId,
+                            force: force ? force : false,
+                            cancelTask: cancelTask ? cancelTask : false
+                        }
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                            initPage();
+                        } else {
+                            var buttons = {
+                                labelYes: $filter('translate')('common.button.yes'),
+                                labelNo: $filter('translate')('common.button.no')
+                            };
+
+                            var opts = {
+                                size: 'md'
+                            };
+                            var dlg;
+
+                            if (response.data.status === "LOCKED" && !force) {
+                                dlg = dialogs.confirm($filter('translate')('title.confirm'), response.data.restartMsg, buttons, opts);
+                                dlg.result.then(
+                                    function () {
+                                        $scope.accept(true, cancelTask);
+                                    },
+                                    function () {
+                                    });
+                            } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
+                                dlg = dialogs.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnExistTask'), buttons, opts);
+                                dlg.result.then(
+                                    function () {
+                                        $scope.accept(force, true);
+                                    },
+                                    function () {
+                                    });
+                            } else if (response.data.status === "NOT_EXIST_XML") {
+                                $window.alert($filter('translate')('title.acceptImpossible'));
+                            }
+                        }
+                    })
                 };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Проверить"
+                 */
+                $scope.check = function (force) {
+                    $http({
+                        method: "PUT",
+                        url: "/controller/actions/declarationData/check",
+                        params: {
+                            declarationDataId: $stateParams.declarationId,
+                            force: force ? force : false
+                        }
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        } else {
+                            var buttons = {
+                                labelYes: $filter('translate')('common.button.yes'),
+                                labelNo: $filter('translate')('common.button.no')
+                            };
+
+                            var opts = {
+                                size: 'md'
+                            };
+                            var dlg;
+
+                            if (response.data.status === "LOCKED" && !force) {
+                                dlg = dialogs.confirm($filter('translate')('title.confirm'), response.data.restartMsg, buttons, opts);
+                                dlg.result.then(
+                                    function () {
+                                        $scope.check(true);
+                                    },
+                                    function () {
+                                    });
+                            } else if (response.data.status === "NOT_EXIST_XML") {
+                                $window.alert($filter('translate')('title.checkImpossible'));
+                            }
+                        }
+                    })
+                };
+
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
-                $scope.returnButtonClick = function () {
+                $scope.returnToCreated = function () {
                     var buttons = {
                         labelYes: $filter('translate')('common.button.yes'),
                         labelNo: $filter('translate')('common.button.no')
@@ -68,7 +187,7 @@
                         size: 'md'
                     };
 
-                    var dlg = dialogs.confirm("Подтверждение", "Вы действительно хотите вернуть в статус \"Создана\" формы?", buttons, opts);
+                    var dlg = dialogs.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnToCreatedDeclaration'), buttons, opts);
                     dlg.result.then(
                         function () {
                             $http({
@@ -87,7 +206,7 @@
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Удалить"
                  */
-                $scope.deleteRecordClick = function () {
+                $scope.deleteDeclaration = function () {
                     var buttons = {
                         labelYes: $filter('translate')('common.button.yes'),
                         labelNo: $filter('translate')('common.button.no')
@@ -97,7 +216,7 @@
                         size: 'md'
                     };
 
-                    var dlg = dialogs.confirm("Подтверждение", "Вы уверены, что хотите удалить форму?", buttons, opts);
+                    var dlg = dialogs.confirm($filter('translate')('title.confirm'), $filter('translate')('title.deleteDeclaration'), buttons, opts);
                     dlg.result.then(
                         function () {
                             $http({
