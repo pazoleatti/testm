@@ -1243,13 +1243,13 @@ def checkDataConsolidated() {
             listDepartmentNotExistRnu.add(it.value)
         }
         logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                " года" + correctionDateExpression + " не созданы экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotExistRnu.join("\", \"")}'." +
-                " Данные этих форм не включены в отчетность!")
+                " года" + correctionDateExpression + " не созданы экземпляры консолидированных налоговых форм для следующих ТБ: \"${listDepartmentNotExistRnu.join("\", \"")}\"" +
+                ". Данные этих форм не включены в отчетность!")
     }
 
     if (!listDepartmentNotAcceptedRnu.isEmpty()) {
         logger.warn("За период $periodCode ($periodName) ${ScriptUtils.formatDate(calendarStartDate, "yyyy")}" +
-                " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: '${listDepartmentNotAcceptedRnu.join("\", \"")}'," +
+                " года" + correctionDateExpression + " имеются не принятые экземпляры консолидированных налоговых форм для следующих ТБ: \"${listDepartmentNotAcceptedRnu.join("\", \"")}\"" +
                 ". Данные этих форм не включены в отчетность!")
     }
 }
