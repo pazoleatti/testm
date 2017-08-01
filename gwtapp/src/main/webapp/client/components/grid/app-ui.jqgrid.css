@@ -155,6 +155,7 @@ background-position: -40px 0;*/
 
 .ui-jqgrid .ui-pg-table {
     height: 28px;
+    margin: 0 auto;
 }
 
 .ui-jqgrid .ui-pg-input {
