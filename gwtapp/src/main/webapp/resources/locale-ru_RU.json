@@ -287,5 +287,7 @@
   "filesComment.title.user": "Пользователь",
   "filesComment.title.userDepartment": "Подразделение пользователя",
   "filesComment.delete.header": "Подтверждение удаления записи",
-  "filesComment.delete.text": "Вы действительно хотите удалить выбранные записи?"
+  "filesComment.delete.text": "Вы действительно хотите удалить выбранные записи?",
+  "filesComment.comment": "Комментарий:",
+  "filesComment.files": "Файлы:"
 }

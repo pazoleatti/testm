@@ -39,16 +39,15 @@
                 $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
 
                 $scope.openHistoryOfChange = function () {
-                    appDialogs.create('client/app/taxes/ndfl/logBusines.html', 'logBusinesFormCtrl', {declarationId: $scope.formNumber});
+                    appDialogs.create('client/app/taxes/ndfl/logBusines.html', 'logBusinesFormCtrl', {declarationId: $scope.declarationId});
                 };
 
                 /**
-                 * @description Обработка события, которое возникает при нажании на ссылку "Файлы и комментарии"
+                 * @description Открытие модального окна "Файлы и комментарии"
                  */
                 $scope.filesAndComments = function () {
-                    var dlg = dialogs.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsDialogCtrl',{declarationId: $scope.formNumber});
-                    return dlg.result.then(function () {
-                    });
+                    appDialogs.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsCtrl',{declarationId: $scope.declarationId});
+
                 };
 
                 /**
@@ -207,7 +206,7 @@
                         function (data) {
                             if (data) {
                                 $scope.department = data.department;
-                                $scope.formNumber = $stateParams.declarationId;
+                                $scope.declarationId = $stateParams.declarationId;
                                 $scope.creator = data.creationUserName;
                                 $scope.formType = data.declarationFormKind;
                                 $scope.period = data.reportPeriodYear + ", " + data.reportPeriod;

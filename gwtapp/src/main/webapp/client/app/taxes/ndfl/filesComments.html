@@ -7,11 +7,11 @@
 </div>
 <div class="modal-body" style="height: 500px">
     <div style="height: 35%">
-        <h3>Комментарий:</h3>
+        <label class="font-normal" for="comment">{{::'filesComment.comment' |translate}}</label>
         <textarea id="comment" style="width: 100%; height: 75%" >{{comment}}</textarea>
     </div>
     <div>
-        <h3>Файлы:</h3>
+        <label class="font-normal" for="fileCommentGrid">{{::'filesComment.files' |translate}}</label>
         <div data-aplana-grid
              data-grid-options="fileCommentGrid.options"
              data-grid-ctrl="fileCommentGrid.ctrl"
@@ -24,13 +24,13 @@
     <div class="button_panel" style="float: left;">
         <div class="btn-toolbar" role="toolbar">
             <span>
-                <button type="file" class="btn btn-default" ngf-select="addFileClick($file)">
-                    <img src="client/img/button/enable/create_entry.png" width="15px" height="15px"/>
+                <button type="file" class="btn btn-success" ngf-select="addFileClick($file)">
+                    <i class="glyphicon glyphicon-plus-sign"></i>
                 </button>
             </span>
             <span>
-                <button type="button" class="btn btn-default" data-ng-click="removeFileClick()">
-                    <img src="client/img/button/enable/delete_entry.png" width="15px" height="15px"/>
+                <button type="button" class="btn btn-danger" data-ng-click="removeFileClick()">
+                    <i class="glyphicon glyphicon-remove-sign"></i>
                 </button>
             </span>
         </div>

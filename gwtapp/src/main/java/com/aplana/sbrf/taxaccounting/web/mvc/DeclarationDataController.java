@@ -501,16 +501,15 @@ public class DeclarationDataController {
     }
 
     /**
-     * Получение данных для МО "Файлы и Комментарии"
+     * Получение дополнительной информации о файлах декларации с комментариями
      *
-     * @param id идентификатор формы
-     * @return DeclarationDataFileComment модель, в которой содержаться данные о файлах
-     *                        и комментарий для текущей формы.
+     * @param id                            идентификатор декларации
+     * @return DeclarationDataFileComment   объект модели, в которой содержаться данные о файлах
+     *                                      и комментарий для текущей декларации.
      */
-    @RequestMapping (value = "/rest/declaration/filesComments", method = RequestMethod.GET,params="projection=getDeclarationFilesComments")
+    @RequestMapping(value = "/rest/declarationData", method = RequestMethod.GET, params = "projection=filesComments")
     @ResponseBody
-    public DeclarationDataFileComment fetchFilesComments(@RequestParam long id){
-        TAUserInfo userInfo = securityService.currentUserInfo();
+    public DeclarationDataFileComment fetchFilesComments(@RequestParam long id) {
         if (!declarationService.existDeclarationData(id)) {
             throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id), null);
         }
@@ -524,25 +523,24 @@ public class DeclarationDataController {
     }
 
     /**
-     * Сохранение данных для МО "Файлы и Комментарии"
+     * Сохранение дополнительной информации о файлах декларации с комментариями
      *
-     * @param dataFileComment объект модели, в котором содержаться данные о файлах
-     *                        и комментарий для текущей формы.
+     * @param dataFileComment               сохраняемый объект декларации, в котором содержаться
+     *                                      данные о файлах и комментарий для текущей декларации.
+     * @return DeclarationDataFileComment   новый объект модели, в котором содержаться данные
+     *                                      о файлах и комментарий для текущей декларации.
      */
 
-    @RequestMapping(value="actions/declaration/filesComments/save",method = RequestMethod.POST)
+    @RequestMapping(value = "/rest/declarationData", method = RequestMethod.POST, params = "projection=filesComments")
     @ResponseBody
-    public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment){
+    public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
         long declarationDataId = dataFileComment.getDeclarationId();
-        TAUserInfo userInfo = securityService.currentUserInfo();
 
         DeclarationDataFileComment result = new DeclarationDataFileComment();
         if (!declarationService.existDeclarationData(declarationDataId)) {
             throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
         }
         //TODO: Добавить логирование и проверку на доступность изменений для текущего пользователя.
-
-        String key = declarationService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.EDIT_FILE_COMMENT_DEC);
 
         declarationService.saveFilesComments(declarationDataId, dataFileComment.getComment(), dataFileComment.getDeclarationDataFiles());
 
