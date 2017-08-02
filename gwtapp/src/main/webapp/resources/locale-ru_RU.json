@@ -277,5 +277,15 @@
   "uploadTransportData.button.upload": "Загрузить файл",
   "uploadTransportData.button.loadAll": "Обработать файлы из каталога загрузки",
   "uploadTransportData.description.upload": "Загружаются только те файлы, которые пользователь предоставляет системе по нажатию этой кнопки.",
-  "uploadTransportData.description.loadAll": "Загружаются файлы из каталогов загруки."
+  "uploadTransportData.description.loadAll": "Загружаются файлы из каталогов загруки.",
+
+  "filesComment.header": "Файлы и комментарии",
+  "filesComment.title.fileName": "Имя файла",
+  "filesComment.title.fileType": "Тип файла",
+  "filesComment.title.comment": "Комментарий",
+  "filesComment.title.dateTime": "Дата-Время",
+  "filesComment.title.user": "Пользователь",
+  "filesComment.title.userDepartment": "Подразделение пользователя",
+  "filesComment.delete.header": "Подтверждение удаления записи",
+  "filesComment.delete.text": "Вы действительно хотите удалить выбранные записи?"
 }

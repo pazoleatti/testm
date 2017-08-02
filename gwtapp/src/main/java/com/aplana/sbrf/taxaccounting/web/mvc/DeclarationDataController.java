@@ -499,4 +499,57 @@ public class DeclarationDataController {
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
+
+    /**
+     * Получение данных для МО "Файлы и Комментарии"
+     *
+     * @param id идентификатор формы
+     * @return DeclarationDataFileComment модель, в которой содержаться данные о файлах
+     *                        и комментарий для текущей формы.
+     */
+    @RequestMapping (value = "/rest/declaration/filesComments", method = RequestMethod.GET,params="projection=getDeclarationFilesComments")
+    @ResponseBody
+    public DeclarationDataFileComment fetchFilesComments(@RequestParam long id){
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        if (!declarationService.existDeclarationData(id)) {
+            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id), null);
+        }
+
+        DeclarationDataFileComment result = new DeclarationDataFileComment();
+
+        result.setDeclarationId(id);
+        result.setDeclarationDataFiles(declarationService.getFiles(id));
+        result.setComment(declarationService.getNote(id));
+        return result;
+    }
+
+    /**
+     * Сохранение данных для МО "Файлы и Комментарии"
+     *
+     * @param dataFileComment объект модели, в котором содержаться данные о файлах
+     *                        и комментарий для текущей формы.
+     */
+
+    @RequestMapping(value="actions/declaration/filesComments/save",method = RequestMethod.POST)
+    @ResponseBody
+    public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment){
+        long declarationDataId = dataFileComment.getDeclarationId();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        DeclarationDataFileComment result = new DeclarationDataFileComment();
+        if (!declarationService.existDeclarationData(declarationDataId)) {
+            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
+        }
+        //TODO: Добавить логирование и проверку на доступность изменений для текущего пользователя.
+
+        String key = declarationService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.EDIT_FILE_COMMENT_DEC);
+
+        declarationService.saveFilesComments(declarationDataId, dataFileComment.getComment(), dataFileComment.getDeclarationDataFiles());
+
+        result.setDeclarationDataFiles(declarationService.getFiles(declarationDataId));
+        result.setComment(declarationService.getNote(declarationDataId));
+        result.setDeclarationId(declarationDataId);
+
+        return result;
+    }
 }
