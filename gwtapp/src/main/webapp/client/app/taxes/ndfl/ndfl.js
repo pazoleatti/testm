@@ -14,7 +14,8 @@
             'app.prepayment',
             'app.formSources',
             'app.logBusines',
-            'app.logPanel'])
+            'app.logPanel',
+            'app.filesComments'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationId}',
@@ -39,6 +40,15 @@
                 $scope.openHistoryOfChange = function () {
 
                     var dlg = dialogs.create('client/app/taxes/ndfl/logBusines.html', 'logBusinesFormCtrl', {declarationId: $scope.formNumber});
+                    return dlg.result.then(function () {
+                    });
+                };
+
+                /**
+                 * @description Обработка события, которое возникает при нажании на ссылку "Файлы и комментарии"
+                 */
+                $scope.filesAndComments = function () {
+                    var dlg = dialogs.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsDialogCtrl',{declarationId: $scope.formNumber});
                     return dlg.result.then(function () {
                     });
                 };
@@ -237,6 +247,9 @@
                         function () {
                         });
                 };
+
+
+
 
                 /**
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"
