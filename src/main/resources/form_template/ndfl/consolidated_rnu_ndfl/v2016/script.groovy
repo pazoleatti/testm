@@ -390,7 +390,7 @@ Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String
 Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
     Map<Long, List<Map<String, RefBookValue>>> result = new HashMap<Long, List<Map<String, RefBookValue>>>();
     declarationDataIdList.each {
-        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id)"
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id) AND ref_book_id_doc.status = 0"
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
         refBookMap.each { personId, refBookValues ->
