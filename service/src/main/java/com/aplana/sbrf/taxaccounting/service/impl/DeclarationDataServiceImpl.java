@@ -1825,7 +1825,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId) {
+    public String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId) {
+        String toReturn = null;
         DeclarationData declarationDataTemp = new DeclarationData();
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
@@ -1838,11 +1839,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, exchangeParams);
         // Проверяем ошибки
         if (logger.containsLevel(LogLevel.ERROR)) {
-            String msg = "Найдены ошибки при выполнении выгрузки отчетности";
             if (paramMap.containsKey("errMsg")) {
-                msg = (String)paramMap.get("errMsg");
+                toReturn = (String)paramMap.get("errMsg");
             }
-            throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
         }
+        return toReturn;
     }
 }

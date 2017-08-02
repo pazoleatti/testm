@@ -425,6 +425,7 @@ public interface DeclarationDataService {
 	 * Проверки перед созданием отчетности для выгрузки
 	 * @param departmentReportPeriod - отчетный период
 	 * @param declarationTypeId идентификатор типа декларации
+	 * @return возвращает сообщение об ошибке, иначе null
 	 */
-	void preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
+	String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
 }

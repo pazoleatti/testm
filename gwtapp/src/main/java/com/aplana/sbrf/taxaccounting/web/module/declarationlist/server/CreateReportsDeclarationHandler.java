@@ -2,10 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateReportsDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateReportsDeclarationResult;
@@ -26,9 +30,9 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class CreateReportsDeclarationHandler extends AbstractActionHandler<CreateReportsDeclarationAction, CreateReportsDeclarationResult> {
 
-	public CreateReportsDeclarationHandler() {
-		super(CreateReportsDeclarationAction.class);
-	}
+    public CreateReportsDeclarationHandler() {
+        super(CreateReportsDeclarationAction.class);
+    }
 
     @Autowired
     private SecurityService securityService;
@@ -48,8 +52,8 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
-	@Override
-	public CreateReportsDeclarationResult execute(final CreateReportsDeclarationAction action, ExecutionContext executionContext) throws ActionException {
+    @Override
+    public CreateReportsDeclarationResult execute(final CreateReportsDeclarationAction action, ExecutionContext executionContext) throws ActionException {
         final ReportType reportType = ReportType.CREATE_REPORTS_DEC;
         CreateReportsDeclarationResult result = new CreateReportsDeclarationResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
@@ -71,7 +75,16 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriods.get(0);
 
-        declarationDataService.preCreateReports(logger, userInfo, departmentReportPeriod, action.getDeclarationTypeId());
+        String errMsg = declarationDataService.preCreateReports(logger, userInfo, departmentReportPeriod, action.getDeclarationTypeId());
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            if (errMsg.contains("Отсутствует отчетность")) {
+                result.setErrMsg(errMsg);
+            }
+            result.setStatus(true);
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        }
 
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("declarationTypeId", action.getDeclarationTypeId());
@@ -116,10 +129,10 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
 
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
-	}
+    }
 
-	@Override
-	public void undo(CreateReportsDeclarationAction action, CreateReportsDeclarationResult result, ExecutionContext executionContext) throws ActionException {
-		//Nothing
-	}
+    @Override
+    public void undo(CreateReportsDeclarationAction action, CreateReportsDeclarationResult result, ExecutionContext executionContext) throws ActionException {
+        //Nothing
+    }
 }
