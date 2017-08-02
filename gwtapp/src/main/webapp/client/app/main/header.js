@@ -9,7 +9,8 @@
             'ui.router',
             'ng.deviceDetector',
             'app.notifications',
-            'app.uploadTransportData'
+            'app.uploadTransportData',
+            'app.dialogs'
         ])
         .directive('appHeader', function () {
             return {
@@ -18,8 +19,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'dialogs', 'NotificationResource',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, dialogs, NotificationResource) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'NotificationResource', 'appDialogs',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, NotificationResource, appDialogs) {
                 /**
                  * @description Получаем необходимые настройки с сервера
                  * @param {{project_properties}} response
@@ -35,6 +36,7 @@
                         $scope.security = {
                             user: {
                                 name: response.data.user_data.user.name,
+                                login: response.data.user_data.user.login,
                                 department: response.data.department
                             }
                         };
@@ -124,7 +126,6 @@
                 //noinspection JSValidateJSDoc
                 /**
                  * @description Выход из системы
-                 * @param USER_DATA.login
                  */
                 $scope.logout = function () {
                     // Сообщаем клиентской части системы, что выходим. Если есть несохраненные данные - нужно ловить это сообщение
@@ -138,7 +139,7 @@
                         $.ajax({
                             type: "GET",
                             url: "controller/actions/clearAuthenticationCache",
-                            username: USER_DATA.login,
+                            username: $scope.security.user.login,
                             password: 'logout' + (new Date()).getTime().toString(),
                             noalert: true
                         }).always(function () {
@@ -148,9 +149,7 @@
                 };
 
                 $scope.showNotificationClick = function () {
-                    var dlg = dialogs.create('client/app/main/notifications.html', 'notificationsFormCtrl');
-                    return dlg.result.then(function () {
-                    });
+                    appDialogs.create('client/app/main/notifications.html', 'notificationsFormCtrl');
                 };
 
                 function decline(num, nominative, singular, plural) {

@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -14,12 +12,13 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,11 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Контроллер для работы с формами ПНФ/КНФ
+ * Контроллер для работы с декларациями
  */
 @RestController
 public class DeclarationDataController {
-    private static final Log LOG = LogFactory.getLog(TransportDataController.class);
+    private static final String ENCODING = "UTF-8";
 
     private DeclarationDataService declarationService;
     private SecurityService securityService;
@@ -73,42 +72,31 @@ public class DeclarationDataController {
         this.lockDataService = lockDataService;
     }
 
-    private static final String ENCODING = "UTF-8";
-
-    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        }
-    };
-
-
     /**
      * Формирование отчета для НФ/декларации в формате xlsx
      *
-     * @param id       идентификатор формы
-     * @param response ответ
-     * @throws IOException
+     * @param declarationDataId идентификатор декларации
+     * @param response          ответ
      */
-    @GetMapping(value = "/actions/declarationData/xlsx/{id}", produces = "application/octet-stream")
-    public void xlsx(@PathVariable long id, HttpServletResponse response)
+    @GetMapping(value = "/actions/declarationData/xlsx/{declarationDataId}", produces = "application/octet-stream")
+    public void xlsx(@PathVariable long declarationDataId, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
         String fileName = null;
-        String xmlDataFileName = declarationService.getXmlDataFileName(id, userInfo);
+        String xmlDataFileName = declarationService.getXmlDataFileName(declarationDataId, userInfo);
         if (xmlDataFileName != null) {
             fileName = URLEncoder.encode(xmlDataFileName.replace("zip", "xlsx"), ENCODING);
         }
 
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
-        String uuid = reportService.getDec(userInfo, id, DeclarationDataReportType.EXCEL_DEC);
+        String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             DataInputStream in = new DataInputStream(blobData.getInputStream());
             OutputStream out = response.getOutputStream();
-            int count = 0;
+            int count;
             try {
                 count = IOUtils.copy(in, out);
             } finally {
@@ -122,20 +110,19 @@ public class DeclarationDataController {
     /**
      * Формирование специфичного отчета для НФ/декларации
      *
-     * @param alias    тип специфичного отчета
-     * @param id       идентификатор формы
-     * @param response ответ
-     * @throws IOException
+     * @param alias             тип специфичного отчета
+     * @param declarationDataId идентификатор декларации
+     * @param response          ответ
      */
-    @GetMapping(value = "/actions/declarationData/specific/{alias}/{id}")
-    public void specific(@PathVariable String alias, @PathVariable long id, HttpServletResponse response)
+    @GetMapping(value = "/actions/declarationData/specific/{alias}/{declarationDataId}")
+    public void specific(@PathVariable String alias, @PathVariable long declarationDataId, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
-        DeclarationData declaration = declarationService.get(id, userInfo);
+        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
 
-        String uuid = reportService.getDec(securityService.currentUserInfo(), id, ddReportType);
+        String uuid = reportService.getDec(securityService.currentUserInfo(), declarationDataId, ddReportType);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
 
@@ -146,7 +133,7 @@ public class DeclarationDataController {
 
             DataInputStream in = new DataInputStream(blobData.getInputStream());
             OutputStream out = response.getOutputStream();
-            int count = 0;
+            int count;
             try {
                 count = IOUtils.copy(in, out);
             } finally {
@@ -167,16 +154,15 @@ public class DeclarationDataController {
     /**
      * Формирует изображение для модели для PDFViewer
      *
-     * @param id       идентификатор формы
-     * @param pageId   идентификатор страницы
-     * @param response ответ
-     * @throws IOException
+     * @param declarationDataId идентификатор декларации
+     * @param pageId            идентификатор страницы
+     * @param response          ответ
      */
-    @GetMapping(value = "/actions/declarationData/pageImage/{id}/{pageId}/*", produces = "image/png")
-    public void pageImage(@PathVariable int id, @PathVariable int pageId,
+    @GetMapping(value = "/actions/declarationData/pageImage/{declarationDataId}/{pageId}/*", produces = "image/png")
+    public void pageImage(@PathVariable int declarationDataId, @PathVariable int pageId,
                           HttpServletResponse response) throws IOException {
 
-        InputStream pdfData = declarationService.getPdfDataAsStream(id, securityService.currentUserInfo());
+        InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
         PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
                 pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
         pdfData.close();
@@ -186,16 +172,15 @@ public class DeclarationDataController {
     /**
      * Формирование отчета для НФ/декларации в формате xml
      *
-     * @param id       идентификатор формы
-     * @param response ответ
-     * @throws IOException
+     * @param declarationDataId идентификатор декларации
+     * @param response          ответ
      */
-    @GetMapping(value = "/actions/declarationData/xml/{id}", produces = "application/octet-stream")
-    public void xml(@PathVariable int id, HttpServletResponse response)
+    @GetMapping(value = "/actions/declarationData/xml/{declarationDataId}", produces = "application/octet-stream")
+    public void xml(@PathVariable int declarationDataId, HttpServletResponse response)
             throws IOException {
 
-        InputStream xmlDataIn = declarationService.getXmlDataAsStream(id, securityService.currentUserInfo());
-        String fileName = URLEncoder.encode(declarationService.getXmlDataFileName(id, securityService.currentUserInfo()), ENCODING);
+        InputStream xmlDataIn = declarationService.getXmlDataAsStream(declarationDataId, securityService.currentUserInfo());
+        String fileName = URLEncoder.encode(declarationService.getXmlDataFileName(declarationDataId, securityService.currentUserInfo()), ENCODING);
 
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
@@ -209,20 +194,21 @@ public class DeclarationDataController {
     /**
      * Формирует DeclarationResult
      *
-     * @param id идентификатор формы
-     * @return модель DeclarationResult, в которой содержаться данные о форме
+     * @param declarationDataId идентификатор декларации
+     * @return модель DeclarationResult, в которой содержаться данные о декларации
      */
-    @GetMapping(value = "/rest/declarationData", params = "projection=getDeclarationData")
-    public DeclarationResult fetchDeclarationData(@RequestParam long id) {
+    @GetMapping(value = "/rest/declarationData", params = "projection=declarationData")
+    public DeclarationResult fetchDeclarationData(@RequestParam long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-        if (!declarationService.existDeclarationData(id)) {
-            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id), null);
+        if (!declarationService.existDeclarationData(declarationDataId)) {
+            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
         }
 
         DeclarationResult result = new DeclarationResult();
 
-        DeclarationData declaration = declarationService.get(id, userInfo);
+        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
 
@@ -246,14 +232,14 @@ public class DeclarationDataController {
             result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
         }
 
-        result.setCreationDate(sdf.get().format(logBusinessService.getFormCreationDate(declaration.getId())));
+        result.setCreationDate(sdf.format(logBusinessService.getFormCreationDate(declaration.getId())));
         return result;
     }
 
     /**
-     * Удаление формы
+     * Удаление декларации
      *
-     * @param declarationDataId идентификатор формы
+     * @param declarationDataId идентификатор декларации
      */
     @PostMapping(value = "/actions/declarationData/delete")
     public void deleteDeclaration(@RequestParam int declarationDataId) {
@@ -265,22 +251,22 @@ public class DeclarationDataController {
     /**
      * Вернуть в создана
      *
-     * @param declarationDataId идентификатор формы
+     * @param declarationDataId идентификатор декларации
      */
-    @PutMapping(value = "/actions/declarationData/returnToCreated")
+    @PostMapping(value = "/actions/declarationData/returnToCreated")
     public void returnToCreated(@RequestParam int declarationDataId) {
         Logger logger = new Logger();
         declarationService.cancel(logger, declarationDataId, securityService.currentUserInfo());
     }
 
     /**
-     * Рассчитать форму
+     * Рассчитать декларацию
      *
-     * @param declarationDataId идентификатор формы
-     * @param force признак для перезапуска задачи
-     * @param cancelTask  признак для отмены задачи
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @param cancelTask        признак для отмены задачи
      */
-    @PutMapping(value = "/actions/declarationData/recalculate")
+    @PostMapping(value = "/actions/declarationData/recalculate")
     public RecalculateDeclarationDataResult recalculateDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
         final RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
@@ -348,7 +334,7 @@ public class DeclarationDataController {
                     }
                 });
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         result.setUuid(logEntryService.save(logger.getEntries()));
@@ -356,12 +342,12 @@ public class DeclarationDataController {
     }
 
     /**
-     * Проверить форму
+     * Проверить декларацию
      *
-     * @param declarationDataId идентификатор формы
-     * @param force признак для перезапуска задачи
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
      */
-    @PutMapping(value = "/actions/declarationData/check")
+    @PostMapping(value = "/actions/declarationData/check")
     public CheckDeclarationDataResult checkDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
         final CheckDeclarationDataResult result = new CheckDeclarationDataResult();
@@ -423,12 +409,13 @@ public class DeclarationDataController {
         } else {
             try {
                 lockDataService.addUserWaitingForLock(lockDataAccept.getKey(), userInfo.getUser().getId());
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
             logger.error(
                     String.format(
                             LockData.LOCK_CURRENT,
-                            sdf.get().format(lockDataAccept.getDateLock()),
+                            sdf.format(lockDataAccept.getDateLock()),
                             userService.getUser(lockDataAccept.getUserId()).getName(),
                             declarationService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, taxType))
             );
@@ -439,13 +426,13 @@ public class DeclarationDataController {
     }
 
     /**
-     * Принять форму
+     * Принять декларацию
      *
-     * @param declarationDataId идентификатор формы
-     * @param force признак для перезапуска задачи
-     * @param cancelTask  признак для отмены задачи
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @param cancelTask        признак для отмены задачи
      */
-    @PutMapping(value = "/actions/declarationData/accept")
+    @PostMapping(value = "/actions/declarationData/accept")
     public AcceptDeclarationDataResult acceptDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
         final AcceptDeclarationDataResult result = new AcceptDeclarationDataResult();

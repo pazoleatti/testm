@@ -6,11 +6,11 @@
                 translate}}:</a> - {{::'header.ndfl.forms' | translate}}:</h1>
         </div>
         <div class="header-col w200" style="float: right; margin-top: 20px;">
-            <div class="btn-group" uib-dropdown>
-                <button id="single-button" type="button" class="btn btn-danger" uib-dropdown-toggle>
+            <div class="btn-group" data-uib-dropdown>
+                <button id="single-button" type="button" class="btn btn-danger" data-uib-dropdown-toggle>
                     <span data-translate-once="link.ndfl.reporting"></span>
                 </button>
-                <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button" style="margin-left: -180px;">
+                <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button" style="margin-left: -180px;">
                     <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a></li>
                     <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a></li>
                     <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formForFL' | translate}}</a></li>
@@ -114,7 +114,7 @@
                     <!--Удалить-->
                     <span>
                         <button type="button" class="btn btn-danger"
-                                data-ng-click="deleteDeclaration()">
+                                data-ng-click="delete()">
                             <span data-translate-once="button.delete"></span>
                         </button>
                     </span>
@@ -124,8 +124,8 @@
         </div>
     </div>
 
-    <uib-tabset active="activeForm" class="form100" style="height:66%;">
-        <uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('requisites')">
+    <data-uib-tabset active="activeForm" class="form100" style="height:66%;">
+        <data-uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('requisites')">
             <div data-ng-controller="ndflFLCtrl">
                 <div class="container-grid" style="height: 100%">
                     <div class='container-grid-top'>
@@ -148,9 +148,9 @@
                     </div>
                 </div>
             </div>
-        </uib-tab>
+        </data-uib-tab>
 
-        <uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
+        <data-uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
                  select="selectTab('incomesAndTax')">
             <div data-ng-controller="incomesAndTaxCtrl">
                 <div class="container-grid" style="height: 100%">
@@ -178,9 +178,9 @@
                     </div>
                 </div>
             </div>
-        </uib-tab>
+        </data-uib-tab>
 
-        <uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
+        <data-uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
                  select="selectTab('deductions')">
             <div data-ng-controller="deductionCtrl">
                 <div class="container-grid" style="height: 100%">
@@ -197,9 +197,9 @@
                     </div>
                 </div>
             </div>
-        </uib-tab>
+        </data-uib-tab>
 
-        <uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
+        <data-uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
                  select="selectTab('advancePayments')">
             <div data-ng-controller="prepaymentCtrl">
                 <div class="container-grid" style="height: 100%">
@@ -216,7 +216,7 @@
                     </div>
                 </div>
             </div>
-        </uib-tab>
+        </data-uib-tab>
 
-    </uib-tabset>
+    </data-uib-tabset>
 </div>

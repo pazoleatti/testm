@@ -12,6 +12,7 @@
             'app.filterUtils',
             'app.rest',
             'app.formatters',
+            'app.dialogs',
             'ui.router',
             'ui.validate',
             'ui.select2',
@@ -36,12 +37,9 @@
         ])
 
         // Отображение диалогового окна с сообщением .
-        .factory('ShowToDoDialog', ['dialogs', '$filter', function (dialogs, $filter) {
+        .factory('ShowToDoDialog', ['appDialogs', '$filter', function (appDialogs, $filter) {
             return function () {
-                var opts = {
-                    size: 'md'
-                };
-                dialogs.message($filter('translate')('messageDialog.toDo.title'), $filter('translate')('messageDialog.toDo.message'), opts);
+                appDialogs.message($filter('translate')('messageDialog.toDo.title'), $filter('translate')('messageDialog.toDo.message'));
             };
         }])
 
