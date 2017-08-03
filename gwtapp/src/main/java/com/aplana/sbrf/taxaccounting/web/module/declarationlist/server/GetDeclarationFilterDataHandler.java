@@ -69,6 +69,15 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
         res.setUserDepartmentId(currentUser.getUser().getDepartmentId());
         res.setAsnuIds(currentUser.getUser().getAsnuIds());
 
+        List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
+        for(DeclarationType declarationType: declarationFilterValues.getDeclarationTypes()) {
+            if (!action.isReports() && (declarationType.getId() == 100 || declarationType.getId() == 101) ||
+                    action.isReports() && (declarationType.getId() == 102 || declarationType.getId() == 103 || declarationType.getId() == 104) ) {
+                declarationTypes.add(declarationType);
+            }
+        }
+        declarationFilterValues.setDeclarationTypes(declarationTypes);
+
 		return res;
 	}
 

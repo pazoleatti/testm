@@ -205,14 +205,23 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdTemp(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
 
     /**
-     * Найти данные о доходах ФЛ по идентификатору и интервалу. Отбор происходит по дате НДФЛ
+     * Найти данные о доходах ФЛ по идентификатору ФЛ и интервалу. Отбор происходит по дате НДФЛ
      *
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о доходах ФЛ по идентификатору ФЛ и интервалу. Отбор происходит по дате выплаты дохода
+     * @param ndflPersonId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
 
     /**
      * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
@@ -244,7 +253,7 @@ public interface NdflPersonDao {
      * @param prFequals1   - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
+    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1);
 
     /**
      * Найти все NdflPerson по заданным параметрам
@@ -255,6 +264,14 @@ public interface NdflPersonDao {
      * @return результат запроса
      */
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
+
+    /**
+     * Найти количество NdflPerson по заданным параметрам
+     * @param declarationDataId
+     * @param parameters
+     * @return
+     */
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters);
 
     /**
      * @param sqlQuery
@@ -295,7 +312,7 @@ public interface NdflPersonDao {
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ
@@ -385,6 +402,14 @@ public interface NdflPersonDao {
     List<Integer> findDublRowNum(String tableName, Long declarationDataId);
 
     /**
+     * Поиск дублей по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    Map<Long, List<Integer>> findDublRowNumMap(String tableName, Long declarationDataId);
+
+    /**
      * Поиск пропусков по полю rownum
      *
      * @param tableName
@@ -392,4 +417,33 @@ public interface NdflPersonDao {
      * @return
      */
     List<Integer> findMissingRowNum(String tableName, Long declarationDataId);
+
+    /**
+     * Поиск пропусков по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId);
+
+    /**
+     * Получить число ФЛ в NDFL_PERSON
+     * @param declarationDataId
+     * @return
+     */
+    int getNdflPersonCount(Long declarationDataId);
+
+    /**
+     * Получить число справок ФЛ в NDFL_REFERENCES
+     * @param declarationDataId
+     * @return
+     */
+    int getNdflPersonReferencesCount(Long declarationDataId);
+
+    /**
+     * Получить число ФЛ в 6НДФЛ
+     * @param declarationDataId
+     * @return
+     */
+    int get6NdflPersonCount(Long declarationDataId);
 }

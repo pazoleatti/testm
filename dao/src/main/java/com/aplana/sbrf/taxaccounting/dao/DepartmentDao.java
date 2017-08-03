@@ -200,7 +200,37 @@ public interface DepartmentDao {
 
     int getHierarchyLevel(int departmentId);
 
-    List<Integer> getAllPerformers(int departmentId, int declarationTypeId);
+    /**
+     * Получить списиок подразделений, для которых подразделение пользователя(или его дочернее подразделение) является исполнителем макетов
+     * @param userDepId подразделения-исполнителя
+     * @param declarationTypeId id макета
+     * @return
+     */
+    List<Integer> getAllPerformers(int userDepId, int declarationTypeId);
+
+    /**
+     * Получить списиок ТБ подразделений, для которых подразделение из ТБ пользователя является исполнителем макетов
+     * @param userTBDepId подразделения-исполнителя
+     * @param declarationTypeId id макета
+     * @return
+     */
+    List<Integer> getAllTBPerformers(int userTBDepId, int declarationTypeId);
 
     List<Integer> getAllPerformers(int userDepId, List<TaxType> taxTypes);
+
+    /**
+     * Получить список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     * @param performerDepartmentId ID подразделения, которое является исполнителем
+     * @return Список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение
+     */
+    List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId);
+
+    /**
+     * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
+     * @param kpp
+     * @param oktmo
+     * @param reportPeriodEndDate
+     * @return
+     */
+    String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
 }

@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.aplana.taxaccounting</groupId>
-        <artifactId>ndfl</artifactId>
-        <version>1.0</version>
-    </parent>
+	<parent>
+		<groupId>com.aplana.taxaccounting</groupId>
+		<artifactId>ndfl</artifactId>
+        <version>1.2</version>
+	</parent>
 
     <artifactId>model</artifactId>
     <description>АС "Учёт налогов" - Модельные объекты</description>
@@ -52,7 +52,6 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>1.13.4.RELEASE</version>
         </dependency>
     </dependencies>
 

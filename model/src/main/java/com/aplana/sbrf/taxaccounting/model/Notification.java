@@ -10,6 +10,8 @@ import java.util.Date;
 public class Notification implements Serializable {
     private static final long serialVersionUID = -5255606476850599691L;
 
+    private static final int MAX_LENGTH_TEXT = 1000;
+
     private Long id;
     private Integer reportPeriodId;
     private Integer senderDepartmentId;
@@ -82,7 +84,11 @@ public class Notification implements Serializable {
     }
 
     public void setText(String text) {
-        this.text = text;
+        if (text != null && !text.isEmpty() && text.length() > MAX_LENGTH_TEXT) {
+            this.text = text.substring(0, MAX_LENGTH_TEXT - 3) + "...";
+        } else {
+            this.text = text;
+        }
     }
 
     public Date getCreateDate() {

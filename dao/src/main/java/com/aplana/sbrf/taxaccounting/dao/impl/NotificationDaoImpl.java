@@ -17,6 +17,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.model.QNotification.notification;
@@ -225,7 +226,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         }
 
         OrderSpecifier orderForSubQuery;
-        Sort sort = pagingParams.getSort();
+        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
+        Sort sort = new Sort(sortOrder);
         if (sort.getOrderFor("createDate") != null) {
             orderForSubQuery = sort.getOrderFor("createDate").isAscending() ? notification.createDate.asc() : notification.createDate.desc();
         } else if (sort.getOrderFor("text") != null) {
@@ -302,5 +304,14 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     @Override
     public void deleteAll(List<Long> notificationIds) {
         sqlQueryFactory.delete(notification).where(notification.id.in(notificationIds)).execute();
+    }
+
+    @Override
+    public Date getLastNotificationDate() {
+        Date lastDate = getJdbcTemplate().queryForObject("select max(CREATE_DATE) from NOTIFICATION", Date.class);
+        if (lastDate != null) {
+            return new Date(lastDate.getTime());
+        }
+        return null;
     }
 }

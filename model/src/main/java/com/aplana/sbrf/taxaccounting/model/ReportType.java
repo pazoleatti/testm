@@ -13,7 +13,7 @@ public enum ReportType {
 
     EXCEL_DEC(0, "XLSX", "Формирование отчета %s в XLSX-формате", 5L, 105L),
     XML_DEC(1, "XML", "Расчет %s", 6L, 106L),
-    PDF_DEC(2, "PDF", "Создание формы предварительного просмотра %s", 7L, 107L),
+    PDF_DEC(2, "PDF", "Создание формы предварительного просмотра%s", 7L, 107L),
     JASPER_DEC(3, "JASPER", "", 8L, 108L),
     SPECIFIC_REPORT_DEC(4, "SPECIFIC", "Формирование отчета \"%s\" %s", 26L, 126L),
     UPDATE_TEMPLATE_DEC(5, "UPDATE_TEMPLATE_DEC", "Обновление макета", 0L, 0L), //формально является задачей
@@ -23,6 +23,7 @@ public enum ReportType {
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие %s", 15L, 115L),
     IMPORT_TF_DEC(2, "IMPORT_TF_DECLARATION", "Импорт ТФ из каталога загрузки", 0L, 0L), //формально является задачей, блокирует форму при импорт из каталога загрузки
     DELETE_DEC(5, "DELETE_DECLARATION", "Удаление налоговой формы", 0L, 0L), //формально является задачей,
+    TO_CREATE_DEC(6, "MOVE_TO_CREATE", "Возврат в Создана", 0L, 0L),
 
     CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 28L, 128L),
     CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Формирование отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L, 129L),

@@ -46,7 +46,6 @@ public class TARole implements Serializable {
 	private int id;
 	private String alias;
 	private String name;
-    private TaxType taxType;
 
     public int getId() {
 		return id;
@@ -67,14 +66,6 @@ public class TARole implements Serializable {
 		this.alias = alias;
 	}
 
-    public TaxType getTaxType() {
-        return taxType;
-    }
-
-    public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
-    }
-
     @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -85,7 +76,6 @@ public class TARole implements Serializable {
 		if (id != taRole.id) return false;
 		if (!alias.equals(taRole.alias)) return false;
 		if (!name.equals(taRole.name)) return false;
-        if (!taxType.equals(taRole.taxType)) return false;
 
 		return true;
 	}
@@ -100,8 +90,6 @@ public class TARole implements Serializable {
         return "TARole{" +
                 "id: " + id +
                 ", alias: " + alias +
-                ", name: " + name +
-                (taxType != null ? (", taxType: " + taxType.getCode()) : "") +
-                '}';
+                ", name: " + name + '}';
     }
 }

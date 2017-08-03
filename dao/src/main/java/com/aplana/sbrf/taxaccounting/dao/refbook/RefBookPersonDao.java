@@ -18,6 +18,12 @@ public interface RefBookPersonDao {
     //--------------------------- РНУ ---------------------------
 
     /**
+     * Очищает в NDFL_PERSON столбец PERSON_ID по declarationDataId
+     * @param declarationDataId
+     */
+    void clearRnuNdflPerson(Long declarationDataId);
+
+    /**
      * @param version
      */
     void fillRecordVersions(Date version);

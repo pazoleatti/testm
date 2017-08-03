@@ -235,7 +235,7 @@ public class PeriodServiceImpl implements PeriodService {
                 ));
             } else {
                 logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + departmentReportPeriod.getReportPeriod().getName()
-                        + " " + year + " открыт для " + departmentService.getDepartment(departmentReportPeriod.getDepartmentId()).getName()));
+                        + " " + year + " открыт для \"" + departmentService.getDepartment(departmentReportPeriod.getDepartmentId()).getName() + "\""));
             }
 		}
 	}
@@ -279,7 +279,7 @@ public class PeriodServiceImpl implements PeriodService {
                         ));
                     } else {
                         logs.add(new LogEntry(LogLevel.INFO, "Корректирующий период: " + period.getReportPeriod().getName()
-                                + " " + year + " открыт для " + departmentService.getDepartment(period.getDepartmentId()).getName()));
+                                + " " + year + " открыт для \"" + departmentService.getDepartment(period.getDepartmentId()).getName() + "\""));
                     }
                 }
             } else {

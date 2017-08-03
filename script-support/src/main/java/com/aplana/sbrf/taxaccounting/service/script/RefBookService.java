@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -182,4 +180,11 @@ public interface RefBookService {
     @SuppressWarnings("unused")
     Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
                                               Map<String, Map<String, RefBookValue>> refBookCache);
+
+    /**
+     * Получить выборку пользователей для представления "Список пользователей"
+     * @param filter фильтер
+     * @return возвращает страницу со списком пользователей
+     */
+    PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
 }

@@ -112,7 +112,7 @@ public class NdflReferencesEditView extends PopupViewWithUiHandlers<NdflReferenc
 
     @UiHandler("cancelButton")
     public void onCloseClicked(ClickEvent event) {
-        getUiHandlers().onCancellClicked();
+        getUiHandlers().onCancelClicked();
     }
 
     private void onSelection() {

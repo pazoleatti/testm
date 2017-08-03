@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import org.springframework.data.domain.Sort;
-
 import java.io.Serializable;
 
 /**
@@ -116,10 +114,5 @@ public class PagingParams implements Serializable {
         builder.append(direction);
         builder.append("]");
         return builder.toString();
-    }
-
-    public Sort getSort() {
-        Sort.Order order = new Sort.Order(direction.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, property);
-        return new Sort(order);
     }
 }

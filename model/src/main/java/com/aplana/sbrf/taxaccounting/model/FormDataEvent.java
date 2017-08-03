@@ -36,16 +36,20 @@ public enum FormDataEvent implements Serializable {
     AFTER_CALCULATE(25, "После рассчитать"),
 
     CREATE_FORMS(23, "Создание экземпляров форм"), // Вызывается не для экземпляра формы
+	PRE_CREATE_REPORTS(24, "Проверки перед формировнием отчетности"), // Вызывается не для экземпляра формы
     CREATE_REPORTS(24, "Сформировать отчетность"), // Вызывается не для экземпляра формы
 
     CHANGE_STATUS_ED(26, "Изменить состояние ЭД"),
+
+    CREATE_EXCEL_REPORT(27, "Сформировать Excel отчет"),
+	CREATE_PDF_REPORT(28, "Сформировать PDF отчет"),
 
     MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),
 	MOVE_APPROVED_TO_ACCEPTED(103, "Принять из \"Утверждена\""),
 	MOVE_ACCEPTED_TO_APPROVED(104, "Вернуть из \"Принята\" в \"Утверждена\""),
 	MOVE_CREATED_TO_ACCEPTED(105, "Принять из \"Создана\""),
-	MOVE_ACCEPTED_TO_CREATED(106, "Вернуть из \"Принята\" в \"Создана\""),
+	MOVE_ACCEPTED_TO_CREATED(106, "Возврат в \"Создана\""),
 	MOVE_CREATED_TO_PREPARED(107, "Подготовить из \"Создана\""),
 	MOVE_PREPARED_TO_CREATED(108,  "Вернуть из \"Подготовлена\" в \"Создана\""),
 	MOVE_PREPARED_TO_ACCEPTED(109,  "Принять из \"Подготовлена\""),

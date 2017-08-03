@@ -8,9 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -19,7 +17,6 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -79,10 +76,17 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
     @Override
     public void onContinue() {
         final DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
+        if (getView().getSelectedDeclarationType() != null) {
+            filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
+        }
         filter.setDepartmentIds(getView().getSelectedDepartment());
         filter.setReportPeriodIds(getView().getSelectedReportPeriod());
-
+        if (filter.getDeclarationTypeIds() == null || filter.getDepartmentIds() == null ||
+                filter.getReportPeriodIds() == null || filter.getDeclarationTypeIds().isEmpty() ||
+                filter.getDepartmentIds().isEmpty() || filter.getReportPeriodIds().isEmpty()) {
+            Dialog.warningMessage("", "Заполнены не все поля отчетности");
+            return;
+        }
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);
@@ -112,6 +116,9 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
                             });
                         } else {
                             onHide();
+                            if (result.getErrMsg() != null) {
+                                Dialog.errorMessage(result.getErrMsg());
+                            }
                             LogAddEvent.fire(DeclarationDownloadReportsPresenter.this, result.getUuid());
                         }
                     }

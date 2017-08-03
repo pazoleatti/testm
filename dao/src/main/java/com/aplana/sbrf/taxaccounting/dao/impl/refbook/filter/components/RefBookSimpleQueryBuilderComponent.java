@@ -778,6 +778,9 @@ public class RefBookSimpleQueryBuilderComponent {
         PreparedStatementData sql = new PreparedStatementData("UPDATE ").append(refBook.getTableName()).append(" SET\n");
         for (Pair<String, RefBookValue> valuePair : valuesPairs) {
             String columnName = valuePair.getFirst();
+            if (columnName.toLowerCase().equals(RefBook.RECORD_ID_ALIAS) || RefBook.SYSTEM_ALIASES.contains(columnName.toLowerCase())) {
+                continue;
+            }
             Object columnValue = valuePair.getSecond().getValue();
 
             sql.append(columnName).append(" = :").append(columnName).append(",\n");

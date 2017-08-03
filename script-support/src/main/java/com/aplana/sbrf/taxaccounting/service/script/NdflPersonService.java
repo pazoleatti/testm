@@ -133,6 +133,14 @@ public interface NdflPersonService {
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, int startIndex, int pageSize);
 
     /**
+     * Найти количество NdflPerson по заданным параметрам
+     * @param declarationDataId
+     * @param parameters
+     * @return
+     */
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters);
+
+    /**
      * Удаляет все данные о физлицах из декларации
      *
      * @param declarationDataId
@@ -170,7 +178,16 @@ public interface NdflPersonService {
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
      * @return
      */
-    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate);
+    List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
+
+    /**
+     * Найти данные о доходах ФЛ по идентификатору ФЛ и интервалу. Отбор происходит по дате выплаты дохода
+     * @param ndflPersonId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate);
 
     /**
      * Найти данные о вычетах ФЛ с признаком вычета "Остальные"
@@ -202,7 +219,7 @@ public interface NdflPersonService {
      * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
-    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
+    List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1);
 
     /**
      * Возвращает количество Физлиц для декларации
@@ -219,7 +236,7 @@ public interface NdflPersonService {
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
 
     /**
      * Данные об авансах Физлиц
@@ -317,6 +334,15 @@ public interface NdflPersonService {
      */
     List<Integer> findDublRowNum(String tableName, Long declarationDataId);
 
+
+    /**
+     * Поиск дублей по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    Map<Long, List<Integer>> findDublRowNumMap(String tableName, Long declarationDataId);
+
     /**
      * Поиск пропусков по полю rownum
      * @param tableName
@@ -324,5 +350,13 @@ public interface NdflPersonService {
      * @return
      */
     List<Integer> findMissingRowNum(String tableName, Long declarationDataId);
+
+    /**
+     * Поиск пропусков по полю rownum
+     * @param tableName
+     * @param declarationDataId
+     * @return
+     */
+    Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId);
 }
 

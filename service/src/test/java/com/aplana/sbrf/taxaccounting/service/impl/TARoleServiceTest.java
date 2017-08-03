@@ -2,13 +2,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TARoleDao;
 import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.TARoleService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +39,6 @@ public class TARoleServiceTest {
                     role.setId(id);
                     role.setName(String.valueOf(id));
                     role.setAlias(String.valueOf(id));
-                    role.setTaxType(TaxType.NDFL);
                     return role;
                 }
             });

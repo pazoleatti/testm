@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Edit
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.EnableDuplicateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -43,10 +44,12 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     private Long recordId;
     private final EditFormPresenter editFormPresenter;
     private DispatchRequest dispatchRequest;
+    private EventBus eventBus;
 
     @Inject
     public RefBookLinearPresenter(EventBus eventBus, EditFormPresenter editFormPresenter, MyView view, DispatchAsync dispatchAsync) {
         super(eventBus, view);
+        this.eventBus = eventBus;
         this.editFormPresenter = editFormPresenter;
         this.dispatchAsync = dispatchAsync;
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
@@ -58,11 +61,14 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         if (getView().getSelectedRow() != null) {
             recordId = getView().getSelectedRow().getRefBookRowId();
             ShowItemEvent.fire(this, null, recordId);
+            eventBus.fireEvent(new EnableDuplicateEvent(true));
             /*editPresenter.setRecordId(recordId);
             editPresenter.show(recordId);*/
         } else if (recordId == null) {
             ShowItemEvent.fire(this, null, null);
             //editPresenter.setRecordId(null);
+        } else {
+            eventBus.fireEvent(new EnableDuplicateEvent(false));
         }
     }
 
@@ -132,6 +138,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         dataProvider.firstNamePattern = event.getFirstName();
         dataProvider.searchPattern = event.getSearchPattern();
         dataProvider.exactSearch = event.isExactSearch();
+        //getView().setSelected(null, true);
         getView().updateTable();
     }
 

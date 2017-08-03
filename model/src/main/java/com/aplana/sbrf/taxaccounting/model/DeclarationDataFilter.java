@@ -57,6 +57,8 @@ public class DeclarationDataFilter implements Serializable {
      */
     private Integer userDepartmentId;
 
+    private Boolean controlNs;
+
     /*true, если сортируем по возрастанию, false - по убыванию*/
 	private boolean ascSorting;
 
@@ -246,5 +248,13 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setUserDepartmentId(Integer userDepartmentId) {
         this.userDepartmentId = userDepartmentId;
+    }
+
+    public Boolean getControlNs() {
+        return controlNs;
+    }
+
+    public void setControlNs(Boolean controlNs) {
+        this.controlNs = controlNs;
     }
 }

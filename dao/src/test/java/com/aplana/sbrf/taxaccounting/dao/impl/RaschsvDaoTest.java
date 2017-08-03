@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.raschsv.*;
 import com.aplana.sbrf.taxaccounting.model.raschsv.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+@Ignore("Отключил, так как Сборы не используются")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"RaschsvDaoTest.xml"})
 @Transactional

@@ -299,11 +299,11 @@ public class RefBookSimpleDataProviderHelper {
                 }
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
-                refBookDao.updateVersionRelevancePeriod(RefBook.REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
+                refBookDao.updateVersionRelevancePeriod(refBook.getTableName(), result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
                 return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookDao.deleteRecordVersions(RefBook.REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(result.getRecordId()), false);
+                refBookDao.deleteRecordVersions(refBook.getTableName(), Arrays.asList(result.getRecordId()), false);
             }
         }
         return true;

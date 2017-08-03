@@ -1941,7 +1941,7 @@ begin
       select min(a.id) into v_result
         from mv_fias_area_act a
        where a.regioncode=p_region
-         and (p_check_element is null or p_check_element is not null and a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
+         and (a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
          and (p_check_ftype is null or p_check_ftype is not null and a.ftype=nvl(lower(p_check_ftype),'-'))
          and a.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='CITY') then
@@ -1962,7 +1962,7 @@ begin
                  and (p_check_ftype is null or p_check_ftype is not null and l.ftype=nvl(lower(p_check_ftype),'-'))
                  and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and c.id=p_parent_id)
                  and l.has_child=decode(p_leaf,1,0,1)
-              union
+              union 
               select l.id
                 from mv_fias_locality_act l left join mv_fias_area_act a on (a.aoid=l.parentguid)
                where l.regioncode=p_region
@@ -1981,7 +1981,7 @@ begin
                  and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and c.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
-              union
+              union 
               select s.id
                 from mv_fias_street_act s left join mv_fias_locality_act l on (l.aoid=s.parentguid)
                where s.regioncode=p_region
@@ -1989,7 +1989,7 @@ begin
                  and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and l.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
-              union
+              union 
               select s.id
                 from mv_fias_street_act s left join mv_fias_area_act a on (a.aoid=s.parentguid)
                where s.regioncode=p_region
@@ -2021,23 +2021,23 @@ begin
              f.shortname fias_street_type,
              fc.id fias_city_id,
              fc.formalname fias_city_name,
-             (select decode(count(*),0,0,1)
-                from fias_addrobj f
-               where f.regioncode=n.region_code
+             (select decode(count(*),0,0,1) 
+                from fias_addrobj f 
+               where f.regioncode=n.region_code 
                  and replace(f.postalcode,' ','')=n.post_index) chk_index,
-             (select decode(count(*),0,0,1)
-                from fias_addrobj f
+             (select decode(count(*),0,0,1) 
+                from fias_addrobj f 
                where f.regioncode=n.region_code) chk_region,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.area_fname,',','AREA',0)
+             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.area_fname,',','AREA',0) 
                   else 1
              end chk_area,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.city_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';',';'),n.area_fname),'CITY',n.city_leaf)
+             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.city_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';',';'),n.area_fname),'CITY',n.city_leaf) 
                   else 1
              end chk_city,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.loc_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';',';')||nvl2(n.city_fname,n.city_fname||';',''),nvl(n.city_fname,n.area_fname)),'LOCALITY',n.loc_leaf)
+             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.loc_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';',';')||nvl2(n.city_fname,n.city_fname||';',''),nvl(n.city_fname,n.area_fname)),'LOCALITY',n.loc_leaf) 
                   else 1
              end chk_loc,
-             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.street_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';','')||nvl2(n.city_fname,n.city_fname||';','')||nvl2(n.loc_fname,n.loc_fname||';',''),nvl(n.loc_fname,n.city_fname)),'STREET',1)
+             case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.street_fname,decode(p_check_type,1,nvl2(n.area_fname,n.area_fname||';','')||nvl2(n.city_fname,n.city_fname||';','')||nvl2(n.loc_fname,n.loc_fname||';',''),nvl(n.loc_fname,n.city_fname)),'STREET',1) 
                   else 1
              end chk_street
         from (
@@ -2078,13 +2078,13 @@ begin
                              end city_leaf,
                              case when n.street is null and n.locality is not null then 1
                                   else 0
-                             end loc_leaf
+                             end loc_leaf       
                         from ndfl_person n
                        where n.declaration_data_id=p_declaration
                          --and n.id between p_start_id and p_start_id+999
                       ) tab
                 ) n left join fias_addrobj f on (f.id=n.fa_id) left join fias_addrobj fc on (fc.id=f.parentguid);
-
+    
     return v_ref;
   end;
   -------------------------------------------------------------------------------------------------------------
@@ -2116,7 +2116,7 @@ begin
   from (
         select t4.*,
                fias_pkg.CheckAddrElementRetID(t4.region_code,t4.street_fname,t4.street_type,nvl(t4.loc_id,t4.city_id),'STREET',1) street_id
-          from (
+          from (                     
                 select t3.*,
                        fias_pkg.CheckAddrElementRetID(t3.region_code,t3.loc_fname,t3.loc_type,nvl(t3.city_id,t3.area_id),'LOCALITY',-1/*t3.loc_leaf*/) loc_id
                   from (
@@ -2124,9 +2124,9 @@ begin
                                fias_pkg.CheckAddrElementRetID(t2.region_code,t2.city_fname,t2.city_type,t2.area_id,'CITY',t2.city_leaf) city_id
                           from (
                                 select t1.*,
-                                       (select decode(count(*),0,0,1) from mv_fias_street_act f
+                                       (select decode(count(*),0,0,1) from mv_fias_street_act f 
                                          where f.regioncode=t1.region_code and f.postalcode=t1.post_index) chk_index,
-                                       (select decode(count(*),0,0,1) from mv_fias_street_act f
+                                       (select decode(count(*),0,0,1) from mv_fias_street_act f 
                                          where f.regioncode=t1.region_code) chk_region,
                                        fias_pkg.CheckAddrElementRetID(t1.region_code,t1.area_fname,t1.area_type,null,'AREA',0)  area_id,
                                        nvl2(t1.area_fname,t1.area_fname||',','')||nvl2(t1.city_fname,t1.city_fname||',','')||nvl2(t1.loc_fname,t1.loc_fname||',','')||
@@ -2158,13 +2158,15 @@ begin
                                                end city_leaf,
                                                case when n.street is null and n.locality is not null then 1
                                                     else 0
-                                               end loc_leaf
+                                               end loc_leaf       
                                           from ndfl_person n
                                          where n.declaration_data_id=p_declaration) t1
                                ) t2
                        ) t3
                ) t4
-       ) n left join mv_fias_street_act f on (f.id=n.street_id)
+       ) n left join (select * from mv_fias_street_act
+                      union
+                      select * from mv_fias_locality_act) f on (f.id=nvl(n.street_id,n.loc_id))
            left join mv_fias_locality_act fl on (fl.aoid=f.parentguid)
            left join mv_fias_city_act fc on (fc.aoid=f.parentguid);
 

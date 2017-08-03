@@ -5,9 +5,13 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -43,10 +47,10 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractDec
 
     @Override
     protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        long declarationDataId = (Long)params.get("declarationDataId");
-        String alias = (String)params.get("alias");
+        long declarationDataId = (Long) params.get("declarationDataId");
+        String alias = (String) params.get("alias");
 
-        int userId = (Integer)params.get(USER_ID.name());
+        int userId = (Integer) params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
         final String lock = (String) params.get(LOCKED_OBJECT.name());
@@ -57,16 +61,18 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractDec
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
 
         Map<String, Object> subreportParamValues = null;
+        Map<String, String> viewParamValues = Collections.EMPTY_MAP;
         DataRow<Cell> selectedRecord = null;
         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
-            subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
+            subreportParamValues = (Map<String, Object>) params.get("subreportParamValues");
+            viewParamValues = (Map<String, String>) params.get("viewParamValues");
             if (params.containsKey("selectedRecord")) {
-                selectedRecord = (DataRow<Cell>)params.get("selectedRecord");
+                selectedRecord = (DataRow<Cell>) params.get("selectedRecord");
             }
         }
 
         if (declarationData != null) {
-            String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, selectedRecord, userInfo, new LockStateLogger() {
+            String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                     lockService.updateState(lock, lockDate, state);
@@ -84,7 +90,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractDec
 
     @Override
     protected DeclarationDataReportType getDeclarationDataReportType(Map<String, Object> params) {
-        String alias = (String)params.get("alias");
+        String alias = (String) params.get("alias");
         DeclarationData declarationData = getDeclaration(params);
         DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
@@ -98,36 +104,20 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractDec
 
     @Override
     protected String getAdditionalString(DeclarationData declaration, Map<String, Object> params) {
-        String alias = (String)params.get("alias");
+        String alias = (String) params.get("alias");
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
         StringBuilder strSubreportParamValues = new StringBuilder(", ");
-        if (!subreport.getDeclarationSubreportParams().isEmpty()) {
-            Map<String, Object> subreportParamValues = (Map<String, Object>)params.get("subreportParamValues");
-            for(DeclarationSubreportParam declarationSubreportParam: subreport.getDeclarationSubreportParams()) {
-                strSubreportParamValues.append(declarationSubreportParam.getName()).append(": ");
-                Object value = subreportParamValues.get(declarationSubreportParam.getAlias());
-                strSubreportParamValues.append("\"");
-                if (value != null) {
-                    switch (declarationSubreportParam.getType()) {
-                        case STRING:
-                            strSubreportParamValues.append(value.toString());
-                            break;
-                        case NUMBER:
-                            strSubreportParamValues.append(value.toString());
-                            break;
-                        case DATE:
-                            strSubreportParamValues.append(SDF_DD_MM_YYYY.get().format((Date) value));
-                            break;
-                        case REFBOOK:
-                            String strVal = refBookHelper.dereferenceValue((Long) value, declarationSubreportParam.getRefBookAttributeId());
-                            strSubreportParamValues.append(strVal);
-                            break;
-                    }
-                }
-                strSubreportParamValues.append("\"");
-                strSubreportParamValues.append(", ");
-            }
+
+        Map<String, String> subreportParamValues = (Map<String, String>) params.get("viewParamValues");
+        for (Map.Entry<String, String> entry : subreportParamValues.entrySet()) {
+            strSubreportParamValues.append(entry.getKey()).append(": ");
+            strSubreportParamValues.append("\"");
+            strSubreportParamValues.append(entry.getValue());
+            strSubreportParamValues.append("\"");
+            strSubreportParamValues.append(", ");
+
         }
+
         strSubreportParamValues = strSubreportParamValues.delete(strSubreportParamValues.length() - 2, strSubreportParamValues.length());
         String str = super.getAdditionalString(declaration, params);
         if (str.isEmpty()) {
@@ -150,7 +140,7 @@ public abstract class SpecificReportDeclarationDataAsyncTask extends AbstractDec
     }
 
     private String getMessage(Map<String, Object> params, boolean isSuccess, boolean unexpected) {
-        String alias = (String)params.get("alias");
+        String alias = (String) params.get("alias");
         DeclarationData declaration = getDeclaration(params);
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
 

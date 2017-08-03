@@ -12,7 +12,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +46,6 @@ public class DeclarationServiceTest {
 
         declarationType.setId(1);
         declarationType.setName("name");
-        declarationType.setTaxType(TaxType.INCOME);
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);

@@ -2525,4 +2525,70 @@ public final class ScriptUtils {
             throw new TAInterruptedException();
         }
     }
+
+    /**
+     * Проверка ИНН физического лица
+     * @param innValue
+     * @return
+     * @see <a href="https://conf.aplana.com/pages/viewpage.action?pageId=27182953>Проверка ИНН физического лица</a>
+     */
+    public static String checkInn(String innValue) {
+        if (innValue != null) {
+            if (innValue.length() != 12) {
+                return "Значение гр. \"ИНН в РФ\" (\"" + innValue + "\") должно содержать 12 символов";
+            }
+            if (!checkFormat(innValue, "[0-9]{12}")) {
+                return "Значение гр. \"ИНН в РФ\" (\"" + innValue + "\") должно содержать только цифры";
+            }
+            if (Arrays.asList("00","90","93","94","95","96","98").contains(innValue.substring(0, 2))) {
+                return "Значение гр. \"ИНН в РФ\" (\"" + innValue + "\") некорректно. Первые два разряда ИНН не могут быть равны одному из значений: \"00\",\"90\",\"93\",\"94\",\"95\",\"96\",\"98\", может быть отказано в приеме";
+            }
+            if (!RefBookUtils.checkControlSumInn(innValue)) {
+                return "Некорректное контрольное число в значении гр. \"ИНН в РФ\" (\"" + innValue + "\")";
+            }
+        }
+        return null;
+    }
+
+    public static String checkName(String value, String attrName) {
+        if (value != null) {
+            if (Arrays.asList(" ","ь","ъ","-",".","'").contains(value.substring(0, 1).toLowerCase())) {
+                return "Значение гр. \"" + attrName + "\" (\"" + value +"\") не должно начинаться с символов \"Ъ\", \"Ь\", дефис, точка, апостроф и пробел. Может быть отказано в приеме";
+            }
+            if (!checkFormat(value, "^[а-яА-ЯёЁ -]+")) {
+                return "Значение гр. \"" + attrName + "\" (\"" + value +"\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы";
+           }
+        }
+        return null;
+    }
+
+    public static String checkDul(String code, String value, String attrName) {
+        String format = null;
+        String formatStr = null;
+        String zeroFormat = null;
+        if (code.equals("21")) {
+            format = "[0-9]{2} [0-9]{2} [0-9]{6}";
+            formatStr = "\"99 99 999999\", где 9 - любая десятичная цифра (обязательная)";
+            zeroFormat = "([0]{2} [0]{2} [0-9]{6}|[0-9]{2} [0-9]{2} [0]{6})";
+        } else if (code.equals("07")) {
+            format = "[А-ЯЁ]{2} [0-9]?[0-9]{6}";
+            formatStr = "\"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)";
+            zeroFormat = "[А-ЯЁ]{2} [0]?[0]{6}";
+        } else if (code.equals("18")) {
+            format = "[А-ЯЁ]{2}-[0-9]{3} [0-9]{7}";
+            formatStr = "\"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)";
+            zeroFormat = "[А-ЯЁ]{2}-([0]{3} [0-9]{7}|[0-9]{3} [0]{7})";
+        } else if (code.equals("24")) {
+            format = "[А-ЯЁ]{2} [0-9]{7}";
+            formatStr = "\"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)";
+            zeroFormat = "[А-ЯЁ]{2} [0]{7}";
+        }
+        if (format != null && !checkFormat(value, format)) {
+            return "Значение гр. \"" + attrName + "\" (\"" + value + "\") не соответствует формату " + formatStr;
+        }
+        if (zeroFormat != null && checkFormat(value, zeroFormat)) {
+            return "Значение гр. \"" + attrName + "\" (\"" + value + "\") не должно быть нулевым";
+        }
+        return null;
+    }
 }

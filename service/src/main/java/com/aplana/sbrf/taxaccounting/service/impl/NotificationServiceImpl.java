@@ -88,4 +88,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteAll(List<Long> notificationIds) {
         notificationDao.deleteAll(notificationIds);
     }
+
+    @Override
+    public Date getLastNotificationDate() {
+        return notificationDao.getLastNotificationDate();
+    }
 }

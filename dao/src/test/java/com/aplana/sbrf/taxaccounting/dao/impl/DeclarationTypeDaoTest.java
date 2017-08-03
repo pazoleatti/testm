@@ -1,14 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +32,6 @@ public class DeclarationTypeDaoTest {
 		DeclarationType dt = declarationTypeDao.get(1);
 		assertEquals(1, dt.getId());
 		assertEquals("Вид налоговой формы 1", dt.getName());
-		assertEquals(TaxType.TRANSPORT, dt.getTaxType());
 	}
 	
 	@Test(expected=DaoException.class)
@@ -51,20 +46,16 @@ public class DeclarationTypeDaoTest {
 	}
 
 	@Test
+    @Ignore("Не используется вид налога")
 	public void testListByTaxType() {
 		List<DeclarationType> list = declarationTypeDao.listAllByTaxType(TaxType.TRANSPORT);
-		assertEquals(1, list.size());
-		
-		for (DeclarationType dt: list) {
-			assertEquals(TaxType.TRANSPORT, dt.getTaxType());
-		}
+    	assertEquals(1, list.size());
 	}
 
     @Test
     public void save() {
         DeclarationType type = new DeclarationType();
         type.setName("testName");
-        type.setTaxType(TaxType.PROPERTY);
         type.setStatus(VersionedObjectStatus.NORMAL);
 
         int id = declarationTypeDao.save(type);
@@ -73,6 +64,7 @@ public class DeclarationTypeDaoTest {
     }
 
     @Test
+    @Ignore("Не используется вид налога")
     public void testGetByFilter(){
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.INCOME);

@@ -17,11 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Arrays.asList;
-
 /**
  * Реализация сервиса для проверки прав на доступ к декларациям
- * 
+ *
  * @author dsultanbekov
  */
 @Service
@@ -46,12 +44,12 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	 * В сущности эта функция проверяет наличие прав на просмотр декларации,
 	 * логика вынесена в отдельный метод, так как используется в нескольких
 	 * местах данного сервиса
-	 * 
+	 *
 	 * @param userInfo информация о пользователе
 	 * @param departmentReportPeriod Отчетный период подразделения
      * @param checkedSet необязательный параметр — набор проверенных наборов параметров, используется для оптимизации
 	 */
-	private void checkRolesForReading(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DepartmentReportPeriod departmentReportPeriod, Set<String> checkedSet, Logger logger) {
+	private void checkRolesForReading(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DepartmentReportPeriod departmentReportPeriod, Long asnuId, Set<String> checkedSet, Logger logger) {
         if (checkedSet != null) {
             String key = userInfo.getUser().getId() + "_" + departmentReportPeriod.getId();
             if (checkedSet.contains(key)) {
@@ -60,32 +58,55 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             checkedSet.add(key);
         }
 
-		Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-        TaxType taxType = declarationTemplate.getType().getTaxType();
+        //Подразделение формы
+		Department declDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+
+        TaxType taxType = TaxType.NDFL;
 		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
         if (departmentReportPeriod.isBalance()) {
             error("Налоговая форма не может быть создана в периоде ввода остатков!", logger);
-        }
-
-        // Проверка возможности работать с видом налога
-        if (!userInfo.getUser().hasTax(taxType)) {
-            error("Нет прав доступа к данному налогу", logger);
         }
 
         // Выборка для доступа к экземплярам деклараций
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
 
 		// Контролёр УНП может просматривать все декларации
-		if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+		if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP)) {
 			return;
 		}
 
-        // Контролёр или Контролёр НС
-        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)
-                || userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+        // Контролёр НС
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS)) {
+            //ТБ формы
+            int declarationTB = departmentService.getParentTB(declDepartment.getId()).getId();
+            //Подразделение и ТБ пользователя
+            int userTB = departmentService.getParentTB(userInfo.getUser().getDepartmentId()).getId();
+
+            //Подразделение формы и подразделение пользователя должны относиться к одному ТБ или
+            if (userTB == declarationTB) {
+                return;
+            }
+
+            //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
+            List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
+
+            //Подразделение формы относится к одному из ТБ подразделений, для которых подразделение пользователя является исполнителем
+            if (tbDepartments.contains(declarationTB)) {
+                return;
+            }
+        }
+
+        // Оператор (НДФЛ или Сборы)
+        if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_OPER)) {
+            if (asnuId != null && !checkUserAsnu(userInfo, asnuId)) {
+                throw new AccessDeniedException("Нет прав на доступ к форме");
+            }
+
 			List<Integer> executors = departmentService.getTaxDeclarationDepartments(userInfo.getUser(), declarationTemplate.getType());
-			if (executors.contains(declarationDepartment.getId())) {
-				return;
+			if (executors.contains(declDepartment.getId())) {
+			    if (!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED)) {
+                    return;
+                }
 			}
         }
 
@@ -97,14 +118,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
-        // Нет прав на АСНУ
-        if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ декларации");
-        }
-
         // Просматривать декларацию может только контролёр УНП и контролёр
 		// текущего уровня для обособленных подразделений
-		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), checkedSet, null);
+		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), declaration.getAsnuId(), checkedSet, null);
 	}
 
 	private void canCreate(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod,
@@ -119,7 +135,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
 		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentReportPeriod.getDepartmentId(),
-                declarationTemplate.getType().getTaxType(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {
@@ -132,7 +148,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры
 		// текущего уровня обособленного подразделения
-		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, logger);
+		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, null, checkedSet, logger);
 	}
 
 	private void canAccept(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -154,20 +170,15 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Период закрыт");
         }
 
-        // Нет прав на АСНУ
-        if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ декларации");
-        }
-
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
-        if (!userInfo.getUser().hasRoles(declarationTemplate.getType().getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException("Нет прав на принятие налоговой формы");
         }
 
         // Принять декларацию могут только контолёр текущего уровня
 		// обособленного подразделения и контролёр УНП
-		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, declaration.getAsnuId(), checkedSet, null);
 	}
 
 	private void canReject(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -184,20 +195,15 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Период закрыт");
         }
 
-        // Нет прав на АСНУ
-        if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ налоговой формы");
-        }
-
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
-        if (!userInfo.getUser().hasRoles(declarationTemplate.getType().getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException("Нет прав на отмену принятия налоговой формы");
         }
 
         // Отменить принятие декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, declaration.getAsnuId(), checkedSet, null);
 	}
 
 	private void canDelete(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -214,15 +220,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Период закрыт");
         }
 
-        // Нет прав на АСНУ
-        if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ декларации");
-        }
-
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
         // Удалять могут только контролёр текущего уровня и контролёр УНП
-        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, declaration.getAsnuId(), checkedSet, null);
     }
 
 	private void canRefresh(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -239,16 +240,11 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Период закрыт");
         }
 
-        // Нет прав на АСНУ
-        if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ декларации");
-        }
-
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
         // Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
-		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+		checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, declaration.getAsnuId(), checkedSet, null);
 	}
 
     private void canChangeStatus(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -260,14 +256,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
 
-        // Нет прав на АСНУ
-        if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ декларации");
-        }
-
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
-        if (!userInfo.getUser().hasRoles(declarationTemplate.getType().getTaxType(), TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException("Нет прав на изменение состояния ЭД");
         }
 
@@ -277,7 +268,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         // Обновлять декларацию могут только контолёр текущего уровня и
         // контролёр УНП
-        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, declaration.getAsnuId(), checkedSet, null);
     }
 
     private void canCheck(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
@@ -289,16 +280,11 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
 
-        // Нет прав на АСНУ
-        if (!checkUserAsnu(userInfo, declaration)) {
-            throw new AccessDeniedException("Нет прав на АСНУ декларации");
-        }
-
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
         // Обновлять декларацию могут только контолёр текущего уровня и
         // контролёр УНП
-        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, checkedSet, null);
+        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriod, declaration.getAsnuId(), checkedSet, null);
     }
 
     @Override
@@ -408,13 +394,13 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
      * Если табличка SEC_USER_ASNU пустая, то права есть на все записи.
      *
      * @param userInfo пользователь
-     * @param declarationData проверяемая налоговая деркалация
+     * @param asnuId АСНУ НФ, для ПНФ значение должно быть задано, для остальных форм null
      */
-    private boolean checkUserAsnu(TAUserInfo userInfo, DeclarationData declarationData) {
+    private boolean checkUserAsnu(TAUserInfo userInfo, Long asnuId) {
         if (userInfo.getUser().getAsnuIds() == null || userInfo.getUser().getAsnuIds().isEmpty()) {
             return true;
         }
 
-        return userInfo.getUser().getAsnuIds().contains(declarationData.getAsnuId());
+        return userInfo.getUser().getAsnuIds().contains(asnuId);
     }
 }

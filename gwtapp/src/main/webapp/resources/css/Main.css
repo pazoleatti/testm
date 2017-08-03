@@ -219,8 +219,13 @@ h3{
     margin:  8px 10px 8px 0px !important;
 }
 
+.AplanaHeaderPanel {
+    padding-right: 17px;
+}
+
 .AplanaScrollPanel {
     padding-bottom: 17px;
+    padding-right: 17px;
 }
 
 .LinkDiv {

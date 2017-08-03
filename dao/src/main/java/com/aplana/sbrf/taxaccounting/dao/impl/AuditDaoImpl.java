@@ -250,7 +250,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "_", "10%", "40%", "90%")),
-                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_55),
+                !s_45_55.isEmpty() ? SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_55) : "1=3",
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.N_ROLE_CONTROL_NS, null, "90%"))
         );

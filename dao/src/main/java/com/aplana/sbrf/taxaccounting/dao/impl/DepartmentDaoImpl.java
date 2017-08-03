@@ -425,7 +425,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
                 "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
                 "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd))) " +
-                "and dt.id = ddt.declaration_type_id and dt.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
+                "and dt.id = ddt.declaration_type_id " +
                 "union " +
                 "select distinct dft.department_id parent_id, dfts.department_id id " +
                 "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
@@ -574,7 +574,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return getNamedParameterJdbcTemplate().queryForList("SELECT DISTINCT ddt2.department_id\n" +
                     "FROM department_declaration_type ddt2\n" +
                     "INNER JOIN declaration_type dt ON dt.id = ddt2.declaration_type_id\n" +
-                    "WHERE dt.tax_type in (:taxTypes) AND ddt2.department_id IN (\n" +
+                    "WHERE ddt2.department_id IN (\n" +
                     "  SELECT dep.ID FROM department dep CONNECT BY PRIOR dep.ID = dep.parent_id START WITH dep.ID in (\n" +
                     "    SELECT DISTINCT ddt.department_id\n" +
                     "    FROM department_declaration_type ddt\n" +
@@ -587,4 +587,69 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
+    @Override
+    public List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("performerDepartmentId", performerDepartmentId);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("SELECT id\n" +
+                    "FROM department\n" +
+                    "WHERE parent_id = 0 AND type = 2\n" +
+                    "CONNECT BY id = prior parent_id START WITH id IN (\n" +
+                    "  SELECT DISTINCT ddt.department_id\n" +
+                    "  FROM department_declaration_type ddt\n" +
+                    "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
+                    "  WHERE ddtp.performer_dep_id in (\n" +
+                    "    select dep_ddtp.id from department dep_ddtp connect by prior dep_ddtp.id = dep_ddtp.parent_id start with dep_ddtp.id = :performerDepartmentId\n" +
+                    "  )" +
+                    ")", params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
+    }
+
+    @Override
+    public List<Integer> getAllTBPerformers(int userDepId, int declarationTypeId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("userDepId", userDepId);
+        params.put("declarationTypeId", declarationTypeId);
+        try {
+            return getNamedParameterJdbcTemplate().queryForList("SELECT id\n" +
+                    "FROM department\n" +
+                    "WHERE parent_id = 0 AND type = 2\n" +
+                    "CONNECT BY id = prior parent_id START WITH id IN (\n" +
+                    "  SELECT DISTINCT ddt.department_id\n" +
+                    "  FROM department_declaration_type ddt\n" +
+                    "  INNER JOIN department_decl_type_performer ddtp ON ddt.id = ddtp.department_decl_type_id\n" +
+                    "  where ddt.declaration_type_id=:declarationTypeId and ddtp.performer_dep_id in (\n" +
+                    "    select dep_ddtp.id from department dep_ddtp connect by prior dep_ddtp.id = dep_ddtp.parent_id start with dep_ddtp.id = :userDepId\n" +
+                    "  )\n" +
+                    ")", params, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Integer>();
+        }
+    }
+
+    @Override
+    public String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate) {
+        String query = "select dep.name, max(rnd.version) " +
+                "from department dep " +
+                "join ref_book_ndfl_detail rnd on dep.id = rnd.department_id " +
+                "join ref_book_oktmo ro on ro.id = rnd.oktmo " +
+                "where rnd.kpp = :kpp and ro.code = :oktmo and rnd.version <= :reportPeriodEndDate group by dep.NAME";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo)
+                .addValue("reportPeriodEndDate", reportPeriodEndDate);
+        List<String> result = getNamedParameterJdbcTemplate().query(query, params, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet resultSet, int i) throws SQLException {
+                return resultSet.getString("name");
+            }
+        });
+        if (result != null) {
+            return result.get(0);
+        }
+        return "";
+    }
 }

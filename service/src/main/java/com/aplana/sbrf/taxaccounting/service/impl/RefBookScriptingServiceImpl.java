@@ -91,7 +91,10 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         String script = writer.toString();
         String scriptFilePath = null;
         if (versionInfoProperties != null && versionInfoProperties.getProperty("productionMode").equals("false")) {
-            scriptFilePath = getScriptFilePath(script, SCRIPT_PATH_PREFIX, logger);
+            scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger);
+            if (scriptFilePath != null) {
+                script = getScript(scriptFilePath);
+            }
         }
         if (!canExecuteScript(script, event)) {
             return false;
@@ -142,9 +145,6 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         Bindings bindings = getScriptEngine().createBindings();
         bindings.put("dataSource", applicationContext.getBean("dataSource"));
 
-        Binding binding = new Binding();
-        binding.setVariable("dataSource", applicationContext.getBean("dataSource"));
-
         // ScriptExposed
         Map<String, ?> scriptComponents = applicationContext.getBeansWithAnnotation(ScriptExposed.class);
         for (Object component : scriptComponents.values()) {
@@ -156,30 +156,20 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             }
         }
         bindings.putAll(scriptComponents);
-        for(Map.Entry<String, ?> entry: scriptComponents.entrySet()) {
-            binding.setVariable(entry.getKey(), entry.getValue());
-        }
 
         bindings.put("formDataEvent", event);
         bindings.put("logger", scriptLogger);
         bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
 
-        binding.setVariable("formDataEvent", event);
-        binding.setVariable("logger", scriptLogger);
-        binding.setVariable("userInfo", userInfo);
-        binding.setVariable("refBookFactory", refBookFactory);
-
         String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
         if (versionInfoProperties != null) {
             applicationVersion += " " + versionInfoProperties.getProperty("version");
         }
         bindings.put("applicationVersion", applicationVersion);
-        binding.setVariable("applicationVersion", applicationVersion);
 
         if (userInfo != null && userInfo.getUser() != null) {
             bindings.put("user", userInfo.getUser());
-            binding.setVariable("user", userInfo.getUser());
         }
 
         // Перенос доп. параметров
@@ -188,19 +178,15 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
                 if (bindings.containsKey(entry.getKey()))
                     throw new IllegalArgumentException(String.format(DUPLICATING_ARGUMENTS_ERROR, entry.getKey()));
                 bindings.put(entry.getKey(), entry.getValue());
-                binding.setVariable(entry.getKey(), entry.getValue());
             }
         }
 
         // Выполнение импорта скрипта справочника
-        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" + event.getTitle()
-                + "» для справочника «" + refBook.getName() + "»"));
         if (scriptFilePath == null || versionInfoProperties == null || versionInfoProperties.getProperty("productionMode").equals("true")) {
             executeScript(bindings, script, scriptLogger);
         } else {
-            executeLocalScript(binding, scriptFilePath, logger);
+            executeLocalScript(toBinding(bindings), scriptFilePath, logger);
         }
-        scriptLogger.setMessageDecorator(null);
 
         // Перенос записей из локального лога в глобальный
         logger.getEntries().addAll(scriptLogger.getEntries());

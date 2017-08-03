@@ -200,6 +200,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     public void onSave() {
         List<DataRow<Cell>> rows = getView().getTableRows();
         saveData(convert(rows));
+        getView().setIsFormModified(false);
     }
 
     private Column getColumn(String alias) {

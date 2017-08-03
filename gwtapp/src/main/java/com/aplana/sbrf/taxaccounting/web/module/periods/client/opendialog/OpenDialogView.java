@@ -82,7 +82,8 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@Override
 	public void setTaxType(TaxType taxType) {
-		period.setFilter(taxType.getCode() + "=1");
+	    // Не используется в справочнике
+		//period.setFilter(taxType.getCode() + "=1");
 	}
 
     @Override
