@@ -14,7 +14,7 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,10 +26,13 @@ import static com.querydsl.sql.oracle.OracleGrammar.sysdate;
 @Repository
 public class NotificationDaoImpl extends AbstractDao implements NotificationDao {
 
-    @Autowired
-    SQLQueryFactory sqlQueryFactory;
+    final private SQLQueryFactory sqlQueryFactory;
 
-    final QBean<Notification> notificationBean = bean(Notification.class, notification.id, notification.createDate, notification.deadline,
+    public NotificationDaoImpl(SQLQueryFactory sqlQueryFactory) {
+        this.sqlQueryFactory = sqlQueryFactory;
+    }
+
+    final private QBean<Notification> notificationBean = bean(Notification.class, notification.id, notification.createDate, notification.deadline,
             notification.isRead, notification.logId, notification.receiverDepartmentId, notification.reportId,
             notification.reportPeriodId, notification.roleId, notification.senderDepartmentId, notification.text, notification.type, notification.userId);
 
@@ -185,16 +188,16 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     public List<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
         StringPath rn = Expressions.stringPath("rn");
         StringPath notificationTable = Expressions.stringPath("notification");
-        OrderSpecifier order;
+        OrderSpecifier orderForRowNumber;
         switch (filter.getSortColumn()) {
             case DATE:
-                order = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
+                orderForRowNumber = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
                 break;
             case TEXT:
-                order = filter.isAsc() ? notification.text.asc() : notification.text.desc();
+                orderForRowNumber = filter.isAsc() ? notification.text.asc() : notification.text.desc();
                 break;
             default:
-                order = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
+                orderForRowNumber = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
                 break;
         }
 
@@ -221,10 +224,21 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             whereOut.and(rn.between(filter.getStartIndex().toString(), String.valueOf(filter.getStartIndex() + filter.getCountOfRecords())));
         }
 
+        OrderSpecifier orderForSubQuery;
+        Sort sort = pagingParams.getSort();
+        if (sort.getOrderFor("createDate") != null) {
+            orderForSubQuery = sort.getOrderFor("createDate").isAscending() ? notification.createDate.asc() : notification.createDate.desc();
+        } else if (sort.getOrderFor("text") != null) {
+            orderForSubQuery = sort.getOrderFor("text").isAscending() ? notification.text.asc() : notification.text.desc();
+        } else {
+            orderForSubQuery = notification.createDate.desc();
+        }
+
         SimpleExpression subQuery = sqlQueryFactory.select(notification.id, notification.reportPeriodId, notification.senderDepartmentId, notification.receiverDepartmentId, notification.isRead
                 , notification.text, notification.logId, notification.createDate, notification.deadline, notification.userId, notification.roleId, notification.reportId, notification.type
-                , isSupportOver() ? SQLExpressions.rowNumber().over().orderBy(order).as("rn") : SQLExpressions.rowNumber().over().as("rn"))
+                , isSupportOver() ? SQLExpressions.rowNumber().over().orderBy(orderForRowNumber).as("rn") : SQLExpressions.rowNumber().over().as("rn"))
                 .from(notification)
+                .orderBy(orderForSubQuery)
                 .where(where).as(notificationTable);
 
         return sqlQueryFactory.select(SQLExpressions.all).from(subQuery)

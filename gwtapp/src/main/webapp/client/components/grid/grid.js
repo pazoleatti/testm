@@ -277,7 +277,7 @@
                     }
                 };
 
-                var applyAttr = function(tr, attr, attrValue) {
+                var applyAttr = function (tr, attr, attrValue) {
                     tr.attr(attr, attrValue);
                 };
 
@@ -502,11 +502,11 @@
                              * перезагружает данные в грид. переустанавливает параметр data
                              * @param data новый массив объектов для отображения
                              */
-                            refreshGridData: function (data){
+                            refreshGridData: function (data) {
                                 if (scope.gridCtrl.getGrid) {
                                     var arrData = data || [];
                                     scope.gridCtrl.getGrid().jqGrid('clearGridData');
-                                    scope.gridCtrl.getGrid().jqGrid('setGridParam', { data: arrData });
+                                    scope.gridCtrl.getGrid().jqGrid('setGridParam', {data: arrData});
                                     scope.gridCtrl.refreshGrid();
                                 }
                             },
@@ -545,13 +545,13 @@
                                     }
                                 }
                             },
-                            toggleGroupTree: function() {
+                            toggleGroupTree: function () {
                                 var target = $(this);
                                 var currentTr = target.closest('tr');
                                 var rowId = currentTr.attr('id');
                                 scope.gridCtrl.toggleGroupTreeRecursive(rowId, true);
                             },
-                            toggleGroupTreeRecursive: function(rowId, changeState) {
+                            toggleGroupTreeRecursive: function (rowId, changeState) {
                                 var tr = scope.gridParams.gridItself.find('tr[id="' + rowId + '"]')[0];
                                 var jTr = $(tr);
                                 var state = jTr.attr('grid-group-row-collapse-state');
@@ -570,7 +570,7 @@
                                 if (state === 'open') {
                                     childrenArray = scope.gridCtrl.getTreeChildren(rowId);
 
-                                    angular.forEach(childrenArray, function(child) {
+                                    angular.forEach(childrenArray, function (child) {
                                         var childRowId = AplanaUtils.getObjectPropertyValueByPath(child, scope.gridCtrl.$getKeyAttribute());
                                         var trChild = scope.gridParams.gridItself.find('tr[id="' + childRowId + '"]')[0];
 
@@ -580,7 +580,7 @@
                                 } else {
                                     childrenArray = scope.gridCtrl.getTreeRecursiveChildren(rowId);
 
-                                    angular.forEach(childrenArray, function(child) {
+                                    angular.forEach(childrenArray, function (child) {
                                         var childRowId = AplanaUtils.getObjectPropertyValueByPath(child, scope.gridCtrl.$getKeyAttribute());
                                         var trChild = scope.gridParams.gridItself.find('tr[id="' + childRowId + '"]')[0];
 
@@ -588,7 +588,7 @@
                                     });
                                 }
                             },
-                            clickGroupTreeCheckbox: function() {
+                            clickGroupTreeCheckbox: function () {
                                 var currentTr = $(this).closest('tr');
                                 var checkbox = currentTr.find('.cbox');
                                 var isChecked = checkbox[0].checked;
@@ -597,7 +597,7 @@
                                 // При снятии отметки с родительского элемента, отметка снимается и с дочерних
                                 var rowId = currentTr.attr('id');
                                 var childrenArray = scope.gridCtrl.getTreeRecursiveChildren(rowId);
-                                angular.forEach(childrenArray, function(child) {
+                                angular.forEach(childrenArray, function (child) {
                                     var childRowId = AplanaUtils.getObjectPropertyValueByPath(child, scope.gridCtrl.$getKeyAttribute());
                                     var checkbox = scope.gridParams.gridItself.find('tr[id="' + childRowId + '"]').find('.cbox[type="checkbox"]')[0];
 
@@ -611,7 +611,7 @@
                                     scope.$apply(read());
                                 }
 
-                                angular.forEach(childrenArray, function(child) {
+                                angular.forEach(childrenArray, function (child) {
                                     var childRowId = AplanaUtils.getObjectPropertyValueByPath(child, scope.gridCtrl.$getKeyAttribute());
                                     var checkbox = scope.gridParams.gridItself.find('tr[id="' + childRowId + '"]').find('.cbox[type="checkbox"]')[0];
 
@@ -621,24 +621,24 @@
                                 });
                                 scope.gridCtrl.updateGrayTreeCheckbox(rowId);
                             },
-                            clickMultiselectCheckbox: function() {
+                            clickMultiselectCheckbox: function () {
                                 // При любом действии - убрать серые чекбоксы
                                 applyRowStyle(scope.gridParams.gridItself.find('tr').find('.cbox[type="checkbox"]'), {className: 'opacityCbox'}, false);
                             },
-                            clickSubGroupTreeCheckbox: function() {
+                            clickSubGroupTreeCheckbox: function () {
                                 var currentTr = $(this).closest('tr');
                                 var rowId = currentTr.attr('id');
 
                                 // При снятии отметки с одного или нескольких элементов галка у родительского элемента становится серой
                                 var parentArray = scope.gridCtrl.getTreeRecursiveParent(rowId);
 
-                                angular.forEach(parentArray, function(parent) {
+                                angular.forEach(parentArray, function (parent) {
                                     var parentId = AplanaUtils.getObjectPropertyValueByPath(parent, scope.gridCtrl.$getKeyAttribute());
                                     scope.gridCtrl.updateGrayTreeCheckbox(parentId);
                                 });
                             },
-                            updateGrayTreeCheckbox: function(rowId) {
-                                setTimeout(function() {
+                            updateGrayTreeCheckbox: function (rowId) {
+                                setTimeout(function () {
                                     // При снятии отметки с одного или нескольких элементов галка у родительского элемента становится серой
                                     var checkbox = scope.gridParams.gridItself.find('tr[id="' + rowId + '"]').find('.cbox[type="checkbox"]')[0];
 
@@ -649,10 +649,10 @@
                                     }
                                 }, 0);
                             },
-                            getGrayCheckbox: function() {
+                            getGrayCheckbox: function () {
                                 var result = [];
 
-                                angular.forEach(scope.gridParams.gridItself.find('.cbox.opacityCbox[type="checkbox"]'), function(element) {
+                                angular.forEach(scope.gridParams.gridItself.find('.cbox.opacityCbox[type="checkbox"]'), function (element) {
                                     var tr = $(element).closest('tr');
                                     var rowId = $(tr).attr('id');
 
@@ -661,11 +661,11 @@
 
                                 return result;
                             },
-                            isAllChildrenTreeSelect: function(rowId) {
+                            isAllChildrenTreeSelect: function (rowId) {
                                 var childrenArray = scope.gridCtrl.getTreeRecursiveChildren(rowId);
                                 var selectedArray = scope.gridCtrl.getAllSelectedRows();
 
-                                for(var i = 0; i < childrenArray.length; ++i) {
+                                for (var i = 0; i < childrenArray.length; ++i) {
                                     if (selectedArray.indexOf(childrenArray[i]) === -1) {
                                         return false;
                                     }
@@ -673,13 +673,13 @@
 
                                 return true;
                             },
-                            hasTreeChildren: function(rowId) {
+                            hasTreeChildren: function (rowId) {
                                 var node = this.gridNodeArray[rowId];
                                 var nextNode = node.nextNode;
 
                                 return nextNode && nextNode.level > node.level;
                             },
-                            getTreeLevel: function(rowId) {
+                            getTreeLevel: function (rowId) {
                                 var result = [];
                                 var entity = this.getRawData(rowId);
 
@@ -696,7 +696,7 @@
 
                                 return result.length;
                             },
-                            getTreeRecursiveParent: function(rowId) {
+                            getTreeRecursiveParent: function (rowId) {
                                 var result = [];
                                 var parentNode = this.gridNodeArray[rowId].parent;
 
@@ -707,19 +707,19 @@
 
                                 return result;
                             },
-                            getTreeChildren: function(rowId) {
+                            getTreeChildren: function (rowId) {
                                 var result = [];
 
-                                angular.forEach(this.gridNodeArray[rowId].child, function(childNode) {
+                                angular.forEach(this.gridNodeArray[rowId].child, function (childNode) {
                                     result.push(scope.gridCtrl.getRawData(childNode.rowId));
                                 });
 
                                 return result;
                             },
-                            getTreeRecursiveChildren: function(rowId) {
+                            getTreeRecursiveChildren: function (rowId) {
                                 var result = [];
 
-                                angular.forEach(this.gridNodeArray[rowId].child, function(childNode) {
+                                angular.forEach(this.gridNodeArray[rowId].child, function (childNode) {
                                     result.push(scope.gridCtrl.getRawData(childNode.rowId));
                                     if (childNode.child.length > 0) {
                                         result.push.apply(result, scope.gridCtrl.getTreeRecursiveChildren(childNode.rowId));
@@ -728,7 +728,7 @@
 
                                 return result;
                             },
-                            applyGrouping: function() {
+                            applyGrouping: function () {
                                 if (scope.gridOptions.groupConfig) {
                                     var tr = scope.gridParams.gridItself.find("tr.jqgrow");
 
@@ -742,7 +742,7 @@
                                     }
                                 }
                             },
-                            createStructure: function() {
+                            createStructure: function () {
                                 this.gridNodeArray = {};
 
                                 var prevNode;
@@ -760,7 +760,7 @@
                                         parent: null,
                                         child: []
                                     };
-                                    this.gridNodeArray[rowId]  = node;
+                                    this.gridNodeArray[rowId] = node;
 
                                     if (prevNode) {
                                         prevNode.nextNode = node;
@@ -792,7 +792,7 @@
                                     prevNode = node;
                                 }
                             },
-                            applyTreeGrouping: function() {
+                            applyTreeGrouping: function () {
                                 var trArray = scope.gridParams.gridItself.find("tr.jqgrow");
                                 this.createStructure();
 
@@ -843,7 +843,7 @@
                                     grid.on("click", ".ui-jqgrid-labels .cbox[type=checkbox]", scope.gridCtrl.clickMultiselectCheckbox);
                                 }
                             },
-                            applyNoTreeGrouping: function() {
+                            applyNoTreeGrouping: function () {
                                 var tr = scope.gridParams.gridItself.find("tr.jqgrow");
                                 var prevRow;
                                 var prevGroupId;
@@ -904,13 +904,13 @@
                                 grid.off("click", "td:has(.grid-group-row-collapse-clickable)", scope.gridCtrl.toggleGroupNoTree);
                                 grid.on("click", "td:has(.grid-group-row-collapse-clickable)", scope.gridCtrl.toggleGroupNoTree);
                             },
-                            getGroup: function(rowId) {
+                            getGroup: function (rowId) {
                                 return AplanaUtils.getObjectPropertyValueByPath(this.getRawData(rowId), scope.gridOptions.groupConfig.noTree.groupObject);
                             },
-                            getGroupId: function(rowId) {
+                            getGroupId: function (rowId) {
                                 return AplanaUtils.getObjectPropertyValueByPath(this.getRawData(rowId), scope.gridOptions.groupConfig.noTree.groupId);
                             },
-                            toggleGroupNoTree: function() {
+                            toggleGroupNoTree: function () {
                                 var currentCollapse = $(this).find('.grid-group-row-collapse-clickable');
                                 var currentTr = currentCollapse.closest('tr');
                                 var groupId = currentTr.attr('group');
@@ -924,7 +924,7 @@
 
                                 var trArray = scope.gridParams.gridItself.find('tr[groupId="' + groupId + '"]');
 
-                                trArray.each(function(index, tr) {
+                                trArray.each(function (index, tr) {
                                     if ($(tr).is(':hidden')) {
                                         $(tr).show();
                                     } else {
@@ -932,7 +932,7 @@
                                     }
                                 });
                             },
-                            clickGroupNoTreeCheckbox: function() {
+                            clickGroupNoTreeCheckbox: function () {
                                 var currentCB = $(this);
                                 var currentTr = currentCB.closest('tr');
                                 var groupId = currentTr.attr('group');
@@ -940,7 +940,7 @@
 
                                 var checkboxes = scope.gridParams.gridItself.find('tr[groupId="' + groupId + '"]').find('.cbox[type="checkbox"]');
 
-                                checkboxes.each(function(index, checkbox) {
+                                checkboxes.each(function (index, checkbox) {
                                     if (checkbox.checked !== isChecked) {
                                         scope.grid.setSelection($(this).closest('tr').attr('id'), true);
                                     }
@@ -988,9 +988,9 @@
 
                                 return softContains(ids, recordId);
                             },
-                            updateModel: function() {
+                            updateModel: function () {
                                 if (ngModel) {
-                                    setTimeout(function() {
+                                    setTimeout(function () {
                                         scope.$apply(read());
                                     }, 0);
                                 }
@@ -1070,7 +1070,7 @@
                         if (data) {
                             gridConfig.data = data;
 
-                            gridConfig.data.forEach(function(element, index) {
+                            gridConfig.data.forEach(function (element, index) {
                                 gridConfig.data[index] = AplanaUtils.sanitizeRecursively(element);
                             });
                         }
@@ -1090,12 +1090,14 @@
                         if (gridConfig.datatype === 'angularResource') {
                             gridConfig.datatype = function (postdata) {
                                 var requestParameters = (_.isFunction(gridConfig.requestParameters) ?
-                                        gridConfig.requestParameters() : gridConfig.requestParameters) || {};
+                                    gridConfig.requestParameters() : gridConfig.requestParameters) || {};
                                 requestParameters = angular.extend($pagingBuilder(postdata), requestParameters);
                                 requestParameters.pagingParams = JSON.stringify({
                                     page: requestParameters.page,
                                     count: requestParameters.rows,
-                                    startIndex: requestParameters.page === 1 ? 0 : requestParameters.rows * (requestParameters.page - 1)
+                                    startIndex: requestParameters.page === 1 ? 0 : requestParameters.rows * (requestParameters.page - 1),
+                                    property: postdata.sidx,
+                                    direction: postdata.sord
                                 });
 
                                 var gridLoadData = function () {
@@ -1105,7 +1107,7 @@
                                         });
 
                                         if (data && data.rows) {
-                                            data.rows.forEach(function(element, index) {
+                                            data.rows.forEach(function (element, index) {
                                                 data.rows[index] = AplanaUtils.sanitizeRecursively(element);
                                             });
                                         }
@@ -1309,7 +1311,7 @@
 
                         // добавляем колонки для группировки
                         if (scope.gridOptions.groupConfig) {
-                            var cellAttrFunction = function(rowId, tv, rawObject, cm, rdata) {
+                            var cellAttrFunction = function (rowId, tv, rawObject, cm, rdata) {
                                 return ' style="cursor: pointer" class="unselectable unselectableTd"';
                             };
 
@@ -1386,7 +1388,7 @@
                                             scope.$apply(ngModel.$setPristine());
                                         }
                                     }
-                                    setTimeout(function() {
+                                    setTimeout(function () {
                                         fillLastColumn();
                                     }, 0);
                                 }
@@ -1515,7 +1517,7 @@
                          */
                         function fillHeight() {
                             if (scope && scope.gridFillSpace) {
-                                var container = $(scope.gridFillSpaceContainerSelector );
+                                var container = $(scope.gridFillSpaceContainerSelector);
                                 var containerTop = $(scope.gridFillSpaceContainerSelectorTop);
                                 var containerMinHeight = parseInt($(scope.gridFillSpaceContainerSelector).css('min-height'), 10);
                                 var view = $(scope.gridFillSpaceViewSelector);
@@ -1577,7 +1579,7 @@
                                 //if group header is checked, to check all child checkboxes
                                 var checkboxes = currentCB.closest('tr').nextUntil('tr.jqgroup').find('.cbox[type="checkbox"]');
 
-                                checkboxes.each(function(index, checkbox){
+                                checkboxes.each(function (index, checkbox) {
                                     if (!checkbox.checked || !isChecked) {
                                         scope.grid.setSelection($(this).closest('tr').attr('id'), true);
                                     }
@@ -1664,7 +1666,7 @@
                     }
                 };
             }])
-        .factory('$gridStack', [ '$$stackedMap', '$timeout', 'AplanaUtils', function ($$stackedMap, $timeout) {
+        .factory('$gridStack', ['$$stackedMap', '$timeout', 'AplanaUtils', function ($$stackedMap, $timeout) {
             var stackedAdjustWidthGrids = $$stackedMap.createNew();
             var $gridStack = {};
 
@@ -1767,11 +1769,11 @@
             });
 
             return $gridStack;
-        } ])
+        }])
         /**
          * Фильтр добавляет чекбокс к заголовку группы
          */
-        .filter('checkboxGrouping', function() {
+        .filter('checkboxGrouping', function () {
             return function (groupName) {
                 return '<input type="checkbox" class="groupHeader" />&nbsp;' + groupName;
             };
@@ -1779,7 +1781,7 @@
         /**
          * Фильтр формирует поле с коллапсом для группировки
          */
-        .filter('groupFormatter', function() {
+        .filter('groupFormatter', function () {
             return function () {
                 return '<span class="grid-group-row-collapse noselect" style="font-size: large;"></span>';
             };
@@ -1794,20 +1796,20 @@
          * objectRoot - корневая сущность (необязательный параметр)
          * _level - количество уровней в иерарахии (необязательный параметр =1 по умолчанию)
          */
-        .filter('multiGroupSortType', ['AplanaUtils', function(AplanaUtils) {
+        .filter('multiGroupSortType', ['AplanaUtils', function (AplanaUtils) {
             var pad = "0000000000";
 
-            var lpad = function(id) {
+            var lpad = function (id) {
                 var str = id.toString();
                 return pad.substring(0, pad.length - str.length) + str;
             };
 
-            var hash = function(id, sort) {
+            var hash = function (id, sort) {
                 return lpad(sort) + '!' + lpad(id);
             };
 
-            return function(columnIdName, parentEntityName, sortColumnName, objectRoot, _level) {
-                var treeObjectHash = function(_obj) {
+            return function (columnIdName, parentEntityName, sortColumnName, objectRoot, _level) {
+                var treeObjectHash = function (_obj) {
                     var object = objectRoot ? AplanaUtils.getObjectPropertyValueByPath(_obj, objectRoot) : _obj;
                     var level = _level ? _level : 1;
 
@@ -1852,19 +1854,19 @@
          * columnSortName - название поле, по которому сортируется сущность
          * columnParentSortName - название поля, по которому сортируется группировка
          */
-        .filter('groupSortCustomType', ['AplanaUtils', function(AplanaUtils) {
+        .filter('groupSortCustomType', ['AplanaUtils', function (AplanaUtils) {
             var pad = "0000000000";
 
-            var lpad = function(id) {
+            var lpad = function (id) {
                 var str = id.toString();
                 return pad.substring(0, pad.length - str.length) + str;
             };
 
-            var hash = function(id, sort) {
+            var hash = function (id, sort) {
                 return lpad(sort) + '!' + lpad(id);
             };
 
-            return function(columnIdName, columnParentIdName, columnSortName, columnParentSortName) {
+            return function (columnIdName, columnParentIdName, columnSortName, columnParentSortName) {
                 return function (cell, obj) {
                     var id = AplanaUtils.getObjectPropertyValueByPath(obj, columnIdName);
                     var sort = AplanaUtils.getObjectPropertyValueByPath(obj, columnSortName);

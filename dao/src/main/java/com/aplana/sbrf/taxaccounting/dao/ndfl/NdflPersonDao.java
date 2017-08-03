@@ -84,9 +84,9 @@ public interface NdflPersonDao {
     /**
      * Найти все NdflPersonIncome по заданным параметрам
      *
-     * @param declarationDataId идентификатор декларации
-     * @param parameters        карта наименований параметров и значений
-     * @param pagingParams      параметры вывода результата
+     * @param declarationDataId      идентификатор декларации
+     * @param ndflPersonIncomeFilter параметры фильтра
+     * @param pagingParams           параметры вывода результата
      * @return результат запроса
      */
     public PagingResult<NdflPersonIncome> findPersonIncomeByParameters(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams);
@@ -109,9 +109,9 @@ public interface NdflPersonDao {
     /**
      * Найти все NdflPersonDeduction по заданным параметрам
      *
-     * @param declarationDataId идентификатор декларации
-     * @param ndflPersonDeductionFilter  параметры фильтра
-     * @param pagingParams      параметры вывода результата
+     * @param declarationDataId         идентификатор декларации
+     * @param ndflPersonDeductionFilter параметры фильтра
+     * @param pagingParams              параметры вывода результата
      * @return результат запроса
      */
     public PagingResult<NdflPersonDeduction> findPersonDeductionByParameters(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams);
@@ -134,9 +134,9 @@ public interface NdflPersonDao {
     /**
      * Найти все NdflPersonPrepayment по заданным параметрам
      *
-     * @param declarationDataId идентификатор декларации
-     * @param ndflPersonPrepaymentFilter  параметры фильтра
-     * @param pagingParams      параметры вывода результата
+     * @param declarationDataId          идентификатор декларации
+     * @param ndflPersonPrepaymentFilter параметры фильтра
+     * @param pagingParams               параметры вывода результата
      * @return результат запроса
      */
     public PagingResult<NdflPersonPrepayment> findPersonPrepaymentByParameters(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams);
@@ -171,6 +171,7 @@ public interface NdflPersonDao {
 
     /**
      * Найти данные о доходах по КПП и ОКТМО для Физлица
+     *
      * @param ndflPersonId
      * @param kpp
      * @param oktmo
@@ -229,7 +230,7 @@ public interface NdflPersonDao {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
+     * @param prFequals1   - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
     List<NdflPersonDeduction> findDeductionsWithDeductionsMarkNotOstalnie(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
@@ -240,7 +241,7 @@ public interface NdflPersonDao {
      * @param ndflPersonId
      * @param startDate    - начало периода для "Дата удержания налога" и "Дата платежного поручения"
      * @param endDate      - окончание периода для "Дата удержания налога" и "Дата платежного поручения"
-     * @param prFequals1 - является ли признакФ равным 1, для формы 2-НДФЛ
+     * @param prFequals1   - является ли признакФ равным 1, для формы 2-НДФЛ
      * @return
      */
     List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
@@ -288,6 +289,7 @@ public interface NdflPersonDao {
 
     /**
      * Найти NdflPerson строки данных о доходах которых соответствуют парам кпп и октмо
+     *
      * @param declarationDataId
      * @param kpp
      * @param oktmo
@@ -375,6 +377,7 @@ public interface NdflPersonDao {
 
     /**
      * Поиск дублей по полю rownum
+     *
      * @param tableName
      * @param declarationDataId
      * @return
@@ -383,6 +386,7 @@ public interface NdflPersonDao {
 
     /**
      * Поиск пропусков по полю rownum
+     *
      * @param tableName
      * @param declarationDataId
      * @return
