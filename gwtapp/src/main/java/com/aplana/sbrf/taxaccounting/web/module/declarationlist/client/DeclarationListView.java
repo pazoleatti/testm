@@ -722,6 +722,11 @@ public class DeclarationListView extends
                 accept = false;
                 delete = false;
             }
+            if(!row.isActive()) {
+                cancel = false;
+                accept = false;
+                calculate = false;
+            }
         }
         checkButton.setEnabled(check);
         recalculateButton.setEnabled(calculate);

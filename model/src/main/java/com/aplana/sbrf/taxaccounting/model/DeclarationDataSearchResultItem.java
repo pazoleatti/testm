@@ -91,6 +91,11 @@ public class DeclarationDataSearchResultItem implements Serializable {
      */
     private String declarationDataCreationUserName;
 
+    /**
+     * открыт ли период
+     */
+    private boolean isActive;
+
 	public Long getDeclarationDataId() {
 		return declarationDataId;
 	}
@@ -281,5 +286,13 @@ public class DeclarationDataSearchResultItem implements Serializable {
 
     public void setDeclarationDataCreationUserName(String declarationDataCreationUserName) {
         this.declarationDataCreationUserName = declarationDataCreationUserName;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

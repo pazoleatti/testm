@@ -116,6 +116,9 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
                             });
                         } else {
                             onHide();
+                            if (result.getErrMsg() != null) {
+                                Dialog.errorMessage(result.getErrMsg());
+                            }
                             LogAddEvent.fire(DeclarationDownloadReportsPresenter.this, result.getUuid());
                         }
                     }

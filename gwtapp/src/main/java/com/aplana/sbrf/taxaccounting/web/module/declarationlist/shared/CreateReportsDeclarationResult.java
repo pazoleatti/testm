@@ -13,6 +13,8 @@ public class CreateReportsDeclarationResult implements Result {
      */
     private boolean status;
 
+    private String errMsg;
+
     public String getUuid() {
         return uuid;
     }
@@ -35,5 +37,13 @@ public class CreateReportsDeclarationResult implements Result {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public String getErrMsg() {
+        return errMsg;
+    }
+
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
     }
 }

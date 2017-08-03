@@ -1719,8 +1719,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo, declarationDataTemp, FormDataEvent.CREATE_FORMS, logger, additionalParameters);
 
         int success = 0;
-        int pairKppOktomoTotal = 0;
-        pairKppOktomoTotal = (Integer) scriptParams.get("pairKppOktmoTotal");
+        int pairKppOktomoTotal = (Integer) scriptParams.get("pairKppOktmoTotal");
         List<String> errorMsgList = new ArrayList<String>();
         for (Map.Entry<Long, Map<String, Object>> entry: formMap.entrySet()) {
             Logger scriptLogger = new Logger();
@@ -1730,30 +1729,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } catch (Exception e) {
                 createForm = false;
                 if (e.getMessage() != null) {
-                    scriptLogger.error(e);
+                    scriptLogger.warn(e.getMessage());
                 }
             } finally {
-                if (!createForm || scriptLogger.containsLevel(LogLevel.ERROR)) {
-                    for (LogEntry logEntry: scriptLogger.getEntries()) {
-                        DeclarationData declarationData = get(entry.getKey(), userInfo);
-                        if (logEntry.getLevel().equals(LogLevel.ERROR)) {
-                                errorMsgList.add(String.format("Не удалось создать форму %s, за период %s, %s%s, подразделение: %s, КПП: %s ОКТМО: %s. Ошибка: %s",
-                                    declarationTemplateService.get(declarationDataTemp.getDeclarationTemplateId()).getName(),
-                                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(),
-                                    departmentReportPeriod.getCorrectionDate() != null? ", с датой сдачи корректировки " + new SimpleDateFormat("dd.MM.yyyy").format(departmentReportPeriod.getCorrectionDate()): "",
-                                    departmentService.getDepartment(departmentReportPeriod.getDepartmentId()).getName(),
-                                    declarationData.getKpp(),
-                                    declarationData.getOktmo(),
-                                    logEntry.getMessage()));
-                        }
-                    }
+                if (!createForm) {
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
                     String message = getDeclarationFullName(entry.getKey(), null);
                     logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"));
-                    logger.getEntries().addAll(scriptLogger.getEntries());
                 }
+                logger.getEntries().addAll(scriptLogger.getEntries());
             }
         }
         logger.info("Количество успешно созданных форм: %d. Не удалось создать форм: %d.", success, pairKppOktomoTotal - success);
@@ -1831,7 +1817,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId) {
+    public String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId) {
+        String toReturn = null;
         DeclarationData declarationDataTemp = new DeclarationData();
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
@@ -1844,11 +1831,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, exchangeParams);
         // Проверяем ошибки
         if (logger.containsLevel(LogLevel.ERROR)) {
-            String msg = "Найдены ошибки при выполнении выгрузки отчетности";
             if (paramMap.containsKey("errMsg")) {
-                msg = (String)paramMap.get("errMsg");
+                toReturn = (String)paramMap.get("errMsg");
             }
-            throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
         }
+        return toReturn;
     }
 }
