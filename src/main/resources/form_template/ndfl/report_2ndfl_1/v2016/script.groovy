@@ -1575,7 +1575,7 @@ def checkDataConsolidated() {
         Long departmentCode = departmentService.get(dd.departmentId)?.code
 
         // Если налоговая форма не принята
-        if (!dd.state.equals(State.ACCEPTED)) {
+        if (!dd.state.equals(State.ACCEPTED) && mapDepartmentNotExistRnu[departmentCode] != null) {
             listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
         }
         mapDepartmentNotExistRnu.remove(departmentCode)
@@ -1696,7 +1696,7 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
     if (departmentReportPeriod.getCorrectionDate() != null) {
         strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
     }
-    pairKppOktmoSize = pairKppOktmoList?.size()?: 0
+    pairKppOktmoSize = pairKppOktmoList?.size() ?: 0
     // Все подходящие КНФ
     def allDeclarationData = findAllTerBankDeclarationData(departmentReportPeriod)
     if (allDeclarationData == null) {
@@ -3220,7 +3220,7 @@ class Ndfl2Node {
 
 /**
  * Компонент дерева представляющий атрибут
- * @param < T >       - Класс значения атрибута из xml, с которым будем работать
+ * @param < T >        - Класс значения атрибута из xml, с которым будем работать
  */
 class Ndfl2Leaf<T> {
     String name;

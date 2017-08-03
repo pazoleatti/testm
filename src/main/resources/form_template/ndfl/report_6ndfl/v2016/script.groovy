@@ -1223,7 +1223,7 @@ def checkDataConsolidated() {
         Long departmentCode = departmentService.get(dd.departmentId)?.code
 
         // Если налоговая форма не принята
-        if (!dd.state.equals(State.ACCEPTED)) {
+        if (!dd.state.equals(State.ACCEPTED) && mapDepartmentNotExistRnu[departmentCode] != null) {
             listDepartmentNotAcceptedRnu << mapDepartmentNotExistRnu[departmentCode]
         }
         mapDepartmentNotExistRnu.remove(departmentCode)
