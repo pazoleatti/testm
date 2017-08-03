@@ -256,7 +256,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/returnToCreated")
     public void returnToCreatedDeclaration(@RequestParam int declarationDataId) {
         Logger logger = new Logger();
-        declarationService.cancel(logger, declarationDataId, securityService.currentUserInfo());
+        declarationService.cancel(logger, declarationDataId, null, securityService.currentUserInfo());
     }
 
     /**
@@ -277,7 +277,7 @@ public class DeclarationDataController {
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
-        final TaxType taxType = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getType().getTaxType();
+        final TaxType taxType = TaxType.NDFL;
 
         Logger logger = new Logger();
         try {
@@ -359,7 +359,7 @@ public class DeclarationDataController {
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
-        final TaxType taxType = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getType().getTaxType();
+        final TaxType taxType = TaxType.NDFL;
         Logger logger = new Logger();
         LockData lockDataAccept = lockDataService.getLock(declarationService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
         if (lockDataAccept == null) {
@@ -444,7 +444,7 @@ public class DeclarationDataController {
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
-        final TaxType taxType = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getType().getTaxType();
+        final TaxType taxType = TaxType.NDFL;
         String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
             DeclarationData declarationData = declarationService.get(declarationDataId, userInfo);

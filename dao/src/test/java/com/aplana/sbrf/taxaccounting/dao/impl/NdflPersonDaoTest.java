@@ -56,7 +56,7 @@ public class NdflPersonDaoTest {
         parameters.put("lastName", "Иванов");
         parameters.put("firstName", "Федор");
         parameters.put("middleName", "Иванович");
-        String sql = NdflPersonDaoImpl.buildQuery(parameters);
+        String sql = NdflPersonDaoImpl.buildQuery(parameters, null);
         Assert.assertTrue(sql.contains("lower(np.last_name) like lower(:lastName)"));
         Assert.assertFalse(sql.contains("np.inp = :inp"));
         //test...
@@ -284,7 +284,7 @@ public class NdflPersonDaoTest {
         personPrepayment.setRowNum(BigDecimal.valueOf(row));
         personPrepayment.setOperationId("11111");
 
-        personPrepayment.setSumm(1999999L);
+        personPrepayment.setSumm(new BigDecimal("1999999")); //по xsd это поле xs:integer
         personPrepayment.setNotifNum("123-456-000");
         personPrepayment.setNotifDate(toDate("01.01.2016"));
         personPrepayment.setNotifSource("AAA");

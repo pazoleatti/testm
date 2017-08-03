@@ -1318,7 +1318,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         NdflPersonIncome ndflPersonIncome = new NdflPersonIncome();
 
         ndflPersonIncome.setNdflPersonId(ndflPersonId);
-        ndflPersonIncome.setRowNum(BigDecimal.valueOf(rowNum));
+        ndflPersonIncome.setRowNum(rowNum);
 
         ndflPersonIncome.setIncomeCode(column4);
         ndflPersonIncome.setIncomeType(column5);

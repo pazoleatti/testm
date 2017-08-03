@@ -664,19 +664,23 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " \n");
-        sb.append(buildQueryBody(parameters, pagingParams));
-        sb.append("ORDER BY np.row_num \n");
+        sb.append(buildQueryBody(parameters));
+        if (pagingParams != null && pagingParams.getProperty() != null) {
+            sb.append("order by ").append(pagingParams.getProperty()).append(" ").append(pagingParams.getDirection());
+        } else {
+            sb.append("ORDER BY np.row_num \n");
+        }
         return sb.toString();
     }
 
     public static String buildCountQuery(Map<String, Object> params) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT COUNT(*) \n")
-                .append(buildQueryBody(params, null));
+                .append(buildQueryBody(params));
         return sb.toString();
     }
 
-    private static String buildQueryBody(Map<String, Object> parameters, PagingParams pagingParams) {
+    private static String buildQueryBody(Map<String, Object> parameters) {
         StringBuilder sb = new StringBuilder();
         sb.append("FROM ndfl_person np \n");
         sb.append("LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id \n");
@@ -728,11 +732,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             if (contains(parameters, "idDocNumber")) {
                 sb.append("AND (translate(lower(np.id_doc_number), '0-, ', '0') like translate(lower(:idDocNumber), '0-, ', '0')) \n");
             }
-        }
-        if (pagingParams != null && pagingParams.getProperty() != null) {
-            sb.append("order by ").append(pagingParams.getProperty()).append(" ").append(pagingParams.getDirection());
-        } else {
-            sb.append("ORDER BY np.row_num \n");
         }
         return sb.toString();
     }
@@ -1355,7 +1354,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setRowNum(rs.getBigDecimal( "row_num"));
             personPrepayment.setOperationId(rs.getString("operation_id"));
 
-            personPrepayment.setSumm(rs.getLong("summ"));
+            personPrepayment.setSumm(rs.getBigDecimal("summ"));
             personPrepayment.setNotifNum(rs.getString("notif_num"));
             personPrepayment.setNotifDate(rs.getDate("notif_date"));
             personPrepayment.setNotifSource(rs.getString("notif_source"));

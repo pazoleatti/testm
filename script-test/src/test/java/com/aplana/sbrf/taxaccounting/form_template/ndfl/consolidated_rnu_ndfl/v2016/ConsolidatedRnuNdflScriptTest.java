@@ -261,7 +261,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     private NdflPersonIncome createNdflPersonIncomes(BigDecimal row, String operationId) {
         NdflPersonIncome personIncome = new NdflPersonIncome();
-        personIncome.setRowNum(BigDecimal.valueOf(row));
+        personIncome.setRowNum(row);
         personIncome.setOperationId("11111");
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
@@ -274,7 +274,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     private NdflPersonDeduction createNdflPersonDeduction(BigDecimal row) {
         NdflPersonDeduction personDeduction = new NdflPersonDeduction();
-        personDeduction.setRowNum(BigDecimal.valueOf(row));
+        personDeduction.setRowNum(row);
         personDeduction.setOperationId("11111");
         personDeduction.setTypeCode("001");
 
@@ -299,7 +299,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     private NdflPersonPrepayment createNdflPersonPrepayment(BigDecimal row) {
         NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
-        personPrepayment.setRowNum(BigDecimal.valueOf(row));
+        personPrepayment.setRowNum(row);
         personPrepayment.setOperationId("11111");
         personPrepayment.setSumm(new BigDecimal(1999999)); //по xsd это поле xs:integer
         personPrepayment.setNotifNum("123-456-000");
