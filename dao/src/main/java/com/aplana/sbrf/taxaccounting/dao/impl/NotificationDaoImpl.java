@@ -226,7 +226,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         }
 
         OrderSpecifier orderForSubQuery;
-        Sort sort = pagingParams.getSort();
+        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
+        Sort sort = new Sort(sortOrder);
         if (sort.getOrderFor("createDate") != null) {
             orderForSubQuery = sort.getOrderFor("createDate").isAscending() ? notification.createDate.asc() : notification.createDate.desc();
         } else if (sort.getOrderFor("text") != null) {
