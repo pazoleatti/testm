@@ -3498,8 +3498,6 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Общ5 Принадлежность дат операций к отчетному периоду. Проверка перенесана в событие загрузки ТФ
-            operationNotRelateToCurrentPeriod(ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.taxDate,
-                    ndflPersonIncome.kpp, ndflPersonIncome.oktmo, ndflPersonFL.inp, ndflPersonFL.fio, ndflPersonIncome)
 
             // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
             List<ColumnFillConditionData> columnFillConditionDataList = []
@@ -3589,7 +3587,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column22And23And24Fill(),
                     new Column12NotFill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
-                    String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как заполнены гр. \"%s\", \"%s\", \"%s\"",
+                    String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
                             C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?:"",
                             C_PAYMENT_DATE,
                             C_PAYMENT_NUMBER,
@@ -3902,17 +3900,7 @@ class ColumnFillConditionData {
     class Column10Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
-        }
-    }
-    /**
-     * Проверка: "Раздел 2. Графы 6, 10 заполнены"
-     */
-    @TypeChecked
-    class Column6And10Fill implements ColumnFillConditionChecker {
-        @Override
-        boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.incomeAccruedDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)
+            return ndflPersonIncome.incomeAccruedSumm != null
         }
     }
     /**
@@ -3922,7 +3910,7 @@ class ColumnFillConditionData {
     class Column11Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+            return ndflPersonIncome.incomePayoutSumm != null
         }
     }
     /**
@@ -3932,7 +3920,7 @@ class ColumnFillConditionData {
     class Column7And11Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.incomePayoutDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)
+            return ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.incomePayoutSumm != null
         }
     }
     /**
@@ -3986,9 +3974,9 @@ class ColumnFillConditionData {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
             if (temporalySolution) {
-                return !ScriptUtils.isEmpty(ndflPersonIncome.taxRate)
+                return ndflPersonIncome.taxRate != null
             }
-            return !ScriptUtils.isEmpty(ndflPersonIncome.taxRate)
+            return ndflPersonIncome.taxRate != null
         }
     }
     /**
@@ -4112,7 +4100,7 @@ class ColumnFillConditionData {
     class Column22And23And24NotFill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+            return ndflPersonIncome.paymentDate == null && ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm == null
         }
     }
     /**
@@ -4122,7 +4110,7 @@ class ColumnFillConditionData {
     class Column22And23And24Fill implements ColumnFillConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome) {
-            return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && !ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)
+            return ndflPersonIncome.paymentDate != null && !ScriptUtils.isEmpty(ndflPersonIncome.paymentNumber) && ndflPersonIncome.taxSumm != null
         }
     }
     /**
@@ -4629,7 +4617,7 @@ class ColumnFillConditionData {
                                     (ndflPersonIncomePreview == null || ndflPersonIncomePreview.incomeAccruedDate < it.incomeAccruedDate)
                         }
                     }
-                    if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.calculatedTax ?: 0 + ndflPersonIncomePreview.calculatedTax ?: 0)) {
+                    if (!(ndflPersonIncome.withholdingTax == (ndflPersonIncome.calculatedTax ?: 0) + (ndflPersonIncomePreview.calculatedTax ?: 0))) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме значений гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\") предыдущей записи",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
@@ -4650,7 +4638,7 @@ class ColumnFillConditionData {
                     }
                     if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
+                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не должно превышать 50%% от разности значение гр. \"%s\" (\"%s\") и гр. \"%s\" (\"%s\")",
                                 C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0,
                                 C_TAX_BASE, ndflPersonIncome.taxBase ?: 0,
                                 C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0
@@ -4698,7 +4686,7 @@ class ColumnFillConditionData {
             //Long taxSumm = ndflPersonIncomeCurrentByPersonIdAndOperationIdList.sum {it.taxSumm?: 0} ?: 0
 
             // СведДох8 НДФЛ.Расчет.Сумма.Не удержанный (Графа 18)
-            if (calculatedTaxSum > withholdingTaxSum) {
+            if (ndflPersonIncome.notHoldingTax != null && calculatedTaxSum > withholdingTaxSum) {
                 if (!(notHoldingTaxSum == calculatedTaxSum - withholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
@@ -4712,7 +4700,7 @@ class ColumnFillConditionData {
             }
 
             // СведДох9 НДФЛ.Расчет.Сумма.Излишне удержанный (Графа 19)
-            if (calculatedTaxSum < withholdingTaxSum) {
+            if (ndflPersonIncome.overholdingTax != null && calculatedTaxSum < withholdingTaxSum) {
                 if (!(overholdingTaxSum == withholdingTaxSum - calculatedTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") должна быть равна разнице сумм значений гр.\"%s\" (\"%s\") и гр.\"%s\" (\"%s\") для всех строк одной операции",
@@ -4726,7 +4714,7 @@ class ColumnFillConditionData {
             }
 
             // СведДох10 НДФЛ.Расчет.Сумма.Возвращенный налогоплательщику (Графа 20)
-            if (ndflPersonIncome.refoundTax > 0) {
+            if (ndflPersonIncome.refoundTax != null && ndflPersonIncome.refoundTax > 0) {
                 if (!(refoundTaxSum <= overholdingTaxSum)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                     String errMsg = String.format("Сумма значений гр. \"%s\" (\"%s\") не должна превышать сумму значений гр.\"%s\" (\"%s\") для всех строк одной операции",
@@ -4812,6 +4800,38 @@ class ColumnFillConditionData {
                             logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInp, pathError, errMsg)
                         }
                     }
+                }
+            }
+
+            //СведДох12	 Отсутствие нулевых значений
+            LOG_TYPE_NOT_ZERO_CHECK: {
+                if (ndflPersonIncome.incomeAccruedSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.incomeAccruedSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.incomePayoutSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.incomePayoutSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_INCOME_PAYOUT_SUMM, ndflPersonIncome.incomePayoutSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.taxRate != null && ScriptUtils.isEmpty(ndflPersonIncome.taxRate)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_TAX_RATE, ndflPersonIncome.taxRate
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
+                }
+                if (ndflPersonIncome.taxSumm != null && ScriptUtils.isEmpty(ndflPersonIncome.taxSumm)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не может быть равно \"0\"",
+                            C_TAX_SUMM, ndflPersonIncome.taxSumm
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_NOT_ZERO, fioAndInp, pathError, errMsg)
                 }
             }
         }
@@ -5176,7 +5196,7 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
             // Выч14 Документ о праве на налоговый вычет.Код источника (Графа 7)
-            if (ndflPersonDeduction.typeCode == "1" && ndflPersonDeduction.notifSource != "0000") {
+            if (ndflPersonDeduction.notifType == "1" && ndflPersonDeduction.notifSource != "0000") {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\") не соответствует значению гр. \"%s\" (\"%s\")",
                        C_NOTIF_SOURCE, ndflPersonDeduction.notifSource ?: "",

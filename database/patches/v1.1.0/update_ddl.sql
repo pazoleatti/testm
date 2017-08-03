@@ -12,6 +12,11 @@ prompt alter ref_book_person.old_id and update attributes
 @@alter_person_old_id.sql;
 commit;
 
+-- alter ref_book_calendar  
+prompt alter ref_book_calendar
+@@alter_ref_book_calendar.sql;
+commit;
+
 -- changes fias_addrobj
 prompt drop unuseable columns from fias_addrobj
 @@fias_addrobj_drop_cols.sql

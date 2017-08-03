@@ -113,7 +113,7 @@ final String NDFL_PERSON_KNF_ID = "ndflPersonKnfId"
 @Field final int REPORT_PERIOD_TYPE_ID = 8
 
 @Field final FORM_NAME_NDFL6 = "6-НДФЛ"
-@Field final FORM_NAME_NDFL2 = "2-НДФЛ(1)"
+@Field final FORM_NAME_NDFL2 = "2-НДФЛ (1)"
 @Field final int DECLARATION_TYPE_RNU_NDFL_ID = 101
 @Field final int DECLARATION_TYPE_NDFL2_1_ID = 102
 @Field final int DECLARATION_TYPE_NDFL2_2_ID = 104
@@ -880,7 +880,7 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
         def sumDohObch2 = mapSumDohObch2.get(stavka6)
 
         if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
-            def msgErrorRes = sprintf(msgError, "сумме начисленного дохода") + " по «Ставке» " + stavka6
+            def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода»") + " по «Ставке» " + stavka6
             logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
         }
     }
@@ -1078,6 +1078,10 @@ List<PairKppOktmo> getPairKppOktmoList() {
             }
         }
         referencesOktmoList.removeAll([null])
+        if (referencesOktmoList.isEmpty()) {
+            logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", FORM_NAME_NDFL6, depName, "$otchetGod ${reportPeriod.name}")
+            return
+        }
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
         departmentParamTableList.each { dep ->
             ScriptUtils.checkInterrupted()
@@ -1095,8 +1099,8 @@ List<PairKppOktmo> getPairKppOktmoList() {
             logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", FORM_NAME_NDFL6, depName, "$otchetGod ${reportPeriod.name}")
             return
         }
-        pairKppOktmoSize = pairKppOktmoList.size()
     }
+    pairKppOktmoSize = pairKppOktmoList.size()
     return pairKppOktmoList
 }
 
@@ -1230,40 +1234,43 @@ def checkDataConsolidated() {
 }
 
 def createForm() {
-    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-    def declarationTypeId = currDeclarationTemplate.type.id
-    // Список физлиц для каждой пары КПП и ОКТМО
-    def ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
+    try {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        def currDeclarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+        def declarationTypeId = currDeclarationTemplate.type.id
+        // Список физлиц для каждой пары КПП и ОКТМО
+        def ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
 
-    declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-        declarationService.delete(it.id, userInfo)
-    }
+        declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
+            declarationService.delete(it.id, userInfo)
+        }
 
-    if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
-        return
-    }
-    // Пары КПП/ОКТМО отсутствующие в справочнике настройки подразделений
-    declarationDataConsolidated = declarationDataConsolidated ?: declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, departmentReportPeriod.id).get(0)
-    List<Pair<String, String>> kppOktmoNotPresentedInRefBookList = declarationService.findNotPresentedPairKppOktmo(declarationDataConsolidated.id);
-    for (Pair<String, String> kppOktmoNotPresentedInRefBook: kppOktmoNotPresentedInRefBookList) {
-        logger.warn("Для подразделения Тербанк отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.", kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
-    }
-    ndflPersonsGroupedByKppOktmo.each { npGroup ->
-        ScriptUtils.checkInterrupted()
-        Map<String, Object> params
-        def oktmo = npGroup.key.oktmo
-        def kpp = npGroup.key.kpp
-        def taxOrganCode = npGroup.key.taxOrganCode
-        def npGropSourcesIdList = npGroup.value.id
-        Long ddId
-        params = new HashMap<String, Object>()
-        ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, null)
+        if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
+            return
+        }
+        // Пары КПП/ОКТМО отсутствующие в справочнике настройки подразделений
+        declarationDataConsolidated = declarationDataConsolidated ?: declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, departmentReportPeriod.id).get(0)
+        List<Pair<String, String>> kppOktmoNotPresentedInRefBookList = declarationService.findNotPresentedPairKppOktmo(declarationDataConsolidated.id);
+        for (Pair<String, String> kppOktmoNotPresentedInRefBook : kppOktmoNotPresentedInRefBookList) {
+            logger.warn("Для подразделения Тербанк отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.", kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
+        }
+        ndflPersonsGroupedByKppOktmo.each { npGroup ->
+            ScriptUtils.checkInterrupted()
+            Map<String, Object> params
+            def oktmo = npGroup.key.oktmo
+            def kpp = npGroup.key.kpp
+            def taxOrganCode = npGroup.key.taxOrganCode
+            def npGropSourcesIdList = npGroup.value.id
+            Long ddId
+            params = new HashMap<String, Object>()
+            ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
+                    departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, null)
 
-        params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
-        params.put("pairKppOktmoTotal", pairKppOktmoSize)
-        formMap.put(ddId, params)
+            params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
+            formMap.put(ddId, params)
+        }
+    } finally {
+        scriptParams.put("pairKppOktmoTotal", pairKppOktmoSize)
     }
 }
 
@@ -1631,7 +1638,7 @@ def getDepartmentParam(def departmentId, def reportPeriodId, boolean throwIfEmpt
                 return null
             }
         }
-        departmentCache.put(departmentId, departmentParamList?.get(0))
+        departmentCache.put(departmentId, departmentParamList?.get(departmentParamList.size() - 1))
     }
     return departmentCache.get(departmentId)
 }
@@ -1646,7 +1653,7 @@ def getDepartmentParam(def departmentId) {
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
             departmentParamException(departmentId, declarationData.reportPeriodId)
         }
-        departmentParam = departmentParamList?.get(0)
+        departmentParam = departmentParamList?.get(departmentParamList.size() - 1)
     }
     return departmentParam
 }
@@ -1687,11 +1694,13 @@ def getDepartmentParamTable(def departmentParamId) {
  */
 def getDepartmentParamDetails(String kpp, String oktmo) {
     def departmentParamRow
-    def oktmoReference = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "CODE = '$oktmo'", null).get(0).id.value
-    departmentParamRow = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null).get(0)
-    if (departmentParamRow == null) {
+    def oktmoReferenceList = getProvider(REF_BOOK_OKTMO_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "CODE = '$oktmo'", null)
+    def oktmoReference = oktmoReferenceList.get(oktmoReferenceList.size() - 1).id.value
+    def departmentParamRowList = getProvider(REF_BOOK_NDFL_DETAIL_ID).getRecords(getReportPeriodEndDate(declarationData.reportPeriodId), null, "OKTMO = $oktmoReference AND KPP = '$kpp'", null)
+    if (departmentParamRowList == null || departmentParamRowList.isEmpty()) {
         departmentParamException(declarationData.departmentId, declarationData.reportPeriodId)
     }
+    departmentParamRow = departmentParamRowList.get(departmentParamRowList.size() - 1)
 
     return departmentParamRow
 }

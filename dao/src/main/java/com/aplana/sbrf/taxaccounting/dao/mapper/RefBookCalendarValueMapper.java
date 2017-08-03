@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.mapper;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 import java.sql.ResultSet;
@@ -22,6 +24,7 @@ public class RefBookCalendarValueMapper extends RefBookAbstractValueMapper{
     @Override
     protected Map<String, RefBookValue> createResult(ResultSet rs) throws SQLException {
         Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+        result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS)));
         return result;
     }
 }

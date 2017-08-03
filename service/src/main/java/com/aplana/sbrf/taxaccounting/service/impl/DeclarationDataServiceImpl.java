@@ -1711,6 +1711,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         Map<Long, Map<String, Object>> formMap = new HashMap<Long, Map<String, Object>>();
         additionalParameters.put("formMap", formMap);
+        Map<String, Object> scriptParams = new HashMap<String, Object>();
+        additionalParameters.put("scriptParams", scriptParams);
         DeclarationData declarationDataTemp = new DeclarationData();
         declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
         declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
@@ -1718,9 +1720,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         int success = 0;
         int pairKppOktomoTotal = 0;
+        pairKppOktomoTotal = (Integer) scriptParams.get("pairKppOktmoTotal");
         List<String> errorMsgList = new ArrayList<String>();
         for (Map.Entry<Long, Map<String, Object>> entry: formMap.entrySet()) {
-            pairKppOktomoTotal = (Integer) entry.getValue().get("pairKppOktmoTotal");
             Logger scriptLogger = new Logger();
             boolean createForm = true;
             try {

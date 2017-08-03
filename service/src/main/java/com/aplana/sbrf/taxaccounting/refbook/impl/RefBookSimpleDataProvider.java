@@ -302,8 +302,10 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                 try {
                     updateRecordVersionWithoutLock(logger, uniqueRecordId, versionFrom, versionTo, records);
                 } catch (Exception e) {
-                    throw new ServiceLoggerException(e.getLocalizedMessage(),
+                    ServiceLoggerException exception = new ServiceLoggerException(e.getLocalizedMessage(),
                             logEntryService.save(logger.getEntries()));
+                    exception.initCause(e);
+                    throw exception;
                 }
             } finally {
                 unlockObjects(lockedObjects, userId);
@@ -485,8 +487,10 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             if (logger != null) {
                 logger.error(e);
                 logger.clear(LogLevel.INFO);
-                throw new ServiceLoggerException("Запись не сохранена, обнаружены фатальные ошибки!",
+                ServiceLoggerException exception = new ServiceLoggerException("Запись не сохранена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
+                exception.initCause(e);
+                throw exception;
             } else {
                 throw new ServiceException("Запись не сохранена, обнаружены фатальные ошибки!");
             }
