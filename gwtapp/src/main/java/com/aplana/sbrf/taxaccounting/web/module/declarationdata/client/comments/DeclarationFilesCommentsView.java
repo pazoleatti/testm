@@ -60,7 +60,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
     }
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
-    private static final int NOTE_MAX_LENGTH = 255;
+    private static final int NOTE_MAX_LENGTH = 512;
 
     private final PopupPanel widget;
 
@@ -108,7 +108,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
 
-        note.getElement().setAttribute("maxLength", "255");
+        note.getElement().setAttribute("maxLength", String.valueOf(NOTE_MAX_LENGTH));
 
         selectionModel.addSelectionChangeHandler(
                 new SelectionChangeEvent.Handler() {

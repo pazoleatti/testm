@@ -353,10 +353,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             values.put("userDepId", filter.getUserDepartmentId());
         }
 
-        if (filter.getTaxType() != null) {
-            sql.append(" AND dectype.tax_type = ").append("\'").append(filter.getTaxType().getCode()).append("\'");
-        }
-
         if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
             sql
                     .append(" AND ")
@@ -438,7 +434,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.state, dec.tax_organ_code, dec.kpp, dec.oktmo, ")
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date,")
+                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, tp.year, drp.correction_date,")
                 .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
@@ -771,6 +767,26 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getNamedParameterJdbcTemplate().queryForObject("SELECT id FROM declaration_data WHERE id = :declarationDataId", values, Long.class) > 0;
         } catch (EmptyResultDataAccessException e) {
             return false;
+        }
+    }
+
+    @Override
+    public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
+        String sql = "select " +
+                "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                "drp.report_period_id, drp.department_id, dd.note " +
+             "from declaration_data dd join department_report_period drp on drp.ID = dd.department_report_period_id " +
+                "where dd.declaration_template_id = :declarationTypeId " +
+                "and drp.report_period_id = :reportPeriodId " +
+                "and drp.is_active = 1 ";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTypeId", declarationTypeId)
+                .addValue("reportPeriodId", reportPeriodId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<DeclarationData>();
         }
     }
 }

@@ -15,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.changestatused.ChangeStatusEDPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.comments.DeclarationDeclarationFilesCommentsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.move_to_create.MoveToCreatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.move_to_create.NoteEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.NdflReferencesEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subreportParams.SubreportParamsPresenter;
@@ -22,6 +24,8 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.OperationInfoAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.OperationInfoResult;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
@@ -44,13 +48,14 @@ import java.util.Date;
 import java.util.List;
 
 public class DeclarationDataPresenter
-		extends
-		Presenter<DeclarationDataPresenter.MyView, DeclarationDataPresenter.MyProxy>
-		implements DeclarationDataUiHandlers {
+        extends
+        Presenter<DeclarationDataPresenter.MyView, DeclarationDataPresenter.MyProxy>
+        implements DeclarationDataUiHandlers {
 
-	@ProxyCodeSplit
-	@NameToken(DeclarationDataTokens.declarationData)
-    public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>, Place {}
+    @ProxyCodeSplit
+    @NameToken(DeclarationDataTokens.declarationData)
+    public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>, Place {
+    }
 
     public static final String DECLARATION_UPDATE_MSG = "Область предварительного просмотра. Расчет налоговой формы выполнен.";
     public static final String DECLARATION_UPDATE_MSG_D = "Область предварительного просмотра. Расчет уведомления выполнен.";
@@ -62,19 +67,19 @@ public class DeclarationDataPresenter
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
-	public interface MyView extends View,
-			HasUiHandlers<DeclarationDataUiHandlers> {
+    public interface MyView extends View,
+            HasUiHandlers<DeclarationDataUiHandlers> {
         void showCheck(boolean show);
 
-		void showAccept(boolean show);
+        void showAccept(boolean show);
 
-		void showReject(boolean show);
+        void showReject(boolean show);
 
-		void showRecalculateButton(boolean show);
+        void showRecalculateButton(boolean show);
 
         void showDownloadButtons(boolean show);
 
-		void showDelete(boolean show);
+        void showDelete(boolean show);
 
         void showChangeStatusEDButton(boolean show);
 
@@ -84,15 +89,15 @@ public class DeclarationDataPresenter
 
         void setDeclarationDataId(Long declarationDataId);
 
-		void setTitle(String title, boolean isTaxTypeDeal);
+        void setTitle(String title, boolean isTaxTypeDeal);
 
-		void setDepartment(String department);
+        void setDepartment(String department);
 
-		void setReportPeriod(String reportPeriod);
+        void setReportPeriod(String reportPeriod);
 
-		void setBackButton(String link, String text);
+        void setBackButton(String link, String text);
 
-		void setPdf(Pdf pdf);
+        void setPdf(Pdf pdf);
 
         void setKpp(String kpp);
 
@@ -137,65 +142,105 @@ public class DeclarationDataPresenter
         Button getAddErrorButton();
     }
 
-	private final DispatchAsync dispatcher;
-	private final TaPlaceManager placeManager;
-	private final HistoryPresenter historyPresenter;
+    private final DispatchAsync dispatcher;
+    private final TaPlaceManager placeManager;
+    private final HistoryPresenter historyPresenter;
     private final SubreportParamsPresenter subreportParamsPresenter;
     private final DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter;
     private final ChangeStatusEDPresenter changeStatusEDPresenter;
     private final SourcesPresenter sourcesPresenter;
     private final NdflReferencesEditPresenter ndflReferencesEditPresenter;
-	private long declarationId;
+    private final MoveToCreatePresenter moveToCreatePresenter;
+    private long declarationId;
     private DeclarationData declarationData;
     private String taxName;
     private TaxType taxType;
     private DeclarationFormKind declarationFormKind;
     private List<DeclarationSubreport> subreports = new ArrayList<DeclarationSubreport>();
+    private boolean isRemoved = false;
 
-	@Inject
-	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
-									final MyProxy proxy, DispatchAsync dispatcher,
-									PlaceManager placeManager,
-									HistoryPresenter historyPresenter, SubreportParamsPresenter subreportParamsPresenter,
+    @Inject
+    public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
+                                    final MyProxy proxy, final DispatchAsync dispatcher,
+                                    PlaceManager placeManager,
+                                    HistoryPresenter historyPresenter, SubreportParamsPresenter subreportParamsPresenter,
                                     SourcesPresenter sourcesPresenter, DeclarationDeclarationFilesCommentsPresenter declarationFilesCommentsPresenter,
-                                    ChangeStatusEDPresenter changeStatusEDPresenter, NdflReferencesEditPresenter ndflReferencesEditPresenter) {
-		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
-		this.dispatcher = dispatcher;
-		this.historyPresenter = historyPresenter;
-		this.placeManager = (TaPlaceManager) placeManager;
+                                    ChangeStatusEDPresenter changeStatusEDPresenter, NdflReferencesEditPresenter ndflReferencesEditPresenter,
+                                    MoveToCreatePresenter moveToCreatePresenter) {
+        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        this.dispatcher = dispatcher;
+        this.historyPresenter = historyPresenter;
+        this.placeManager = (TaPlaceManager) placeManager;
         this.sourcesPresenter = sourcesPresenter;
         this.subreportParamsPresenter = subreportParamsPresenter;
         this.declarationFilesCommentsPresenter = declarationFilesCommentsPresenter;
         this.changeStatusEDPresenter = changeStatusEDPresenter;
         this.ndflReferencesEditPresenter = ndflReferencesEditPresenter;
-		getView().setUiHandlers(this);
-	}
+        this.moveToCreatePresenter = moveToCreatePresenter;
+        ndflReferencesEditPresenter.setDeclarationDataPresenter(DeclarationDataPresenter.this);
+        eventBus.addHandler(NoteEvent.TYPE, new NoteEvent.CommentEventHandler() {
+            @Override
+            public void update(final NoteEvent event) {
+                if (event.getComment() != null && event.getDeclarationDataId() != null) {
+                    LogCleanEvent.fire(DeclarationDataPresenter.this);
+                    OperationInfoAction actionInfo = new OperationInfoAction();
+                    actionInfo.setDeclarationDataReportType(DeclarationDataReportType.TO_CREATE_DEC.getReportType().getDescription());
+                    List<Long> ddList = new ArrayList<Long>();
+                    ddList.add(event.getDeclarationDataId());
+                    actionInfo.setDeclarationDataIdList(ddList);
+                    dispatcher.execute(actionInfo, CallbackUtils.defaultCallback(new AbstractCallback<OperationInfoResult>() {
+                        @Override
+                        public void onSuccess(OperationInfoResult result) {
+                            LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                            AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+                            action.setAccepted(false);
+                            action.setDeclarationId(event.getDeclarationDataId());
+                            action.setReasonForReturn(event.getComment());
+                            action.setTaxType(taxType);
+                            dispatcher.execute(action, CallbackUtils
+                                    .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+                                        @Override
+                                        public void onSuccess(AcceptDeclarationDataResult result) {
+                                            if (!checkExistDeclarationData(result)) return;
+                                            revealPlaceRequest();
+                                        }
+                                    }, DeclarationDataPresenter.this));
+                        }
 
-	/**
-	 * Здесь происходит подготовка декларации.
-	 * 
-	 * @param request
-	 *            запрос
-	 */
-	@Override
-	public void prepareFromRequest(final PlaceRequest request) {
-		super.prepareFromRequest(request);
-		final long id = ParamUtils.getLong(request,
-				DeclarationDataTokens.declarationId);
+                    }, DeclarationDataPresenter.this));
+                }
+            }
+        });
 
-		GetDeclarationDataAction action = new GetDeclarationDataAction();
-		action.setId(id);
-		dispatcher.execute(
-				action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetDeclarationDataResult>() {
-							@Override
-							public void onSuccess(
-									GetDeclarationDataResult result) {
+        getView().setUiHandlers(this);
+    }
+
+    /**
+     * Здесь происходит подготовка декларации.
+     *
+     * @param request запрос
+     */
+    @Override
+    public void prepareFromRequest(final PlaceRequest request) {
+        super.prepareFromRequest(request);
+        isRemoved = false;
+        final long id = ParamUtils.getLong(request,
+                DeclarationDataTokens.declarationId);
+
+        GetDeclarationDataAction action = new GetDeclarationDataAction();
+        action.setId(id);
+        ndflReferencesEditPresenter.clean();
+        dispatcher.execute(
+                action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetDeclarationDataResult>() {
+                            @Override
+                            public void onSuccess(
+                                    GetDeclarationDataResult result) {
                                 LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-								declarationId = id;
+                                declarationId = id;
                                 declarationData = result.getDeclarationData();
-								taxName = result.getTaxType().name();
+                                taxName = result.getTaxType().name();
                                 taxType = result.getTaxType();
                                 declarationFormKind = result.getDeclarationFormKind();
                                 //sourcesPresenter.setTaxType(taxType);
@@ -206,12 +251,12 @@ public class DeclarationDataPresenter
                                 if (result.getCorrectionDate() != null) {
                                     periodStr += ", корр. (" + DATE_TIME_FORMAT.format(result.getCorrectionDate()) + ")";
                                 }
-								getView().setReportPeriod(periodStr);
+                                getView().setReportPeriod(periodStr);
                                 getView().setDepartment(result.getDepartment());
                                 getView().setVisiblePDF(result.isVisiblePDF());
                                 subreports = result.getSubreports();
                                 getView().setSubreports(result.getSubreports());
-                                if (taxType.equals(TaxType.NDFL)){
+                                if (taxType.equals(TaxType.NDFL)) {
                                     if (DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind())) {
                                         getView().setPropertyBlockVisible(true, true, true, result.getStateEDName() != null, false, taxType);
                                         getView().setKpp(declarationData.getKpp());
@@ -234,35 +279,35 @@ public class DeclarationDataPresenter
                                 getView().setCreateDate(result.getCreationDate());
 
                                 boolean isReports = TaxType.NDFL.equals(taxType) && DeclarationFormKind.REPORTS.equals(result.getDeclarationFormKind());
-								getView()
-										.setBackButton(
-												"#"
-														+ DeclarationListNameTokens.DECLARATION_LIST
-														+ ";nType="
-														+ result.getTaxType()
-                                                        + (isReports?(";" + DeclarationListPresenter.REPORTS + "=" + true):""), result.getTaxType()
-                                        .getName());
-								getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
-								updateTitle(result.getDeclarationType());
+                                getView()
+                                        .setBackButton(
+                                                "#"
+                                                        + DeclarationListNameTokens.DECLARATION_LIST
+                                                        + ";nType="
+                                                        + result.getTaxType()
+                                                        + (isReports ? (";" + DeclarationListPresenter.REPORTS + "=" + true) : ""), result.getTaxType()
+                                                        .getName());
+                                getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
+                                updateTitle(result.getDeclarationType());
 
                                 getView().setPdfPage(0);
                                 getView().showState(declarationData.getState());
-								getView().showCheck(result.isCanCheck());
-								getView().showAccept(result.isCanAccept());
-								getView().showReject(result.isCanReject());
-								getView().showDelete(result.isCanDelete());
-								getView().showRecalculateButton(result.isCanRecalculate() && !isReports);
-								getView().showChangeStatusEDButton(result.isCanChangeStatusED());
-                                if(declarationData.getDeclarationTemplateId() == 102 || declarationData.getDeclarationTemplateId() == 104) {
+                                getView().showCheck(result.isCanCheck());
+                                getView().showAccept(result.isCanAccept());
+                                getView().showReject(result.isCanReject());
+                                getView().showDelete(result.isCanDelete());
+                                getView().showRecalculateButton(result.isCanRecalculate() && !isReports);
+                                getView().showChangeStatusEDButton(result.isCanChangeStatusED());
+                                if (declarationData.getDeclarationTemplateId() == 102 || declarationData.getDeclarationTemplateId() == 104) {
                                     getView().getAddErrorButton().setVisible(true);
                                 } else {
                                     getView().getAddErrorButton().setVisible(false);
                                 }
                                 onTimerReport(DeclarationDataReportType.XML_DEC, false);
                                 onTimerReport(DeclarationDataReportType.EXCEL_DEC, false);
-							}
-						}, DeclarationDataPresenter.this).addCallback(
-                        new ManualRevealCallback(DeclarationDataPresenter.this){
+                            }
+                        }, DeclarationDataPresenter.this).addCallback(
+                        new ManualRevealCallback(DeclarationDataPresenter.this) {
                             @Override
                             public void onFailure(Throwable caught) {
                                 placeManager.navigateBackQuietly();
@@ -271,10 +316,11 @@ public class DeclarationDataPresenter
                             }
                         }));
 
-	}
+    }
 
     @Override
     public void onTimerReport(final DeclarationDataReportType type, final boolean isTimer) {
+
         TimerReportAction action = new TimerReportAction();
         action.setDeclarationDataId(declarationId);
         action.setType(type.getReportAlias());
@@ -330,9 +376,9 @@ public class DeclarationDataPresenter
                             getView().updatePrintReportButtonName(type, false, null);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (DeclarationDataReportType.XML_DEC.equals(type)) {
-                                getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение налоговой формы данными":"Заполнение уведомления данными");
+                                getView().showNoPdf(!TaxType.DEAL.equals(taxType) ? "Заполнение налоговой формы данными" : "Заполнение уведомления данными");
                             } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
-                                getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
+                                getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
                                         " Идет формирование формы предварительного просмотра");
                             }
                             getView().updatePrintReportButtonName(type, false, null);
@@ -350,7 +396,7 @@ public class DeclarationDataPresenter
                 .simpleCallback(new AbstractCallback<TimerSubreportResult>() {
                     @Override
                     public void onSuccess(TimerSubreportResult result) {
-                        for(DeclarationSubreport subreport: subreports) {
+                        for (DeclarationSubreport subreport : subreports) {
                             if (!checkExistDeclarationData(result)) return;
                             TimerSubreportResult.Status status = result.getMapExistReport().get(subreport.getAlias());
                             if (status != null) {
@@ -377,28 +423,28 @@ public class DeclarationDataPresenter
     }
 
     @Override
-	public boolean useManualReveal() {
-		return true;
-	}
+    public boolean useManualReveal() {
+        return true;
+    }
 
-	@Override
-	public void onRecalculateClicked(final Date docDate, final boolean force, final boolean cancelTask) {
-		LogCleanEvent.fire(this);
-        getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение налоговой формы данными":"Заполнение уведомления данными");
+    @Override
+    public void onRecalculateClicked(final Date docDate, final boolean force, final boolean cancelTask) {
+        LogCleanEvent.fire(this);
+        getView().showNoPdf(!TaxType.DEAL.equals(taxType) ? "Заполнение налоговой формы данными" : "Заполнение уведомления данными");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
-		action.setDeclarationId(declarationId);
-		action.setDocDate(docDate);
+        action.setDeclarationId(declarationId);
+        action.setDocDate(docDate);
         action.setTaxType(taxType);
         action.setForce(force);
         action.setCancelTask(cancelTask);
-		dispatcher
-				.execute(
-						action,
-						CallbackUtils
-								.defaultCallback(new AbstractCallback<RecalculateDeclarationDataResult>() {
-									@Override
-									public void onSuccess(
-											RecalculateDeclarationDataResult result) {
+        dispatcher
+                .execute(
+                        action,
+                        CallbackUtils
+                                .defaultCallback(new AbstractCallback<RecalculateDeclarationDataResult>() {
+                                    @Override
+                                    public void onSuccess(
+                                            RecalculateDeclarationDataResult result) {
                                         if (!checkExistDeclarationData(result)) return;
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                                         if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
@@ -417,7 +463,7 @@ public class DeclarationDataPresenter
                                             });
                                         }
                                         onTimerReport(DeclarationDataReportType.XML_DEC, false);
-									}
+                                    }
 
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -426,26 +472,26 @@ public class DeclarationDataPresenter
                                         onTimerReport(DeclarationDataReportType.XML_DEC, false);
                                     }
                                 }, DeclarationDataPresenter.this));
-	}
+    }
 
-	@Override
-	public void accept(boolean accepted, final boolean force, final boolean cancelTask) {
-		if (accepted) {
-			LogCleanEvent.fire(this);
-			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
-			action.setAccepted(true);
-			action.setDeclarationId(declarationId);
+    @Override
+    public void accept(boolean accepted, final boolean force, final boolean cancelTask) {
+        if (accepted) {
+            LogCleanEvent.fire(this);
+            AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
+            action.setAccepted(true);
+            action.setDeclarationId(declarationId);
             action.setForce(force);
             action.setTaxType(taxType);
             action.setCancelTask(cancelTask);
-			dispatcher
-					.execute(
-							action,
-							CallbackUtils
-									.defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
-										@Override
-										public void onSuccess(
-												AcceptDeclarationDataResult result) {
+            dispatcher
+                    .execute(
+                            action,
+                            CallbackUtils
+                                    .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
+                                        @Override
+                                        public void onSuccess(
+                                                AcceptDeclarationDataResult result) {
                                             if (!checkExistDeclarationData(result)) return;
                                             LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                                             if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
@@ -466,34 +512,18 @@ public class DeclarationDataPresenter
                                                 });
                                             }
                                             onTimerReport(DeclarationDataReportType.ACCEPT_DEC, false);
-										}
-									}, DeclarationDataPresenter.this));
-		} else {
-            Dialog.confirmMessageYesClose("Вернуть в Создана", "Вы действительно хотите вернуть в статус \"Создана\" форму?\"", new DialogHandler() {
-                @Override
-                public void yes() {
-                    LogCleanEvent.fire(DeclarationDataPresenter.this);
-                    AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
-                    action.setAccepted(false);
-                    action.setDeclarationId(declarationId);
-                    dispatcher.execute(action, CallbackUtils
-                            .defaultCallback(new AbstractCallback<AcceptDeclarationDataResult>() {
-                                @Override
-                                public void onSuccess(AcceptDeclarationDataResult result) {
-                                    if (!checkExistDeclarationData(result)) return;
-                                    revealPlaceRequest();
-                                }
-                            }, DeclarationDataPresenter.this));
-                }
-            });
-            //dialogPresenter.setDeclarationId(declarationId);
-			//addToPopupSlot(dialogPresenter);
-		}
+                                        }
+                                    }, DeclarationDataPresenter.this));
+        } else {
+            LogCleanEvent.fire(DeclarationDataPresenter.this);
+            moveToCreatePresenter.setDeclarationDataId(declarationId);
+            addToPopupSlot(moveToCreatePresenter);
+        }
 
-	}
+    }
 
-	@Override
-	public void delete() {
+    @Override
+    public void delete() {
         final DeclarationDataPresenter t = this;
         Dialog.confirmMessage(!taxType.equals(TaxType.DEAL) ? DECLARATION_DELETE_Q : DECLARATION_DELETE_Q_D, new DialogHandler() {
             @Override
@@ -501,6 +531,7 @@ public class DeclarationDataPresenter
                 LogCleanEvent.fire(t);
                 DeleteDeclarationDataAction action = new DeleteDeclarationDataAction();
                 action.setDeclarationId(declarationId);
+                isRemoved = true;
                 dispatcher
                         .execute(
                                 action,
@@ -509,15 +540,20 @@ public class DeclarationDataPresenter
                                             @Override
                                             public void onSuccess(
                                                     DeleteDeclarationDataResult result) {
-                                                if (!checkExistDeclarationData(result)) return;
                                                 MessageEvent
                                                         .fire(DeclarationDataPresenter.this, DECLARATION_DELETE_MSG);
                                                 boolean isReports = TaxType.NDFL.equals(taxType) && DeclarationFormKind.REPORTS.equals(declarationFormKind);
                                                 placeManager
                                                         .revealPlace(new PlaceRequest(DeclarationListNameTokens.DECLARATION_LIST)
                                                                 .with("nType", taxName)
-                                                                .with(DeclarationListPresenter.REPORTS, isReports?"true":"false"));
+                                                                .with(DeclarationListPresenter.REPORTS, isReports ? "true" : "false"));
 
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                super.onFailure(caught);
+                                                isRemoved = false;
                                             }
                                         }, DeclarationDataPresenter.this));
                 Dialog.hideMessage();
@@ -533,19 +569,19 @@ public class DeclarationDataPresenter
                 Dialog.hideMessage();
             }
         });
-	}
+    }
 
-	@Override
-	public void check(final boolean force) {
-		LogCleanEvent.fire(this);
-		CheckDeclarationDataAction checkAction = new CheckDeclarationDataAction();
-		checkAction.setDeclarationId(declarationId);
+    @Override
+    public void check(final boolean force) {
+        LogCleanEvent.fire(this);
+        CheckDeclarationDataAction checkAction = new CheckDeclarationDataAction();
+        checkAction.setDeclarationId(declarationId);
         checkAction.setTaxType(taxType);
         checkAction.setForce(force);
-		dispatcher.execute(checkAction, CallbackUtils
-				.defaultCallback(new AbstractCallback<CheckDeclarationDataResult>() {
-					@Override
-					public void onSuccess(CheckDeclarationDataResult result) {
+        dispatcher.execute(checkAction, CallbackUtils
+                .defaultCallback(new AbstractCallback<CheckDeclarationDataResult>() {
+                    @Override
+                    public void onSuccess(CheckDeclarationDataResult result) {
                         if (!checkExistDeclarationData(result)) return;
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
@@ -561,38 +597,38 @@ public class DeclarationDataPresenter
                         }
                         onTimerReport(DeclarationDataReportType.CHECK_DEC, false);
                     }
-				}, this));
-	}
+                }, this));
+    }
 
     @Override
     public void addError() {
-	    ndflReferencesEditPresenter.setDeclarationDataId(declarationId);
+        ndflReferencesEditPresenter.setDeclarationDataId(declarationId);
         addToPopupSlot(ndflReferencesEditPresenter);
     }
 
     @Override
-	public void downloadXml() {
-		Window.open(GWT.getHostPageBaseURL() + "rest/download/declarationData/xml/"
-				+ declarationId, null, null);
-	}
+    public void downloadXml() {
+        Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xml/"
+                + declarationId, null, null);
+    }
 
-	@Override
-	public void onInfoClicked() {
-		historyPresenter.prepareDeclarationHistory(declarationId, taxType);
-		addToPopupSlot(historyPresenter);
-	}
+    @Override
+    public void onInfoClicked() {
+        historyPresenter.prepareDeclarationHistory(declarationId, taxType);
+        addToPopupSlot(historyPresenter);
+    }
 
     @Override
     public void revealPlaceRequest() {
-		placeManager.revealPlace(new PlaceRequest(
-				DeclarationDataTokens.declarationData).with(
-				DeclarationDataTokens.declarationId,
-				String.valueOf(declarationId)));
-	}
+        placeManager.revealPlace(new PlaceRequest(
+                DeclarationDataTokens.declarationData).with(
+                DeclarationDataTokens.declarationId,
+                String.valueOf(declarationId)));
+    }
 
-	private void updateTitle(String declarationType) {
-		TitleUpdateEvent.fire(this, "Налоговая форма", declarationType);
-	}
+    private void updateTitle(String declarationType) {
+        TitleUpdateEvent.fire(this, "Налоговая форма", declarationType);
+    }
 
     @Override
     public TaxType getTaxType() {
@@ -722,8 +758,8 @@ public class DeclarationDataPresenter
     }
 
     public boolean checkExistDeclarationData(DeclarationDataResult result) {
-	    if (!result.isExistDeclarationData()) {
-	        LogCleanEvent.fire(DeclarationDataPresenter.this);
+        if (!isRemoved && !result.isExistDeclarationData()) {
+            LogCleanEvent.fire(DeclarationDataPresenter.this);
             Dialog.errorMessage("Налоговая форма с номером = " + result.getDeclarationDataId() + " не существует либо была удалена. Вы будете перенаправлены на главную страницу", new DialogHandler() {
                 @Override
                 public void close() {
@@ -735,7 +771,7 @@ public class DeclarationDataPresenter
     }
 
     @Override
-    public void onReset(){
+    public void onReset() {
         // при каждом открытии страницы скрываем модальные окна, на случай если они были открыты а адрес страницы поменяли
         this.historyPresenter.getView().hide();
         this.subreportParamsPresenter.getView().hide();

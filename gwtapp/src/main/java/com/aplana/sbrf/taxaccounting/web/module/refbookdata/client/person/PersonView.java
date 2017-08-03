@@ -108,7 +108,7 @@ public class PersonView extends PopupViewWithUiHandlers<PersonUiHandlers> implem
         personPicker.setAttributeId(9059L);
         personPicker.setWidth("100%");
         personPicker.setManualUpdate(true);
-        personPicker.setPeriodDates(new Date(), new Date());
+        personPicker.setTitle("Физические лица");
 
         personPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
@@ -123,7 +123,7 @@ public class PersonView extends PopupViewWithUiHandlers<PersonUiHandlers> implem
         duplicatePersonPicker.setAttributeId(9059L);
         duplicatePersonPicker.setWidth("100%");
         duplicatePersonPicker.setManualUpdate(true);
-        duplicatePersonPicker.setPeriodDates(new Date(), new Date());
+        duplicatePersonPicker.setTitle("Физические лица");
 
         duplicatePersonPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
@@ -187,6 +187,8 @@ public class PersonView extends PopupViewWithUiHandlers<PersonUiHandlers> implem
        add("MIDDLE_NAME");
        add("INN");
        add("SNILS");
+       add("INN_FOREIGN");
+       add("DOC_NUMBER");
        add("OLD_ID");
     }};
 
@@ -451,5 +453,13 @@ public class PersonView extends PopupViewWithUiHandlers<PersonUiHandlers> implem
             default:
                 return HasHorizontalAlignment.ALIGN_LEFT;
         }
+    }
+
+    @Override
+    public void setRelevanceDate(Date relevanceDate) {
+        personPicker.setPeriodDates(relevanceDate, relevanceDate);
+        duplicatePersonPicker.setPeriodDates(relevanceDate, relevanceDate);
+        personPicker.setPeriodDates(null, null);
+        duplicatePersonPicker.setPeriodDates(null, null);
     }
 }

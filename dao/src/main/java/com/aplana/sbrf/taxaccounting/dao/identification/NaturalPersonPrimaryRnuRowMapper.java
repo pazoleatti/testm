@@ -76,12 +76,6 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
             person.getPersonDocumentList().add(personDocument);
         }
 
-        //добавлено для 115 макета
-        person.setPension(SqlUtils.getInteger(rs, "pension"));
-        person.setMedical(SqlUtils.getInteger(rs, "medical"));
-        person.setSocial(SqlUtils.getInteger(rs, "social"));
-        person.setSex(SqlUtils.getInteger(rs, "sex"));
-
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
 
         //Используются только адреса которые прошли проверку по ФИАС

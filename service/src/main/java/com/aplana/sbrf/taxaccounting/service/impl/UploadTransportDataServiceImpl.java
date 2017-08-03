@@ -2,23 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.ImportCounter;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TransportDataParam;
-import com.aplana.sbrf.taxaccounting.model.UploadResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -26,16 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -48,13 +23,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -441,7 +410,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
 
             String reportPeriodName = "";
-            String filter = "CODE='" + reportPeriodCode + "' AND " + declarationType.getTaxType().getCode() + "=1";
+            String filter = "CODE='" + reportPeriodCode + "'";
             PagingResult<Map<String, RefBookValue>> reportPeriodDicts = refBookDao.getRecords(REF_BOOK_PERIOD_DICT, null, null, filter, null);
             if (reportPeriodDicts.size() == 1) {
                 reportPeriodName = reportPeriodDicts.get(0).get("NAME").getStringValue();
@@ -450,10 +419,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             }
             // Указан недопустимый код периода
-            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(declarationType.getTaxType(), reportPeriodCode, year);
+            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodCode, year);
             if (reportPeriod == null) {
                 logger.warn(U2, fileName);
-                logger.warn(U2_3, declarationType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
+                logger.warn(U2_3, TaxType.NDFL.getName(), reportPeriodCode, reportPeriodName, year);
                 return null;
             }
 
@@ -474,7 +443,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             // 40 - Выборка для доступа к экземплярам НФ/деклараций
             List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    declarationType.getTaxType(), null, null);
+                    TaxType.NDFL, null, null);
             if (!departmentList.contains(formDepartment.getId())) {
                 logger.warn(U3 + U3_1, fileName, formDepartment.getName());
                 return null;
@@ -489,7 +458,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             // Назначение подразделению типа и вида НФ
             List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(formDepartment.getId(),
-                    declarationTemplate.getType().getTaxType(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                    TaxType.NDFL, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
             boolean found = false;
             for (DepartmentDeclarationType ddt : ddts) {
                 if (ddt.getDeclarationTypeId() == declarationType.getId()) {
@@ -504,7 +473,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             // Период отсутствует либо закрыт
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(formDepartment.getId(), reportPeriod.getId());
             if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-                logger.warn(U3 + U3_4, fileName, declarationType.getTaxType().getName(), reportPeriodCode, reportPeriodName, year);
+                logger.warn(U3 + U3_4, fileName, TaxType.NDFL.getName(), reportPeriodCode, reportPeriodName, year);
                 return null;
             }
 

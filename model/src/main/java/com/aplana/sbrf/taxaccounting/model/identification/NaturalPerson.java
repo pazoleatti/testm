@@ -34,11 +34,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     private String middleName;
 
     /**
-     * Пол
-     */
-    private Integer sex;
-
-    /**
      * ИНН
      */
     private String inn;
@@ -88,9 +83,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
      */
     private Address address;
 
-    private Integer pension;
-    private Integer medical;
-    private Integer social;
     private Integer employee;
 
     /**
@@ -149,14 +141,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
         this.middleName = middleName;
     }
 
-    public Integer getSex() {
-        return sex;
-    }
-
-    public void setSex(Integer sex) {
-        this.sex = sex;
-    }
-
     public String getInn() {
         return inn;
     }
@@ -212,30 +196,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
 
     public void setAddress(Address address) {
         this.address = address;
-    }
-
-    public Integer getPension() {
-        return pension;
-    }
-
-    public void setPension(Integer pension) {
-        this.pension = pension;
-    }
-
-    public Integer getMedical() {
-        return medical;
-    }
-
-    public void setMedical(Integer medical) {
-        this.medical = medical;
-    }
-
-    public Integer getSocial() {
-        return social;
-    }
-
-    public void setSocial(Integer social) {
-        this.social = social;
     }
 
     public Integer getEmployee() {
@@ -325,7 +285,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
                 .append("lastName", lastName)
                 .append("firstName", firstName)
                 .append("middleName", middleName)
-                .append("sex", sex)
                 .append("inn", inn)
                 .append("innForeign", innForeign)
                 .append("snils", snils)
@@ -335,9 +294,6 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
                 .append("personIdentityList", personIdentityList)
                 .append("personDocumentList", personDocumentList)
                 .append("address", address)
-                .append("pension", pension)
-                .append("medical", medical)
-                .append("social", social)
                 .append("employee", employee)
                 .append("weigth", weigth)
                 .toString();

@@ -15,7 +15,6 @@ import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Базовый класс для тестов скриптов.

@@ -42,7 +42,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
     };
 
     public static final String LOCK_INFO_MSG = "Запрашиваемая операция \"%s\" уже запущена %s пользователем %s. Вы добавлены в список получателей оповещения о выполнении данной операции.";
-    public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
+    public static final String CREATE_TASK = "Операция \"%s\" %s поставлена в очередь на исполнение";
     public static final String CANCEL_MSG = "Запрашиваемая операция \"%s\" уже запущена (находится в очереди на выполнение). Отменить задачу и создать новую?";
     public static final String RESTART_MSG = "Запрашиваемая операция \"%s\" уже запущена (выполняется Системой). При ее отмене задача выполнится до конца, но результат выполнения не будет сохранен. Отменить задачу и создать новую?";
 
@@ -122,7 +122,15 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
 							params, balancingVariant);
 
                     // Шаг 8
-                    logger.info(String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo)));
+                    Object declarationDataId = params.get("declarationDataId");
+                    if (declarationDataId != null) {
+                        String message = String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "для формы № " + params.get("declarationDataId"));
+                        logger.info(message.replaceAll("\"\"", "\""));
+                    } else {
+                        String message = String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo), "");
+                        logger.info(message.replaceAll("\"\"", "\""));
+                    }
+
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
                     int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);

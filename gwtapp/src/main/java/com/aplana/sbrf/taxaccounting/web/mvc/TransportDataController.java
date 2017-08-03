@@ -108,7 +108,7 @@ public class TransportDataController {
                                 params, balancingVariant);
                         LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                         lockDataService.updateQueue(key, lockData.getDateLock(), queue);
-                        logger.info(String.format(CREATE_TASK, "Загрузки файла"));
+                        logger.info(String.format(CREATE_TASK, "Загрузка файла"));
                     } catch (AsyncTaskException e) {
                         lockDataService.unlock(key, userId);
                         logger.error("Ошибка при постановке в очередь задачи загрузки ТФ.");

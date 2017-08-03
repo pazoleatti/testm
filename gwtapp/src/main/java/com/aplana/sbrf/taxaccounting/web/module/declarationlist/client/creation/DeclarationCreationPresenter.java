@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
@@ -22,7 +23,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -59,10 +59,13 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     private TaxType taxType;
     private DeclarationFormKind declarationFormKind;
 
+    private EventBus eventBus;
+
     @Inject
     public DeclarationCreationPresenter(final EventBus eventBus, final MyView view,
                                         DispatchAsync dispatcher, PlaceManager placeManager) {
         super(eventBus, view);
+        this.eventBus = eventBus;
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
         getView().setUiHandlers(this);
@@ -70,6 +73,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 
     @Override
     protected void onHide() {
+        eventBus.fireEvent(new FocusActionEvent(false));
         clearValues();
         getView().hide();
     }
@@ -77,9 +81,17 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     @Override
     public void onContinue() {
         final DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
+        if (getView().getSelectedDeclarationType() != null) {
+            filter.setDeclarationTypeIds(Arrays.asList(getView().getSelectedDeclarationType().longValue()));
+        }
         filter.setDepartmentIds(getView().getSelectedDepartment());
         filter.setReportPeriodIds(getView().getSelectedReportPeriod());
+        if (filter.getDeclarationTypeIds() == null || filter.getDepartmentIds() == null ||
+                filter.getReportPeriodIds() == null || filter.getDeclarationTypeIds().isEmpty() ||
+                filter.getDepartmentIds().isEmpty() || filter.getReportPeriodIds().isEmpty()) {
+            Dialog.warningMessage("", "Заполнены не все поля отчетности");
+            return;
+        }
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);

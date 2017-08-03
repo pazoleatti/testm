@@ -19,6 +19,7 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
     private int sortColumnIndex;
     private boolean ascSorting;
     private String filter;
+    private boolean person = false;
 
     public long getRefBookId() {
 		return refBookId;
@@ -106,6 +107,14 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 
     public void setFilter(String filter) {
         this.filter = filter;
+    }
+
+    public boolean isPerson() {
+        return person;
+    }
+
+    public void setPerson(boolean person) {
+        this.person = person;
     }
 
     @Override

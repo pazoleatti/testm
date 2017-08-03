@@ -15,8 +15,6 @@ public interface IdentityPerson {
 
     String getMiddleName();
 
-    Integer getSex();
-
     String getInn();
 
     String getInnForeign();
@@ -30,12 +28,6 @@ public interface IdentityPerson {
     Date getBirthDate();
 
     Address getAddress();
-
-    Integer getPension();
-
-    Integer getMedical();
-
-    Integer getSocial();
 
     Integer getEmployee();
 

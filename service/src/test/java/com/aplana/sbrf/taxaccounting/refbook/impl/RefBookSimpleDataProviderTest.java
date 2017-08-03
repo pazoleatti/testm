@@ -110,14 +110,6 @@ public class RefBookSimpleDataProviderTest {
     }
 
     @Test
-    public void dereferenceValuesInvokesDao() throws Exception {
-        List<Long> recordIds = new ArrayList<Long>();
-        provider.dereferenceValues(42L, recordIds);
-
-        verify(refBookDaoMock).dereferenceValues(RFB_TABLE_NAME, 42L, recordIds);
-    }
-
-    @Test
     public void getInactiveRecordsInPeriodInvokesDao() throws Exception {
         List<Long> recordIds = new ArrayList<Long>();
         Date startDate = new Date(0);
@@ -184,6 +176,14 @@ public class RefBookSimpleDataProviderTest {
 
     @Test
     public void dereferenceValuesExecutes() throws Exception {
+        RefBook refBook = new RefBook();
+        List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+        RefBookAttribute refBookAttribute = new RefBookAttribute();
+        refBookAttribute.setId(50L);
+        refBookAttribute.setAlias("alias");
+        attributes.add(refBookAttribute);
+        refBook.setAttributes(attributes);
+        provider.setRefBook(refBook);
         provider.dereferenceValues(50L, new ArrayList<Long>(Arrays.asList(4L)));
     }
 

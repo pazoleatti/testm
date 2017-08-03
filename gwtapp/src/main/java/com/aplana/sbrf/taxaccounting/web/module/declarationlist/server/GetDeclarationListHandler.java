@@ -106,7 +106,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 
         action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
 
-        if (taxType.equals(TaxType.NDFL) && !currentUser.hasRole(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER) ||
+        if (!currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS) && currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_OPER) ||
                 taxType.equals(TaxType.PFR) && !currentUser.hasRole(TARole.F_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.F_ROLE_OPER)) {
             action.getDeclarationFilter().setUserDepartmentId(currentUser.getDepartmentId());
         }

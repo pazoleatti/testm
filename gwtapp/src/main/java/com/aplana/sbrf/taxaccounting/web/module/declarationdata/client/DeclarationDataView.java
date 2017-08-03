@@ -531,26 +531,26 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 timerSpecific.scheduleRepeating(4000);
                 timerSpecific.run();
             } else {
-                //viewPdf.setVisible(false);
+                viewPdf.setVisible(false);
                 printToXml.setVisible(false);
                 printToExcelPanel.setVisible(false);
                 printAnchor.setEnabled(false);
                 timerSpecific.cancel();
             }
-        } /*else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
+        } else if (DeclarationDataReportType.PDF_DEC.equals(type)) {
             if (isLoad) {
                 viewPdf.setVisible(false);
                 timerPDF.cancel();
             } else {
                 viewPdf.setVisible(isVisiblePDF);
             }
-        }*/ else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
-            if (!isLoad) {
+        } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
+            if (isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerAccept.cancel();
             }
         } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
-            if (!isLoad) {
+            if (isLoad) {
                 getUiHandlers().revealPlaceRequest();
                 timerCheck.cancel();
             }
@@ -571,7 +571,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 timerPDF.run();
             }
         } else if (DeclarationDataReportType.ACCEPT_DEC.equals(type)) {
-            timerAccept.scheduleRepeating(4000);
+            timerAccept.scheduleRepeating(1000);
             timerAccept.run();
         } else if (DeclarationDataReportType.CHECK_DEC.equals(type)) {
             timerCheck.scheduleRepeating(4000);
@@ -661,7 +661,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public void setVisiblePDF(boolean isVisiblePDF) {
         this.isVisiblePDF = isVisiblePDF;
-        //viewPdf.setVisible(isVisiblePDF);
+        viewPdf.setVisible(isVisiblePDF);
     }
 
     @Override

@@ -60,8 +60,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo) {
-        return ndflPersonDao.findNdflPersonByPairKppOktmo(declarationDataId, kpp, oktmo);
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
+        return ndflPersonDao.findNdflPersonByPairKppOktmo(declarationDataId, kpp, oktmo, is2Ndfl2);
     }
 
     @Override
@@ -140,6 +140,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
             parameters = new HashMap<String, Object>();
         }
         return ndflPersonDao.findNdflPersonByParameters(declarationDataId, parameters, new PagingParams(startIndex, pageSize));
+    }
+
+    @Override
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters) {
+        return ndflPersonDao.findNdflPersonCountByParameters(declarationDataId, parameters);
     }
 
     @Override

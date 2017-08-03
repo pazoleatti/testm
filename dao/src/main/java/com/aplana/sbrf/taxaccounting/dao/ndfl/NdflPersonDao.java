@@ -257,6 +257,14 @@ public interface NdflPersonDao {
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
 
     /**
+     * Найти количество NdflPerson по заданным параметрам
+     * @param declarationDataId
+     * @param parameters
+     * @return
+     */
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters);
+
+    /**
      * @param sqlQuery
      * @param parameters
      * @return
@@ -295,7 +303,7 @@ public interface NdflPersonDao {
      * @param oktmo
      * @return
      */
-    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo);
+    List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2);
 
     /**
      * Найти доходы из КНФ которая является источником для ОНФ 2-НДФЛ

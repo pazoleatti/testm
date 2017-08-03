@@ -425,7 +425,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
                 "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
                 "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd))) " +
-                "and dt.id = ddt.declaration_type_id and dt.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
+                "and dt.id = ddt.declaration_type_id " +
                 "union " +
                 "select distinct dft.department_id parent_id, dfts.department_id id " +
                 "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
@@ -574,7 +574,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return getNamedParameterJdbcTemplate().queryForList("SELECT DISTINCT ddt2.department_id\n" +
                     "FROM department_declaration_type ddt2\n" +
                     "INNER JOIN declaration_type dt ON dt.id = ddt2.declaration_type_id\n" +
-                    "WHERE dt.tax_type in (:taxTypes) AND ddt2.department_id IN (\n" +
+                    "WHERE ddt2.department_id IN (\n" +
                     "  SELECT dep.ID FROM department dep CONNECT BY PRIOR dep.ID = dep.parent_id START WITH dep.ID in (\n" +
                     "    SELECT DISTINCT ddt.department_id\n" +
                     "    FROM department_declaration_type ddt\n" +

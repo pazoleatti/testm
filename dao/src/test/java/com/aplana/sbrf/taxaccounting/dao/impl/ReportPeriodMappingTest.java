@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

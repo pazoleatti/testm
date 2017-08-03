@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
@@ -83,7 +82,7 @@ public interface DeclarationDataService {
      * @param stateLogger
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
+    String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
 
     /**
      * Подготовить данные для спец. отчета
@@ -149,10 +148,20 @@ public interface DeclarationDataService {
      * Отмена принятия декларации
      * @param logger - объект журнала
      * @param declarationDataId идентификатор декларации
+	 * @param note - причина возврата
      * @param userInfo информация о пользователе, выполняющего действие
      * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
      */
-    void cancel(Logger logger, long declarationDataId, TAUserInfo userInfo);
+    void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo);
+
+	/**
+	 * Проверяет есть ли у формы приемники в состоянии Принята или Подготовлена
+	 * @param declarationDataId - идентификатор декларации
+	 * @param logger - объект журнала
+	 * @param userInfo - информация о пользователе, выполняющего действие
+	 * @return - список ИД приемников  в состоянии Принята или Подготовлена
+	 */
+    public List<Long> getReceiversAcceptedPrepared(long declarationDataId, Logger logger, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
@@ -411,4 +420,11 @@ public interface DeclarationDataService {
 	 * @return
 	 */
 	boolean existDeclarationData(long declarationDataId);
+
+	/**
+	 * Проверки перед созданием отчетности для выгрузки
+	 * @param departmentReportPeriod - отчетный период
+	 * @param declarationTypeId идентификатор типа декларации
+	 */
+	void preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
 }

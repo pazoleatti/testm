@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.event.ChooseButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.ndfl_references.search.NdflReferencesSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.NdflReferenceDTO;
@@ -58,6 +59,7 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
 
     private final DispatchAsync dispatcher;
     private Long declarationDataId;
+    private DeclarationDataPresenter declarationDataPresenter;
     private NdflReferencesSearchPresenter ndflReferencesSearchPresenter;
     private ListDataProvider<DataRow<Cell>> dataProvider = new ListDataProvider<DataRow<Cell>>();
     private boolean dataProviderInitialized = false;
@@ -82,6 +84,9 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
         this.ndflReferencesSearchPresenter = ndflReferencesSearchPresenter;
     }
 
+    public void setDeclarationDataPresenter(DeclarationDataPresenter declarationDataPresenter) {
+        this.declarationDataPresenter = declarationDataPresenter;
+    }
 
     public void setDeclarationDataId(Long declarationDataId) {
         this.declarationDataId = declarationDataId;
@@ -104,6 +109,7 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
         UpdateNdflReferencesAction action = new UpdateNdflReferencesAction();
         action.setNdflReferences(toNdflReference(rows));
         action.setNote(note);
+        action.setDeclarationDataId(declarationDataId);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<UpdateNdflReferenceResult>() {
             @Override
             public void onSuccess(UpdateNdflReferenceResult result) {
@@ -111,12 +117,13 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
                     row.getCell(getView().getTaxServiceTextColumn().getAlias()).setStringValue(note);
                     getView().getTable().redraw();
                 }
+                declarationDataPresenter.viewReport(true, true, DeclarationDataReportType.PDF_DEC);
             }
         }, this));
     }
 
     @Override
-    public void onCancellClicked() {
+    public void onCancelClicked() {
         Dialog.confirmMessageYesNo("Закрытие", "Закрыть окно?", new DialogHandler() {
             @Override
             public void yes() {
@@ -131,6 +138,11 @@ public class NdflReferencesEditPresenter extends PresenterWidget<NdflReferencesE
         super.onHide();
         /*getView().getTable().setRowData(new ArrayList<DataRow<Cell>>());
         getView().setNote(null);*/
+    }
+
+    public void clean() {
+        getView().updateTable(0);
+        getView().setNote("");
     }
 
     private DataRow<Cell> createDataRow() {

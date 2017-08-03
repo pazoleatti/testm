@@ -88,6 +88,11 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
     @Override
     public void onConfirm() {
         AddDeclarationSourceAction action = new AddDeclarationSourceAction();
+
+        if (!isMandatoryAttributesFilled()) {
+            return;
+        }
+
         action.setDepartmentId(getView().getDepartments());
         action.setDeclarationTypeId(getView().getFormTypes());
         action.setPerformers(getView().getPerformers());
@@ -97,7 +102,6 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
                 new AbstractCallback<AddDeclarationSourceResult>() {
                     @Override
                     public void onSuccess(AddDeclarationSourceResult result) {
-
                         if (result.isIssetRelations()){
                             LogAddEvent.fire(DeclarationDestinationsPresenter.this, result.getUuid());
                             // показать сообщение
@@ -114,6 +118,28 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
                         UpdateTable.fire(DeclarationDestinationsPresenter.this, getView().getDepartments());
                     }
                 }, this));
+    }
+
+    private boolean isMandatoryAttributesFilled() {
+        boolean departmentsEmpty = getView().getDepartments().isEmpty();
+        boolean formsEmpty = getView().getFormTypes().isEmpty();
+        boolean performersEmpty = getView().getPerformers().isEmpty();
+        if (departmentsEmpty || formsEmpty || performersEmpty) {
+            StringBuilder messageBuilder = new StringBuilder("Не заполнены обязательные атрибуты, необходимые для создания назначения: ");
+            if (departmentsEmpty) {
+                messageBuilder.append("Подразделение, ");
+            }
+            if (formsEmpty) {
+                messageBuilder.append("Макет, ");
+            }
+            if (performersEmpty) {
+                messageBuilder.append("Исполнители, ");
+            }
+            String message = messageBuilder.delete(messageBuilder.length() - 2, messageBuilder.length()).toString();
+            Dialog.warningMessage("Не заполнены обязательные атрибуты", message);
+            return false;
+        }
+        return true;
     }
 
     @Override

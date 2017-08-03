@@ -653,10 +653,31 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return new PagingResult<NdflPerson>(result, getCount(totalQuery, parameters));
     }
 
+    @Override
+    public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters) {
+        parameters.put("declarationDataId", declarationDataId);
+        String query = buildCountQuery(parameters);
+        return getNamedParameterJdbcTemplate().queryForObject(query, parameters, Integer.class);
+    }
+
     public static String buildQuery(Map<String, Object> parameters, PagingParams pagingParams) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " \n");
+        sb.append(buildQueryBody(parameters, pagingParams));
+        sb.append("ORDER BY np.row_num \n");
+        return sb.toString();
+    }
+
+    public static String buildCountQuery(Map<String, Object> params) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT COUNT(*) \n")
+                .append(buildQueryBody(params, null));
+        return sb.toString();
+    }
+
+    private static String buildQueryBody(Map<String, Object> parameters, PagingParams pagingParams) {
+        StringBuilder sb = new StringBuilder();
         sb.append("FROM ndfl_person np \n");
         sb.append("LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id \n");
         sb.append("WHERE np.declaration_data_id = :declarationDataId \n");
@@ -714,7 +735,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             sb.append("ORDER BY np.row_num \n");
         }
         return sb.toString();
-
     }
 
     private static boolean contains(Map<String, Object> param, String key) {
@@ -757,21 +777,35 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo) {
-        String sql = "SELECT DISTINCT /*+rule */" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
+    public List<NdflPerson> findNdflPersonByPairKppOktmo(List<Long> declarationDataId, String kpp, String oktmo, boolean is2Ndfl2) {
+        StringBuilder queryBuilder = new StringBuilder("SELECT DISTINCT /*+rule */")
+                .append(createColumns(NdflPerson.COLUMNS, "np"))
+                .append(", r.record_id ")
+                .append(" FROM ndfl_person np ")
+                .append(" JOIN REF_BOOK_PERSON r ON np.person_id = r.id ")
+                .append(" JOIN ndfl_person_income npi ")
+                .append(" ON np.id = npi.ndfl_person_id ")
+                .append(" WHERE npi.kpp = :kpp ")
+                .append(" AND npi.oktmo = :oktmo ")
+                .append(" AND np.DECLARATION_DATA_ID in (:declarationDataId)");
+        if (is2Ndfl2) {
+            queryBuilder.append(" AND npi.NOT_HOLDING_TAX IS NOT NULL")
+                    .append(" AND npi.NOT_HOLDING_TAX > 0");
+        }
+        /*String sql = "SELECT DISTINCT *//*+rule *//*" + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " +
                 " FROM ndfl_person np " +
                 " LEFT JOIN REF_BOOK_PERSON r ON np.person_id = r.id " +
                 " INNER JOIN ndfl_person_income npi " +
                 " ON np.id = npi.ndfl_person_id " +
                 " WHERE npi.kpp = :kpp " +
                 " AND npi.oktmo = :oktmo " +
-                " AND np.DECLARATION_DATA_ID in (:declarationDataId)";
+                " AND np.DECLARATION_DATA_ID in (:declarationDataId)";*/
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("declarationDataId", declarationDataId)
                 .addValue("kpp", kpp)
                 .addValue("oktmo", oktmo);
         try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonRowMapper());
+            return getNamedParameterJdbcTemplate().query(queryBuilder.toString(), params, new NdflPersonDaoImpl.NdflPersonRowMapper());
         } catch (EmptyResultDataAccessException ex) {
             return new ArrayList<NdflPerson>();
         }
@@ -1259,10 +1293,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setTaxRate(SqlUtils.getInteger(rs, "tax_rate"));
             personIncome.setTaxDate(rs.getDate("tax_date"));
 
-            personIncome.setCalculatedTax(rs.getBigDecimal("calculated_tax"));
-            personIncome.setWithholdingTax(rs.getBigDecimal("withholding_tax"));
-            personIncome.setNotHoldingTax(rs.getBigDecimal("not_holding_tax"));
-            personIncome.setOverholdingTax(rs.getBigDecimal("overholding_tax"));
+            personIncome.setCalculatedTax(rs.getBigDecimal( "calculated_tax"));
+            personIncome.setWithholdingTax(rs.getBigDecimal( "withholding_tax"));
+            personIncome.setNotHoldingTax(rs.getBigDecimal( "not_holding_tax"));
+            personIncome.setOverholdingTax(rs.getBigDecimal( "overholding_tax"));
             personIncome.setRefoundTax(SqlUtils.getLong(rs, "refound_tax"));
 
             personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
@@ -1284,7 +1318,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             NdflPersonDeduction personDeduction = new NdflPersonDeduction();
             personDeduction.setId(SqlUtils.getLong(rs, "id"));
             personDeduction.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
-            personDeduction.setRowNum(rs.getBigDecimal("row_num"));
+            personDeduction.setRowNum(rs.getBigDecimal( "row_num"));
             personDeduction.setOperationId(rs.getString("operation_id"));
 
             personDeduction.setTypeCode(rs.getString("type_code"));
@@ -1318,10 +1352,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
             personPrepayment.setId(SqlUtils.getLong(rs, "id"));
             personPrepayment.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
-            personPrepayment.setRowNum(rs.getBigDecimal("row_num"));
+            personPrepayment.setRowNum(rs.getBigDecimal( "row_num"));
             personPrepayment.setOperationId(rs.getString("operation_id"));
 
-            personPrepayment.setSumm(rs.getBigDecimal("summ"));
+            personPrepayment.setSumm(rs.getLong("summ"));
             personPrepayment.setNotifNum(rs.getString("notif_num"));
             personPrepayment.setNotifDate(rs.getDate("notif_date"));
             personPrepayment.setNotifSource(rs.getString("notif_source"));

@@ -329,7 +329,7 @@ public class DeclarationDataServiceImplTest {
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, TaxType.INCOME), "Принятие налоговой формы");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.EXCEL_DEC, TaxType.INCOME), "Формирование отчета налоговой формы в XLSX-формате");
         assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.XML_DEC, TaxType.INCOME), "Расчет налоговой формы");
-        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.PDF_DEC, TaxType.INCOME), "Создание формы предварительного просмотра налоговой формы");
+        assertEquals(declarationDataService.getTaskName(DeclarationDataReportType.PDF_DEC, TaxType.INCOME), "Создание формы предварительного просмотра");
         assertEquals(declarationDataService.getTaskName(specificReport, TaxType.INCOME), "Формирование отчета \"report name\" налоговой формы");
     }
 
@@ -413,7 +413,7 @@ public class DeclarationDataServiceImplTest {
         });
         ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
-        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null, userInfo, new LockStateLogger() {
+        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null,null, userInfo, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 //Nothing

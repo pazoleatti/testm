@@ -72,9 +72,7 @@ public class GetPdfDeclarationHandler extends AbstractActionHandler<GetPdfAction
     private Pdf generatePdfViewerModel(long declarationDataId, TAUserInfo userInfo) {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-        TaxType taxType = declarationTemplateService
-                .get(declarationData.getDeclarationTemplateId())
-                .getType().getTaxType();
+        TaxType taxType = TaxType.NDFL;
 
         Pdf pdf = new Pdf();
         pdf.setTitle(!taxType.equals(TaxType.DEAL) ? "Список листов налоговой формы" : "Список листов уведомления");

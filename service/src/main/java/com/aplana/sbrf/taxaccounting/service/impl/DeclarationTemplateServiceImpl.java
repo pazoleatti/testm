@@ -438,7 +438,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 String.format(
                         LockData.DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
                         declarationTemplate.getName(),
-                        declarationTemplate.getType().getTaxType().getName(),
+                        TaxType.NDFL.getName(),
                         sdf.get().format(declarationTemplate.getVersion()),
                         endVersion != null ? sdf.get().format(endVersion) : "-"
                 ));

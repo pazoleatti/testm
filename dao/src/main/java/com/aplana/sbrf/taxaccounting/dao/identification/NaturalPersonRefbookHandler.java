@@ -173,7 +173,6 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             person.setLastName(rs.getString("last_name"));
             person.setFirstName(rs.getString("first_name"));
             person.setMiddleName(rs.getString("middle_name"));
-            person.setSex(SqlUtils.getInteger(rs, "sex"));
             person.setInn(rs.getString("inn"));
             person.setInnForeign(rs.getString("inn_foreign"));
             person.setSnils(rs.getString("snils"));
@@ -184,9 +183,6 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             person.setCitizenship(getCountryById(SqlUtils.getLong(rs, "citizenship")));
 
             //additional
-            person.setPension(SqlUtils.getInteger(rs, "pension"));
-            person.setMedical(SqlUtils.getInteger(rs, "medical"));
-            person.setSocial(SqlUtils.getInteger(rs, "social"));
             person.setEmployee(SqlUtils.getInteger(rs, "employee"));
             person.setSourceId(SqlUtils.getLong(rs, "source_id"));
             person.setRecordId(SqlUtils.getLong(rs, "record_id"));
