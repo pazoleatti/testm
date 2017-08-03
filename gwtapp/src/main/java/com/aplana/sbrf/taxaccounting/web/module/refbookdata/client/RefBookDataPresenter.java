@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Chec
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.EnableDuplicateEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OnTimerEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
@@ -43,7 +44,9 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
@@ -140,6 +143,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void setUploadAvailable(boolean uploadAvailable);
 
         void setLockInformation(String title);
+
+        void addEnterNativePreviewHandler();
+
+        void removeEnterNativePreviewHandler();
+
+        void setEnableDuplicateButton(boolean enable);
     }
 
     @Inject
@@ -149,6 +158,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 PersonPresenter personPresenter,
                                 PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        eventBus.addHandler(EnableDuplicateEvent.TYPE, new EnableDuplicateEvent.EnableDuplicateHandler() {
+            @Override
+            public void onSelectTableRow(EnableDuplicateEvent event) {
+                getView().setEnableDuplicateButton(event.isEnableDuplicate());
+            }
+        });
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
         this.editFormPresenter = editFormPresenter;
@@ -169,6 +184,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     protected void onHide() {
         super.onHide();
+        getView().removeEnterNativePreviewHandler();
         refBookId = null;
         refBookLinearPresenter.reset();
         editFormPresenter.setIsFormModified(false);
@@ -186,6 +202,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     protected void onReveal() {
         super.onReveal();
+        getView().addEnterNativePreviewHandler();
         LogCleanEvent.fire(this);
         setInSlot(TYPE_editFormPresenter, editFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookLinearPresenter);
@@ -563,7 +580,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     @Override
     public void duplicateClicked() {
-        personPresenter.init(refBookLinearPresenter.getSelectedRow(), columns);
+        personPresenter.init(refBookLinearPresenter.getSelectedRow(), getView().getRelevanceDate(), columns);
         addToPopupSlot(personPresenter);
     }
 

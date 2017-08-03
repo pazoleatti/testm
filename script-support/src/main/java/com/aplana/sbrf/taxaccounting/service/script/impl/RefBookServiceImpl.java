@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
@@ -15,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
@@ -47,6 +46,9 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
+
+    @Autowired
+    private TAUserService taUserService;
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
@@ -173,5 +175,10 @@ public class RefBookServiceImpl implements RefBookService {
             refBookCache.put(key, getRecordData(refBookId, recordId));
         }
         return refBookCache.get(key);
+    }
+
+    @Override
+    public PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter) {
+        return taUserService.getUsersByFilter(filter);
     }
 }

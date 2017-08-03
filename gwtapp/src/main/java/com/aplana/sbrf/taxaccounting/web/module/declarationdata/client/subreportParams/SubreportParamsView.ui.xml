@@ -29,6 +29,19 @@
             margin: 0px 10px 4px 10px;
         }
 
+        .info-label {
+            padding: 5px;
+            font-size: 13px;
+            margin: 0px 10px 4px 10px;
+            background-color: #f0f8d1;
+        }
+
+        .border {
+            border: 1px solid #aeaeac;
+            border-radius: 6px;
+            margin: 10px 5px 10px 5px;
+        }
+
         .horSep {
             height: 1px;
             margin: 4px 9px 0px 9px;
@@ -46,7 +59,11 @@
 
             <g:Label ui:field="horSep" addStyleNames="{style.horSep}"/>
 
-            <g:Label ui:field="selectRecordLabel" text="Выбор записи:"  addStyleNames="{style.label}"/>
+            <g:HTMLPanel ui:field="infoPanel" height="100%" visible="false" addStyleNames="{style.border}">
+                <g:Label ui:field="infoLabel" text="" addStyleNames="{style.info-label}"/>
+            </g:HTMLPanel>
+
+            <g:Label ui:field="selectRecordLabel" text="Выбор записи:" addStyleNames="{style.label}"/>
 
             <g:ResizeLayoutPanel ui:field="resultPanel" addStyleNames="{style.table}" visible="false" width="540px">
                 <t:GenericDataGrid height="100%" width="100%" ui:field="resultTable"/>

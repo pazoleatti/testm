@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
@@ -194,7 +195,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         this.context = context;
     }
 
-    @Override
+    /*@Override
     public boolean checkUnique(DeclarationData declarationData, Logger logger) {
         DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
         DeclarationData existingDeclarationData = declarationDataDao.find(template.getType().getId(),
@@ -206,7 +207,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             return false;
         }
         return true;
-    }
+    }*/
 
     @Override
     public String getXmlDataFileName(long declarationDataId) {
@@ -261,6 +262,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters, Closure xmlBuilder) {
         ByteArrayInputStream xmlData = xmlBuilder == null ? null : generateXmlData(xmlBuilder);
         return declarationDataService.createJasperReport(xmlData, jrxmlTemplate, parameters);
+    }
+
+    @Override
+    public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters, InputStream inputStream) {
+        return declarationDataService.createJasperReport(inputStream, jrxmlTemplate, parameters);
     }
 
     @Override
@@ -418,5 +424,21 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                                                                        Boolean departmentReportPeriodStatus, Integer declarationState) {
         return declarationDataDao.findDeclarationDataIdByTypeStatusReportPeriod(reportPeriodId, ndflId, declarationTypeId,
                 departmentType, departmentReportPeriodStatus, declarationState);
+    }
+
+
+    @Override
+    public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
+        return declarationDataDao.findAllActive(declarationTypeId, reportPeriodId);
+    }
+
+    @Override
+    public List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo) {
+        return declarationDataDao.find(declarationTemplate, departmentReportPeriodId, taxOrganCode, kpp, oktmo);
+    }
+
+    @Override
+    public List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId) {
+        return declarationDataDao.findNotPresentedPairKppOktmo(declarationDataId);
     }
 }

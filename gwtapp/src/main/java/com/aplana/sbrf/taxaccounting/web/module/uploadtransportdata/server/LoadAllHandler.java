@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         TAUserInfo userInfo = securityService.currentUserInfo();
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        BalancingVariants balancingVariant = BalancingVariants.SHORT;
+        BalancingVariants balancingVariant = BalancingVariants.LONG;
         LockData lockData = lockDataService.lock(key, userId,
                 LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
                 LockData.State.IN_QUEUE.getText());

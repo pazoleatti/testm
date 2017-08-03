@@ -31,6 +31,7 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
         void init(RefBookDataRow row, List<RefBookAttribute> attributes);
         void setTableColumns(final List<RefBookColumn> columns);
         void setDuplicateTableColumns(final List<RefBookColumn> columns);
+        void setRelevanceDate(Date relevanceDate);
         void setTableRows(final List<RefBookDataRow> rows);
         void setDuplicateTableRows(final List<RefBookDataRow> rows);
     }
@@ -53,7 +54,6 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
     @Override
     protected void onReveal() {
         super.onReveal();
-        updatePanel();
     }
 
     private void updatePanel() {
@@ -113,15 +113,23 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
                                 updatePanel();
                             }
                         }, PersonPresenter.this));
-
     }
 
-    public void init(RefBookDataRow row, List<RefBookColumn> columns) {
-        getView().setTableColumns(columns);
-        getView().setDuplicateTableColumns(columns);
-        this.row = row;
-        this.columns = columns;
-        //getView().init(row, columns);
+    public void init(final RefBookDataRow row, final Date relevanceDate, List<RefBookColumn> columns) {
+        GetPersonRefBookAttributesAction action = new GetPersonRefBookAttributesAction();
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetPersonRefBookAttributesResult>() {
+                            @Override
+                            public void onSuccess(GetPersonRefBookAttributesResult result) {
+                                getView().setTableColumns(result.getColumns());
+                                getView().setDuplicateTableColumns(result.getColumns());
+                                getView().setRelevanceDate(relevanceDate);
+                                PersonPresenter.this.row = row;
+                                PersonPresenter.this.columns = result.getColumns();
+                                updatePanel();
+                            }
+                        }, PersonPresenter.this));
     }
 
     @Override
@@ -130,9 +138,9 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
         action.setFilter(RefBook.RECORD_ID_ALIAS + " = " + recordId);
         action.setRefBookId(RefBook.Id.PERSON.getId());
         action.setPagingParams(new PagingParams(1, 1));
-        action.setRelevanceDate(new Date());
         action.setSortColumnIndex(0);
         action.setAscSorting(false);
+        action.setPerson(true);
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetRefBookTableDataResult>() {
@@ -155,9 +163,9 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
         action.setRecordId(recordId);
         action.setRefBookId(RefBook.Id.PERSON.getId());
         action.setPagingParams(new PagingParams(1, 1));
-        action.setRelevanceDate(new Date());
         action.setSortColumnIndex(0);
         action.setAscSorting(false);
+        action.setPerson(true);
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetRefBookTableDataResult>() {

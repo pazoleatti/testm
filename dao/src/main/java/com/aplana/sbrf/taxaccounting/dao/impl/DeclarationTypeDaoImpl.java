@@ -33,7 +33,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 			DeclarationType res = new DeclarationType();
 			res.setId(SqlUtils.getInteger(rs, "id"));
 			res.setName(rs.getString("name"));
-			res.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
             res.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
             res.setIsIfrs(rs.getBoolean("is_ifrs"));
             res.setIfrsName(rs.getString("ifrs_name"));
@@ -80,9 +79,9 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 	@Override
 	public List<DeclarationType> listAllByTaxType(TaxType taxType){
 		return getJdbcTemplate().query(
-				"SELECT * FROM declaration_type dt WHERE dt.tax_type = ? AND status = ?",
-				new Object[]{String.valueOf(taxType.getCode()), 0},
-				new int[]{Types.VARCHAR, Types.INTEGER},
+				"SELECT * FROM declaration_type dt WHERE status = ?",
+				new Object[]{0},
+				new int[]{Types.INTEGER},
 				new DeclarationTypeRowMapper()
 		);
 	}
@@ -92,12 +91,11 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         try {
 
             int typeId = generateId("seq_declaration_type", Integer.class);
-            getJdbcTemplate().update("insert into declaration_type (id, name, tax_type, status) values (?,?,?,?)",
+            getJdbcTemplate().update("insert into declaration_type (id, name, status) values (?,?,?)",
                     new Object[]{typeId,
                             type.getName(),
-                            type.getTaxType().getCode(),
                             type.getStatus().getId()},
-                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.VARCHAR, Types.NUMERIC});
+                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.NUMERIC});
             return typeId;
         } catch (DataAccessException e){
 			LOG.error("Ошибка при создании макета", e);
@@ -135,10 +133,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
     public List<Integer> getByFilter(TemplateFilter filter) {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("select id from declaration_type where status = 0");
-        if (filter.getTaxType() != null) {
-            ps.appendQuery(" and TAX_TYPE = ?");
-            ps.addParam(String.valueOf(filter.getTaxType().getCode()));
-        }
         if (!filter.getSearchText().isEmpty()) {
             ps.appendQuery(" and LOWER(name) like LOWER(?)");
             ps.addParam("%"+filter.getSearchText().toLowerCase()+"%");
@@ -162,9 +156,9 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
                         " select distinct t.* from declaration_type t" +
                         " join department_declaration_type ddt on t.id = ddt.declaration_type_id" +
                         " join allTemplates all_t on ddt.declaration_type_id = all_t.declaration_type_id" +
-                        " where ddt.department_id=? and t.tax_type=? and all_t.status = 0 and ((all_t.versionFrom <= ? and all_t.versionTo >= ?) or (all_t.versionFrom <= ? and all_t.versionTo is null))",
-                new Object[]{departmentId, String.valueOf(taxType.getCode()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
-                new int[]{Types.NUMERIC, Types.CHAR, Types.DATE, Types.DATE, Types.DATE},
+                        " where ddt.department_id=? and all_t.status = 0 and ((all_t.versionFrom <= ? and all_t.versionTo >= ?) or (all_t.versionFrom <= ? and all_t.versionTo is null))",
+                new Object[]{departmentId, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
+                new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE},
                 new DeclarationTypeRowMapper()
         );
     }

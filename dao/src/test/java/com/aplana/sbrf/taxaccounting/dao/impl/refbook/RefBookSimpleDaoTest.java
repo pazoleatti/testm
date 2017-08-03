@@ -5,13 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,20 +16,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -387,9 +370,6 @@ public class RefBookSimpleDaoTest {
         RefBookValue parentVal = new RefBookValue(RefBookAttributeType.REFERENCE, parentId);
         RefBookValue birthVal = new RefBookValue(RefBookAttributeType.DATE, new GregorianCalendar(1970,3,5).getTime());
         RefBookValue citizVal = new RefBookValue(RefBookAttributeType.REFERENCE, 266174099L);
-        RefBookValue socVal = new RefBookValue(RefBookAttributeType.NUMBER, 1);
-        RefBookValue pensVal = new RefBookValue(RefBookAttributeType.NUMBER, 1);
-        RefBookValue medVal = new RefBookValue(RefBookAttributeType.NUMBER, 1);
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
         values.put("FIRST_NAME", fNameVal);
         values.put("LAST_NAME", lNameVal);
@@ -397,9 +377,6 @@ public class RefBookSimpleDaoTest {
         values.put(RefBook.RECORD_PARENT_ID_ALIAS, parentVal);
         values.put("BIRTH_DATE", birthVal);
         values.put("CITIZENSHIP", citizVal);
-        values.put("SOCIAL", socVal);
-        values.put("PENSION", pensVal);
-        values.put("MEDICAL", medVal);
 
         RefBookRecord record = new RefBookRecord();
         record.setVersionTo(version);
@@ -435,7 +412,7 @@ public class RefBookSimpleDaoTest {
 
     @Test
     public void getNextVersionExecutes() throws Exception {
-        dao.getNextVersion(createRefBook(), new Date(0), "SEX = 1");
+        dao.getNextVersion(createRefBook(), new Date(0), "TAXPAYER_STATE = 1");
     }
 
     @Test

@@ -91,11 +91,12 @@ public class GetDeclarationDataHandler
         result.setCreationDate(sdf.get().format(logBusinessService.getFormCreationDate(declaration.getId())));
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        TaxType taxType = declarationTemplate.getType().getTaxType();
+        TaxType taxType = TaxType.NDFL;
         result.setTaxType(taxType);
 
         result.setDeclarationType(declarationTemplate.getType().getName());
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind());
+        result.setShowPrintToXml(!declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.CONSOLIDATED));
         result.setSubreports(declarationTemplate.getSubreports());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));

@@ -3,22 +3,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookFactoryImpl;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
-import com.aplana.sbrf.taxaccounting.service.ScriptExecutionService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,9 +23,7 @@ import org.springframework.util.ClassUtils;
 
 import java.io.FileNotFoundException;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +56,6 @@ public class ScriptExecutionServiceTest {
 
         DeclarationType declarationType10 = new DeclarationType();
         declarationType10.setId(10);
-        declarationType10.setTaxType(TaxType.INCOME);
         DeclarationTemplate declarationTemplate10 = new DeclarationTemplate();
         declarationTemplate10.setId(10);
         declarationTemplate10.setName("template10");
@@ -76,7 +63,6 @@ public class ScriptExecutionServiceTest {
 
         DeclarationType declarationType = new DeclarationType();
         declarationType.setId(11);
-        declarationType.setTaxType(TaxType.INCOME);
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(11);
         declarationTemplate.setName("template");

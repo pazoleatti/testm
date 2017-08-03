@@ -61,13 +61,11 @@ public class DeclarationTemplateDaoTest {
 	public void testGet() {
 		DeclarationTemplate d1 = declarationTemplateDao.get(1);
 		assertEquals(1, d1.getId().longValue());
-		assertEquals('T', d1.getType().getTaxType().getCode());
 		/*assertFalse(d1.isActive());*/
         assertEquals("Налоговая форма 1", d1.getName());
 
 		DeclarationTemplate d2 = declarationTemplateDao.get(2);
 		assertEquals(2, d2.getId().longValue());
-		assertEquals('T', d2.getType().getTaxType().getCode());
 		/*assertTrue(d2.isActive());*/
 	}
 	
@@ -89,7 +87,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setJrxmlBlobId("1");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
-        declarationTemplate.setDeclarationFormTypeId(1L);
+        declarationTemplate.setDeclarationFormTypeId(2L);
 		int id = declarationTemplateDao.create(declarationTemplate);
 
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
@@ -110,7 +108,7 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
-        declarationTemplate.setDeclarationFormTypeId(1L);
+        declarationTemplate.setDeclarationFormTypeId(2L);
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.REPORTS);
         declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
 		DeclarationType declarationType = declarationTypeDao.get(1);
@@ -195,7 +193,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
-        declarationTemplate.setDeclarationFormTypeId(1L);
+        declarationTemplate.setDeclarationFormTypeId(2L);
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
 
@@ -274,7 +272,7 @@ public class DeclarationTemplateDaoTest {
     public void testGeByFilter(){
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.TRANSPORT);
-        Assert.assertEquals(4, declarationTemplateDao.getByFilter(filter).size());
+        Assert.assertEquals(6, declarationTemplateDao.getByFilter(filter).size());
     }
 
     @Test

@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBoo
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,9 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERSON.getId());
         RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId());
+        refBook = SerializationUtils.clone(refBook);
+        RefBook idDocRefBook = refBookFactory.get(RefBook.Id.ID_DOC.getId());
+        refBook.getAttributes().add(idDocRefBook.getAttribute("DOC_NUMBER"));
         result.setTableHeaders(refBook.getAttributes());
 
         Map<String, RefBookValue> rowRecord = refBookDataProvider.getRecordData(action.getRecord().getRefBookRowId());
@@ -57,7 +61,7 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
 
         // Получаем исходную запись
         List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
-        GetRefBookDataRowHandler.dereference(refBook, Arrays.asList(rowRecord), rows, refBookHelper, columnMap);
+        GetRefBookDataRowHandler.dereference(refBook, true, refBookFactory, Arrays.asList(rowRecord), rows, refBookHelper, columnMap);
         result.setDataRow(rows.get(0));
 
         // Получаем оригиал, если запись не является оригиналом
@@ -72,7 +76,7 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
                 Map<Long, Map<String, RefBookValue>> originalMapRecords = refBookDataProvider.getRecordDataWhere(RefBook.BUSINESS_ID_ALIAS + "=" + recordId);
                 originalRecord = (Map<String, RefBookValue>)originalMapRecords.values().toArray()[0];
             }
-            GetRefBookDataRowHandler.dereference(refBook, Arrays.asList(originalRecord), rows, refBookHelper, columnMap);
+            GetRefBookDataRowHandler.dereference(refBook, true, refBookFactory, Arrays.asList(originalRecord), rows, refBookHelper, columnMap);
             result.setOriginalRow(rows.get(0));
         }
 
@@ -85,7 +89,7 @@ public class GetDuplicatePersonHandler extends AbstractActionHandler<GetDuplicat
             refBookPage.addAll(recordData.values());
         }
         rows = new ArrayList<RefBookDataRow>();
-        GetRefBookDataRowHandler.dereference(refBook, refBookPage, rows, refBookHelper, columnMap);
+        GetRefBookDataRowHandler.dereference(refBook, true, refBookFactory, refBookPage, rows, refBookHelper, columnMap);
         result.setDuplicateRows(rows);
         return result;
     }

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -29,9 +30,9 @@ public interface FiasRefBookDao {
      * Найти идентификаторы всех адресообразующих обектов в справочнике ФИАС соответствующие адресам указанным в РНУ-НДФЛ
      *
      * @param declarationId идентификатор декларации
-     * @return карта идентификатор записи РНУ-НДФЛ - идентификатор адреса в справочнике ФИАС
+     * @return карта идентификатор записи РНУ-НДФЛ - результат проверки адреса (идентификатор адреса в справочнике ФИАС и поля chk_*)
      */
-    Map<Long, Long> checkAddressByFias(Long declarationId, int p_check_type);
+    Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationId, int p_check_type);
 
     /**
      * Выполнить проверку на наличие/отсутствие в ФИАС элементов адресов, указанных в декларации

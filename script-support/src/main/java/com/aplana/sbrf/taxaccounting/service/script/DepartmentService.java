@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -58,4 +59,13 @@ public interface DepartmentService {
      * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
      */
     String getParentsHierarchyShortNames(Integer departmentId);
+
+    /**
+     * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
+     * @param kpp
+     * @param oktmo
+     * @param reportPeriodEndDate
+     * @return
+     */
+    String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
 }

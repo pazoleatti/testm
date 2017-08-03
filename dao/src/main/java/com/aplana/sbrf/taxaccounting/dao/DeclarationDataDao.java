@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
 import java.util.List;
@@ -197,4 +198,30 @@ public interface DeclarationDataDao {
 	 * @return
 	 */
 	boolean existDeclarationData(long declarationDataId);
+
+	/**
+	 * Найти все формы всех подразделений в активном периоде по виду и периоду
+	 * @param declarationTypeId
+	 * @param reportPeriodId
+	 * @return
+	 */
+	List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId);
+
+	/**
+	 * Найти НФ по типу, периоду, и значениям Налоговый орган, КПП, ОКТМО
+	 * @param declarationTemplate
+	 * @param departmentReportPeriodId
+	 * @param taxOrganCode
+	 * @param kpp
+	 * @param oktmo
+	 * @return
+	 */
+	List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo);
+
+	/**
+	 * Находит все пары КПП/ОКТМО которых нет в справочнике Подразделений, но которые представлены у операций относящихся к НФ
+	 * @param declarationDataId
+	 * @return
+	 */
+	List<Pair<String, String >> findNotPresentedPairKppOktmo(Long declarationDataId);
 }

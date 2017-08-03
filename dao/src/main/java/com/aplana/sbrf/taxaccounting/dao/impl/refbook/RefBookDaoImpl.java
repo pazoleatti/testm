@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookAddressValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -296,7 +297,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (calcHasChild) {
             records = getRecordsWithHasChild(ps, refBookClone);
         } else {
-            records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
+            records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), getRowMapper(refBookClone));
         }
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
@@ -548,6 +549,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
         final RefBook refBook = get(refBookId);
         final Map<Long, Map<String, RefBookValue>> resultMap = new HashMap<Long, Map<String, RefBookValue>>();
+        RowMapper<Map<String, RefBookValue>> rowMapper = getRowMapper(refBook);
 
         getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
             @Override
@@ -1512,7 +1514,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
         refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
 
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), getRowMapper(refBookClone));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
         result.setTotalCount(getRecordVersionsCount(refBookId, uniqueRecordId));
@@ -1528,7 +1530,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
         refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
 
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), getRowMapper(refBookClone));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
         result.setTotalCount(getRecordVersionsCountByRecordId(refBookId, recordId));
@@ -2501,11 +2503,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT row_number_over");
-        if (!refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
-            ps.appendQuery(", ");
-            ps.appendQuery("id ");
-            ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-        }
+        ps.appendQuery(", id ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", ");
             ps.appendQuery(attribute.getAlias());
@@ -2799,16 +2798,21 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      */
     @Override
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
+        RowMapper<Map<String, RefBookValue>> rowMapper = getRowMapper(refBook);
         if (!ps.getParams().isEmpty()) {
-            RowMapper<Map<String, RefBookValue>> rowMapper;
-            if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
-                rowMapper = new RefBookCalendarValueMapper(refBook);
-                return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
-            }
-            rowMapper = new RefBookValueMapper(refBook);
             return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), rowMapper);
         } else {
-            return getJdbcTemplate().query(ps.getQuery().toString(), new RefBookCalendarValueMapper(refBook));
+            return getJdbcTemplate().query(ps.getQuery().toString(), rowMapper);
+        }
+    }
+
+    private RowMapper<Map<String, RefBookValue>> getRowMapper(RefBook refBook) {
+        if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
+            return new RefBookCalendarValueMapper(refBook);
+        } else if (refBook.getId().equals(RefBook.Id.PERSON_ADDRESS.getId())) {
+            return new RefBookAddressValueMapper(refBook);
+        } else {
+            return new RefBookValueMapper(refBook);
         }
     }
 
@@ -2888,7 +2892,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         Map<String, Long> params = new HashMap<String, Long>();
         params.put("id", id);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+            return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, getRowMapper(refBook));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

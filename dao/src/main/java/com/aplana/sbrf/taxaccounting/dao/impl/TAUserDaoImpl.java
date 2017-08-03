@@ -38,7 +38,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			result.setId(SqlUtils.getInteger(rs,"id"));
 			result.setName(rs.getString("name"));
 			result.setAlias(rs.getString("alias"));
-            result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
             return result;
 		}
 	}; 
@@ -113,7 +112,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
     private List<TARole> getRoles(int userId) {
         return getJdbcTemplate().query(
-                "select id, alias, name, tax_type from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) order by id",
+                "select id, alias, name from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) order by id",
                 new Object[] { userId },
                 new int[] { Types.NUMERIC },
                 TA_ROLE_MAPPER
@@ -251,7 +250,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-    private void updateUserAsnu(final TAUser user) {
+	@Override
+    public void updateUserAsnu(final TAUser user) {
         try {
             getJdbcTemplate().update("delete from sec_user_asnu where user_id=?", user.getId());
 

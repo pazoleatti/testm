@@ -12,10 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.GetCommonParameterAction;
-import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.GetCommonParameterResult;
-import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.SaveCommonParameterAction;
-import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.SaveCommonParameterResult;
+import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -69,6 +66,8 @@ public class CommonParameterPresenter extends Presenter<CommonParameterPresenter
         void refreshGrid(List<DataRow<Cell>> rowsData);
 
         void updateStyle(ConfigurationParam configurationParam, boolean valid);
+
+        void setEditPanelVisible(boolean show);
     }
 
     private final DispatchAsync dispatcher;
@@ -90,6 +89,12 @@ public class CommonParameterPresenter extends Presenter<CommonParameterPresenter
         LogShowEvent.fire(this, false);
         rowsData.clear();
         getView().initView();
+        dispatcher.execute(new GetUserRoleCommonParameterAction(), CallbackUtils.defaultCallback(new AbstractCallback<GetUserRoleCommonParameterResult>() {
+            @Override
+            public void onSuccess(GetUserRoleCommonParameterResult result) {
+                getView().setEditPanelVisible(result.isCanEdit());
+            }
+        }, CommonParameterPresenter.this));
     }
 
     /**

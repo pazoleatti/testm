@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
@@ -46,6 +47,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -63,6 +65,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     private static final String KPP = "123456789";
     private static final String CODE_ORG = "0123456789";
     private static final String REPORT_PERSON_NAME = "report_person";
+    private static final String TEST_FILE_NAME = "_______18_0001_001000212016ecf863ca-6349-4105-b1e1-33c1good.xml";
 
     @Override
     protected DeclarationData getDeclarationData() {
@@ -93,12 +96,36 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     @Override
     protected InputStream getInputStream() {
-        return PrimaryRnuNdflScriptTest.class.getResourceAsStream("_______18_0001_001000212016ecf863ca-6349-4105-b1e1-33c1good.xml");
+        return PrimaryRnuNdflScriptTest.class.getResourceAsStream(TEST_FILE_NAME);
+    }
+
+    private String getTestFileName(){
+        return PrimaryRnuNdflScriptTest.class.getResource(TEST_FILE_NAME).getFile();
     }
 
 
     @Test
     public void importDataTest() throws IOException {
+        testHelper.setDataFile(new File(getTestFileName()));
+        RefBookDataProvider refBookDataProviderIncomeCode = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.INCOME_CODE.getId())).thenReturn(refBookDataProviderIncomeCode);
+        RefBookDataProvider refBookDataProviderDeductionType = mock(RefBookDataProvider.class);
+        when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.DEDUCTION_TYPE.getId())).thenReturn(refBookDataProviderDeductionType);
+
+        PagingResult<Map<String, RefBookValue>> recordVersionIncomeCode  = new PagingResult<Map<String, RefBookValue>>();
+        recordVersionIncomeCode.add(new HashMap<String, RefBookValue>(){{
+            put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1));
+            put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1000"));
+            put(RefBook.RECORD_VERSION_FROM_ALIAS, new RefBookValue(RefBookAttributeType.DATE, new Date()));
+            put(RefBook.RECORD_VERSION_TO_ALIAS, new RefBookValue(RefBookAttributeType.DATE, new Date()));
+        }});
+        when(refBookDataProviderIncomeCode.getRecordsVersion(any(Date.class), any(Date.class), any(PagingParams.class), anyString())).thenReturn(recordVersionIncomeCode);
+
+        PagingResult<Map<String, RefBookValue>> recordVersionDeductionType = new PagingResult<Map<String, RefBookValue>>();
+        recordVersionDeductionType.add(new HashMap<String, RefBookValue>(){{
+            put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1000"));
+        }});
+        when(refBookDataProviderDeductionType.getRecordsVersion(any(Date.class), any(Date.class), any(PagingParams.class), anyString())).thenReturn(recordVersionDeductionType );
 
         final List<NdflPerson> importedData = new ArrayList<NdflPerson>();
         when(testHelper.getNdflPersonService().save(any(NdflPerson.class))).thenAnswer(new Answer<Long>() {
@@ -112,7 +139,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
             }
         });
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(importedData.size(), 0);
+        Assert.assertEquals(2, importedData.size());
         checkLogger();
     }
 
@@ -160,8 +187,6 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getNdflPersonService().findNdflPerson(any(Long.class))).thenReturn(new ArrayList<NdflPerson>(ndflPersonMap.values()));
 
         when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), any(String.class), any(RefBookAttribute.class))).thenReturn(getCountryRefBook());
-
-        when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
 
         when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
 

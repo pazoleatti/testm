@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.junit.Test;
 
 import java.io.*;
@@ -24,6 +25,8 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 	private final static String SCRIPT_PATH_PREFIX = "../src/main/resources";
 	// Имя файла скрипта
 	private final static String SCRIPT_PATH_FILE_NAME = "script.groovy";
+	// Тестовые скрипты
+	private final static String TEST_SCRIPT_PATH_PREFIX = "../service/src/test/resources/com/aplana/sbrf/taxaccounting/service/impl/groovy";
 
 	private static final String SCRIPT1 = "// графа 71 - col_052_3_2\n" +
 			" /*   case FormDataEvent.CHECK:\n" +
@@ -38,6 +41,13 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 			" /*   case FormDataEvent.CHECK:\n" +
 			"        formDataService.checkUnique(formData, logger)*/\n" +
 			"        break";
+
+	private static String SCRIPT2 =
+			"package refbook.test.p2\n" +
+					"switch (formDataEvent) {\n" +
+					"   case FormDataEvent.IMPORT:\n" +
+					"   break\n" +
+					"}";
 
 	//@Test
 	public void canExecuteScriptTest() {
@@ -82,14 +92,14 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 			for (long value : times) {
 				totalTime += value;
 			}
-			double average = ((double)totalTime)/index;
+			double average = ((double) totalTime) / index;
 			double sqrDiff = 0;
 			for (long value : times) {
 				sqrDiff += ((value - average) * (value - average));
 			}
 			System.out.println(index + " combinations \"script-event\" operated by " + totalTime + " milliseconds");
 			System.out.println("Average value : " + average);
-			System.out.println("Dispersion value : " + sqrDiff/index);
+			System.out.println("Dispersion value : " + sqrDiff / index);
 			System.out.println("Min time : " + min + " milliseconds");
 			//System.out.println("Max time : " + max + " milliseconds. Script first line : " + badScript.substring(0, badScript.indexOf(eol)));
 		} catch (IOException e) {
@@ -135,5 +145,18 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 		} finally {
 			stream.close();
 		}
+	}
+
+	@Test
+	public void getPackageName() {
+		assertEquals("refbook.test.p2", getPackageName(SCRIPT2));
+	}
+
+	@Test
+	public void getScriptFilePath() {
+		assertTrue(getScriptFilePath("refbook.test.p1", TEST_SCRIPT_PATH_PREFIX, new Logger())
+				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\p1\\script.groovy"));
+		assertTrue(getScriptFilePath("refbook.test.p2", TEST_SCRIPT_PATH_PREFIX, new Logger())
+				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\p2\\script.groovy"));
 	}
 }

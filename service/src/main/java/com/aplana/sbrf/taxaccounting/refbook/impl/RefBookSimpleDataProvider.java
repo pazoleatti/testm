@@ -302,8 +302,10 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
                 try {
                     updateRecordVersionWithoutLock(logger, uniqueRecordId, versionFrom, versionTo, records);
                 } catch (Exception e) {
-                    throw new ServiceLoggerException(e.getLocalizedMessage(),
+                    ServiceLoggerException exception = new ServiceLoggerException(e.getLocalizedMessage(),
                             logEntryService.save(logger.getEntries()));
+                    exception.initCause(e);
+                    throw exception;
                 }
             } finally {
                 unlockObjects(lockedObjects, userId);
@@ -485,8 +487,10 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             if (logger != null) {
                 logger.error(e);
                 logger.clear(LogLevel.INFO);
-                throw new ServiceLoggerException("Запись не сохранена, обнаружены фатальные ошибки!",
+                ServiceLoggerException exception = new ServiceLoggerException("Запись не сохранена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
+                exception.initCause(e);
+                throw exception;
             } else {
                 throw new ServiceException("Запись не сохранена, обнаружены фатальные ошибки!");
             }
@@ -705,7 +709,13 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
     @Override
     public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
-        return refBookDao.dereferenceValues(getRefBook().getTableName(), attributeId, recordIds);
+        Map<Long, Map<String, RefBookValue>> recordData = getRecordData(new ArrayList<Long>(recordIds));
+        String refBookAttributeAlias = refBook.getAttribute(attributeId).getAlias();
+        Map<Long, RefBookValue> result = new HashMap<Long, RefBookValue>();
+        for(Map.Entry<Long, Map<String, RefBookValue>> record: recordData.entrySet()) {
+            result.put(record.getKey(), record.getValue().get(refBookAttributeAlias));
+        }
+        return result;
     }
 
     @Override

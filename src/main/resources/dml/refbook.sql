@@ -174,7 +174,7 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9057, 904, 'Признак застрахованного лица в системе обязательного социального страхования', 'SOCIAL', 2, 17, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9058, 904, 'Сотрудник', 'EMPLOYEE', 2, 18, null, null, 1, 0, 15, 1, 0, null, null, 0, 1);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9060, 904, 'Система-источник', 'SOURCE_ID', 4, 19, 900, 9002, 1, null, 15, 0, 0, null, null, 0, null);
-insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9063, 904, 'Старый идентификатор ФЛ', 'OLD_ID', 2, 20, null, null, 0, 0, 10, 0, 0, null, null, 1, 10);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (9063, 904, 'Старый идентификатор ФЛ', 'OLD_ID', 2, 20, null, null, 0, 0, 10, 0, 0, null, null, 1, 18);
 
 update ref_book_attribute set required=0 where id in (9041,9042,9050,9052,9055,9056,9057,9058);
 
@@ -362,7 +362,9 @@ update ref_book_attribute set attribute_id = 652 where id=9421;
 update ref_book_attribute set max_length=1000 where id=9534;
 
 update ref_book_attribute set attribute_id = 9122 where id = 9054;
-
+---------------------------------
+delete from ref_book_attribute where id in (9243,9244,9313,27,28,843,2072);
+delete from ref_book_attribute where id in (9044,9055,9056,9057,9023,9024);
 ---------------------------------
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -99,4 +100,10 @@ public interface NotificationDao {
      * @param notificationIds идентификаторы оповещений
      */
     void deleteAll(List<Long> notificationIds);
+
+	/**
+	 * Получение даты последнего оповещения
+	 * @return
+	 */
+	Date getLastNotificationDate();
 }

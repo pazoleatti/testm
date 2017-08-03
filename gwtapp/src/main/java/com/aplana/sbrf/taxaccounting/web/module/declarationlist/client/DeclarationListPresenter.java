@@ -2,10 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -16,7 +20,10 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.download.
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.move_to_create.CommentEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.move_to_create.MoveToCreateListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.event.UpdateNotificationCount;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -31,8 +38,9 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.*;
 
 public class DeclarationListPresenter extends
-		DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
-		DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler {
+        DeclarationListPresenterBase<DeclarationListPresenter.MyProxy> implements
+        DeclarationListUiHandlers, DeclarationFilterReadyEvent.MyHandler, DeclarationFilterApplyEvent.DeclarationFilterApplyHandler,
+        UpdateNotificationCount.UpdateNotificationCountHandler {
 
     private static final String TYPE = "nType";
     public static final String REPORTS = "isReports";
@@ -48,11 +56,18 @@ public class DeclarationListPresenter extends
     private TaxType taxType;
     private Boolean isReports;
     private boolean ready = false;
+    private EventBus eventBus;
 
     @ProxyEvent
     @Override
     public void onClickApply(DeclarationFilterApplyEvent event) {
         onFind();
+    }
+
+    @Override
+    protected void onBind() {
+        super.onBind();
+        addRegisteredHandler(UpdateNotificationCount.getType(), this);
     }
 
     private void onFind() {
@@ -65,6 +80,7 @@ public class DeclarationListPresenter extends
 
     @Override
     public void onCreateClicked() {
+        eventBus.fireEvent(new FocusActionEvent(true));
         creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), DeclarationFormKind.CONSOLIDATED, this);
     }
 
@@ -79,28 +95,57 @@ public class DeclarationListPresenter extends
     }
 
     @ProxyCodeSplit
-	@NameToken(DeclarationListNameTokens.DECLARATION_LIST)
-	public interface MyProxy extends ProxyPlace<DeclarationListPresenter>, Place {
-	}
-
-	@Inject
-	public DeclarationListPresenter(EventBus eventBus, DeclarationListPresenterBase.MyView view, MyProxy proxy,
-	                         PlaceManager placeManager, DispatchAsync dispatcher,
-	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter,
-                             DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter, ChangeStatusEDPresenter changeStatusEDPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter);
-		getView().setUiHandlers(this);
+    @NameToken(DeclarationListNameTokens.DECLARATION_LIST)
+    public interface MyProxy extends ProxyPlace<DeclarationListPresenter>, Place {
     }
 
-	@Override
-	public void prepareFromRequest(PlaceRequest request) {
-		try {
-			LogCleanEvent.fire(this);
-			LogShowEvent.fire(this, false);
-			super.prepareFromRequest(request);
+    @Inject
+    public DeclarationListPresenter(EventBus eventBus, DeclarationListPresenterBase.MyView view, MyProxy proxy,
+                                    PlaceManager placeManager, final DispatchAsync dispatcher,
+                                    DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter,
+                                    DeclarationDownloadReportsPresenter declarationDownloadReportsPresenter, ChangeStatusEDPresenter changeStatusEDPresenter,
+                                    MoveToCreateListPresenter moveToCreateListPresenter) {
+        super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter, declarationDownloadReportsPresenter, changeStatusEDPresenter, moveToCreateListPresenter);
+        this.eventBus = eventBus;
+        eventBus.addHandler(CommentEvent.TYPE, new CommentEvent.CommentEventHandler() {
+            @Override
+            public void update(final CommentEvent event) {
+                LogCleanEvent.fire(DeclarationListPresenter.this);
+                OperationInfoAction actionInfo = new OperationInfoAction();
+                actionInfo.setDeclarationDataReportType(DeclarationDataReportType.TO_CREATE_DEC.getReportType().getDescription());
+                actionInfo.setDeclarationDataIdList(event.getDeclarationDataIdList());
+                dispatcher.execute(actionInfo, CallbackUtils.defaultCallback(new AbstractCallback<OperationInfoResult>() {
+                    @Override
+                    public void onSuccess(OperationInfoResult result) {
+                        LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
+                        AcceptDeclarationListAction action = new AcceptDeclarationListAction();
+                        action.setDeclarationIds(getView().getSelectedIds());
+                        action.setTaxType(taxType);
+                        action.setAccepted(false);
+                        action.setReasonForReturn(event.getComment());
+                        dispatcher.execute(action, CallbackUtils
+                                .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
+                                    @Override
+                                    public void onSuccess(AcceptDeclarationListResult result) {
+                                        onFind();
+                                    }
+                                }, DeclarationListPresenter.this));
+                    }
+                }, DeclarationListPresenter.this));
+            }
+        });
+        getView().setUiHandlers(this);
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        try {
+            LogCleanEvent.fire(this);
+            LogShowEvent.fire(this, false);
+            super.prepareFromRequest(request);
             TaxType taxTypeOld = taxType;
             Boolean isReportsOld = isReports;
-			taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
+            taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
             isReports = Boolean.parseBoolean(request.getParameter(REPORTS, "false"));
             if (TaxType.PFR.equals(taxType)) {
                 isReports = false;
@@ -112,7 +157,7 @@ public class DeclarationListPresenter extends
             }
             //String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
             filterPresenter.setDeclarationListPresenter(this);
-			filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType.name() + "_" + isReports));
+            filterPresenter.initFilter(taxType, isReports, filterStates.get(taxType.name() + "_" + isReports));
             filterPresenter.getView().updateFilter(taxType, isReports);
             getView().updatePageSize(taxType);
 
@@ -126,16 +171,21 @@ public class DeclarationListPresenter extends
                         @Override
                         public void onSuccess(DetectUserRoleResult result) {
                             getView().setVisibleCancelButton(result.isControl());
+                            getView().setVisibleCreateButton(result.isControl() && !isReports);
+                            getView().showCheck(result.isControl() || result.isHasRoleOperator());
+                            getView().showRecalculate(!isReports && (result.isControl() || result.isHasRoleOperator()));
+                            getView().showAccept(result.isControl());
+                            getView().showDelete(result.isControl() || result.isHasRoleOperator());
                         }
                     }, this));
-		} catch (Exception e) {
-			ErrorEvent.fire(this, "Не удалось открыть список налоговых форм", e);
-		}
-	}
+        } catch (Exception e) {
+            ErrorEvent.fire(this, "Не удалось открыть список налоговых форм", e);
+        }
+    }
 
-	@ProxyEvent
-	@Override
-	public void onFilterReady(DeclarationFilterReadyEvent event) {
+    @ProxyEvent
+    @Override
+    public void onFilterReady(DeclarationFilterReadyEvent event) {
         if (event.getSource() == filterPresenter) {
             ready = true;
             DeclarationDataFilter dataFilter = filterPresenter.getFilterData();
@@ -147,7 +197,7 @@ public class DeclarationListPresenter extends
              Почему GWTP вызывает блокировку даже если страница
              уже видна - непонятно.*/
             getProxy().manualReveal(DeclarationListPresenter.this);
-		}
+        }
     }
 
     @Override
@@ -184,7 +234,7 @@ public class DeclarationListPresenter extends
                             getView().setPage(result.getPage());
                         } else {
                             getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
+                                    result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
                                     selectedItemIds);
                             selectedItemIds = null;
                         }
@@ -192,8 +242,8 @@ public class DeclarationListPresenter extends
                 }, DeclarationListPresenter.this));
     }
 
-    private void updateTitle(TaxType taxType){
-		String description = "Список налоговых форм";
+    private void updateTitle(TaxType taxType) {
+        String description = "Список налоговых форм";
         String title = "Список налоговых форм";
         if (taxType != null) {
             switch (taxType) {
@@ -205,10 +255,10 @@ public class DeclarationListPresenter extends
                     break;
             }
         }
-		TitleUpdateEvent.fire(this, title, description);
-	}
+        TitleUpdateEvent.fire(this, title, description);
+    }
 
-    private void saveFilterState(TaxType taxType, DeclarationDataFilter filter){
+    private void saveFilterState(TaxType taxType, DeclarationDataFilter filter) {
         // Это ворк эраунд.
         // Нужно клонировать состояние т.к. в DeclarationDataPresenter
         // может менять значения в этом объекте, что нужно не всегда.
@@ -238,9 +288,16 @@ public class DeclarationListPresenter extends
     }
 
     @Override
+    protected void onReveal() {
+        super.onReveal();
+        eventBus.fireEvent(new FocusActionEvent(false));
+    }
+
+    @Override
     protected void onHide() {
         super.onHide();
         selectedItemIds = getView().getSelectedIds();
+        eventBus.fireEvent(new FocusActionEvent(true));
     }
 
     @Override
@@ -302,24 +359,9 @@ public class DeclarationListPresenter extends
                         }
                     }, DeclarationListPresenter.this));
         } else {
-            Dialog.confirmMessageYesClose(Dialog.CONFIRM_MESSAGE, "Вы действительно хотите вернуть в статус \"Создана\" формы?", new DialogHandler() {
-                @Override
-                public void yes() {
-                    AcceptDeclarationListAction action = new AcceptDeclarationListAction();
-                    action.setDeclarationIds(getView().getSelectedIds());
-                    action.setTaxType(taxType);
-                    action.setAccepted(accepted);
-                    dispatcher.execute(action, CallbackUtils
-                            .defaultCallback(new AbstractCallback<AcceptDeclarationListResult>() {
-                                @Override
-                                public void onSuccess(AcceptDeclarationListResult result) {
-                                    LogAddEvent.fire(DeclarationListPresenter.this, result.getUuid());
-                                    onFind();
-                                }
-                            }, DeclarationListPresenter.this));
-                    super.yes();
-                }
-            });
+            LogCleanEvent.fire(DeclarationListPresenter.this);
+            moveToCreateListPresenter.setDeclarationDataIdList(getView().getSelectedIds());
+            addToPopupSlot(moveToCreateListPresenter);
         }
     }
 
@@ -371,5 +413,18 @@ public class DeclarationListPresenter extends
     @Override
     public Boolean getIsReports() {
         return isReports;
+    }
+
+    @Override
+    public void updateNotificationCountHandler(UpdateNotificationCount event) {
+        GetDeclarationListStateAction action = new GetDeclarationListStateAction();
+        action.setDeclarationIds(getView().getVisibleItemIds());
+        dispatcher.execute(action, CallbackUtils
+                .simpleCallback(new AbstractCallback<GetDeclarationListStateResult>() {
+                    @Override
+                    public void onSuccess(GetDeclarationListStateResult result) {
+                        getView().updateStatus(result.getStateMap());
+                    }
+                }));
     }
 }

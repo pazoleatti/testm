@@ -21,7 +21,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
 		result.setDeclarationTemplateId(SqlUtils.getInteger(rs,"declaration_template_id"));
 		result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
 		result.setReportPeriodName(rs.getString("report_period_name"));
-		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+		result.setTaxType(TaxType.NDFL);
         result.setState(State.fromId(rs.getInt("state")));
         result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
 		result.setDeclarationType(rs.getString("declaration_type_name"));
@@ -41,6 +41,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
             result.setDeclarationDataCreationDate(new Date(decl_data_creation_date.getTime()));
         }
         result.setDeclarationDataCreationUserName(rs.getString("import_decl_data_user_name"));
+        result.setActive(SqlUtils.getInteger(rs,"is_active") == 1);
         return result;
 	}
 }

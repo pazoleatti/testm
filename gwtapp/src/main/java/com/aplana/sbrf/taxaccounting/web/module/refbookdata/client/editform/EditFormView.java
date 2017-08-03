@@ -260,6 +260,9 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
 
     @Override
     protected boolean isVersionDatesChanged() {
+	    if (!versioned) {
+	        return false;
+        }
         return isStartVersionChanged() || isEndVersionChanged();
     }
 }

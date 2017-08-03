@@ -16,7 +16,6 @@ import java.util.List;
  */
 public class Logger {
 	private static final Log LOG = LogFactory.getLog(Logger.class);
-	private LogMessageDecorator messageDecorator;
 	private List<LogEntry> entries = new ArrayList<LogEntry>();
     //Добавили пока на пробу, поскольку необходимо логгирование в справочнике Подразделений
     private TAUserInfo taUserInfo;
@@ -70,7 +69,7 @@ public class Logger {
 	}
 
 	/**
-	 * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то)
+	 * Добавить предупреждающее сообщение в журнал (работа системы не нарушена, но нужно обратить внимание пользователя на что-то)
 	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
@@ -170,9 +169,6 @@ public class Logger {
         int topPosition = 0;
 
         String extMessage = String.format(message, args);
-        if (messageDecorator != null) {
-            extMessage = messageDecorator.getDecoratedMessage(extMessage);
-        }
 
         LogEntry entry = new LogEntry(level, extMessage);
         entries.add(topPosition, entry);
@@ -180,9 +176,6 @@ public class Logger {
 
     private void log(LogLevel level, String message, String type, String object, boolean excludeIfNotExist, Object...args) {
         String extMessage = String.format(message, args);
-        if (messageDecorator != null) {
-            extMessage = messageDecorator.getDecoratedMessage(extMessage);
-        }
 
         LogEntry entry = new LogEntry(level, extMessage, type, object);
         if (!excludeIfNotExist || !entries.contains(entry)) {
@@ -216,20 +209,6 @@ public class Logger {
         this.entries = entries;
     }
 
-    /**
-	 * Установить декоратор для текста сообщений.
-	 * Если установлен в null, то сообщения пишутся в неизменном виде,
-	 * в противном случае к строке будет применено преобразование, выполняемое методом {@LogMessageDecorator#getDecoratedMessage} 
-	 * @param messageDecorator декоратор, может быть null
-	 */
-	public void setMessageDecorator(LogMessageDecorator messageDecorator) {
-		this.messageDecorator = messageDecorator;
-	}
-
-    public LogMessageDecorator getMessageDecorator() {
-        return messageDecorator;
-    }
-	
 	/**
 	 * Очистить содержимое журнала
 	 */

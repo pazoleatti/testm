@@ -27,6 +27,8 @@ public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
         HeaderPanel headerPanel = (HeaderPanel) getWidget();
         final CustomScrollPanel scrollPanel = (CustomScrollPanel ) headerPanel.getContentWidget();
         scrollPanel.getWidget().addStyleName("AplanaScrollPanel");
+        final SimplePanel simplePanel = (SimplePanel) headerPanel.getHeaderWidget();
+        simplePanel.getWidget().addStyleName("AplanaHeaderPanel");
         setSkipRowHoverCheck(true);
         setSkipRowHoverFloatElementCheck(true);
         setSkipRowHoverStyleUpdate(true);

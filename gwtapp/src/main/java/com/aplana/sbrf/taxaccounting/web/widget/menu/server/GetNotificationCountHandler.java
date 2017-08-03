@@ -49,6 +49,7 @@ public class GetNotificationCountHandler extends AbstractActionHandler<GetNotifi
         filter.setUserRoleIds(userRoles);
         filter.setRead(false);
 		result.setNotificationCount(notificationService.getCountByFilter(filter));
+        result.setLastNotificationDate(notificationService.getLastNotificationDate());
 
         if (user.getRoles().hashCode() != getNotificationCountAction.getRolesHashCode()) {
             // изменился набор ролей

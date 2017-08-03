@@ -4,6 +4,8 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEventHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
@@ -13,11 +15,14 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.Date;
@@ -49,8 +54,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     TextBox filterText, filterLastName, filterFirstName;
     @UiField
-    LinkButton sendQuery;
-    @UiField
     DropdownButton printAnchor;
     @UiField
     LinkButton upload;
@@ -58,6 +61,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     Label lockInformation;
     @UiField
     SplitLayoutPanel tablePanel;
+
 
 
     public static final int DEFAULT_TABLE_PANEL_TOP_POSITION = 34;
@@ -68,11 +72,21 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     private LinkButton printToExcel, printToCSV;
     private boolean uploadAvailable;
 
+    private HandlerRegistration nativePreviewHandler;
+
+    private boolean enterEventDisabled;
+
     public RefBookDataView() {
     }
 
     @Inject
-	public RefBookDataView(final Binder uiBinder) {
+	public RefBookDataView(EventBus eventBus, final Binder uiBinder) {
+        eventBus.addHandler(FocusActionEvent.TYPE, new FocusActionEventHandler() {
+            @Override
+            public void update(FocusActionEvent event) {
+                enterEventDisabled = event.isFocusEnabled();
+            }
+        });
 		initWidget(uiBinder.createAndBindUi(this));
 
 		relevanceDate.setValue(new Date());
@@ -223,11 +237,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         getUiHandlers().duplicateClicked();
     }
 
-    @UiHandler("sendQuery")
-    void sendQueryButtonClicked(ClickEvent event) {
-        getUiHandlers().sendQuery();
-    }
-
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
         getUiHandlers().onDeleteRowClicked();
@@ -307,7 +316,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @Override
     public void updateSendQuery(boolean isAvailable) {
-        sendQuery.setVisible(isAvailable);
         edit.setVisible(!isAvailable && edit.isVisible());
     }
 
@@ -423,4 +431,25 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         hierarchyPanelStyle.setProperty("top", DEFAULT_TABLE_PANEL_TOP_POSITION + downShift, Style.Unit.PX);
     }
 
+    @Override
+    public void addEnterNativePreviewHandler() {
+        nativePreviewHandler = Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
+                    searchButtonClicked(null);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void removeEnterNativePreviewHandler() {
+        nativePreviewHandler.removeHandler();
+    }
+
+    @Override
+    public void setEnableDuplicateButton(boolean enable) {
+        duplicate.setEnabled(enable);
+    }
 }

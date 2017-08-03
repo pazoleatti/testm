@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,11 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"TAUserDaoTest.xml"})
@@ -64,7 +59,6 @@ public class TAUserDaoTest {
 		role.setId(1);
 		role.setAlias("N_ROLE_OPER");
 		role.setName("Контролёр");
-        role.setTaxType(TaxType.NDFL);
 		List<TARole> roles = new ArrayList<TARole>();
 		roles.add(role);
 		TAUser user = new TAUser();
@@ -90,7 +84,6 @@ public class TAUserDaoTest {
 		role.setId(1);
 		role.setAlias("N_ROLE_OPER");
 		role.setName("Контролёр");
-		role.setTaxType(TaxType.NDFL);
 		List<TARole> roles = new ArrayList<TARole>();
 		TAUser user = new TAUser();
 		user.setActive(true);
@@ -139,13 +132,11 @@ public class TAUserDaoTest {
 		TARole role = new TARole();
 		role.setAlias("N_ROLE_OPER");
 		role.setName("Оператор");
-        role.setTaxType(TaxType.NDFL);
         List<TARole> roles = new ArrayList<TARole>();
 		roles.add(role);
 		TARole role1 = new TARole();
 		role1.setAlias("N_ROLE_CONTROL_UNP");
 		role1.setName("Контролёр УНП");
-        role1.setTaxType(TaxType.NDFL);
 		roles.add(role1);
 		
 		user.setRoles(roles);

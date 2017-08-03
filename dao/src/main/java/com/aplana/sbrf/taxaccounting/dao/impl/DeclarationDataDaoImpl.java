@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultIt
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -342,19 +343,39 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
                 .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id and dec.declaration_template_id = dectemplate.id");
 
-        if (filter.getUserDepartmentId() != null) {
-            sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
-                .append(" OR :userDepId IN (\n" +
-                    "SELECT DISTINCT ddtp.performer_dep_id \n" +
-                    "FROM department_decl_type_performer ddtp \n" +
-                    "INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
-                    "WHERE ddt.declaration_type_id = dectemplate.declaration_type_id AND ddt.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.parent_id = dep_ddtp.ID START WITH dep_ddtp.ID = drp.department_id)\n" +
-                    "))");
+        if (filter.getUserDepartmentId() != null &&  filter.getControlNs() != null) {
+            if (!filter.getControlNs()) {
+                sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
+                        .append(" OR :userDepId IN (\n" +
+                                "SELECT DISTINCT ddtp.performer_dep_id \n" +
+                                "FROM department_decl_type_performer ddtp \n" +
+                                "INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
+                                "WHERE ddt.declaration_type_id = dectemplate.declaration_type_id AND ddt.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.parent_id = dep_ddtp.ID START WITH dep_ddtp.ID = drp.department_id)\n" +
+                                "))");
+            } else {
+                sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
+                        .append(" OR EXISTS (\n" +
+                                "   SELECT ddtp.performer_dep_id \n" +
+                                "   FROM department_decl_type_performer ddtp \n" +
+                                "   INNER JOIN department_declaration_type ddt ON ddt.ID = ddtp.department_decl_type_id \n" +
+                                "   WHERE ddt.declaration_type_id = dectemplate.declaration_type_id \n" +
+                                "   AND ddt.department_id IN ( \n" +
+                                "       SELECT dep_ddtp.ID " +
+                                "       FROM department dep_ddtp \n" +
+                                "       CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id \n" +
+                                "       START WITH dep_ddtp.ID = ( \n" +
+                                "                      SELECT dep.ID \n" +
+                                "                      FROM department dep \n" +
+                                "                      WHERE dep.parent_id = 0 and dep.type = 2 \n" +
+                                "                      CONNECT BY PRIOR dep.parent_id = dep.id \n" +
+                                "                      START WITH dep.id = drp.department_id \n" +
+                                "                ) \n" +
+                                "   ) \n" +
+                                "INTERSECT \n " +
+                                "   SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId) \n" +
+                                ") \n");
+            }
             values.put("userDepId", filter.getUserDepartmentId());
-        }
-
-        if (filter.getTaxType() != null) {
-            sql.append(" AND dectype.tax_type = ").append("\'").append(filter.getTaxType().getCode()).append("\'");
         }
 
         if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
@@ -438,7 +459,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.state, dec.tax_organ_code, dec.kpp, dec.oktmo, ")
                 .append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
                 .append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year, drp.correction_date,")
+                .append(" rp.ID as report_period_id, rp.NAME as report_period_name, tp.year, drp.correction_date, drp.is_active,")
                 .append(" dec.asnu_id as asnu_id, dec.file_name as file_name, dec.doc_state_id, dec.note,")
                 .append(" dectemplate.form_kind as form_kind, dectemplate.form_type as form_type,")
                 .append(" (select bd.creation_date from declaration_report dr left join blob_data bd on bd.id = dr.blob_data_id where dr.declaration_data_id = dec.id and dr.type = 1) as creation_date,")
@@ -704,24 +725,22 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> findDeclarationDataByFileNameAndFileType(String fileName, Long fileTypeId) {
         String sql =
                 "select " +
-                    "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                    "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
-                    "drp.report_period_id, drp.department_id, dd.note " +
-                "from " +
-                    "DECLARATION_DATA dd " +
-                    "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
-                    "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
-                    "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
-                "where " +
-                    "lower(bd.name) = lower(:fileName) " +
-                    (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId ");
+                        "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                        "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                        "drp.report_period_id, drp.department_id, dd.note " +
+                        "from " +
+                        "DECLARATION_DATA dd " +
+                        "left join department_report_period drp on (dd.department_report_period_id = drp.id) " +
+                        "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
+                        "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
+                        "where " +
+                        "lower(bd.name) LIKE  lower('%"+fileName+"%') " +
+                        (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId");
 
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("fileName", fileName);
         if (fileTypeId != null) {
             params.addValue("fileTypeId", fileTypeId);
         }
-
         return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
 
     }
@@ -771,6 +790,80 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getNamedParameterJdbcTemplate().queryForObject("SELECT id FROM declaration_data WHERE id = :declarationDataId", values, Long.class) > 0;
         } catch (EmptyResultDataAccessException e) {
             return false;
+        }
+    }
+
+    @Override
+    public List<DeclarationData> findAllActive(int declarationTypeId, int reportPeriodId) {
+        String sql = "select " +
+                "dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
+                "dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, " +
+                "drp.report_period_id, drp.department_id, dd.note " +
+                "from declaration_data dd join department_report_period drp on drp.ID = dd.department_report_period_id " +
+                "where dd.declaration_template_id = :declarationTypeId " +
+                "and drp.report_period_id = :reportPeriodId " +
+                "and drp.is_active = 1 ";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTypeId", declarationTypeId)
+                .addValue("reportPeriodId", reportPeriodId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<DeclarationData>();
+        }
+    }
+
+    @Override
+    public List<DeclarationData> find(int declarationTemplate, int departmentReportPeriodId, String taxOrganCode, String kpp, String oktmo) {
+        StringBuilder query = new StringBuilder("select ")
+                .append("dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, ")
+                .append("dd.department_report_period_id, dd.asnu_id, dd.file_name, dd.doc_state_id, ")
+                .append("drp.report_period_id, drp.department_id, dd.note ")
+                .append("from declaration_data dd join declaration_template dt on dt.id = dd.declaration_template_id ")
+                .append("join department_report_period drp on drp.ID = dd.department_report_period_id ")
+                .append("where dd.kpp = :kpp and dd.oktmo = :oktmo and dt.id = :declarationTemplate ")
+                .append("and drp.id = :departmentReportPeriodId and dd.tax_organ_code = :taxOrganCode");
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTemplate", declarationTemplate)
+                .addValue("departmentReportPeriodId", departmentReportPeriodId)
+                .addValue("taxOrganCode", taxOrganCode)
+                .addValue("kpp", kpp)
+                .addValue("oktmo", oktmo);
+        try {
+            return getNamedParameterJdbcTemplate().query(query.toString(), params, new DeclarationDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<DeclarationData>();
+        }
+    }
+
+    @Override
+    public List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId) {
+        String sql = "select distinct npi.kpp, npi.oktmo " +
+                "from ndfl_person_income npi " +
+                "join ndfl_person np on npi.ndfl_person_id = np.id " +
+                "join declaration_data dd on np.declaration_data_id = dd.ID " +
+                "join department_report_period drp on dd.department_report_period_id = drp.id " +
+                "join report_period rp on drp.report_period_id = rp.ID " +
+                "where dd.id = :declarationDataId " +
+                "and (npi.kpp, npi.oktmo) " +
+                "not in (" +
+                "select rnd.kpp, ro.code " +
+                "from ref_book_ndfl_detail rnd " +
+                "join ref_book_oktmo ro on ro.id = rnd.oktmo " +
+                "where rnd.version <= rp.end_date)";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("declarationDataId", declarationDataId);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Pair<String, String>>() {
+                @Override
+                public Pair<String, String> mapRow(ResultSet resultSet, int i) throws SQLException {
+                    String kpp = resultSet.getString("kpp");
+                    String oktmo = resultSet.getString("oktmo");
+                    return new Pair<String, String>(kpp, oktmo);
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Pair<String, String>>();
         }
     }
 }

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.components.RefBookSimpleQueryBuilderComponent;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookAddressValueMapper;
+import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookCalendarValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
@@ -67,6 +69,16 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     @Autowired
     private ApplicationContext applicationContext;
 
+    private RowMapper<Map<String, RefBookValue>> getRowMapper(RefBook refBook) {
+        if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
+            return new RefBookCalendarValueMapper(refBook);
+        } else if (refBook.getId().equals(RefBook.Id.PERSON_ADDRESS.getId())) {
+            return new RefBookAddressValueMapper(refBook);
+        } else {
+            return new RefBookValueMapper(refBook);
+        }
+    }
+
     /**
      * Загружает данные справочника из отдельной таблицы на определенную дату актуальности
      * @param refBook справочник
@@ -98,7 +110,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
 		PreparedStatementData ps = queryBuilder.psGetRecordsQuery(refBook, versionFrom, versionTo, filter);
 		LOG.debug(ps.getQuery().toString());
 		List<Map<String, RefBookValue>> records =
-			getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), ps.getNamedParams(), new RefBookValueMapper(refBook));
+			getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), ps.getNamedParams(), getRowMapper(refBook));
 
 		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
 		result.setTotalCount(records.size());
@@ -116,7 +128,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psGetRecordData(refBook);
         ps.addNamedParam("id", id);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), new RefBookValueMapper(refBook));
+            return getNamedParameterJdbcTemplate().queryForObject(ps.getQueryString(), ps.getNamedParams(), getRowMapper(refBook));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -133,7 +145,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, recordIds);
 
         try {
-            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), new RefBookValueMapper(refBook)));
+            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), getRowMapper(refBook)));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -151,7 +163,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, whereClause);
 
         try {
-            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), new RefBookValueMapper(refBook)));
+            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), getRowMapper(refBook)));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -168,11 +180,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     public Map<Long, Map<String, RefBookValue>> getRecordDataVersionWhere(RefBook refBook, String whereClause, Date version) {
         PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, whereClause, version);
 
-        String sql = ps.getQueryString();
-        System.out.println(sql);
-
         try {
-            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), ps.getParams().toArray(), new RefBookValueMapper(refBook)));
+            return mapListToData(getJdbcTemplate().query(ps.getQueryString(), ps.getParams().toArray(), getRowMapper(refBook)));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -745,7 +754,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         //Добавляем атрибуты версии, т.к они не хранятся в бд
         newRefBook.getAttributes().add(RefBook.getVersionFromAttribute());
         newRefBook.getAttributes().add(RefBook.getVersionToAttribute());
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(newRefBook));
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), getRowMapper(newRefBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // получаем информацию о количестве версий
         result.setTotalCount(getRecordVersionsCount(newRefBook, uniqueRecordId));

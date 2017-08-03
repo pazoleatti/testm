@@ -225,8 +225,12 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartmentIds());
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
-            // 1
-            retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
+            Set<Integer> departments = new LinkedHashSet<Integer>();
+            departments.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
+            for(int tbId : getTBDepartmentIdsByDeclarationPerformer(departmentDao.getParentTBId(tAUser.getDepartmentId()))) {
+                departments.addAll(departmentDao.getDepartmentTBChildrenId(tbId));
+            }
+            retList.addAll(departments);
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
             // 1
             retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
@@ -431,18 +435,21 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public List<Integer> getTBDepartmentIdsByDeclarationPerformer(int performerDepartmentId) {
+        return departmentDao.getTBDepartmentIdsByDeclarationPerformer(performerDepartmentId);
+    }
+
+    @Override
     public List<Integer> getTaxDeclarationDepartments(TAUser tAUser, DeclarationType declarationType) {
-        TaxType taxType = declarationType.getTaxType();
+        TaxType taxType = TaxType.NDFL;
         if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)
                 || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
             return departmentDao.listDepartmentIds();
-        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS)
-                || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)) {
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS)) {
             // Все подразделения в рамках ТБ
             return departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId());
-        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER)
-                || tAUser.hasRole(taxType, TARole.F_ROLE_OPER)) {
+        } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER)) {
             List<Integer> departmentIds = new ArrayList<Integer>();
             // Подразделение + дочерниее
             departmentIds.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
@@ -451,5 +458,9 @@ public class DepartmentServiceImpl implements DepartmentService {
             return departmentIds;
         }
         return new ArrayList<Integer>();
+    }
+
+    public List<Integer> getAllTBPerformers(int userTBDepId, DeclarationType declarationType) {
+        return departmentDao.getAllTBPerformers(userTBDepId, declarationType.getId());
     }
 }

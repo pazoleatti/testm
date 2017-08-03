@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Types;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,13 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     //--------------------------- РНУ ---------------------------
 
     @Override
+    public void clearRnuNdflPerson(Long declarationDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("declarationDataId", declarationDataId);
+        getNamedParameterJdbcTemplate().update("update NDFL_PERSON set PERSON_ID = null where DECLARATION_DATA_ID = :declarationDataId", values);
+    }
+
+    @Override
     public void fillRecordVersions(Date version) {
         //long time = System.currentTimeMillis();
         getJdbcTemplate().update("call person_pkg.FillRecordVersions(?)", version);
@@ -44,6 +52,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, primaryRnuRowMapper), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
+        params.addValue("p_asnu", asnuId);
         Map<String, Object> returnedResults = call.execute(params);
         return (List<NaturalPerson>) returnedResults.get("ref_cursor");
     }
@@ -54,6 +63,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
+        params.addValue("p_asnu", asnuId);
         call.execute(params);
         return naturalPersonHandler.getResult();
     }
@@ -79,7 +89,7 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     public List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
 
         StringBuilder SQL = new StringBuilder();
-        SQL.append("SELECT id, declaration_data_id, person_id, row_num, inp, snils, last_name, first_name, middle_name, birth_day, citizenship, inn_np, inn_foreign, id_doc_type, id_doc_number, status, post_index, region_code, area, city, locality, street, house, building, flat, country_code, address, additional_data, NULL sex, NULL pension, NULL medical, NULL social, NULL correct_num, NULL period, NULL rep_period, NULL num, NULL sv_date  \n");
+        SQL.append("SELECT id, declaration_data_id, person_id, row_num, inp, snils, last_name, first_name, middle_name, birth_day, citizenship, inn_np, inn_foreign, id_doc_type, id_doc_number, status, post_index, region_code, area, city, locality, street, house, building, flat, country_code, address, additional_data, NULL correct_num, NULL period, NULL rep_period, NULL num, NULL sv_date  \n");
         SQL.append("FROM ndfl_person \n");
         SQL.append("WHERE declaration_data_id = :declarationDataId");
 

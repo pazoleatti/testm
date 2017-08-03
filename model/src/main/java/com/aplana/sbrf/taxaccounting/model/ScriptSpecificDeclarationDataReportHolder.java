@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,6 +33,11 @@ public class ScriptSpecificDeclarationDataReportHolder {
      * Значения параметров спец. отчета
      */
     private Map<String, Object> subreportParamValues;
+
+    /**
+     * Параметры для отображения в уведомлениях
+     */
+    private Map<String, String> viewParamValues;
 
     private PrepareSpecificReportResult prepareSpecificReportResult;
 
@@ -110,5 +113,13 @@ public class ScriptSpecificDeclarationDataReportHolder {
 
     public void setSelectedRecord(DataRow<Cell> selectedRecord) {
         this.selectedRecord = selectedRecord;
+    }
+
+    public Map<String, String> getViewParamValues() {
+        return viewParamValues;
+    }
+
+    public void setViewParamValues(Map<String, String> viewParamValues) {
+        this.viewParamValues = viewParamValues;
     }
 }

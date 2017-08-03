@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,12 +30,12 @@ public class FiasRefBookDaoOracleTest {
 
     @Test
     public void testCheckAddressByFias() {
-        Map<Long, Long> result = fiasRefBookDao.checkAddressByFias(15563L, 0);
+        Map<Long, FiasCheckInfo> result = fiasRefBookDao.checkAddressByFias(15563L, 0);
 
         int i = 0;
         for (Long key : result.keySet()) {
 
-            Long v = result.get(key);
+            Long v = result.get(key).getFiasId();
             if (v == null) {
                 System.out.print(key + ", ");
                 i++;
