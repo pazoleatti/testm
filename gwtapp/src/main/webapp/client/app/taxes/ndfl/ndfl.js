@@ -29,14 +29,14 @@
          * @description Контроллер страницы РНУ НДФЛ и вкладки "Реквизиты"
          */
         .controller('ndflCtrl', [
-            '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', 'appDialogs',
-            function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appDialogs) {
+            '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', 'appDialogs', '$rootScope',
+            function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appDialogs, $rootScope) {
 
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();
                 };
 
-                $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
+                $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
 
                 $scope.openHistoryOfChange = function () {
                     appDialogs.create('client/app/taxes/ndfl/logBusines.html', 'logBusinesFormCtrl', {declarationId: $scope.formNumber});

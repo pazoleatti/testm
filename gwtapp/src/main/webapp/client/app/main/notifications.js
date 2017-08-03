@@ -5,51 +5,59 @@
      * @description Модуль для работы со формами ндфл
      */
     angular.module('app.notifications', [])
-        /**
-         * @description Контроллер формы создания/редактирования ФЛ
-         */
-        .controller('notificationsFormCtrl', ["$scope", "$http", "$uibModalInstance", "NotificationResource", "$filter", 'dialogs', '$logPanel',
-            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, dialogs, $logPanel) {
+    /**
+     * @description Контроллер формы создания/редактирования ФЛ
+     */
+        .controller('notificationsFormCtrl', ["$scope", "$http", "$uibModalInstance", "NotificationResource", "$filter", 'dialogs', '$logPanel', '$rootScope',
+            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, dialogs, $logPanel, $rootScope) {
                 $http({
                     method: "PUT",
                     url: "controller/actions/notification/markAsRead"
                 }).success(function () {
-                    $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
+                    $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
                 });
 
                 $scope.notificationsGrid =
-                {
-                    ctrl: {},
-                    value: [],
-                    options: {
-                        datatype: "angularResource",
-                        angularResource: NotificationResource,
-                        requestParameters: function () {
-                            return {
-                                projection: 'notifications'
-                            };
-                        },
-                        height: 250,
-                        colNames: [
-                            '',
-                            $filter('translate')('notifications.title.createDate'),
-                            $filter('translate')('notifications.title.content'),
-                            $filter('translate')('notifications.title.link')],
-                        colModel: [
-                            {name: 'id', index: 'id', width: 176, key: true, hidden: true},
-                            {name: 'createDate', index: 'createDate', width: 135, formatter: $filter('dateFormatter')},
-                            {name: 'text', index: 'text', width: 520, formatter: $filter('notificationTextFormatter')},
-                            {name: 'reportId', index: 'reportId', width: 175, sortable: false}
-                        ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
-                        viewrecords: true,
-                        sortname: 'id',
-                        sortorder: "desc",
-                        hidegrid: false,
-                        multiselect: true
-                    }
-                };
+                    {
+                        ctrl: {},
+                        value: [],
+                        options: {
+                            datatype: "angularResource",
+                            angularResource: NotificationResource,
+                            requestParameters: function () {
+                                return {
+                                    projection: 'notifications'
+                                };
+                            },
+                            height: 250,
+                            colNames: [
+                                $filter('translate')('notifications.title.createDate'),
+                                $filter('translate')('notifications.title.content'),
+                                $filter('translate')('notifications.title.link')],
+                            colModel: [
+                                {
+                                    name: 'createDate',
+                                    index: 'createDate',
+                                    width: 135,
+                                    formatter: $filter('dateFormatter')
+                                },
+                                {
+                                    name: 'text',
+                                    index: 'text',
+                                    width: 520,
+                                    formatter: $filter('notificationTextFormatter')
+                                },
+                                {name: 'reportId', index: 'reportId', width: 175, sortable: false}
+                            ],
+                            rowNum: 10,
+                            rowList: [10, 20, 30],
+                            viewrecords: true,
+                            sortname: 'createDate',
+                            sortorder: "desc",
+                            hidegrid: false,
+                            multiselect: true
+                        }
+                    };
 
                 /**
                  * @description Удаление оповещения
@@ -97,7 +105,7 @@
                 };
 
                 $(document).undelegate('#notificationsTable .notification-link', 'click');
-                $(document).delegate('#notificationsTable .notification-link', 'click', function() {
+                $(document).delegate('#notificationsTable .notification-link', 'click', function () {
                     var logId = $(this).attr('log-id');
                     $logPanel.open('log-panel-container', logId);
                 });

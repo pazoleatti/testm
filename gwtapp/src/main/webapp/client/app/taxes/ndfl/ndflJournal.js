@@ -17,9 +17,9 @@
          * @description Контроллер списка форм
          */
         .controller('ndflJournalCtrl', [
-            '$scope', '$timeout', '$state', 'dialogs', 'ShowToDoDialog',
-            function ($scope, $timeout, $state, dialogs, $showToDoDialog) {
-                $scope.$parent.$broadcast('UPDATE_NOTIF_COUNT');
+            '$scope', '$timeout', '$state', 'dialogs', 'ShowToDoDialog', '$rootScope',
+            function ($scope, $timeout, $state, dialogs, $showToDoDialog, $rootScope) {
+                $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
                 /**
                  * @description Обновление грида
                  * @param page
