@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
@@ -20,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -182,10 +184,64 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
 
+        OrderSpecifier order;
+        Sort sort = pagingParams.getSort();
+        if (sort.getOrderFor("rowNum") != null) {
+            order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonIncome.rowNum.asc() : ndflPersonIncome.rowNum.desc();
+        } else if (sort.getOrderFor("inp") != null) {
+            order = sort.getOrderFor("inp").isAscending() ? ndflPerson.inp.asc() : ndflPerson.inp.desc();
+        } else if (sort.getOrderFor("operationId") != null) {
+            order = sort.getOrderFor("operationId").isAscending() ? ndflPersonIncome.operationId.asc() : ndflPersonIncome.operationId.desc();
+        } else if (sort.getOrderFor("incomeCode") != null) {
+            order = sort.getOrderFor("incomeCode").isAscending() ? ndflPersonIncome.incomeCode.asc() : ndflPersonIncome.incomeCode.desc();
+        } else if (sort.getOrderFor("incomeType") != null) {
+            order = sort.getOrderFor("incomeType").isAscending() ? ndflPersonIncome.incomeType.asc() : ndflPersonIncome.incomeType.desc();
+        } else if (sort.getOrderFor("incomeAccruedDate") != null) {
+            order = sort.getOrderFor("incomeAccruedDate").isAscending() ? ndflPersonIncome.incomeAccruedDate.asc() : ndflPersonIncome.incomeAccruedDate.desc();
+        } else if (sort.getOrderFor("incomePayoutDate") != null) {
+            order = sort.getOrderFor("incomePayoutDate").isAscending() ? ndflPersonIncome.incomePayoutDate.asc() : ndflPersonIncome.incomePayoutDate.desc();
+        } else if (sort.getOrderFor("kpp") != null) {
+            order = sort.getOrderFor("kpp").isAscending() ? ndflPersonIncome.kpp.asc() : ndflPersonIncome.kpp.desc();
+        } else if (sort.getOrderFor("oktmo") != null) {
+            order = sort.getOrderFor("oktmo").isAscending() ? ndflPersonIncome.oktmo.asc() : ndflPersonIncome.oktmo.desc();
+        } else if (sort.getOrderFor("incomeAccruedSumm") != null) {
+            order = sort.getOrderFor("incomeAccruedSumm").isAscending() ? ndflPersonIncome.incomeAccruedSumm.asc() : ndflPersonIncome.incomeAccruedSumm.desc();
+        } else if (sort.getOrderFor("incomePayoutSumm") != null) {
+            order = sort.getOrderFor("incomePayoutSumm").isAscending() ? ndflPersonIncome.incomePayoutSumm.asc() : ndflPersonIncome.incomePayoutSumm.desc();
+        } else if (sort.getOrderFor("totalDeductionsSumm") != null) {
+            order = sort.getOrderFor("totalDeductionsSumm").isAscending() ? ndflPersonIncome.totalDeductionsSumm.asc() : ndflPersonIncome.totalDeductionsSumm.desc();
+        } else if (sort.getOrderFor("taxBase") != null) {
+            order = sort.getOrderFor("taxBase").isAscending() ? ndflPersonIncome.taxBase.asc() : ndflPersonIncome.taxBase.desc();
+        } else if (sort.getOrderFor("taxRate") != null) {
+            order = sort.getOrderFor("taxRate").isAscending() ? ndflPersonIncome.taxRate.asc() : ndflPersonIncome.taxRate.desc();
+        } else if (sort.getOrderFor("taxDate") != null) {
+            order = sort.getOrderFor("taxDate").isAscending() ? ndflPersonIncome.taxDate.asc() : ndflPersonIncome.taxDate.desc();
+        } else if (sort.getOrderFor("calculatedTax") != null) {
+            order = sort.getOrderFor("calculatedTax").isAscending() ? ndflPersonIncome.calculatedTax.asc() : ndflPersonIncome.calculatedTax.desc();
+        } else if (sort.getOrderFor("withholdingTax") != null) {
+            order = sort.getOrderFor("withholdingTax").isAscending() ? ndflPersonIncome.withholdingTax.asc() : ndflPersonIncome.withholdingTax.desc();
+        } else if (sort.getOrderFor("notHoldingTax") != null) {
+            order = sort.getOrderFor("notHoldingTax").isAscending() ? ndflPersonIncome.notHoldingTax.asc() : ndflPersonIncome.notHoldingTax.desc();
+        } else if (sort.getOrderFor("overholdingTax") != null) {
+            order = sort.getOrderFor("overholdingTax").isAscending() ? ndflPersonIncome.overholdingTax.asc() : ndflPersonIncome.overholdingTax.desc();
+        } else if (sort.getOrderFor("refoundTax") != null) {
+            order = sort.getOrderFor("refoundTax").isAscending() ? ndflPersonIncome.refoundTax.asc() : ndflPersonIncome.refoundTax.desc();
+        } else if (sort.getOrderFor("taxTransferDate") != null) {
+            order = sort.getOrderFor("taxTransferDate").isAscending() ? ndflPersonIncome.taxTransferDate.asc() : ndflPersonIncome.taxTransferDate.desc();
+        } else if (sort.getOrderFor("paymentDate") != null) {
+            order = sort.getOrderFor("paymentDate").isAscending() ? ndflPersonIncome.paymentDate.asc() : ndflPersonIncome.paymentDate.desc();
+        } else if (sort.getOrderFor("paymentNumber") != null) {
+            order = sort.getOrderFor("paymentNumber").isAscending() ? ndflPersonIncome.paymentNumber.asc() : ndflPersonIncome.paymentNumber.desc();
+        } else if (sort.getOrderFor("taxSumm") != null) {
+            order = sort.getOrderFor("taxSumm").isAscending() ? ndflPersonIncome.taxSumm.asc() : ndflPersonIncome.taxSumm.desc();
+        } else {
+            order = ndflPersonIncome.rowNum.asc();
+        }
+
         List<NdflPersonIncome> ndflPersonIncomeList = sqlQueryFactory.from(ndflPersonIncome)
                 .innerJoin(ndflPersonIncome.ndflPersonIFkNp, ndflPerson)
                 .where(where)
-                .orderBy(ndflPersonIncome.rowNum.asc())
+                .orderBy(order)
                 .offset(pagingParams.getStartIndex())
                 .limit(pagingParams.getCount())
                 .transform(GroupBy.groupBy(ndflPersonIncome.id).list(ndflPersonIncomeBean));
@@ -252,10 +308,48 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
 
+        OrderSpecifier order;
+        Sort sort = pagingParams.getSort();
+        if (sort.getOrderFor("rowNum") != null) {
+            order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonDeduction.rowNum.asc() : ndflPersonDeduction.rowNum.desc();
+        } else if (sort.getOrderFor("inp") != null) {
+            order = sort.getOrderFor("inp").isAscending() ? ndflPerson.inp.asc() : ndflPerson.inp.desc();
+        } else if (sort.getOrderFor("typeCode") != null) {
+            order = sort.getOrderFor("typeCode").isAscending() ? ndflPersonDeduction.typeCode.asc() : ndflPersonDeduction.typeCode.desc();
+        } else if (sort.getOrderFor("notifType") != null) {
+            order = sort.getOrderFor("notifType").isAscending() ? ndflPersonDeduction.notifType.asc() : ndflPersonDeduction.notifType.desc();
+        } else if (sort.getOrderFor("notifDate") != null) {
+            order = sort.getOrderFor("notifDate").isAscending() ? ndflPersonDeduction.notifDate.asc() : ndflPersonDeduction.notifDate.desc();
+        } else if (sort.getOrderFor("notifNum") != null) {
+            order = sort.getOrderFor("notifNum").isAscending() ? ndflPersonDeduction.notifNum.asc() : ndflPersonDeduction.notifNum.desc();
+        } else if (sort.getOrderFor("notifSource") != null) {
+            order = sort.getOrderFor("notifSource").isAscending() ? ndflPersonDeduction.notifSource.asc() : ndflPersonDeduction.notifSource.desc();
+        } else if (sort.getOrderFor("notifSumm") != null) {
+            order = sort.getOrderFor("notifSumm").isAscending() ? ndflPersonDeduction.notifSumm.asc() : ndflPersonDeduction.notifSumm.desc();
+        } else if (sort.getOrderFor("operationId") != null) {
+            order = sort.getOrderFor("operationId").isAscending() ? ndflPersonDeduction.operationId.asc() : ndflPersonDeduction.operationId.desc();
+        } else if (sort.getOrderFor("incomeAccrued") != null) {
+            order = sort.getOrderFor("incomeAccrued").isAscending() ? ndflPersonDeduction.incomeAccrued.asc() : ndflPersonDeduction.incomeAccrued.desc();
+        } else if (sort.getOrderFor("incomeCode") != null) {
+            order = sort.getOrderFor("incomeCode").isAscending() ? ndflPersonDeduction.incomeCode.asc() : ndflPersonDeduction.incomeCode.desc();
+        } else if (sort.getOrderFor("incomeSumm") != null) {
+            order = sort.getOrderFor("incomeSumm").isAscending() ? ndflPersonDeduction.incomeSumm.asc() : ndflPersonDeduction.incomeSumm.desc();
+        } else if (sort.getOrderFor("periodPrevDate") != null) {
+            order = sort.getOrderFor("periodPrevDate").isAscending() ? ndflPersonDeduction.periodPrevDate.asc() : ndflPersonDeduction.periodPrevDate.desc();
+        } else if (sort.getOrderFor("periodPrevSumm") != null) {
+            order = sort.getOrderFor("periodPrevSumm").isAscending() ? ndflPersonDeduction.periodPrevSumm.asc() : ndflPersonDeduction.periodPrevSumm.desc();
+        } else if (sort.getOrderFor("periodCurrDate") != null) {
+            order = sort.getOrderFor("periodCurrDate").isAscending() ? ndflPersonDeduction.periodCurrDate.asc() : ndflPersonDeduction.periodCurrDate.desc();
+        } else if (sort.getOrderFor("periodCurrSumm") != null) {
+            order = sort.getOrderFor("periodCurrSumm").isAscending() ? ndflPersonDeduction.periodCurrSumm.asc() : ndflPersonDeduction.periodCurrSumm.desc();
+        } else {
+            order = ndflPersonDeduction.rowNum.asc();
+        }
+
         List<NdflPersonDeduction> ndflPersonDeductionList = sqlQueryFactory.from(ndflPersonDeduction)
                 .innerJoin(ndflPersonDeduction.ndflPdFkNp, ndflPerson)
                 .where(where)
-                .orderBy(ndflPersonDeduction.rowNum.asc())
+                .orderBy(order)
                 .offset(pagingParams.getStartIndex())
                 .limit(pagingParams.getCount())
                 .transform(GroupBy.groupBy(ndflPersonDeduction.id).list(ndflPersonDeductionBean));
@@ -313,10 +407,30 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
 
+        OrderSpecifier order;
+        Sort sort = pagingParams.getSort();
+        if (sort.getOrderFor("rowNum") != null) {
+            order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonPrepayment.rowNum.asc() : ndflPersonPrepayment.rowNum.desc();
+        } else if (sort.getOrderFor("inp") != null) {
+            order = sort.getOrderFor("inp").isAscending() ? ndflPerson.inp.asc() : ndflPerson.inp.desc();
+        } else if (sort.getOrderFor("operationId") != null) {
+            order = sort.getOrderFor("operationId").isAscending() ? ndflPersonPrepayment.operationId.asc() : ndflPersonPrepayment.operationId.desc();
+        } else if (sort.getOrderFor("summ") != null) {
+            order = sort.getOrderFor("summ").isAscending() ? ndflPersonPrepayment.summ.asc() : ndflPersonPrepayment.summ.desc();
+        } else if (sort.getOrderFor("notifNum") != null) {
+            order = sort.getOrderFor("notifNum").isAscending() ? ndflPersonPrepayment.notifNum.asc() : ndflPersonPrepayment.notifNum.desc();
+        } else if (sort.getOrderFor("notifDate") != null) {
+            order = sort.getOrderFor("notifDate").isAscending() ? ndflPersonPrepayment.notifDate.asc() : ndflPersonPrepayment.notifDate.desc();
+        } else if (sort.getOrderFor("notifSource") != null) {
+            order = sort.getOrderFor("notifSource").isAscending() ? ndflPersonPrepayment.notifSource.asc() : ndflPersonPrepayment.notifSource.desc();
+        } else {
+            order = ndflPersonPrepayment.rowNum.asc();
+        }
+
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = sqlQueryFactory.from(ndflPersonPrepayment)
                 .innerJoin(ndflPersonPrepayment.ndflPpFkNp, ndflPerson)
                 .where(where)
-                .orderBy(ndflPersonPrepayment.rowNum.asc())
+                .orderBy(order)
                 .offset(pagingParams.getStartIndex())
                 .limit(pagingParams.getCount())
                 .transform(GroupBy.groupBy(ndflPersonPrepayment.id).list(ndflPersonPrepaymentBean));
@@ -524,7 +638,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
         parameters.put("declarationDataId", declarationDataId);
-        String query = buildQuery(parameters);
+        String query = buildQuery(parameters, pagingParams);
         String totalQuery = query;
         if (pagingParams != null) {
             long lastindex = pagingParams.getStartIndex() + pagingParams.getCount();
@@ -539,7 +653,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return new PagingResult<NdflPerson>(result, getCount(totalQuery, parameters));
     }
 
-    public static String buildQuery(Map<String, Object> parameters) {
+    public static String buildQuery(Map<String, Object> parameters, PagingParams pagingParams) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT " + createColumns(NdflPerson.COLUMNS, "np") + ", r.record_id " + " \n");
@@ -594,7 +708,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 sb.append("AND (translate(lower(np.id_doc_number), '0-, ', '0') like translate(lower(:idDocNumber), '0-, ', '0')) \n");
             }
         }
-        sb.append("ORDER BY np.row_num \n");
+        if (pagingParams != null && pagingParams.getProperty() != null) {
+            sb.append("order by ").append(pagingParams.getProperty()).append(" ").append(pagingParams.getDirection());
+        } else {
+            sb.append("ORDER BY np.row_num \n");
+        }
         return sb.toString();
 
     }

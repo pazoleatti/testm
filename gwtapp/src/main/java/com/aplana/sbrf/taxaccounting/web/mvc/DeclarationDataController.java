@@ -254,7 +254,7 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      */
     @PostMapping(value = "/actions/declarationData/returnToCreated")
-    public void returnToCreated(@RequestParam int declarationDataId) {
+    public void returnToCreatedDeclaration(@RequestParam int declarationDataId) {
         Logger logger = new Logger();
         declarationService.cancel(logger, declarationDataId, securityService.currentUserInfo());
     }
