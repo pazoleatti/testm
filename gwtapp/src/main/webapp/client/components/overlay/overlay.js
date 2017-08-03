@@ -496,7 +496,7 @@
                              "<div id='overlay-right' class='overlay-content'>"+
                              "<div class='overlay-container-img'></div>"+
                              "</div>"+
-                             "<div id='overlay-left' class='overlay-content'> Загрузка"+
+                             "<div id='overlay-left' class='overlay-content'>"+
                              "</div>"+
                              "</div>"+
                              "<div id='overlay-helper'></div>"+
