@@ -29,7 +29,7 @@ INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10004,1001,'Имя','firstName',2,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-	(10005,1001,'ИНН','inn',5,'N',null,null,0);
+	(10005,1001,'ИНН','inn',5,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10006,1001,'ИНП','inp',6,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
@@ -48,7 +48,7 @@ INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10014,1011,'Имя','firstName',2,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-	(10015,1011,'ИНН','inn',5,'N',null,null,0);
+	(10015,1011,'ИНН','inn',5,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10016,1011,'ИНП','inp',6,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
@@ -66,9 +66,13 @@ INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10204,1021,'Отчество','middleName',3,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-	(10205,1021,'Дата рождения','birthDay',4,'D',null,null,0);
+	(10206,1021,'№ ДУЛ','idDocNumber',7,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-	(10206,1021,'№ ДУЛ','idDocNumber',5,'S',null,null,0);
+	(10207,1021,'ИНН','inn',4,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10208,1021,'Дата рождения с','fromBirthDay',5,'D',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10209,1021,'Дата рождения по','toBirthDay',6,'D',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10401,1041,'Номер справки','pNumSpravka',0,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
@@ -78,10 +82,13 @@ INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 	(10404,1041,'Отчество','middleName',3,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-	(10405,1041,'Дата рождения','birthDay',4,'D',null,null,0);
+	(10406,1041,'№ ДУЛ','idDocNumber',7,'S',null,null,0);
 INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
-	(10406,1041,'№ ДУЛ','idDocNumber',5,'S',null,null,0);
-	
+	(10407,1041,'ИНН','inn',4,'S',null,null,0);
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10408,1041,'Дата рождения с','fromBirthDay',5,'D',null,null,0); 
+INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+	(10409,1041,'Дата рождения по','toBirthDay',6,'D',null,null,0);
 	
 COMMIT;
 EXIT;

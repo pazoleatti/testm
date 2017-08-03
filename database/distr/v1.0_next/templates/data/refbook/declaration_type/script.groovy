@@ -978,7 +978,6 @@ def importNdflResponse() {
     // Проверить ОНФ на отсутствие ранее загруженного Файла ответа по условию: "Имя Файла ответа" не найдено в ОНФ."Файлы и комментарии"
     def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
     if (!beforeUploadDeclarationDataList.isEmpty()) {
-        logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
         return
     }
 
@@ -990,30 +989,25 @@ def importNdflResponse() {
 
     // Выполнить проверку структуры файла ответа на соответствие XSD
     if (NDFL6 == formTypeCode) {
+        SAXHandler handl = new SAXHandler('Файл', 'Файл', true)
+        try {
+            inputStream = new FileInputStream(dataFile)
+            SAXParserFactory factory = SAXParserFactory.newInstance()
+            SAXParser saxParser = factory.newSAXParser()
+            saxParser.parse(inputStream, handl)
+        } catch (Exception e) {
+
+            e.printStackTrace()
+
+        } finally {
+            IOUtils.closeQuietly(inputStream)
+        }
+        // handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation');
+        handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation')
+
         def templateFile = null
-
-        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_1)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_NDFL_1)
-            }
-        }
-
-        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_2)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_NDFL_2)
-            }
-        }
-
-        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_3)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_NDFL_3)
-            }
-        }
-
-        if (UploadFileName.startsWith(ANSWER_PATTERN_NDFL_4)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_NDFL_4)
-            }
+        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+            it.fileName.equals(handl.getListValueAttributesTag().get('xsi:noNamespaceSchemaLocation'));
         }
 
         if (!templateFile) {
@@ -1024,6 +1018,7 @@ def importNdflResponse() {
         declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
 
         if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.error("Файл ответа \"%s\" не соответствует формату", UploadFileName)
             return
         }
     }
@@ -1114,7 +1109,7 @@ def importNdflResponse() {
     def fileDate = null
 
     if (isNdfl6Response(UploadFileName)) {
-        fileDate = Date.parse("yyyyMMdd", UploadFileName.replaceAll(NDFL6_FILE_NAME_PATTERN, "\$10"))
+        fileDate = Date.parse("yyyyMMdd", UploadFileName.substring(52, 60))
     } else if (isNdfl2ResponseReestr(UploadFileName)) {
         fileDate = Date.parse("dd.MM.yyyy", ndfl2ContentReestrMap.get(NDFL2_REGISTER_DATE))
     } else if (isNdfl2ResponseProt(UploadFileName)) {

@@ -502,7 +502,8 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
     @Override
     public void updateInfoLabel(boolean visible, String text, Map<String, String> styleMap) {
         if (text != null) {
-            infoLabel.setText(text);
+            // Замена пробелов на non-breaking space дает возможность переноса строк с помощью \n
+            infoLabel.setText(text.replaceAll(" +", "\u00a0").replaceAll("\n", " "));
         }
         if (styleMap != null) {
             for (Map.Entry<String, String> entry : styleMap.entrySet()) {

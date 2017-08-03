@@ -1,5 +1,6 @@
 --ref_book
 update ref_book set visible=0 where id in (940,941,939,2,938,925,937,25,26);
+update ref_book set read_only = 1 where id = 922;
 
 -- ref_book_present_place
 update ref_book_ndfl_detail set present_place=null where present_place in (select id from ref_book_present_place where (for_fond=1 and for_ndfl=0 and code<>'335') or code='350');

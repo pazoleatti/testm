@@ -24,10 +24,13 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -37,6 +40,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.QNdflPerson.ndflPerson;
@@ -557,12 +561,40 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, Date startDate, Date endDate) {
+    public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonIdAndTaxDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
         String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + ", null inp FROM ndfl_person_income npi " +
-                " WHERE npi.ndfl_person_id = :ndflPersonId" +
-                " AND npi.TAX_DATE between :startDate AND :endDate";
+                "WHERE npi.operation_id in " +
+                "(select npi.operation_id " +
+                "from ndfl_person_income npi " +
+                "where npi.ndfl_person_id = :ndflPersonId " +
+                "AND npi.tax_rate = :taxRate " +
+                "AND npi.tax_date between :startDate AND :endDate) " +
+                "AND npi.ndfl_person_id = :ndflPersonId";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
+                .addValue("taxRate", taxRate)
+                .addValue("startDate", startDate)
+                .addValue("endDate", endDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(sql, params, new NdflPersonDaoImpl.NdflPersonIncomeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<NdflPersonIncome>();
+        }
+    }
+
+    @Override
+    public List<NdflPersonIncome> findIncomesByPayoutDate(long ndflPersonId, int taxRate, Date startDate, Date endDate) {
+        String sql = "SELECT " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi " +
+                "WHERE npi.operation_id in " +
+                "(select npi.operation_id " +
+                "from ndfl_person_income npi " +
+                "where npi.ndfl_person_id = :ndflPersonId " +
+                "AND npi.tax_rate = :taxRate " +
+                "AND npi.income_payout_date between :startDate AND :endDate) " +
+                "AND npi.ndfl_person_id = :ndflPersonId";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ndflPersonId", ndflPersonId)
+                .addValue("taxRate", taxRate)
                 .addValue("startDate", startDate)
                 .addValue("endDate", endDate);
         try {
@@ -615,17 +647,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
+    public List<NdflPersonPrepayment> findPrepaymentsByPeriodAndNdflPersonId(long ndflPersonId, int taxRate, Date startDate, Date endDate, boolean prFequals1) {
         String priznakFClause = "";
         if (!prFequals1) {
             priznakFClause = " AND npi.not_holding_tax > 0";
         }
         String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp WHERE npp.ndfl_person_id = :ndflPersonId " +
                 "AND npp.operation_id IN (SELECT npi.operation_id FROM ndfl_person_income npi " +
-                "WHERE npi.ndfl_person_id = :ndflPersonId AND npi.tax_date BETWEEN :startDate AND :endDate" + priznakFClause + ")";
+                "WHERE npi.ndfl_person_id = :ndflPersonId " +
+                "AND npi.tax_rate = :taxRate " +
+                "AND npi.tax_date BETWEEN :startDate AND :endDate" + priznakFClause + ")";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
+                .addValue("taxRate", taxRate)
                 .addValue("startDate", startDate)
                 .addValue("endDate", endDate);
         try {
@@ -1134,17 +1169,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId) {
         String sql = "WITH t AS (SELECT t.row_num, p.ID p_id FROM " + tableName + " t " +
-                    " INNER JOIN ndfl_person p ON t.ndfl_person_id = p.ID \n" +
-                    " WHERE t.row_num IS NOT NULL AND p.declaration_data_id =:declaration_data_id \n" +
-                    " ORDER BY t.row_num, p.ID),\n" +
-                    " t_cnt AS (SELECT MAX(row_num) cnt, p_id  FROM t GROUP BY p_id)\n" +
-                    " ,pivot_data_params AS (SELECT MAX(cnt) AS pv_hi_limit FROM t_cnt)\n" +
-                    " ,pivot_data AS (SELECT ROWNUM AS nr FROM pivot_data_params CONNECT BY ROWNUM < pv_hi_limit+1)\n" +
-                    " SELECT p_id, nr row_num\n" +
-                    " FROM t_cnt, pivot_data\n" +
-                    " WHERE cnt >= nr\n" +
-                    " MINUS (SELECT p_id, row_num FROM t)\n" +
-                    " ORDER BY 2 ";
+                " INNER JOIN ndfl_person p ON t.ndfl_person_id = p.ID \n" +
+                " WHERE t.row_num IS NOT NULL AND p.declaration_data_id =:declaration_data_id \n" +
+                " ORDER BY t.row_num, p.ID),\n" +
+                " t_cnt AS (SELECT MAX(row_num) cnt, p_id  FROM t GROUP BY p_id)\n" +
+                " ,pivot_data_params AS (SELECT MAX(cnt) AS pv_hi_limit FROM t_cnt)\n" +
+                " ,pivot_data AS (SELECT ROWNUM AS nr FROM pivot_data_params CONNECT BY ROWNUM < pv_hi_limit+1)\n" +
+                " SELECT p_id, nr row_num\n" +
+                " FROM t_cnt, pivot_data\n" +
+                " WHERE cnt >= nr\n" +
+                " MINUS (SELECT p_id, row_num FROM t)\n" +
+                " ORDER BY 2 ";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declaration_data_id", declarationDataId);
         final Map<Long, List<Integer>> result = new HashMap<Long, List<Integer>>();
@@ -1293,10 +1328,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setTaxRate(SqlUtils.getInteger(rs, "tax_rate"));
             personIncome.setTaxDate(rs.getDate("tax_date"));
 
-            personIncome.setCalculatedTax(rs.getBigDecimal( "calculated_tax"));
-            personIncome.setWithholdingTax(rs.getBigDecimal( "withholding_tax"));
-            personIncome.setNotHoldingTax(rs.getBigDecimal( "not_holding_tax"));
-            personIncome.setOverholdingTax(rs.getBigDecimal( "overholding_tax"));
+            personIncome.setCalculatedTax(rs.getBigDecimal("calculated_tax"));
+            personIncome.setWithholdingTax(rs.getBigDecimal("withholding_tax"));
+            personIncome.setNotHoldingTax(rs.getBigDecimal("not_holding_tax"));
+            personIncome.setOverholdingTax(rs.getBigDecimal("overholding_tax"));
             personIncome.setRefoundTax(SqlUtils.getLong(rs, "refound_tax"));
 
             personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
@@ -1318,7 +1353,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             NdflPersonDeduction personDeduction = new NdflPersonDeduction();
             personDeduction.setId(SqlUtils.getLong(rs, "id"));
             personDeduction.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
-            personDeduction.setRowNum(rs.getBigDecimal( "row_num"));
+            personDeduction.setRowNum(rs.getBigDecimal("row_num"));
             personDeduction.setOperationId(rs.getString("operation_id"));
 
             personDeduction.setTypeCode(rs.getString("type_code"));
@@ -1352,7 +1387,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             NdflPersonPrepayment personPrepayment = new NdflPersonPrepayment();
             personPrepayment.setId(SqlUtils.getLong(rs, "id"));
             personPrepayment.setNdflPersonId(SqlUtils.getLong(rs, "ndfl_person_id"));
-            personPrepayment.setRowNum(rs.getBigDecimal( "row_num"));
+            personPrepayment.setRowNum(rs.getBigDecimal("row_num"));
             personPrepayment.setOperationId(rs.getString("operation_id"));
 
             personPrepayment.setSumm(rs.getBigDecimal("summ"));
@@ -1380,5 +1415,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("declarationDataId", declarationDataId);
         return getCount(query, parameters);
+    }
+
+    @Override
+    public int get6NdflPersonCount(Long declarationDataId) {
+        SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("report_pkg").withFunctionName("GetNDFL6PersCnt");
+        call.declareParameters(new SqlOutParameter("personCnt", Types.INTEGER), new SqlParameter("p_declaration", Types.NUMERIC));
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("p_declaration", declarationDataId);
+        return (Integer)call.execute(params).get("personCnt");
     }
 }

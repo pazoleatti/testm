@@ -155,7 +155,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
                     @Override
                     public void onSuccess(EditFormResult result) {
                         getView().hide();
-                        UpdateTable.fire(DeclarationDestinationsPresenter.this);
+                        UpdateTable.fire(DeclarationDestinationsPresenter.this, getView().getDepartments());
                     }
                 }, this));
     }
