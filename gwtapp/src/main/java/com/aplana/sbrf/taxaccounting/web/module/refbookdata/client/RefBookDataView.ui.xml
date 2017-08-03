@@ -150,8 +150,8 @@
 
                     <g:cell horizontalAlignment="left" width="100%">
                         <g:HorizontalPanel verticalAlignment="middle" title="Искать по точному совпадению">
-                            <g:CheckBox ui:field="exactSearch" />
-                            <g:Label text="Искать по точному совпадению" addStyleNames="{style.overflowHidden}"/>
+                            <g:CheckBox ui:field="exactSearch" text="Искать по точному совпадению" />
+                            <!--<g:Label text="Искать по точному совпадению" addStyleNames="{style.overflowHidden}"/>-->
                         </g:HorizontalPanel>
                     </g:cell>
 

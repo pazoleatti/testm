@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.service.script.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -67,6 +68,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public String getParentsHierarchyShortNames(Integer departmentId) {
         return departmentService.getParentsHierarchyShortNames(departmentId);
+    }
+
+    @Override
+    public String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate) {
+        return departmentDao.getDepartmentNameByPairKppOktmo(kpp, oktmo, reportPeriodEndDate);
     }
 }
 

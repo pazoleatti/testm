@@ -1,4 +1,4 @@
-package refbook.person
+package refbook.id_doc
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException

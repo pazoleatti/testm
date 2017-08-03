@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -471,11 +472,18 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         when(testHelper.getNdflPersonService().findNdflPersonIncome(any(Long.class))).thenReturn(ndflPersonIncomeList);
         when(testHelper.getNdflPersonService().findNdflPersonDeduction(any(Long.class))).thenReturn(ndflPersonDeductionList);
 
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setName("год");
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2016);
+        reportPeriod.setTaxPeriod(taxPeriod);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
         testHelper.execute(FormDataEvent.CHECK);
-        checkLogger();
-        Assert.assertTrue(containLog("(.*)«Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»(.*)"));
-        Assert.assertTrue(containLog("(.*)Значение не соответствует правилу: «Графа 12 Раздел 2» = сумма значений «Граф 16 Раздел 3»(.*)"));
-        Assert.assertTrue(containLog("(.*)сумма значений «Граф 16 Раздела 3» <= «Графа 10 Раздел 2»(.*)"));
+        //checkLogger();
+        Assert.assertTrue(containLog("(.*)Значение гр\\. \"Сумма вычета\" \\(\"125\"\\) должно быть равно сумме гр\\. \"Сумма вычета\" \\(\"250\"\\) раздела 3(.*)"));
+        Assert.assertTrue(containLog("(.*)Значение гр\\. \"Сумма вычета\" \\(\"125\"\\) должно быть не меньше значение гр\\. \"Начисление\" \\(\"125\"\\) раздела 3(.*)"));
     }
 
     /**

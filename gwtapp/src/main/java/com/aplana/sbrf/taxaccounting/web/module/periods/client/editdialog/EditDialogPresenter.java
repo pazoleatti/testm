@@ -199,7 +199,7 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
 
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
-		getView().setTaxType(taxType);
+//		getView().setTaxType(taxType);
 	}
 
     public void init(EditDialogData data) {

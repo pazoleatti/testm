@@ -33,6 +33,7 @@
             padding: 5px;
             font-size: 13px;
             margin: 0px 10px 4px 10px;
+            background-color: #f0f8d1;
         }
 
         .border {

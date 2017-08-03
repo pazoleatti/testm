@@ -1,13 +1,2 @@
-alter table fias_addrobj drop column autocode;
-alter table fias_addrobj drop column areacode;
-alter table fias_addrobj drop column citycode;
-alter table fias_addrobj drop column ctarcode;
-alter table fias_addrobj drop column placecode;
-alter table fias_addrobj drop column plancode;
-alter table fias_addrobj drop column streetcode;
-alter table fias_addrobj drop column extrcode;
-alter table fias_addrobj drop column sextcode;
-alter table fias_addrobj drop column centstatus;
-alter table fias_addrobj drop column operstatus;
-alter table fias_addrobj drop column divtype;
-alter table fias_addrobj drop column offname;
+alter table fias_addrobj drop (autocode,areacode,citycode,ctarcode,placecode,plancode,streetcode,extrcode,sextcode,
+                               centstatus,operstatus,divtype,offname);

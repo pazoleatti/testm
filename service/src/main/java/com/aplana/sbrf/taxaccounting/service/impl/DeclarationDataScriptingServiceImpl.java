@@ -150,16 +150,11 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			}
 		}
 
-		ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
-		logger.setMessageDecorator(d);
-
 		if (scriptFilePath == null || versionInfoProperties == null || versionInfoProperties.getProperty("productionMode").equals("true")) {
 			executeScript(b, declarationTemplate.getCreateScript(), logger);
 		} else {
 			executeLocalScript(toBinding(b), scriptFilePath, logger);
 		}
-
-		logger.setMessageDecorator(null);
 
 		return true;
 	}

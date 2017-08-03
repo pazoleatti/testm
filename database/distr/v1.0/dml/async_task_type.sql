@@ -33,3 +33,5 @@ insert into async_task_type (id,name,handler_jndi,short_queue_limit,task_limit,l
 insert into async_task_type (id,name,handler_jndi,short_queue_limit,task_limit,limit_kind,dev_mode) values (129,'Формирование отчетности','CreateReportsAsyncTaskSpring',null,null,null,'1');
 insert into async_task_type (id,name,handler_jndi,short_queue_limit,task_limit,limit_kind,dev_mode) values (28,'Создание экземпляров форм','ejb/ndfl/async-task.jar/CreateFormsAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote',null,null,null,'0');
 insert into async_task_type (id,name,handler_jndi,short_queue_limit,task_limit,limit_kind,dev_mode) values (128,'Создание экземпляров форм','CreateFormsAsyncTaskSpring',null,null,null,'1');
+
+update async_task_type set limit_kind='Количество ФЛ в НФ' where id in (5, 6, 7, 14, 15);

@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,13 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
     @Autowired
     private NotificationService notificationService;
 
+    private static final ThreadLocal<SimpleDateFormat> sdf_time = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm:ss.SSS");
+        }
+    };
+
     public DeleteDeclarationListHandler() {
         super(DeleteDeclarationListAction.class);
     }
@@ -48,10 +56,16 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
         for (Long declarationId : action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(declarationId)) {
                 try {
+                    Date startDate = new Date();
                     String declarationFullName = declarationDataService.getDeclarationFullName(declarationId, null);
                     declarationDataService.delete(declarationId, taUserInfo);
-                    logger.info("Успешно удалён объект: %s, № %d", declarationFullName, declarationId);
+                    Date endDate = new Date();
+                    Long divTime = endDate.getTime() - startDate.getTime();
+                    String msg = String.format("Длительность выполнения операции: %d мс (%s - %s)",divTime,sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                    logger.info("Успешно удалён объект: %s, № %d.", declarationFullName, declarationId);
+                    logger.info(msg);
                     sendNotifications("Успешно удалён объект: " + declarationFullName + ", № " + declarationId, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                    logger.clear();
                 } catch (Exception e) {
                     logger.error("При удалении объекта: %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
                     if (e instanceof ServiceLoggerException) {

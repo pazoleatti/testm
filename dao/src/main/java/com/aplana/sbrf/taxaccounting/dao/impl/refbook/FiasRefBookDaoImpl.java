@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.FiasRefBookDao;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.AddressObject;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo;
+import org.apache.commons.collections4.map.LinkedMap;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
@@ -134,8 +137,8 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
 
 
     @Override
-    public Map<Long, Long> checkAddressByFias(Long declarationId, int p_check_type) {
-        Map<Long, Long> result = new HashMap<Long, Long>();
+    public Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationId, int p_check_type) {
+        Map<Long, FiasCheckInfo> result = new HashMap<Long, FiasCheckInfo>();
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("fias_pkg").withFunctionName("CheckAddrByFias");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, new CheckAddressByFiasRowHandler(result)), new SqlParameter("p_declaration", Types.NUMERIC), new SqlParameter("p_check_type", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -151,17 +154,26 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
      */
     class CheckAddressByFiasRowHandler implements RowCallbackHandler {
 
-        Map<Long, Long> result;
+        Map<Long, FiasCheckInfo> result;
 
-        public CheckAddressByFiasRowHandler(Map<Long, Long> result) {
+        public CheckAddressByFiasRowHandler(Map<Long, FiasCheckInfo> result) {
             this.result = result;
         }
 
         @Override
         public void processRow(ResultSet rs) throws SQLException {
             Long ndflPersonId = SqlUtils.getLong(rs, "id");
-            Long fiasId = SqlUtils.getLong(rs, "fias_id");
-            this.result.put(ndflPersonId, fiasId);
+
+            FiasCheckInfo fiasCheckInfo = new FiasCheckInfo();
+            fiasCheckInfo.setFiasId(SqlUtils.getLong(rs, "fias_id"));
+            fiasCheckInfo.setValidIndex(SqlUtils.getInteger(rs, "chk_index") == 1);
+            fiasCheckInfo.setValidRegion(SqlUtils.getInteger(rs, "chk_region") == 1);
+            fiasCheckInfo.setValidArea(SqlUtils.getInteger(rs, "chk_area") == 1);
+            fiasCheckInfo.setValidCity(SqlUtils.getInteger(rs, "chk_city") == 1);
+            fiasCheckInfo.setValidLoc(SqlUtils.getInteger(rs, "chk_loc") == 1);
+            fiasCheckInfo.setValidStreet(SqlUtils.getInteger(rs, "chk_street") == 1);
+
+            this.result.put(ndflPersonId, fiasCheckInfo);
         }
     }
 

@@ -110,9 +110,10 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                             public void onSuccess(CreateDeclarationResult result) {
                                 if (result.getDeclarationId() == null) {
                                     LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-                                    String title = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
+                                    /*String title = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
                                     String msg = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Отчетности не созданы" : "Налоговоя форма не создана");
-                                    Dialog.infoMessage(title, msg);
+                                    Dialog.infoMessage(title, msg);*/
+                                    onHide();
                                 } else {
                                     onHide();
                                     placeManager

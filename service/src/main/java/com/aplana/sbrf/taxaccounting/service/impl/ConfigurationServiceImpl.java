@@ -400,6 +400,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         model.put(ConfigurationParam.NO_CODE, oldModel.get(ConfigurationParam.NO_CODE));
         model.put(ConfigurationParam.SBERBANK_INN, oldModel.get(ConfigurationParam.SBERBANK_INN));
+        model.put(ConfigurationParam.LIMIT_IDENT, oldModel.get(ConfigurationParam.LIMIT_IDENT));
+        model.put(ConfigurationParam.SHOW_TIMING, oldModel.get(ConfigurationParam.SHOW_TIMING));
         configurationDao.save(model);
         for (ConfigurationParam param: ConfigurationParam.values()) {
             if (ConfigurationParamGroup.COMMON.equals(param.getGroup())) {

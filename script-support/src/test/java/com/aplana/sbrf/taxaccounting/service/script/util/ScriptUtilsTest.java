@@ -353,4 +353,54 @@ public class ScriptUtilsTest {
 
         Assert.assertFalse(ScriptUtils.isEmpty(new BigDecimal("0.01")));
     }
+
+    @Test
+    public void checkInn() {
+        Assert.assertEquals("Значение гр. \"ИНН в РФ\" (\"100\") должно содержать 12 символов", ScriptUtils.checkInn("100"));
+        Assert.assertEquals("Значение гр. \"ИНН в РФ\" (\"123456789 12\") должно содержать только цифры", ScriptUtils.checkInn("123456789 12"));
+        Assert.assertEquals("Значение гр. \"ИНН в РФ\" (\"003456789012\") некорректно. Первые два разряда ИНН не могут быть равны одному из значений: \"00\",\"90\",\"93\",\"94\",\"95\",\"96\",\"98\", может быть отказано в приеме", ScriptUtils.checkInn("003456789012"));
+        Assert.assertEquals("Некорректное контрольное число в значении гр. \"ИНН в РФ\" (\"123456789012\")", ScriptUtils.checkInn("123456789012"));
+        Assert.assertNull(ScriptUtils.checkInn("500100732259"));
+    }
+
+    @Test
+    public void checkName() {
+        Assert.assertEquals("Значение гр. \"name\" (\"-иван\") не должно начинаться с символов \"Ъ\", \"Ь\", дефис, точка, апостроф и пробел. Может быть отказано в приеме", ScriptUtils.checkName("-иван", "name"));
+        Assert.assertEquals("Значение гр. \"name\" (\"Иbан\") содержит недопустимые символы. Значение может содержать только буквы русского алфавита (кириллица), пробелы и дефисы", ScriptUtils.checkName("Иbан", "name"));
+        Assert.assertNull(ScriptUtils.checkName("Иван", "name"));
+        Assert.assertNull(ScriptUtils.checkName("Ив-ан", "name"));
+
+    }
+    @Test
+    public void checkDul() {
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 01 12345\") не соответствует формату \"99 99 999999\", где 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("21", "00 01 12345", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 01 000000\") не должно быть нулевым", ScriptUtils.checkDul("21", "00 01 000000", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 00 000100\") не должно быть нулевым", ScriptUtils.checkDul("21", "00 00 000100", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("21", "80 00 010006", "dulNumber"));
+
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 12345678\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)" , ScriptUtils.checkDul("07", "АП 12345678", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап 1234567\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)" , ScriptUtils.checkDul("07", "Ап 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"GT 1234567\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)" , ScriptUtils.checkDul("07", "GT 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 000000\") не должно быть нулевым", ScriptUtils.checkDul("07", "АП 000000", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 0000000\") не должно быть нулевым", ScriptUtils.checkDul("07", "АП 0000000", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("07", "АП 1234567", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("07", "АП 123456", "dulNumber"));
+
+
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-012 12345678\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "АП-012 12345678", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап-012 1234567\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "Ап-012 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП- 012 1234567\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "АП- 012 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-000 1234567\") не должно быть нулевым", ScriptUtils.checkDul("18", "АП-000 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-012 0000000\") не должно быть нулевым", ScriptUtils.checkDul("18", "АП-012 0000000", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-000 0000000\") не должно быть нулевым", ScriptUtils.checkDul("18", "АП-000 0000000", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("18", "АП-012 1234567", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("18", "УУ-900 9999999", "dulNumber"));
+
+
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 12345678\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("24", "АП 12345678", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап 1234567\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("24", "Ап 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"GT 1234567\") не соответствует формату \"ББ 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("24", "GT 1234567", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 0000000\") не должно быть нулевым", ScriptUtils.checkDul("07", "АП 0000000", "dulNumber"));
+        Assert.assertNull(ScriptUtils.checkDul("24", "АП 1234567", "dulNumber"));
+    }
 }

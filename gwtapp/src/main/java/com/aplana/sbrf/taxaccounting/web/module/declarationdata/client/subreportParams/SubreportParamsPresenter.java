@@ -47,6 +47,10 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     private boolean selectRecord = false;
     private Map<String, Object> subreportParamValues;
 
+    private final String RNU_NDFL_ALIAS = "rnu_ndfl_person_db";
+
+    private final String REPORT_NDFL_ALIAS = "report_2ndfl";
+
     public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
         void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
 
@@ -61,6 +65,8 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
         void addEnterNativePreviewHandler();
 
         void removeEnterNativePreviewHandler();
+
+        Map<String, Object> getPersonFieldsValues() throws BadValueException, WarnValueException;
     }
 
     @Inject
@@ -109,7 +115,11 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
             action.setTaxType(declarationDataPresenter.getTaxType());
             action.setType(declarationSubreport.getAlias());
-            subreportParamValues = getView().getFieldsValues();
+            if (declarationSubreport.getAlias().equals(RNU_NDFL_ALIAS) || declarationSubreport.getAlias().equals(REPORT_NDFL_ALIAS)) {
+                subreportParamValues = getView().getPersonFieldsValues();
+            } else {
+                subreportParamValues = getView().getFieldsValues();
+            }
             action.setSubreportParamValues(subreportParamValues);
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<PrepareSubreportResult>() {
@@ -151,7 +161,6 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                                 if (resultSize < countAvailbaleDataRows) {
                                     StringBuilder infoMessage = new StringBuilder();
                                     Map<String, String> styleMap = new HashMap<String, String>();
-                                    styleMap.put("backgroundColor", "rgb(199, 248, 250)");
                                     infoMessage.append("Найдено ")
                                             .append(countAvailbaleDataRows)
                                             .append(" записей. Отображено записей ")
@@ -161,7 +170,6 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                                 } else {
                                     StringBuilder infoMessage = new StringBuilder();
                                     Map<String, String> styleMap = new HashMap<String, String>();
-                                    styleMap.put("backgroundColor", "rgb(240, 248, 209)");
                                     infoMessage.append("Найдено записей ")
                                             .append(countAvailbaleDataRows)
                                             .append(".");
@@ -182,8 +190,21 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
         } catch (WarnValueException wve) {
             Map<String, String> styleMap = new HashMap<String, String>();
-            styleMap.put("backgroundColor", "rgb(240, 248, 209)");
             getView().updateInfoLabel(true, createDialogMessage(wve), styleMap);
+            LogCleanEvent.fire(SubreportParamsPresenter.this);
+            List<GetLogAction.PairLogLevelMessage> messagesList = new LinkedList<GetLogAction.PairLogLevelMessage>();
+            Iterator<String> iterator = wve.iterator();
+            while (iterator.hasNext()) {
+                messagesList.add(new GetLogAction.PairLogLevelMessage(GetLogAction.LogLevel.WARN, iterator.next()));
+            }
+            GetLogAction action = new GetLogAction();
+            action.setMessages(messagesList);
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetLogResult>() {
+                @Override
+                public void onSuccess(GetLogResult result) {
+                    LogAddEvent.fire(SubreportParamsPresenter.this, result.getUuid());
+                }
+            }, SubreportParamsPresenter.this));
         }
     }
 
@@ -230,7 +251,6 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
                     CallbackUtils.defaultCallback(new SaveLogEntriesCallBack(), this));
         } catch (WarnValueException wve) {
             Map<String, String> styleMap = new HashMap<String, String>();
-            styleMap.put("backgroundColor", "rgb(240, 248, 209)");
             getView().updateInfoLabel(true, createDialogMessage(wve), styleMap);
         }
 

@@ -96,6 +96,9 @@ create index idx_rb_ndfl_det_ndfl_id on ref_book_ndfl_detail(ref_book_ndfl_id);
 create index idx_refbook_ndfl_depart on ref_book_ndfl(department_id);
 create index idx_decl_templ_form_kind on declaration_template(form_kind);
 
+create index idx_ndfl_person_ded_src on ndfl_person_deduction(source_id);
+create index idx_ndfl_person_pre_src on ndfl_person_prepayment(source_id);
+
 prompt create indexes for all cascade forein keys
 @@create_indexes_for_fk;
 

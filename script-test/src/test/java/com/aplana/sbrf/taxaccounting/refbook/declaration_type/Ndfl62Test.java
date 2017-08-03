@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -285,7 +286,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
     @Test
     @SuppressWarnings("unchecked")
     public void testNdfl6IV() throws ParseException {
-        String fileName = "IV_NONDFL6_7707083893997950001_7707083893997950001_7707_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
+        String fileName = "IV_NONDFL6_7707083893997950001_7707083893997950001_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
         InputStream inputStream = Ndfl62Test.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/refbook/declaration_type/" + fileName);
 
         testHelper.setImportInputStream(inputStream);
@@ -302,6 +303,11 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         DeclarationTemplateFile xsdFile = new DeclarationTemplateFile();
         xsdFile.setFileName("IV_NONDFL6.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
+
+        DeclarationTemplateFile xsdFile2 = new DeclarationTemplateFile();
+        xsdFile2.setFileName("IV_OTCH_1_098_00_05_04_01.xsd");
+
+        declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile2));
 
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE"), anyLong()))
                 .thenReturn(Arrays.asList(declarationData));
@@ -351,7 +357,6 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         Assert.assertEquals("uzer", resultFile.getUserName());
         Assert.assertEquals("dep/dep1", resultFile.getUserDepartmentName());
         Assert.assertEquals(ATTACH_FILE_TYPE_SAVE_ID.longValue(), resultFile.getFileTypeId());
-        Assert.assertEquals(sdf.parse("30.12.2016"), resultFile.getDate());
 
         ArgumentCaptor<Long> declarationDataId = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<Long> docStateId = ArgumentCaptor.forClass(Long.class);
@@ -362,7 +367,8 @@ public class Ndfl62Test extends RefBookScriptTestBase {
 
     @Test
     public void testNdfl6KV() throws ParseException {
-        String fileName = "KV_NONDFL6_7707083893997950001_7707083893997950001_7707_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
+
+        String fileName = "KV_NONDFL6_7707083893997950001_7707083893997950001_20161230_704AD75C-9327-4472-9663-54F7FE5589C9.xml";
         InputStream inputStream = Ndfl62Test.class.getResourceAsStream("/com/aplana/sbrf/taxaccounting/refbook/declaration_type/" + fileName);
 
         testHelper.setImportInputStream(inputStream);
@@ -377,10 +383,10 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         declarationTemplate.setId(DECLARATION_TEMPLATE_ID);
         declarationTemplate.setDeclarationFormTypeId(DECLARATION_FORM_TYPE_ID);
         DeclarationTemplateFile xsdFile = new DeclarationTemplateFile();
-        xsdFile.setFileName("KV_NONDFL6.xsd");
+        xsdFile.setFileName("KV_OTCH_1_095_00_05_04_01.xsd");
         declarationTemplate.setDeclarationTemplateFiles(Arrays.asList(xsdFile));
 
-        when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_9979_7707083893775001001_20160406_2FCC177D-2C02-59A5-E054-00144F6713DE"), anyLong()))
+        when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq("NO_NDFL6_9979_7736_7707083893661132022_20170626_87B707FC-2FD4-44A4-88F1-B476D5577D45"), anyLong()))
                 .thenReturn(Arrays.asList(declarationData));
         when(testHelper.getDeclarationService().findDeclarationDataByFileNameAndFileType(eq(fileName), anyLong()))
                 .thenReturn(new ArrayList<DeclarationData>());
@@ -428,8 +434,6 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         Assert.assertEquals("uzer", resultFile.getUserName());
         Assert.assertEquals("dep/dep1", resultFile.getUserDepartmentName());
         Assert.assertEquals(ATTACH_FILE_TYPE_SAVE_ID.longValue(), resultFile.getFileTypeId());
-        Assert.assertEquals(sdf.parse("30.12.2016"), resultFile.getDate());
-
         ArgumentCaptor<Long> declarationDataId = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<Long> docStateId = ArgumentCaptor.forClass(Long.class);
         verify(testHelper.getDeclarationService(), Mockito.times(1)).setDocStateId(declarationDataId.capture(), docStateId.capture());

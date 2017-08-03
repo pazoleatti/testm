@@ -515,7 +515,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     public List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1) {
         String priznakFClause;
         if (prFequals1) {
-            priznakFClause = " AND npi.INCOME_ACCRUED_SUMM <> 0";
+            // В качестве временного решения не используется https://conf.aplana.com/pages/viewpage.action?pageId=27176125 п.18
+            priznakFClause = /*" AND npi.INCOME_ACCRUED_SUMM <> 0"*/ "";
         } else {
             priznakFClause = " AND npi.NOT_HOLDING_TAX > 0";
         }
@@ -619,7 +620,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         if (!prFequals1) {
             priznakFClause = " AND npi.not_holding_tax > 0";
         }
-        String sql = "SELECT * FROM ndfl_person_prepayment npp WHERE npp.ndfl_person_id = :ndflPersonId " +
+        String sql = "SELECT " + createColumns(NdflPersonPrepayment.COLUMNS, "npp") + " FROM ndfl_person_prepayment npp WHERE npp.ndfl_person_id = :ndflPersonId " +
                 "AND npp.operation_id IN (SELECT npi.operation_id FROM ndfl_person_income npi " +
                 "WHERE npi.ndfl_person_id = :ndflPersonId AND npi.tax_date BETWEEN :startDate AND :endDate" + priznakFClause + ")";
 
@@ -1363,5 +1364,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             return personPrepayment;
         }
+    }
+
+    @Override
+    public int getNdflPersonCount(Long declarationDataId) {
+        String query = "select np.id from ndfl_person np where declaration_data_id = :declarationDataId";
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("declarationDataId", declarationDataId);
+        return getCount(query, parameters);
+    }
+
+    @Override
+    public int getNdflPersonReferencesCount(Long declarationDataId) {
+        String query = "select nr.id from ndfl_references nr where declaration_data_id = :declarationDataId";
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("declarationDataId", declarationDataId);
+        return getCount(query, parameters);
     }
 }

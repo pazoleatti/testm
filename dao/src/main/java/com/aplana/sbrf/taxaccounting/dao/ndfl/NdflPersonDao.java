@@ -417,4 +417,18 @@ public interface NdflPersonDao {
      */
     Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId);
 
+    /**
+     * Получить число ФЛ в NDFL_PERSON
+     * @param declarationDataId
+     * @return
+     */
+    int getNdflPersonCount(Long declarationDataId);
+
+    /**
+     * Получить число справок ФЛ в NDFL_REFERENCES
+     * @param declarationDataId
+     * @return
+     */
+    int getNdflPersonReferencesCount(Long declarationDataId);
+
 }

@@ -65,6 +65,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     private static final String KPP = "123456789";
     private static final String CODE_ORG = "0123456789";
     private static final String REPORT_PERSON_NAME = "report_person";
+    private static final String TEST_FILE_NAME = "_______18_0001_001000212016ecf863ca-6349-4105-b1e1-33c1good.xml";
 
     @Override
     protected DeclarationData getDeclarationData() {
@@ -95,12 +96,17 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     @Override
     protected InputStream getInputStream() {
-        return PrimaryRnuNdflScriptTest.class.getResourceAsStream("_______18_0001_001000212016ecf863ca-6349-4105-b1e1-33c1good.xml");
+        return PrimaryRnuNdflScriptTest.class.getResourceAsStream(TEST_FILE_NAME);
+    }
+
+    private String getTestFileName(){
+        return PrimaryRnuNdflScriptTest.class.getResource(TEST_FILE_NAME).getFile();
     }
 
 
     @Test
     public void importDataTest() throws IOException {
+        testHelper.setDataFile(new File(getTestFileName()));
         RefBookDataProvider refBookDataProviderIncomeCode = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(RefBook.Id.INCOME_CODE.getId())).thenReturn(refBookDataProviderIncomeCode);
         RefBookDataProvider refBookDataProviderDeductionType = mock(RefBookDataProvider.class);

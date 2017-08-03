@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.Address;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument;
 import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier;
+import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +18,7 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
     private Long asnuId;
 
-    private Map<Long, Long> fiasAddressIdsMap;
+    private Map<Long, FiasCheckInfo> fiasAddressIdsMap;
 
     public Long getAsnuId() {
         return asnuId;
@@ -27,11 +28,11 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         this.asnuId = asnuId;
     }
 
-    public Map<Long, Long> getFiasAddressIdsMap() {
+    public Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
         return fiasAddressIdsMap;
     }
 
-    public void setFiasAddressIdsMap(Map<Long, Long> fiasAddressIdsMap) {
+    public void setFiasAddressIdsMap(Map<Long, FiasCheckInfo> fiasAddressIdsMap) {
         this.fiasAddressIdsMap = fiasAddressIdsMap;
     }
 
@@ -78,12 +79,8 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
         person.setTaxPayerStatus(getTaxpayerStatusByCode(rs.getString("status")));
 
-        //Используются только адреса которые прошли проверку по ФИАС
-        Long fiasAddressId = getFiasAddressId(person, ndflPersonId);
-
-        if (fiasAddressId != null) {
-            person.setAddress(buildAddress(rs));
-        }
+        //Используются все адреса, а не только те, которые прошли проверку по ФИАС
+        person.setAddress(buildAddress(rs));
 
         //rs.getString("additional_data")
         return person;
@@ -108,10 +105,10 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         return address;
     }
 
-    public Long getFiasAddressId(NaturalPerson person, Long ndflPersonId) {
+    public FiasCheckInfo getFiasAddressId(NaturalPerson person, Long ndflPersonId) {
 
         if (fiasAddressIdsMap != null) {
-            Long result = fiasAddressIdsMap.get(ndflPersonId);
+            FiasCheckInfo result = fiasAddressIdsMap.get(ndflPersonId);
             if (result == null) {
                 logger.warn("Не найден адрес физического лица " + IdentificationUtils.buildNotice(person));
             }

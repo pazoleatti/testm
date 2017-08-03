@@ -138,7 +138,6 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
         action.setFilter(RefBook.RECORD_ID_ALIAS + " = " + recordId);
         action.setRefBookId(RefBook.Id.PERSON.getId());
         action.setPagingParams(new PagingParams(1, 1));
-        action.setRelevanceDate(new Date());
         action.setSortColumnIndex(0);
         action.setAscSorting(false);
         action.setPerson(true);
@@ -164,7 +163,6 @@ public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> imp
         action.setRecordId(recordId);
         action.setRefBookId(RefBook.Id.PERSON.getId());
         action.setPagingParams(new PagingParams(1, 1));
-        action.setRelevanceDate(new Date());
         action.setSortColumnIndex(0);
         action.setAscSorting(false);
         action.setPerson(true);
