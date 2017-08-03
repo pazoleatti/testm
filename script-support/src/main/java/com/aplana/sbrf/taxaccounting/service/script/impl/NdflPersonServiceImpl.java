@@ -205,8 +205,19 @@ public class NdflPersonServiceImpl implements NdflPersonService {
         return ndflPersonDao.findDublRowNum(tableName, declarationDataId);
     }
 
+
+    @Override
+    public Map<Long, List<Integer>> findDublRowNumMap(String tableName, Long declarationDataId) {
+        return ndflPersonDao.findDublRowNumMap(tableName, declarationDataId);
+    }
+
     @Override
     public List<Integer> findMissingRowNum(String tableName, Long declarationDataId) {
         return ndflPersonDao.findMissingRowNum(tableName, declarationDataId);
+    }
+
+    @Override
+    public Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId) {
+        return ndflPersonDao.findMissingRowNumMap(tableName, declarationDataId);
     }
 }

@@ -22,7 +22,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.service.script.RefBookService
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -67,8 +66,6 @@ switch (formDataEvent) {
 final ReportPeriodService reportPeriodService = getProperty("reportPeriodService")
 @Field
 final DepartmentService departmentService = getProperty("departmentService")
-@Field
-final RefBookService refBookService = getProperty("refBookService")
 
 def getProperty(String name) {
     try {
@@ -161,7 +158,7 @@ def departmentParamTableListCache = [:];
 @Field def reportPeriodEndDate = null
 
 // Кэш для справочников
-@Field Map<String, Map<String, RefBookValue>> refBookCache = [:]
+@Field def refBookCache = [:]
 
 // Коды мест предоставления документа
 @Field def presentPlaceCodeCache = [:]
@@ -451,6 +448,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
     //    println(writer)
 }
+
 
 class PairPersonOperationId {
     Long ndflPersonId
@@ -962,9 +960,8 @@ def getProvider(def long providerId) {
 /**
  * Разыменование записи справочника
  */
-@TypeChecked
-Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
-    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/
@@ -1032,16 +1029,6 @@ def createForm() {
         }
         declarations.removeAll(declarationsForRemove)
 
-        if (declarations.isEmpty()) {
-            DepartmentReportPeriod prevDrp = departmentReportPeriodList.get(0)
-            def reportPeriod = prevDrp.reportPeriod
-            def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-            def periodCode = period?.CODE?.stringValue
-            def periodName = period?.NAME?.stringValue
-            String correctionDateExpression = prevDrp.correctionDate == null ? "" : ", с датой сдачи корректировки ${prevDrp?.correctionDate?.format("dd.MM.yyyy")},"
-            logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдены КПП для формирования уточненной отчетности")
-            return
-        }
         declarations.each { declaration ->
             pairKppOktmoList << new PairKppOktmo(declaration.kpp, declaration.oktmo, declaration.taxOrganCode)
         }
@@ -1126,10 +1113,6 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         allDeclarationData.addAll(declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, it))
     }
 
-    if (allDeclarationData.isEmpty()) {
-        createEmptyMessage(departmentReportPeriod, false)
-        return allDeclarationData
-    }
     // удаление форм не со статусом Принята
     def declarationsForRemove = []
     allDeclarationData.each { declaration ->
@@ -1138,26 +1121,7 @@ def findAllTerBankDeclarationData(def departmentReportPeriod) {
         }
     }
     allDeclarationData.removeAll(declarationsForRemove)
-
-    if (allDeclarationData.isEmpty()) {
-        createEmptyMessage(departmentReportPeriod, true)
-    }
     return allDeclarationData
-}
-
-def createEmptyMessage(departmentReportPeriod, boolean acceptChecking) {
-    def reportPeriod = departmentReportPeriod.reportPeriod
-    def period = getRefBookValue(RefBook.Id.PERIOD_CODE.id, reportPeriod?.dictTaxPeriodId)
-    def periodCode = period?.CODE?.stringValue
-    def periodName = period?.NAME?.stringValue
-    Department department = departmentService.get(departmentReportPeriod.departmentId)
-    String correctionDateExpression = departmentReportPeriod.correctionDate == null ? "" : ", с датой сдачи корректировки ${departmentReportPeriod.correctionDate.format("dd.MM.yyyy")},"
-    if (acceptChecking) {
-        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная) должна быть в состоянии \"Принята\". Примите форму и повторите операцию")
-    } else {
-        logger.info("Для заданного подразделения ${department.name} и периода $periodCode ($periodName) ${ScriptUtils.formatDate(reportPeriod.calendarStartDate, "yyyy")}" + correctionDateExpression + " не найдена форма РНУ НДФЛ (консолидированная)")
-    }
-
 }
 
 def addNdflPersons(ndflPersonsGroupedByKppOktmo, pairKppOktmoBeingComparing, ndflPersonList) {

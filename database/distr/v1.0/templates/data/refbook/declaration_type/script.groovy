@@ -281,7 +281,7 @@ def importPrimary1151111() {
     try {
         declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.id)
     } catch (Exception ignored) {
-        logger.info("Файл «%s» не загружен: " +
+        logger.error("Файл «%s» не загружен: " +
                 "В подразделении %s не назначено ни одного актуального макета с параметрами: Вид = 1151111, Тип = Первичная либо Отчетная",
                 UploadFileName, departmentName
         )
@@ -1292,7 +1292,7 @@ def _importTF() {
         declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.getId());
     } catch (Exception e) {
         // Если шаблона нет, то не загружаем ТФ
-        logger.info("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена. %s.", e.getMessage());
+        logger.error("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена. %s", e.getMessage());
         return;
     }
 

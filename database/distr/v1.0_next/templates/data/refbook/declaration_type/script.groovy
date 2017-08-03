@@ -3,8 +3,6 @@ package refbook.declaration_type
 import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.service.impl.*
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -111,10 +109,10 @@ String ATTR_YEAR = "ОтчетГод";
 
 // Шаблоны имен файлов
 @Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)_(.*)\\.(xml|XML)";
-@Field final String KV_PATTERN = "KV_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String UO_PATTERN = "UO_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String IV_PATTERN = "IV_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String UU_PATTERN = "UU_(.*)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
+@Field final String KV_PATTERN = "KV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String UO_PATTERN = "UO_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String IV_PATTERN = "IV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
+@Field final String UU_PATTERN = "UU_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
 
 @Field final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
 @Field final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
@@ -124,10 +122,6 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String ANSWER_PATTERN_2 = "UO_"
 @Field final String ANSWER_PATTERN_3 = "IV_"
 @Field final String ANSWER_PATTERN_4 = "UU_"
-@Field final String ANSWER_PATTERN_NDFL_1 = "KV_NONDFL"
-@Field final String ANSWER_PATTERN_NDFL_2 = "UO_NONDFL"
-@Field final String ANSWER_PATTERN_NDFL_3 = "IV_NONDFL"
-@Field final String ANSWER_PATTERN_NDFL_4 = "UU_NONDFL"
 @Field final String NDFL2_KV_FILE_TAG = "СвКвит"
 @Field final String NDFL2_KV_FILE_ATTR = "ИмяОбрабФайла"
 @Field final String NDFL2_UO_FILE_TAG = "ОбщСвУвед"
@@ -184,7 +178,7 @@ def importTF() {
         importNDFL()
     } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
         importPrimary1151111()
-    } else if (isNdfl6Response(UploadFileName)) {
+    } else if (isNdfl6Response(UploadFileName) && isNdfl6AndNot11151111(UploadFileName)) {
         importNdflResponse()
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
@@ -212,17 +206,6 @@ def importNDFL() {
  * Импорт ТФ 1151111
  */
 def importPrimary1151111() {
-    ScriptUtils.checkInterrupted();
-
-    def declarationTemplate = declarationService.getTemplate(DECLARATION_TYPE_RASCHSV_NDFL_ID.intValue())
-    declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName.substring(0, UploadFileName.lastIndexOf('.')), declarationTemplate.xsdId)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        logger.error("Файл «%s» не загружен: ТФ не соответствует xsd-схеме.", UploadFileName);
-        return
-    }
-
-    ScriptUtils.checkInterrupted();
-
     // 2. Разбор имени файла
     String tranNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$1")
     String endNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$2")
@@ -371,39 +354,6 @@ def importAnswer1151111() {
         attrNameFind = "ИмяОбрабФайла"
     }
 
-    // 2. Выполним проверку структуры файла ответа на соответствие XSD
-    def declarationTemplate = declarationService.getTemplate(DECLARATION_TYPE_RASCHSV_NDFL_ID.intValue())
-    def templateFile = null
-    if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-            it.fileName.startsWith(ANSWER_PATTERN_1)
-        }
-    }
-    if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-            it.fileName.startsWith(ANSWER_PATTERN_2)
-        }
-    }
-    if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-            it.fileName.startsWith(ANSWER_PATTERN_3)
-        }
-    }
-    if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
-        templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-            it.fileName.startsWith(ANSWER_PATTERN_4)
-        }
-    }
-    if (!templateFile) {
-        logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
-        return
-    }
-    declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        logger.error("Файл «%s» не загружен: ТФ не соответствует xsd-схеме.", UploadFileName);
-        return
-    }
-
     // 3. Выполним чтение Имени отчетного файла из элемента файла ответа
     def declarationDataFileNameReportList = []
     try {
@@ -464,6 +414,38 @@ def importAnswer1151111() {
             throw new IllegalArgumentException(String.format(msgError, msgErrorList.join(", ")));
         }
         def declarationData = declarationDataList.get(0)
+
+        // 2. Выполним проверку структуры файла ответа на соответствие XSD
+        def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+        def templateFile = null
+        if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_1)
+            }
+        }
+        if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_2)
+            }
+        }
+        if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_3)
+            }
+        }
+        if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
+            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
+                it.fileName.startsWith(ANSWER_PATTERN_4)
+            }
+        }
+        if (!templateFile) {
+            logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
+            return
+        }
+        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
+        }
 
         // 5. Проверка того, что файл ответа не был загружен ранее
         def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
@@ -565,10 +547,10 @@ def isNdfl2ResponseReestr(fileName) {
  * Проверяет является ли файл ответом от ФНС 6 НДФЛ
  */
 def isNdfl6Response(fileName) {
-    return fileName.startsWith(ANSWER_PATTERN_NDFL_1) ||
-            fileName.startsWith(ANSWER_PATTERN_NDFL_2) ||
-            fileName.startsWith(ANSWER_PATTERN_NDFL_3) ||
-            fileName.startsWith(ANSWER_PATTERN_NDFL_4)
+    return fileName.startsWith(ANSWER_PATTERN_1) ||
+            fileName.startsWith(ANSWER_PATTERN_2) ||
+            fileName.startsWith(ANSWER_PATTERN_3) ||
+            fileName.startsWith(ANSWER_PATTERN_4)
 }
 
 /**
@@ -664,7 +646,7 @@ def getDocWeight(fileName) {
 @Field final Pattern NDFL2_PROTOCOL_DATE_PATTERN = Pattern.compile("ПРОТОКОЛ № .+ от (\\d{2}\\.\\d{2}\\.\\d{4})")
 @Field final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
 @Field final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
-@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(NONDFL.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
+@Field final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
 
 /**
  * Чтение содержание файла 2 НДФЛ - протокол
@@ -1383,7 +1365,6 @@ def _importTF() {
 }
 
 def readXml1151111() {
-
     def sett = [:]
     sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR])
 

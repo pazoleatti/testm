@@ -1941,7 +1941,7 @@ begin
       select min(a.id) into v_result
         from mv_fias_area_act a
        where a.regioncode=p_region
-         and (p_check_element is null or p_check_element is not null and a.fname=nvl(replace(lower(p_check_element),' ',''),'-'))
+         and a.fname=nvl(replace(lower(p_check_element),' ',''),'-')
          and (p_check_ftype is null or p_check_ftype is not null and a.ftype=nvl(lower(p_check_ftype),'-'))
          and a.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='CITY') then
@@ -1950,7 +1950,7 @@ begin
        where c.regioncode=p_region
          and c.fname=nvl(replace(lower(p_check_element),' ',''),'-')
          and c.ftype=nvl(lower(p_check_ftype),'г')
-         and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and a.id=p_parent_id)
+         and (p_parent_id is null and c.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
          and c.has_child=decode(p_leaf,1,0,1);
     elsif (p_check_type='LOCALITY') then
       select min(id) into v_result
@@ -1960,7 +1960,7 @@ begin
                where l.regioncode=p_region
                  and l.fname=nvl(replace(lower(p_check_element),' ',''),'-')
                  and (p_check_ftype is null or p_check_ftype is not null and l.ftype=nvl(lower(p_check_ftype),'-'))
-                 and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and c.id=p_parent_id)
+                 and (p_parent_id is null and c.parentguid is null or p_parent_id is not null and c.id=p_parent_id)
                  and l.has_child=decode(p_leaf,1,0,1)
               union
               select l.id
@@ -1968,7 +1968,7 @@ begin
                where l.regioncode=p_region
                  and l.fname=nvl(replace(lower(p_check_element),' ',''),'-')
                  and (p_check_ftype is null or p_check_ftype is not null and l.ftype=nvl(lower(p_check_ftype),'-'))
-                 and (p_parent_id is null /*and l.parentguid is null*/ or p_parent_id is not null and a.id=p_parent_id)
+                 and (p_parent_id is null and l.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
                  and l.has_child=decode(p_leaf,1,0,1)
             );
     elsif (p_check_type='STREET') then
@@ -1978,7 +1978,7 @@ begin
                 from mv_fias_street_act s left join mv_fias_city_act c on (c.aoid=s.parentguid)
                where s.regioncode=p_region
                  and s.fname=nvl(replace(lower(p_check_element),' ',''),'-')
-                 and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
+                 and s.ftype=nvl(lower(p_check_ftype),'ул')
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and c.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
               union
@@ -1986,7 +1986,7 @@ begin
                 from mv_fias_street_act s left join mv_fias_locality_act l on (l.aoid=s.parentguid)
                where s.regioncode=p_region
                  and s.fname=nvl(replace(lower(p_check_element),' ',''),'-')
-                 and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
+                 and s.ftype=nvl(lower(p_check_ftype),'ул')
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and l.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
               union
@@ -1994,7 +1994,7 @@ begin
                 from mv_fias_street_act s left join mv_fias_area_act a on (a.aoid=s.parentguid)
                where s.regioncode=p_region
                  and s.fname=nvl(replace(lower(p_check_element),' ',''),'-')
-                 and (p_check_ftype is null or p_check_ftype is not null and s.ftype=nvl(lower(p_check_ftype),'ул'))
+                 and s.ftype=nvl(lower(p_check_ftype),'ул')
                  and (p_parent_id is null and s.parentguid is null or p_parent_id is not null and a.id=p_parent_id)
                  and s.has_child=decode(p_leaf,1,0,1)
             );
@@ -2118,7 +2118,7 @@ begin
                fias_pkg.CheckAddrElementRetID(t4.region_code,t4.street_fname,t4.street_type,nvl(t4.loc_id,t4.city_id),'STREET',1) street_id
           from (
                 select t3.*,
-                       fias_pkg.CheckAddrElementRetID(t3.region_code,t3.loc_fname,t3.loc_type,nvl(t3.city_id,t3.area_id),'LOCALITY',-1/*t3.loc_leaf*/) loc_id
+                       fias_pkg.CheckAddrElementRetID(t3.region_code,t3.loc_fname,t3.loc_type,nvl(t3.city_id,t3.area_id),'LOCALITY',t3.loc_leaf) loc_id
                   from (
                         select t2.*,
                                fias_pkg.CheckAddrElementRetID(t2.region_code,t2.city_fname,t2.city_type,t2.area_id,'CITY',t2.city_leaf) city_id
@@ -2134,8 +2134,8 @@ begin
                                   from (
                                         select n.id,
                                                n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
-                                               fias_pkg.GetParseType(3,n.area,1) area_type,
-                                               fias_pkg.GetParseName(3,n.area,1) area_fname,
+                                               fias_pkg.GetParseType(3,n.area) area_type,
+                                               fias_pkg.GetParseName(3,n.area) area_fname,
                                                case when n.city is null and n.region_code='77' then 'г'
                                                     when n.city is null and n.region_code='78' then 'г'
                                                     when n.city is null and n.region_code='92' then 'г'
@@ -2192,11 +2192,11 @@ begin
              fc.id fias_city_id,
              fc.formalname fias_city_name,
              (select decode(count(*),0,0,1) 
-                from mv_fias_street_act f 
+                from mv_fias_street_act f
                where f.regioncode=n.region_code 
                  and f.postalcode=n.post_index) chk_index,
              (select decode(count(*),0,0,1) 
-                from mv_fias_street_act f 
+                from mv_fias_street_act f
                where f.regioncode=n.region_code) chk_region,
              case when n.fa_id is null then fias_pkg.CheckAddrElement(n.region_code,n.area_fname,',','AREA',0) 
                   else 1
@@ -2325,7 +2325,7 @@ begin
     dbms_mview.REFRESH('MV_FIAS_LOCALITY_ACT', 'C');
     dbms_mview.REFRESH('MV_FIAS_STREET_ACT', 'C');
   end;
-  
+
 
 end fias_pkg;
 /

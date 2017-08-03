@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="2164"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -13390,7 +13390,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{УдержНал}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{УдержНал}.charAt(2)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="11ecc4e3-303a-4bc7-b728-43120407b8de" x="520" y="57" width="15" height="20" isPrintWhenDetailOverflows="true"/>
@@ -13551,7 +13551,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{УдержНал}.charAt(2)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{УдержНал}.charAt(3)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="9c251669-ed13-4756-9b2a-6b8c0cbf9f96" x="475" y="57" width="15" height="20" isPrintWhenDetailOverflows="true"/>

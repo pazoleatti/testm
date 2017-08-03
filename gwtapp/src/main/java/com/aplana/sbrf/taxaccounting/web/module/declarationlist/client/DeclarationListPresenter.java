@@ -126,6 +126,7 @@ public class DeclarationListPresenter extends
                         @Override
                         public void onSuccess(DetectUserRoleResult result) {
                             getView().setVisibleCancelButton(result.isControl());
+                            getView().setVisibleCreateButton(result.isControl());
                         }
                     }, this));
 		} catch (Exception e) {

@@ -852,7 +852,7 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
                 def svSumDohNodes = svedDohNode.depthFirst().grep { it.name() == NODE_NAME_SV_SUM_DOH2 }
                 svSumDohNodes.each { svSumDohNode ->
                     if (svSumDohNode.attributes()[ATTR_KOD_DOHOD2].toString() == "1010") {
-                        sumDohDivObch2 += svSumDohNode.attributes()[ATTR_SUM_DOHOD2] ?: 0
+                        sumDohDivObch2 += Double.valueOf(svSumDohNode.attributes()[ATTR_SUM_DOHOD2] ?: 0)
                     }
                 }
             }

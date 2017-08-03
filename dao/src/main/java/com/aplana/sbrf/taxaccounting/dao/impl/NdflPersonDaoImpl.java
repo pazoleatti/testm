@@ -1046,19 +1046,46 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
+    public Map<Long, List<Integer>> findDublRowNumMap(String tableName, Long declarationDataId) {
+        String sql = "SELECT i.row_num, i.NDFL_PERSON_ID p_id FROM " + tableName + " i \n" +
+                "INNER JOIN NDFL_PERSON p ON i.ndfl_person_id = p.ID \n" +
+                "WHERE p.declaration_data_id =:declaration_data_id AND i.row_num IS NOT NULL \n" +
+                "GROUP BY i.row_num, i.NDFL_PERSON_ID \n" +
+                "HAVING COUNT(i.row_num) > 1";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declaration_data_id", declarationDataId);
+        final Map<Long, List<Integer>> result = new HashMap<Long, List<Integer>>();
+        getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Object>() {
+            @Override
+            public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Long p_id = rs.getLong("p_id");
+                if (!result.containsKey(p_id)) {
+                    result.put(p_id, new ArrayList<Integer>());
+                }
+                result.get(p_id).add(rs.getInt("row_num"));
+                return null;
+            }
+        });
+
+        return result;
+    }
+
+    @Override
     public List<Integer> findMissingRowNum(String tableName, Long declarationDataId) {
         String sql = null;
         if (tableName.equals("NDFL_PERSON")) {
             sql = "WITH t AS (SELECT t.row_num FROM " + tableName + " t " +
                     " WHERE t.row_num IS NOT NULL AND t.declaration_data_id =:declaration_data_id ORDER BY t.row_num) " +
                     " SELECT LEVEL AS row_num FROM (SELECT MAX(row_num) AS max_x FROM t) " +
-                    " CONNECT BY LEVEL <= max_x MINUS SELECT row_num FROM t";
+                    " CONNECT BY LEVEL <= max_x MINUS SELECT row_num FROM t " +
+                    " MINUS SELECT (CASE WHEN count(*) = 0 THEN 1 ELSE 0 END) row_num  FROM t";
         } else {
             sql = "WITH t AS (SELECT t.row_num FROM " + tableName + " t " +
                     " INNER JOIN NDFL_PERSON p ON t.ndfl_person_id = p.id " +
                     " WHERE t.row_num IS NOT NULL AND p.declaration_data_id =:declaration_data_id ORDER BY t.row_num) " +
                     " SELECT LEVEL AS row_num FROM (SELECT MAX(row_num) AS max_x FROM t) " +
-                    " CONNECT BY LEVEL <= max_x MINUS SELECT row_num FROM t";
+                    " CONNECT BY LEVEL <= max_x MINUS SELECT row_num FROM t " +
+                    " MINUS SELECT (CASE WHEN count(*) = 0 THEN 1 ELSE 0 END) row_num  FROM t";
         }
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declaration_data_id", declarationDataId);
@@ -1068,6 +1095,38 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 return rs.getInt("row_num");
             }
         });
+    }
+
+    @Override
+    public Map<Long, List<Integer>> findMissingRowNumMap(String tableName, Long declarationDataId) {
+        String sql = "WITH t AS (SELECT t.row_num, p.ID p_id FROM " + tableName + " t " +
+                    " INNER JOIN ndfl_person p ON t.ndfl_person_id = p.ID \n" +
+                    " WHERE t.row_num IS NOT NULL AND p.declaration_data_id =:declaration_data_id \n" +
+                    " ORDER BY t.row_num, p.ID),\n" +
+                    " t_cnt AS (SELECT MAX(row_num) cnt, p_id  FROM t GROUP BY p_id)\n" +
+                    " ,pivot_data_params AS (SELECT MAX(cnt) AS pv_hi_limit FROM t_cnt)\n" +
+                    " ,pivot_data AS (SELECT ROWNUM AS nr FROM pivot_data_params CONNECT BY ROWNUM < pv_hi_limit+1)\n" +
+                    " SELECT p_id, nr row_num\n" +
+                    " FROM t_cnt, pivot_data\n" +
+                    " WHERE cnt >= nr\n" +
+                    " MINUS (SELECT p_id, row_num FROM t)\n" +
+                    " ORDER BY 2 ";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declaration_data_id", declarationDataId);
+        final Map<Long, List<Integer>> result = new HashMap<Long, List<Integer>>();
+        getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Object>() {
+            @Override
+            public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Long p_id = rs.getLong("p_id");
+                if (!result.containsKey(p_id)) {
+                    result.put(p_id, new ArrayList<Integer>());
+                }
+                result.get(p_id).add(rs.getInt("row_num"));
+                return null;
+            }
+        });
+
+        return result;
     }
 
     private static String createColumns(String[] columns, String alias) {
