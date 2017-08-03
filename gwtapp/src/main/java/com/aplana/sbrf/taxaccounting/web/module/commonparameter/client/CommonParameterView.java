@@ -16,6 +16,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.Range;
@@ -43,6 +44,9 @@ public class CommonParameterView extends ViewWithUiHandlers<CommonParameterUiHan
 
     @UiField
     Button restoreButton;
+
+    @UiField
+    HorizontalPanel editPanel;
 
     private RefBookColumn paramColumn = new RefBookColumn();
     private StringColumn valueColumn = new StringColumn();
@@ -162,5 +166,10 @@ public class CommonParameterView extends ViewWithUiHandlers<CommonParameterUiHan
     @Override
     public void updateStyle(ConfigurationParam configurationParam, boolean valid) {
         updateStyle(ConfigurationParam.SBERBANK_INN.equals(configurationParam) ? 0 : 1, valid);
+    }
+
+    @Override
+    public void setEditPanelVisible(boolean show) {
+        editPanel.setVisible(show);
     }
 }
