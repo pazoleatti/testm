@@ -84,8 +84,6 @@ final DepartmentService departmentService = getProperty("departmentService")
 @Field
 final RefBookService refBookService = getProperty("refBookService")
 @Field
-final FormDataService formDataService = getProperty("formDataService")
-@Field
 final String DATE_FORMAT = "dd.MM.yyyy"
 @Field
 final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
@@ -390,7 +388,7 @@ Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String
 Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
     Map<Long, List<Map<String, RefBookValue>>> result = new HashMap<Long, List<Map<String, RefBookValue>>>();
     declarationDataIdList.each {
-        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id) AND ref_book_id_doc.status = 0"
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id)"
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
         refBookMap.each { personId, refBookValues ->
@@ -1943,8 +1941,8 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String LOG_TYPE_PERSON_MSG = "Значение гр. \"%s\" (\"%s\") не соответствует справочнику \"%s\""
 @Field final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
 
-@Field final String LOG_TYPE_2_6 = "\"Дата начисления дохода\" указана некорректно"
-@Field final String LOG_TYPE_2_12 = "\"Сумма вычета\" указана некорректно"
+@Field final String LOG_TYPE_2_6 = "Дата начисления дохода указана некорректно"
+@Field final String LOG_TYPE_2_12 = "Сумма вычета указана некорректно"
 @Field final String LOG_TYPE_2_14 = "\"Налоговая ставка\" указана некорректно"
 @Field final String LOG_TYPE_2_14_MSG = "Значение гр. \"%s\" (\"%s\") указано некорректно. Для \"Кода дохода\" (\"%s\") и \"Статуса НП\" (\"%s\") предусмотрены ставки: %s"
 @Field final String LOG_TYPE_2_16 = "\"НДФЛ исчисленный\" рассчитан некорректно"
@@ -2578,13 +2576,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPerson.citizenship == "643") {
             if (ndflPerson.innNp == null) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
+                logger.warnExp("%s. %s.", "ИНН не указан", fioAndInp, pathError,
                         "Значение гр. \"ИНН в РФ\" не указано. Прием налоговым органом обеспечивается, может быть предупреждение")
             } else {
                 String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
                 if (checkInn != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.errorExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
+                    logger.errorExp("%s. %s.", "ИНН не соответствует формату", fioAndInp, pathError,
                             checkInn)
                 }
             }
@@ -2612,7 +2610,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String checkName = ScriptUtils.checkName(ndflPerson.lastName, "Фамилия")
                 if (checkName != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
                             checkName)
                 }
             }
@@ -2620,7 +2618,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String checkName = ScriptUtils.checkName(ndflPerson.firstName, "Имя")
                 if (checkName != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
                             checkName)
                 }
             }
@@ -2629,7 +2627,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
             if (checkDul != null) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError,
+                logger.warnExp("%s. %s.", "ДУЛ не соответствует формату", fioAndInp, pathError,
                         checkDul)
             }
         }
@@ -2640,7 +2638,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     "СНИЛС", ndflPerson.snils?:""
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-            logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
+            logger.warnExp("%s. %s.", "СНИЛС не соответствует формату", fioAndInp, pathError,
                     errMsg)
         }
     }
@@ -2968,7 +2966,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             department ? department.name : ""
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "КПП и ОКТМО не соответствуют Тербанку", fioAndInp, pathError,
                             errMsg)
                 } else {
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
@@ -2977,7 +2975,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             department ? department.name : ""
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "КПП и ОКТМО не соответствуют Тербанку", fioAndInp, pathError,
                             errMsg)
                 }
             }
@@ -3014,7 +3012,7 @@ boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, S
  */
 @TypeChecked
 Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /**

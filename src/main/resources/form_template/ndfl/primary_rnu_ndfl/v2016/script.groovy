@@ -32,21 +32,19 @@ import org.springframework.jdbc.core.RowMapper
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import javax.script.ScriptException
-import javax.xml.namespace.QName
-import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
-import javax.xml.stream.events.*
+    import javax.script.ScriptException
+    import javax.xml.namespace.QName
+    import javax.xml.stream.XMLEventReader
+    import javax.xml.stream.XMLInputFactory
+    import javax.xml.stream.events.*
 import javax.xml.ws.LogicalMessage
 import java.sql.ResultSet
-import java.sql.SQLException
-import java.sql.SQLSyntaxErrorException
+    import java.sql.SQLException
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+    import java.util.regex.Matcher
+    import java.util.regex.Pattern
 
     /**
      * Скрипт макета декларации РНУ-НДФЛ(первичная)
@@ -84,9 +82,7 @@ import java.util.regex.Pattern
             checkData()
             break
         case FormDataEvent.CALCULATE:
-            updateAndCheckException({
-                calculate()
-            })
+            calculate()
             // Формирование pdf-отчета формы
             declarationService.createPdfReport(logger, declarationData, userInfo)
             break
@@ -2809,8 +2805,8 @@ class NdflPersonFL {
     @Field final String LOG_TYPE_PERSON_MSG = "Значение гр. \"%s\" (\"%s\") не соответствует справочнику \"%s\""
     @Field final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
 
-    @Field final String LOG_TYPE_2_6 = "\"Дата начисления дохода\" указана некорректно"
-    @Field final String LOG_TYPE_2_12 = "\"Сумма вычета\" указана некорректно"
+    @Field final String LOG_TYPE_2_6 = "Дата начисления дохода указана некорректно"
+    @Field final String LOG_TYPE_2_12 = "Сумма вычета указана некорректно"
     @Field final String LOG_TYPE_2_14 = "\"Налоговая ставка\" указана некорректно"
     @Field final String LOG_TYPE_2_14_MSG = "Значение гр. \"%s\" (\"%s\") указано некорректно. Для \"Кода дохода\" (\"%s\") и \"Статуса НП\" (\"%s\") предусмотрены ставки: %s"
     @Field final String LOG_TYPE_2_16 = "\"НДФЛ исчисленный\" рассчитан некорректно"
@@ -3419,13 +3415,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             if (ndflPerson.citizenship == "643") {
                 if (ndflPerson.innNp == null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "ИНН не указан", fioAndInp, pathError,
                             "Значение гр. \"ИНН в РФ\" не указано. Прием налоговым органом обеспечивается, может быть предупреждение")
                 } else {
                     String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
                     if (checkInn != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.errorExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
+                        logger.errorExp("%s. %s.", "ИНН не соответствует формату", fioAndInp, pathError,
                                 checkInn)
                     }
                 }
@@ -3453,7 +3449,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String checkName = ScriptUtils.checkName(ndflPerson.lastName, "Фамилия")
                     if (checkName != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
                                 checkName)
                     }
                 }
@@ -3461,7 +3457,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     String checkName = ScriptUtils.checkName(ndflPerson.firstName, "Имя")
                     if (checkName != null) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                        logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
+                        logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
                                 checkName)
                     }
                 }
@@ -3470,7 +3466,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
                 if (checkDul != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "ДУЛ не соответствует формату", fioAndInp, pathError,
                             checkDul)
                 }
             }
@@ -3481,7 +3477,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         "СНИЛС", ndflPerson.snils?:""
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
+                logger.warnExp("%s. %s.", "СНИЛС не соответствует формату", fioAndInp, pathError,
                         errMsg)
             }
         }
@@ -5686,19 +5682,3 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
         ) as Throwable
     }
-
-@TypeChecked
-void updateAndCheckException(Closure<Object> update) {
-    try {
-        update()
-    } catch (ServiceException e) {
-        int i = ExceptionUtils.indexOfThrowable(e, SQLSyntaxErrorException.class);
-        if (i != -1) {
-            SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException)ExceptionUtils.getThrowableList(e).get(i)
-            if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049")) {
-                throw new ServiceException("", e)
-            }
-        }
-        throw e;
-    }
-}
