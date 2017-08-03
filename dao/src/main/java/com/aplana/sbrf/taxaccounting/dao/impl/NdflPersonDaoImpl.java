@@ -36,12 +36,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 import static com.aplana.sbrf.taxaccounting.model.QNdflPerson.ndflPerson;
 import static com.aplana.sbrf.taxaccounting.model.QNdflPersonDeduction.ndflPersonDeduction;
@@ -189,7 +186,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
 
         OrderSpecifier order;
-        Sort sort = pagingParams.getSort();
+        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
+        Sort sort = new Sort(sortOrder);
         if (sort.getOrderFor("rowNum") != null) {
             order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonIncome.rowNum.asc() : ndflPersonIncome.rowNum.desc();
         } else if (sort.getOrderFor("inp") != null) {
@@ -313,7 +311,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
 
         OrderSpecifier order;
-        Sort sort = pagingParams.getSort();
+        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
+        Sort sort = new Sort(sortOrder);
         if (sort.getOrderFor("rowNum") != null) {
             order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonDeduction.rowNum.asc() : ndflPersonDeduction.rowNum.desc();
         } else if (sort.getOrderFor("inp") != null) {
@@ -412,7 +411,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
 
         OrderSpecifier order;
-        Sort sort = pagingParams.getSort();
+        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
+        Sort sort = new Sort(sortOrder);
         if (sort.getOrderFor("rowNum") != null) {
             order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonPrepayment.rowNum.asc() : ndflPersonPrepayment.rowNum.desc();
         } else if (sort.getOrderFor("inp") != null) {
