@@ -123,17 +123,13 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
     private boolean isMandatoryAttributesFilled() {
         boolean departmentsEmpty = getView().getDepartments().isEmpty();
         boolean formsEmpty = getView().getFormTypes().isEmpty();
-        boolean performersEmpty = getView().getPerformers().isEmpty();
-        if (departmentsEmpty || formsEmpty || performersEmpty) {
+        if (departmentsEmpty || formsEmpty) {
             StringBuilder messageBuilder = new StringBuilder("Не заполнены обязательные атрибуты, необходимые для создания назначения: ");
             if (departmentsEmpty) {
                 messageBuilder.append("Подразделение, ");
             }
             if (formsEmpty) {
                 messageBuilder.append("Макет, ");
-            }
-            if (performersEmpty) {
-                messageBuilder.append("Исполнители, ");
             }
             String message = messageBuilder.delete(messageBuilder.length() - 2, messageBuilder.length()).toString();
             Dialog.warningMessage("Не заполнены обязательные атрибуты", message);

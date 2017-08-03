@@ -1747,13 +1747,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                     logEntry.getMessage()));
                         }
                     }
-                    logger.error("Произошла непредвиденная ошибка при расчете для объекта: " + getDeclarationFullName(entry.getKey(), null));
-                    DeclarationData declarationData = get(entry.getKey(), userInfo);
-                    String taxOrgan = declarationData.getTaxOrganCode() != null ? "Налоговый орган: \"" + declarationData.getTaxOrganCode() + "\"" : "";
-                    String kpp = declarationData.getKpp() != null ? ", КПП: \"" + declarationData.getKpp() + "\"" : "";
-                    String oktmo = declarationData.getOktmo() != null ? ", ОКТМО: \"" + declarationData.getOktmo() + "\"" : "";
-                    auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Произошла ошибка для " + taxOrgan + kpp + oktmo, null);
-                    logger.getEntries().addAll(scriptLogger.getEntries());
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;

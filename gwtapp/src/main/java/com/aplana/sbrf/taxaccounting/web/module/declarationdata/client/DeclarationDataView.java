@@ -27,6 +27,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     public static final String DATE_BOX_TITLE = "Дата и время создания формы";
     public static final String DATE_BOX_TITLE_D = "Дата и время создания формы";
+    public static final String CONSOLIDATED_DECLARATION_TYPE_NAME = "РНУ_НДФЛ (консолидированная)";
     private static final int TABLE_TOP3 = 107;
     private static final int TABLE_TOP4 = 124;
 
@@ -105,7 +106,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     private HorizontalPanel printToExcelPanel;
 
     private Timer timerExcel, timerXML, timerPDF, timerAccept, timerSpecific, timerCheck;
-    private boolean isVisiblePDF;
+    private boolean isVisiblePDF, showPrintToXml;
 
 	@Inject
 	@UiConstructor
@@ -122,6 +123,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 }
             }
         });
+        printToXml.setVisible(false);
 
         LinkButton printToExcel = new LinkButton("Сформировать в XLSX");
         printToExcel.setHeight("20px");
@@ -285,7 +287,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public void showDownloadButtons(boolean show) {
         printToExcelPanel.setVisible(show);
-        printToXml.setVisible(show);
+        printToXml.setVisible(show && showPrintToXml);
     }
 
 	@Override
@@ -525,7 +527,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             printToExcelPanel.setVisible(false);
             if (isLoad) {
                 printToExcelPanel.setVisible(true);
-                printToXml.setVisible(true);
+                printToXml.setVisible(showPrintToXml);
                 printAnchor.setEnabled(true);
                 timerXML.cancel();
                 timerSpecific.scheduleRepeating(4000);
@@ -677,5 +679,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public Button getAddErrorButton() {
         return addErrorButton;
+    }
+
+    @Override
+    public void showPrintToXml(boolean show) {
+        showPrintToXml = show;
+        printToXml.setVisible(show);
     }
 }
