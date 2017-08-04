@@ -96,6 +96,7 @@ body {
 
 .navbar {
   margin-bottom: 0; /* Устраняем лишнее пространство межжу меню и основным содержимым*/
+  min-height: 41px;
 }
 
 .navbar .dropdown:hover {
@@ -540,7 +541,7 @@ hr {
   .navbar-nav > li {
     border-left: 1px solid #fff;
     height: 40px;
-    margin-top: 4px;
+    margin-top: 0;
     div {
       padding: 0 10px;
     }
@@ -557,6 +558,7 @@ hr {
     margin: -1px 3px 0 2px;
     display: inline-block;
     border: none;
+    font-size: 14px;
     &:hover {
       background: #fff;
     }
@@ -564,14 +566,16 @@ hr {
 }
 
 .logo {
-  width: 138px;
+  width: 132px;
   height: 54px;
   margin: -4px 9px -30px 0;
   background: #fff;
   padding: 15px 11px;
   border-radius: 0 0 16px 0;
 }
-
+.logo img{
+  width: 110px;
+}
 .navbar-right {
   color: #fff;
   margin-right: 0;
@@ -947,4 +951,35 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 }
 .splitter-icon-chevron-up{
   cursor: pointer;
+}
+#main-page{
+  width: 39%;
+  height: 60%;
+  padding: 40px;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-size: 2.6em;
+  text-align: center;
+  color: #ccc;
+}
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  vertical-align: middle;
+  border-top: 9px dashed;
+  border-top: 4px solid \9;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  margin-top: -2px;
+}
+
+.ui-jqgrid-view, .ui-jqgrid-bdiv, .ui-jqgrid-hdiv, .ui-corner-bottom {
+  width: 100%!important;
 }
