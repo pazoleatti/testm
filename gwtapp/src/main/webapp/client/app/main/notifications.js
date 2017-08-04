@@ -39,7 +39,7 @@
                                     name: 'createDate',
                                     index: 'createDate',
                                     width: 135,
-                                    formatter: $filter('dateFormatter')
+                                    formatter: $filter('dateTimeFormatter')
                                 },
                                 {
                                     name: 'text',
