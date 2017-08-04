@@ -34,7 +34,7 @@
                     <div class="header-col w400">
                         <div>
                             <label class="w100">{{::'title.department' | translate}}:</label>
-                            <label class="font-normal">{{department}}</label>
+                            <label class="font-normal">{{declarationData.department}}</label>
                         </div>
                         <div>
                             <label class="w100">{{::'title.formNumber' | translate}}:</label>
@@ -42,31 +42,31 @@
                         </div>
                         <div>
                             <label class="w100">{{::'title.creator' | translate}}:</label>
-                            <label class="font-normal">{{creator}}</label>
+                            <label class="font-normal">{{declarationData.creationUserName}}</label>
                         </div>
                     </div>
                     <div class="header-col w300">
                         <div>
                             <label>{{::'title.formType' | translate}}:</label>
-                            <label class="font-normal">{{formType}}</label>
+                            <label class="font-normal">{{declarationData.declarationFormKind}}</label>
                         </div>
                         <div>
                             <label>{{::'title.period' | translate}}:</label>
-                            <label class="font-normal">{{period}}</label>
+                            <label class="font-normal">{{declarationData.reportPeriodYear}}, {{declarationData.reportPeriod}}</label>
                         </div>
                         <div>
                             <label>{{::'title.state' | translate}}:</label>
-                            <label class="font-normal">{{state}}</label>
+                            <label class="font-normal">{{declarationData.state}}</label>
                         </div>
                     </div>
                     <div class="header-col w350">
                         <div>
                             <label>{{::'title.nameAsnu' | translate}}:</label>
-                            <label class="font-normal">{{nameAsnu}}</label>
+                            <label class="font-normal">{{declarationData.asnuName}}</label>
                         </div>
                         <div>
                             <label>{{::'title.dateAndTimeCreate' | translate}}:</label>
-                            <label class="font-normal">{{dateAndTimeCreate}}</label>
+                            <label class="font-normal">{{declarationData.creationDate}}</label>
                         </div>
                     </div>
                     <div class="header-col w200" style="float: right;">

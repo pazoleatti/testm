@@ -45,4 +45,17 @@ describe('formatters', function () {
             });
         });
     });
+
+    /**
+     * Возвращаем текст в зависимости от переданного числа
+     */
+    describe("amountCasesFormatter", function () {
+        it("Formatters. Test3. Проверка amountCasesFormatter", function () {
+            inject(function (amountCasesFormatterFilter) {
+                expect(amountCasesFormatterFilter(1, "оповещение", "оповещения", "оповещений")).toBe("оповещение");
+                expect(amountCasesFormatterFilter(2, "оповещение", "оповещения", "оповещений")).toBe("оповещения");
+                expect(amountCasesFormatterFilter(5, "оповещение", "оповещения", "оповещений")).toBe("оповещений");
+            });
+        });
+    });
 });

@@ -46,9 +46,7 @@
                  * @description Обработка события, которое возникает при нажании на ссылку "Файлы и комментарии"
                  */
                 $scope.filesAndComments = function () {
-                    var dlg = dialogs.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsDialogCtrl',{declarationId: $scope.formNumber});
-                    return dlg.result.then(function () {
-                    });
+                    appDialogs.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsDialogCtrl', {declarationId: $scope.formNumber});
                 };
 
                 /**
@@ -65,7 +63,7 @@
                         }
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            // $logPanel.open('log-panel-container', response.data.uuid);
+                            $logPanel.open('log-panel-container', response.data.uuid);
                         } else {
                             var dlg;
                             if (response.data.status === "LOCKED" && !force) {
@@ -187,8 +185,6 @@
                 };
 
 
-
-
                 /**
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"
                  */
@@ -206,14 +202,8 @@
                         },
                         function (data) {
                             if (data) {
-                                $scope.department = data.department;
+                                $scope.declarationData = data;
                                 $scope.formNumber = $stateParams.declarationId;
-                                $scope.creator = data.creationUserName;
-                                $scope.formType = data.declarationFormKind;
-                                $scope.period = data.reportPeriodYear + ", " + data.reportPeriod;
-                                $scope.state = data.state;
-                                $scope.nameAsnu = data.asnuName;
-                                $scope.dateAndTimeCreate = data.creationDate;
                             }
                         }
                     );
