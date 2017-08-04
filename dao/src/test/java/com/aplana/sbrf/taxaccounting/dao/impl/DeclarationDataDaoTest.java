@@ -160,11 +160,11 @@ public class DeclarationDataDaoTest {
 	@Test
 	public void findPageTest(){
 		DeclarationDataFilter filter = new DeclarationDataFilter();
-		PagingParams pageParams = new PagingParams(0, 0);
+		PagingParams pageParams = new PagingParams(0, 1);
 		PagingResult<DeclarationDataSearchResultItem> res;
 		final long TOTAL_RECORDS_COUNT = declarationDataDao.getCount(filter);
 
-		for(int requestedCount = 0; requestedCount < TOTAL_RECORDS_COUNT; requestedCount += 2){
+		for(int requestedCount = 1; requestedCount < TOTAL_RECORDS_COUNT; requestedCount += 2){
 			pageParams.setStartIndex(0);
 			pageParams.setCount(requestedCount);
 			res = declarationDataDao.findPage(filter, DeclarationDataSearchOrdering.ID, true, pageParams);

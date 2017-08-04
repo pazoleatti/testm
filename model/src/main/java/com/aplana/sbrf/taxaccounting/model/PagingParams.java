@@ -24,11 +24,6 @@ public class PagingParams implements Serializable {
     private int page = 1;
 
     /**
-     * Начальный номер строки, с которой должен быть возвращен результат. По умолчанию = 0
-     */
-    //TODO https://jira.aplana.com/browse/SBRFNDFL-1668 удалить поле
-    private int startIndex = 0;
-    /**
      * Количество возвращаемых элементов, начиная с индекса startIndex. По умолчанию = 10
      */
     private int count = 10;
@@ -36,9 +31,24 @@ public class PagingParams implements Serializable {
     public PagingParams() {
     }
 
+    @Deprecated
+    // Убрано поле startIndex, поэтому вместо этого конструктора лучше использовать статический метод getInstance
     public PagingParams(int startIndex, int count) {
         setStartIndex(startIndex);
         setCount(count);
+    }
+
+    /**
+     * Возвращает новый экземпляр PagingParams
+     * @param page
+     * @param count
+     * @return
+     */
+    public static PagingParams getInstance(int page, int count) {
+        PagingParams toReturn = new PagingParams();
+        toReturn.setPage(page);
+        toReturn.setCount(count);
+        return toReturn;
     }
 
     /**
@@ -47,16 +57,7 @@ public class PagingParams implements Serializable {
      * @return стартовый индекс списка записей (начиная с 0)
      */
     public int getStartIndex() {
-        return startIndex;
-    }
-
-    /**
-     * Задать стартовый индекс
-     *
-     * @param startIndex стартовый индекс записи (начиная с 0)
-     */
-    public final void setStartIndex(int startIndex) {
-        this.startIndex = startIndex;
+        return count * (page - 1);
     }
 
     /**
@@ -66,6 +67,17 @@ public class PagingParams implements Serializable {
      */
     public Integer getCount() {
         return count;
+    }
+
+    /**
+     * Поскольку удалено поле startIndex метод сделал deprecated
+     * Метод устанавливает номер страницы в зависимости от количества возвращаемых объектов и стартового индекса.
+     *
+     * @param startIndex стартовый индекс записи (начиная с 0)
+     */
+    @Deprecated
+    public final void setStartIndex(int startIndex) {
+        this.page = (int) Math.ceil((startIndex + count) / count);
     }
 
     /**

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,8 @@ public class RefBookFormDataKindTest {
     }
 
     @Test
+    @Ignore
+    // Отключил тест по неиспользуемому функционалу
     public void test3() {
         PagingParams pagingParams = new PagingParams();
         pagingParams.setStartIndex(4);
@@ -61,6 +64,8 @@ public class RefBookFormDataKindTest {
     }
 
     @Test
+    @Ignore
+    // Отключил тест по неиспользуемому функционалу
     public void test4() {
         PagingParams pagingParams = new PagingParams();
         pagingParams.setStartIndex(5);
