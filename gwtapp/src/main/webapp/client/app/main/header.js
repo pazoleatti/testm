@@ -6,15 +6,13 @@
      */
 
     angular.module('app.header', [
-            'ui.router',
-            'ng.deviceDetector',
-            'app.notifications',
-            'app.uploadTransportData',
-            'app.dialogs',
-            'app.constants',
-            'app.permissionUtils',
-            'app.formatters'
-        ])
+        'ui.router',
+        'ng.deviceDetector',
+        'app.notifications',
+        'app.uploadTransportData',
+        'app.dialogs',
+        'app.formatters'
+    ])
         .directive('appHeader', function () {
             return {
                 templateUrl: 'client/app/main/header.html',
@@ -22,8 +20,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'NotificationResource', 'appDialogs', 'APP_CONSTANTS', 'PermissionChecker', 'amountCasesFormatterFilter',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, NotificationResource, appDialogs, APP_CONSTANTS, PermissionChecker, amountCasesFormatterFilter) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'NotificationResource', 'appDialogs', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, NotificationResource, appDialogs, amountCasesFormatterFilter) {
                 /**
                  * @description Получаем необходимые настройки с сервера
                  * @param {{project_properties}} response
@@ -40,32 +38,27 @@
                             user: {
                                 name: response.data.user_data.user.name,
                                 login: response.data.user_data.user.login,
-                                department: response.data.department,
-                                permissions: response.data.user_data.user.permissions
+                                department: response.data.department
                             }
                         };
 
                         var subtree = [];
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.forms'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL"
-                            });
-                        }
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
-                            });
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
-                            });
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
-                            });
-                        }
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.forms'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL"
+                        });
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
+                        });
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
+                        });
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
+                        });
 
                         subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.accountability'),
