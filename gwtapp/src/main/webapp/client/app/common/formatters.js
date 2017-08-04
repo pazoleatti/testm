@@ -44,5 +44,37 @@
                     return $filter('date')(value.millis, 'dd.MM.yyyy HH:mm:ss');
                 }
             };
-        }]);
+        }])
+
+        /**
+         * @description Возвращает текст в зависимости от переданного числа
+         *
+         * @param num - число
+         * @param nominative - единственное число
+         * @param singular - множественное число от 2 до 4
+         * @param plural - множественное число
+         * @return Текст, склонение которого зависит от переданного числа
+         */
+        .filter('amountCasesFormatter', ['$filter', function ($filter) {
+            return function (num, nominative, singular, plural) {
+                var text;
+                if (num > 10 && ((num % 100) / 10) === 1) {
+                    return num + " " + plural;
+                }
+                switch (num % 10) {
+                    case 1:
+                        text = nominative;
+                        break;
+                    case 2:
+                    case 3:
+                    case 4:
+                        text = singular;
+                        break;
+                    default: // case 0, 5-9
+                        text = plural;
+                }
+                return text;
+            }
+        }])
+    ;
 }());

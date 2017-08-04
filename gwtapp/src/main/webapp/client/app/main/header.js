@@ -10,7 +10,10 @@
             'ng.deviceDetector',
             'app.notifications',
             'app.uploadTransportData',
-            'app.dialogs'
+            'app.dialogs',
+            'app.constants',
+            'app.permissionUtils',
+            'app.formatters'
         ])
         .directive('appHeader', function () {
             return {
@@ -19,8 +22,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'NotificationResource', 'appDialogs',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, NotificationResource, appDialogs) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'NotificationResource', 'appDialogs', 'APP_CONSTANTS', 'PermissionChecker', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, NotificationResource, appDialogs, APP_CONSTANTS, PermissionChecker, amountCasesFormatterFilter) {
                 /**
                  * @description Получаем необходимые настройки с сервера
                  * @param {{project_properties}} response
@@ -37,29 +40,42 @@
                             user: {
                                 name: response.data.user_data.user.name,
                                 login: response.data.user_data.user.login,
-                                department: response.data.department
+                                department: response.data.department,
+                                permissions: response.data.user_data.user.permissions
                             }
                         };
+
+                        var subtree = [];
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
+                            subtree.push({
+                                name: $filter('translate')('menu.taxes.ndfl.forms'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL"
+                            });
+                        }
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
+                            subtree.push({
+                                name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
+                            });
+                            subtree.push({
+                                name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
+                            });
+                            subtree.push({
+                                name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
+                            });
+                        }
+
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.accountability'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL;isReports=true"
+                        });
 
                         //Задаем ссылки для главного меню
                         $scope.treeTaxes = [{
                             name: $filter('translate')('menu.taxes.ndfl'),
-                            subtree: [{
-                                name: $filter('translate')('menu.taxes.ndfl.forms'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL"
-                            }, {
-                                name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
-                            }, {
-                                name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
-                            }, {
-                                name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
-                            }, {
-                                name: $filter('translate')('menu.taxes.ndfl.accountability'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL;isReports=true"
-                            }]
+                            subtree: subtree
                         }, {
                             name: $filter('translate')('menu.taxes.service'),
                             subtree: [{
@@ -152,34 +168,14 @@
                     appDialogs.create('client/app/main/notifications.html', 'notificationsFormCtrl');
                 };
 
-                function decline(num, nominative, singular, plural) {
-                    var text;
-                    if (num > 10 && ((num % 100) / 10) === 1) {
-                        return num + " " + plural;
-                    }
-
-                    switch (num % 10) {
-                        case 1:
-                            text = nominative;
-                            break;
-                        case 2:
-                        case 3:
-                        case 4:
-                            text = singular;
-                            break;
-                        default: // case 0, 5-9
-                            text = plural;
-                    }
-                    $scope.notificationsCount = num + " " + text;
-                }
-
                 function updateNotificationCount() {
                     NotificationResource.query({
                         projection: 'count'
                     }, function (data) {
                         if (parseInt(data.notifications_count) !== 0) {
                             $scope.showImage = true;
-                            decline(parseInt(data.notifications_count), "оповещение", "оповещения", "оповещений");
+                            $scope.notificationsCount = data.notifications_count + " "
+                                + amountCasesFormatterFilter(parseInt(data.notifications_count), $filter('translate')('notifications.nominative'), $filter('translate')('notifications.singular'), $filter('translate')('notifications.plural'));
                         } else {
                             $scope.showImage = false;
                             $scope.notificationsCount = "Нет оповещений";
