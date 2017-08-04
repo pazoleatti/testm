@@ -101,13 +101,13 @@
 	<!-- Error 403. Access forbidden. Unknown user. -->
 	<error-page>
 		<error-code>403</error-code>
-		<location>/src/main/webapp/WEB-INF/jsp/forbidden.jsp</location>
+		<location>/WEB-INF/jsp/forbidden.jsp</location>
 	</error-page>
 
     <!-- Error 404. Page not found. -->
     <error-page>
         <error-code>404</error-code>
-        <location>/src/main/webapp/WEB-INF/jsp/404.jsp</location>
+        <location>/WEB-INF/jsp/404.jsp</location>
     </error-page>
 
 	<!-- Default page to serve -->
