@@ -52,11 +52,5 @@
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
-        // Файлы и комментарии
-        .factory('FilesCommentsResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/declaration/filesComments?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
-            });
-        }])
     ;
 }());

@@ -251,6 +251,9 @@
   "notifications.title.delete": "Подтверждение удаления оповещений",
   "notifications.title.deleteText": "Вы действительно хотите удалить выбранные оповещения?",
   "notifications.title.deleteLink": "Удалить оповещение",
+  "notifications.nominative": "оповещение",
+  "notifications.singular": "оповещения",
+  "notifications.plural": "оповещений",
 
   "logPanel.title.dateTime": "Время",
   "logPanel.title.message": "Сообщение",
@@ -287,5 +290,7 @@
   "filesComment.title.user": "Пользователь",
   "filesComment.title.userDepartment": "Подразделение пользователя",
   "filesComment.delete.header": "Подтверждение удаления записи",
-  "filesComment.delete.text": "Вы действительно хотите удалить выбранные записи?"
+  "filesComment.delete.text": "Вы действительно хотите удалить выбранные записи?",
+  "filesComment.comment": "Комментарий:",
+  "filesComment.files": "Файлы:"
 }

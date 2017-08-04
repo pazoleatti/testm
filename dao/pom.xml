@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.aplana.taxaccounting</groupId>
 		<artifactId>ndfl</artifactId>
-        <version>2.0</version>
+        <version>2.1</version>
 	</parent>
 
 	<artifactId>dao</artifactId>
@@ -131,7 +131,6 @@
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql-spring</artifactId>
-            <version>4.1.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
