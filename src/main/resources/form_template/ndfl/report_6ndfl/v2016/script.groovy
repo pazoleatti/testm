@@ -216,7 +216,6 @@ def buildXmlForSpecificReport(def writer) {
 }
 
 def buildXml(def writer, boolean isForSpecificReport) {
-    if (declarationData.kpp != "661232028") throw new Exception("tratata")
     ScriptUtils.checkInterrupted()
     ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo)
     // Получим ИНН из справочника "Общие параметры"
