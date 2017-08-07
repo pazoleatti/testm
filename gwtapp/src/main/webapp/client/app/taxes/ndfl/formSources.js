@@ -5,7 +5,7 @@
      * @description Модуль для для работы с приемниками и источниками формы
      */
 
-    angular.module('app.formSources', ['ui.router', 'app.rest'])
+    angular.module('app.formSources', ['ui.router', 'app.rest', 'app.ndfl'])
 
     /**
      * @description Контроллер модального окна, в котором выводятся источники и приемники формы
@@ -216,7 +216,7 @@
 
         .filter('declarationIdFormatter', function () {
             return function (value) {
-                return '<a class="sources-link" form-id="' + value + '">' + value + '</a>';
+                return '<a class="sources-link" declaration-id="' + value + '">' + value + '</a>';
             };
         });
 }());
