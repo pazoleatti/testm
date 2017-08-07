@@ -292,5 +292,7 @@
   "filesComment.delete.header": "Подтверждение удаления записи",
   "filesComment.delete.text": "Вы действительно хотите удалить выбранные записи?",
   "filesComment.comment": "Комментарий:",
-  "filesComment.files": "Файлы:"
+  "filesComment.files": "Файлы:",
+  "filesComment.button.add": "Добавить",
+  "filesComment.button.remove": "Удалить"
 }

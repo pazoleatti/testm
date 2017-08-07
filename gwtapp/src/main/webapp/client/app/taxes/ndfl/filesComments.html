@@ -25,12 +25,12 @@
         <div class="btn-toolbar" role="toolbar">
             <span>
                 <button type="file" class="btn btn-success" ngf-select="addFileClick($file)">
-                    <i class="glyphicon glyphicon-plus-sign"></i>
+                    <span class="glyphicon glyphicon-plus-sign" ></span>{{::'filesComment.button.add' |translate}}
                 </button>
             </span>
             <span>
                 <button type="button" class="btn btn-danger" data-ng-click="removeFileClick()">
-                    <i class="glyphicon glyphicon-remove-sign"></i>
+                    <span class="glyphicon glyphicon-remove-sign"></span>{{::'filesComment.button.remove' |translate}}
                 </button>
             </span>
         </div>
