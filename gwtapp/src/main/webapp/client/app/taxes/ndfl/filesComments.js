@@ -95,7 +95,6 @@
                     if (file) {
                         Upload.upload({
                             url: 'controller/actions/uploadController/formDataFiles',
-                            headers: {'Content-type': 'multipart/form-data'},
                             data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {
@@ -117,7 +116,7 @@
                                     _.each(ids, function (element) {
                                         files.push(grid.getLocalRow(element));
                                     });
-
+                                    grid.trigger("reloadGrid");
                                     $logPanel.open('log-panel-container', response.data.uuid);
                                 }
                             }
@@ -131,7 +130,6 @@
                 $scope.removeFileClick = function () {
 
                     if ($scope.fileCommentGrid.value && $scope.fileCommentGrid.value.length !== 0) {
-                        //var dlg =
                         appDialogs.confirm($filter('translate')('filesComment.delete.header'), $filter('translate')('filesComment.delete.text'))
                             .result.then(
                             function () {
