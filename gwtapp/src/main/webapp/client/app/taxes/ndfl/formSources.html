@@ -5,7 +5,7 @@
         translate}}
     </h4>
 </div>
-<div class="modal-body" style="height: 370px;">
+<div class="modal-body" style="min-height: 350px">
     <div>
         <label style="margin-bottom: 0;">
             <input class="cbox" type="checkbox" data-ng-model="gridFilter.showSources" data-ng-change="updateGridData()"/>
@@ -26,7 +26,7 @@
          data-ng-model="sourcesGrid.value"
          data-grid-hide-legend="false"
          id="sourcesTable"
-         style="float: left; width: 100%;"></div>
+         style="float: left; width: 100%; "></div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-danger" id="closeButton" data-ng-click="close()">

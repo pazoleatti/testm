@@ -36,7 +36,7 @@
                     options: {
                         datatype: "local",
                         data: [],
-                        height: "auto",
+                        height: 237,
                         colNames: [
                             $filter('translate')('sources.tableColumn.index'),
                             $filter('translate')('sources.tableColumn.tax'),
