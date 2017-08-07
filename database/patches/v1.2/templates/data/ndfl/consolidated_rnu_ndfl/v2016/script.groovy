@@ -390,7 +390,7 @@ Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String
 Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
     Map<Long, List<Map<String, RefBookValue>>> result = new HashMap<Long, List<Map<String, RefBookValue>>>();
     declarationDataIdList.each {
-        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id)"
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id) AND ref_book_id_doc.status = 0"
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
         refBookMap.each { personId, refBookValues ->
@@ -2474,7 +2474,7 @@ def checkDataReference(
 
         // Спр8 Код вычета (Обязательное поле)
         if (ndflPersonDeduction.typeCode != "000" && ndflPersonDeduction.typeCode != null && !deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
-            String errMsg = String.format(LOG_TYPE_PERSON_MSG,
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                     C_TYPE_CODE, ndflPersonDeduction.typeCode ?: "",
                     R_TYPE_CODE
             )
@@ -2485,7 +2485,7 @@ def checkDataReference(
         // Спр9 Документ о праве на налоговый вычет.Код источника (Обязательное поле)
         if (ndflPersonDeduction.notifSource != null && !taxInspectionList.contains(ndflPersonDeduction.notifSource)) {
             //TODO turn_to_error
-            String errMsg = String.format(LOG_TYPE_PERSON_MSG,
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                     C_NOTIF_SOURCE, ndflPersonDeduction.notifSource ?: "",
                     R_NOTIF_SOURCE
             )
@@ -2506,7 +2506,7 @@ def checkDataReference(
         // Спр9 Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Обязательное поле)
         if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
             //TODO turn_to_error
-            String errMsg = String.format(LOG_TYPE_PERSON_MSG,
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                     P_NOTIF_SOURCE, ndflPersonPrepayment.notifSource ?: "",
                     R_NOTIF_SOURCE
             )
