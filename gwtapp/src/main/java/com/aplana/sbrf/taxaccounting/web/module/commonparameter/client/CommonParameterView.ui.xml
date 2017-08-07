@@ -53,7 +53,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="5" verticalAlignment="middle" addStyleNames="{style.btnPanel}">
+                <g:HorizontalPanel ui:field="editPanel" spacing="5" verticalAlignment="middle" addStyleNames="{style.btnPanel}">
                     <g:cell>
                         <g:Button ui:field="restoreButton" text="Восстановить значения по умолчанию"/>
                     </g:cell>
