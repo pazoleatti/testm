@@ -59,7 +59,6 @@
   "button.updateFLData": "Обновить данные ФЛ",
   "button.fillTransferTerm": "Заполнить \"Срок перечисления в бюджет\"",
   "button.fillIncomeAttr": "Заполнить \"Признак дохода\"",
-
   "messageDialog.toDo.title": "Информация",
   "messageDialog.toDo.message": "Функционал находится в разработке",
 
@@ -94,7 +93,7 @@
   "menu.administration.settings.importingScripts": "Импорт скриптов",
   "menu.manuals.manualUser": "Руководство пользователя",
   "menu.manuals.manualLayoutDesigner": "Руководство настройщика макетов",
-
+  "move_back":"Назад",
   "header.ndflJournal.forms": "НДФЛ - Список налоговых форм",
   "header.ndfl.forms": "РНУ НДФЛ",
   "header.ndfl.form.create": "Создание новой записи",
