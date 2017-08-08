@@ -15,18 +15,13 @@ import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.model.ActionResult;
-import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.shared.LoadAllResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -36,27 +31,23 @@ import java.util.UUID;
 /**
  * Контроллер для работы с ТФ
  */
-@Controller
-@RequestMapping(value = "/actions/transportData")
+@RestController
 public class TransportDataController {
-    private static final Log LOG = LogFactory.getLog(TransportDataController.class);
+    private static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
 
-    @Autowired
-    private LogEntryService logEntryService;
+    private final LogEntryService logEntryService;
+    private final SecurityService securityService;
+    private final BlobDataService blobDataService;
+    private final LockDataService lockDataService;
+    private final AsyncManager asyncManager;
 
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private BlobDataService blobDataService;
-
-    @Autowired
-    private LockDataService lockDataService;
-
-    @Autowired
-    private AsyncManager asyncManager;
-
-    public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
+    public TransportDataController(LogEntryService logEntryService, SecurityService securityService, BlobDataService blobDataService, LockDataService lockDataService, AsyncManager asyncManager) {
+        this.logEntryService = logEntryService;
+        this.securityService = securityService;
+        this.blobDataService = blobDataService;
+        this.lockDataService = lockDataService;
+        this.asyncManager = asyncManager;
+    }
 
 
     /**
@@ -64,11 +55,10 @@ public class TransportDataController {
      *
      * @param file ТФ
      * @return uuid группы сообщений
-     * @throws IOException
+     * @throws IOException IOException
      */
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    @ResponseBody
-    public ActionResult upload(@RequestParam(value = "uploader", required = true) MultipartFile file) throws IOException {
+    @PostMapping(value = "/actions/transportData/upload")
+    public ActionResult upload(@RequestParam(value = "uploader") MultipartFile file) throws IOException {
         Logger logger = new Logger();
 
         if (file == null || file.isEmpty()) {
@@ -138,8 +128,7 @@ public class TransportDataController {
      *
      * @return uuid группы сообщений
      */
-    @RequestMapping(value = "/loadAll", method = RequestMethod.POST)
-    @ResponseBody
+    @PostMapping(value = "/actions/transportData/loadAll")
     public ActionResult loadAll() {
         Logger logger = new Logger();
 
@@ -189,39 +178,5 @@ public class TransportDataController {
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
         return result;
-    }
-
-
-    /**
-     * Обработка исключений, связанных с тем, что скрипт выполнился с ошибками
-     *
-     * @param e        исключение
-     * @param response ответ
-     * @throws IOException
-     */
-    @ExceptionHandler(ServiceLoggerException.class)
-    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response)
-            throws IOException {
-        response.getWriter().printf("error uuid %s", e.getUuid());
-    }
-
-    /**
-     * Обработка стандартных исключений
-     *
-     * @param e        исключение
-     * @param response ответ
-     */
-    @ExceptionHandler(Exception.class)
-    public void exceptionHandler(Exception e, final HttpServletResponse response) {
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        LOG.warn(e.getLocalizedMessage(), e);
-        try {
-            Logger logger = new Logger();
-            logger.error("Ошибка: " + e.getMessage());
-            response.getWriter().printf("error uuid %s", logEntryService.save(logger.getEntries()));
-        } catch (IOException ioException) {
-            LOG.error(ioException.getMessage(), ioException);
-        }
     }
 }

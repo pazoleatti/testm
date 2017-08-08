@@ -685,12 +685,11 @@ public class DeclarationDataPresenter
                             } else if (CreateAsyncTaskStatus.EXIST.equals(result.getStatus())) {
                                 switch (type.getReportType()) {
                                     case EXCEL_DEC:
-                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/declarationData/xlsx/"
-                                                + declarationId);
+                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/rest/declarationData/" + declarationId + "/xlsx");
                                         break;
                                     case SPECIFIC_REPORT_DEC:
-                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/declarationData/specific/"
-                                                + type.getSubreport().getAlias() + "/" + declarationId);
+                                        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/rest/declarationData/" + declarationId + "/specific/"
+                                                + type.getSubreport().getAlias());
                                         break;
                                     default:
                                         break;

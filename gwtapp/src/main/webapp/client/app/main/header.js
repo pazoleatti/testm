@@ -10,7 +10,7 @@
         'ng.deviceDetector',
         'app.notifications',
         'app.uploadTransportData',
-        'app.dialogs',
+        'app.modals',
         'app.formatters'
     ])
         .directive('appHeader', function () {
@@ -20,25 +20,25 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'NotificationResource', 'appDialogs', 'amountCasesFormatterFilter',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, NotificationResource, appDialogs, amountCasesFormatterFilter) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter) {
                 /**
                  * @description Получаем необходимые настройки с сервера
                  * @param {{project_properties}} response
                  */
-                $http.get('controller/rest/configService/getConfig').then(
-                    function (response) {
-                        $scope.gwtMode = response.data.gwtMode;
-                        $scope.version = response.data.project_properties.version;
-                        $scope.revision = response.data.project_properties.revision;
-                        $scope.serverName = response.data.project_properties.serverName;
+                ConfigResource.query({},
+                    function (data) {
+                        $scope.gwtMode = data.gwtMode;
+                        $scope.version = data.versionInfoProperties.version;
+                        $scope.revision = data.versionInfoProperties.revision;
+                        $scope.serverName = data.versionInfoProperties.serverName;
                         $scope.browser = deviceDetector.browser + " " + deviceDetector.browser_version;
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
                         $scope.security = {
                             user: {
-                                name: response.data.user_data.user.name,
-                                login: response.data.user_data.user.login,
-                                department: response.data.department
+                                name: data.taUserInfo.user.name,
+                                login: data.taUserInfo.user.login,
+                                department: data.department
                             }
                         };
 
@@ -115,7 +115,7 @@
                                 href: "controller/actions/cache/clear-cache"
                             }, {
                                 name: $filter('translate')('menu.administration.settings.exportLayouts'),
-                                href: "controller/actions/formTemplate/downloadAll"
+                                href: "controller/actions/declarationTemplate/downloadAll"
                             }, {
                                 name: $filter('translate')('menu.administration.settings.importingScripts'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!scriptsImport"
@@ -157,11 +157,11 @@
                     });
                 };
 
-                $scope.showNotificationClick = function () {
-                    appDialogs.create('client/app/main/notifications.html', 'notificationsFormCtrl');
+                $scope.openNotifications = function () {
+                    appModals.create('client/app/main/notifications.html', 'notificationsCtrl');
                 };
 
-                function updateNotificationCount() {
+                $scope.updateNotificationCount = function () {
                     NotificationResource.query({
                         projection: 'count'
                     }, function (data) {
@@ -174,16 +174,16 @@
                             $scope.notificationsCount = "Нет оповещений";
                         }
                     });
-                }
+                };
 
-                $scope.$on("UPDATE_NOTIF_COUNT", function () {
-                    updateNotificationCount();
+                $scope.$on("UPDATE_NOTIFICATION_COUNT", function () {
+                    $scope.updateNotificationCount();
                 });
 
-                updateNotificationCount();
+                $scope.updateNotificationCount();
 
                 setInterval(function () {
-                    updateNotificationCount();
+                    $scope.updateNotificationCount();
                 }, 30000);
             }]);
 }());

@@ -10,8 +10,8 @@
     /**
      * @description Контроллер модального окна, в котором выводятся источники и приемники формы
      */
-        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'SourcesResource',
-            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, SourcesResource) {
+        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'DeclarationDataResource',
+            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, DeclarationDataResource) {
                 $scope.sourcesGridData = [];
 
                 //Чекбоксы
@@ -22,8 +22,9 @@
                 };
 
                 //Получение списка приемников и источников
-                SourcesResource.query({
-                    declarationId: $stateParams.declarationId
+                DeclarationDataResource.querySource({
+                    declarationDataId: $stateParams.declarationDataId,
+                    projection: "sources"
                 }, function (response) {
                     $scope.sourcesGridData = response;
                     $scope.updateGridData();
@@ -77,7 +78,7 @@
                                 index: 'declarationDataId',
                                 width: 100,
                                 sortable: false,
-                                formatter: $filter('declarationIdFormatter')
+                                formatter: $filter('declarationDataIdFormatter')
                             },
                             {name: 'fullDepartmentName', index: 'fullDepartmentName', width: 150, sortable: false},
                             {
@@ -139,9 +140,9 @@
                 //Переход по ссылке на другую форму
                 $(document).undelegate('#sourcesTable .sources-link', 'click');
                 $(document).delegate('#sourcesTable .sources-link', 'click', function () {
-                    var declarationId = $(this).attr('declaration-id');
+                    var declarationDataId = $(this).attr('data-declaration-data-id');
                     $scope.close();
-                    $state.go('ndfl', {declarationId: declarationId});
+                    $state.go('ndfl', {declarationDataId: declarationDataId});
                 });
             }])
 
@@ -214,9 +215,9 @@
             };
         })
 
-        .filter('declarationIdFormatter', function () {
+        .filter('declarationDataIdFormatter', function () {
             return function (value) {
-                return '<a class="sources-link" declaration-id="' + value + '">' + value + '</a>';
+                return '<a class="sources-link" data-declaration-data-id="' + value + '">' + value + '</a>';
             };
         });
 }());

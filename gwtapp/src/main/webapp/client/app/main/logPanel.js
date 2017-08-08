@@ -1,12 +1,10 @@
 (function () {
     'use strict';
-
     /**
-     * @description Модуль для панели уведомлений
+     * @description Модуль панели уведомлений
      */
-
     angular.module('app.logPanel', ['aplana.splitter', 'ui.router'])
-        .factory("$logPanel", ['$compile', '$rootScope', '$filter', 'LogEntryResource',
+        .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource',
             function ($compile, $rootScope, $filter, LogEntryResource) {
                 var logPanel = {};
 
@@ -54,7 +52,8 @@
                 }
 
                 /**
-                 * Метод отображает панель уведомлений со списком сообщений
+                 * @description Метод отображает панель уведомлений со списком сообщений
+                 *
                  * @param rootElementId Идентификатор родительского элемента, внизу которого отображается панель уведомления
                  * @param logId Идентификатор группы сообщений
                  */
@@ -136,7 +135,7 @@
                 return logPanel;
             }])
 
-        .filter('iconFormatter', ['$filter', function ($filter) {
+        .filter('iconFormatter', ['$filter', function () {
             return function (value, row, logEntryObject) {
                 if (logEntryObject.level === 'ERROR') {
                     return '<img src="resources/img/error-16.png" height="15" width="15">';
@@ -146,7 +145,7 @@
             };
         }])
 
-        .filter('textColorFormatter', ['$filter', function ($filter) {
+        .filter('textColorFormatter', ['$filter', function () {
             return function (value, row, logEntryObject) {
                 if (logEntryObject.level === 'ERROR') {
                     return '<div class="log-error-message">' + value + '</div>';
@@ -156,7 +155,7 @@
             };
         }])
 
-        .filter('incrementFormatter', ['$filter', function ($filter) {
+        .filter('incrementFormatter', ['$filter', function () {
             return function (value) {
                 if (angular.isNumber(value)) {
                     return value + 1;

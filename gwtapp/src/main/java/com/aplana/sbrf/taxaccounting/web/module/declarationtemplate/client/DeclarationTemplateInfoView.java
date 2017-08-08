@@ -40,19 +40,19 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
     public interface Binder extends UiBinder<Widget, DeclarationTemplateInfoView> { }
 
     interface UrlTemplates extends SafeHtmlTemplates {
-        @Template("controller/actions/downloadByUuid/{0}")
+        @Template("controller/actions/declarationTemplate/downloadByUuid/{0}")
         SafeHtml getDownloadUrl(String uuid);
 
-        @Template("controller/actions/declarationTemplate/downloadDect/{0}")
+        @Template("controller/actions/declarationTemplate/{0}/downloadDect")
         SafeHtml getDownloadDTUrl(int dtId);
 
-        @Template("controller/actions/uploadJrxml/{0}")
+        @Template("controller/actions/declarationTemplate/{0}/uploadJrxml")
         SafeHtml getUploadJrxmlUrl(int dtId);
 
-        @Template("controller/actions/uploadXsd/{0}")
+        @Template("controller/actions/declarationTemplate/{0}/uploadXsd")
         SafeHtml getUploadXsdlUrl(int dtId);
 
-        @Template("controller/actions/declarationTemplate/uploadDect/{0}")
+        @Template("controller/actions/declarationTemplate/{0}/uploadDect")
         SafeHtml getUploadDTUrl(int dtId);
     }
 

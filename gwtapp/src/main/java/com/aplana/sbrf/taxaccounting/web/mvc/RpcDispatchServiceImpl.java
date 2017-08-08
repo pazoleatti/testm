@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 /**
  * Переопределяем несколько методов GWT чтобы прокинуть AccessDeniedException.
  * Для версии java 1.7 достаточно переопределить doUnexpectedFailure().
- *
+ * <p>
  * http://jira.aplana.com/browse/SBRFACCTAX-5434
  *
  * @author fmukhametdinov
@@ -39,15 +39,14 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
     private static final String xsrfAttackMessage = "Cookie provided by RPC doesn't match request cookie, " +
             "aborting action, possible XSRF attack. (Maybe you forgot to set the security cookie?)";
 
-	@Autowired
-	private ServerInfo serverInfo;
+    private final ServerInfo serverInfo;
+    private final SecurityService securityService;
 
     @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    public RpcDispatchServiceImpl(Logger logger, Dispatch dispatch, RequestProvider requestProvider) {
+    public RpcDispatchServiceImpl(Logger logger, Dispatch dispatch, RequestProvider requestProvider, ServerInfo serverInfo, SecurityService securityService) {
         super(logger, dispatch, requestProvider);
+        this.serverInfo = serverInfo;
+        this.securityService = securityService;
     }
 
     @Override
@@ -57,7 +56,7 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
 
     @Override
     protected void doUnexpectedFailure(Throwable e) {
-		boolean isAccessDeniedException = false;
+        boolean isAccessDeniedException = false;
         Throwable cause = e;
 
         while (cause.getCause() != null && !(cause instanceof AccessDeniedException)) {
@@ -153,31 +152,32 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
         return cookieInRequest.equals(cookieSentByRPC);
     }
 
-	/**
-	 * Дополнительная информация о текущей сессии, которая спровоцировала исключительную ситуацию
-	 * @return
-	 */
-	private String getSessionInfo() {
-		if (SecurityContextHolder.getContext().getAuthentication() != null) {
+    /**
+     * Дополнительная информация о текущей сессии, которая спровоцировала исключительную ситуацию
+     *
+     * @return информация о текущей сессии
+     */
+    private String getSessionInfo() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
             TAUserInfo userInfo = securityService.currentUserInfo();
-			return String.format("Server: %s; Context path: %s; User: %s; IP-address: %s",
-					serverInfo.getServerName(),
-					getServletContext().getContextPath(),
-					userInfo.getUser().getLogin(),
-					userInfo.getIp());
-		}
-		return String.format("Server: %s; Context path: %s; User: ?; IP-address: ?",
-				serverInfo.getServerName(),
-				getServletContext().getContextPath());
-	}
+            return String.format("Server: %s; Context path: %s; User: %s; IP-address: %s",
+                    serverInfo.getServerName(),
+                    getServletContext().getContextPath(),
+                    userInfo.getUser().getLogin(),
+                    userInfo.getIp());
+        }
+        return String.format("Server: %s; Context path: %s; User: ?; IP-address: ?",
+                serverInfo.getServerName(),
+                getServletContext().getContextPath());
+    }
 
-	@Override
-	public void log(String message, Throwable t) {
-		super.log(getSessionInfo() + System.getProperty("line.separator") + message, t);
-	}
+    @Override
+    public void log(String message, Throwable t) {
+        super.log(getSessionInfo() + System.getProperty("line.separator") + message, t);
+    }
 
-	@Override
-	public void log(String msg) {
-		super.log(getSessionInfo() + System.getProperty("line.separator") + msg);
-	}
+    @Override
+    public void log(String msg) {
+        super.log(getSessionInfo() + System.getProperty("line.separator") + msg);
+    }
 }
