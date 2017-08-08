@@ -8876,7 +8876,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="9" isBold="true" pdfEncoding="Identity-H"/>
 				</textElement>
-				<text><![CDATA[Раздел 1. Обобщеные показатели]]></text>
+				<text><![CDATA[Раздел 1. Обобщенные показатели]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="fdd4c3ad-36ff-438e-bec2-f93191320baa" mode="Transparent" x="28" y="20" width="140" height="20" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
