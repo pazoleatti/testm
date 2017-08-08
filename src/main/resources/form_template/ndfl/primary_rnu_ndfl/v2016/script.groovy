@@ -5691,12 +5691,13 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
 void updateAndCheckException(Closure<Object> update) {
     try {
         update()
-    } catch (ServiceException e) {
+    } catch (Exception e) {
         int i = ExceptionUtils.indexOfThrowable(e, SQLSyntaxErrorException.class);
         if (i != -1) {
             SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException)ExceptionUtils.getThrowableList(e).get(i)
-            if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049")) {
-                throw new ServiceException("", e)
+            if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049") || sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-00060")) {
+                e.printStackTrace()
+                throw new ServiceException("В данный момент уже выполняется операция с налоговой формой содержащей тех же физических лиц, что и текущая налоговая форма. Попробуйте выполнить операцию позднее.")
             }
         }
         throw e;
