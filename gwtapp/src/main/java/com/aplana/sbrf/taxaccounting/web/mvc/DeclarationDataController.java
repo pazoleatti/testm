@@ -175,7 +175,7 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/pageImage/{pageId}/*", produces = MediaType.IMAGE_PNG_VALUE)
     public void getPageImage(@PathVariable int declarationDataId, @PathVariable int pageId,
-                          HttpServletResponse response) throws IOException {
+                             HttpServletResponse response) throws IOException {
 
         InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
         PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
@@ -593,8 +593,8 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @return источники и приемники декларации
      */
-    @GetMapping(value = "/rest/declarationData", params = "projection=sources")
-    public List<Relation> getDeclarationSourcesAndDestinations(@RequestParam long declarationDataId) {
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=sources")
+    public List<Relation> getDeclarationSourcesAndDestinations(@PathVariable long declarationDataId) {
         if (declarationService.existDeclarationData(declarationDataId)) {
             TAUserInfo userInfo = securityService.currentUserInfo();
             Logger logger = new Logger();
