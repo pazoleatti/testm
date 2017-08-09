@@ -242,7 +242,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataAccessService.checkEvents(userInfo, declarationTemplateId, departmentReportPeriod,
                         FormDataEvent.CREATE, logger);
                 if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceLoggerException(("Уведомление не создано"), logEntryService.save(logger.getEntries()));
+                    throw new ServiceLoggerException(("Налоговая форма не создана"), logEntryService.save(logger.getEntries()));
                 }
 
                 DeclarationData newDeclaration = new DeclarationData();
