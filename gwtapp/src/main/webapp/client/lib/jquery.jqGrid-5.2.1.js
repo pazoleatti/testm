@@ -2713,7 +2713,7 @@
                     pgcnt = "pg_"+pgid;
                     lft = pgid+"_left"; cent = pgid+"_center"; rgt = pgid+"_right";
                     $("#"+$.jgrid.jqID(pgid) )
-                        .append("<div id='"+pgcnt+"' class='ui-pager-control' role='group'><table " + getstyle(stylemodule, 'pagerTable', false, 'ui-pg-table ui-common-table ui-pager-table') + "><tbody><tr><td id='"+lft+"' align='left'></td><td id='"+cent+"' align='center' style='white-space:pre;'></td><td id='"+rgt+"' align='right'></td></tr></tbody></table></div>")
+                        .append("<div id='"+pgcnt+"' class='ui-pager-control' role='group'><table " + getstyle(stylemodule, 'pagerTable', false, 'ui-pg-table ui-common-table ui-pager-table') + " style=' width: 100%;table-layout: fixed; height: 100%;'><tbody><tr><td id='"+lft+"' align='left'></td><td id='"+cent+"' align='center' style='white-space:pre;'></td><td id='"+rgt+"' align='right'></td></tr></tbody></table></div>")
                         .attr("dir","ltr"); //explicit setting
                     if(ts.p.rowList.length >0){
                         str = "<td dir=\""+dir+"\">";
@@ -10391,7 +10391,7 @@
                 if(o.cloneToTop && $t.p.toppager) {clone = 2;}
                 for(i = 0; i<clone; i++) {
                     var tbd,
-                        navtbl = $("<table class='ui-pg-table navtable ui-common-table'><tbody><tr></tr></tbody></table>"),
+                        navtbl = $("<table class='ui-pg-table navtable ui-common-table' style='float: left; table-layout: auto;'><tbody><tr></tr></tbody></table>"),
                         sep = "<td class='ui-pg-button " +commonstyle.disabled + "' style='width:4px;'><span class='ui-separator'></span></td>",
                         pgid, elemids;
                     if(i===0) {

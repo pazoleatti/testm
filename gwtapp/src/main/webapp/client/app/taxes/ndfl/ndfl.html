@@ -2,11 +2,11 @@
     <!--Заголовок-->
     <div class="row" style="min-width: 1400px;">
         <div class="header-col" style="margin-left: 15px;">
-            <h1><a href="{{'Main.jsp' + gwtMode + '#!declarationList;nType=NDFL'}}">{{::'menu.taxes.ndfl' |
+            <h1><a href="{{'Main.jsp' + gwtMode + '#!declarationList;nType=NDFL'}}">{{::'move_back' |
                 translate}}:</a> - {{::'header.ndfl.forms' | translate}}:</h1>
         </div>
-        <div class="header-col w200" style="float: right; margin-top: 20px;">
-            <div class="btn-group" data-uib-dropdown>
+        <div class="header-col w200" style="float: right; margin-top: 20px; margin-bottom: -14px;">
+            <div class="btn-group" data-uib-dropdown style="float: right;" >
                 <button id="single-button" type="button" class="btn btn-danger" data-uib-dropdown-toggle>
                     <span data-translate-once="link.ndfl.reporting"></span>
                 </button>
@@ -34,52 +34,52 @@
                     <div class="header-col w400">
                         <div>
                             <label class="w100">{{::'title.department' | translate}}:</label>
-                            <label class="font-normal">{{declarationData.department}}</label>
+                            <label class="font-normal info-text200">{{declarationData.department}}</label>
                         </div>
                         <div>
                             <label class="w100">{{::'title.formNumber' | translate}}:</label>
-                            <label class="font-normal">{{declarationDataId}}</label>
+                            <label class="font-normal info-text200">{{declarationDataId}}</label>
                         </div>
                         <div>
                             <label class="w100">{{::'title.creator' | translate}}:</label>
-                            <label class="font-normal">{{declarationData.creationUserName}}</label>
+                            <label class="font-normal info-text200">{{declarationData.creationUserName}}</label>
                         </div>
                     </div>
-                    <div class="header-col w300">
+                    <div class="header-col w400">
                         <div>
                             <label>{{::'title.formType' | translate}}:</label>
-                            <label class="font-normal">{{declarationData.declarationFormKind}}</label>
+                            <label class="font-normal info-text200">{{declarationData.declarationFormKind}}</label>
                         </div>
                         <div>
                             <label>{{::'title.period' | translate}}:</label>
-                            <label class="font-normal">{{declarationData.reportPeriodYear}}, {{declarationData.reportPeriod}}</label>
+                            <label class="font-normal info-text200">{{declarationData.reportPeriodYear}}, {{declarationData.reportPeriod}}</label>
                         </div>
                         <div>
                             <label>{{::'title.state' | translate}}:</label>
-                            <label class="font-normal">{{declarationData.state}}</label>
+                            <label class="font-normal info-text200">{{declarationData.state}}</label>
                         </div>
                     </div>
                     <div class="header-col w350">
                         <div>
                             <label>{{::'title.nameAsnu' | translate}}:</label>
-                            <label class="font-normal">{{declarationData.asnuName}}</label>
+                            <label class="font-normal info-text200">{{declarationData.asnuName}}</label>
                         </div>
                         <div>
-                            <label>{{::'title.dateAndTimeCreate' | translate}}:</label>
-                            <label class="font-normal">{{declarationData.creationDate}}</label>
+                            <label style="width: 207px;">{{::'title.dateAndTimeCreate' | translate}}:</label>
+                            <label class="font-normal info-text200" style="width: 138px;">{{declarationData.creationDate}}</label>
                         </div>
                     </div>
                     <div class="header-col w200" style="float: right;">
                         <!-- ссылка на модальное окно измениий по налоговой форме -->
-                        <button type="button" class="btn btn-danger" style="width: 145px;"
+                        <button type="button" class="btn btn-danger" style="width: 145px; float: right;"
                                 data-ng-click="openHistoryOfChange()">
                             <span data-translate-once="link.ndfl.historyOfChange"></span>
                         </button>
-                        <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px;"
+                        <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px; float: right;"
                                 data-ng-click="filesAndComments()">
                             <span data-translate-once="link.ndfl.filesAndComment"></span>
                         </button>
-                        <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px;"
+                        <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px; float: right;"
                                 data-ng-click="showSourcesClick()">
                             <span data-translate-once="link.ndfl.sources"></span>
                         </button>
