@@ -5,68 +5,68 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import org.apache.commons.fileupload.FileUploadException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.CharEncoding.UTF_8;
+
 /**
- * User: avanteev
- * Сервлет для обработки загрузки файла из налоговых форм на сервер
+ * Контроллер для загрузки файлов
  */
-
-@Controller
-@RequestMapping("/actions/uploadController")
+@RestController
 public class UploadController {
+    /**
+     * Максимальный размер файла (5 Мб)
+     */
+    private static final int MAX_FILE_SIZE = 5242880;
 
-    private static final int MAX_FILE_SIZE = 5242880; // 5 МБайт
+    private BlobDataService blobDataService;
+    private LogEntryService logEntryService;
 
-    @Autowired
-    BlobDataService blobDataService;
-
-    @Autowired
-    LogEntryService logEntryService;
+    public UploadController(BlobDataService blobDataService, LogEntryService logEntryService) {
+        this.blobDataService = blobDataService;
+        this.logEntryService = logEntryService;
+    }
 
     /**
-     * Загрузка файла в формате xls
+     * Загрузка файла
+     *
      * @param file файл
-     * @throws FileUploadException
-     * @throws IOException
+     * @return строка с uuid
+     * @throws IOException в случае исключения при работе с потоками/файлами
      */
-    @ResponseBody
-    @RequestMapping(value = "/pattern", method = RequestMethod.POST, produces = "text/html; charset=UTF-8")
-    public String processUploadXls(@RequestParam("uploader") MultipartFile file) throws FileUploadException, IOException{
+    @PostMapping(value = "/actions/upload/file", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
+    public String uploadFile(@RequestParam("uploader") MultipartFile file) throws IOException {
         String uuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
         return "{uuid : \"" + uuid + "\"}";
     }
 
     /**
      * Загрузка нескольких файлов налоговых форм
-     * @param files файлы
+     *
+     * @param files   файлы
      * @param request запрос
-     * @throws IOException
-     * @throws JSONException
+     * @throws IOException в случае исключения при работе с потоками/файлами
+     * @throws JSONException JSONException
+     * @return строка с данными о загрузке файлов
      */
-    @ResponseBody
-    @RequestMapping(value = "/formDataFiles", method = RequestMethod.POST, produces = "text/html; charset=UTF-8")
-    public String processUploadFormDataFiles(@RequestParam("uploader") List<MultipartFile> files,
-                                          HttpServletRequest request)
+    @PostMapping(value = "/actions/upload/files", produces = MediaType.TEXT_HTML_VALUE + "; charset=UTF-8")
+    public String uploadFiles(@RequestParam("uploader") List<MultipartFile> files,
+                              HttpServletRequest request)
             throws IOException, JSONException {
-        request.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding(UTF_8);
         List<String> uuidList = new ArrayList<String>();
-        for(MultipartFile file: files) {
+        for (MultipartFile file : files) {
             if (file.getSize() <= MAX_FILE_SIZE) {
                 uuidList.add(blobDataService.create(file.getInputStream(), file.getOriginalFilename()));
             }
@@ -89,6 +89,5 @@ public class UploadController {
             jsonObject.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(log.getEntries()));
             return jsonObject.toString();
         }
-
     }
 }

@@ -8,14 +8,7 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('logBusinesFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'LogBusinesResource', function ($scope, $uibModalInstance, $filter, $http, LogBusinesResource) {
-            // Инициализация данных по изменению налоговой формы
-            LogBusinesResource.query({
-                formId: $scope.$resolve.data.declarationId
-            }, function (data) {
-                $scope.logBusinesGrid.ctrl.refreshGridData(data);
-            });
-
+        .controller('logBusinesFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'DeclarationDataResource', function ($scope, $uibModalInstance, $filter, $http, DeclarationDataResource) {
             /**
              * @description Закрытие окна
              */
@@ -28,7 +21,14 @@
              */
             $scope.logBusinesGrid = {
                 options: {
-                    datatype: "local",
+                    datatype: "angularResource",
+                    angularResource: DeclarationDataResource,
+                    requestParameters: function () {
+                        return {
+                            projection: "businessLogs",
+                            declarationDataId: $scope.$resolve.data.declarationDataId
+                        };
+                    },
                     height: 250,
                     colNames: [
                         '',

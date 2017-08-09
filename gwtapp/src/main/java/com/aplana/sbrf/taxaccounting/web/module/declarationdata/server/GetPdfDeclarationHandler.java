@@ -86,7 +86,7 @@ public class GetPdfDeclarationHandler extends AbstractActionHandler<GetPdfAction
                     PdfPage pdfPage = new PdfPage();
                     pdfPage.setTitle("Лист " + (i + 1));
 
-                    pdfPage.setSrc(String.format("controller/actions/declarationData/pageImage/%d/%d/%s",
+                    pdfPage.setSrc(String.format("controller/rest/declarationData/%d/pageImage/%d/%s",
                             declarationDataId, i, randomUUID));
                     pdfPages.add(pdfPage);
                 }

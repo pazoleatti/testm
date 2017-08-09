@@ -129,7 +129,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                 public void onSuccess(PrintAuditDataResult result) {
                     if (result.getUuid() != null) {
                         DownloadUtils.
-                                openInIframe("controller/actions/downloadBlobController/processLogDownload/" + result.getUuid());
+                                openInIframe("controller/actions/report/" + result.getUuid() + "/processLogDownload");
                         getView().updatePrintReportButtonName(ReportType.CSV_AUDIT, false);
                         getView().stopTimerReport(ReportType.CSV_AUDIT);
                         manualMenuPresenter.updateNotificationCount();
@@ -200,7 +200,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                                 getView().updatePrintReportButtonName(reportType, !result.isLocked() && result.isExist());
                             } else{
                                 DownloadUtils.
-                                        openInIframe("controller/actions/downloadBlobController/processArchiveDownload/" + result.getUuid());
+                                        openInIframe("controller/actions/report/" + result.getUuid() + "/processArchiveDownload");
                                 getView().stopTimerReport(ReportType.ARCHIVE_AUDIT);
                             }
                         } else if (reportType == ReportType.CSV_AUDIT){

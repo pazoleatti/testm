@@ -8,6 +8,7 @@
 			/WEB-INF/applicationContext.xml
 			/WEB-INF/security.xml
 			/WEB-INF/spring-ejb.xml
+			/WEB-INF/mvc-dispatcher-servlet-jetty.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
             classpath:com/aplana/sbrf/taxaccounting/script-support.xml
 			classpath:com/aplana/sbrf/taxaccounting/service.xml

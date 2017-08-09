@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Сведения о доходах и НДФЛ"
      */
         .controller('incomesAndTaxCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', 'dialogs', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog',
-            function ($scope, $timeout, $state, $stateParams, dialogs, $http, NdflPersonResource, $filter, $showToDoDialog) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog) {
 
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();
@@ -43,7 +43,7 @@
                                 return {
                                     projection: "personsIncome",
                                     ndflPersonIncomeFilter: JSON.stringify({
-                                        declarationDataId: $stateParams.declarationId,
+                                        declarationDataId: $stateParams.declarationDataId,
                                         inp: $scope.searchFilter.params.inp,
                                         operationId: $scope.searchFilter.params.operationId,
                                         kpp: $scope.searchFilter.params.kpp,

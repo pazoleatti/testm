@@ -2,27 +2,38 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    <bean class="org.mockito.Mockito" factory-method="mock">
+    <bean id="declarationTemplateService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService"/>
     </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
+    <bean id="securityService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService"/>
     </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
+    <bean id="declarationTemplateImpexService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService"/>
     </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
+    <bean id="logEntryService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
     </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock" name="declarationTemplateMainOperatingService">
+    <bean id="mainOperatingService" class="org.mockito.Mockito" factory-method="mock" name="declarationTemplateMainOperatingService">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.MainOperatingService"/>
     </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
+    <bean id="blobDataService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TAUserService"/>
     </bean>
+    <bean id="formTemplateImpexService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService"/>
+    </bean>
 
-    <bean id="formTemplateController" class="com.aplana.sbrf.taxaccounting.web.mvc.DeclarationTemplateController"/>
+    <bean id="formTemplateController" class="com.aplana.sbrf.taxaccounting.web.mvc.DeclarationTemplateController">
+        <constructor-arg index="0" ref="securityService"/>
+        <constructor-arg index="1" ref="declarationTemplateService"/>
+        <constructor-arg index="2" ref="declarationTemplateImpexService"/>
+        <constructor-arg index="3" ref="mainOperatingService"/>
+        <constructor-arg index="4" ref="blobDataService"/>
+        <constructor-arg index="5" ref="logEntryService"/>
+        <constructor-arg index="6" ref="formTemplateImpexService"/>
+    </bean>
 </beans>

@@ -95,7 +95,7 @@ public class DeclarationTemplateSubreportPresenter
     @Override
     public void downloadFile() {
         if (getView().getSelectedSubreport().getBlobDataId() != null) {
-            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/downloadByUuid/" + getView().getSelectedSubreport().getBlobDataId());
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "controller/actions/declarationTemplate/downloadByUuid/" + getView().getSelectedSubreport().getBlobDataId());
         }
     }
 

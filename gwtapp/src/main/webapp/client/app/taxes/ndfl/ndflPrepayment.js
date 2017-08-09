@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Сведения о доходах в виде авансовых платежей"
      */
         .controller('prepaymentCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', 'dialogs', '$http', 'NdflPersonResource', '$filter',
-            function ($scope, $timeout, $state, $stateParams, dialogs, $http, NdflPersonResource, $filter) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter) {
                 /**
                  * @description Обновление грида
                  * @param page
@@ -38,7 +38,7 @@
                                 return {
                                     projection: "personsPrepayment",
                                     ndflPersonPrepaymentFilter: JSON.stringify({
-                                        declarationDataId: $stateParams.declarationId,
+                                        declarationDataId: $stateParams.declarationDataId,
                                         inp: $scope.searchFilter.params.inp,
                                         operationId: $scope.searchFilter.params.operationId,
                                         notifNum: $scope.searchFilter.params.notifNum,

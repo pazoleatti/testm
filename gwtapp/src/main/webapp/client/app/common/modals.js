@@ -5,13 +5,13 @@
     'use strict';
 
     angular
-        .module('app.dialogs', [
+        .module('app.modals', [
             'ui.bootstrap',
             'ui.bootstrap.modal',
             'dialogs.main'
         ])
 
-        .provider('appDialogs', [function () {
+        .provider('appModals', [function () {
             // Настройки по умолчанию. См. http://angular-ui.github.io/bootstrap/#/modal
             var _wSize = 'md';
             var _b = 'static';
@@ -48,7 +48,7 @@
                         return dialogs.create('client/lib/templates/confirmDialog.html', 'confirmCtrl', data, opts)
                     },
                     /**
-                     * Создает произвольный диалог
+                     * Создает произвольное модальное окно
                      *
                      * @param url строка, адреса html-макета
                      * @param ctrlr строка, название контроллера
@@ -67,7 +67,7 @@
                         return dialogs.create(url, ctrlr, data, opts)
                     },
                     /**
-                     * Диалог-уведомление. Сообщает пользователю информацию.
+                     * Модальное окно-уведомление. Сообщает пользователю информацию.
                      *
                      * @param header строка, заголовок
                      * @param msg строка, текст сообщения

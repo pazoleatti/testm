@@ -4,7 +4,7 @@ import java.util.List;
 
 public class DeclarationDataFileComment {
 
-    private long declarationId;
+    private long declarationDataId;
     private List<DeclarationDataFile> declarationDataFiles;
     private String comment;
 
@@ -27,11 +27,11 @@ public class DeclarationDataFileComment {
         this.comment = comment;
     }
 
-    public long getDeclarationId() {
-        return declarationId;
+    public long getDeclarationDataId() {
+        return declarationDataId;
     }
 
-    public void setDeclarationId(long declarationId) {
-        this.declarationId = declarationId;
+    public void setDeclarationDataId(long declarationDataId) {
+        this.declarationDataId = declarationDataId;
     }
 }

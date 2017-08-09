@@ -5,14 +5,7 @@
      */
     angular
         .module('app', [
-            'app.header',
-            'app.logPanel',
-            'app.ndflJournal',
-            'app.ndfl',
-            'app.filterUtils',
-            'app.rest',
-            'app.formatters',
-            'app.dialogs',
+            // Стандартные/внешние модули, плагины, компоненты
             'ui.router',
             'ui.validate',
             'ui.select2',
@@ -22,6 +15,7 @@
             'angularFileUpload',
             'ngCookies',
             'pascalprecht.translate',
+            // Наши компоненты
             'aplana.overlay',
             'aplana.alert',
             'aplana.utils',
@@ -33,16 +27,27 @@
             'aplana.datePicker',
             'aplana.dropdown',
             'aplana.formLeaveConfirmer',
-            'aplana.link'
+            'aplana.link',
+            // Модули приложения
+            'app.header',
+            'app.logPanel',
+            'app.ndfl',
+            'app.filterUtils',
+            'app.rest',
+            'app.formatters',
+            'app.modals'
         ])
-
-        // Отображение диалогового окна с сообщением .
-        .factory('ShowToDoDialog', ['appDialogs', '$filter', function (appDialogs, $filter) {
+        /**
+         * @description Отображение модального окна с сообщением "Функционал находится в разработке".
+         */
+        .factory('ShowToDoDialog', ['appModals', '$filter', function (appModals, $filter) {
             return function () {
-                appDialogs.message($filter('translate')('messageDialog.toDo.title'), $filter('translate')('messageDialog.toDo.message'));
+                appModals.message($filter('translate')('messageDialog.toDo.title'), $filter('translate')('messageDialog.toDo.message'));
             };
         }])
-
+        /**
+         * @description Конфигурирование роутера и локализации сообщений для приложения
+         */
         .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
             function ($stateProvider, $urlRouterProvider, $translateProvider) {
                 // Указание страницы по умолчанию

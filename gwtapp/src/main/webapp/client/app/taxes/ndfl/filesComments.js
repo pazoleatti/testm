@@ -14,10 +14,10 @@
             '$uibModalInstance',
             '$filter',
             '$logPanel',
-            'appDialogs',
+            'appModals',
             'DeclarationDataResource',
             'Upload',
-            function ($scope, $http, $uibModalInstance, $filter, $logPanel, appDialogs, DeclarationDataResource, Upload) {
+            function ($scope, $http, $uibModalInstance, $filter, $logPanel, appModals, DeclarationDataResource, Upload) {
 
                 // TODO: https://jira.aplana.com/browse/SBRFNDFL-1669
                 // получать данные о типах приаттаченных файлов с сервера.
@@ -75,7 +75,7 @@
                  **/
                 function initPage() {
                     DeclarationDataResource.query({
-                            id: $scope.$resolve.data.declarationId,
+                            declarationDataId: $scope.$resolve.data.declarationDataId,
                             projection: "filesComments"
                         },
                         function (data) {
@@ -94,7 +94,7 @@
                 $scope.addFileClick = function (file) {
                     if (file) {
                         Upload.upload({
-                            url: 'controller/actions/uploadController/formDataFiles',
+                            url: 'controller/actions/upload/files',
                             data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {
@@ -110,7 +110,7 @@
                                     date: new Date().getTime()
                                 }];
                                 var grid = $scope.fileCommentGrid.ctrl.getGrid();
-                                if (grid.addRowData(newFile.uuid, newFile, "last")) {
+                                if (grid.addRowData(newFile[0].uuid, newFile, "last")) {
                                     var files = [];
                                     var ids = grid.getDataIDs();
                                     _.each(ids, function (element) {
@@ -128,17 +128,14 @@
                  * @description Обработчик кнопки "Удалить файл"
                  **/
                 $scope.removeFileClick = function () {
-
                     if ($scope.fileCommentGrid.value && $scope.fileCommentGrid.value.length !== 0) {
-                        appDialogs.confirm($filter('translate')('filesComment.delete.header'), $filter('translate')('filesComment.delete.text'))
+                        appModals.confirm($filter('translate')('filesComment.delete.header'), $filter('translate')('filesComment.delete.text'))
                             .result.then(
                             function () {
                                 var grid = $scope.fileCommentGrid.ctrl.getGrid();
                                 _.each($scope.fileCommentGrid.value, function (element) {
                                     grid.delRowData(element.uuid);
                                 });
-                            },
-                            function () {
                             });
                     }
                 };
@@ -160,7 +157,7 @@
                         {
                             declarationDataFiles: files,
                             comment: $scope.comment,
-                            declarationId: $scope.$resolve.data.declarationId
+                            declarationDataId: $scope.$resolve.data.declarationDataId
                         },
                         function (data) {
                             if (data) {

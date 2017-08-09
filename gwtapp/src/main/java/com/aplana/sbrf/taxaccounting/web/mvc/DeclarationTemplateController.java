@@ -7,64 +7,71 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.apache.commons.fileupload.FileUploadException;
+import com.aplana.sbrf.taxaccounting.web.model.CustomMediaType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLEncoder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 /**
  * Контроллер для работы с шаблоном декларации
  */
-@Controller
-@RequestMapping(value = "/actions")
+@RestController
 public class DeclarationTemplateController {
 
     private static final Log LOG = LogFactory.getLog(DeclarationTemplateController.class);
-    private static final String ENCODING = "UTF-8";
 
-    @Autowired
-    SecurityService securityService;
-    @Autowired
-    DeclarationTemplateService declarationTemplateService;
-    @Autowired
-    DeclarationTemplateImpexService declarationTemplateImpexService;
-    @Autowired
-    @Qualifier("declarationTemplateMainOperatingService")
-    private MainOperatingService mainOperatingService;
-    @Autowired
-    BlobDataService blobDataService;
-    @Autowired
-    LogEntryService logEntryService;
+    private SecurityService securityService;
+    private DeclarationTemplateService declarationTemplateService;
+    private DeclarationTemplateImpexService declarationTemplateImpexService;
+    private final MainOperatingService mainOperatingService;
+    private BlobDataService blobDataService;
+    private LogEntryService logEntryService;
+    private FormTemplateImpexService formTemplateImpexService;
+
+    public DeclarationTemplateController(SecurityService securityService, DeclarationTemplateService declarationTemplateService, DeclarationTemplateImpexService declarationTemplateImpexService,
+                                         @Qualifier("declarationTemplateMainOperatingService") MainOperatingService mainOperatingService, BlobDataService blobDataService,
+                                         LogEntryService logEntryService, FormTemplateImpexService formTemplateImpexService) {
+        this.securityService = securityService;
+        this.declarationTemplateService = declarationTemplateService;
+        this.declarationTemplateImpexService = declarationTemplateImpexService;
+        this.mainOperatingService = mainOperatingService;
+        this.blobDataService = blobDataService;
+        this.logEntryService = logEntryService;
+        this.formTemplateImpexService = formTemplateImpexService;
+    }
 
     /**
      * Выгрузка шаблона декларации
+     *
      * @param declarationTemplateId идентификатор шаблона декларации
-     * @param req запрос
-     * @param resp ответ
-     * @throws IOException
+     * @param req                   запрос
+     * @param resp                  ответ
+     * @throws IOException IOException
      */
-    @RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
+    @GetMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/downloadDect")
     public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
-            resp.setContentType("application/zip");
+            resp.setContentType(CustomMediaType.APPLICATION_ZIP_VALUE);
             resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-            resp.setCharacterEncoding("UTF-8");
+            resp.setCharacterEncoding(UTF_8);
             try {
                 declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
             } finally {
@@ -75,14 +82,15 @@ public class DeclarationTemplateController {
 
     /**
      * Загрузка шаблона декларации
-     * @param file файл шаблона декларации
+     *
+     * @param file                  файл шаблона декларации
      * @param declarationTemplateId идентификатор шаблона декларации
-     * @param req запрос
-     * @param resp ответ
-     * @throws IOException
+     * @param req                   запрос
+     * @param resp                  ответ
+     * @throws IOException IOException
      */
-    @RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
-    public void uploadDect(@RequestParam(value = "uploader", required = true) MultipartFile file,
+    @PostMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/uploadDect")
+    public void uploadDect(@RequestParam(value = "uploader") MultipartFile file,
                            @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
@@ -94,7 +102,7 @@ public class DeclarationTemplateController {
             declarationTemplateService.lock(declarationTemplateId, userInfo);
 
             try {
-                req.setCharacterEncoding("UTF-8");
+                req.setCharacterEncoding(UTF_8);
 
                 if (file.getSize() == 0)
                     throw new ServiceException("Архив пустой.");
@@ -150,15 +158,16 @@ public class DeclarationTemplateController {
 
     /**
      * Загрузка файла в формате jrxml
-     * @param file файл шаблона декларации
+     *
+     * @param file                  файл шаблона декларации
      * @param declarationTemplateId идентификатор шаблона декларации
-     * @param req запрос
-     * @param resp ответ
-     * @throws IOException
+     * @param req                   запрос
+     * @param resp                  ответ
+     * @throws IOException IOException
      */
-    @RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
+    @PostMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/uploadJrxml")
     @Transactional
-    public void processUpload(@RequestParam(value = "uploader", required = true) MultipartFile file,
+    public void processUpload(@RequestParam(value = "uploader") MultipartFile file,
                               @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
@@ -169,8 +178,8 @@ public class DeclarationTemplateController {
             declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
             declarationTemplateService.lock(declarationTemplateId, userInfo);
 
-            req.setCharacterEncoding("UTF-8");
-            resp.setCharacterEncoding("UTF-8");
+            req.setCharacterEncoding(UTF_8);
+            resp.setCharacterEncoding(UTF_8);
             InputStream inputStream = null;
             try {
                 if (file.getSize() == 0)
@@ -231,15 +240,16 @@ public class DeclarationTemplateController {
 
     /**
      * Загрузка файла в формате xsd
-     * @param file файл шаблона декларации
+     *
+     * @param file                  файл шаблона декларации
      * @param declarationTemplateId идентификатор шаблона декларации
-     * @param req запрос
-     * @param resp ответ
-     * @throws IOException
+     * @param req                   запрос
+     * @param resp                  ответ
+     * @throws IOException IOException
      */
-    @RequestMapping(value = "uploadXsd/{declarationTemplateId}",method = RequestMethod.POST)
+    @PostMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/uploadXsd")
     @Transactional
-    public void processUploadXsd(@RequestParam(value = "uploader", required = true) MultipartFile file,
+    public void processUploadXsd(@RequestParam(value = "uploader") MultipartFile file,
                                  @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
@@ -251,8 +261,8 @@ public class DeclarationTemplateController {
                 declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
                 declarationTemplateService.lock(declarationTemplateId, userInfo);
 
-                req.setCharacterEncoding("UTF-8");
-                resp.setCharacterEncoding("UTF-8");
+                req.setCharacterEncoding(UTF_8);
+                resp.setCharacterEncoding(UTF_8);
                 JSONObject resultUuid = new JSONObject();
 
                 try {
@@ -282,123 +292,68 @@ public class DeclarationTemplateController {
 
     /**
      * Выгрузка файла по uuid
+     *
      * @param uuid уникальный идентификатор файла
-     * @param req запрос
+     * @param req  запрос
      * @param resp ответ
-     * @throws IOException
+     * @throws IOException IOException
      */
-    @RequestMapping(value = "/downloadByUuid/{uuid}",method = RequestMethod.GET)
+    @GetMapping(value = "/actions/declarationTemplate/downloadByUuid/{uuid}")
     public void processDownload(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             BlobData blobData = blobDataService.get(uuid);
-            createResponse(req, resp, blobData);
-        }
-    }
-
-    /**
-     * Обработка исключений, связанных с тем, что скрипт выполнился с ошибками
-     * @param e исключение
-     * @param response ответ
-     * @throws IOException
-     * @throws JSONException
-     */
-    @ExceptionHandler(ServiceLoggerException.class)
-    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException, JSONException {
-        JSONObject errors = new JSONObject();
-        response.setCharacterEncoding("UTF-8");
-        errors.put(UuidEnum.ERROR_UUID.toString(), e.getUuid());
-        response.getWriter().printf(errors.toString());
-    }
-
-    /**
-     * Обработка стандартных исключений
-     * @param e исключение
-     * @param response ответ
-     * @throws JSONException
-     */
-    @ExceptionHandler(Exception.class)
-    public void exceptionHandler(Exception e, final HttpServletResponse response) throws JSONException {
-        response.setCharacterEncoding("UTF-8");
-        LOG.error(e.getLocalizedMessage(), e);
-        JSONObject errors = new JSONObject();
-        try {
-            Logger log = new Logger();
-            log.error(e.getMessage());
-            errors.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(log.getEntries()));
-            response.getWriter().printf(errors.toString());
-        } catch (IOException ioException) {
-            LOG.error(ioException.getMessage(), ioException);
+            ResponseUtils.createBlobResponse(req, resp, blobData);
         }
     }
 
     /**
      * Проверка logger на наличие ошибок
-     * @param logger
+     *
+     * @param logger логгер
      */
     private void checkErrors(Logger logger) {
-        if (logger.containsLevel(LogLevel.ERROR)){
+        if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 
     /**
-     * Создание заголовка ответа
-     * @param req запрос
-     * @param response ответ
-     * @param blobData файловое хранилище
-     * @throws IOException
-     */
-    private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final BlobData blobData) throws IOException{
-        String fileName = blobData.getName();
-        setCorrectFileName(req, response, fileName);
-
-        DataInputStream in = new DataInputStream(blobData.getInputStream());
-        OutputStream out = response.getOutputStream();
-        int count = 0;
-        try {
-            count = IOUtils.copy(in, out);
-        } finally {
-            in.close();
-            out.close();
-        }
-        response.setContentLength(count);
-    }
-
-    /**
-     * Приведение названия файла к корректному виду
-     * @param request запрос
-     * @param response ответ
-     * @param originalFileName название файла
-     * @throws UnsupportedEncodingException
-     */
-    private void setCorrectFileName(HttpServletRequest request, HttpServletResponse response, String originalFileName) throws UnsupportedEncodingException {
-        String userAgent = request.getHeader("User-Agent").toLowerCase();
-        String fileName = URLEncoder.encode(originalFileName, ENCODING).replaceAll("\\+", "%20");
-        String fileNameAttr = "filename=";
-        if (userAgent.contains("msie") || userAgent.contains("webkit")) {
-            fileName = "\"" + fileName + "\"";
-        } else {
-            fileNameAttr = fileNameAttr.replace("=", "*=") + ENCODING + "''";
-        }
-        response.setHeader("Content-Disposition", "attachment;" + fileNameAttr + fileName);
-    }
-
-    /**
      * Проверка пользователя на наличие необходимых прав
+     *
      * @param response ответ
      * @param userInfo данные пользователя
-     * @return
-     * @throws IOException
+     * @return признак наличия прав
+     * @throws IOException IOException
      */
     private boolean checkRole(HttpServletResponse response, TAUserInfo userInfo) throws IOException {
         if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
+            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+            response.setCharacterEncoding(UTF_8);
             response.getWriter().printf("Ошибка доступа (недостаточно прав)");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }
         return true;
+    }
+
+    /**
+     * Выгрузка макетов делкараций
+     *
+     * @param response ответ
+     * @throws IOException IOException
+     */
+    @RequestMapping(value = "/actions/declarationTemplate/downloadAll")
+    public void downloadAll(HttpServletResponse response) throws IOException {
+        response.setHeader("Content-Disposition",
+                String.format("attachment; filename=\"Templates(%s).zip\"",
+                        new SimpleDateFormat("yyyy-MM-dd").format(new Date()))
+        );
+        response.setCharacterEncoding(UTF_8);
+        try {
+            formTemplateImpexService.exportAllTemplates(response.getOutputStream());
+        } finally {
+            IOUtils.closeQuietly(response.getOutputStream());
+        }
     }
 }

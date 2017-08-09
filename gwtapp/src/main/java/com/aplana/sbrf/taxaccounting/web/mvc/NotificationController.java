@@ -31,6 +31,7 @@ public class NotificationController {
 
     /**
      * Привязка данных из параметров запроса
+     *
      * @param binder спец. DataBinder для привязки
      */
     @InitBinder
@@ -44,7 +45,7 @@ public class NotificationController {
      * @param pagingParams параметры для пагинации
      * @return список оповещений
      */
-    @GetMapping(value = "/rest/notification", params = "projection=notifications")
+    @GetMapping(value = "/rest/notification")
     public JqgridPagedList<Notification> fetchNotifications(@RequestParam PagingParams pagingParams) {
         TAUser user = securityService.currentUserInfo().getUser();
         List<Integer> userRoles = new ArrayList<Integer>();
@@ -86,7 +87,6 @@ public class NotificationController {
      */
     @GetMapping(value = "/rest/notification", params = "projection=count")
     public Map<String, Object> fetchNotificationCount() {
-
         TAUser user = securityService.currentUserInfo().getUser();
         List<Integer> userRoles = new ArrayList<Integer>();
         for (TARole role : user.getRoles()) {
@@ -105,7 +105,7 @@ public class NotificationController {
     /**
      * Помечает все оповещения текущего пользователя как прочитанные
      */
-    @PutMapping(value = "/actions/notification/markAsRead")
+    @PostMapping(value = "/actions/notification/markAsRead")
     public void markAsRead() {
         TAUser user = securityService.currentUserInfo().getUser();
         List<Integer> userRoles = new ArrayList<Integer>();
@@ -117,5 +117,4 @@ public class NotificationController {
         filter.setUserRoleIds(userRoles);
         notificationService.updateUserNotificationsStatus(filter);
     }
-
 }

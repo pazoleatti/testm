@@ -58,4 +58,20 @@ describe('formatters', function () {
             });
         });
     });
+
+    /**
+     * Преобразуем коллекцию объектов в коллекцию их идентификаторов
+     */
+    describe("idExtractor", function () {
+        var value = [[{id: 1, data: 10}], [{id: 1, data: 10}, {id: 2, data: 20}, {id: 3, data: 30}], []];
+        var result = [[1], [1, 2, 3], []];
+
+        using(value, result, function (value, result) {
+            it("Formatters. Test3. Проверка idExtractor", function () {
+                inject(function (idExtractorFilter) {
+                    expect(idExtractorFilter(value)).toEqual(result);
+                });
+            });
+        });
+    });
 });

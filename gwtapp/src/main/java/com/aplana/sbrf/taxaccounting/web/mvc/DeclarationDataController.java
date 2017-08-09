@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -11,14 +12,19 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -28,16 +34,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 /**
  * Контроллер для работы с декларациями
  */
 @RestController
 public class DeclarationDataController {
-    private static final String ENCODING = "UTF-8";
+    /**
+     * Привязка данных из параметров запроса
+     *
+     * @param binder спец. DataBinder для привязки
+     */
+    @InitBinder
+    public void init(ServletRequestDataBinder binder) {
+        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+    }
 
     private DeclarationDataService declarationService;
     private SecurityService securityService;
@@ -45,48 +59,51 @@ public class DeclarationDataController {
     private BlobDataService blobDataService;
     private DeclarationTemplateService declarationTemplateService;
     private LogBusinessService logBusinessService;
-    private TAUserService userService;
+    private TAUserService taUserService;
     private DepartmentService departmentService;
     private DepartmentReportPeriodService departmentReportPeriodService;
     private RefBookFactory rbFactory;
     private AsyncTaskManagerService asyncTaskManagerService;
     private LogEntryService logEntryService;
     private LockDataService lockDataService;
+    private SourceService sourceService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService userService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
-                                     LogEntryService logEntryService, LockDataService lockDataService) {
+                                     TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
+                                     LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
         this.blobDataService = blobDataService;
         this.declarationTemplateService = declarationTemplateService;
         this.logBusinessService = logBusinessService;
-        this.userService = userService;
+        this.taUserService = taUserService;
         this.departmentService = departmentService;
         this.departmentReportPeriodService = departmentReportPeriodService;
         this.rbFactory = rbFactory;
         this.asyncTaskManagerService = asyncTaskManagerService;
         this.logEntryService = logEntryService;
         this.lockDataService = lockDataService;
+        this.sourceService = sourceService;
     }
 
     /**
-     * Формирование отчета для НФ/декларации в формате xlsx
+     * Формирование отчета для декларации в формате xlsx
      *
      * @param declarationDataId идентификатор декларации
      * @param response          ответ
+     * @throws IOException IOException
      */
-    @GetMapping(value = "/actions/declarationData/xlsx/{declarationDataId}", produces = "application/octet-stream")
-    public void xlsx(@PathVariable long declarationDataId, HttpServletResponse response)
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}/xlsx", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
         String fileName = null;
         String xmlDataFileName = declarationService.getXmlDataFileName(declarationDataId, userInfo);
         if (xmlDataFileName != null) {
-            fileName = URLEncoder.encode(xmlDataFileName.replace("zip", "xlsx"), ENCODING);
+            fileName = URLEncoder.encode(xmlDataFileName.replace("zip", "xlsx"), UTF_8);
         }
 
         response.setHeader("Content-Disposition", "attachment; filename=\""
@@ -108,14 +125,15 @@ public class DeclarationDataController {
     }
 
     /**
-     * Формирование специфичного отчета для НФ/декларации
+     * Формирование специфичного отчета для декларации
      *
      * @param alias             тип специфичного отчета
      * @param declarationDataId идентификатор декларации
      * @param response          ответ
+     * @throws IOException IOException
      */
-    @GetMapping(value = "/actions/declarationData/specific/{alias}/{declarationDataId}")
-    public void specific(@PathVariable String alias, @PathVariable long declarationDataId, HttpServletResponse response)
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}/specific/{alias}")
+    public void downloadDeclarationSpecific(@PathVariable String alias, @PathVariable long declarationDataId, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
@@ -126,8 +144,8 @@ public class DeclarationDataController {
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
 
-            String fileName = URLEncoder.encode(blobData.getName(), ENCODING);
-            response.setContentType("application/octet-stream");
+            String fileName = URLEncoder.encode(blobData.getName(), UTF_8);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
             response.setHeader("Content-Disposition", "attachment; filename=\""
                     + fileName + "\"");
 
@@ -143,24 +161,21 @@ public class DeclarationDataController {
             response.setContentLength(count);
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().printf("Отчет не найден");
-
         }
     }
 
 
     /**
-     * Формирует изображение для модели для PDFViewer
+     * Формирует изображение для просмотра делкарации в PDFViewer
      *
      * @param declarationDataId идентификатор декларации
      * @param pageId            идентификатор страницы
      * @param response          ответ
+     * @throws IOException IOException
      */
-    @GetMapping(value = "/actions/declarationData/pageImage/{declarationDataId}/{pageId}/*", produces = "image/png")
-    public void pageImage(@PathVariable int declarationDataId, @PathVariable int pageId,
-                          HttpServletResponse response) throws IOException {
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}/pageImage/{pageId}/*", produces = MediaType.IMAGE_PNG_VALUE)
+    public void getPageImage(@PathVariable int declarationDataId, @PathVariable int pageId,
+                             HttpServletResponse response) throws IOException {
 
         InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
         PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
@@ -170,17 +185,18 @@ public class DeclarationDataController {
 
 
     /**
-     * Формирование отчета для НФ/декларации в формате xml
+     * Формирование отчета для декларации в формате xml
      *
      * @param declarationDataId идентификатор декларации
      * @param response          ответ
+     * @throws IOException IOException
      */
-    @GetMapping(value = "/actions/declarationData/xml/{declarationDataId}", produces = "application/octet-stream")
-    public void xml(@PathVariable int declarationDataId, HttpServletResponse response)
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}/xml", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public void downloadDeclarationXml(@PathVariable int declarationDataId, HttpServletResponse response)
             throws IOException {
 
         InputStream xmlDataIn = declarationService.getXmlDataAsStream(declarationDataId, securityService.currentUserInfo());
-        String fileName = URLEncoder.encode(declarationService.getXmlDataFileName(declarationDataId, securityService.currentUserInfo()), ENCODING);
+        String fileName = URLEncoder.encode(declarationService.getXmlDataFileName(declarationDataId, securityService.currentUserInfo()), UTF_8);
 
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
@@ -197,8 +213,8 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @return модель DeclarationResult, в которой содержаться данные о декларации
      */
-    @GetMapping(value = "/rest/declarationData", params = "projection=declarationData")
-    public DeclarationResult fetchDeclarationData(@RequestParam long declarationDataId) {
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=declarationData")
+    public DeclarationResult fetchDeclarationData(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
@@ -216,7 +232,7 @@ public class DeclarationDataController {
 
         String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {
-            result.setCreationUserName(userService.getUser(userLogin).getName());
+            result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
@@ -241,8 +257,8 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      */
-    @PostMapping(value = "/actions/declarationData/delete")
-    public void deleteDeclaration(@RequestParam int declarationDataId) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/delete")
+    public void deleteDeclaration(@PathVariable int declarationDataId) {
         if (declarationService.existDeclarationData(declarationDataId)) {
             declarationService.delete(declarationDataId, securityService.currentUserInfo());
         }
@@ -253,8 +269,8 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      */
-    @PostMapping(value = "/actions/declarationData/returnToCreated")
-    public void returnToCreatedDeclaration(@RequestParam int declarationDataId) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/returnToCreated")
+    public void returnToCreatedDeclaration(@PathVariable int declarationDataId) {
         Logger logger = new Logger();
         declarationService.cancel(logger, declarationDataId, null, securityService.currentUserInfo());
     }
@@ -265,9 +281,10 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
+     * @return модель RecalculateDeclarationDataResult, в которой содержаться данные о результате расчета декларации
      */
-    @PostMapping(value = "/actions/declarationData/recalculate")
-    public RecalculateDeclarationDataResult recalculateDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/recalculate")
+    public RecalculateDeclarationDataResult recalculateDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
         final RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         if (!declarationService.existDeclarationData(declarationDataId)) {
@@ -276,7 +293,6 @@ public class DeclarationDataController {
             return result;
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
-        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         final TaxType taxType = TaxType.NDFL;
 
         Logger logger = new Logger();
@@ -346,9 +362,10 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
+     * @return модель CheckDeclarationDataResult, в которой содержаться данные о результате проверки декларации
      */
-    @PostMapping(value = "/actions/declarationData/check")
-    public CheckDeclarationDataResult checkDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/check")
+    public CheckDeclarationDataResult checkDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
         final CheckDeclarationDataResult result = new CheckDeclarationDataResult();
 
@@ -358,7 +375,6 @@ public class DeclarationDataController {
             return result;
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
-        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         final TaxType taxType = TaxType.NDFL;
         Logger logger = new Logger();
         LockData lockDataAccept = lockDataService.getLock(declarationService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
@@ -416,7 +432,7 @@ public class DeclarationDataController {
                     String.format(
                             LockData.LOCK_CURRENT,
                             sdf.format(lockDataAccept.getDateLock()),
-                            userService.getUser(lockDataAccept.getUserId()).getName(),
+                            taUserService.getUser(lockDataAccept.getUserId()).getName(),
                             declarationService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, taxType))
             );
             throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), taxType.getDeclarationShortName());
@@ -431,9 +447,10 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
+     * @return модель AcceptDeclarationDataResult, в которой содержаться данные о результате принятия декларации
      */
-    @PostMapping(value = "/actions/declarationData/accept")
-    public AcceptDeclarationDataResult acceptDeclaration(@RequestParam final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/accept")
+    public AcceptDeclarationDataResult acceptDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
         final AcceptDeclarationDataResult result = new AcceptDeclarationDataResult();
         if (!declarationService.existDeclarationData(declarationDataId)) {
@@ -443,7 +460,6 @@ public class DeclarationDataController {
         }
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         final TaxType taxType = TaxType.NDFL;
         String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
@@ -503,38 +519,35 @@ public class DeclarationDataController {
     /**
      * Получение дополнительной информации о файлах декларации с комментариями
      *
-     * @param id                            идентификатор декларации
-     * @return DeclarationDataFileComment   объект модели, в которой содержаться данные о файлах
-     *                                      и комментарий для текущей декларации.
+     * @param declarationDataId идентификатор декларации
+     * @return DeclarationDataFileComment объект модели, в которой содержаться данные о файлах
+     * и комментарий для текущей декларации.
      */
-    @RequestMapping(value = "/rest/declarationData", method = RequestMethod.GET, params = "projection=filesComments")
-    @ResponseBody
-    public DeclarationDataFileComment fetchFilesComments(@RequestParam long id) {
-        if (!declarationService.existDeclarationData(id)) {
-            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id), null);
+    @GetMapping(value = "/rest/declarationData", params = "projection=filesComments")
+    public DeclarationDataFileComment fetchFilesComments(@RequestParam long declarationDataId) {
+        if (!declarationService.existDeclarationData(declarationDataId)) {
+            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
         }
 
         DeclarationDataFileComment result = new DeclarationDataFileComment();
 
-        result.setDeclarationId(id);
-        result.setDeclarationDataFiles(declarationService.getFiles(id));
-        result.setComment(declarationService.getNote(id));
+        result.setDeclarationDataId(declarationDataId);
+        result.setDeclarationDataFiles(declarationService.getFiles(declarationDataId));
+        result.setComment(declarationService.getNote(declarationDataId));
         return result;
     }
 
     /**
      * Сохранение дополнительной информации о файлах декларации с комментариями
      *
-     * @param dataFileComment               сохраняемый объект декларации, в котором содержаться
-     *                                      данные о файлах и комментарий для текущей декларации.
+     * @param dataFileComment сохраняемый объект декларации, в котором содержаться
+     *                        данные о файлах и комментарий для текущей декларации.
      * @return DeclarationDataFileComment   новый объект модели, в котором содержаться данные
-     *                                      о файлах и комментарий для текущей декларации.
+     * о файлах и комментарий для текущей декларации.
      */
-
-    @RequestMapping(value = "/rest/declarationData", method = RequestMethod.POST, params = "projection=filesComments")
-    @ResponseBody
+    @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
     public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
-        long declarationDataId = dataFileComment.getDeclarationId();
+        long declarationDataId = dataFileComment.getDeclarationDataId();
 
         DeclarationDataFileComment result = new DeclarationDataFileComment();
         if (!declarationService.existDeclarationData(declarationDataId)) {
@@ -546,8 +559,53 @@ public class DeclarationDataController {
 
         result.setDeclarationDataFiles(declarationService.getFiles(declarationDataId));
         result.setComment(declarationService.getNote(declarationDataId));
-        result.setDeclarationId(declarationDataId);
+        result.setDeclarationDataId(declarationDataId);
 
         return result;
+    }
+
+    /**
+     * Возвращает историю измений декларации по её идентификатору
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param pagingParams      параметры пагинации
+     * @return список изменений декларации
+     */
+    @GetMapping(value = "/rest/declarationData", params = "projection=businessLogs")
+    public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@RequestParam long declarationDataId, @RequestParam PagingParams pagingParams) {
+        ArrayList<LogBusinessModel> logBusinessModelArrayList = new ArrayList<LogBusinessModel>();
+        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, HistoryBusinessSearchOrdering.DATE, true)) {
+            LogBusinessModel logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
+                    taUserService.getUser(logBusiness.getUserLogin()).getName());
+            logBusinessModelArrayList.add(logBusinessModel);
+        }
+        PagingResult<LogBusinessModel> result = new PagingResult<LogBusinessModel>(logBusinessModelArrayList, logBusinessModelArrayList.size());
+        return JqgridPagedResourceAssembler.buildPagedList(
+                result,
+                result.size(),
+                pagingParams
+        );
+    }
+
+    /**
+     * Получение источников и приемников декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return источники и приемники декларации
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=sources")
+    public List<Relation> getDeclarationSourcesAndDestinations(@PathVariable long declarationDataId) {
+        if (declarationService.existDeclarationData(declarationDataId)) {
+            TAUserInfo userInfo = securityService.currentUserInfo();
+            Logger logger = new Logger();
+            DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
+
+            List<Relation> relationList = new ArrayList<Relation>();
+            relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
+            relationList.addAll(sourceService.getDeclarationDestinationsInfo(declaration, true, false, null, userInfo, logger));
+            return relationList;
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

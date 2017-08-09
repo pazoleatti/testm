@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Реквизиты"
      */
         .controller('ndflFLCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', 'dialogs', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog',
-            function ($scope, $timeout, $state, $stateParams, dialogs, $http, NdflPersonResource, $filter, $showToDoDialog) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog) {
 
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();
@@ -42,7 +42,7 @@
                                 return {
                                     projection: "ndflPersons",
                                     ndflPersonFilter: JSON.stringify({
-                                        declarationDataId: $stateParams.declarationId,
+                                        declarationDataId: $stateParams.declarationDataId,
                                         inp: $scope.searchFilter.params.inp,
                                         innNp: $scope.searchFilter.params.innNp,
                                         innForeign: $scope.searchFilter.params.innForeign,

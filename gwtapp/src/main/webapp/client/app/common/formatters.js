@@ -47,6 +47,29 @@
         }])
 
         /**
+         * @description Фильтр создаёт по коллекции объектов коллекцию их идентификаторов.
+         *
+         * @param items - коллекция объектов
+         * @param property - имя свойства объекта, содержащее идентификатор (по-умолчанию 'id')
+         * @return коллекция идентификаторов объектов
+         */
+        .filter('idExtractor', function () {
+            return function (items, property) {
+                if (!property) {
+                    property = 'id';
+                }
+
+                var result = [];
+                angular.forEach(items, function (item) {
+                    console.log(item);
+                    result.push(_.property(property)(item));
+                });
+
+                return result;
+            };
+        })
+
+        /**
          * @description Возвращает текст в зависимости от переданного числа
          *
          * @param num - число

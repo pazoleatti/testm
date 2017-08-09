@@ -5,34 +5,49 @@ import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import java.util.Date;
 
 /**
- * Модель данных для списка измений по налоговой форме в нормальном виде
+ * Модель данных для истории изменений декларации
  */
 public class LogBusinessModel {
-    //дата правки формы
+
+    /**
+     * Дата
+     */
     private Date logDate;
 
-    //роль пользователя
+    /**
+     * Роль пользователя
+     */
     private String roles;
 
-    //id декларации
-    private Long declarationId;
+    /**
+     * Идентификатор декларации
+     */
+    private Long declarationDataId;
 
-    //наименование подразделения
+    /**
+     * Подразделение пользователя
+     */
     private String departmentName;
 
-    //примечание
+    /**
+     * Текст сообщения
+     */
     private String note;
 
-    //название события правки
+    /**
+     * Наименование события
+     */
     private String eventName;
 
-    //полное имя пользователя
+    /**
+     * Полное имя пользователя
+     */
     private String userFullName;
 
     public LogBusinessModel(LogBusiness logBusiness, String eventName, String userFullName) {
         this.logDate = logBusiness.getLogDate();
         this.roles = logBusiness.getRoles();
-        this.declarationId = logBusiness.getDeclarationId();
+        this.declarationDataId = logBusiness.getDeclarationId();
         this.departmentName = logBusiness.getDepartmentName();
         this.note = logBusiness.getNote();
         this.eventName = eventName;
@@ -48,7 +63,7 @@ public class LogBusinessModel {
     }
 
     public Long getDeclarationId() {
-        return declarationId;
+        return declarationDataId;
     }
 
     public String getDepartmentName() {

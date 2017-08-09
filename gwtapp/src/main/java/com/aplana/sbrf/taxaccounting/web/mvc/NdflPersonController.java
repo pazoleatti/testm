@@ -12,7 +12,10 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,6 +37,7 @@ public class NdflPersonController {
 
     /**
      * Привязка данных из параметров запроса
+     *
      * @param binder спец. DataBinder для привязки
      */
     @InitBinder
@@ -51,8 +55,8 @@ public class NdflPersonController {
     /**
      * Найти все данные НДФЛ ФЛ привязанные к декларации
      *
-     * @param ndflPersonFilter  параметры фильтра
-     * @param pagingParams      параметры для пагинации
+     * @param ndflPersonFilter параметры фильтра
+     * @param pagingParams     параметры для пагинации
      * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=ndflPersons")
@@ -104,7 +108,7 @@ public class NdflPersonController {
      * Найти все данные о доходах и НДФЛ привязанные к декларации
      *
      * @param ndflPersonIncomeFilter параметры фильтра
-     * @param pagingParams      параметры для пагинации
+     * @param pagingParams           параметры для пагинации
      * @return список NdflPersonIncomeFilter заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_INCOME
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsIncome")
@@ -123,7 +127,7 @@ public class NdflPersonController {
      * Найти все данные о вычетах привязанные к декларации
      *
      * @param ndflPersonDeductionFilter параметры фильтра
-     * @param pagingParams      параметры для пагинации
+     * @param pagingParams              параметры для пагинации
      * @return список NdflPersonDeduction заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_DEDUCTION
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsDeduction")
@@ -142,7 +146,7 @@ public class NdflPersonController {
      * Найти все данные о вычетах привязанные к декларации
      *
      * @param ndflPersonPrepaymentFilter параметры фильтра
-     * @param pagingParams      параметры для пагинации
+     * @param pagingParams               параметры для пагинации
      * @return список NdflPersonDeduction заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_DEDUCTION
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsPrepayment")

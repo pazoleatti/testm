@@ -57,7 +57,7 @@
                         </g:cell>
                     </g:VerticalPanel>
                     <g:HorizontalPanel ui:field="buttonPanel" spacing="3" verticalAlignment="middle">
-                        <fileuplod:FileUploadWidget text="Добавить" ui:field="addFile" actionUrl="controller/actions/uploadController/formDataFiles/" multiple="true" img="resources/img/row-add.png" />
+                        <fileuplod:FileUploadWidget text="Добавить" ui:field="addFile" actionUrl="controller/actions/upload/files" multiple="true" img="resources/img/row-add.png" />
                         <style:LinkButton text="Удалить" ui:field="removeFile" img="resources/img/row-delete.png"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>

@@ -22,11 +22,16 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,13 +41,13 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(value = "DeclarationTemplateControllerTest.xml")
 @WebAppConfiguration
 public class DeclarationTemplateControllerTest {
-
     private MockMvc mockMvc;
 
     @Autowired
@@ -70,7 +75,20 @@ public class DeclarationTemplateControllerTest {
         Mockito.when(securityService.currentUserInfo()).thenReturn(userInfo);
 
         // Setup Spring test in standalone mode
-        this.mockMvc = MockMvcBuilders.standaloneSetup(declarationTemplateController).build();
+        this.mockMvc = standaloneSetup(declarationTemplateController)
+                .setHandlerExceptionResolvers(createExceptionResolver())
+                .build();
+    }
+
+    private ExceptionHandlerExceptionResolver createExceptionResolver() {
+        ExceptionHandlerExceptionResolver exceptionResolver = new ExceptionHandlerExceptionResolver() {
+            protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
+                Method method = new ExceptionHandlerMethodResolver(GlobalControllerExceptionHandler.class).resolveMethod(exception);
+                return new ServletInvocableHandlerMethod(new GlobalControllerExceptionHandler(logEntryService), method);
+            }
+        };
+        exceptionResolver.afterPropertiesSet();
+        return exceptionResolver;
     }
 
     @Test
@@ -99,7 +117,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/actions/declarationTemplate/uploadDect/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/uploadDect").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -133,7 +151,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/actions/declarationTemplate/uploadDect/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/uploadDect").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -178,7 +196,7 @@ public class DeclarationTemplateControllerTest {
             expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
             expectedJson.put(UuidEnum.UPLOADED_FILE.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/actions/declarationTemplate/uploadDect/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/uploadDect").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -215,7 +233,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/actions/uploadXsd/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/uploadXsd").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -239,7 +257,7 @@ public class DeclarationTemplateControllerTest {
 
         String uuid = UUID.randomUUID().toString();
         when(blobDataService.get(uuid)).thenReturn(data);
-        mockMvc.perform(get(String.format("/actions/downloadByUuid/%s", uuid)).header("User-Agent", "msie"))
+        mockMvc.perform(get(String.format("/actions/declarationTemplate/downloadByUuid/%s", uuid)).header("User-Agent", "msie"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(s))
                 .andExpect(MockMvcResultMatchers.header().string(key, value));

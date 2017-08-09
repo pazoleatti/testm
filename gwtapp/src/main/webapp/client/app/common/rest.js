@@ -13,43 +13,53 @@
      *  'delete': {method:'DELETE'} };
      */
     angular.module('app.rest', ['ngResource'])
-        // Оповещения
+        /**
+         * @description Конфигурация
+         */
+        .factory('ConfigResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/config', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+        /**
+         * @description Оповещения
+         */
         .factory('NotificationResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/notification?projection=:projection', {}, {
+            return $resource('controller/rest/notification?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
-        // ФЛ
+        /**
+         * @description Данные НДФЛ по физлицу
+         */
         .factory('NdflPersonResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/ndflPerson?projection=:projection', {}, {
+            return $resource('controller/rest/ndflPerson?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
-        // Данные для формы
+        /**
+         * @description Декларация
+         */
         .factory('DeclarationDataResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/declarationData?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
+            return $resource('controller/rest/declarationData/:declarationDataId?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
             });
         }])
-
-        // Уведомления
+        /**
+         * @description Уведомления
+         */
         .factory('LogEntryResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/logEntry/:uuid?projection=:projection', {}, {
+            return $resource('controller/rest/logEntry/:uuid?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
-
-        // Информация по изменению налоговой формы
-        .factory('LogBusinesResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/logBusines/:formId', {}, {
-                query: {method: 'GET', isArray: true, cache: false}
-            });
-        }])
-
-        // Источники и приемники
-        .factory('SourcesResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/sources/:declarationId', {}, {
-                query: {method: 'GET', isArray: true, cache: false}
+        /**
+         * @description Файлы и комментарии
+         */
+        .factory('FilesCommentsResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/declaration/filesComments?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
             });
         }])
     ;

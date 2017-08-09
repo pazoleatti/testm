@@ -1,102 +1,79 @@
 (function () {
     'use strict';
-
     /**
-     * @description Модуль для работы со формами ндфл
+     * @description Модуль модального окна оповещений
      */
-    angular.module('app.notifications', [])
+    angular.module('app.notifications', ['app.modals'])
     /**
-     * @description Контроллер формы создания/редактирования ФЛ
+     * @description Контроллер модального окна оповещений
      */
-        .controller('notificationsFormCtrl', ["$scope", "$http", "$uibModalInstance", "NotificationResource", "$filter", 'dialogs', '$logPanel', '$rootScope',
-            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, dialogs, $logPanel, $rootScope) {
-                $http({
-                    method: "PUT",
-                    url: "controller/actions/notification/markAsRead"
-                }).success(function () {
-                    $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
+        .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope',
+            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope) {
+                // Пометим все оповещения как прочтённые
+                $http.post("controller/actions/notification/markAsRead").success(function () {
+                    $rootScope.$broadcast('UPDATE_NOTIFICATION_COUNT');
                 });
 
-                $scope.notificationsGrid =
-                    {
-                        ctrl: {},
-                        value: [],
-                        options: {
-                            datatype: "angularResource",
-                            angularResource: NotificationResource,
-                            requestParameters: function () {
-                                return {
-                                    projection: 'notifications'
-                                };
+                // Грид оповещений
+                $scope.notificationsGrid = {
+                    ctrl: {},
+                    value: [],
+                    options: {
+                        datatype: "angularResource",
+                        angularResource: NotificationResource,
+                        height: 250,
+                        colNames: [
+                            $filter('translate')('notifications.title.createDate'),
+                            $filter('translate')('notifications.title.content'),
+                            $filter('translate')('notifications.title.link')
+                        ],
+                        colModel: [
+                            {
+                                name: 'createDate',
+                                index: 'createDate',
+                                width: 135,
+                                formatter: $filter('dateTimeFormatter')
                             },
-                            height: 250,
-                            colNames: [
-                                $filter('translate')('notifications.title.createDate'),
-                                $filter('translate')('notifications.title.content'),
-                                $filter('translate')('notifications.title.link')],
-                            colModel: [
-                                {
-                                    name: 'createDate',
-                                    index: 'createDate',
-                                    width: 135,
-                                    formatter: $filter('dateTimeFormatter')
-                                },
-                                {
-                                    name: 'text',
-                                    index: 'text',
-                                    width: 520,
-                                    formatter: $filter('notificationTextFormatter')
-                                },
-                                {name: 'reportId', index: 'reportId', width: 175, sortable: false}
-                            ],
-                            rowNum: 10,
-                            rowList: [10, 20, 30],
-                            viewrecords: true,
-                            sortname: 'createDate',
-                            sortorder: "desc",
-                            hidegrid: false,
-                            multiselect: true
-                        }
-                    };
+                            {
+                                name: 'text',
+                                index: 'text',
+                                width: 520,
+                                formatter: $filter('notificationTextFormatter')
+                            },
+                            {name: 'reportId', index: 'reportId', width: 175, sortable: false}
+                        ],
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
+                        viewrecords: true,
+                        sortname: 'createDate',
+                        sortorder: "desc",
+                        hidegrid: false,
+                        multiselect: true
+                    }
+                };
 
                 /**
-                 * @description Удаление оповещения
+                 * @description Удаление выбранных в гриде оповещений
                  */
-                $scope.deleteNotification = function () {
-                    var buttons = {
-                        labelYes: $filter('translate')('common.button.yes'),
-                        labelNo: $filter('translate')('common.button.no')
-                    };
-
-                    var opts = {
-                        size: 'md'
-                    };
-
+                $scope.delete = function () {
                     if ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length !== 0) {
-                        var dlg = dialogs.confirm($filter('translate')('notifications.title.delete'), $filter('translate')('notifications.title.deleteText'), buttons, opts);
-                        dlg.result.then(
+                        appModals.confirm($filter('translate')('notifications.title.delete'), $filter('translate')('notifications.title.deleteText'))
+                            .result.then(
                             function () {
-                                var ids = [];
-                                _.each($scope.notificationsGrid.value, function (element) {
-                                    ids.push(element.id);
-                                });
-
                                 $http({
                                     method: "POST",
                                     url: "controller/actions/notification/delete",
                                     params: {
-                                        ids: ids
+                                        ids: $filter('idExtractor')($scope.notificationsGrid.value)
                                     }
                                 }).success(function () {
                                     $scope.notificationsGrid.ctrl.refreshGrid();
                                 });
-                            },
-                            function () {
-
                             });
                     }
                 };
 
+                // TODO: Убрать после https://jira.aplana.com/browse/SBRFNDFL-1671
                 /**
                  * @description Закрытие окна
                  */
@@ -104,16 +81,19 @@
                     $uibModalInstance.dismiss('Canceled');
                 };
 
+                // Открытие панели уведомлений при клике по ссылке в оповещении
                 $(document).undelegate('#notificationsTable .notification-link', 'click');
                 $(document).delegate('#notificationsTable .notification-link', 'click', function () {
-                    var logId = $(this).attr('log-id');
+                    var logId = $(this).attr('data-log-id');
                     $logPanel.open('log-panel-container', logId);
                 });
             }])
-
+        /**
+         * @description Фильтр для формирования ссылки на панель уведомлений
+         */
         .filter('notificationTextFormatter', ['$filter', function ($filter) {
-            return function (value, row, notificationObject) {
-                return '<a class="notification-link" log-id="' + notificationObject.logId + '">' + value + '</a>';
+            return function (value, row, notification) {
+                return '<a class="notification-link" data-log-id="' + notification.logId + '">' + value + '</a>';
             };
         }]);
 }());

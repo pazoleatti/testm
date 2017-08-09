@@ -17,6 +17,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -308,7 +309,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
     @Override
     public Date getLastNotificationDate() {
-        Date lastDate = getJdbcTemplate().queryForObject("select max(CREATE_DATE) from NOTIFICATION", Date.class);
+        Timestamp lastDate = sqlQueryFactory.select(notification.createDate.max()).from(notification).fetchFirst();
         if (lastDate != null) {
             return new Date(lastDate.getTime());
         }
