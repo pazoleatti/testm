@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDec
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.GetDeclarationFilterDataHandler;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
@@ -53,6 +54,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
     }
 
+    private DeclarationDataSearchService declarationDataSearchService;
     private DeclarationDataService declarationService;
     private SecurityService securityService;
     private ReportService reportService;
@@ -71,7 +73,9 @@ public class DeclarationDataController {
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
                                      TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
-                                     LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService) {
+                                     LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService,
+                                     DeclarationDataSearchService declarationDataSearchService) {
+        this.declarationDataSearchService = declarationDataSearchService;
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -607,5 +611,55 @@ public class DeclarationDataController {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * Получение списка налоговых форм
+     *
+     * @param pagingParams параметры для пагинации
+     * @return список налоговых форм
+     */
+    @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
+    public JqgridPagedList<DeclarationDataSearchResultItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
+
+        //TODO: переместить реализацию в сервис
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+        Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
+        boolean isAscSorting = pagingParams.getDirection().equals("asc");
+
+        receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(currentUser, TaxType.NDFL, null, null));
+
+        List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
+        for (DeclarationFormKind declarationFormKind : GetDeclarationFilterDataHandler.getAvailableDeclarationFormKind(TaxType.NDFL, false, currentUser)) {
+            availableDeclarationFormKindIds.add(declarationFormKind.getId());
+        }
+
+        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
+
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1757 реализовать сортировку в том числе по другим полям
+        dataFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
+        dataFilter.setAscSorting(isAscSorting);
+        dataFilter.setAsnuIds(currentUser.getAsnuIds());
+        dataFilter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
+        dataFilter.setFormKindIds(availableDeclarationFormKindIds);
+        dataFilter.setCountOfRecords(pagingParams.getCount());
+        dataFilter.setStartIndex(pagingParams.getStartIndex());
+        dataFilter.setUserDepartmentId(currentUser.getId());
+
+        if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
+            dataFilter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
+            dataFilter.setControlNs(true);
+        } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
+            dataFilter.setUserDepartmentId(currentUser.getDepartmentId());
+            dataFilter.setControlNs(false);
+        }
+
+        PagingResult<DeclarationDataSearchResultItem> declarations = declarationDataSearchService.search(dataFilter);
+
+        return JqgridPagedResourceAssembler.buildPagedList(
+                declarations,
+                declarations.getTotalCount(),
+                pagingParams
+        );
     }
 }

@@ -1,5 +1,5 @@
 (function () {
-    'use strict'
+    'use strict';
 
     angular
     /**
@@ -19,6 +19,20 @@
                 VIEW_ADMINISTRATION_SETTINGS: 1 << 7,
                 VIEW_MANUAL_USER: 1 << 8,
                 VIEW_MANUAL_DESIGNER: 1 << 9
+            },
+            NDFL_STATS: {
+                CREATED: "Создана",
+                PREPARED: "Подготовлена",
+                ACCEPTED: "Принята",
+                NOT_EXIST: "Не создана"
+            },
+            NDFL_FORMKIND: {
+                PRIMARY: "Первичная",
+                CONSOLIDATED: "Консолидированная",
+                SUMMARY: "Сводная",
+                UNP: "Форма УНП",
+                ADDITIONAL: "Выходная",
+                CALCULATED: "Расчетная"
             }
-        })
+        });
 }());

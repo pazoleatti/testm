@@ -45,7 +45,9 @@
                         var subtree = [];
                         subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.forms'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL"
+                            onClick: function () {
+                                $state.go('ndflJournal');
+                            }
                         });
                         subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
