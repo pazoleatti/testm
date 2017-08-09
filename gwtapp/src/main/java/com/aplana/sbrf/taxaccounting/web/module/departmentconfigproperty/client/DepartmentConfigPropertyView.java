@@ -473,6 +473,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public void setTableData(int startIndex, long count, List<Map<String, TableCell>> itemList) {
         model.getList().clear();
         model.getList().addAll(makeDataRowsFromModel(itemList));
+        pager.setPage(0);
         table.redraw();
     }
 
