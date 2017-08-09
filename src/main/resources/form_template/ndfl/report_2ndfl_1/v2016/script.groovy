@@ -1761,7 +1761,7 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
         if (declarationData.declarationTemplateId == NDFL_2_2_DECLARATION_TYPE) {
             logger.error("Отчетность $reportType  для $depName за период $otchetGod ${reportPeriod.name}$strCorrPeriod не сформирована. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName за период $otchetGod ${reportPeriod.name}$strCorrPeriod отсутствуют операции, содержащие сведения о не удержанном налоге.")
         } else {
-            logger.warn("Отчетность $reportType  для $depName за период $otchetGod ${reportPeriod.name}$strCorrPeriod не сформирована. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName за период $otchetGod ${reportPeriod.name}$strCorrPeriod отсутствуют операции.")
+            logger.error("Отчетность $reportType  для $depName за период $otchetGod ${reportPeriod.name}$strCorrPeriod не сформирована. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName за период $otchetGod ${reportPeriod.name}$strCorrPeriod отсутствуют операции.")
         }
         checkPresentedPairsKppOktmo()
     }
