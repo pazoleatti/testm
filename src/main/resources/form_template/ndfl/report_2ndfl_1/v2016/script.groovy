@@ -3,6 +3,7 @@ package form_template.ndfl.report_2ndfl_1.v2016
 import com.aplana.sbrf.taxaccounting.model.Column
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.model.StringColumn
 import groovy.transform.CompileStatic
 import groovy.xml.XmlUtil
@@ -1624,9 +1625,16 @@ def createForm() {
         def ndflPersonsIdGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
 
         // Удаление ранее созданных отчетных форм
-        declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-            ScriptUtils.checkInterrupted();
-            declarationService.delete(it.id, userInfo)
+        List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTypeId, declarationData.departmentReportPeriodId, logger, userInfo)
+        if (!notDeletedDeclarationPair.isEmpty()) {
+            logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
+            notDeletedDeclarationPair.each() {
+                logger.error("Форма %d, выполняется операция \"%s\"",
+                        it.first, declarationService.getTaskName(it.second)
+                )
+            }
+            logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
+            return
         }
 
         if (ndflPersonsIdGroupedByKppOktmo == null || ndflPersonsIdGroupedByKppOktmo.isEmpty()) {
@@ -1675,8 +1683,11 @@ def createForm() {
 def checkPresentedPairsKppOktmo() {
     declarationDataConsolidated = declarationDataConsolidated ?: declarationService.find(RNU_NDFL_DECLARATION_TYPE, declarationData.departmentReportPeriodId).get(0)
     List<Pair<String, String>> kppOktmoNotPresentedInRefBookList = declarationService.findNotPresentedPairKppOktmo(declarationDataConsolidated.id);
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.getDepartmentId())
     for (Pair<String, String> kppOktmoNotPresentedInRefBook : kppOktmoNotPresentedInRefBookList) {
-        logger.warn("Для подразделения Тербанк отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.", kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
+        logger.warn("Для подразделения %s отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.",
+                department.getName(), kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
     }
 }
 

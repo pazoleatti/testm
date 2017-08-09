@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -84,6 +85,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "консолидация).";
     private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
     private static final int DEFAULT_TF_FILE_TYPE_CODE = 1;
+
+    final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(DeclarationDataReportType.ACCEPT_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.XML_DEC, DeclarationDataReportType.IMPORT_TF_DEC, DeclarationDataReportType.DELETE_DEC));
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -375,31 +378,55 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void delete(long id, TAUserInfo userInfo) {
+        delete(id, userInfo, true);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void delete(long id, TAUserInfo userInfo, boolean createLock) {
         LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
         LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
         LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
-        if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
-            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
-            DeclarationData declarationData = declarationDataDao.get(id);
+        LockData lockDataDelete = null;
+        if (lockData == null && lockDataAccept == null && lockDataCheck == null && createLock) {
+            lockDataDelete = lockDataService.lock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId(),
+                    getDeclarationFullName(id, DeclarationDataReportType.DELETE_DEC));
+        }
+        if (lockData == null && lockDataAccept == null && lockDataCheck == null && lockDataDelete == null) {
+            try {
+                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
+                DeclarationData declarationData = declarationDataDao.get(id);
 
-            Logger logger = new Logger();
-            declarationDataScriptingService.executeScript(userInfo,
-                    declarationData, FormDataEvent.DELETE, new Logger(), null);
+                Logger logger = new Logger();
+                declarationDataScriptingService.executeScript(userInfo,
+                        declarationData, FormDataEvent.DELETE, new Logger(), null);
 
-            // Проверяем ошибки
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException(
-                        "Найдены ошибки при выполнении удаления налоговой формы",
-                        logEntryService.save(logger.getEntries()));
+                // Проверяем ошибки
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException(
+                            "Найдены ошибки при выполнении удаления налоговой формы",
+                            logEntryService.save(logger.getEntries()));
+                }
+
+                deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
+                declarationDataDao.delete(id);
+
+                auditService.add(FormDataEvent.DELETE, userInfo, declarationData, null, "Налоговая форма удалена", null);
+            } finally {
+                if (createLock) {
+                    lockDataService.unlock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId());
+                }
             }
-
-            deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
-            declarationDataDao.delete(id);
-
-            auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Налоговая форма удалена", null);
         } else {
-            if (lockData == null) lockData = lockDataAccept;
-            if (lockData == null) lockData = lockDataCheck;
+            if (lockData == null) {
+                lockData = lockDataAccept;
+            }
+            if (lockData == null) {
+                lockData = lockDataCheck;
+            }
+            if (lockData == null) {
+                lockData = lockDataDelete;
+            }
             Logger logger = new Logger();
             TAUser blocker = taUserService.getUser(lockData.getUserId());
             logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), lockData.getDescription());
@@ -1374,7 +1401,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "");
             case DELETE_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                        "налоговой формы",
+                        getTaskName(ddReportType, TaxType.NDFL),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
@@ -1519,6 +1546,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case EXCEL_DEC:
             case TO_CREATE_DEC:
             case XML_DEC:
+            case DELETE_DEC:
                 return String.format(ddReportType.getReportType().getDescription(), taxType.getDeclarationShortName());
             case PDF_DEC:
                 return String.format(ddReportType.getReportType().getDescription(), "");
@@ -1845,4 +1873,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         return toReturn;
     }
+
+    @Override
+    public Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId) {
+        Map<DeclarationDataReportType, LockData> result = new HashMap<DeclarationDataReportType, LockData>();
+        for (DeclarationDataReportType reportType : reportTypes) {
+            LockData lockData = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
+            if (lockData != null) {
+                result.put(reportType, lockData);
+            }
+        }
+        return result;
+    }
+
 }
