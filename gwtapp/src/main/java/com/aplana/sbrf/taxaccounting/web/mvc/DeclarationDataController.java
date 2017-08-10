@@ -527,8 +527,8 @@ public class DeclarationDataController {
      * @return DeclarationDataFileComment объект модели, в которой содержаться данные о файлах
      * и комментарий для текущей декларации.
      */
-    @GetMapping(value = "/rest/declarationData", params = "projection=filesComments")
-    public DeclarationDataFileComment fetchFilesComments(@RequestParam long declarationDataId) {
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=filesComments")
+    public DeclarationDataFileComment fetchFilesComments(@PathVariable long declarationDataId) {
         if (!declarationService.existDeclarationData(declarationDataId)) {
             throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
         }
