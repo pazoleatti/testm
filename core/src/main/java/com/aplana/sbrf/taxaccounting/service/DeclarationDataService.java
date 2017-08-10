@@ -97,12 +97,21 @@ public interface DeclarationDataService {
 	DeclarationData get(long declarationDataId, TAUserInfo userInfo);
 
 	/**
-	 * Удалить декларацию
+	 * Удалить декларацию, при этом создается блокировка
 	 * @param declarationDataId идентификатор декларации
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
 	 */
 	void delete(long declarationDataId, TAUserInfo userInfo);
+
+	/**
+	 * Удалить декларацию
+	 * @param declarationDataId идентификатор декларации
+	 * @param userInfo информация о пользователе, выполняющего действие
+	 * @param createLock если true, то создается блокировка, иначе блокировка не создается
+	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+	 */
+	void delete(long declarationDataId, TAUserInfo userInfo, boolean createLock);
 
 	/**
 	 * метод запускает скрипты с событием проверить
@@ -428,4 +437,11 @@ public interface DeclarationDataService {
 	 * @return возвращает сообщение об ошибке, иначе null
 	 */
 	String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
+
+	/**
+	 * Получает мапу созданных блокировок по основным операциям формы
+	 * @param declarationDataId
+	 * @return
+	 */
+	Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId);
 }
