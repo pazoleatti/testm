@@ -5697,7 +5697,7 @@ void updateAndCheckException(Closure<Object> update) {
             SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException)ExceptionUtils.getThrowableList(e).get(i)
             if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049") || sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-00060")) {
                 e.printStackTrace()
-                throw new ServiceException("В данный момент уже выполняется операция с налоговой формой содержащей тех же физических лиц, что и текущая налоговая форма. Попробуйте выполнить операцию позднее.")
+                throw new ServiceException("Невозможно выполнить обновление записей справочника \"Физические лица\" при выполнении расчета налоговой формы номер: ${declarationData.id}. Записи справочника \"Физические лица\" используются при идентификации физических лиц в расчете другой налоговой формы. Выполните операцию позднее.")
             }
         }
         throw e;
