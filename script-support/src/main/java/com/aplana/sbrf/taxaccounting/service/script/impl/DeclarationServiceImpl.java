@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
@@ -14,12 +15,15 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -39,6 +43,8 @@ import java.util.zip.ZipInputStream;
 @Service("declarationService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder {
+
+    private static final Log LOG = LogFactory.getLog(DeclarationService.class);
 
     private static final String CHECK_UNIQUE_ERROR = "Налоговая форма с заданными параметрами уже существует!";
     private static final String CHECK_UNIQUE_NOTIFICATION_ERROR = "Уведомление с заданными параметрами уже существует!";
@@ -79,6 +85,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private ConfigurationService configurationService;
     @Autowired
     private ValidateXMLService validateXMLService;
+    @Autowired
+    private LockDataService lockDataService;
 
     @Override
     public DeclarationData getDeclarationData(long declarationDataId) {
@@ -302,8 +310,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public void delete(long declarationDataId, TAUserInfo userInfo) {
-        declarationDataDao.setStatus(declarationDataId, State.CREATED);
-        declarationDataService.delete(declarationDataId, userInfo);
+        if (declarationDataDao.existDeclarationData(declarationDataId)) {
+            declarationDataDao.setStatus(declarationDataId, State.CREATED);
+            declarationDataService.delete(declarationDataId, userInfo, false);
+        }
     }
 
 
@@ -440,5 +450,77 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId) {
         return declarationDataDao.findNotPresentedPairKppOktmo(declarationDataId);
+    }
+
+    @Override
+    public Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId) {
+        return declarationDataService.getLockTaskType(declarationDataId);
+    }
+
+    @Override
+    public String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type) {
+        return declarationDataService.generateAsyncTaskKey(declarationDataId, type);
+    }
+
+    @Override
+    public LockData createDeleteLock(long declarationDataId, TAUserInfo userInfo) {
+        String deleteLockKey = generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.DELETE_DEC);
+        LockData lockData = lockDataService.lock(deleteLockKey, userInfo.getUser().getId(),
+                declarationDataService.getDeclarationFullName(declarationDataId, DeclarationDataReportType.DELETE_DEC));
+        if (lockData != null) {
+            return null;
+        }
+        return lockDataService.getLock(deleteLockKey);
+    }
+
+    @Override
+    public String getTaskName(DeclarationDataReportType ddReportType) {
+        return declarationDataService.getTaskName(ddReportType, TaxType.NDFL);
+    }
+
+
+    @Override
+    public List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, Logger logger, TAUserInfo userInfo) {
+        List<Pair<Long, DeclarationDataReportType>> result = new ArrayList<Pair<Long, DeclarationDataReportType>>();
+
+        // Список ранее созданных отчетных форм
+        List<DeclarationData> deletedDeclarationDataList = find(declarationTypeId, departmentReportPeriodId);
+        // Список блокировок на удаление форм
+        List<LockData> lockList = new ArrayList<LockData>();
+        try {
+            for(DeclarationData deletedDeclarationData: deletedDeclarationDataList) {
+                Map<DeclarationDataReportType, LockData> taskTypeMap = getLockTaskType(deletedDeclarationData.getId());
+                if (!taskTypeMap.isEmpty()) {
+                    for(DeclarationDataReportType declarationDataReportType: taskTypeMap.keySet()) {
+                        result.add(new Pair<Long, DeclarationDataReportType>(deletedDeclarationData.getId(), declarationDataReportType));
+                    }
+                } else {
+                    LockData deleteLock = createDeleteLock(deletedDeclarationData.getId(), userInfo);
+                    if (deleteLock != null) {
+                        lockList.add(deleteLock);
+                    } else {
+                        result.add(new Pair<Long, DeclarationDataReportType>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
+                    }
+                }
+            }
+            if (result.size() == 0) {
+                for(DeclarationData deletedDeclarationData: deletedDeclarationDataList) {
+                    ScriptUtils.checkInterrupted();
+                    try {
+                        delete(deletedDeclarationData.getId(), userInfo);
+                    } catch (ServiceException e) {
+                        LOG.error(e);
+                        result.add(new Pair<Long, DeclarationDataReportType>(deletedDeclarationData.getId(), DeclarationDataReportType.DELETE_DEC));
+                        break;
+                    }
+                }
+            }
+        } finally {
+            // удаляем блокировки
+            for(LockData lockData: lockList) {
+                lockDataService.unlock(lockData.getKey(), lockData.getUserId());
+            }
+        }
+        return result;
     }
 }

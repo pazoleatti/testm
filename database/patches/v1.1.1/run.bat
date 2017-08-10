@@ -17,6 +17,9 @@ MKDIR %BAD_DIR%
 DEL /s /q /f %LOG_DIR%\*.txt
 DEL /s /q /f %BAD_DIR%\*.*
 
+ECHO ## ddl
+"%ORA_BIN%\sqlplus" %AUTH% @"update_ddl.sql" > "%LOG_DIR%/update_ddl.txt"
+
 ECHO ## dml: templates
 CD templates/script
 CALL templates.bat
