@@ -237,7 +237,8 @@ def buildXml(def writer, boolean isForSpecificReport) {
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
     if (poMestuParam == null) {
-        throw new RuntimeException("Код места в настройках подразделений не соответствует справочнику")
+        logger.error("Код места в настройках подразделений не соответствует справочнику")
+        return
     }
     def taxPlaceTypeCode = poMestuParam?.CODE?.value
 
