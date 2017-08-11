@@ -5692,12 +5692,13 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
 void updateAndCheckException(Closure<Object> update) {
     try {
         update()
-    } catch (ServiceException e) {
+    } catch (Exception e) {
         int i = ExceptionUtils.indexOfThrowable(e, SQLSyntaxErrorException.class);
         if (i != -1) {
             SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException)ExceptionUtils.getThrowableList(e).get(i)
-            if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049")) {
-                throw new ServiceException("", e)
+            if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049") || sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-00060")) {
+                e.printStackTrace()
+                throw new ServiceException("Невозможно выполнить обновление записей справочника \"Физические лица\" при выполнении расчета налоговой формы номер: ${declarationData.id}. Записи справочника \"Физические лица\" используются при идентификации физических лиц в расчете другой налоговой формы. Выполните операцию позднее.")
             }
         }
         throw e;
