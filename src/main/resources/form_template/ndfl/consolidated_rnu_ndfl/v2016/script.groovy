@@ -538,8 +538,6 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
         i++;
     }
 
-    logger.info(String.format("НФ-источников выбрано для консолидации (" + i + calcTimeMillis(time)))
-
     return result;
 }
 
