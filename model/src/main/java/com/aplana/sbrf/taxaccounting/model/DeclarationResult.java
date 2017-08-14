@@ -36,6 +36,10 @@ public class DeclarationResult {
      * Дата и время создания формы
      */
     private String creationDate;
+    /**
+     * Права
+     */
+    private long permissions;
 
     public String getDepartment() {
         return department;
@@ -99,5 +103,13 @@ public class DeclarationResult {
 
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public long getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(long permissions) {
+        this.permissions = permissions;
     }
 }
