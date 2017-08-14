@@ -45,6 +45,7 @@
                 appModals.message($filter('translate')('messageDialog.toDo.title'), $filter('translate')('messageDialog.toDo.message'));
             };
         }])
+
         /**
          * @description Конфигурирование роутера и локализации сообщений для приложения
          */
@@ -70,9 +71,23 @@
             }
         ]);
 
-    angular.element(document).ready(function () {
-        angular.bootstrap(document, ['app']);
-    });
+    var UserDataResource = angular.injector(['app.rest']).get('UserDataResource');
+    UserDataResource.query({
+            projection: "user"
+        },
+        function (data) {
+            angular.element(document).ready(function () {
+                var $inj = angular.bootstrap(document, ['app']);
+                var $rootScope = $inj.get("$rootScope");
+
+                $rootScope.user = {
+                    name: data.taUserInfo.user.name,
+                    login: data.taUserInfo.user.login,
+                    department: data.department,
+                    permissions: data.taUserInfo.user.permissions
+                };
+            });
+        });
 
     /**
      * @description Поиск по нажатию на enter

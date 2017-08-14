@@ -84,4 +84,40 @@
 			<beans:bean class="com.aplana.sbrf.taxaccounting.web.main.api.server.AuthenticationUserDetailsServiceImpl"/>
 		</beans:property>
 	</beans:bean>
+
+	<beans:bean id="permissionEvaluator"
+				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.BasePermissionEvaluator">
+		<beans:property name="permissionFactoryRegistry">
+			<beans:map>
+				<beans:entry key="com.aplana.sbrf.taxaccounting.model.TAUser" value-ref="userPermissionFactory"/>
+				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationData" value-ref="declarationDataPermissionFactory"/>
+			</beans:map>
+		</beans:property>
+	</beans:bean>
+
+	<!--Фабрики системы расчета прав-->
+	<beans:bean id="userPermissionFactory"
+				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.BasePermissionFactory">
+		<beans:constructor-arg
+				value="com.aplana.sbrf.taxaccounting.web.spring.permissions.UserPermission"/>
+	</beans:bean>
+	<beans:bean id="declarationDataPermissionFactory"
+				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.BasePermissionFactory">
+		<beans:constructor-arg
+				value="com.aplana.sbrf.taxaccounting.web.spring.permissions.DeclarationDataPermission"/>
+	</beans:bean>
+
+	<!--Объекты расчета прав-->
+	<beans:bean id="userPermissionSetter"
+				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.UserPermissionSetter">
+		<beans:property name="permissionFactory" ref="userPermissionFactory"/>
+		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+	</beans:bean>
+
+	<beans:bean id="declarationDataPermissionSetter"
+				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.DeclarationDataPermissionSetter">
+		<beans:property name="permissionFactory" ref="declarationDataPermissionFactory"/>
+		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+	</beans:bean>
+
 </beans:beans>

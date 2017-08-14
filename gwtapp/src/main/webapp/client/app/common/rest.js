@@ -22,6 +22,14 @@
             });
         }])
         /**
+         * @description Данные о пользователе
+         */
+        .factory('UserDataResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/userData', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+        /**
          * @description Оповещения
          */
         .factory('NotificationResource', ['$resource', function ($resource) {
