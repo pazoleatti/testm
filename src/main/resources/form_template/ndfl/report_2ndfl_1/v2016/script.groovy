@@ -54,6 +54,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import java.util.zip.ZipInputStream
 
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
     case FormDataEvent.CHECK: //Проверки
         println "!CHECK!"
         check()

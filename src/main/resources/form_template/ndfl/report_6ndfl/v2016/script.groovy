@@ -1,6 +1,7 @@
 package form_template.ndfl.report_6ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.transform.TypeChecked
@@ -35,6 +36,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
     case FormDataEvent.CHECK: //Проверки
         println "!CHECK!"
         checkXml()

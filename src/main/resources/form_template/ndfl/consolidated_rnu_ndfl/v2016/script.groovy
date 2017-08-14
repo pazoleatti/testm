@@ -39,6 +39,8 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreate()
         break
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+        checkAccept()
     case FormDataEvent.CHECK: //Проверить
         checkData()
         break
@@ -49,9 +51,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CALCULATE: // Формирование pdf-отчета формы
         declarationService.createPdfReport(logger, declarationData, userInfo)
-        break
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        checkAccept()
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesListForTemporarySolution()
