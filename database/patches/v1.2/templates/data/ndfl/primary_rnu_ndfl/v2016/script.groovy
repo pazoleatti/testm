@@ -79,6 +79,7 @@ import java.util.regex.Pattern
             // Формирование спецотчета
             createSpecificReport()
             break
+        case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         case FormDataEvent.CHECK:
             // Проверки
             checkData()
@@ -500,10 +501,9 @@ import java.util.regex.Pattern
             //Выводим информацию о созданных записях
             for (NaturalPerson person : insertRecords) {
                 String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
-                logForDebug(noticeMsg);
+                logger.info(noticeMsg);
                 createCnt++;
             }
-
         }
 
         logForDebug("Создано записей: " + createCnt)
@@ -3505,7 +3505,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
             List<ColumnFillConditionData> columnFillConditionDataList = []
-            //1 Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
+            //1 Раздел 2. Графа 4 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column4Fill(),
@@ -3517,12 +3517,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             C_TAX_SUMM
                     )
             )
+            //1 Раздел 2. Графа 5 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
             columnFillConditionDataList << new ColumnFillConditionData(
                     new Column22And23And24NotFill(),
                     new Column5Fill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                            C_INCOME_CODE,
+                            C_INCOME_TYPE,
                             C_PAYMENT_DATE,
                             C_PAYMENT_NUMBER,
                             C_TAX_SUMM
@@ -5697,7 +5698,8 @@ void updateAndCheckException(Closure<Object> update) {
             SQLSyntaxErrorException sqlSyntaxErrorException = (SQLSyntaxErrorException)ExceptionUtils.getThrowableList(e).get(i)
             if (sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-02049") || sqlSyntaxErrorException.getLocalizedMessage().contains("ORA-00060")) {
                 e.printStackTrace()
-                throw new ServiceException("Невозможно выполнить обновление записей справочника \"Физические лица\" при выполнении расчета налоговой формы номер: ${declarationData.id}. Записи справочника \"Физические лица\" используются при идентификации физических лиц в расчете другой налоговой формы. Выполните операцию позднее.")
+                logger.error("Невозможно выполнить обновление записей справочника \"Физические лица\" при выполнении расчета налоговой формы номер: ${declarationData.id}. Записи справочника \"Физические лица\" используются при идентификации физических лиц в расчете другой налоговой формы. Выполните операцию позднее.")
+                return
             }
         }
         throw e;
