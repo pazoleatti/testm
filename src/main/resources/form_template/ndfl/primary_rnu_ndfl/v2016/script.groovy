@@ -79,6 +79,7 @@ import java.util.regex.Pattern
             // Формирование спецотчета
             createSpecificReport()
             break
+        case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         case FormDataEvent.CHECK:
             // Проверки
             checkData()
