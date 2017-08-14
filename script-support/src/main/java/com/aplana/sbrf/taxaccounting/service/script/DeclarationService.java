@@ -415,4 +415,44 @@ public interface DeclarationService {
      * @return
      */
     List<Pair<String, String >> findNotPresentedPairKppOktmo(Long declarationDataId);
+
+    /**
+     * Получает мапу созданных блокировок по основным операциям формы
+     * @param declarationDataId
+     * @return
+     */
+    Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId);
+
+    /**
+     * Генерация ключа блокировки для асинхронных задач по НФ
+     * @param declarationDataId
+     * @param type
+     * @return код блокировки
+     */
+    String generateAsyncTaskKey(long declarationDataId, DeclarationDataReportType type);
+
+    /**
+     * Создание блокировки на удаление НФ
+     * @param declarationDataId
+     * @param userInfo
+     * @return если блокировка успешно создана, то возвращает её, иначе null
+     */
+    LockData createDeleteLock(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Формирует название операции
+     * @param ddReportType
+     * @return
+     */
+    String getTaskName(DeclarationDataReportType ddReportType);
+
+    /**
+     * Удаляет все формы заданного вида в заданном отчетном периоде
+     * @param declarationTypeId вид НФ
+     * @param departmentReportPeriodId отчетный период
+     * @param logger
+     * @param userInfo
+     * @return если удаление прошло успешно, то возвращает пустой список, иначе список Pair<id-формы, типа блокировки>, по которым существует блокировка или произошла ошибка удаления
+     */
+    List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, Logger logger, TAUserInfo userInfo);
 }

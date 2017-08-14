@@ -32,6 +32,7 @@
             'app.header',
             'app.logPanel',
             'app.ndfl',
+            'app.ndflJournal',
             'app.filterUtils',
             'app.rest',
             'app.formatters',

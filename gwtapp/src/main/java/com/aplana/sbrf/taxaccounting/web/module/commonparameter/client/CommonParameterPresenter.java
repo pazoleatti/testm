@@ -39,6 +39,8 @@ public class CommonParameterPresenter extends Presenter<CommonParameterPresenter
     private Map<ConfigurationParam, String> defaultParamValues = new HashMap<ConfigurationParam, String>() {{
         put(ConfigurationParam.SBERBANK_INN, "7707083893");
         put(ConfigurationParam.NO_CODE, "9979");
+        put(ConfigurationParam.SHOW_TIMING, "0");
+        put(ConfigurationParam.LIMIT_IDENT, "0.65");
     }};
 
     private static final String CANCEL_DIALOG_TITLE = "Отмена операции";

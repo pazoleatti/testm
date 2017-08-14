@@ -84,6 +84,7 @@ public class Notification implements Serializable {
     }
 
     public void setText(String text) {
+        text = text.replaceAll("\"\"+", "\"");
         if (text != null && !text.isEmpty() && text.length() > MAX_LENGTH_TEXT) {
             this.text = text.substring(0, MAX_LENGTH_TEXT - 3) + "...";
         } else {

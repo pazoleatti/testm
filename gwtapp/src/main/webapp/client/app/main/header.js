@@ -45,26 +45,25 @@
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
 
                         var subtree = [];
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.forms'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL"
-                            });
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.forms'),
+                            onClick: function () {
+                                $state.go('ndflJournal');
+                            }
+                        });
                         }
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
-                            });
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
-                            });
-                            subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
-                            });
-                        }
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
+                        });
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
+                        });
+                        subtree.push({
+                            name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
+                            href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
+                        });}
 
                         if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_REPORTS)) {
                             subtree.push({

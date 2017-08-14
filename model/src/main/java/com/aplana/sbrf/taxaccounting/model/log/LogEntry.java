@@ -60,13 +60,13 @@ public class LogEntry implements Serializable {
      */
     public LogEntry(LogLevel level, String message) {
         this.level = level;
-        this.message = message;
+        setMessage(message);
         this.date = new Date();
     }
 
     public LogEntry(LogLevel level, String message, String type, String object) {
         this.level = level;
-        this.message = message;
+        setMessage(message);
         setType(type);
         setObject(object);
         this.date = new Date();
@@ -125,7 +125,7 @@ public class LogEntry implements Serializable {
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        this.message = message.replaceAll("\"\"+", "\"");
     }
 
     public String getObject() {

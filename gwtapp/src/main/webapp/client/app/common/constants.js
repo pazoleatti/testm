@@ -1,5 +1,5 @@
 (function () {
-    'use strict'
+    'use strict';
 
     angular
     /**
@@ -27,6 +27,20 @@
                 ACCEPTED: 1 << 3,
                 DELETE: 1 << 4,
                 RETURN_TO_CREATED: 1 << 5
+            },
+            NDFL_STATS: {
+                CREATED: "Создана",
+                PREPARED: "Подготовлена",
+                ACCEPTED: "Принята",
+                NOT_EXIST: "Не создана"
+            },
+            NDFL_FORMKIND: {
+                PRIMARY: "Первичная",
+                CONSOLIDATED: "Консолидированная",
+                SUMMARY: "Сводная",
+                UNP: "Форма УНП",
+                ADDITIONAL: "Выходная",
+                CALCULATED: "Расчетная"
             }
-        })
+        });
 }());
