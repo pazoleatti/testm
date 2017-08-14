@@ -500,10 +500,9 @@ import java.util.regex.Pattern
             //Выводим информацию о созданных записях
             for (NaturalPerson person : insertRecords) {
                 String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
-                logForDebug(noticeMsg);
+                logger.info(noticeMsg);
                 createCnt++;
             }
-
         }
 
         logForDebug("Создано записей: " + createCnt)
