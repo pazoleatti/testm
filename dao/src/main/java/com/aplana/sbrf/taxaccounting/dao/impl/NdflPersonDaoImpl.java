@@ -151,7 +151,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 " and npi.OKTMO = :oktmo and npi.KPP = :kpp " +
                 " UNION SELECT /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi" +
                 " WHERE npi.ndfl_person_id in (:ndflPersonId)" +
-                " AND npi.payment_date between :startDate AND :endDate" +
+                " AND npi.tax_transfer_date between :startDate AND :endDate" +
                 " and npi.OKTMO = :oktmo and npi.KPP = :kpp ";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
