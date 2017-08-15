@@ -1,6 +1,7 @@
 package form_template.ndfl.report_6ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.transform.TypeChecked
@@ -35,6 +36,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
     case FormDataEvent.CHECK: //Проверки
         println "!CHECK!"
         checkXml()
@@ -237,7 +239,8 @@ def buildXml(def writer, boolean isForSpecificReport) {
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
     if (poMestuParam == null) {
-        throw new RuntimeException("Код места в настройках подразделений не соответствует справочнику")
+        logger.error("Код места в настройках подразделений не соответствует справочнику")
+        return
     }
     def taxPlaceTypeCode = poMestuParam?.CODE?.value
 
@@ -533,7 +536,7 @@ int findCorrectionNumber() {
     Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
     while (it.hasNext()) {
         DepartmentReportPeriod depReportPeriod = it.next();
-        if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+        if (depReportPeriod.id == declarationData.departmentReportPeriodId || depReportPeriod.correctionDate != null && depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
             it.remove();
         }
     }

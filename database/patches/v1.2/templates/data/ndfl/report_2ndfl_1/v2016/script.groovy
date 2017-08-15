@@ -54,6 +54,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import java.util.zip.ZipInputStream
 
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
     case FormDataEvent.CHECK: //Проверки
         println "!CHECK!"
         check()
@@ -816,7 +817,7 @@ int findCorrectionNumber() {
     Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
     while (it.hasNext()) {
         DepartmentReportPeriod depReportPeriod = it.next();
-        if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+        if (depReportPeriod.id == declarationData.departmentReportPeriodId || depReportPeriod.correctionDate != null && depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
             it.remove();
         }
     }
