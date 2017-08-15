@@ -25,7 +25,6 @@ import java.util.Map;
 /**
  * @author Andrey Drunk
  */
-@Ignore("Выключил тесты до мержа изменений из ветки 1.0")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FiasRefBookDaoTest.xml"})
 @Transactional
