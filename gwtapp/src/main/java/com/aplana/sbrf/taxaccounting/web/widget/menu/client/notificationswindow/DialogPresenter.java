@@ -125,7 +125,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
                         if (NotificationType.REF_BOOK_REPORT.equals(result.getNotificationType())) {
                             if (result.isExist()) {
                                 DownloadUtils.openInIframe(
-                                        GWT.getHostPageBaseURL() + "controller/actions/report/" + result.getReportId() + "/downloadRefBookReport");
+                                        GWT.getHostPageBaseURL() + "controller/rest/blobData/" + result.getReportId());
                             } else {
                                 Dialog.errorMessage(result.getMsg());
                                 getView().updateRow(id, result.getReportId());

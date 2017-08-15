@@ -55,7 +55,7 @@ public class DeclarationTemplateFilesView extends ViewWithUiHandlers<Declaration
 
     private List<DeclarationTemplateFile> declarationTemplateFiles;
 
-    private static String actionUrl = "controller/actions/upload/file/";
+    private static String actionUrl = "controller/actions/blobData/uploadFile/";
     private static String respPattern = "(<pre.*?>|<PRE.*?>)(.+?)(</pre>|</PRE>)(.*)";
 
     @Inject

@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Информация о пользователе, его ролях и принадлежности к подразделению
  */
-public class TAUser implements Serializable {
+public class TAUser implements AuthorisableEntity, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/** Код учетной записи для пользователя "Система" */
@@ -20,6 +20,7 @@ public class TAUser implements Serializable {
 	private int departmentId;
 	private boolean active;
 	private String email;
+	private long permissions;
 
 	public int getId() {
 		return id;
@@ -69,6 +70,8 @@ public class TAUser implements Serializable {
     public void setAsnuIds(List<Long> asnuIds) {
         this.asnuIds = asnuIds;
     }
+	public long getPermissions() { return permissions; }
+	public void setPermissions(long permissions) { this.permissions = permissions; }
 
     /**
 	 * Проверяет, что у пользователя есть роль с заданным {@link TARole#getAlias() алиасом}

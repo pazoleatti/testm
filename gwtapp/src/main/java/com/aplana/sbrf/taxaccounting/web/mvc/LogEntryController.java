@@ -73,7 +73,7 @@ public class LogEntryController {
      * @return Map с количеством ошибок на каждом уровне важности
      */
     @GetMapping(value = "/rest/logEntry/{uuid}", params = "projection=count")
-    public Map<LogLevel, Integer> getLogEntriesCount(@PathVariable String uuid) {
+    public Map<LogLevel, Integer> fetchLogEntriesCount(@PathVariable String uuid) {
         return logEntryService.getLogCount(uuid);
     }
 

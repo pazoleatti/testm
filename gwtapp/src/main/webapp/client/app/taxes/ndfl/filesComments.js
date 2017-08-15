@@ -94,7 +94,7 @@
                 $scope.addFileClick = function (file) {
                     if (file) {
                         Upload.upload({
-                            url: 'controller/actions/upload/files',
+                            url: 'controller/actions/blobData/uploadFiles',
                             data: {uploader: file}
                         }).progress(function (e) {
                         }).then(function (response) {

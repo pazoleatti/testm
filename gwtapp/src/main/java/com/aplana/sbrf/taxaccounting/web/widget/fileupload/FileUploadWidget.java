@@ -69,7 +69,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     }
 
     private String value;
-    private static String actionUrl = "controller/actions/upload/file/";
+    private static String actionUrl = "controller/actions/blobData/uploadFile/";
     private static String respPattern = "(<pre.*?>|<PRE.*?>)(.+?)(</pre>|</PRE>)(.*)";
     private String extension;
 

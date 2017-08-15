@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * Работа с ними должна вестись через отдельные методы на dao и сервисном слое
  * @author dsultanbekov
  */
-public class DeclarationData extends IdentityObject<Long> {
+public class DeclarationData extends IdentityObject<Long> implements AuthorisableEntity {
 	private static final long serialVersionUID = 1L;
 
 	private int declarationTemplateId;	
@@ -43,6 +43,11 @@ public class DeclarationData extends IdentityObject<Long> {
      * Статус ЭД
      */
     private Long docState;
+
+    /**
+     * Права
+     */
+    private long permissions;
 
     /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
@@ -175,4 +180,7 @@ public class DeclarationData extends IdentityObject<Long> {
     public void setDocState(Long docState) {
         this.docState = docState;
     }
+
+    public long getPermissions() { return permissions; }
+    public void setPermissions(long permissions) { this.permissions = permissions; }
 }

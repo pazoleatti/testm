@@ -95,7 +95,7 @@ public class DeclarationTemplateSubreportView extends ViewWithUiHandlers<Declara
 
     private List<DeclarationSubreport> subreports;
 
-    private static String actionUrl = "controller/actions/upload/file/";
+    private static String actionUrl = "controller/actions/blobData/uploadFile/";
     private static String respPattern = "(<pre.*?>|<PRE.*?>)(.+?)(</pre>|</PRE>)(.*)";
     // Типы Параметров
     private static final String STRING_TYPE = DeclarationSubreportParamType.STRING.getTitle();

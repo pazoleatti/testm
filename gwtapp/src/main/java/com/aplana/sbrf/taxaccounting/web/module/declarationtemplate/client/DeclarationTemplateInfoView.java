@@ -40,10 +40,10 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
     public interface Binder extends UiBinder<Widget, DeclarationTemplateInfoView> { }
 
     interface UrlTemplates extends SafeHtmlTemplates {
-        @Template("controller/actions/declarationTemplate/downloadByUuid/{0}")
+        @Template("controller/rest/blobData/{0}/conf")
         SafeHtml getDownloadUrl(String uuid);
 
-        @Template("controller/actions/declarationTemplate/{0}/downloadDect")
+        @Template("controller/actions/declarationTemplate/{0}/download")
         SafeHtml getDownloadDTUrl(int dtId);
 
         @Template("controller/actions/declarationTemplate/{0}/uploadJrxml")
@@ -52,7 +52,7 @@ public class DeclarationTemplateInfoView extends ViewWithUiHandlers<DeclarationT
         @Template("controller/actions/declarationTemplate/{0}/uploadXsd")
         SafeHtml getUploadXsdlUrl(int dtId);
 
-        @Template("controller/actions/declarationTemplate/{0}/uploadDect")
+        @Template("controller/actions/declarationTemplate/{0}/upload")
         SafeHtml getUploadDTUrl(int dtId);
     }
 

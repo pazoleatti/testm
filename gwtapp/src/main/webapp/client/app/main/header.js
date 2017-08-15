@@ -11,7 +11,9 @@
         'app.notifications',
         'app.uploadTransportData',
         'app.modals',
-        'app.formatters'
+        'app.formatters',
+        'app.constants',
+        'app.permissionUtils'
     ])
         .directive('appHeader', function () {
             return {
@@ -20,13 +22,20 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter', 'APP_CONSTANTS', 'PermissionChecker',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter, APP_CONSTANTS, PermissionChecker) {
+
+                $scope.security = {
+                    user: $rootScope.user
+                };
+
                 /**
                  * @description Получаем необходимые настройки с сервера
                  * @param {{project_properties}} response
                  */
-                ConfigResource.query({},
+                ConfigResource.query({
+                        projection: "configurations"
+                    },
                     function (data) {
                         $scope.gwtMode = data.gwtMode;
                         $scope.version = data.versionInfoProperties.version;
@@ -34,22 +43,16 @@
                         $scope.serverName = data.versionInfoProperties.serverName;
                         $scope.browser = deviceDetector.browser + " " + deviceDetector.browser_version;
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
-                        $scope.security = {
-                            user: {
-                                name: data.taUserInfo.user.name,
-                                login: data.taUserInfo.user.login,
-                                department: data.department
-                            }
-                        };
 
                         var subtree = [];
-                        subtree.push({
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.forms'),
                             onClick: function () {
                                 $state.go('ndflJournal');
                             }
                         });
-                        subtree.push({
+                        }
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
                             href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
                         });
@@ -60,12 +63,14 @@
                         subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
                             href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
-                        });
+                        });}
 
-                        subtree.push({
-                            name: $filter('translate')('menu.taxes.ndfl.accountability'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL;isReports=true"
-                        });
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_REPORTS)) {
+                            subtree.push({
+                                name: $filter('translate')('menu.taxes.ndfl.accountability'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL;isReports=true"
+                            });
+                        }
 
                         //Задаем ссылки для главного меню
                         $scope.treeTaxes = [{
@@ -79,58 +84,82 @@
                                     $state.go('uploadTransportData');
                                 }
                             }]
-                        }, {
-                            name: $filter('translate')('menu.taxes.commonParameters'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!commonParameter"
                         }];
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
+                            $scope.treeTaxes.push({
+                                name: $filter('translate')('menu.taxes.commonParameters'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!commonParameter"
+                            });
+                        }
 
                         $scope.treeNsi = [{
                             name: $filter('translate')('menu.nsi.refbooks'),
                             href: "Main.jsp" + $scope.gwtMode + "#!refbooklist"
                         }];
 
-                        $scope.treeAdministration = [{
-                            name: $filter('translate')('menu.administration.blockList'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!lockList"
-                        }, {
-                            name: $filter('translate')('menu.administration.auditLog'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!audit"
-                        }, {
-                            name: $filter('translate')('menu.administration.usersList'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!members"
-                        }, {
-                            name: $filter('translate')('menu.administration.configParams'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!configuration"
-                        }, {
-                            name: $filter('translate')('menu.administration.taskManager'),
-                            href: "Main.jsp" + $scope.gwtMode + "#!taskList"
-                        }, {
-                            name: $filter('translate')('menu.administration.settings'),
-                            subtree: [{
-                                name: $filter('translate')('menu.administration.settings.mockOfTaxForms'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!declarationTemplateList"
+                        $scope.treeAdministration = [];
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK_AND_AUDIT)) {
+                            $scope.treeAdministration.push({
+                                name: $filter('translate')('menu.administration.blockList'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!lockList"
                             }, {
-                                name: $filter('translate')('menu.administration.settings.refbooks'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!refbooklistadmin"
-                            }, {
-                                name: $filter('translate')('menu.administration.settings.resetCache'),
-                                href: "controller/actions/cache/clear-cache"
-                            }, {
-                                name: $filter('translate')('menu.administration.settings.exportLayouts'),
-                                href: "controller/actions/declarationTemplate/downloadAll"
-                            }, {
-                                name: $filter('translate')('menu.administration.settings.importingScripts'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!scriptsImport"
-                            }]
-                        }];
+                                name: $filter('translate')('menu.administration.auditLog'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!audit"
+                            });
+                        }
 
-                        $scope.treeManual = [{
-                            name: $filter('translate')('menu.manuals.manualUser'),
-                            href: "resources/help_ndfl.pdf"
-                        }, {
-                            name: $filter('translate')('menu.manuals.manualLayoutDesigner'),
-                            href: "resources/help_conf.pdf"
-                        }];
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_USERS)) {
+                            $scope.treeAdministration.push({
+                                name: $filter('translate')('menu.administration.usersList'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!members"
+                            });
+                        }
+
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
+                            $scope.treeAdministration.push({
+                                name: $filter('translate')('menu.administration.configParams'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!configuration"
+                            }, {
+                                name: $filter('translate')('menu.administration.taskManager'),
+                                href: "Main.jsp" + $scope.gwtMode + "#!taskList"
+                            });
+                        }
+
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_SETTINGS)) {
+                            $scope.treeAdministration.push({
+                                name: $filter('translate')('menu.administration.settings'),
+                                subtree: [{
+                                    name: $filter('translate')('menu.administration.settings.mockOfTaxForms'),
+                                    href: "Main.jsp" + $scope.gwtMode + "#!declarationTemplateList"
+                                }, {
+                                    name: $filter('translate')('menu.administration.settings.refbooks'),
+                                    href: "Main.jsp" + $scope.gwtMode + "#!refbooklistadmin"
+                                }, {
+                                    name: $filter('translate')('menu.administration.settings.resetCache'),
+                                    href: "controller/actions/cache/clear-cache"
+                                }, {
+                                    name: $filter('translate')('menu.administration.settings.exportLayouts'),
+                                    href: "controller/actions/declarationTemplate/downloadAll"
+                                }, {
+                                    name: $filter('translate')('menu.administration.settings.importingScripts'),
+                                    href: "Main.jsp" + $scope.gwtMode + "#!scriptsImport"
+                                }]
+                            });
+                        }
+
+                        $scope.treeManual = [];
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_USER)) {
+                            $scope.treeManual.push({
+                                name: $filter('translate')('menu.manuals.manualUser'),
+                                href: "resources/help_ndfl.pdf"
+                            });
+                        }
+                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_DESIGNER)) {
+                            $scope.treeManual.push({
+                                name: $filter('translate')('menu.manuals.manualLayoutDesigner'),
+                                href: "resources/help_conf.pdf"
+                            });
+                        }
                     }
                 );
 

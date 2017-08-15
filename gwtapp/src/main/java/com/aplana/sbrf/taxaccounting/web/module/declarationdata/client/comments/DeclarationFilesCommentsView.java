@@ -234,7 +234,7 @@ public class DeclarationFilesCommentsView extends PopupViewWithUiHandlers<Declar
         DataRowColumn<String> fileNameColumnUI = new DataRowColumn<String>(new ClickableTextCell(), fileNameColumn) {
             @Override
             public void render(com.google.gwt.cell.client.Cell.Context context, DataRow<Cell> object, SafeHtmlBuilder sb) {
-                String link = "<a href=\"" + GWT.getHostPageBaseURL() + "controller/actions/report/" + object.getCell(uuidColumn.getAlias()).getStringValue() + "/downloadDeclarationDataFile\">" + object.getCell(fileNameColumn.getAlias()).getStringValue() + "</a>";
+                String link = "<a href=\"" + GWT.getHostPageBaseURL() + "controller/rest/blobData/" + object.getCell(uuidColumn.getAlias()).getStringValue() + "\">" + object.getCell(fileNameColumn.getAlias()).getStringValue() + "</a>";
                 sb.appendHtmlConstant(link);
             }
 
