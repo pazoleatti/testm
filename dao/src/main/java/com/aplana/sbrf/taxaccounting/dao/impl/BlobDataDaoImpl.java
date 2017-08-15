@@ -1,188 +1,131 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLExpressions;
+import com.querydsl.sql.SQLQueryFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.stereotype.Repository;
 
 import java.io.InputStream;
-import java.sql.*;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
+import static com.aplana.sbrf.taxaccounting.model.QBlobData.blobData;
+import static com.querydsl.core.types.Projections.bean;
+import static com.querydsl.sql.oracle.OracleGrammar.sysdate;
+
 /**
- * User: avanteev
- *
- * Дао для работы с файловым хранилищем.
+ * Реализация доступа к базе данных для {@link BlobData}.
  */
 @Repository
-public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
+public class BlobDataDaoImpl implements BlobDataDao {
 
-	private static final Log LOG = LogFactory.getLog(BlobDataDaoImpl.class);
+    final private SQLQueryFactory sqlQueryFactory;
 
-    private static final class BlobDataRowMapper implements RowMapper<BlobData>{
+    public BlobDataDaoImpl(SQLQueryFactory sqlQueryFactory) {
+        this.sqlQueryFactory = sqlQueryFactory;
+    }
 
-        @Override
-        public BlobData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            BlobData blobData = new BlobData();
-            blobData.setCreationDate(new Date(rs.getTimestamp("creation_date").getTime()));
-            blobData.setName(rs.getString("name"));
-            blobData.setUuid(rs.getString("id"));
-            blobData.setInputStream(rs.getBlob("data").getBinaryStream());
-            return blobData;
-        }
+    final private QBean<BlobData> blobDataBean = bean(BlobData.class,
+            blobData.id.as("uuid"),
+            blobData.name,
+            blobData.data.as("inputStream"),
+            blobData.creationDate);
+
+    @Override
+    public String createWithSysdate(final BlobData newBlobData) {
+        sqlQueryFactory.insert(blobData)
+                .columns(blobData.id, blobData.name, blobData.data, blobData.creationDate)
+                .values(newBlobData.getUuid(), newBlobData.getName(), newBlobData.getInputStream(), sysdate)
+                .execute();
+        return newBlobData.getUuid();
     }
 
     @Override
-    public String create(final BlobData blobData) {
-        try{
-            PreparedStatementCreator psc = new PreparedStatementCreator() {
-
-                @Override
-                public PreparedStatement createPreparedStatement(Connection con)
-                        throws SQLException {
-
-                    PreparedStatement ps = con
-                            .prepareStatement(
-                                    "INSERT INTO blob_data (id, name, data, creation_date) VALUES (?,?,?,sysdate)");
-                    ps.setString(1, blobData.getUuid());
-                    ps.setString(2, blobData.getName());
-                    ps.setBlob(3, blobData.getInputStream());
-                    return ps;
-                }
-            };
-            getJdbcTemplate().update(psc);
-            return blobData.getUuid();
-        } catch (DataAccessException e) {
-                throw new DaoException("Не удалось создать отчет." + e.toString());
-        }
-    }
-
-    @Override
-    public String createWithDate(final BlobData blobData) {
-        try{
-            PreparedStatementCreator psc = new PreparedStatementCreator() {
-
-                @Override
-                public PreparedStatement createPreparedStatement(Connection con)
-                        throws SQLException {
-
-                    PreparedStatement ps = con
-                            .prepareStatement(
-                                    "INSERT INTO blob_data (id, name, creation_date, data) VALUES (?,?,?,?)");
-                    ps.setString(1, blobData.getUuid());
-                    ps.setString(2, blobData.getName());
-                    ps.setDate(3, new java.sql.Date(blobData.getCreationDate().getTime()));
-                    ps.setBlob(4, blobData.getInputStream());
-                    return ps;
-                }
-            };
-            getJdbcTemplate().update(psc);
-            return blobData.getUuid();
-        } catch (DataAccessException e) {
-            throw new DaoException("Не удалось создать отчет." + e.toString());
-        }
+    public String create(final BlobData newBlobData) {
+        sqlQueryFactory.insert(blobData)
+                .columns(blobData.id, blobData.name, blobData.data, blobData.creationDate)
+                .values(newBlobData.getUuid(), newBlobData.getName(), newBlobData.getInputStream(), newBlobData.getCreationDate())
+                .execute();
+        return newBlobData.getUuid();
     }
 
     @Override
     public void delete(String uuid) {
-        try{
-            getJdbcTemplate().update("DELETE FROM blob_data WHERE id = ?",
-                    new Object[]{uuid},
-                    new int[]{Types.CHAR});
-        } catch (DataAccessException e){
-            throw new DaoException(String.format("Не удалось удалить запись с id = %s", uuid), e);
-        }
+        sqlQueryFactory.delete(blobData)
+                .where(blobData.id.eq(uuid))
+                .execute();
     }
 
     @Override
     public void delete(List<String> uuidStrings) {
-        try {
-            HashMap<String, Object> valuesMap = new HashMap<String, Object>();
-            getNamedParameterJdbcTemplate().update(String.format("DELETE FROM blob_data WHERE %s", SqlUtils.transformToSqlInStatementForString("id", uuidStrings)),
-                    valuesMap);
-        } catch (DataAccessException e){
-			LOG.error(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
-            throw new DaoException(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
-        }
+        sqlQueryFactory.delete(blobData)
+                .where(blobData.id.in(uuidStrings))
+                .execute();
     }
 
     @Override
-    public void save(final String uuid, final InputStream dataIn) {
-        try{
-            PreparedStatementCreator psc = new PreparedStatementCreator() {
-
-                @Override
-                public PreparedStatement createPreparedStatement(Connection con)
-                        throws SQLException {
-
-                    PreparedStatement ps = con
-                            .prepareStatement(
-                                    "UPDATE blob_data SET data = ? WHERE id = ?");
-                    ps.setBlob(1, dataIn);
-                    ps.setString(2, uuid);
-                    return ps;
-                }
-            };
-            int rowNum = getJdbcTemplate().update(psc);
-            if(rowNum == 0)
-                throw new DaoException(String.format("Не существует записи с id = %s", uuid));
-
-        } catch (DataAccessException e){
-            throw new DaoException(String.format("Не удалось обновить данные для id = %s", uuid), e);
-        }
+    public void updateDataByUUID(final String uuid, final InputStream inputStream) {
+        sqlQueryFactory.update(blobData)
+                .where(blobData.id.eq(uuid))
+                .set(blobData.data, inputStream)
+                .execute();
     }
 
     @Override
-    public BlobData get(String uuid) {
-        try{
-            return getJdbcTemplate().queryForObject("SELECT id, name, data, creation_date FROM blob_data WHERE id = ?",
-                    new Object[]{uuid},
-                    new int[]{Types.CHAR},
-                    new BlobDataRowMapper());
-        }catch (EmptyResultDataAccessException e){
-            return null;
-        }
+    public BlobData fetch(String uuid) {
+        return sqlQueryFactory.select(blobDataBean)
+                .from(blobData)
+                .where(blobData.id.eq(uuid))
+                .fetchOne();
     }
 
     @Override
-    public long getLength(String uuid) {
-        try{
-            return getJdbcTemplate().queryForObject("SELECT dbms_lob.getlength(data) FROM blob_data WHERE id = ?",
-                    new Object[]{uuid},
-                    new int[]{Types.CHAR},
-					Long.class);
-        }catch (EmptyResultDataAccessException e){
-            return 0;
-        }
+    public long fetchLength(String uuid) {
+        return sqlQueryFactory.select(SQLExpressions.relationalFunctionCall(Long.class, "dbms_lob.getlength", blobData.data))
+                .from(blobData)
+                .where(blobData.id.eq(uuid))
+                .fetchOne();
     }
 
     @Override
-    public int clean() {
-        try {
-            return getJdbcTemplate().update("delete from blob_data bd where id not in " +
-                    "(select distinct id from " +
-                    "(select script_id id from ref_book " +
-                    "union select xsd from declaration_template " +
-                    "union select jrxml from declaration_template " +
-                    "union select blob_data_id from declaration_report " +
-                    "union select blob_data_id from form_data_report " +
-                    "union select blob_data_id from ifrs_data " +
-                    "union select blob_data_id from form_data_file " +
-                    "union select blob_data_id from declaration_data_file " +
-                    "union select blob_data_id from declaration_template_file " +
-                    "union select blob_data_id from declaration_subreport) where id is not null) " +
-                    "and (sysdate - bd.creation_date) > " + (isDateDiffNumber() ? "1" : "numtodsinterval(24, 'hour')"));
-        } catch (DataAccessException e){
-            throw new DaoException(String.format("Ошибка при удалении устаревших записей таблицы BLOB_DATA. %s.", e.getMessage()));
-        }
+    public long clean() {
+        List<String> blobIDS = sqlQueryFactory.select().unionAll(
+                SQLExpressions.select(QRefBook.refBook.scriptId)
+                        .from(QRefBook.refBook)
+                        .where(QRefBook.refBook.scriptId.isNotNull()),
+                SQLExpressions.select(QDeclarationTemplate.declarationTemplate.xsd)
+                        .from(QDeclarationTemplate.declarationTemplate)
+                        .where(QDeclarationTemplate.declarationTemplate.xsd.isNotNull()),
+                SQLExpressions.select(QDeclarationReport.declarationReport.blobDataId)
+                        .from(QDeclarationReport.declarationReport)
+                        .where(QDeclarationReport.declarationReport.blobDataId.isNotNull()),
+                SQLExpressions.select(QFormDataReport.formDataReport.blobDataId)
+                        .from(QFormDataReport.formDataReport)
+                        .where(QFormDataReport.formDataReport.blobDataId.isNotNull()),
+                SQLExpressions.select(QIfrsData.ifrsData.blobDataId)
+                        .from(QIfrsData.ifrsData)
+                        .where(QIfrsData.ifrsData.blobDataId.isNotNull()),
+                SQLExpressions.select(QFormDataReport.formDataReport.blobDataId)
+                        .from(QFormDataReport.formDataReport)
+                        .where(QFormDataReport.formDataReport.blobDataId.isNotNull()),
+                SQLExpressions.select(QDeclarationDataFile.declarationDataFile.blobDataId)
+                        .from(QDeclarationDataFile.declarationDataFile)
+                        .where(QDeclarationDataFile.declarationDataFile.blobDataId.isNotNull()),
+                SQLExpressions.select(QDeclarationTemplateFile.declarationTemplateFile.blobDataId)
+                        .from(QDeclarationTemplateFile.declarationTemplateFile)
+                        .where(QDeclarationTemplateFile.declarationTemplateFile.blobDataId.isNotNull()),
+                SQLExpressions.select(QDeclarationSubreport.declarationSubreport.blobDataId)
+                        .from(QDeclarationSubreport.declarationSubreport)
+                        .where(QDeclarationSubreport.declarationSubreport.blobDataId.isNotNull())
+        ).fetch();
+
+        Date oneDayBack = sqlQueryFactory.select(SQLExpressions.addDays(sysdate, -1)).fetchOne();
+
+        return sqlQueryFactory.delete(blobData)
+                .where(blobData.id.notIn(blobIDS).and(blobData.creationDate.lt(new LocalDateTime(oneDayBack))))
+                .execute();
     }
 }

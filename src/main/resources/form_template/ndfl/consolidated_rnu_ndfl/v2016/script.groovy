@@ -4106,7 +4106,7 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
     BigDecimal sumNdflDeduction = new BigDecimal(0)
     for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
         if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                && ndflPersonIncome.incomeAccruedDate?.format(DATE_FORMAT) == ndflPersonDeduction.incomeAccrued?.format(DATE_FORMAT)
+                && ndflPersonIncome.incomeAccruedDate?.toLocalDate().equals(ndflPersonDeduction.incomeAccrued?.toLocalDate())
                 && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
             sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
         }
@@ -4194,8 +4194,8 @@ interface DateConditionChecker {
 class Column6EqualsColumn7 implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
-        String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
-        String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
+        String accrued = ndflPersonIncome.incomeAccruedDate?.toString("dd.MM.yyyy")
+        String payout = ndflPersonIncome.incomePayoutDate?.toString("dd.MM.yyyy")
         return accrued == payout
     }
 }
@@ -4216,7 +4216,7 @@ class MatchMask implements DateConditionChecker {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
-        String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
+        String accrued = ndflPersonIncome.incomeAccruedDate.toString("dd.MM.yyyy")
         Pattern pattern = Pattern.compile(maskRegex)
         Matcher matcher = pattern.matcher(accrued)
         if (matcher.matches()) {
@@ -4237,7 +4237,7 @@ class LastMonthCalendarDay implements DateConditionChecker {
             return true
         }
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
         int currentMonth = calendar.get(Calendar.MONTH)
         calendar.add(calendar.DATE, 1)
         int comparedMonth = calendar.get(Calendar.MONTH)
@@ -4256,7 +4256,7 @@ class Column7LastDayOfYear1 implements DateConditionChecker {
             return false
         }
         Calendar calendarPayout = Calendar.getInstance()
-        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
+        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 11) {
@@ -4278,7 +4278,7 @@ class Column7LastDayOfYear2 implements DateConditionChecker {
             return false
         }
         Calendar calendarPayout = Calendar.getInstance()
-        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
+        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 11) {
@@ -4300,14 +4300,14 @@ class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
             return false
         }
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
         // находим последний день месяца
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
         Date workDay = calendar.getTime()
         // если последний день месяца приходится на выходной, то следующий первый рабочий день
         int offset = 0
         workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-        return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
+        return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.toDate().getTime()
     }
 }
 
@@ -4322,11 +4322,11 @@ class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
         // "Графа 7" + "1 рабочий день"
         int offset = 1
-        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(workDay);
 
@@ -4345,11 +4345,11 @@ class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
         // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
         int offset = 30
-        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(workDay);
 
@@ -4368,10 +4368,10 @@ class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
         Calendar calendar7 = Calendar.getInstance();
-        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
+        calendar7.setTime(ndflPersonIncome.incomePayoutDate.toDate());
 
         // находим последний день месяца
         calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))

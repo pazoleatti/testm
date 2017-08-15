@@ -24,7 +24,7 @@ public class QRaschsvPersSvStrahLic extends com.querydsl.sql.RelationalPathBase<
 
     public static final QRaschsvPersSvStrahLic raschsvPersSvStrahLic = new QRaschsvPersSvStrahLic("RASCHSV_PERS_SV_STRAH_LIC");
 
-    public final DateTimePath<java.sql.Timestamp> dataRozd = createDateTime("dataRozd", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> dataRozd = createDateTime("dataRozd", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> declarationDataId = createNumber("declarationDataId", Long.class);
 
@@ -64,7 +64,7 @@ public class QRaschsvPersSvStrahLic extends com.querydsl.sql.RelationalPathBase<
 
     public final StringPath snils = createString("snils");
 
-    public final DateTimePath<java.sql.Timestamp> svData = createDateTime("svData", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> svData = createDateTime("svData", org.joda.time.LocalDateTime.class);
 
     public final com.querydsl.sql.PrimaryKey<QRaschsvPersSvStrahLic> persSvStrahFacePk = createPrimaryKey(id);
 

@@ -24,7 +24,7 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
 
     public static final QDepartmentReportPeriod departmentReportPeriod = new QDepartmentReportPeriod("DEPARTMENT_REPORT_PERIOD");
 
-    public final DateTimePath<java.sql.Timestamp> correctionDate = createDateTime("correctionDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> correctionDate = createDateTime("correctionDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Integer> departmentId = createNumber("departmentId", Integer.class);
 

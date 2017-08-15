@@ -44,13 +44,6 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
     @Autowired
     private BlobDataService blobDataService;
 
-    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        }
-    };
-
     public TimerSubreportDeclarationHandler() {
         super(TimerSubreportAction.class);
     }
@@ -86,7 +79,7 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
                 return TimerSubreportResult.STATUS_NOT_EXIST;
             } else {
                 BlobData blobData = blobDataService.get(uuid);
-                return new TimerSubreportResult.Status(TimerSubreportResult.StatusReport.EXIST, sdf.get().format(blobData.getCreationDate()));
+                return new TimerSubreportResult.Status(TimerSubreportResult.StatusReport.EXIST, blobData.getCreationDate().toString("dd.MM.yyyy HH:mm:ss"));
             }
         }
         return TimerSubreportResult.STATUS_LOCKED;

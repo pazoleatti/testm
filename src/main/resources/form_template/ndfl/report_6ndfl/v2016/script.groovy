@@ -473,9 +473,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                 }
                             }
                             СумДата(
-                                    ДатаФактДох: incomeAccruedDate?.format(DATE_FORMAT_DOTTED),
-                                    ДатаУдержНал: taxDate?.format(DATE_FORMAT_DOTTED),
-                                    СрокПрчслНал: transferDate?.format(DATE_FORMAT_DOTTED),
+                                    ДатаФактДох: incomeAccruedDate?.toString(DATE_FORMAT_DOTTED),
+                                    ДатаУдержНал: taxDate?.toString(DATE_FORMAT_DOTTED),
+                                    СрокПрчслНал: transferDate?.toString(DATE_FORMAT_DOTTED),
                                     ФактДоход: ScriptUtils.round(incomePayoutSumm, 2),
                                     УдержНал: withholdingTax
                             ) {}

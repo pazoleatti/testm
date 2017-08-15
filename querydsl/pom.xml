@@ -43,6 +43,10 @@
                     <sourceFolder></sourceFolder>
                     <targetFolder>model/src/main/java</targetFolder>
                     <exportViews>false</exportViews>
+                    <customTypes>
+                        <customType>com.querydsl.sql.types.LocalDateTimeType</customType>
+                        <customType>com.querydsl.sql.types.InputStreamType</customType>
+                    </customTypes>
                     <numericMappings>
                         <numericMapping>
                             <total>2</total>

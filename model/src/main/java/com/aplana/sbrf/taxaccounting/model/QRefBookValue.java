@@ -26,7 +26,7 @@ public class QRefBookValue extends com.querydsl.sql.RelationalPathBase<QRefBookV
 
     public final NumberPath<Long> attributeId = createNumber("attributeId", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> dateValue = createDateTime("dateValue", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> dateValue = createDateTime("dateValue", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<java.math.BigDecimal> numberValue = createNumber("numberValue", java.math.BigDecimal.class);
 

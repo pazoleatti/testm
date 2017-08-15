@@ -24,7 +24,7 @@ public class QFormSearchResult extends com.querydsl.sql.RelationalPathBase<QForm
 
     public static final QFormSearchResult formSearchResult = new QFormSearchResult("FORM_SEARCH_RESULT");
 
-    public final DateTimePath<java.sql.Timestamp> date = createDateTime("date", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> date = createDateTime("date", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> formDataId = createNumber("formDataId", Long.class);
 

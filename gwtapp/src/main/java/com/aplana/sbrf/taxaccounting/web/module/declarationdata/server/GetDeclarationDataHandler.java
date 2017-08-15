@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclar
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -73,9 +74,9 @@ public class GetDeclarationDataHandler
         Set<FormDataEvent> permittedEvents = declarationAccessService.getPermittedEvents(userInfo, action.getId());
 
         DeclarationData declaration = declarationDataService.get(action.getId(), userInfo);
-        Date docDate = declarationDataService.getXmlDataDocDate(action.getId(), userInfo);
+        LocalDateTime docDate = declarationDataService.getXmlDataDocDate(action.getId(), userInfo);
         result.setDeclarationData(declaration);
-        result.setDocDate(docDate != null ? docDate : new Date());
+        result.setDocDate(docDate != null ? docDate.toDate() : new Date());
 
         result.setCanCheck(permittedEvents.contains(FormDataEvent.CHECK));
         result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED));

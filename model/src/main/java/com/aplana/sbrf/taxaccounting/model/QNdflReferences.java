@@ -24,7 +24,7 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
 
     public static final QNdflReferences ndflReferences = new QNdflReferences("NDFL_REFERENCES");
 
-    public final DateTimePath<java.sql.Timestamp> birthday = createDateTime("birthday", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> birthday = createDateTime("birthday", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> declarationDataId = createNumber("declarationDataId", Long.class);
 
@@ -48,7 +48,7 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
 
     public final StringPath surname = createString("surname");
 
-    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> version = createDateTime("version", org.joda.time.LocalDateTime.class);
 
     public final com.querydsl.sql.PrimaryKey<QNdflReferences> ndflReferencesPk = createPrimaryKey(id);
 

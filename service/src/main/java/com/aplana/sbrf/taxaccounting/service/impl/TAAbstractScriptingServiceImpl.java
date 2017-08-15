@@ -137,8 +137,9 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 
 	protected String getPackageName(String script) {
 		try {
-			Class scriptClass = ((GroovyScriptEngine)getScriptEngine()).getScriptClass(script);
-			return scriptClass.getName().substring(0, scriptClass.getName().lastIndexOf('.'));
+            String packageWord = "package";
+			String scriptLines[] = script.split("\\r\\n|\\n|\\r");
+			return scriptLines[0].substring(script.indexOf(packageWord) + packageWord.length() + 1).trim();
 		} catch (Exception e) {
 			LOG.warn(e.getMessage(), e);
 			throw new ServiceException(e.getMessage(), e);

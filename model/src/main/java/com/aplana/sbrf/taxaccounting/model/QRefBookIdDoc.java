@@ -36,7 +36,7 @@ public class QRefBookIdDoc extends com.querydsl.sql.RelationalPathBase<QRefBookI
 
     public final StringPath issuedBy = createString("issuedBy");
 
-    public final DateTimePath<java.sql.Timestamp> issuedDate = createDateTime("issuedDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> issuedDate = createDateTime("issuedDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> personId = createNumber("personId", Long.class);
 
@@ -44,7 +44,7 @@ public class QRefBookIdDoc extends com.querydsl.sql.RelationalPathBase<QRefBookI
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> version = createDateTime("version", org.joda.time.LocalDateTime.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookIdDoc> refBookIdDocPk = createPrimaryKey(id);
 

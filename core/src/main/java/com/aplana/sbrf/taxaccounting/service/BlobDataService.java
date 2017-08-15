@@ -1,20 +1,21 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import org.joda.time.LocalDateTime;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.List;
 
 /**
- * User: avanteev
+ * Интерфейс сервиса для работы с {@link BlobData}
  */
 public interface BlobDataService {
 
     /**
      * Создание записи
-     * @param is содержимое файла
+     *
+     * @param is   содержимое файла
      * @param name имя для базы
      * @return uuid идентификатор
      */
@@ -22,6 +23,7 @@ public interface BlobDataService {
 
     /**
      * Создание записи
+     *
      * @param path путь к файлу
      * @param name имя для базы
      * @return uuid идентификатор
@@ -30,35 +32,40 @@ public interface BlobDataService {
 
     /**
      * Создание записи
-     * @param file файл
-     * @param name имя для базы
+     *
+     * @param file       файл
+     * @param name       имя для базы
      * @param createDate дата (например, полученная из xml, как в декларациях)
      * @return uuid идентификатор
      */
-    String create(File file, String name, Date createDate);
+    String create(File file, String name, LocalDateTime createDate);
 
     /**
      * Создание записи
+     *
      * @return uuid идентификатор
      */
     String create(BlobData data);
 
     /**
      * Удаление записи.
+     *
      * @param blobId uuid
      */
     void delete(String blobId);
 
     /**
      * Удаление записи.
+     *
      * @param blobIdStrings набор uuid
      */
     void delete(List<String> blobIdStrings);
 
     /**
      * Обновление записи в базе
+     *
      * @param blobId uuid
-     * @param is данные
+     * @param is     данные
      */
     void save(String blobId, InputStream is);
 
@@ -72,6 +79,7 @@ public interface BlobDataService {
 
     /**
      * Получение длины данных в blob
+     *
      * @param uuid
      * @return
      */
@@ -80,7 +88,8 @@ public interface BlobDataService {
     /**
      * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
      * Производит очистку таблиц BLOB_DATA, DECLARATION_REPORT, LOG
+     *
      * @return Количество удаленных запсией
      */
-    int clean();
+    long clean();
 }

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -138,7 +139,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         notCorrect_2.put("ERRTEXT", new RefBookValue(RefBookAttributeType.STRING, null));
         when(ndflRefProvider.getRecordData(eq(NOT_CORRECT_2_ID))).thenReturn(notCorrect_2);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -252,7 +253,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         resultTypeRef.put("CODE", codeTypeRefBookValue);
         when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -330,7 +331,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         resultTypeRef.put("CODE", codeTypeRefBookValue);
         when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -407,7 +408,7 @@ public class Ndfl62Test extends RefBookScriptTestBase {
         resultTypeRef.put("CODE", codeTypeRefBookValue);
         when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();

@@ -26,9 +26,9 @@ public class QDeclarationSource extends com.querydsl.sql.RelationalPathBase<QDec
 
     public final NumberPath<Integer> departmentDeclarationTypeId = createNumber("departmentDeclarationTypeId", Integer.class);
 
-    public final DateTimePath<java.sql.Timestamp> periodEnd = createDateTime("periodEnd", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> periodEnd = createDateTime("periodEnd", org.joda.time.LocalDateTime.class);
 
-    public final DateTimePath<java.sql.Timestamp> periodStart = createDateTime("periodStart", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> periodStart = createDateTime("periodStart", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Integer> srcDepartmentFormTypeId = createNumber("srcDepartmentFormTypeId", Integer.class);
 

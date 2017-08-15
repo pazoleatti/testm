@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
+import org.joda.time.LocalDateTime;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -9,13 +11,13 @@ import java.util.Date;
 public class NdflPersonIncomeByDate {
 
     // Дата начисления дохода
-    private Date incomeAccruedDate;
+    private LocalDateTime incomeAccruedDate;
 
     // Дата удержания налога
-    private Date taxDate;
+    private LocalDateTime taxDate;
 
     // Срок перечисления налога в бюджет
-    private Date taxTransferDate;
+    private LocalDateTime taxTransferDate;
 
     // Сумма выплаченного дохода
     private BigDecimal incomePayoutSumm;
@@ -23,24 +25,24 @@ public class NdflPersonIncomeByDate {
     // Сумма налога удержанная
     private Long withholdingTax;
 
-    public Date getIncomeAccruedDate() {
+    public LocalDateTime getIncomeAccruedDate() {
         return incomeAccruedDate;
     }
-    public void setIncomeAccruedDate(Date incomeAccruedDate) {
+    public void setIncomeAccruedDate(LocalDateTime incomeAccruedDate) {
         this.incomeAccruedDate = incomeAccruedDate;
     }
 
-    public Date getTaxDate() {
+    public LocalDateTime getTaxDate() {
         return taxDate;
     }
-    public void setTaxDate(Date taxDate) {
+    public void setTaxDate(LocalDateTime taxDate) {
         this.taxDate = taxDate;
     }
 
-    public Date getTaxTransferDate() {
+    public LocalDateTime getTaxTransferDate() {
         return taxTransferDate;
     }
-    public void setTaxTransferDate(Date taxTransferDate) {
+    public void setTaxTransferDate(LocalDateTime taxTransferDate) {
         this.taxTransferDate = taxTransferDate;
     }
 

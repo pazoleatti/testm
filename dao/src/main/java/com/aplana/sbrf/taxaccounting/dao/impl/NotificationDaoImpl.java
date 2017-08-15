@@ -14,10 +14,10 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQueryFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -34,9 +34,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         this.sqlQueryFactory = sqlQueryFactory;
     }
 
-    final private QBean<Notification> notificationBean = bean(Notification.class, notification.id, notification.createDate, notification.deadline,
-            notification.isRead, notification.logId, notification.receiverDepartmentId, notification.reportId,
-            notification.reportPeriodId, notification.roleId, notification.senderDepartmentId, notification.text, notification.type, notification.userId);
+    final private QBean<Notification> notificationBean = bean(Notification.class, notification.all());
 
     @Override
     public long save(Notification notificationForSave) {
@@ -309,9 +307,9 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
     @Override
     public Date getLastNotificationDate() {
-        Timestamp lastDate = sqlQueryFactory.select(notification.createDate.max()).from(notification).fetchFirst();
+        LocalDateTime lastDate = sqlQueryFactory.select(notification.createDate.max()).from(notification).fetchFirst();
         if (lastDate != null) {
-            return new Date(lastDate.getTime());
+            return lastDate.toDate();
         }
         return null;
     }

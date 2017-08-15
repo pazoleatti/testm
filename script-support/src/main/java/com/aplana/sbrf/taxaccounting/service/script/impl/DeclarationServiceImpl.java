@@ -25,6 +25,7 @@ import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.util.IOUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -373,7 +374,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile) {
         loadDeclarationDataService.importDeclarationData(logger, userInfo, declarationData, inputStream, fileName, dataFile, attachFileType, createDateFile);
     }
 

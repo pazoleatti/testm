@@ -12,6 +12,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,8 +27,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -178,10 +178,10 @@ public class NdflPersonDaoTest {
         //test cascade delete
     }
 
-    public static Date toDate(String dateStr) {
+    public static LocalDateTime toDate(String dateStr) {
         try {
-            return new SimpleDateFormat("dd.MM.yyyy").parse(dateStr);
-        } catch (ParseException e) {
+            return LocalDateTime.parse(dateStr,  DateTimeFormat.forPattern("dd.MM.yyyy"));
+        } catch (IllegalArgumentException e) {
             return null;
         }
     }

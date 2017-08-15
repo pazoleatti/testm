@@ -28,13 +28,13 @@ public class QConfigurationScheduler extends com.querydsl.sql.RelationalPathBase
 
     public final NumberPath<Integer> id = createNumber("id", Integer.class);
 
-    public final DateTimePath<java.sql.Timestamp> lastFireDate = createDateTime("lastFireDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> lastFireDate = createDateTime("lastFireDate", org.joda.time.LocalDateTime.class);
 
-    public final DateTimePath<java.sql.Timestamp> modificationDate = createDateTime("modificationDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> modificationDate = createDateTime("modificationDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath schedule = createString("schedule");
 
-    public final DateTimePath<java.sql.Timestamp> startDate = createDateTime("startDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> startDate = createDateTime("startDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath taskName = createString("taskName");
 

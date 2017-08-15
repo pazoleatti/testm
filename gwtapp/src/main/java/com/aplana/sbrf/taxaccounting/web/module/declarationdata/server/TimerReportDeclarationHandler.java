@@ -90,7 +90,7 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
                 }
             } else {
                 BlobData blobData = blobDataService.get(uuid);
-                return new TimerReportResult.Status(TimerReportResult.StatusReport.EXIST, sdf.get().format(blobData.getCreationDate())) ;
+                return new TimerReportResult.Status(TimerReportResult.StatusReport.EXIST, blobData.getCreationDate().toString("dd.MM.yyyy HH:mm:ss")) ;
             }
         }
         return TimerReportResult.STATUS_LOCKED;

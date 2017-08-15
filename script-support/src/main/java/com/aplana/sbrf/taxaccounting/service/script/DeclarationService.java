@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
+import org.joda.time.LocalDateTime;
 
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
@@ -310,7 +311,7 @@ public interface DeclarationService {
      * @param createDateFile
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                               String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile);
+                               String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile);
 
     /**
      * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
+import org.joda.time.LocalDateTime;
 
 import java.io.File;
 import java.io.InputStream;
@@ -203,7 +204,7 @@ public interface DeclarationDataService {
 	 * @return дату последнего изменения декларации из xml данных
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
+	LocalDateTime getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Поиск декларации
@@ -383,7 +384,7 @@ public interface DeclarationDataService {
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
 							   String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
-							   AttachFileType fileType, Date createDateFile);
+							   AttachFileType fileType, LocalDateTime createDateFile);
 
     /**
      * Получение данных по файлам для формы "Файлы и комментарии"

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class DeclarationDataDaoTest {
         blobData = new BlobData();
         blobData.setName("");
         blobData.setInputStream(new ByteArrayInputStream("test-data-string-2".getBytes()));
-        blobData.setCreationDate(new Date());
+        blobData.setCreationDate(new LocalDateTime());
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
     }
 	

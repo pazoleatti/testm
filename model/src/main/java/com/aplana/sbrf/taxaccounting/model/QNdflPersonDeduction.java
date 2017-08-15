@@ -26,7 +26,7 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> incomeAccrued = createDateTime("incomeAccrued", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> incomeAccrued = createDateTime("incomeAccrued", org.joda.time.LocalDateTime.class);
 
     public final StringPath incomeCode = createString("incomeCode");
 
@@ -34,7 +34,7 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
 
     public final NumberPath<Long> ndflPersonId = createNumber("ndflPersonId", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> notifDate = createDateTime("notifDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> notifDate = createDateTime("notifDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath notifNum = createString("notifNum");
 
@@ -46,11 +46,11 @@ public class QNdflPersonDeduction extends com.querydsl.sql.RelationalPathBase<QN
 
     public final StringPath operationId = createString("operationId");
 
-    public final DateTimePath<java.sql.Timestamp> periodCurrDate = createDateTime("periodCurrDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> periodCurrDate = createDateTime("periodCurrDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<java.math.BigDecimal> periodCurrSumm = createNumber("periodCurrSumm", java.math.BigDecimal.class);
 
-    public final DateTimePath<java.sql.Timestamp> periodPrevDate = createDateTime("periodPrevDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> periodPrevDate = createDateTime("periodPrevDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<java.math.BigDecimal> periodPrevSumm = createNumber("periodPrevSumm", java.math.BigDecimal.class);
 

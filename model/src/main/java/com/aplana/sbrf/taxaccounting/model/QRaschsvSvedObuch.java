@@ -36,7 +36,7 @@ public class QRaschsvSvedObuch extends com.querydsl.sql.RelationalPathBase<QRasc
 
     public final NumberPath<Long> raschsvSvSum1TipId = createNumber("raschsvSvSum1TipId", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> spravData = createDateTime("spravData", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> spravData = createDateTime("spravData", org.joda.time.LocalDateTime.class);
 
     public final StringPath spravNodeName = createString("spravNodeName");
 

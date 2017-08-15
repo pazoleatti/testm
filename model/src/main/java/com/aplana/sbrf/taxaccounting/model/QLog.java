@@ -24,7 +24,7 @@ public class QLog extends com.querydsl.sql.RelationalPathBase<QLog> {
 
     public static final QLog log = new QLog("LOG");
 
-    public final DateTimePath<java.sql.Timestamp> creationDate = createDateTime("creationDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> creationDate = createDateTime("creationDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath id = createString("id");
 

@@ -24,17 +24,17 @@ public class QReportPeriod extends com.querydsl.sql.RelationalPathBase<QReportPe
 
     public static final QReportPeriod reportPeriod = new QReportPeriod("REPORT_PERIOD");
 
-    public final DateTimePath<java.sql.Timestamp> calendarStartDate = createDateTime("calendarStartDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> calendarStartDate = createDateTime("calendarStartDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> dictTaxPeriodId = createNumber("dictTaxPeriodId", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> endDate = createDateTime("endDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> endDate = createDateTime("endDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Integer> id = createNumber("id", Integer.class);
 
     public final StringPath name = createString("name");
 
-    public final DateTimePath<java.sql.Timestamp> startDate = createDateTime("startDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> startDate = createDateTime("startDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Integer> taxPeriodId = createNumber("taxPeriodId", Integer.class);
 

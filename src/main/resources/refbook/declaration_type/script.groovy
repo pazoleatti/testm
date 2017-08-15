@@ -20,6 +20,8 @@ import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
 import java.util.regex.Pattern
 
+import org.joda.time.LocalDateTime;
+
 /**
  * Created by lhaziev on 09.02.2017.
  */
@@ -1116,7 +1118,7 @@ def importNdflResponse() {
     }
 
     // Сохранение файла ответа в форме
-    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
+    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new LocalDateTime())
     def createUser = declarationService.getSystemUserInfo().getUser()
     def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
 

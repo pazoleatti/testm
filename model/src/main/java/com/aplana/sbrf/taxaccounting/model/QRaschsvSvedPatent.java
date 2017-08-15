@@ -24,9 +24,9 @@ public class QRaschsvSvedPatent extends com.querydsl.sql.RelationalPathBase<QRas
 
     public static final QRaschsvSvedPatent raschsvSvedPatent = new QRaschsvSvedPatent("RASCHSV_SVED_PATENT");
 
-    public final DateTimePath<java.sql.Timestamp> dataKonDeyst = createDateTime("dataKonDeyst", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> dataKonDeyst = createDateTime("dataKonDeyst", org.joda.time.LocalDateTime.class);
 
-    public final DateTimePath<java.sql.Timestamp> dataNachDeyst = createDateTime("dataNachDeyst", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> dataNachDeyst = createDateTime("dataNachDeyst", org.joda.time.LocalDateTime.class);
 
     public final StringPath nomPatent = createString("nomPatent");
 

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.joda.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +45,7 @@ public class NdflPerson extends IdentityObject<Long> {
     private String middleName;
 
     // Налогоплательщик.Дата рождения (Графа 6)
-    private Date birthDay;
+    private LocalDateTime birthDay;
 
     // Гражданство (код страны) (Графа 7)
     private String citizenship;
@@ -198,11 +199,11 @@ public class NdflPerson extends IdentityObject<Long> {
         this.middleName = middleName;
     }
 
-    public Date getBirthDay() {
+    public LocalDateTime getBirthDay() {
         return birthDay;
     }
 
-    public void setBirthDay(Date birthDay) {
+    public void setBirthDay(LocalDateTime birthDay) {
         this.birthDay = birthDay;
     }
 

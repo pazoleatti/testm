@@ -24,7 +24,7 @@ public class QRefBookCalendar extends com.querydsl.sql.RelationalPathBase<QRefBo
 
     public static final QRefBookCalendar refBookCalendar = new QRefBookCalendar("REF_BOOK_CALENDAR");
 
-    public final DateTimePath<java.sql.Timestamp> cdate = createDateTime("cdate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> cdate = createDateTime("cdate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Byte> ctype = createNumber("ctype", Byte.class);
 

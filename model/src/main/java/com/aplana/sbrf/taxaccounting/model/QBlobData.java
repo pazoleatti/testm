@@ -24,9 +24,9 @@ public class QBlobData extends com.querydsl.sql.RelationalPathBase<QBlobData> {
 
     public static final QBlobData blobData = new QBlobData("BLOB_DATA");
 
-    public final DateTimePath<java.sql.Timestamp> creationDate = createDateTime("creationDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> creationDate = createDateTime("creationDate", org.joda.time.LocalDateTime.class);
 
-    public final SimplePath<java.sql.Blob> data = createSimple("data", java.sql.Blob.class);
+    public final SimplePath<java.io.InputStream> data = createSimple("data", java.io.InputStream.class);
 
     public final StringPath id = createString("id");
 

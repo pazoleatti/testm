@@ -34,7 +34,7 @@ public class QTmpPersonDubles extends com.querydsl.sql.RelationalPathBase<QTmpPe
 
     public final NumberPath<Long> asnuRefId = createNumber("asnuRefId", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> birthDate = createDateTime("birthDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> birthDate = createDateTime("birthDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath build = createString("build");
 
@@ -96,7 +96,7 @@ public class QTmpPersonDubles extends com.querydsl.sql.RelationalPathBase<QTmpPe
 
     public final StringPath street = createString("street");
 
-    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> version = createDateTime("version", org.joda.time.LocalDateTime.class);
 
     public QTmpPersonDubles(String variable) {
         super(QTmpPersonDubles.class, forVariable(variable), "NDFL_UNSTABLE", "TMP_PERSON_DUBLES");
