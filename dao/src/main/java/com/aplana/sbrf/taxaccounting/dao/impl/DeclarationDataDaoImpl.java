@@ -699,7 +699,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, drp.report_period_id, drp.department_id " +
                 "from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
                 "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId " +
-                "and drp.department_id = :departmentId and drp.REPORT_PERIOD_ID = :reportPeriodId " +
+                "and drp.id = dd.DEPARTMENT_REPORT_PERIOD_ID " +
                 "and dd.DECLARATION_TEMPLATE_ID in " +
                 "(select dt.id from DECLARATION_TEMPLATE dt" +
                 " where dt.DECLARATION_TYPE_ID = :declarationTypeId) " +
@@ -710,8 +710,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTypeId", declarationTypeId)
                 .addValue("departmentReportPeriodId", departmentReportPeriodId)
-                .addValue("departmentId", departmentId)
-                .addValue("reportPeriodId", reportPeriodId)
                 .addValue("kpp", kpp)
                 .addValue("oktmo", oktmo);
         try {

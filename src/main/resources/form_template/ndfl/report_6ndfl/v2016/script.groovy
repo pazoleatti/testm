@@ -536,7 +536,7 @@ int findCorrectionNumber() {
     Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
     while (it.hasNext()) {
         DepartmentReportPeriod depReportPeriod = it.next();
-        if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+        if (depReportPeriod.id == declarationData.departmentReportPeriodId || depReportPeriod.correctionDate != null && depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
             it.remove();
         }
     }
