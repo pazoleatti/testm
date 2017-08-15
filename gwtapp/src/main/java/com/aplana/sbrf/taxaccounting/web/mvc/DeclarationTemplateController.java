@@ -64,8 +64,8 @@ public class DeclarationTemplateController {
      * @param resp                  ответ
      * @throws IOException IOException
      */
-    @GetMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/downloadDect")
-    public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
+    @GetMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/download")
+    public void download(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
             String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
@@ -89,8 +89,8 @@ public class DeclarationTemplateController {
      * @param resp                  ответ
      * @throws IOException IOException
      */
-    @PostMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/uploadDect")
-    public void uploadDect(@RequestParam(value = "uploader") MultipartFile file,
+    @PostMapping(value = "/actions/declarationTemplate/{declarationTemplateId}/upload")
+    public void upload(@RequestParam(value = "uploader") MultipartFile file,
                            @PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
@@ -287,23 +287,6 @@ public class DeclarationTemplateController {
                     declarationTemplateService.unlock(declarationTemplateId, userInfo);
                 }
             }
-        }
-    }
-
-    /**
-     * Выгрузка файла по uuid
-     *
-     * @param uuid уникальный идентификатор файла
-     * @param req  запрос
-     * @param resp ответ
-     * @throws IOException IOException
-     */
-    @GetMapping(value = "/actions/declarationTemplate/downloadByUuid/{uuid}")
-    public void processDownload(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        if (checkRole(resp, securityService.currentUserInfo())) {
-            BlobData blobData = blobDataService.get(uuid);
-            ResponseUtils.createBlobResponse(req, resp, blobData);
         }
     }
 

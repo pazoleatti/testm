@@ -158,7 +158,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
     public void downloadDect() {
         if (declarationTemplate.getId() != null) {
             DownloadUtils.openInIframe(
-                    GWT.getHostPageBaseURL() + "controller/actions/declarationTemplate/" + declarationTemplate.getId() + "/downloadDect");
+                    GWT.getHostPageBaseURL() + "controller/actions/declarationTemplate/" + declarationTemplate.getId() + "/download");
         }
     }
 

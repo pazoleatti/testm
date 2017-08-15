@@ -21,18 +21,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
@@ -40,7 +37,6 @@ import java.util.UUID;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 
@@ -117,7 +113,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/uploadDect").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/upload").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -151,7 +147,7 @@ public class DeclarationTemplateControllerTest {
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/uploadDect").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/upload").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -196,7 +192,7 @@ public class DeclarationTemplateControllerTest {
             expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
             expectedJson.put(UuidEnum.UPLOADED_FILE.toString(), uuid);
 
-            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/uploadDect").file(multipartFile)
+            mockMvc.perform(fileUpload("/actions/declarationTemplate/1/upload").file(multipartFile)
                             .contentType(mediaType)
                             .param("description", "description")
                             .param("title", "title")
@@ -244,22 +240,5 @@ public class DeclarationTemplateControllerTest {
             if (!cf.delete())
                 System.out.println("Can't delete");
         }
-    }
-
-    @Test
-    public void downloadTest() throws Exception {
-        BlobData data = new BlobData();
-        data.setName("привет.xsd");
-        String s = "<name>HELLO!</nme>";
-        String key = "Content-Disposition";
-        String value = "attachment;filename=\"" + URLEncoder.encode(data.getName(), "UTF-8").replaceAll("\\+", "%20") + "\"";
-        data.setInputStream(new ByteArrayInputStream(s.getBytes()));
-
-        String uuid = UUID.randomUUID().toString();
-        when(blobDataService.get(uuid)).thenReturn(data);
-        mockMvc.perform(get(String.format("/actions/declarationTemplate/downloadByUuid/%s", uuid)).header("User-Agent", "msie"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(s))
-                .andExpect(MockMvcResultMatchers.header().string(key, value));
     }
 }

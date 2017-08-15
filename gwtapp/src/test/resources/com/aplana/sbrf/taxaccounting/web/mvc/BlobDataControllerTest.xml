@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="securityService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService"/>
+    </bean>
+    <bean id="blobDataService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TAUserService"/>
+    </bean>
+    <bean id="logEntryService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
+    </bean>
+
+    <bean id="blobDataController" class="com.aplana.sbrf.taxaccounting.web.mvc.BlobDataController">
+        <constructor-arg index="0" ref="securityService"/>
+        <constructor-arg index="1" ref="blobDataService"/>
+        <constructor-arg index="2" ref="logEntryService"/>
+    </bean>
+</beans>

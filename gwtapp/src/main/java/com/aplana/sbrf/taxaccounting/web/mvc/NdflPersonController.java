@@ -57,7 +57,7 @@ public class NdflPersonController {
      *
      * @param ndflPersonFilter параметры фильтра
      * @param pagingParams     параметры для пагинации
-     * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
+     * @return список данных типа {@link NdflPerson}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=ndflPersons")
     public JqgridPagedList<NdflPerson> fetchPersonData(@RequestParam NdflPersonFilter ndflPersonFilter,
@@ -109,7 +109,7 @@ public class NdflPersonController {
      *
      * @param ndflPersonIncomeFilter параметры фильтра
      * @param pagingParams           параметры для пагинации
-     * @return список NdflPersonIncomeFilter заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_INCOME
+     * @return список данных типа {@link NdflPersonIncomeFilter}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsIncome")
     public JqgridPagedList<NdflPersonIncome> fetchPersonIncomeData(@RequestParam NdflPersonIncomeFilter ndflPersonIncomeFilter,
@@ -128,7 +128,7 @@ public class NdflPersonController {
      *
      * @param ndflPersonDeductionFilter параметры фильтра
      * @param pagingParams              параметры для пагинации
-     * @return список NdflPersonDeduction заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_DEDUCTION
+     * @return список данных типа {@link NdflPersonDeduction}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsDeduction")
     public JqgridPagedList<NdflPersonDeduction> fetchPersonDeductionsData(@RequestParam NdflPersonDeductionFilter ndflPersonDeductionFilter,
@@ -147,7 +147,7 @@ public class NdflPersonController {
      *
      * @param ndflPersonPrepaymentFilter параметры фильтра
      * @param pagingParams               параметры для пагинации
-     * @return список NdflPersonDeduction заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_DEDUCTION
+     * @return список данных типа {@link NdflPersonDeduction}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsPrepayment")
     public JqgridPagedList<NdflPersonPrepayment> fetchPersonPrepaymentData(@RequestParam NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter,

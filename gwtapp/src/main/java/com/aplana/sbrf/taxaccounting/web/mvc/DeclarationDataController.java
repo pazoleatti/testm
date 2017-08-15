@@ -121,8 +121,8 @@ public class DeclarationDataController {
             try {
                 count = IOUtils.copy(in, out);
             } finally {
-                in.close();
-                out.close();
+                IOUtils.closeQuietly(in);
+                IOUtils.closeQuietly(out);
             }
             response.setContentLength(count);
         }
@@ -159,8 +159,8 @@ public class DeclarationDataController {
             try {
                 count = IOUtils.copy(in, out);
             } finally {
-                in.close();
-                out.close();
+                IOUtils.closeQuietly(in);
+                IOUtils.closeQuietly(out);
             }
             response.setContentLength(count);
         } else {
@@ -182,9 +182,11 @@ public class DeclarationDataController {
                              HttpServletResponse response) throws IOException {
 
         InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
+        OutputStream out = response.getOutputStream();
         PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
                 pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
-        pdfData.close();
+        IOUtils.closeQuietly(pdfData);
+        IOUtils.closeQuietly(out);
     }
 
 
@@ -200,6 +202,7 @@ public class DeclarationDataController {
             throws IOException {
 
         InputStream xmlDataIn = declarationService.getXmlDataAsStream(declarationDataId, securityService.currentUserInfo());
+        OutputStream out = response.getOutputStream();
         String fileName = URLEncoder.encode(declarationService.getXmlDataFileName(declarationDataId, securityService.currentUserInfo()), UTF_8);
 
         response.setHeader("Content-Disposition", "attachment; filename=\""
@@ -208,6 +211,7 @@ public class DeclarationDataController {
             IOUtils.copy(xmlDataIn, response.getOutputStream());
         } finally {
             IOUtils.closeQuietly(xmlDataIn);
+            IOUtils.closeQuietly(out);
         }
     }
 
@@ -215,7 +219,7 @@ public class DeclarationDataController {
      * Формирует DeclarationResult
      *
      * @param declarationDataId идентификатор декларации
-     * @return модель DeclarationResult, в которой содержаться данные о декларации
+     * @return модель {@link DeclarationResult}, в которой содержаться данные о декларации
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=declarationData")
     public DeclarationResult fetchDeclarationData(@PathVariable long declarationDataId) {
@@ -285,7 +289,7 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
-     * @return модель RecalculateDeclarationDataResult, в которой содержаться данные о результате расчета декларации
+     * @return модель {@link RecalculateDeclarationDataResult}, в которой содержаться данные о результате расчета декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/recalculate")
     public RecalculateDeclarationDataResult recalculateDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
@@ -366,7 +370,7 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
-     * @return модель CheckDeclarationDataResult, в которой содержаться данные о результате проверки декларации
+     * @return модель {@link CheckDeclarationDataResult}, в которой содержаться данные о результате проверки декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/check")
     public CheckDeclarationDataResult checkDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force) {
@@ -451,7 +455,7 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
-     * @return модель AcceptDeclarationDataResult, в которой содержаться данные о результате принятия декларации
+     * @return модель {@link AcceptDeclarationDataResult}, в которой содержаться данные о результате принятия декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/accept")
     public AcceptDeclarationDataResult acceptDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
@@ -524,7 +528,7 @@ public class DeclarationDataController {
      * Получение дополнительной информации о файлах декларации с комментариями
      *
      * @param declarationDataId идентификатор декларации
-     * @return DeclarationDataFileComment объект модели, в которой содержаться данные о файлах
+     * @return объект модели {@link DeclarationDataFileComment}, в которой содержаться данные о файлах
      * и комментарий для текущей декларации.
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=filesComments")
@@ -546,7 +550,7 @@ public class DeclarationDataController {
      *
      * @param dataFileComment сохраняемый объект декларации, в котором содержаться
      *                        данные о файлах и комментарий для текущей декларации.
-     * @return DeclarationDataFileComment   новый объект модели, в котором содержаться данные
+     * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
      * о файлах и комментарий для текущей декларации.
      */
     @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
@@ -573,7 +577,7 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      * @param pagingParams      параметры пагинации
-     * @return список изменений декларации
+     * @return список изменений декларации {@link LogBusinessModel}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=businessLogs")
     public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@RequestParam long declarationDataId, @RequestParam PagingParams pagingParams) {
@@ -595,7 +599,7 @@ public class DeclarationDataController {
      * Получение источников и приемников декларации
      *
      * @param declarationDataId идентификатор декларации
-     * @return источники и приемники декларации
+     * @return источники и приемники декларации {@link Relation}
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=sources")
     public List<Relation> getDeclarationSourcesAndDestinations(@PathVariable long declarationDataId) {
@@ -617,7 +621,7 @@ public class DeclarationDataController {
      * Получение списка налоговых форм
      *
      * @param pagingParams параметры для пагинации
-     * @return список налоговых форм
+     * @return список налоговых форм {@link DeclarationDataSearchResultItem}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
     public JqgridPagedList<DeclarationDataSearchResultItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
