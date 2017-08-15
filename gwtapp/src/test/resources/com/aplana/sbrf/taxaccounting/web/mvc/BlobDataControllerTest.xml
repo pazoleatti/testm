@@ -15,10 +15,14 @@
     <bean id="logEntryService" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
     </bean>
+    <bean id="reportService" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ReportService"/>
+    </bean>
 
     <bean id="blobDataController" class="com.aplana.sbrf.taxaccounting.web.mvc.BlobDataController">
         <constructor-arg index="0" ref="securityService"/>
         <constructor-arg index="1" ref="blobDataService"/>
         <constructor-arg index="2" ref="logEntryService"/>
+        <constructor-arg index="3" ref="reportService"/>
     </bean>
 </beans>
