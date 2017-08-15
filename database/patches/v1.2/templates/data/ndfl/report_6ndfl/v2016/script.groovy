@@ -1,5 +1,6 @@
 package form_template.ndfl.report_6ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.transform.TypeChecked
@@ -1174,7 +1175,7 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
                 addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
             } else {
                 String depChildName = departmentService.getDepartmentNameByPairKppOktmo(pair.kpp, pair.oktmo, departmentReportPeriod.reportPeriod.endDate)
-                logger.warn("Не удалось создать форму $FORM_NAME_NDFL6, за период $otchetGod ${reportPeriod.name} $strCorrPeriod, подразделение: ${depChildName ?: ""}, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo}. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName, за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют операции о НДФЛ для указанных КПП и ОКТМО.")
+                logger.warn("Не удалось создать форму $FORM_NAME_NDFL6, за период $otchetGod ${reportPeriod.name}$strCorrPeriod, подразделение: ${depChildName ?: ""}, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo}. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName, за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют операции о НДФЛ для указанных КПП и ОКТМО.")
             }
         }
     }
@@ -1261,8 +1262,17 @@ def createForm() {
         // Список физлиц для каждой пары КПП и ОКТМО
         def ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
 
-        declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-            declarationService.delete(it.id, userInfo)
+        // Удаление ранее созданных отчетных форм
+        List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTypeId, declarationData.departmentReportPeriodId, logger, userInfo)
+        if (!notDeletedDeclarationPair.isEmpty()) {
+            logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
+            notDeletedDeclarationPair.each() {
+                logger.error("Форма %d, выполняется операция \"%s\"",
+                        it.first, declarationService.getTaskName(it.second)
+                )
+            }
+            logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
+            return
         }
 
         if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
@@ -1294,8 +1304,11 @@ def createForm() {
 def checkPresentedPairsKppOktmo() {
     declarationDataConsolidated = declarationDataConsolidated ?: declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, declarationData.departmentReportPeriodId).get(0)
     List<Pair<String, String>> kppOktmoNotPresentedInRefBookList = declarationService.findNotPresentedPairKppOktmo(declarationDataConsolidated.id);
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.getDepartmentId())
     for (Pair<String, String> kppOktmoNotPresentedInRefBook : kppOktmoNotPresentedInRefBookList) {
-        logger.warn("Для подразделения Тербанк отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.", kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
+        logger.warn("Для подразделения %s отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.",
+                department.getName(), kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
     }
 }
 
