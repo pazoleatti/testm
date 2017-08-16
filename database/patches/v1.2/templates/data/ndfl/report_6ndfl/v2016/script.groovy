@@ -1,7 +1,9 @@
 package form_template.ndfl.report_6ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.transform.TypeChecked
@@ -101,6 +103,8 @@ final DeclarationService declarationService = getProperty("declarationService")
 final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
 @Field
 final DeclarationData declarationData = getProperty("declarationData")
+@Field
+final NdflPersonService ndflPersonService = getProperty("ndflPersonService")
 @Field
 final Logger logger = getProperty("logger")
 
@@ -307,6 +311,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 def ndflPersonidForSearch = ndflPersonKnfId.collate(1000)
                 // Поиск и добавление доходов
                 ndflPersonidForSearch.each {
+                    ScriptUtils.checkInterrupted()
                     ndflPersonIncomeList.addAll(ndflPersonService.findIncomesForPersonByKppOktmoAndPeriod(it, declarationData.kpp, declarationData.oktmo, reportPeriod.startDate, reportPeriod.endDate))
                 }
                 // Отфилтьтруем строки у которых раздел 2.графа 6 не в этом отчетном периоде
@@ -334,15 +339,20 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
                     // Доходы без ставки
                     def incomesWithNullTaxRate = ndflPersonIncomeList.findAll { it.taxRate == null }
+                    Map<String, List<NdflPersonIncome>> incomesWithNullTaxRateMap = [:]
+                    incomesWithNullTaxRate.each() { NdflPersonIncome incomeWithNullTaxRate ->
+                        if (!incomesWithNullTaxRateMap.containsKey(incomeWithNullTaxRate.operationId)) {
+                            incomesWithNullTaxRateMap.put(incomeWithNullTaxRate.operationId, [])
+                        }
+                        incomesWithNullTaxRateMap.get(incomeWithNullTaxRate.operationId).add(incomeWithNullTaxRate)
+                    }
 
                     // Объединенные доходы без ставки и доходы имеющие одинаковый номер операции, ключ ставка - значение список операций
                     incomesGroupedByRate.each { key, value ->
                         def pickedIncomes = []
-                        value.each { incomeGrouped ->
-                            incomesWithNullTaxRate.each { incomeNullRate ->
-                                if (incomeNullRate.operationId == incomeGrouped.operationId) {
-                                    pickedIncomes << incomeNullRate
-                                }
+                        value.collect(){it.operationId}.toSet().each { operationId ->
+                            if (incomesWithNullTaxRateMap.containsKey(operationId)) {
+                                pickedIncomes.addAll(incomesWithNullTaxRateMap.get(operationId))
                             }
                         }
                         value.addAll(pickedIncomes)

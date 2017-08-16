@@ -215,11 +215,6 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
 
-        // Нельзя удалить декларацию в закрытом периоде
-        if (!departmentReportPeriod.isActive()) {
-            throw new AccessDeniedException("Период закрыт");
-        }
-
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
         // Удалять могут только контролёр текущего уровня и контролёр УНП
