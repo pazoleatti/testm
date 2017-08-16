@@ -1,6 +1,5 @@
-package com.aplana.sbrf.taxaccounting.web.spring.permissions;
+package com.aplana.sbrf.taxaccounting.permissions;
 
-import com.aplana.sbrf.taxaccounting.model.TAUser;
 import org.springframework.security.core.userdetails.User;
 
 /**

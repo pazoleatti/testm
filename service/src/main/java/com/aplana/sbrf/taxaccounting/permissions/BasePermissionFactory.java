@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.spring.permissions;
+package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -106,8 +106,8 @@ public class BasePermissionFactory<T> implements PermissionFactory<T>, Disposabl
 
     @Override
     public void destroy() throws Exception {
-        for(Permission<T> permission:registeredPermissions.values()){
-            if(permission instanceof DisposableBean){
+        for (Permission<T> permission : registeredPermissions.values()) {
+            if (permission instanceof DisposableBean) {
                 ((DisposableBean) permission).destroy();
             }
         }
