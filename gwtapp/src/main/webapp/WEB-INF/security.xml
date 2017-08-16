@@ -86,7 +86,7 @@
 	</beans:bean>
 
 	<beans:bean id="permissionEvaluator"
-				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.BasePermissionEvaluator">
+				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator">
 		<beans:property name="permissionFactoryRegistry">
 			<beans:map>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.TAUser" value-ref="userPermissionFactory"/>
@@ -96,14 +96,14 @@
 
 	<!--Фабрики системы расчета прав-->
 	<beans:bean id="userPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.BasePermissionFactory">
+				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
 		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.web.spring.permissions.UserPermission"/>
+				value="com.aplana.sbrf.taxaccounting.permissions.UserPermission"/>
 	</beans:bean>
 
 	<!--Объекты расчета прав-->
 	<beans:bean id="userPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.web.spring.permissions.UserPermissionSetter">
+				class="com.aplana.sbrf.taxaccounting.permissions.UserPermissionSetter">
 		<beans:property name="permissionFactory" ref="userPermissionFactory"/>
 		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
 	</beans:bean>

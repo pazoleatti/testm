@@ -1,7 +1,9 @@
-package com.aplana.sbrf.taxaccounting.web.spring.permissions;
+package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -11,6 +13,8 @@ import org.springframework.security.core.userdetails.User;
  */
 @Configurable
 public abstract class UserPermission extends AbstractPermission<TAUser> {
+    @Autowired
+    protected TAUserService taUserService;
 
     /**
      * Право доступа к пункту меню "Налоги->НДФЛ->Формы"
@@ -92,6 +96,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            taUserService.getUser(currentUser.getUsername());
             for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
                 if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
@@ -335,6 +340,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
             return false;
         }
     }
+
     /**
      * Право на создание декларации вручную (журнал = отчетность)
      */
@@ -356,6 +362,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
             return false;
         }
     }
+
     /**
      * Право на создание декларации вручную (журнал = налоговые формы)
      */

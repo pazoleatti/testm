@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.spring.permissions;
+package com.aplana.sbrf.taxaccounting.permissions;
 
 import java.util.List;
 

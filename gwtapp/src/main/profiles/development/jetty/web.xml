@@ -5,14 +5,14 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			/WEB-INF/applicationContext.xml
-			/WEB-INF/security.xml
 			/WEB-INF/spring-ejb.xml
 			/WEB-INF/mvc-dispatcher-servlet-jetty.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
             classpath:com/aplana/sbrf/taxaccounting/script-support.xml
 			classpath:com/aplana/sbrf/taxaccounting/service.xml
 			classpath:com/aplana/sbrf/taxaccounting/cache.xml
+			/WEB-INF/applicationContext.xml
+			/WEB-INF/security.xml
 		</param-value>
 	</context-param>
 	<!-- Creates the Spring Container shared by all Servlets and Filters -->

@@ -3,11 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.permissions.UserPermission;
+import com.aplana.sbrf.taxaccounting.permissions.UserPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.UserDataModel;
-import com.aplana.sbrf.taxaccounting.web.spring.permissions.UserPermission;
-import com.aplana.sbrf.taxaccounting.web.spring.permissions.UserPermissionSetter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
