@@ -87,6 +87,15 @@ public interface DeclarationDataDao {
 	List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
 
 	/**
+	 * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает список идентификаторов данных
+	 * по декларациям, соответствующие критериям поиска
+	 * @param declarationDataFilter - фильтр, по которому происходит поиск
+	 * @param pagingParams - диапазон индексов, поле сортировки, прямой/обратный порядок
+	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска
+	 */
+	List<DeclarationDataJournalItem> findPage(DeclarationDataFilter declarationDataFilter,PagingParams pagingParams);
+
+	/**
 	 * Декларация по типу и отчетному периоду подразделения
 	 */
 	List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);

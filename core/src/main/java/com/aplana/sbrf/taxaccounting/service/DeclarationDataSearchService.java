@@ -18,7 +18,15 @@ public interface DeclarationDataSearchService {
 	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска.
 	 */
 	PagingResult<DeclarationDataSearchResultItem> search(DeclarationDataFilter declarationFilter);
-	
+
+	/**
+	 * Получить список деклараций для таблицы "Список налоговых форм" с учётом пагинации.
+	 * @param declarationFilter фильтр, по параметрам которого происходит поиск данных по декларациям
+	 * @param pagingParams параметры пагинации
+	 * @return список идентификаторов данных по декларациям, соответствующие критериям поиска.
+	 */
+	PagingResult<DeclarationDataJournalItem> findDeclarationDataJournalItems(DeclarationDataFilter declarationFilter,PagingParams pagingParams);
+
 	/**
 	 * Получить информацию о значениях, допустимых в фильтрах по декларациям для пользователя по виду налога
 	 * @param userInfo информация о пользователе

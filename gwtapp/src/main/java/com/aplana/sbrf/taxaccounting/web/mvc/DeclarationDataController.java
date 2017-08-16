@@ -624,7 +624,7 @@ public class DeclarationDataController {
      * @return список налоговых форм {@link DeclarationDataSearchResultItem}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
-    public JqgridPagedList<DeclarationDataSearchResultItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
 
         //TODO: переместить реализацию в сервис
         TAUser currentUser = securityService.currentUserInfo().getUser();
@@ -658,11 +658,11 @@ public class DeclarationDataController {
             dataFilter.setControlNs(false);
         }
 
-        PagingResult<DeclarationDataSearchResultItem> declarations = declarationDataSearchService.search(dataFilter);
+        PagingResult<DeclarationDataJournalItem>   pagingResult =  declarationDataSearchService.findDeclarationDataJournalItems(dataFilter,pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
-                declarations,
-                declarations.getTotalCount(),
+                pagingResult,
+                pagingResult.getTotalCount(),
                 pagingParams
         );
     }
