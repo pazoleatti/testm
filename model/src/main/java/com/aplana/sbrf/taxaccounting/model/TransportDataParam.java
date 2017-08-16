@@ -28,7 +28,6 @@ public class TransportDataParam {
     public static final String NAME_EXTENSION = ".rnu";
     public static final String NAME_FORMAT_ERROR_DEC = "Имя транспортного файла «%s» не соответствует формату «<Код подразделения><Код АСНУ (тип доходов)><Код периода><Календарный год><GUID>.xml»!";
     public static final String NAME_FORMAT_ERROR = "Имя транспортного файла «%s» не соответствует формату «<Код налоговой формы><Код подразделения><Код периода><Календарный год><Месяц>.rnu»!";
-    public static final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)\\.(xml|XML)";
     private final String formCode;
     private final String departmentCode;
     private final String reportPeriodCode;
@@ -176,7 +175,6 @@ public class TransportDataParam {
         String kpp = null;
         Integer year = null;
         boolean isFNS = false;
-        Pattern pattern = Pattern.compile(NO_RASCHSV_PATTERN);
         if (name != null && name.toLowerCase().endsWith(NAME_EXTENSION_DEC)
                 & name.length() == NAME_LENGTH_QUARTER_DEC) {
             declarationTypeId = 100;
@@ -192,11 +190,6 @@ public class TransportDataParam {
             } catch (NumberFormatException nfe) {
                 // Ignore
             }
-        } else if (pattern.matcher(name).matches()) {
-            declarationTypeId = 200;
-            departmentCode = null;
-            reportPeriodCode = null;
-            kpp = name.replaceAll(NO_RASCHSV_PATTERN, "$4");
         } else {
             throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR_DEC, name));
         }

@@ -151,8 +151,6 @@ public class NdflPersonDaoTest {
 
         boolean prepaymentEquals = CollectionUtils.isEqualCollection(goodNdflPerson.getPrepayments(), ndflPerson.getPrepayments(), new NdflPersonPrepaymentEquator());
         Assert.assertTrue(prepaymentEquals);
-
-
     }
 
     @Test(expected = DaoException.class)

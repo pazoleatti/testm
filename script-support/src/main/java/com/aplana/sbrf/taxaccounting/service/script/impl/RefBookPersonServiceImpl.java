@@ -58,39 +58,11 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
 
-    // ----------------------------- 1151111 -----------------------------
-
-    @Override
-    public void fillRecordVersions1151111(Date version) {
-        refBookPersonDao.fillRecordVersions1151111(version);
-    }
-
-    @Override
-    public List<NaturalPerson> findPersonForInsertFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, RowMapper<NaturalPerson> naturalPersonPrimaryRnuRowMapper) {
-        return refBookPersonDao.findPersonForInsertFromPrimary1151111(declarationDataId, asnuId, version, naturalPersonPrimaryRnuRowMapper);
-    }
-
-    @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForUpdateFromPrimary1151111(declarationDataId, asnuId, version, naturalPersonHandler);
-    }
-
-    @Override
-    public Map<Long, Map<Long, NaturalPerson>> findPersonForCheckFromPrimary1151111(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
-        return refBookPersonDao.findPersonForCheckFromPrimary1151111(declarationDataId, asnuId, version, naturalPersonHandler);
-    }
-
-    @Override
-    public List<NaturalPerson> findNaturalPersonPrimaryDataFrom1151111(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper) {
-        return refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(declarationDataId, naturalPersonRowMapper);
-    }
-
-
     // ----------------------------- identification -----------------------------
 
     @Override
     public NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger) {
-        return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeigthCalculator(getBaseCalculateList()), logger);
+        return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeightCalculator(getBaseCalculateList()), logger);
     }
 
     @Override
@@ -383,13 +355,13 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         }
     }
 
-    public class PersonDataWeigthCalculator implements WeigthCalculator<IdentityPerson> {
+    public class PersonDataWeightCalculator implements WeigthCalculator<IdentityPerson> {
 
         private Map<String, Double> result = new HashMap<String, Double>();
 
         private List<BaseWeigthCalculator> compareList;
 
-        public PersonDataWeigthCalculator(List<BaseWeigthCalculator> compareList) {
+        public PersonDataWeightCalculator(List<BaseWeigthCalculator> compareList) {
             this.compareList = compareList;
         }
 

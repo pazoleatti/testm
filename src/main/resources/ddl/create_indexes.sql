@@ -56,11 +56,6 @@ create index idx_ndfl_person_prep_pnotdt on ndfl_person_prepayment(ndfl_person_i
 create index idx_ref_deduct_mark_name on ref_book_deduction_mark(name);
 create index idx_ref_deduct_type_dmark on ref_book_deduction_type(deduction_mark);
 create index idx_decl_data_oktmo_kpp on declaration_data(oktmo, kpp);
-create index idx_ras_psv_strlic_decl_person on raschsv_pers_sv_strah_lic(declaration_data_id,person_id);
-create index idx_ra_sv_vypl_parent on raschsv_sv_vypl(raschsv_pers_sv_strah_lic_id);
-create index idx_ra_sv_vypl_mk_parent on raschsv_sv_vypl_mk(raschsv_sv_vypl_id);
-create index idx_ra_vypl_sv_dop_parent on raschsv_vypl_sv_dop(raschsv_pers_sv_strah_lic_id);
-create index idx_ra_vypl_sv_dop_mt_parent on raschsv_vypl_sv_dop_mt(raschsv_vypl_sv_dop_id);
 create index idx_log_entry_date on log_entry(creation_date);
 create index idx_ref_book_cal_work on ref_book_calendar(ctype);
 --create index i_ref_book_oktmo_code on ref_book_oktmo (code); -- дубль в create_ref_constraints.sql

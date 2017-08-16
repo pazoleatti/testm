@@ -352,14 +352,8 @@ import org.joda.time.format.DateTimeFormat
     }
 
     def updatePrimaryToRefBookPersonReferences(primaryDataRecords){
-
         ScriptUtils.checkInterrupted();
-
-        if (FORM_TYPE == 100){
-            ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
-        } else {
-            raschsvPersSvStrahLicService.updateRefBookPersonReferences(primaryDataRecords)
-        }
+        ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
     }
 
     def calculate() {
