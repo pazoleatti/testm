@@ -96,6 +96,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            taUserService.getUser(currentUser.getUsername());
             for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
                 if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
