@@ -308,19 +308,18 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Collection<Integer> getAppointmentDepartments(TAUser tAUser) {
         // Результат выборки должен содержать только уникальные подразделения
         HashSet<Integer> retList = new HashSet<Integer>();
-        for(TaxType taxType: Arrays.asList(TaxType.NDFL, TaxType.PFR)) {
-            if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-                // все подразделения из справочника подразделений
-                for (Department dep : departmentDao.listDepartments()) {
-                    retList.add(dep.getId());
-                }
-            } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-                // 1. подразделения, для форм которых подразделения из выборки 10 - Выборка для бизнес-администрирования назначены исполнителями.
-                retList.addAll(departmentDao.getDepartmentIdsByExecutors(getBADepartmentIds(tAUser)));
-                // 2. подразделения, для форм которых подразделения из выборки 45 - Подразделения, доступные через назначение источников-приёмников назначены исполнителями.
-                for (Department dep : getSourcesDepartments(tAUser, null, null)) {
-                    retList.add(dep.getId());
-                }
+        TaxType taxType = TaxType.NDFL;
+        if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+            // все подразделения из справочника подразделений
+            for (Department dep : departmentDao.listDepartments()) {
+                retList.add(dep.getId());
+            }
+        } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+            // 1. подразделения, для форм которых подразделения из выборки 10 - Выборка для бизнес-администрирования назначены исполнителями.
+            retList.addAll(departmentDao.getDepartmentIdsByExecutors(getBADepartmentIds(tAUser)));
+            // 2. подразделения, для форм которых подразделения из выборки 45 - Подразделения, доступные через назначение источников-приёмников назначены исполнителями.
+            for (Department dep : getSourcesDepartments(tAUser, null, null)) {
+                retList.add(dep.getId());
             }
         }
 

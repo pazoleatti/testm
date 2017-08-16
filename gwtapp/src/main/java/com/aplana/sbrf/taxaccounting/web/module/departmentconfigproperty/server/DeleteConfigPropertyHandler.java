@@ -76,8 +76,6 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
             String filterSlave = "LINK  = " + recordVersion.getRecordId();
             if (action.getTaxType() == TaxType.NDFL) {
                 filterSlave = "REF_BOOK_NDFL_ID = " + recordVersion.getRecordId();
-            } else if (action.getTaxType() == TaxType.PFR) {
-                filterSlave = "REF_BOOK_FOND_ID = " + recordVersion.getRecordId();
             }
 
             PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(period.getCalendarStartDate(), null, filterSlave, null);

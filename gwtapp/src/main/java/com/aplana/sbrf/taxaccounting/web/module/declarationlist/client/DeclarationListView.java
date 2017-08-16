@@ -428,10 +428,8 @@ public class DeclarationListView extends
         declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
         declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
         declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
-        if (taxType == TaxType.NDFL || taxType == TaxType.PFR) {
-            if (!isReports) {
-                declarationTable.addColumn(declarationAsnuColumn, declarationTable.createResizableHeader(ASNU_TITLE, declarationAsnuColumn));
-            }
+        if (taxType == TaxType.NDFL && !isReports) {
+            declarationTable.addColumn(declarationAsnuColumn, declarationTable.createResizableHeader(ASNU_TITLE, declarationAsnuColumn));
         }
 
         declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
@@ -454,10 +452,6 @@ public class DeclarationListView extends
             declarationTable.addColumn(declarationNoteColumn, declarationTable.createResizableHeader(NOTE_TITLE, declarationNoteColumn));
         } else {
             declarationTable.addColumn(fileNameColumn, declarationTable.createResizableHeader(FILE_NAME_TITLE, fileNameColumn));
-            if (taxType == TaxType.PFR) {
-                declarationTable.addColumn(declarationDocStateColumn, declarationTable.createResizableHeader(DOC_STATE_TITLE, declarationDocStateColumn));
-                declarationTable.setColumnWidth(declarationDocStateColumn, 7, Style.Unit.EM);
-            }
         }
 
         if (!isReports) {

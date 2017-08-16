@@ -37,8 +37,7 @@ public class RefBook implements Serializable {
      * Соотношение основной и табличной части настроек подразделений с типом налога
      */
     public enum WithTable {
-        NDFL(TaxType.NDFL, 950L, 951L),
-		FOND(TaxType.PFR, 960L, 961L);
+        NDFL(TaxType.NDFL, 950L, 951L);
 
         private TaxType taxType;
         private Long refBookId;
@@ -131,8 +130,6 @@ public class RefBook implements Serializable {
 		PERSON_CATEGORY(941),						// Категорий застрахованных лиц
 		NDFL(950), 									// Настройки подразделений по НДФЛ
 		NDFL_DETAIL(951), 							// Настройки подразделений по НДФЛ (таблица)
-		FOND(960), 									// Настройки подразделений по Сборы, взносы
-		FOND_DETAIL(961), 							// Настройки подразделений по Сборы, взносы (таблица)
 		NDFL_REFERENCES(964),                       // Реестр справок
 		SEC_USER_ASNU(942);							// Ограничение доступа по АСНУ
 

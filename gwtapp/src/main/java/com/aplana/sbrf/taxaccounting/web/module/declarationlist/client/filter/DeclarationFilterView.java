@@ -316,7 +316,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
         switch (taxType) {
             case NDFL:
-            case PFR:
                 fillNdflPfr(taxType, isReports);
                 break;
             default:
@@ -595,16 +594,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel6.add(label);
             verticalPanel7.add(formStatePicker);
-
-            if (taxType.equals(TaxType.PFR)) {
-                label = getLabel("Состояние ЭД:");
-                label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-                verticalPanel6.add(label);
-                verticalPanel7.add(docStatePicker);
-            }
         }
 
-        if (taxType.equals(TaxType.PFR) || taxType.equals(TaxType.NDFL)) {
+        if (taxType.equals(TaxType.NDFL)) {
             label = getLabel("Файл:");
             label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
             verticalPanel6.add(label);

@@ -247,39 +247,6 @@ def isNdfl6Response(fileName) {
 }
 
 /**
- * Проверяет что файл ответа принадлежит 6 НФДЛ и не пренадлежит 1151111
- * Для этого надо проверить содеражание файла
- */
-def isNdfl6AndNot11151111(fileName) {
-    def contentMap = readNdfl6ResponseContent()
-
-    if (contentMap == null) {
-        return false
-    }
-
-    def reportFileName = getFileName(contentMap, fileName)
-
-    if (reportFileName == null) {
-        return false
-    }
-
-    // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
-    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
-
-    def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
-    if (declarationDataList.isEmpty()) {
-        return false
-    }
-
-    if (declarationDataList.size() > 1) {
-        return false
-    }
-
-    return true
-}
-
-/**
  * Возвращает имя отчетного файла для 6НДФЛ
  */
 def getFileName(contentMap, fileName) {
@@ -1067,41 +1034,6 @@ def _importTF() {
             .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
             .append(", Вид: \"").append(declarationType.getName()).append("\"")
             .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
-}
-
-def readXml1151111() {
-    def sett = [:]
-    sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR])
-
-    try {
-        SAXParserFactory factory = SAXParserFactory.newInstance()
-        SAXParser saxParser = factory.newSAXParser()
-        SAXHandler handler = new SAXHandler(sett)
-        saxParser.parse(ImportInputStream, handler)
-        reportPeriodCode = handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
-        try {
-            year = Integer.parseInt(handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_YEAR))
-        } catch (NumberFormatException nfe) {
-            logger.error("Файл «%s» не загружен: Не удалось извлечь данные о календарном годе из элемента Файл.Документ.ОтчетГод", UploadFileName)
-            return null
-        }
-    } catch (IOException e) {
-        e.printStackTrace()
-        logger.error("Файл «%s» не загружен: Ошибка чтения файла", UploadFileName)
-        return null
-    } catch (ParserConfigurationException e) {
-        e.printStackTrace()
-        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
-        return null
-    } catch (SAXException e) {
-        e.printStackTrace()
-        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
-        return null
-    } finally {
-        IOUtils.closeQuietly(ImportInputStream)
-    }
-
-    return [reportPeriodCode, year]
 }
 
 String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {

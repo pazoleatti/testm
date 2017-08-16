@@ -56,7 +56,6 @@ public class NotificationController {
         filter.setUserId(user.getId());
         Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
         receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null));
-        receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user, TaxType.PFR, null, null));
         filter.setReceiverDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         filter.setUserRoleIds(userRoles);
 

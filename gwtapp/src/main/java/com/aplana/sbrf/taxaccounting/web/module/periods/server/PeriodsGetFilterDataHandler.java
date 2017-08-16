@@ -44,7 +44,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 	        res.setCanEdit(true);
             switch (taxType) {
                 case NDFL:
-                case PFR:
                     res.setCanChangeDepartment(false);
 	                res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
 	                res.setSelectedDepartment(
@@ -66,7 +65,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 			);
 	        switch (taxType) {
                 case NDFL:
-                case PFR:
 			        res.setCanEdit(false);
 			        break;
 	        }

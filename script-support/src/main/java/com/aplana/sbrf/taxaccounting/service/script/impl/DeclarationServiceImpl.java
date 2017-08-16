@@ -54,7 +54,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private static final Map<TaxType, Long> TAX_TYPE_TO_REF_BOOK_MAP = new HashMap<TaxType, Long>() {
         {
             put(TaxType.NDFL, RefBook.Id.NDFL.getId());
-            put(TaxType.PFR, RefBook.Id.FOND.getId());
         }
     };
 

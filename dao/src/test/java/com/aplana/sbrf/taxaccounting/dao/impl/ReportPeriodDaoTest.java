@@ -50,7 +50,7 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getCorrectPeriods() {
-        reportPeriodDao.getCorrectPeriods(TaxType.PFR, 1);
+        reportPeriodDao.getCorrectPeriods(TaxType.NDFL, 1);
     }
 	
 	@Test
@@ -123,11 +123,9 @@ public class ReportPeriodDaoTest {
     @Test
     public void getPeriodsByTaxTypeAndDepartmentsTest() {
         List<ReportPeriod> reportPeriods;
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.PFR, asList(1, 2, 3));
-        Assert.assertEquals(1, reportPeriods.size());
         reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, asList(1, 2, 3));
-        Assert.assertEquals(2, reportPeriods.size());
-        Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2)));
+        Assert.assertEquals(3, reportPeriods.size());
+        Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
             }
 
     private ReportPeriod getReportPeriod() {
@@ -178,7 +176,7 @@ public class ReportPeriodDaoTest {
     @Test
     public void getByTaxTypedCodeYearTest() {
         ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.NDFL, "21", 2013);
-        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.PFR, "99", 2013);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.NDFL, "99", 2015);
         Assert.assertNull(reportPeriod1);
         Assert.assertNotNull(reportPeriod2);
         Assert.assertEquals(3, reportPeriod2.getId().intValue());

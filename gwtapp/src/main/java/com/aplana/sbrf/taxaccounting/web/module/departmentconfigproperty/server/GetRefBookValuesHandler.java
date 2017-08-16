@@ -87,8 +87,6 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         String filterSlave = "LINK  = " + result.getRecordId();
         if (action.getTaxType() == TaxType.NDFL) {
             filterSlave = "REF_BOOK_NDFL_ID = " + result.getRecordId();
-        } else if (action.getTaxType() == TaxType.PFR) {
-            filterSlave = "REF_BOOK_FOND_ID = " + result.getRecordId();
         }
         RefBookAttribute sortAttr = rbFactory.get(action.getSlaveRefBookId()).getAttribute("ROW_ORD");
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(

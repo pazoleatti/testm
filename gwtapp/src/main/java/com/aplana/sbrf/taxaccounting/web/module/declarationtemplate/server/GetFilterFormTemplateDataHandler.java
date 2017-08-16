@@ -35,9 +35,6 @@ public class GetFilterFormTemplateDataHandler extends AbstractActionHandler<GetF
         if (user.hasRole(TARole.N_ROLE_CONF)) {
             taxTypes.add(TaxType.NDFL);
         }
-        if (user.hasRole(TARole.F_ROLE_CONF)) {
-            taxTypes.add(TaxType.PFR);
-        }
 
         res.setTaxTypes(taxTypes);
         return res;

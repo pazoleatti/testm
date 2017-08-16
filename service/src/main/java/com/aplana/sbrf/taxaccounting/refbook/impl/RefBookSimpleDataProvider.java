@@ -249,9 +249,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
 
             if (getRefBook().isVersioned()) {
                 if (!getRefBook().getId().equals(RefBook.WithTable.NDFL.getRefBookId()) &&
-                        !getRefBook().getId().equals(RefBook.WithTable.NDFL.getTableRefBookId()) &&
-                        !getRefBook().getId().equals(RefBook.WithTable.FOND.getRefBookId()) &&
-                        !getRefBook().getId().equals(RefBook.WithTable.FOND.getTableRefBookId())) {
+                        !getRefBook().getId().equals(RefBook.WithTable.NDFL.getTableRefBookId())) {
 
                     for (RefBookRecord record : records) {
                         //Проверка пересечения версий

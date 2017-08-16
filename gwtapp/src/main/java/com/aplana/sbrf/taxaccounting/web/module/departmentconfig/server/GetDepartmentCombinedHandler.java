@@ -80,10 +80,6 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 parentRefBookId = RefBook.Id.NDFL.getId();
                 provider = rbFactory.getDataProvider(parentRefBookId);
                 break;
-            case PFR:
-                parentRefBookId = RefBook.Id.FOND.getId();
-                provider = rbFactory.getDataProvider(parentRefBookId);
-                break;
         }
 
         if (parentRefBookId != null) {

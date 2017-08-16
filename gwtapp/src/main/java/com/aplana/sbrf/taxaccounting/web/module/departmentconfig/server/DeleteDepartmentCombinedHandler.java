@@ -81,9 +81,6 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
                 case NDFL:
                     refBookId = RefBook.Id.NDFL.getId();
                     break;
-                case PFR:
-                    refBookId = RefBook.Id.FOND.getId();
-                    break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
             ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());

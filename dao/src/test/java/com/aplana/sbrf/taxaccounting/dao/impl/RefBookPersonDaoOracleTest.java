@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimary1151111RowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;

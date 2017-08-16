@@ -464,7 +464,6 @@ public class PeriodServiceImpl implements PeriodService {
 
         switch (taxType) {
             case NDFL:
-            case PFR:
                 departmentIds = departmentService.getBADepartmentIds(user.getUser());
                 break;
         }
@@ -566,7 +565,6 @@ public class PeriodServiceImpl implements PeriodService {
         if (user.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             switch (taxType) {
                 case NDFL:
-                case PFR:
                     switch (operation) {
                         case FIND:
                             List<Integer> dep = new ArrayList<Integer>();
@@ -584,7 +582,6 @@ public class PeriodServiceImpl implements PeriodService {
         } else if (user.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             switch (taxType) {
                 case NDFL:
-                case PFR:
                     switch (operation) {
                         case FIND:
                             return departmentService.getTBDepartmentIds(user, taxType);

@@ -35,11 +35,7 @@ public enum TaxType {
     /**
      * НДФЛ
      */
-    NDFL('N', "НДФЛ", "NO_NDFL"),
-    /**
-     * Фонды и Сборы
-     */
-    PFR('F', "Страховые сборы, взносы", "NO_PFR");
+    NDFL('N', "НДФЛ", "NO_NDFL");
 
 	private final char code;
 	private final String name;

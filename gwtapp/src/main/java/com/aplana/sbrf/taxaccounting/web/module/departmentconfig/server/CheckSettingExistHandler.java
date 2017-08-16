@@ -41,9 +41,6 @@ public class CheckSettingExistHandler extends AbstractActionHandler<CheckSetting
             case NDFL:
                 refBookId = RefBook.Id.NDFL.getId();
                 break;
-            case PFR:
-                refBookId =RefBook.Id.FOND.getId();
-                break;
         }
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
