@@ -188,6 +188,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     public List<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
         StringPath rn = Expressions.stringPath("rn");
         StringPath notificationTable = Expressions.stringPath("notification");
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier orderForRowNumber;
         switch (filter.getSortColumn()) {
             case DATE:
@@ -223,7 +224,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
             whereOut.and(rn.between(filter.getStartIndex().toString(), String.valueOf(filter.getStartIndex() + filter.getCountOfRecords())));
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier orderForSubQuery;
         Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
         Sort sort = new Sort(sortOrder);

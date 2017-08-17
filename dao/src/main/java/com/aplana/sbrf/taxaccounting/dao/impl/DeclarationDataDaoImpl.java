@@ -274,7 +274,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             where.and(declarationKind.id.in(filter.getFormKindIds()));
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier ordering;
 
         String orderingProperty = params.getProperty();

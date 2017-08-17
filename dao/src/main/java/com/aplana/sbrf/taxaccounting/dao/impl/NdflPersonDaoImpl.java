@@ -185,7 +185,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.loe(ndflPersonIncomeFilter.getPaymentDateTo())));
             }
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier order;
         Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
         Sort sort = new Sort(sortOrder);
@@ -310,7 +310,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.loe(ndflPersonDeductionFilter.getDeductionDateTo())));
             }
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier order;
         Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
         Sort sort = new Sort(sortOrder);
@@ -410,7 +410,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.loe(ndflPersonPrepaymentFilter.getNotifDateTo())));
             }
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier order;
         Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
         Sort sort = new Sort(sortOrder);
