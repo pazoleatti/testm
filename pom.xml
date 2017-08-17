@@ -46,6 +46,7 @@
         <releasePostfix>-${project.version}</releasePostfix>
         <releaseName>ndfl${releasePostfix}</releaseName>
         <ejb.version>3.0</ejb.version>
+		<querydsl.version>4.1.4</querydsl.version>
 	</properties>
 
 	<dependencyManagement>
@@ -481,19 +482,19 @@
 
 			<!--queryDSL-->
 			<dependency>
-				<groupId>com.mysema.querydsl</groupId>
+				<groupId>com.querydsl</groupId>
 				<artifactId>querydsl-sql</artifactId>
-				<version>3.7.4</version>
+				<version>${querydsl.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.querydsl</groupId>
 				<artifactId>querydsl-core</artifactId>
-				<version>4.1.4</version>
+				<version>${querydsl.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.querydsl</groupId>
 				<artifactId>querydsl-sql-spring</artifactId>
-				<version>4.1.4</version>
+				<version>${querydsl.version}</version>
 			</dependency>
 
 		</dependencies>
