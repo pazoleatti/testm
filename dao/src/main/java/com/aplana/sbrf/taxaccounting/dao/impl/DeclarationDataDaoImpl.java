@@ -69,7 +69,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             declarationType.name.as("declarationType"),
             department.name.as("department"),
             refBookAsnu.name.as("asnuName"),
-            reportPeriod.name.as("repordPeriod"),
+            reportPeriod.name.as("reportPeriod"),
             state.name.as("state"),
             declarationData.fileName,
             logBusiness.logDate.as("creationDate"),
