@@ -302,6 +302,7 @@ create sequence seq_report_period start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table declaration_type (
   id        number(9)           not null,
+  tax_type  char(1)             not null,
   name      varchar2(1000)      not null,
   status    number(1) default 0 not null,
   is_ifrs   number(1) default 0 not null,

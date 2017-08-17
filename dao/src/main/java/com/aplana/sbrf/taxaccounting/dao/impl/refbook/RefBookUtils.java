@@ -171,4 +171,46 @@ public static class RecordVersionMapper implements RowMapper<RefBookRecordVersio
         }
         return false;
     }
+
+    private static RefBookValue getValue(Map<String, RefBookValue> record, String alias) {
+        if (record == null || record.get(alias) == null) {
+            return null;
+        }
+        return record.get(alias);
+    }
+
+    public static String getStringValue(Map<String, RefBookValue> record, String alias) {
+        RefBookValue value = getValue(record, alias);
+        return value != null ? value.getStringValue() : null;
+    }
+
+    public static Integer getIntValue(Map<String, RefBookValue> record, String alias) {
+        RefBookValue value = getValue(record, alias);
+        return value != null ? value.getNumberValue().intValue() : null;
+    }
+
+    public static Long getLongValue(Map<String, RefBookValue> record, String alias) {
+        RefBookValue value = getValue(record, alias);
+        return value != null ? value.getNumberValue().longValue() : null;
+    }
+
+    public static Long getRefValue(Map<String, RefBookValue> record, String alias) {
+        RefBookValue value = getValue(record, alias);
+        return value != null ? value.getReferenceValue() : null;
+    }
+
+    public static Byte getByteValue(Map<String, RefBookValue> record, String alias) {
+        RefBookValue value = getValue(record, alias);
+        return value != null ? value.getNumberValue().byteValue() : null;
+    }
+
+    public static boolean getBooleanValue(Map<String, RefBookValue> record, String alias) {
+        RefBookValue value = getValue(record, alias);
+        return value != null && value.getNumberValue().intValue() == 1;
+    }
+
+    public static Date getDateValue(Map<String, RefBookValue> record, String alias) {
+        RefBookValue value = getValue(record, alias);
+        return value != null ? value.getDateValue() : null;
+    }
 }

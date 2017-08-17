@@ -20,6 +20,13 @@
                 VIEW_MANUAL_USER: 1 << 8,
                 VIEW_MANUAL_DESIGNER: 1 << 9
             },
+            REFBOOK: {
+                DEPARTMENT: 30,
+                DECLARATION_TYPE: 207,
+                ASNU: 900,
+                ATTACH_FILE_TYPE: 934,
+                PERIOD: reportPeriod
+            },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
                 CALCULATE: 1 << 1,

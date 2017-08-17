@@ -70,5 +70,12 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        // Справочник Категории прикрепленных файлов
+        .factory('RefBookValuesResource', ['$resource', function ($resource) {
+            return $resource('/controller/rest/refBookValues/:refBookId', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
     ;
 }());

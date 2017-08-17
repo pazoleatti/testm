@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
 
 /**
  * Типы подразделений банка 
  */
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum DepartmentType implements Serializable {
 	/** 1 Банк - ROOT_BANK */
 	ROOT_BANK("Банк", 1),
