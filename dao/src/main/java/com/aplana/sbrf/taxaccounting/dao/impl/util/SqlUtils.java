@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import org.joda.time.LocalDateTime;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -213,6 +214,18 @@ public final class SqlUtils {
 	public static Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException{
 		Integer ret = resultSet.getInt(columnIndex);
 		return resultSet.wasNull()?null:ret;
+	}
+
+	/**
+	 * Возвращает значение даты/времени в виде {@link LocalDateTime}. Если значения нет, то вернет null
+	 * @param resultSet набор данных
+	 * @param columnLabel название столбца
+	 * @return {@link LocalDateTime}, либо null
+	 * @throws SQLException
+	 */
+	public static LocalDateTime getLocalDateTime(ResultSet resultSet, String columnLabel) throws SQLException {
+		Date date = resultSet.getDate(columnLabel);
+		return resultSet.wasNull()? null : new LocalDateTime(date);
 	}
 
 	/**

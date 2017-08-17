@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -50,11 +50,11 @@ public class NotificationDaoTest {
         assertEquals(1, notificationDao.getByFilter(userIdFilter).size());
 
         NotificationsFilterData userRoleFilter = new NotificationsFilterData();
-        userRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        userRoleFilter.setUserRoleIds(Arrays.asList(2, 3));
         assertEquals(3, notificationDao.getByFilter(userRoleFilter).size());
 
         NotificationsFilterData userAndRoleFilter = new NotificationsFilterData();
-        userAndRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        userAndRoleFilter.setUserRoleIds(Arrays.asList(2, 3));
         userAndRoleFilter.setUserId(3);
         assertEquals(4, notificationDao.getByFilter(userAndRoleFilter).size());
     }
@@ -73,11 +73,11 @@ public class NotificationDaoTest {
         assertEquals(1, notificationDao.getCountByFilter(userIdFilter));
 
         NotificationsFilterData userRoleFilter = new NotificationsFilterData();
-        userRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        userRoleFilter.setUserRoleIds(Arrays.asList(2, 3));
         assertEquals(3, notificationDao.getCountByFilter(userRoleFilter));
 
         NotificationsFilterData userAndRoleFilter = new NotificationsFilterData();
-        userAndRoleFilter.setUserRoleIds(Arrays.asList(2,3));
+        userAndRoleFilter.setUserRoleIds(Arrays.asList(2, 3));
         userAndRoleFilter.setUserId(3);
         assertEquals(4, notificationDao.getCountByFilter(userAndRoleFilter));
     }
@@ -85,12 +85,12 @@ public class NotificationDaoTest {
     @Test
     public void saveTest() {
         Notification n = new Notification();
-        n.setDeadline(new Date());
+        n.setDeadline(new LocalDateTime());
         n.setText("");
         n.setReceiverDepartmentId(1);
         n.setSenderDepartmentId(2);
         n.setReportPeriodId(1);
-        n.setCreateDate(new Date());
+        n.setCreateDate(new LocalDateTime());
         n.setLogId("uuid_1");
         n.setReportId("uuid_2");
         n.setNotificationType(NotificationType.REF_BOOK_REPORT);
@@ -114,8 +114,8 @@ public class NotificationDaoTest {
     public void saveListTest() {
         List<Notification> list = new ArrayList<Notification>();
         Notification n1 = new Notification();
-        n1.setDeadline(new Date());
-        n1.setCreateDate(new Date());
+        n1.setDeadline(new LocalDateTime());
+        n1.setCreateDate(new LocalDateTime());
         n1.setText("test1");
         n1.setReportPeriodId(3);
         n1.setSenderDepartmentId(3);
@@ -123,8 +123,8 @@ public class NotificationDaoTest {
         list.add(n1);
 
         Notification n2 = new Notification();
-        n2.setDeadline(new Date());
-        n2.setCreateDate(new Date());
+        n2.setDeadline(new LocalDateTime());
+        n2.setCreateDate(new LocalDateTime());
         n2.setText("test2");
         n2.setReportPeriodId(4);
         n2.setSenderDepartmentId(3);
@@ -146,9 +146,9 @@ public class NotificationDaoTest {
         result = notificationDao.get(1, 3, 1);
         notNull(result);
         List<DepartmentPair> departments = new ArrayList<DepartmentPair>();
-        departments.add(new DepartmentPair(2,1));
-        departments.add(new DepartmentPair(3,1));
-        departments.add(new DepartmentPair(null,1));
+        departments.add(new DepartmentPair(2, 1));
+        departments.add(new DepartmentPair(3, 1));
+        departments.add(new DepartmentPair(null, 1));
         notificationDao.deleteList(1, departments);
         result = notificationDao.get(1, 2, 1);
         isNull(result);
@@ -159,11 +159,11 @@ public class NotificationDaoTest {
     }
 
 
-	@Test
-	public void getForReceiverTest() {
-		Notification notification = notificationDao.get(1);
-		assertEquals(1L, notification.getId().longValue());
-		assertEquals(1, notification.getReceiverDepartmentId().intValue());
-		assertEquals(2, notification.getSenderDepartmentId().intValue());
-	}
+    @Test
+    public void getForReceiverTest() {
+        Notification notification = notificationDao.get(1);
+        assertEquals(1L, notification.getId().longValue());
+        assertEquals(1, notification.getReceiverDepartmentId().intValue());
+        assertEquals(2, notification.getSenderDepartmentId().intValue());
+    }
 }

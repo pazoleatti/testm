@@ -466,8 +466,6 @@ public class RefBookHelperImpl implements RefBookHelper {
         String linkAlias = "LINK";
         if (refBookId == RefBook.WithTable.NDFL.getRefBookId()) {
             linkAlias = "REF_BOOK_NDFL_ID";
-        } else if (refBookId == RefBook.WithTable.FOND.getRefBookId()) {
-            linkAlias = "REF_BOOK_FOND_ID";
         }
         String filterSlave = linkAlias + " = " + uniqueRecordId;
         RefBookAttribute sortAttr = slaveRefBook.getAttribute("ROW_ORD");

@@ -34,7 +34,7 @@ public class QGetRecordsTest extends com.querydsl.sql.RelationalPathBase<QGetRec
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> version = createDateTime("version", org.joda.time.LocalDateTime.class);
 
     public QGetRecordsTest(String variable) {
         super(QGetRecordsTest.class, forVariable(variable), "NDFL_UNSTABLE", "GET_RECORDS_TEST");

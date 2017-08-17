@@ -265,7 +265,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         personIncome.setOperationId("11111");
         personIncome.setOktmo("oktmo111");
         personIncome.setKpp("kpp111");
-        personIncome.setIncomeAccruedDate(parseDate("01.01.2017"));
+        personIncome.setIncomeAccruedDate(toDate("01.01.2017"));
         personIncome.setPaymentNumber("aaaaaaaa" + row);
         personIncome.setTaxSumm(122222L);
         personIncome.setOperationId(operationId);

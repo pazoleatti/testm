@@ -26,7 +26,7 @@ public class QRefBookPerson extends com.querydsl.sql.RelationalPathBase<QRefBook
 
     public final NumberPath<Long> address = createNumber("address", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> birthDate = createDateTime("birthDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> birthDate = createDateTime("birthDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath birthPlace = createString("birthPlace");
 
@@ -68,7 +68,7 @@ public class QRefBookPerson extends com.querydsl.sql.RelationalPathBase<QRefBook
 
     public final NumberPath<Long> taxpayerState = createNumber("taxpayerState", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> version = createDateTime("version", org.joda.time.LocalDateTime.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookPerson> refBookPersonPk = createPrimaryKey(id);
 

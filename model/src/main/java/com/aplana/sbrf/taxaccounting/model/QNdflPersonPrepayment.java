@@ -28,7 +28,7 @@ public class QNdflPersonPrepayment extends com.querydsl.sql.RelationalPathBase<Q
 
     public final NumberPath<Long> ndflPersonId = createNumber("ndflPersonId", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> notifDate = createDateTime("notifDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> notifDate = createDateTime("notifDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath notifNum = createString("notifNum");
 

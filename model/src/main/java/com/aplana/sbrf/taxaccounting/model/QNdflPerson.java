@@ -30,7 +30,7 @@ public class QNdflPerson extends com.querydsl.sql.RelationalPathBase<QNdflPerson
 
     public final StringPath area = createString("area");
 
-    public final DateTimePath<java.sql.Timestamp> birthDay = createDateTime("birthDay", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> birthDay = createDateTime("birthDay", org.joda.time.LocalDateTime.class);
 
     public final StringPath building = createString("building");
 

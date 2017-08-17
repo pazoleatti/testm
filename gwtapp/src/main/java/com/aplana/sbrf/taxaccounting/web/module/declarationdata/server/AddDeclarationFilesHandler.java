@@ -75,7 +75,7 @@ public class AddDeclarationFilesHandler extends AbstractActionHandler<AddDeclara
             DeclarationDataFile declarationDataFile = new DeclarationDataFile();
             declarationDataFile.setUuid(uuid);
             declarationDataFile.setFileName(blobData.getName());
-            declarationDataFile.setDate(blobData.getCreationDate());
+            declarationDataFile.setDate(blobData.getCreationDate().toDate());
             declarationDataFile.setUserName(userName);
             declarationDataFile.setUserDepartmentName(userDepartmentName);
             declarationDataFile.setNote("");

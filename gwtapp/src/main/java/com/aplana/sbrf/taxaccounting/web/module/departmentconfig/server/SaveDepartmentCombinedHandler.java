@@ -85,9 +85,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 case NDFL:
                     refBookId = RefBook.Id.NDFL.getId();
                     break;
-                case PFR:
-                    refBookId = RefBook.Id.FOND.getId();
-                    break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
             RefBook refBook = rbFactory.get(refBookId);

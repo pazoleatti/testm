@@ -624,12 +624,11 @@ public class DeclarationDataController {
      * @return список налоговых форм {@link DeclarationDataSearchResultItem}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
-    public JqgridPagedList<DeclarationDataSearchResultItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
 
         //TODO: переместить реализацию в сервис
         TAUser currentUser = securityService.currentUserInfo().getUser();
         Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
-        boolean isAscSorting = pagingParams.getDirection().equals("asc");
 
         receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(currentUser, TaxType.NDFL, null, null));
 
@@ -639,16 +638,9 @@ public class DeclarationDataController {
         }
 
         DeclarationDataFilter dataFilter = new DeclarationDataFilter();
-
-        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1757 реализовать сортировку в том числе по другим полям
-        dataFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
-        dataFilter.setAscSorting(isAscSorting);
         dataFilter.setAsnuIds(currentUser.getAsnuIds());
         dataFilter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         dataFilter.setFormKindIds(availableDeclarationFormKindIds);
-        dataFilter.setCountOfRecords(pagingParams.getCount());
-        dataFilter.setStartIndex(pagingParams.getStartIndex());
-        dataFilter.setUserDepartmentId(currentUser.getId());
 
         if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
             dataFilter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
@@ -658,11 +650,11 @@ public class DeclarationDataController {
             dataFilter.setControlNs(false);
         }
 
-        PagingResult<DeclarationDataSearchResultItem> declarations = declarationDataSearchService.search(dataFilter);
+        PagingResult<DeclarationDataJournalItem>   pagingResult =  declarationDataSearchService.findDeclarationDataJournalItems(dataFilter,pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
-                declarations,
-                declarations.getTotalCount(),
+                pagingResult,
+                pagingResult.getTotalCount(),
                 pagingParams
         );
     }

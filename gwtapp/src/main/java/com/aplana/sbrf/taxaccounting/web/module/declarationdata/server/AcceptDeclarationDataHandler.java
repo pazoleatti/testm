@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -176,7 +177,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             List<Notification> notifications = new ArrayList<Notification>();
             Notification notification = new Notification();
             notification.setUserId(userId);
-            notification.setCreateDate(new Date());
+            notification.setCreateDate(new LocalDateTime());
             notification.setText(msg);
             notification.setLogId(uuid);
             notification.setReportId(reportId);

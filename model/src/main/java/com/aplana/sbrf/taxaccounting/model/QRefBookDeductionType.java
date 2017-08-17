@@ -36,7 +36,7 @@ public class QRefBookDeductionType extends com.querydsl.sql.RelationalPathBase<Q
 
     public final NumberPath<Byte> status = createNumber("status", Byte.class);
 
-    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> version = createDateTime("version", org.joda.time.LocalDateTime.class);
 
     public final com.querydsl.sql.PrimaryKey<QRefBookDeductionType> refBookDeductionTypePk = createPrimaryKey(id);
 

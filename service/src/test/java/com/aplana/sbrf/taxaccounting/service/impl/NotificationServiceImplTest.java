@@ -3,13 +3,13 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +32,8 @@ public class NotificationServiceImplTest {
 
         List<Notification> list = new ArrayList<Notification>();
         Notification n1 = new Notification();
-        n1.setDeadline(new Date());
-        n1.setCreateDate(new Date());
+        n1.setDeadline(new LocalDateTime());
+        n1.setCreateDate(new LocalDateTime());
         n1.setText("test1");
         n1.setReportPeriodId(1);
         n1.setSenderDepartmentId(1);
@@ -41,8 +41,8 @@ public class NotificationServiceImplTest {
         list.add(n1);
 
         Notification n2 = new Notification();
-        n2.setDeadline(new Date());
-        n2.setCreateDate(new Date());
+        n2.setDeadline(new LocalDateTime());
+        n2.setCreateDate(new LocalDateTime());
         n2.setText("test2");
         n2.setReportPeriodId(2);
         n2.setSenderDepartmentId(1);

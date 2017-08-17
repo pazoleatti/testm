@@ -24,11 +24,11 @@ public class QReportPeriodType extends com.querydsl.sql.RelationalPathBase<QRepo
 
     public static final QReportPeriodType reportPeriodType = new QReportPeriodType("REPORT_PERIOD_TYPE");
 
-    public final DateTimePath<java.sql.Timestamp> calendarStartDate = createDateTime("calendarStartDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> calendarStartDate = createDateTime("calendarStartDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath code = createString("code");
 
-    public final DateTimePath<java.sql.Timestamp> endDate = createDateTime("endDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> endDate = createDateTime("endDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Byte> f = createNumber("f", Byte.class);
 
@@ -38,7 +38,7 @@ public class QReportPeriodType extends com.querydsl.sql.RelationalPathBase<QRepo
 
     public final StringPath name = createString("name");
 
-    public final DateTimePath<java.sql.Timestamp> startDate = createDateTime("startDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> startDate = createDateTime("startDate", org.joda.time.LocalDateTime.class);
 
     public final com.querydsl.sql.PrimaryKey<QReportPeriodType> reportPeriodTypePk = createPrimaryKey(id);
 

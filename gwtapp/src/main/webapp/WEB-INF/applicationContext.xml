@@ -12,8 +12,13 @@
 
     <import resource="classpath:com/aplana/sbrf/taxaccounting/version-info.xml"/>
 
-    <context:annotation-config/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.web.main.api.server"/>
+    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.permissions"/>
+    <context:component-scan base-package="com.aplana.sbrf.taxaccounting.common"/>
+
+    <context:annotation-config/>
+    <context:spring-configured/>
+
     <bean class="com.aplana.sbrf.taxaccounting.web.main.entry.server.MainServerModule"/>
 
     <bean id="logger" class="com.gwtplatform.dispatch.server.spring.LoggerFactoryBean">

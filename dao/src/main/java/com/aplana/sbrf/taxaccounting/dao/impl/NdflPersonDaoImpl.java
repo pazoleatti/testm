@@ -18,6 +18,7 @@ import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -163,28 +164,28 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonIncome.paymentNumber.toLowerCase().like(ndflPersonIncomeFilter.getNumberPaymentOrder().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getTransferDateFrom() != null) {
-                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.goe(new Timestamp(ndflPersonIncomeFilter.getTransferDateFrom().getTime()))));
+                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.goe(ndflPersonIncomeFilter.getTransferDateFrom())));
             }
 
             if (ndflPersonIncomeFilter.getTransferDateTo() != null) {
-                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.loe(new Timestamp(ndflPersonIncomeFilter.getTransferDateTo().getTime()))));
+                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.loe(ndflPersonIncomeFilter.getTransferDateTo())));
             }
             if (ndflPersonIncomeFilter.getCalculationDateFrom() != null) {
-                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.goe(new Timestamp(ndflPersonIncomeFilter.getCalculationDateFrom().getTime()))));
+                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.goe(ndflPersonIncomeFilter.getCalculationDateFrom())));
             }
 
             if (ndflPersonIncomeFilter.getCalculationDateTo() != null) {
-                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.loe(new Timestamp(ndflPersonIncomeFilter.getCalculationDateTo().getTime()))));
+                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.loe(ndflPersonIncomeFilter.getCalculationDateTo())));
             }
             if (ndflPersonIncomeFilter.getPaymentDateFrom() != null) {
-                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.goe(new Timestamp(ndflPersonIncomeFilter.getPaymentDateFrom().getTime()))));
+                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.goe(ndflPersonIncomeFilter.getPaymentDateFrom())));
             }
 
             if (ndflPersonIncomeFilter.getPaymentDateTo() != null) {
-                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.loe(new Timestamp(ndflPersonIncomeFilter.getPaymentDateTo().getTime()))));
+                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.loe(ndflPersonIncomeFilter.getPaymentDateTo())));
             }
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier order;
         Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
         Sort sort = new Sort(sortOrder);
@@ -296,20 +297,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonDeduction.incomeCode.toLowerCase().like(ndflPersonDeductionFilter.getIncomeCode().toLowerCase()));
             }
             if (ndflPersonDeductionFilter.getCalculationDateFrom() != null) {
-                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.goe(new Timestamp(ndflPersonDeductionFilter.getCalculationDateFrom().getTime()))));
+                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.goe(ndflPersonDeductionFilter.getCalculationDateFrom())));
             }
             if (ndflPersonDeductionFilter.getCalculationDateTo() != null) {
-                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.loe(new Timestamp(ndflPersonDeductionFilter.getCalculationDateTo().getTime()))));
+                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.loe(ndflPersonDeductionFilter.getCalculationDateTo())));
             }
             if (ndflPersonDeductionFilter.getDeductionDateFrom() != null) {
-                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.goe(new Timestamp(ndflPersonDeductionFilter.getDeductionDateFrom().getTime()))));
+                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.goe(ndflPersonDeductionFilter.getDeductionDateFrom())));
             }
 
             if (ndflPersonDeductionFilter.getDeductionDateTo() != null) {
-                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.loe(new Timestamp(ndflPersonDeductionFilter.getDeductionDateTo().getTime()))));
+                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.loe(ndflPersonDeductionFilter.getDeductionDateTo())));
             }
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier order;
         Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
         Sort sort = new Sort(sortOrder);
@@ -403,13 +404,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonPrepayment.notifSource.toLowerCase().like(ndflPersonPrepaymentFilter.getNotifSource().toLowerCase()));
             }
             if (ndflPersonPrepaymentFilter.getNotifDateFrom() != null) {
-                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.goe(new Timestamp(ndflPersonPrepaymentFilter.getNotifDateFrom().getTime()))));
+                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.goe(ndflPersonPrepaymentFilter.getNotifDateFrom())));
             }
             if (ndflPersonPrepaymentFilter.getNotifDateTo() != null) {
-                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.loe(new Timestamp(ndflPersonPrepaymentFilter.getNotifDateTo().getTime()))));
+                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.loe(ndflPersonPrepaymentFilter.getNotifDateTo())));
             }
         }
-
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
         OrderSpecifier order;
         Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
         Sort sort = new Sort(sortOrder);
@@ -481,7 +482,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 " and npi.OKTMO = :oktmo and npi.KPP = :kpp " +
                 " UNION SELECT /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi" +
                 " WHERE npi.ndfl_person_id in (:ndflPersonId)" +
-                " AND npi.payment_date between :startDate AND :endDate" +
+                " AND npi.tax_transfer_date between :startDate AND :endDate" +
                 " and npi.OKTMO = :oktmo and npi.KPP = :kpp ";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ndflPersonId", ndflPersonId)
@@ -1080,7 +1081,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         fieldsSet.addAll(Arrays.asList(fields));
         for (String paramName : defaultSource.getReadablePropertyNames()) {
             if (fieldsSet.contains(paramName)) {
-                result.addValue(paramName, defaultSource.getValue(paramName));
+                Object value = defaultSource.getValue(paramName);
+                if (value instanceof LocalDateTime) {
+                    value = ((LocalDateTime)value).toDate();
+                }
+                result.addValue(paramName, value);
             }
         }
         return result;
@@ -1276,7 +1281,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             person.setLastName(rs.getString("last_name"));
             person.setFirstName(rs.getString("first_name"));
             person.setMiddleName(rs.getString("middle_name"));
-            person.setBirthDay(rs.getDate("birth_day"));
+            person.setBirthDay(SqlUtils.getLocalDateTime(rs, "birth_day"));
             person.setCitizenship(rs.getString("citizenship"));
 
             person.setInnNp(rs.getString("inn_np"));
@@ -1319,14 +1324,14 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             personIncome.setIncomeCode(rs.getString("income_code"));
             personIncome.setIncomeType(rs.getString("income_type"));
-            personIncome.setIncomeAccruedDate(rs.getDate("income_accrued_date"));
-            personIncome.setIncomePayoutDate(rs.getDate("income_payout_date"));
+            personIncome.setIncomeAccruedDate(SqlUtils.getLocalDateTime(rs, "income_accrued_date"));
+            personIncome.setIncomePayoutDate(SqlUtils.getLocalDateTime(rs, "income_payout_date"));
             personIncome.setIncomeAccruedSumm(rs.getBigDecimal("income_accrued_summ"));
             personIncome.setIncomePayoutSumm(rs.getBigDecimal("income_payout_summ"));
             personIncome.setTotalDeductionsSumm(rs.getBigDecimal("total_deductions_summ"));
             personIncome.setTaxBase(rs.getBigDecimal("tax_base"));
             personIncome.setTaxRate(SqlUtils.getInteger(rs, "tax_rate"));
-            personIncome.setTaxDate(rs.getDate("tax_date"));
+            personIncome.setTaxDate(SqlUtils.getLocalDateTime(rs, "tax_date"));
 
             personIncome.setCalculatedTax(rs.getBigDecimal("calculated_tax"));
             personIncome.setWithholdingTax(rs.getBigDecimal("withholding_tax"));
@@ -1334,8 +1339,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setOverholdingTax(rs.getBigDecimal("overholding_tax"));
             personIncome.setRefoundTax(SqlUtils.getLong(rs, "refound_tax"));
 
-            personIncome.setTaxTransferDate(rs.getDate("tax_transfer_date"));
-            personIncome.setPaymentDate(rs.getDate("payment_date"));
+            personIncome.setTaxTransferDate(SqlUtils.getLocalDateTime(rs, "tax_transfer_date"));
+            personIncome.setPaymentDate(SqlUtils.getLocalDateTime(rs, "payment_date"));
             personIncome.setPaymentNumber(rs.getString("payment_number"));
             personIncome.setTaxSumm(SqlUtils.getLong(rs, "tax_summ"));
             personIncome.setSourceId(SqlUtils.getLong(rs, "source_id"));
@@ -1359,18 +1364,18 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setTypeCode(rs.getString("type_code"));
 
             personDeduction.setNotifType(rs.getString("notif_type"));
-            personDeduction.setNotifDate(rs.getDate("notif_date"));
+            personDeduction.setNotifDate(SqlUtils.getLocalDateTime(rs, "notif_date"));
             personDeduction.setNotifNum(rs.getString("notif_num"));
             personDeduction.setNotifSource(rs.getString("notif_source"));
             personDeduction.setNotifSumm(rs.getBigDecimal("notif_summ"));
 
-            personDeduction.setIncomeAccrued(rs.getDate("income_accrued"));
+            personDeduction.setIncomeAccrued(SqlUtils.getLocalDateTime(rs, "income_accrued"));
             personDeduction.setIncomeCode(rs.getString("income_code"));
             personDeduction.setIncomeSumm(rs.getBigDecimal("income_summ"));
 
-            personDeduction.setPeriodPrevDate(rs.getDate("period_prev_date"));
+            personDeduction.setPeriodPrevDate(SqlUtils.getLocalDateTime(rs, "period_prev_date"));
             personDeduction.setPeriodPrevSumm(rs.getBigDecimal("period_prev_summ"));
-            personDeduction.setPeriodCurrDate(rs.getDate("period_curr_date"));
+            personDeduction.setPeriodCurrDate(SqlUtils.getLocalDateTime(rs, "period_curr_date"));
             personDeduction.setPeriodCurrSumm(rs.getBigDecimal("period_curr_summ"));
             personDeduction.setSourceId(SqlUtils.getLong(rs, "source_id"));
             personDeduction.setInp(rs.getString("inp"));
@@ -1392,7 +1397,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             personPrepayment.setSumm(rs.getBigDecimal("summ"));
             personPrepayment.setNotifNum(rs.getString("notif_num"));
-            personPrepayment.setNotifDate(rs.getDate("notif_date"));
+            personPrepayment.setNotifDate(SqlUtils.getLocalDateTime(rs, "notif_date"));
             personPrepayment.setNotifSource(rs.getString("notif_source"));
             personPrepayment.setSourceId(SqlUtils.getLong(rs, "source_id"));
             personPrepayment.setInp(rs.getString("inp"));

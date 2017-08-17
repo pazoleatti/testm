@@ -39,6 +39,8 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreate()
         break
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+        checkAccept()
     case FormDataEvent.CHECK: //Проверить
         checkData()
         break
@@ -49,9 +51,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CALCULATE: // Формирование pdf-отчета формы
         declarationService.createPdfReport(logger, declarationData, userInfo)
-        break
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        checkAccept()
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesListForTemporarySolution()
@@ -538,8 +537,6 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
         result.addAll(ndflPersonList);
         i++;
     }
-
-    logger.info(String.format("НФ-источников выбрано для консолидации (" + i + calcTimeMillis(time)))
 
     return result;
 }
@@ -2666,7 +2663,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         List<ColumnFillConditionData> columnFillConditionDataList = []
-        //1 Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
+        //1 Раздел 2. Графа 4 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column22And23And24NotFill(),
                 new Column4Fill(),
@@ -2678,12 +2675,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         C_TAX_SUMM
                 )
         )
+        //1 Раздел 2. Графа 5 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column22And23And24NotFill(),
                 new Column5Fill(),
                 String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                 String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                        C_INCOME_CODE,
+                        C_INCOME_TYPE,
                         C_PAYMENT_DATE,
                         C_PAYMENT_NUMBER,
                         C_TAX_SUMM

@@ -1,5 +1,9 @@
 package form_template.ndfl.report_6ndfl.v2016
 
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 import groovy.transform.TypeChecked
@@ -34,6 +38,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
     case FormDataEvent.CHECK: //Проверки
         println "!CHECK!"
         checkXml()
@@ -98,6 +103,8 @@ final DeclarationService declarationService = getProperty("declarationService")
 final DepartmentReportPeriodService departmentReportPeriodService = getProperty("departmentReportPeriodService")
 @Field
 final DeclarationData declarationData = getProperty("declarationData")
+@Field
+final NdflPersonService ndflPersonService = getProperty("ndflPersonService")
 @Field
 final Logger logger = getProperty("logger")
 
@@ -236,7 +243,8 @@ def buildXml(def writer, boolean isForSpecificReport) {
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
     if (poMestuParam == null) {
-        throw new RuntimeException("Код места в настройках подразделений не соответствует справочнику")
+        logger.error("Код места в настройках подразделений не соответствует справочнику")
+        return
     }
     def taxPlaceTypeCode = poMestuParam?.CODE?.value
 
@@ -303,6 +311,7 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 def ndflPersonidForSearch = ndflPersonKnfId.collate(1000)
                 // Поиск и добавление доходов
                 ndflPersonidForSearch.each {
+                    ScriptUtils.checkInterrupted()
                     ndflPersonIncomeList.addAll(ndflPersonService.findIncomesForPersonByKppOktmoAndPeriod(it, declarationData.kpp, declarationData.oktmo, reportPeriod.startDate, reportPeriod.endDate))
                 }
                 // Отфилтьтруем строки у которых раздел 2.графа 6 не в этом отчетном периоде
@@ -330,15 +339,20 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
                     // Доходы без ставки
                     def incomesWithNullTaxRate = ndflPersonIncomeList.findAll { it.taxRate == null }
+                    Map<String, List<NdflPersonIncome>> incomesWithNullTaxRateMap = [:]
+                    incomesWithNullTaxRate.each() { NdflPersonIncome incomeWithNullTaxRate ->
+                        if (!incomesWithNullTaxRateMap.containsKey(incomeWithNullTaxRate.operationId)) {
+                            incomesWithNullTaxRateMap.put(incomeWithNullTaxRate.operationId, [])
+                        }
+                        incomesWithNullTaxRateMap.get(incomeWithNullTaxRate.operationId).add(incomeWithNullTaxRate)
+                    }
 
                     // Объединенные доходы без ставки и доходы имеющие одинаковый номер операции, ключ ставка - значение список операций
                     incomesGroupedByRate.each { key, value ->
                         def pickedIncomes = []
-                        value.each { incomeGrouped ->
-                            incomesWithNullTaxRate.each { incomeNullRate ->
-                                if (incomeNullRate.operationId == incomeGrouped.operationId) {
-                                    pickedIncomes << incomeNullRate
-                                }
+                        value.collect(){it.operationId}.toSet().each { operationId ->
+                            if (incomesWithNullTaxRateMap.containsKey(operationId)) {
+                                pickedIncomes.addAll(incomesWithNullTaxRateMap.get(operationId))
                             }
                         }
                         value.addAll(pickedIncomes)
@@ -532,7 +546,7 @@ int findCorrectionNumber() {
     Iterator<DepartmentReportPeriod> it = departmentReportPeriodList.iterator();
     while (it.hasNext()) {
         DepartmentReportPeriod depReportPeriod = it.next();
-        if (depReportPeriod.id == declarationData.departmentReportPeriodId) {
+        if (depReportPeriod.id == declarationData.departmentReportPeriodId || depReportPeriod.correctionDate != null && depReportPeriod.correctionDate > departmentReportPeriod.correctionDate) {
             it.remove();
         }
     }
@@ -1174,7 +1188,7 @@ Map<PairKppOktmo, List<NdflPerson>> getNdflPersonsGroupedByKppOktmo() {
                 addNdflPersons(ndflPersonsGroupedByKppOktmo, pair, ndflPersons)
             } else {
                 String depChildName = departmentService.getDepartmentNameByPairKppOktmo(pair.kpp, pair.oktmo, departmentReportPeriod.reportPeriod.endDate)
-                logger.warn("Не удалось создать форму $FORM_NAME_NDFL6, за период $otchetGod ${reportPeriod.name} $strCorrPeriod, подразделение: ${depChildName ?: ""}, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo}. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName, за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют операции о НДФЛ для указанных КПП и ОКТМО.")
+                logger.warn("Не удалось создать форму $FORM_NAME_NDFL6, за период $otchetGod ${reportPeriod.name}$strCorrPeriod, подразделение: ${depChildName ?: ""}, КПП: ${pair.kpp}, ОКТМО: ${pair.oktmo}. В РНУ НДФЛ (консолидированная) № ${declarationDataConsolidated.id} для подразделения: $depName, за период $otchetGod ${reportPeriod.name} $strCorrPeriod отсутствуют операции о НДФЛ для указанных КПП и ОКТМО.")
             }
         }
     }
@@ -1261,8 +1275,17 @@ def createForm() {
         // Список физлиц для каждой пары КПП и ОКТМО
         def ndflPersonsGroupedByKppOktmo = getNdflPersonsGroupedByKppOktmo()
 
-        declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-            declarationService.delete(it.id, userInfo)
+        // Удаление ранее созданных отчетных форм
+        List<Pair<Long, DeclarationDataReportType>> notDeletedDeclarationPair = declarationService.deleteForms(declarationTypeId, declarationData.departmentReportPeriodId, logger, userInfo)
+        if (!notDeletedDeclarationPair.isEmpty()) {
+            logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
+            notDeletedDeclarationPair.each() {
+                logger.error("Форма %d, выполняется операция \"%s\"",
+                        it.first, declarationService.getTaskName(it.second)
+                )
+            }
+            logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
+            return
         }
 
         if (ndflPersonsGroupedByKppOktmo == null || ndflPersonsGroupedByKppOktmo.isEmpty()) {
@@ -1294,8 +1317,11 @@ def createForm() {
 def checkPresentedPairsKppOktmo() {
     declarationDataConsolidated = declarationDataConsolidated ?: declarationService.find(DECLARATION_TYPE_RNU_NDFL_ID, declarationData.departmentReportPeriodId).get(0)
     List<Pair<String, String>> kppOktmoNotPresentedInRefBookList = declarationService.findNotPresentedPairKppOktmo(declarationDataConsolidated.id);
+    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.getDepartmentId())
     for (Pair<String, String> kppOktmoNotPresentedInRefBook : kppOktmoNotPresentedInRefBookList) {
-        logger.warn("Для подразделения Тербанк отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.", kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
+        logger.warn("Для подразделения %s отсутствуют настройки подразделений для КПП: %s, ОКТМО: %s в справочнике \"Настройки подразделений\". Данные формы РНУ НДФЛ (консолидированная) № %d по указанным КПП и ОКТМО источника выплаты не включены в отчетность.",
+                department.getName(), kppOktmoNotPresentedInRefBook.getFirst(), kppOktmoNotPresentedInRefBook.getSecond(), declarationDataConsolidated.id)
     }
 }
 

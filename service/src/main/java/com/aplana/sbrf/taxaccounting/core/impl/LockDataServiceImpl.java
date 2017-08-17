@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -14,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -305,7 +305,7 @@ public class LockDataServiceImpl implements LockDataService {
 							   for (Integer waitingUser : waitingUsers) {
 								   Notification notification = new Notification();
 								   notification.setUserId(waitingUser);
-								   notification.setCreateDate(new Date());
+								   notification.setCreateDate(new LocalDateTime());
 								   notification.setText(msg);
 								   notifications.add(notification);
 							   }

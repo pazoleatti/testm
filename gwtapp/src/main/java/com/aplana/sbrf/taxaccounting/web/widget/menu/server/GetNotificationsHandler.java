@@ -44,7 +44,6 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         filter.setUserId(user.getId());
 		Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
 		receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null));
-		receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user, TaxType.PFR, null, null));
         filter.setReceiverDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         filter.setUserRoleIds(userRoles);
 
@@ -53,7 +52,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 		for (Notification notification : result) {
 			NotificationTableRow row = new NotificationTableRow();
             row.setId(notification.getId());
-			row.setDate(new Date(notification.getCreateDate().getTime()));
+			row.setDate(notification.getCreateDate().toDate());
 			row.setMsg(notification.getText());
             row.setLogId(notification.getLogId());
             row.setCanDelete(canDelete(notification, user));

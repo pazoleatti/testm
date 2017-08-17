@@ -6,62 +6,68 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * User: avanteev
+ * Интерфейс доступа к базе данных для {@link BlobData}.
  */
 public interface BlobDataDao {
 
     /**
-     * Создание записи в таблице.
-     * @param blobData {@link BlobData}
-     * @return uuid идентификатор
+     * Создание с текущей датой БД.
+     *
+     * @param newBlobData {@link BlobData}
+     * @return uuid идентификатор созданного объекта
      */
-    String create(BlobData blobData);
+    String createWithSysdate(BlobData newBlobData);
 
     /**
-     * Создание записи в таблице.
-     * Проставляет свою дату, а не дату бд.
-     * @param blobData {@link BlobData}
-     * @return uuid идентификатор
+     * Создание.
+     *
+     * @param newBlobData {@link BlobData}
+     * @return uuid идентификатор созданного объекта
      */
-    String createWithDate(BlobData blobData);
+    String create(BlobData newBlobData);
 
     /**
-     * Удаление записи
+     * Удаление по указанному идентификатору
+     *
      * @param uuid идентификатор
      */
     void delete(String uuid);
 
     /**
-     * Удаление записей
-     * @param uuidStrings набор uuid для удаления
+     * Удаление по набору указанных идентикаторов
+     *
+     * @param uuids набор uuid
      */
-    void delete(List<String> uuidStrings);
+    void delete(List<String> uuids);
 
     /**
-     * Обновление уже существующей записи.
-     * Обновляются только само поле с данными файла.
-     * @param dataIn данные для сохранения
-     * @param uuid id записи для обновления
+     * Обновление поля с данными по идентификатору
+     *
+     * @param inputStream данные для сохранения
+     * @param uuid идентификатор
      */
-    void save(String uuid, InputStream dataIn);
+    void updateDataByUUID(String uuid, InputStream inputStream);
 
     /**
-     * Получение записи из таблицы.
+     * Получение по идентификатору
+     *
      * @param uuid идентификатор
      * @return {@link BlobData}
      */
-    BlobData get(String uuid);
+    BlobData fetch(String uuid);
 
     /**
-     * Получение длины данных в blob
-     * @param uuid
-     * @return
+     * Получение длины данных по идентификатору.
+     *
+     * @param uuid идентикатор
+     * @return длина данных
      */
-    long getLength(String uuid);
+    long fetchLength(String uuid);
 
     /**
      * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
-     * @return Количество удаленных запсией
+     *
+     * @return количество удаленных записей
      */
-    int clean();
+    long clean();
 }

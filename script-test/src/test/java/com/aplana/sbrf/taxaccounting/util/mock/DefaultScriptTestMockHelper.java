@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.raschsv.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -16,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.mockito.invocation.InvocationOnMock;
@@ -218,131 +216,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         NdflPersonService ndflPersonService = mock(NdflPersonService.class);
         when(ndflPersonService.save(any(NdflPerson.class))).thenReturn(1243L);
         return ndflPersonService;
-    }
-
-    @Override
-    public RaschsvItogVyplService mockRaschsvItogVyplService() {
-        return mock(RaschsvItogVyplService.class);
-    }
-
-    // "Персонифицированные сведения о застрахованных лицах"
-    @Override
-    public RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService() {
-        RaschsvPersSvStrahLicService raschsvPersSvStrahLicService = mock(RaschsvPersSvStrahLicService.class);
-        when(raschsvPersSvStrahLicService.insertPersSvStrahLic(any(List.class))).thenReturn(1);
-        return raschsvPersSvStrahLicService;
-    }
-
-    // "Сводные данные об обязательствах плательщика страховых взносов"
-    @Override
-    public RaschsvObyazPlatSvService mockRaschsvObyazPlatSvService() {
-        RaschsvObyazPlatSvService raschsvObyazPlatSvService = mock(RaschsvObyazPlatSvService.class);
-        when(raschsvObyazPlatSvService.insertObyazPlatSv(any(RaschsvObyazPlatSv.class))).thenReturn(1L);
-        return raschsvObyazPlatSvService;
-    }
-
-    // "Сумма страховых взносов на пенсионное, медицинское, социальное страхование"
-    @Override
-    public RaschsvUplPerService mockRaschsvUplPerService() {
-        RaschsvUplPerService raschsvObyazPlatSvService = mock(RaschsvUplPerService.class);
-        when(raschsvObyazPlatSvService.insertUplPer(any(List.class))).thenReturn(1);
-        return raschsvObyazPlatSvService;
-    }
-
-    // "Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
-    @Override
-    public RaschsvUplPrevOssService mockRaschsvUplPrevOssService() {
-        RaschsvUplPrevOssService raschsvUplPrevOssService = mock(RaschsvUplPrevOssService.class);
-        when(raschsvUplPrevOssService.insertUplPrevOss(any(RaschsvUplPrevOss.class))).thenReturn(1L);
-        return raschsvUplPrevOssService;
-    }
-
-    // "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
-    @Override
-    public RaschsvSvOpsOmsService mockRaschsvSvOpsOmsService() {
-        RaschsvSvOpsOmsService raschsvSvOpsOmsService = mock(RaschsvSvOpsOmsService.class);
-        when(raschsvSvOpsOmsService.insertRaschsvSvOpsOms(any(List.class))).thenReturn(1);
-        return raschsvSvOpsOmsService;
-    }
-
-    // "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
-    @Override
-    public RaschsvOssVnmService mockRaschsvOssVnmService() {
-        RaschsvOssVnmService raschsvOssVnmService = mock(RaschsvOssVnmService.class);
-        when(raschsvOssVnmService.insertRaschsvOssVnm(any(RaschsvOssVnm.class))).thenReturn(1L);
-        return raschsvOssVnmService;
-    }
-
-    // "Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации"
-    @Override
-    public RaschsvRashOssZakService mockRaschsvRashOssZakService() {
-        RaschsvRashOssZakService raschsvRashOssZakService = mock(RaschsvRashOssZakService.class);
-        when(raschsvRashOssZakService.insertRaschsvRashOssZak(any(RaschsvRashOssZak.class))).thenReturn(1L);
-        return raschsvRashOssZakService;
-    }
-
-    // "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
-    @Override
-    public RaschsvVyplFinFbService mockRaschsvVyplFinFbService() {
-        RaschsvVyplFinFbService raschsvVyplFinFbService = mock(RaschsvVyplFinFbService.class);
-        when(raschsvVyplFinFbService.insertRaschsvVyplFinFb(any(RaschsvVyplFinFb.class))).thenReturn(1L);
-        return raschsvVyplFinFbService;
-    }
-
-    // "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 3 пункта 1 статьи 427"
-    @Override
-    public RaschsvPravTarif31427Service mockRaschsvPravTarif31427Service() {
-        RaschsvPravTarif31427Service raschsvPravTarif31427Service = mock(RaschsvPravTarif31427Service.class);
-        when(raschsvPravTarif31427Service.insertRaschsvPravTarif31427(any(RaschsvPravTarif31427.class))).thenReturn(1L);
-        return raschsvPravTarif31427Service;
-    }
-
-    // "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427"
-    @Override
-    public RaschsvPravTarif51427Service mockRaschsvPravTarif51427Service() {
-        RaschsvPravTarif51427Service raschsvPravTarif51427Service = mock(RaschsvPravTarif51427Service.class);
-        when(raschsvPravTarif51427Service.insertRaschsvPravTarif51427(any(RaschsvPravTarif51427.class))).thenReturn(1L);
-        return raschsvPravTarif51427Service;
-    }
-
-    // "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427"
-    @Override
-    public RaschsvPravTarif71427Service mockRaschsvPravTarif71427Service() {
-        RaschsvPravTarif71427Service raschsvPravTarif71427Service = mock(RaschsvPravTarif71427Service.class);
-        when(raschsvPravTarif71427Service.insertRaschsvPravTarif71427(any(RaschsvPravTarif71427.class))).thenReturn(1L);
-        return raschsvPravTarif71427Service;
-    }
-
-    // "Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427"
-    @Override
-    public RaschsvSvPrimTarif91427Service mockRaschsvSvPrimTarif91427Service() {
-        RaschsvSvPrimTarif91427Service raschsvSvPrimTarif91427Service = mock(RaschsvSvPrimTarif91427Service.class);
-        when(raschsvSvPrimTarif91427Service.insertRaschsvSvPrimTarif91427(any(RaschsvSvPrimTarif91427.class))).thenReturn(1L);
-        return raschsvSvPrimTarif91427Service;
-    }
-
-    // "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)"
-    @Override
-    public RaschsvSvPrimTarif22425Service mockRaschsvSvPrimTarif22425Service() {
-        RaschsvSvPrimTarif22425Service raschsvSvPrimTarif22425Service = mock(RaschsvSvPrimTarif22425Service.class);
-        when(raschsvSvPrimTarif22425Service.insertRaschsvSvPrimTarif22425(any(RaschsvSvPrimTarif22425.class))).thenReturn(1L);
-        return raschsvSvPrimTarif22425Service;
-    }
-
-    // "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
-    @Override
-    public RaschsvSvPrimTarif13422Service mockRaschsvSvPrimTarif13422Service() {
-        RaschsvSvPrimTarif13422Service raschsvSvPrimTarif13422Service = mock(RaschsvSvPrimTarif13422Service.class);
-        when(raschsvSvPrimTarif13422Service.insertRaschsvSvPrimTarif13422(any(RaschsvSvPrimTarif13422.class))).thenReturn(1L);
-        return raschsvSvPrimTarif13422Service;
-    }
-
-    // "Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ"
-    @Override
-    public RaschsvSvnpPodpisantService mockRaschsvSvnpPodpisantService() {
-        RaschsvSvnpPodpisantService raschsvSvnpPodpisantService = mock(RaschsvSvnpPodpisantService.class);
-        when(raschsvSvnpPodpisantService.insertRaschsvSvnpPodpisant(any(RaschsvSvnpPodpisant.class))).thenReturn(1L);
-        return raschsvSvnpPodpisantService;
     }
 
     @Override

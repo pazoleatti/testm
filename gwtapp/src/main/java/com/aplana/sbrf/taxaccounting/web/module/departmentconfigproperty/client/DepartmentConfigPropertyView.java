@@ -92,30 +92,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TableHeader("APPROVE_ORG_NAME")
     };
 
-    private TableHeader[] tableHeaderPfr = new TableHeader[]{
-            new TableHeader("TAX_ORGAN_CODE"),
-            new TableHeader("TAX_ORGAN_CODE_MID"),
-
-            new TableHeader("KPP"),
-            new TableHeader("PRESENT_PLACE"),
-            new TableHeader("NAME"),
-            new TableHeader("OKVED"),
-            new TableHeader("REGION"),
-            new TableHeader("OKTMO"),
-            new TableHeader("PHONE"),
-
-            new TableHeader("REORG_FORM_CODE"),
-            new TableHeader("REORG_INN"),
-            new TableHeader("REORG_KPP"),
-            new TableHeader("SIGNATORY_ID"),
-            new TableHeader("SIGNATORY_SURNAME"),
-            new TableHeader("SIGNATORY_FIRSTNAME"),
-            new TableHeader("SIGNATORY_LASTNAME"),
-            new TableHeader("APPROVE_DOC_NAME"),
-            new TableHeader("APPROVE_ORG_NAME")
-    };
-
-
     public final class TableHeader {
         String name;
 
@@ -301,10 +277,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             ConstNdflHeaderBuilder hb = new ConstNdflHeaderBuilder(table);
             hb.setNeedCheckedRow(false);
             table.setHeaderBuilder(hb);
-        } else if (taxType == TaxType.PFR) {
-            ConstPfrHeaderBuilder hb = new ConstPfrHeaderBuilder(table);
-            hb.setNeedCheckedRow(false);
-            table.setHeaderBuilder(hb);
         }
         table.setSelectionModel(selectionModel);
 
@@ -348,8 +320,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public TableHeader[] getCurrentTableHeaders() {
         if (taxType == TaxType.NDFL) {
             return tableHeaderNdfl;
-        } else if (taxType == TaxType.PFR) {
-            return tableHeaderPfr;
         }
         return new TableHeader[0];
     }
@@ -459,8 +429,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         otherDetails.setVisible(false);
         if (taxType == TaxType.NDFL) {
             taxTypeLbl.setText("НДФЛ");
-        } else if (taxType == TaxType.PFR) {
-            taxTypeLbl.setText("Страховые сборы, взносы");
         }
     }
 
@@ -518,7 +486,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @UiHandler("addLink")
     public void onAddRow(ClickEvent event) {
-        model.getList().add(createDataRow());
+        List<DataRow<Cell>> tempList = new ListDataProvider<DataRow<Cell>>().getList();
+        tempList.add(createDataRow());
+        tempList.addAll(model.getList());
+        model.setList(tempList);
         updateCheckBoxHeader(false);
         setIsFormModified(true);
     }

@@ -14,6 +14,7 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -224,7 +225,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
 
     @Override
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                                      String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
+                                      String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declarationData.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationType declarationType = declarationTemplate.getType();

@@ -24,7 +24,7 @@ public class QRaschsvPravTarif31427 extends com.querydsl.sql.RelationalPathBase<
 
     public static final QRaschsvPravTarif31427 raschsvPravTarif31427 = new QRaschsvPravTarif31427("RASCHSV_PRAV_TARIF3_1_427");
 
-    public final DateTimePath<java.sql.Timestamp> dataZapAkOrg = createDateTime("dataZapAkOrg", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> dataZapAkOrg = createDateTime("dataZapAkOrg", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> doh2489mpr = createNumber("doh2489mpr", Long.class);
 

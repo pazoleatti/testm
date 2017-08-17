@@ -26,7 +26,7 @@ public class QTemplateChanges extends com.querydsl.sql.RelationalPathBase<QTempl
 
     public final NumberPath<Integer> author = createNumber("author", Integer.class);
 
-    public final DateTimePath<java.sql.Timestamp> dateEvent = createDateTime("dateEvent", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> dateEvent = createDateTime("dateEvent", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Integer> declarationTemplateId = createNumber("declarationTemplateId", Integer.class);
 

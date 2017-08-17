@@ -6,6 +6,11 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +30,18 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+import static com.aplana.sbrf.taxaccounting.model.QDeclarationData.declarationData;
+import static com.aplana.sbrf.taxaccounting.model.QDeclarationKind.declarationKind;
+import static com.aplana.sbrf.taxaccounting.model.QDeclarationTemplate.declarationTemplate;
+import static com.aplana.sbrf.taxaccounting.model.QDeclarationType.declarationType;
+import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
+import static com.aplana.sbrf.taxaccounting.model.QDepartmentReportPeriod.departmentReportPeriod;
+import static com.aplana.sbrf.taxaccounting.model.QLogBusiness.logBusiness;
+import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
+import static com.aplana.sbrf.taxaccounting.model.QReportPeriod.reportPeriod;
+import static com.aplana.sbrf.taxaccounting.model.QSecUser.secUser;
+import static com.aplana.sbrf.taxaccounting.model.QState.state;
+import static com.querydsl.core.types.Projections.bean;
 
 /**
  * Реализация Dao для работы с декларациями
@@ -42,6 +59,25 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return new SimpleDateFormat("dd.MM.yyyy");
         }
     };
+
+    final private SQLQueryFactory sqlQueryFactory;
+
+
+    final private QBean<DeclarationDataJournalItem> dataJournalItemQBean = bean(DeclarationDataJournalItem.class,
+            declarationData.id.as("declarationDataId"),
+            declarationKind.name.as("declarationKind"),
+            declarationType.name.as("declarationType"),
+            department.name.as("department"),
+            refBookAsnu.name.as("asnuName"),
+            reportPeriod.name.as("reportPeriod"),
+            state.name.as("state"),
+            declarationData.fileName,
+            logBusiness.logDate.as("creationDate"),
+            secUser.name.as("creationUserName"));
+
+    public DeclarationDataDaoImpl(SQLQueryFactory sqlQueryFactory) {
+        this.sqlQueryFactory = sqlQueryFactory;
+    }
 
     private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
         @Override
@@ -218,6 +254,89 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
+    public List<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams params) {
+
+        BooleanBuilder where = new BooleanBuilder();
+
+        // id в REF_BOOK_ASNU - тип int, а AsnuId в фильтре - тип long
+        if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
+            List<Integer> list = new ArrayList<Integer>();
+            for (Long l : filter.getAsnuIds()) {
+                list.add(l.intValue());
+            }
+            where.and(refBookAsnu.id.in(list));
+        }
+
+        if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
+            where.and(department.id.in(filter.getDepartmentIds()));
+        }
+
+        if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
+            where.and(declarationKind.id.in(filter.getFormKindIds()));
+        }
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
+        OrderSpecifier ordering;
+
+        String orderingProperty = params.getProperty();
+        boolean isAsc = params.getDirection().equals("asc");
+
+        if (orderingProperty.equals("declarationDataId")) {
+            ordering = isAsc ? declarationData.id.asc() : declarationData.id.desc();
+        } else if (orderingProperty.equals("declarationKind")) {
+            ordering = isAsc ? declarationKind.name.asc() : declarationKind.name.desc();
+        } else if (orderingProperty.equals("declarationType")) {
+            ordering = isAsc ? declarationType.name.asc() : declarationType.name.desc();
+        } else if (orderingProperty.equals("department")) {
+            ordering = isAsc ? department.name.asc() : department.name.desc();
+        } else if (orderingProperty.equals("asnuName")) {
+            ordering = isAsc ? refBookAsnu.name.asc() : refBookAsnu.name.desc();
+        } else if (orderingProperty.equals("reportPeriod")) {
+            ordering = isAsc ? reportPeriod.name.asc() : reportPeriod.name.desc();
+        } else if (orderingProperty.equals("state")) {
+            ordering = isAsc ? state.name.asc() : state.name.desc();
+        } else if (orderingProperty.equals("fileName")) {
+            ordering = isAsc ? declarationData.fileName.asc() : declarationData.fileName.desc();
+        } else if (orderingProperty.equals("creationDate")) {
+            ordering = isAsc ? logBusiness.logDate.asc() : logBusiness.logDate.desc();
+        } else if (orderingProperty.equals("creationUserName")) {
+            ordering = isAsc ? secUser.name.asc() : secUser.name.desc();
+        } else {
+            ordering = declarationData.id.desc();
+        }
+
+
+        List<DeclarationDataJournalItem> items = sqlQueryFactory.select(
+                declarationData.id.as("declarationDataId"),
+                declarationKind.name.as("declarationKind"),
+                declarationType.name.as("declarationType"),
+                department.name.as("department"),
+                refBookAsnu.name.as("asnuName"),
+                reportPeriod.name.as("reportPeriod"),
+                state.name.as("state"),
+                declarationData.fileName,
+                logBusiness.logDate.as("creationDate"),
+                secUser.name.as("creationUserName"))
+                .from(declarationData)
+                .leftJoin(declarationData.declarationDataFkAsnuId, refBookAsnu)
+                .leftJoin(declarationData._logBusinessFkDeclarationId, logBusiness).on(logBusiness.eventId.eq((short) 1))
+                .innerJoin(declarationData.declarationDataFkDeclTId, declarationTemplate)
+                .innerJoin(declarationTemplate.declarationTemplateFkDtype, declarationType)
+                .innerJoin(declarationTemplate.declarationTemplateFkindFk, declarationKind)
+                .innerJoin(declarationData.declDataFkDepRepPerId, departmentReportPeriod)
+                .innerJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
+                .innerJoin(declarationData.declarationDataStateFk, state)
+                .innerJoin(departmentReportPeriod.depRepPerFkDepartmentId, department)
+                .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
+                .orderBy(ordering)
+                .where(where)
+                .offset(params.getStartIndex())
+                .limit(params.getCount())
+                .transform(GroupBy.groupBy(declarationData.id).list(dataJournalItemQBean));
+
+        return items;
+    }
+
+    @Override
     public List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
         StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from (");
         HashMap<String, Object> values = new HashMap<String, Object>();
@@ -343,7 +462,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .append(" WHERE EXISTS (SELECT 1 FROM DECLARATION_TEMPLATE dectemp WHERE dectemp.id = dec.declaration_template_id AND dectemp.declaration_type_id = dectype.id)")
                 .append(" AND drp.id = dec.department_report_period_id AND dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id and dec.declaration_template_id = dectemplate.id");
 
-        if (filter.getUserDepartmentId() != null &&  filter.getControlNs() != null) {
+        if (filter.getUserDepartmentId() != null && filter.getControlNs() != null) {
             if (!filter.getControlNs()) {
                 sql.append(" AND (drp.department_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id  START WITH dep_ddtp.ID = :userDepId)")
                         .append(" OR :userDepId IN (\n" +
@@ -698,8 +817,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         String sql = "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
                 "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, drp.report_period_id, drp.department_id " +
                 "from DEPARTMENT_REPORT_PERIOD drp, DECLARATION_DATA dd " +
-                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId and drp.IS_ACTIVE = 1" +
-                "and drp.department_id = :departmentId and drp.REPORT_PERIOD_ID = :reportPeriodId " +
+                "where dd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId " +
+                "and drp.id = dd.DEPARTMENT_REPORT_PERIOD_ID " +
                 "and dd.DECLARATION_TEMPLATE_ID in " +
                 "(select dt.id from DECLARATION_TEMPLATE dt" +
                 " where dt.DECLARATION_TYPE_ID = :declarationTypeId) " +
@@ -710,8 +829,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationTypeId", declarationTypeId)
                 .addValue("departmentReportPeriodId", departmentReportPeriodId)
-                .addValue("departmentId", departmentId)
-                .addValue("reportPeriodId", reportPeriodId)
                 .addValue("kpp", kpp)
                 .addValue("oktmo", oktmo);
         try {
@@ -734,7 +851,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         "inner join declaration_data_file ddf on (dd.id = ddf.declaration_data_id) " +
                         "inner join blob_data bd on (ddf.blob_data_id = bd.id) " +
                         "where " +
-                        "lower(bd.name) LIKE  lower('%"+fileName+"%') " +
+                        "lower(bd.name) LIKE  lower('%" + fileName + "%') " +
                         (fileTypeId == null ? "" : "and ddf.file_type_id = :fileTypeId");
 
         MapSqlParameterSource params = new MapSqlParameterSource();

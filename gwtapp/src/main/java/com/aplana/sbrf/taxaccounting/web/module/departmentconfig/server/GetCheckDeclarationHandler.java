@@ -76,9 +76,6 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
             case NDFL:
                 refBookId = RefBook.WithTable.NDFL.getRefBookId();
                 break;
-            case PFR:
-                refBookId = RefBook.WithTable.FOND.getRefBookId();
-                break;
         }
         RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartment();

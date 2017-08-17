@@ -294,8 +294,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             //Проверка корректности
             checkCorrectness(logger, refBook, null, versionFrom, attributes, records);
 
-            if (!refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId()) &&
-				!refBookId.equals(RefBook.WithTable.FOND.getTableRefBookId())) {
+            if (!refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId())) {
 
                 if (refBook.isVersioned()) {
                     for (RefBookRecord record : records) {
@@ -347,9 +346,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
 
         //Признак настроек подразделений
-        boolean isConfig =
-				refBookId.equals(RefBook.WithTable.FOND.getTableRefBookId()) ||
-                refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId());
+        boolean isConfig = refBookId.equals(RefBook.WithTable.NDFL.getTableRefBookId());
 
         if (!isConfig) {
             //Проверка отсутствия конфликта с датой актуальности родительского элемента
@@ -390,9 +387,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             boolean isDepartmentConfigTable = false;
             Integer i = null;
-            if (Arrays.asList(
-					RefBook.WithTable.NDFL.getTableRefBookId(),
-                    RefBook.WithTable.FOND.getTableRefBookId()).contains(refBook.getId())) {
+            if (RefBook.WithTable.NDFL.getTableRefBookId().equals(refBook.getId())) {
                 isDepartmentConfigTable = true;
                 i = 1;
             }
@@ -446,8 +441,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (isDepartmentConfigTable) i++;
             }
             if (Arrays.asList(
-					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId(),
-                    RefBook.WithTable.FOND.getRefBookId(), RefBook.WithTable.FOND.getTableRefBookId()).contains(refBook.getId())) {
+					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
             } else {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);

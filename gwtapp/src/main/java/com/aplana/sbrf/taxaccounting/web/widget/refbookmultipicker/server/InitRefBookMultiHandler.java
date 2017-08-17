@@ -36,9 +36,7 @@ public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMu
         //Признак настроек подразделений
         boolean isConfig =
 				refBook.getId().equals(RefBook.WithTable.NDFL.getRefBookId()) ||
-				refBook.getId().equals(RefBook.WithTable.FOND.getRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId()) ||
-                refBook.getId().equals(RefBook.WithTable.FOND.getTableRefBookId());
+                refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId());
         result.setVersioned(refBook.isVersioned() && !isConfig);
         return result;
     }

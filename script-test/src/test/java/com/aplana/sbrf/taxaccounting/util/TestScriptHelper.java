@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 
 import javax.script.Bindings;
@@ -61,42 +60,10 @@ public class TestScriptHelper {
     private RefBookPersonService refBookPersonService;
     private TransactionHelper transactionHelper;
 
-    // Сервисы "Персонифицированные сведения о застрахованных лицах"
-    private RaschsvPersSvStrahLicService raschsvPersSvStrahLicService;
-    // Сервисы "Сводные данные об обязательствах плательщика страховых взносов"
-    private RaschsvObyazPlatSvService raschsvObyazPlatSvService;
-    // Сервисы "Сумма страховых взносов на пенсионное, медицинское, социальное страхование"
-    private RaschsvUplPerService raschsvUplPerService;
-    // Сервисы "Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
-    private RaschsvUplPrevOssService raschsvUplPrevOssService;
-    // Сервисы "Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование"
-    private RaschsvSvOpsOmsService raschsvSvOpsOmsService;
-    // Сервисы "Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством"
-    private RaschsvOssVnmService raschsvOssVnmService;
-    // Сервисы "Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации"
-    private RaschsvRashOssZakService raschsvRashOssZakService;
-    // Сервисы "Выплаты, произведенные за счет средств, финансируемых из федерального бюджета"
-    private RaschsvVyplFinFbService raschsvVyplFinFbService;
-    // Сервис "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 3 пункта 1 статьи 427"
-    private RaschsvPravTarif31427Service raschsvPravTarif31427Service;
-    // Сервис "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427"
-    private RaschsvPravTarif51427Service raschsvPravTarif51427Service;
-    // Сервис "Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427"
-    private RaschsvPravTarif71427Service raschsvPravTarif71427Service;
-    // Сервис "Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427"
-    private RaschsvSvPrimTarif91427Service raschsvSvPrimTarif91427Service;
-    // Сервис "Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)"
-    private RaschsvSvPrimTarif22425Service raschsvSvPrimTarif22425Service;
-    // Сервис "Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422"
-    private RaschsvSvPrimTarif13422Service raschsvSvPrimTarif13422Service;
-    // Сервис "Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ"
-    private RaschsvSvnpPodpisantService raschsvSvnpPodpisantService;
     // Сервис "ФИАС адресов"
     private FiasRefBookService fiasRefBookService;
     //Сервисы НДФЛ
     private NdflPersonService ndflPersonService;
-    // Сервис "Сводные сведения о выплатах"
-    private RaschsvItogVyplService raschsvItogVyplService;
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -114,7 +81,6 @@ public class TestScriptHelper {
      * Сервис работы со скриптами НФ в тестовом режиме
      *
      * @param path       Относительный путь к каталогу со скриптом
-     * @param formData   Экземпляр НФ
      * @param mockHelper Хэлпер с заглушками других сервисов, можно переопределить
      */
     public TestScriptHelper(String path, ScriptTestMockHelper mockHelper) {
@@ -149,23 +115,7 @@ public class TestScriptHelper {
         refBookPersonService = mockHelper.mockRefBookPersonService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
-        raschsvItogVyplService = mockHelper.mockRaschsvItogVyplService();
         fiasRefBookService = mockHelper.mockFiasRefBookService();
-        raschsvPersSvStrahLicService = mockHelper.mockRaschsvPersSvStrahLicService();
-        raschsvObyazPlatSvService = mockHelper.mockRaschsvObyazPlatSvService();
-        raschsvUplPerService = mockHelper.mockRaschsvUplPerService();
-        raschsvUplPrevOssService = mockHelper.mockRaschsvUplPrevOssService();
-        raschsvSvOpsOmsService = mockHelper.mockRaschsvSvOpsOmsService();
-        raschsvOssVnmService = mockHelper.mockRaschsvOssVnmService();
-        raschsvRashOssZakService = mockHelper.mockRaschsvRashOssZakService();
-        raschsvVyplFinFbService = mockHelper.mockRaschsvVyplFinFbService();
-        raschsvPravTarif31427Service = mockHelper.mockRaschsvPravTarif31427Service();
-        raschsvPravTarif51427Service = mockHelper.mockRaschsvPravTarif51427Service();
-        raschsvPravTarif71427Service = mockHelper.mockRaschsvPravTarif71427Service();
-        raschsvSvPrimTarif91427Service = mockHelper.mockRaschsvSvPrimTarif91427Service();
-        raschsvSvPrimTarif22425Service = mockHelper.mockRaschsvSvPrimTarif22425Service();
-        raschsvSvPrimTarif13422Service = mockHelper.mockRaschsvSvPrimTarif13422Service();
-        raschsvSvnpPodpisantService = mockHelper.mockRaschsvSvnpPodpisantService();
     }
 
     public void setImportFileInputStream(InputStream importFileInputStream) {
@@ -215,43 +165,10 @@ public class TestScriptHelper {
         bindings.put("currentDataRow", currentDataRow);
         bindings.put("scriptStatusHolder", scriptStatusHolder);
 
-        // Персонифицированные сведения о застрахованных лицах
-        bindings.put("raschsvPersSvStrahLicService", raschsvPersSvStrahLicService);
-        // Сводные данные об обязательствах плательщика страховых взносов
-        bindings.put("raschsvObyazPlatSvService", raschsvObyazPlatSvService);
-        // Сумма страховых взносов на пенсионное, медицинское, социальное страхование
-        bindings.put("raschsvUplPerService", raschsvUplPerService);
-        // Сумма страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
-        bindings.put("raschsvUplPrevOssService", raschsvUplPrevOssService);
-        // Расчет сумм страховых взносов на обязательное пенсионное и медицинское страхование
-        bindings.put("raschsvSvOpsOmsService", raschsvSvOpsOmsService);
-        // Расчет сумм страховых взносов на обязательное социальное страхование на случай временной нетрудоспособности и в связи с материнством
-        bindings.put("raschsvOssVnmService", raschsvOssVnmService);
-        // Расходы по обязательному социальному страхованию на случай временной нетрудоспособности и в связи с материнством и расходы, осуществляемые в соответствии с законодательством Российской Федерации
-        bindings.put("raschsvRashOssZakService", raschsvRashOssZakService);
-        // Выплаты, произведенные за счет средств, финансируемых из федерального бюджета
-        bindings.put("raschsvVyplFinFbService", raschsvVyplFinFbService);
-        // Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 3 пункта 1 статьи 427
-        bindings.put("raschsvPravTarif31427Service", raschsvPravTarif31427Service);
-        // Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 5 пункта 1 статьи 427
-        bindings.put("raschsvPravTarif51427Service", raschsvPravTarif51427Service);
-        // Расчет соответствия условиям применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 7 пункта 1 статьи 427
-        bindings.put("raschsvPravTarif71427Service", raschsvPravTarif71427Service);
-        // Сведения, необходимые для применения пониженного тарифа страховых взносов плательщиками, указанными в подпункте 9 пункта 1 статьи 427
-        bindings.put("raschsvSvPrimTarif91427Service", raschsvSvPrimTarif91427Service);
-        // Сведения, необходимые для применения тарифа страховых взносов, установленного абзацем вторым подпункта 2 пункта 2 статьи 425 (абзацем вторым подпункта 2 статьи 426)
-        bindings.put("raschsvSvPrimTarif22425Service", raschsvSvPrimTarif22425Service);
-        // Сведения об обучающихся, необходимые для применения положений подпункта 1 пункта 3 статьи 422
-        bindings.put("raschsvSvPrimTarif13422Service", raschsvSvPrimTarif13422Service);
-        // Сведения о плательщике страховых взносов и Сведения о лице, подписавшем документ
-        bindings.put("raschsvSvnpPodpisantService", raschsvSvnpPodpisantService);
         //ndfl
         bindings.put("ndflPersonService", ndflPersonService);
         // Фиас адреса
         bindings.put("fiasRefBookService", fiasRefBookService);
-        // Сводные сведения о выплатах
-        bindings.put("raschsvItogVyplService", raschsvItogVyplService);
-
 
         for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
             bindings.put(entry.getKey(), entry.getValue());
@@ -359,14 +276,6 @@ public class TestScriptHelper {
 
     public DepartmentReportPeriodService getDepartmentReportPeriodService() {
         return departmentReportPeriodService;
-    }
-
-    public RaschsvItogVyplService getRaschsvItogVyplService() {
-        return raschsvItogVyplService;
-    }
-
-    public RaschsvObyazPlatSvService getRaschsvObyazPlatSvService() {
-        return raschsvObyazPlatSvService;
     }
 
     public RefBookPersonService getRefBookPersonService() {

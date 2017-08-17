@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Оповещения о назначении даты сдачи отчетности
+ *
  * @author dloshkarev
  */
 public class Notification implements Serializable {
@@ -18,17 +20,27 @@ public class Notification implements Serializable {
     private Integer receiverDepartmentId;
     private String text;
     private String logId;
-    private Date createDate;
-    private Date deadline;
-    /** Идентификатор пользователя, который получит оповещение */
+    private LocalDateTime createDate;
+    private LocalDateTime deadline;
+    /**
+     * Идентификатор пользователя, который получит оповещение
+     */
     private Integer userId;
-    /** Идентификатор роли пользователя, который получит оповещение */
+    /**
+     * Идентификатор роли пользователя, который получит оповещение
+     */
     private Integer roleId;
-    /** Признак прочтения */
+    /**
+     * Признак прочтения
+     */
     private boolean read;
-    /** Идентификатор отчета */
+    /**
+     * Идентификатор отчета
+     */
     private String reportId;
-    /** Тип оповещения */
+    /**
+     * Тип оповещения
+     */
     private NotificationType notificationType = NotificationType.DEFAULT;
 
     public Integer getRoleId() {
@@ -92,19 +104,19 @@ public class Notification implements Serializable {
         }
     }
 
-    public Date getCreateDate() {
+    public LocalDateTime getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
 
-    public Date getDeadline() {
+    public LocalDateTime getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(Date deadline) {
+    public void setDeadline(LocalDateTime deadline) {
         this.deadline = deadline;
     }
 

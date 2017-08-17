@@ -44,13 +44,7 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 	public DeclarationListResult execute(DeclarationListAction action, ExecutionContext executionContext) throws ActionException {
 		DeclarationListResult result = new DeclarationListResult();
         TAUser user = securityService.currentUserInfo().getUser();
-        if (action.getFilter().getTaxType() == null) {
-            if (!user.hasRole(TARole.N_ROLE_CONF)) {
-                action.getFilter().setTaxType(TaxType.PFR);
-            } else if (!user.hasRole(TARole.F_ROLE_CONF)) {
-                action.getFilter().setTaxType(TaxType.NDFL);
-            }
-        }
+        action.getFilter().setTaxType(TaxType.NDFL);
         List<DeclarationType> declarationTypes = declarationTypeService.getByFilter(action.getFilter());
         @SuppressWarnings("unchecked")
         Collection<Integer> ids = CollectionUtils.collect(declarationTypes, new Transformer() {

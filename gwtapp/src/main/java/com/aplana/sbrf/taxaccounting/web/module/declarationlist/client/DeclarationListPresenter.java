@@ -147,9 +147,6 @@ public class DeclarationListPresenter extends
             Boolean isReportsOld = isReports;
             taxType = TaxType.valueOf(request.getParameter(TYPE, ""));
             isReports = Boolean.parseBoolean(request.getParameter(REPORTS, "false"));
-            if (TaxType.PFR.equals(taxType)) {
-                isReports = false;
-            }
             getView().initTable(taxType, isReports);
             if (taxTypeOld == null || !taxType.equals(taxTypeOld) || isReportsOld == null || !isReportsOld.equals(isReports)) {
                 getView().updateTitle(taxType);
@@ -249,9 +246,6 @@ public class DeclarationListPresenter extends
             switch (taxType) {
                 case NDFL:
                     description = "Налоговые формы по НДФЛ";
-                    break;
-                case PFR:
-                    title = "Список налоговых форм";
                     break;
             }
         }

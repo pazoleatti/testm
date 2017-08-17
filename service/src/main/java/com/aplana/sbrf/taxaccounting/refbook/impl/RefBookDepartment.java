@@ -670,7 +670,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         //2
         List<DepartmentReportPeriod> listDRP =
-                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.NDFL, TaxType.PFR), Arrays.asList(0));
+                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.NDFL), Arrays.asList(0));
         if (!listDRP.isEmpty()){
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1
@@ -739,17 +739,11 @@ public class RefBookDepartment implements RefBookDataProvider {
         //11 точка запроса
         Map<Integer, Map<String, Object>> records =
                 refBookDepartmentDao.isVersionUsedInRefBooks(
-                        Arrays.asList(
-                                RefBook.Id.NDFL.getId(),
-								RefBook.Id.FOND.getId()),
+                        Arrays.asList(RefBook.Id.NDFL.getId()),
                         Arrays.asList((long) department.getId())
                 );
         for (Map.Entry<Integer, Map<String, Object>> entry : records.entrySet()){
-			int refBookId = ((Long)entry.getValue().get(RefBookDepartmentDao.REFBOOK_ID_ALIAS)).intValue();
 			TaxType taxType = TaxType.NDFL;
-			if (refBookId == RefBook.Id.FOND.getId()) {
-				taxType = TaxType.PFR;
-			}
             Date startDate = (Date)entry.getValue().get(RefBookDepartmentDao.VERSION_START_ALIAS);
             String rpName =
                     refBookDepartmentDao.getReportPeriodNameByDate(taxType, startDate);

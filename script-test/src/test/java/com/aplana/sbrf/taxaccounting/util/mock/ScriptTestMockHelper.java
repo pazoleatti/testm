@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
-import com.aplana.sbrf.taxaccounting.service.script.raschsv.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 
 import java.util.Map;
@@ -40,43 +39,11 @@ public interface ScriptTestMockHelper {
 
     NdflPersonService mockNdflPersonService();
 
-    RaschsvItogVyplService mockRaschsvItogVyplService();
-
     RefBookDataProvider getRefBookDataProvider();
 
     Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId);
 
     ImportFiasDataService mockImportFiasDataService();
-
-    RaschsvPersSvStrahLicService mockRaschsvPersSvStrahLicService();
-
-    RaschsvObyazPlatSvService mockRaschsvObyazPlatSvService();
-
-    RaschsvUplPerService mockRaschsvUplPerService();
-
-    RaschsvUplPrevOssService mockRaschsvUplPrevOssService();
-
-    RaschsvSvOpsOmsService mockRaschsvSvOpsOmsService();
-
-    RaschsvOssVnmService mockRaschsvOssVnmService();
-
-    RaschsvRashOssZakService mockRaschsvRashOssZakService();
-
-    RaschsvVyplFinFbService mockRaschsvVyplFinFbService();
-
-    RaschsvPravTarif31427Service mockRaschsvPravTarif31427Service();
-
-    RaschsvPravTarif51427Service mockRaschsvPravTarif51427Service();
-
-    RaschsvPravTarif71427Service mockRaschsvPravTarif71427Service();
-
-    RaschsvSvPrimTarif91427Service mockRaschsvSvPrimTarif91427Service();
-
-    RaschsvSvPrimTarif22425Service mockRaschsvSvPrimTarif22425Service();
-
-    RaschsvSvPrimTarif13422Service mockRaschsvSvPrimTarif13422Service();
-
-    RaschsvSvnpPodpisantService mockRaschsvSvnpPodpisantService();
 
     FiasRefBookService fiasRefBookService();
 

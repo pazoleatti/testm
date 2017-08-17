@@ -24,9 +24,9 @@ public class QNotification extends com.querydsl.sql.RelationalPathBase<QNotifica
 
     public static final QNotification notification = new QNotification("NOTIFICATION");
 
-    public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> createDate = createDateTime("createDate", org.joda.time.LocalDateTime.class);
 
-    public final DateTimePath<java.sql.Timestamp> deadline = createDateTime("deadline", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> deadline = createDateTime("deadline", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

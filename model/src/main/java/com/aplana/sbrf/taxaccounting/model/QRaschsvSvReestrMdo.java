@@ -24,7 +24,7 @@ public class QRaschsvSvReestrMdo extends com.querydsl.sql.RelationalPathBase<QRa
 
     public static final QRaschsvSvReestrMdo raschsvSvReestrMdo = new QRaschsvSvReestrMdo("RASCHSV_SV_REESTR_MDO");
 
-    public final DateTimePath<java.sql.Timestamp> dataZapis = createDateTime("dataZapis", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> dataZapis = createDateTime("dataZapis", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

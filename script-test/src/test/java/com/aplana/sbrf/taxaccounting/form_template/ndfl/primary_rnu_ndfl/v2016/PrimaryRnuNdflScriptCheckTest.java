@@ -5,11 +5,14 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -17,9 +20,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +52,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
     /**
      * Проверка наличия конкретного сообщения среди остальных сообщений
      * Поскольку проверка осуществляется, в том числе, по регулярным выражениям необходимо следить, чтоб в проверяемой строке не было символов относящихся к регулярным выражениям: * ( )
+     *
      * @return
      */
     public boolean containLog(String text) {
@@ -66,6 +68,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     /**
      * "Сведения о доходах и НДФЛ" из "Данные о физическом лице - получателе дохода"
+     *
      * @param ndflPersonList
      * @return
      */
@@ -99,7 +102,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
     /**
      * Тесты для "Общие проверки" / 7 "Наличие или отсутствие значения в графе в зависимости от условий"
      */
-@Ignore
+    @Ignore
     @Test
     public void checkDataCommon7Test() {
         initRefBook();
@@ -169,6 +172,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     /**
      * Тестовые данные для "Общие проверки" / 7 "Наличие или отсутствие значения в графе в зависимости от условий"
+     *
      * @return
      */
     private List<NdflPerson> сheckDataCommon7Mock() {
@@ -188,10 +192,10 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         String column4NotEmpty = "2000";
         String column5Empty = null;
         String column5NotEmpty = "01";
-        Date column6Empty = null;
-        Date column6NotEmpty = new Date();
-        Date column7Empty = null;
-        Date column7NotEmpty = new Date();
+        LocalDateTime column6Empty = null;
+        LocalDateTime column6NotEmpty = new LocalDateTime();
+        LocalDateTime column7Empty = null;
+        LocalDateTime column7NotEmpty = new LocalDateTime();
         BigDecimal column10Empty = null;
         BigDecimal column10NotEmpty = new BigDecimal(1);
         BigDecimal column11Empty = null;
@@ -202,8 +206,8 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         BigDecimal column13NotEmpty = new BigDecimal(1);
         Integer column14Empty = null;
         Integer column14NotEmpty = 1;
-        Date column15Empty = null;
-        Date column15NotEmpty = new Date();
+        LocalDateTime column15Empty = null;
+        LocalDateTime column15NotEmpty = new LocalDateTime();
         BigDecimal column16Empty = null;
         BigDecimal column16NotEmpty = BigDecimal.valueOf(1L);
         BigDecimal column17Empty = null;
@@ -214,10 +218,10 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         BigDecimal column19NotEmpty = BigDecimal.valueOf(1L);
         Long column20Empty = null;
         Long column20NotEmpty = 1L;
-        Date column21Empty = null;
-        Date column21NotEmpty = new Date();
-        Date column22Empty = null;
-        Date column22NotEmpty = new Date();
+        LocalDateTime column21Empty = null;
+        LocalDateTime column21NotEmpty = new LocalDateTime();
+        LocalDateTime column22Empty = null;
+        LocalDateTime column22NotEmpty = new LocalDateTime();
         String column23Empty = null;
         String column23NotEmpty = "1";
         Long column24Empty = null;
@@ -357,7 +361,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 column13NotEmpty, column14NotEmpty, column15NotEmpty, column16NotEmpty, column17NotEmpty, column18NotEmpty,
                 column19NotEmpty, column20NotEmpty, column21NotEmpty, column22NotEmpty, column23NotEmpty, column24Empty);
 
-        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>() {{
             add(ndflPersonIncome1);
             add(ndflPersonIncome2);
             add(ndflPersonIncome3);
@@ -400,7 +404,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
      * Тесты для "Общие проверки" / 7 "Наличие или отсутствие значения в графе в зависимости от условий"
      */
     @Test
-	@Ignore
+    @Ignore
     public void checkDataIncome4Test() {
         initRefBook();
 
@@ -413,48 +417,49 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
 
-        int i=0;
+        int i = 0;
 
-        if(containLog("(.*)«Графа 14 Раздел 2 = 13»")){
-            Assert.assertTrue(containLog("( (.*)'1'(.*)«Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2(.*) )|"+
-                    "( (.*)'2'(.*)«Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = (1010)|(1011) и «Графа 12 Раздел 1» = 1(.*) )|"+
+        if (containLog("(.*)«Графа 14 Раздел 2 = 13»")) {
+            Assert.assertTrue(containLog("( (.*)'1'(.*)«Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» ≠ 1010 и «Графа 12 Раздел 1» ≠ 2(.*) )|" +
+                    "( (.*)'2'(.*)«Графа 7 Раздел 1» = 643 и «Графа 4 Раздел 2» = (1010)|(1011) и «Графа 12 Раздел 1» = 1(.*) )|" +
                     "(.*)«Графа 7 Раздел 1» ≠ 643 и («Графа 4 Раздел 2» = 2000 или 2001 или 2010 или 2002 или 2003) и («Графа 12 Раздел 1» >= 3"));
             i++;
         }
 
-        if(containLog("(.*)«Графа 14 Раздел 2 = 15»(.*)")){
+        if (containLog("(.*)«Графа 14 Раздел 2 = 15»(.*)")) {
             Assert.assertTrue(containLog("(.*)«Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1(.*)"));
             i++;
         }
 
-        if(containLog("(.*)«Графа 14 Раздел 2 = 35»(.*)")){
+        if (containLog("(.*)«Графа 14 Раздел 2 = 35»(.*)")) {
             Assert.assertTrue(containLog("(.*)«Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1(.*)"));
             i++;
         }
 
-        if(containLog("(.*)«Графа 14 Раздел 2 = 30»(.*)")){
-            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|"+
+        if (containLog("(.*)«Графа 14 Раздел 2 = 30»(.*)")) {
+            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|" +
                     "((«Графа 12 Раздел 4» ≠ 2000 или 2001 или 2010) и \"графа 12 Раздел 1\" > 2)"));
             i++;
         }
 
-        if(containLog("(.*)«Графа 14 Раздел 2 = 9»(.*)")){
-            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|"+
+        if (containLog("(.*)«Графа 14 Раздел 2 = 9»(.*)")) {
+            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|" +
                     "(«Графа 12 Раздел 4» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2)"));
             i++;
         }
 
-        if(containLog("(.*)«Графа 7 Раздел 1 = 9»(.*)")){
-            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|"+
+        if (containLog("(.*)«Графа 7 Раздел 1 = 9»(.*)")) {
+            Assert.assertTrue(containLog("((.*)«Графа 12 Раздел 1» ≥ 2 и «Графа 4 Раздел 1» ≠ 1010(.*))|" +
                     "(«Графа 12 Раздел 4» ≠ 2000 или 2001 или 2010) и «Графа 12 Раздел 1» > 2)"));
             i++;
         }
 
 
-        if((containLog("(.*)«Графа 7 Раздел 1» ≠ 643(.*)")) &&(i==0)){
+        if ((containLog("(.*)«Графа 7 Раздел 1» ≠ 643(.*)")) && (i == 0)) {
             Assert.assertTrue(containLog("((.*)«Графа 7 Раздел 1» ≠ 643 и «Графа 4 Раздел 2» = 1010 и «Графа 12 Раздел 1» ≠ 1"));
         }
     }
+
     /**
      * Тесты для "Проверки заполнения граф по алгоритмам заполнения РНУ НДФЛ / 4 "Заполнение Раздела 2 Графы 12"
      */
@@ -488,6 +493,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     /**
      * Тестовые данные для "Сведения о доходах и НДФЛ" / СведДох4 НДФЛ.Процентная ставка (Графа 12)
+     *
      * @return
      */
     private List<NdflPerson> checkDataIncome2Mock() {
@@ -503,7 +509,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .status("2")
 
                 .build();
-        Date d=new Date( 2015,12,12);
+        LocalDateTime d = new LocalDateTime(2015, 12, 12, 0, 0);
         final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
                 .rowNum(new BigDecimal(1))
                 .ndflPersonId(ndflPerson1.getId())
@@ -512,12 +518,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .incomeType("1010")
                 .incomeCode("1010")
                 .incomeAccruedDate(d)
-                .incomePayoutDate(new Date(2015,3,12))
+                .incomePayoutDate(new LocalDateTime(2015, 4, 12, 0, 0))
                 .incomeAccruedSumm(new BigDecimal(125))
-                .totalDeductionsSumm( new BigDecimal(125 )  )
+                .totalDeductionsSumm(new BigDecimal(125))
                 .incomePayoutSumm(new BigDecimal(1232))
                 .build();
-        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>() {{
 
             add(ndflPersonIncome1);
         }});
@@ -535,7 +541,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .incomeSumm(new BigDecimal(125))
                 .periodCurrSumm(new BigDecimal(125))
                 .build();
-        ndflPerson1.setDeductions(new ArrayList<NdflPersonDeduction>(){{
+        ndflPerson1.setDeductions(new ArrayList<NdflPersonDeduction>() {{
             add(ndflPersonDeduction1);
         }});
 
@@ -559,12 +565,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .incomeType("1010")
                 .incomeCode("1010")
                 .incomeAccruedDate(d)
-                .incomePayoutDate(new Date(2015,7,12))
+                .incomePayoutDate(new LocalDateTime(2015, 8, 12, 0, 0))
                 .incomeAccruedSumm(new BigDecimal(325))
-                .totalDeductionsSumm( new BigDecimal(125 )  )
+                .totalDeductionsSumm(new BigDecimal(125))
                 .incomePayoutSumm(new BigDecimal(132))
                 .build();
-        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>() {{
 
             add(ndflPersonIncome1);
         }});
@@ -582,7 +588,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .incomeSumm(new BigDecimal(125))
                 .periodCurrSumm(new BigDecimal(125))
                 .build();
-        ndflPerson2.setDeductions(new ArrayList<NdflPersonDeduction>(){{
+        ndflPerson2.setDeductions(new ArrayList<NdflPersonDeduction>() {{
             add(ndflPersonDeduction1);
         }});
 
@@ -590,7 +596,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 // и «графа 10 Раздел 3»= «графа 6 Раздел 2», то «графа 12 Раздел 2» = сумма значений «граф 16 Раздел 3» при соблюдении обязательного условия: «сумма значений «граф 16 Раздела 3» ≤ «графа 10 Раздел 2»
 
 
-        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>(){{
+        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>() {{
             add(ndflPerson1);
             add(ndflPerson2);
         }};
@@ -616,7 +622,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     }
 
-    private List<NdflPerson> checkDataIncome5Mock(){
+    private List<NdflPerson> checkDataIncome5Mock() {
         RefBookPersonTest refBookPersonTest1 = createRefBookPersonTest1();
         final NdflPerson ndflPerson1 = new NdflPersonBuilder.Builder()
                 .id(1L)
@@ -635,17 +641,17 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .ndflPersonId(ndflPerson1.getId())
                 .taxRate(13)
                 .incomeCode("1010")
-                .incomeAccruedDate(new Date(2015,12,12))
+                .incomeAccruedDate(new LocalDateTime(2015, 12, 12, 0, 0))
                 .calculatedTax(new BigDecimal(12))
-                .incomePayoutDate(new Date(2015,12,12))
-                .paymentDate(new Date(2015,12,12))
-                .taxDate(new Date(2015,12,12))
+                .incomePayoutDate(new LocalDateTime(2015, 12, 12, 0, 0))
+                .paymentDate(new LocalDateTime(2015, 12, 12, 0, 0))
+                .taxDate(new LocalDateTime(2015, 12, 12, 0, 0, 0))
                 .incomeAccruedSumm(new BigDecimal(125))
-                .totalDeductionsSumm( new BigDecimal(6 )  )
+                .totalDeductionsSumm(new BigDecimal(6))
                 .calculatedTax(new BigDecimal(12))
 
                 .build();
-        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>() {{
             add(ndflPersonIncome1);
         }});
 
@@ -656,20 +662,19 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .typeCode("104")
                 // Применение вычета.Текущий период.Сумма (Графа 16 P3)
                 .periodCurrSumm(new BigDecimal(1212))
-                .incomeAccrued(new Date(2012,12,12))
+                .incomeAccrued(new LocalDateTime(2012, 12, 12, 0, 0))
                 .notifSumm(new BigDecimal(104))
                 .build();
 
-        ndflPerson1.setDeductions(new ArrayList<NdflPersonDeduction>(){{
+        ndflPerson1.setDeductions(new ArrayList<NdflPersonDeduction>() {{
             add(ndflPersonDeduction1);
         }});
-
 
 
 // и «графа 10 Раздел 3»= «графа 6 Раздел 2», то «графа 12 Раздел 2» = сумма значений «граф 16 Раздел 3» при соблюдении обязательного условия: «сумма значений «граф 16 Раздела 3» ≤ «графа 10 Раздел 2»
 
 
-        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>(){{
+        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>() {{
             add(ndflPerson1);
         }};
         return ndflPersonList;
@@ -677,6 +682,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     /**
      * Тестовые данные для "Сведения о доходах и НДФЛ" / СведДох4 НДФЛ.Процентная ставка (Графа 14)
+     *
      * @return
      */
     private List<NdflPerson> checkDataIncome4Mock() {
@@ -698,7 +704,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .taxRate(13)
                 .incomeCode("1010")
                 .build();
-        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>(){{
+        ndflPerson1.setIncomes(new ArrayList<NdflPersonIncome>() {{
             add(ndflPersonIncome1);
         }});
 
@@ -718,7 +724,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .taxRate(15)
                 .incomeCode("1010")
                 .build();
-        ndflPerson2.setIncomes(new ArrayList<NdflPersonIncome>(){{
+        ndflPerson2.setIncomes(new ArrayList<NdflPersonIncome>() {{
             add(ndflPersonIncome2);
         }});
 
@@ -738,11 +744,11 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .taxRate(35)
                 .incomeCode("2740")
                 .build();
-        ndflPerson3.setIncomes(new ArrayList<NdflPersonIncome>(){{
+        ndflPerson3.setIncomes(new ArrayList<NdflPersonIncome>() {{
             add(ndflPersonIncome3);
         }});
 
-        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>(){{
+        List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>() {{
             add(ndflPerson1);
             add(ndflPerson2);
             add(ndflPerson3);
@@ -752,10 +758,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     /**
      * Данные о физическом лице - получателе дохода
+     *
      * @return
      */
     private static class NdflPersonBuilder {
         NdflPerson ndflPerson;
+
         public static class Builder {
             private Long id;
             private Integer rowNum;
@@ -766,19 +774,57 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private String middleName;
             private String citizenship;
             private String status;
-            public Builder id(Long id) {this.id = id; return this;}
-            public Builder rowNum(Integer rowNum) {this.rowNum = rowNum; return this;}
-            public Builder personId(Long personId) {this.personId = personId; return this;}
-            public Builder inp(String inp) {this.inp = inp; return this;}
-            public Builder lastName(String lastName) {this.lastName = lastName; return this;}
-            public Builder firstName(String firstName) {this.firstName = firstName; return this;}
-            public Builder middleName(String middleName) {this.middleName = middleName; return this;}
-            public Builder citizenship(String citizenship) {this.citizenship = citizenship; return this;}
-            public Builder status(String status) {this.status = status; return this;}
+
+            public Builder id(Long id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder rowNum(Integer rowNum) {
+                this.rowNum = rowNum;
+                return this;
+            }
+
+            public Builder personId(Long personId) {
+                this.personId = personId;
+                return this;
+            }
+
+            public Builder inp(String inp) {
+                this.inp = inp;
+                return this;
+            }
+
+            public Builder lastName(String lastName) {
+                this.lastName = lastName;
+                return this;
+            }
+
+            public Builder firstName(String firstName) {
+                this.firstName = firstName;
+                return this;
+            }
+
+            public Builder middleName(String middleName) {
+                this.middleName = middleName;
+                return this;
+            }
+
+            public Builder citizenship(String citizenship) {
+                this.citizenship = citizenship;
+                return this;
+            }
+
+            public Builder status(String status) {
+                this.status = status;
+                return this;
+            }
+
             public NdflPerson build() {
                 return new NdflPersonBuilder(this).ndflPerson;
             }
         }
+
         private NdflPersonBuilder(Builder b) {
             this.ndflPerson = new NdflPerson();
             this.ndflPerson.setId(b.id);
@@ -795,6 +841,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     /**
      * Сведения о доходах и НДФЛ
+     *
      * @return
      */
     private static class NdflPersonIncomeBuilder {
@@ -807,8 +854,8 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             protected Long ndflPersonId;
             private String incomeCode;
             private String incomeType;
-            private Date incomeAccruedDate;
-            private Date incomePayoutDate;
+            private LocalDateTime incomeAccruedDate;
+            private LocalDateTime incomePayoutDate;
             private String oktmo;
             private String kpp;
             private BigDecimal incomeAccruedSumm;
@@ -816,14 +863,14 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private BigDecimal totalDeductionsSumm;
             private BigDecimal taxBase;
             private Integer taxRate;
-            private Date taxDate;
+            private LocalDateTime taxDate;
             private BigDecimal calculatedTax;
             private BigDecimal withholdingTax;
             private BigDecimal notHoldingTax;
             private BigDecimal overholdingTax;
             private Long refoundTax;
-            private Date taxTransferDate;
-            private Date paymentDate;
+            private LocalDateTime taxTransferDate;
+            private LocalDateTime paymentDate;
             private String paymentNumber;
             private Long taxSumm;
 
@@ -852,12 +899,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder incomeAccruedDate(Date incomeAccruedDate) {
+            public Builder incomeAccruedDate(LocalDateTime incomeAccruedDate) {
                 this.incomeAccruedDate = incomeAccruedDate;
                 return this;
             }
 
-            public Builder incomePayoutDate(Date incomePayoutDate) {
+            public Builder incomePayoutDate(LocalDateTime incomePayoutDate) {
                 this.incomePayoutDate = incomePayoutDate;
                 return this;
             }
@@ -902,7 +949,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder taxDate(Date taxDate) {
+            public Builder taxDate(LocalDateTime taxDate) {
                 this.taxDate = taxDate;
                 return this;
             }
@@ -932,12 +979,12 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder taxTransferDate(Date taxTransferDate) {
+            public Builder taxTransferDate(LocalDateTime taxTransferDate) {
                 this.taxTransferDate = taxTransferDate;
                 return this;
             }
 
-            public Builder paymentDate(Date paymentDate) {
+            public Builder paymentDate(LocalDateTime paymentDate) {
                 this.paymentDate = paymentDate;
                 return this;
             }
@@ -996,16 +1043,16 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private BigDecimal rowNum;
             private String typeCode;
             private String notifType;
-            private Date notifDate;
+            private LocalDateTime notifDate;
             private String notifNum;
             private String notifSource;
             private BigDecimal notifSumm;
-            private Date incomeAccrued;
+            private LocalDateTime incomeAccrued;
             private String incomeCode;
             private BigDecimal incomeSumm;
-            private Date periodPrevDate;
+            private LocalDateTime periodPrevDate;
             private BigDecimal periodPrevSumm;
-            private Date periodCurrDate;
+            private LocalDateTime periodCurrDate;
             private BigDecimal periodCurrSumm;
             private String operationId;
 
@@ -1029,7 +1076,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder notifDate(Date notifDate) {
+            public Builder notifDate(LocalDateTime notifDate) {
                 this.notifDate = notifDate;
                 return this;
             }
@@ -1049,7 +1096,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder incomeAccrued(Date incomeAccrued) {
+            public Builder incomeAccrued(LocalDateTime incomeAccrued) {
                 this.incomeAccrued = incomeAccrued;
                 return this;
             }
@@ -1064,7 +1111,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder periodPrevDate(Date periodPrevDate) {
+            public Builder periodPrevDate(LocalDateTime periodPrevDate) {
                 this.periodPrevDate = periodPrevDate;
                 return this;
             }
@@ -1074,7 +1121,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder periodCurrDate(Date periodCurrDate) {
+            public Builder periodCurrDate(LocalDateTime periodCurrDate) {
                 this.periodCurrDate = periodCurrDate;
                 return this;
             }
@@ -1132,21 +1179,59 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         private String firstName;
         private String middleName;
         private Long address;
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public Long getRecordId() { return recordId; }
-        public void setRecordId(Long recordId) { this.recordId = recordId; }
-        public String getLastName() { return lastName; }
-        public void setLastName(String lastName) { this.lastName = lastName; }
-        public String getFirstName() { return firstName; }
-        public void setFirstName(String firstName) { this.firstName = firstName; }
-        public String getMiddleName() { return middleName; }
-        public void setMiddleName(String middleName) { this.middleName = middleName; }
-        public Long getAddress() { return address; }
-        public void setAddress(Long address) { this.address = address; }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public Long getRecordId() {
+            return recordId;
+        }
+
+        public void setRecordId(Long recordId) {
+            this.recordId = recordId;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getMiddleName() {
+            return middleName;
+        }
+
+        public void setMiddleName(String middleName) {
+            this.middleName = middleName;
+        }
+
+        public Long getAddress() {
+            return address;
+        }
+
+        public void setAddress(Long address) {
+            this.address = address;
+        }
     }
+
     private static class RefBookPersonTestBuilder {
         private RefBookPersonTest refBookPersonTest;
+
         public static class Builder {
             private Long id;
             private Long recordId;
@@ -1154,14 +1239,42 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private String firstName;
             private String middleName;
             private Long address;
-            public Builder id(Long id) { this.id = id; return this; }
-            public Builder recordId(Long recordId) { this.recordId = recordId; return this; }
-            public Builder lastName(String lastName) { this.lastName = lastName; return this; }
-            public Builder firstName(String firstName) { this.firstName = firstName; return this; }
-            public Builder middleName(String middleName) { this.middleName = middleName; return this; }
-            public Builder address(Long address) { this.address = address; return this; }
-            public RefBookPersonTest build() { return new RefBookPersonTestBuilder(this).refBookPersonTest; }
+
+            public Builder id(Long id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder recordId(Long recordId) {
+                this.recordId = recordId;
+                return this;
+            }
+
+            public Builder lastName(String lastName) {
+                this.lastName = lastName;
+                return this;
+            }
+
+            public Builder firstName(String firstName) {
+                this.firstName = firstName;
+                return this;
+            }
+
+            public Builder middleName(String middleName) {
+                this.middleName = middleName;
+                return this;
+            }
+
+            public Builder address(Long address) {
+                this.address = address;
+                return this;
+            }
+
+            public RefBookPersonTest build() {
+                return new RefBookPersonTestBuilder(this).refBookPersonTest;
+            }
         }
+
         private RefBookPersonTestBuilder(Builder b) {
             this.refBookPersonTest = new RefBookPersonTest();
             this.refBookPersonTest.setId(b.id);
@@ -1188,6 +1301,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .build();
         return refBookPersonTest;
     }
+
     private RefBookPersonTest createRefBookPersonTest2() {
         RefBookPersonTest refBookPersonTest = new RefBookPersonTestBuilder.Builder()
                 .id(2L)
@@ -1199,6 +1313,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .build();
         return refBookPersonTest;
     }
+
     private RefBookPersonTest createRefBookPersonTest3() {
         RefBookPersonTest refBookPersonTest = new RefBookPersonTestBuilder.Builder()
                 .id(3L)
@@ -1224,27 +1339,83 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         private String house;
         private String build;
         private String appartment;
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public String getRegionCode() { return regionCode; }
-        public void setRegionCode(String regionCode) { this.regionCode = regionCode; }
-        public String getDistrict() { return district; }
-        public void setDistrict(String district) { this.district = district; }
-        public String getCity() { return city; }
-        public void setCity(String city) { this.city = city; }
-        public String getLocality() { return locality; }
-        public void setLocality(String locality) { this.locality = locality; }
-        public String getStreet() { return street; }
-        public void setStreet(String street) { this.street = street; }
-        public String getHouse() { return house; }
-        public void setHouse(String house) { this.house = house; }
-        public String getBuild() { return build; }
-        public void setBuild(String build) { this.build = build; }
-        public String getAppartment() { return appartment; }
-        public void setAppartment(String appartment) { this.appartment = appartment; }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getRegionCode() {
+            return regionCode;
+        }
+
+        public void setRegionCode(String regionCode) {
+            this.regionCode = regionCode;
+        }
+
+        public String getDistrict() {
+            return district;
+        }
+
+        public void setDistrict(String district) {
+            this.district = district;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
+
+        public String getLocality() {
+            return locality;
+        }
+
+        public void setLocality(String locality) {
+            this.locality = locality;
+        }
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
+
+        public String getHouse() {
+            return house;
+        }
+
+        public void setHouse(String house) {
+            this.house = house;
+        }
+
+        public String getBuild() {
+            return build;
+        }
+
+        public void setBuild(String build) {
+            this.build = build;
+        }
+
+        public String getAppartment() {
+            return appartment;
+        }
+
+        public void setAppartment(String appartment) {
+            this.appartment = appartment;
+        }
     }
+
     private static class RefBookAddressTestBuilder {
         private RefBookAddressTest refBookAddressTest;
+
         public static class Builder {
             private Long id;
             private String regionCode;
@@ -1255,19 +1426,57 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             private String house;
             private String build;
             private String appartment;
-            public Builder id(Long id) { this.id = id; return this; }
-            public Builder regionCode(String regionCode) { this.regionCode = regionCode; return this; }
-            public Builder district(String district) { this.district = district; return this; }
-            public Builder city(String city) { this.city = city; return this; }
-            public Builder locality(String locality) { this.locality = locality; return this; }
-            public Builder street(String street) { this.street = street; return this; }
-            public Builder house(String house) { this.house = house; return this; }
-            public Builder build(String build) { this.build = build; return this; }
-            public Builder appartment(String appartment) { this.appartment = appartment; return this; }
+
+            public Builder id(Long id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder regionCode(String regionCode) {
+                this.regionCode = regionCode;
+                return this;
+            }
+
+            public Builder district(String district) {
+                this.district = district;
+                return this;
+            }
+
+            public Builder city(String city) {
+                this.city = city;
+                return this;
+            }
+
+            public Builder locality(String locality) {
+                this.locality = locality;
+                return this;
+            }
+
+            public Builder street(String street) {
+                this.street = street;
+                return this;
+            }
+
+            public Builder house(String house) {
+                this.house = house;
+                return this;
+            }
+
+            public Builder build(String build) {
+                this.build = build;
+                return this;
+            }
+
+            public Builder appartment(String appartment) {
+                this.appartment = appartment;
+                return this;
+            }
+
             public RefBookAddressTest build() {
                 return new RefBookAddressTestBuilder(this).refBookAddressTest;
             }
         }
+
         private RefBookAddressTestBuilder(Builder b) {
             this.refBookAddressTest = new RefBookAddressTest();
             this.refBookAddressTest.setId(b.id);
@@ -1300,6 +1509,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 .build();
         return refBookAddressTest;
     }
+
     private RefBookAddressTest createRefBookAddressTest2() {
         RefBookAddressTest refBookAddressTest = new RefBookAddressTestBuilder.Builder()
                 .id(2L)
@@ -1314,14 +1524,15 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
     /**
      * Сведения о доходах и НДФЛ
+     *
      * @return
      */
     private NdflPersonIncome createNdflPersonIncome(Long ndflPersonId, BigDecimal rowNum,
                                                     String column4, String column5,
-                                                    Date column6, Date column7, BigDecimal column10, BigDecimal column11,
-                                                    BigDecimal column12, BigDecimal column13, Integer column14, Date column15,
+                                                    LocalDateTime column6, LocalDateTime column7, BigDecimal column10, BigDecimal column11,
+                                                    BigDecimal column12, BigDecimal column13, Integer column14, LocalDateTime column15,
                                                     BigDecimal column16, BigDecimal column17, BigDecimal column18, BigDecimal column19, Long column20,
-                                                    Date column21, Date column22, String column23, Long column24
+                                                    LocalDateTime column21, LocalDateTime column22, String column23, Long column24
     ) {
         NdflPersonIncome ndflPersonIncome = new NdflPersonIncome();
 
@@ -1400,7 +1611,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         Map<String, RefBookValue> pagingResultItem = new HashMap<String, RefBookValue>();
         pagingResultItem.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 350014309L));
         pagingResultItem.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1010"));
-        pagingResultItem.put("record_version_to", new RefBookValue(RefBookAttributeType.DATE,  new Date(2016,12,12)));
+        pagingResultItem.put("record_version_to", new RefBookValue(RefBookAttributeType.DATE, new Date(2016, 12, 12)));
         pagingResult.add(pagingResultItem);
         Map<String, RefBookValue> pagingResultItem2 = new HashMap<String, RefBookValue>();
         pagingResultItem2.put("id", new RefBookValue(RefBookAttributeType.NUMBER, 352114309L));
@@ -1577,6 +1788,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
         // Адреса
         initRefBookAddress();
     }
+
     private void mockRefBook(Long refBookId, PagingResult<Map<String, RefBookValue>> pagingResult) {
         RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
         when(testHelper.getRefBookFactory().getDataProvider(refBookId)).thenReturn(refBookDataProvider);

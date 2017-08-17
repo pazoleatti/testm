@@ -46,7 +46,7 @@ public class QLogSystem extends com.querydsl.sql.RelationalPathBase<QLogSystem> 
 
     public final NumberPath<Byte> isError = createNumber("isError", Byte.class);
 
-    public final DateTimePath<java.sql.Timestamp> logDate = createDateTime("logDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> logDate = createDateTime("logDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath logId = createString("logId");
 

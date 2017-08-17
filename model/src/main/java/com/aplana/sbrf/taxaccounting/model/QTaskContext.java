@@ -28,9 +28,9 @@ public class QTaskContext extends com.querydsl.sql.RelationalPathBase<QTaskConte
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> modificationDate = createDateTime("modificationDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> modificationDate = createDateTime("modificationDate", org.joda.time.LocalDateTime.class);
 
-    public final SimplePath<java.sql.Blob> serializedParams = createSimple("serializedParams", java.sql.Blob.class);
+    public final SimplePath<java.io.InputStream> serializedParams = createSimple("serializedParams", java.io.InputStream.class);
 
     public final NumberPath<Long> taskId = createNumber("taskId", Long.class);
 

@@ -84,9 +84,7 @@ public class RefBookSimpleDataProviderHelper {
         }
 
         //Признак настроек подразделений
-        boolean isConfig =
-				refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId()) ||
-				refBook.getId().equals(RefBook.WithTable.FOND.getTableRefBookId());
+        boolean isConfig = refBook.getId().equals(RefBook.WithTable.NDFL.getTableRefBookId());
 
         if (!isConfig) {
             if (refBook.isHierarchic() && refBook.isVersioned()) {
@@ -209,9 +207,7 @@ public class RefBookSimpleDataProviderHelper {
             }
             boolean isDepartmentConfigTable = false;
             Integer i = null;
-            if (Arrays.asList(
-					RefBook.WithTable.FOND.getTableRefBookId(),
-					RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
+            if (RefBook.WithTable.NDFL.getTableRefBookId().equals(refBook.getId())) {
                 isDepartmentConfigTable = true;
                 i = 1;
             }
@@ -265,8 +261,7 @@ public class RefBookSimpleDataProviderHelper {
                 if (isDepartmentConfigTable) i++;
             }
             if (Arrays.asList(
-					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId(),
-					RefBook.WithTable.FOND.getRefBookId(), RefBook.WithTable.FOND.getTableRefBookId()).contains(refBook.getId())) {
+					RefBook.WithTable.NDFL.getRefBookId(), RefBook.WithTable.NDFL.getTableRefBookId()).contains(refBook.getId())) {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.DEPARTMENT_CONFIG, logger);
             } else {
                 refBookHelper.checkReferenceValues(refBook, references, RefBookHelper.CHECK_REFERENCES_MODE.REFBOOK, logger);

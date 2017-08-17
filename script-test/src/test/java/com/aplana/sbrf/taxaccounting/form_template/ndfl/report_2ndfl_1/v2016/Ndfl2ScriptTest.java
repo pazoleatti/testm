@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.custommonkey.xmlunit.Validator;
 import org.custommonkey.xmlunit.exceptions.XpathException;
+import org.joda.time.LocalDateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -46,7 +47,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
     private static final int DEPARTMENT_PERIOD_ID = 3;
     private static final long REF_BOOK_NDFL_DETAIL_ID = 951L;
     private static final long REB_BOOK_FORM_TYPE_ID = 931L;
-    private  static final long REF_BOOK_DEDUCTION_TYPE_ID = 921L;
+    private static final long REF_BOOK_DEDUCTION_TYPE_ID = 921L;
     private static final long REF_BOOK_DEDUCTION_MARK_ID = 927L;
     private static final long REF_BOOK_OKTMO_ID = 96L;
     private static final long REF_BOOK_SIGNATORY_MARK_ID = 35L;
@@ -89,12 +90,9 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
     @Test
     public void validation_test() throws IOException, SAXException, XpathException {
 
-        Calendar calTax = Calendar.getInstance();
-        calTax.set(2014, 5, 1);
-
-        Calendar calPayment = Calendar.getInstance();
-        calPayment.set(2014, 6, 1);
-        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax.getTime(), calPayment.getTime());
+        LocalDateTime calTax = new LocalDateTime(2014, 6, 1, 0, 0);
+        LocalDateTime calPayment = new LocalDateTime(2014, 7, 1, 0, 0);
+        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax, calPayment);
 
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
 
@@ -136,11 +134,9 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
     @Test
     public void check_selection_when_priznakF_equals_1() throws IOException, SAXException, XpathException {
-        Calendar calTax = Calendar.getInstance();
-        calTax.set(2015, 5, 1);
-        Calendar calPayment = Calendar.getInstance();
-        calPayment.set(2015, 6, 1);
-        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax.getTime(), calPayment.getTime());
+        LocalDateTime calTax = new LocalDateTime(2015, 6, 1, 0, 0);
+        LocalDateTime calPayment = new LocalDateTime(2015, 7, 1, 0, 0);
+        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax, calPayment);
 
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
 
@@ -156,11 +152,9 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
     @Test
     public void check_selection_when_priznakF_equals_2() throws IOException, SAXException, XpathException {
-        Calendar calTax = Calendar.getInstance();
-        calTax.set(2015, 5, 1);
-        Calendar calPayment = Calendar.getInstance();
-        calPayment.set(2015, 6, 1);
-        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax.getTime(), calPayment.getTime());
+        LocalDateTime calTax = new LocalDateTime(2015, 6, 1, 0, 0);
+        LocalDateTime calPayment = new LocalDateTime(2015, 7, 1, 0, 0);
+        List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax, calPayment);
 
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
 
@@ -268,7 +262,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         Map<Integer, List<String>> inn = new HashMap<Integer, List<String>>();
         inn.put(0, Arrays.asList(new String[]{"1234567890"}));
         ConfigurationParam configurationParamTaxOrganCode = ConfigurationParam.NO_CODE;
-        Map <Integer, List<String>> taxOCode = new HashMap<Integer, List<String>>();
+        Map<Integer, List<String>> taxOCode = new HashMap<Integer, List<String>>();
         taxOCode.put(0, Arrays.asList(new String[]{"1234"}));
         configurationParamModel.put(configurationParamInn, inn);
         configurationParamModel.put(configurationParamTaxOrganCode, taxOCode);
@@ -284,20 +278,18 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
         return v.isValid();
     }
 
-    private List<NdflPerson> createNdflPersonMocks(Date taxDate, Date paymentDate) {
+    private List<NdflPerson> createNdflPersonMocks(LocalDateTime taxDate, LocalDateTime paymentDate) {
         List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>();
         NdflPerson ndflPerson = null;
         int taxrate = 13;
-        for (int i = 0; i <2; i++) {
+        for (int i = 0; i < 2; i++) {
             ndflPerson = new NdflPerson();
             ndflPerson.setId(1L);
             ndflPerson.setInnNp("770111111111");
             ndflPerson.setInnForeign("111111111111");
             ndflPerson.setStatus("6");
 
-            Calendar cal = Calendar.getInstance();
-            cal.set(1985, 0, 1);
-            ndflPerson.setBirthDay(cal.getTime());
+            ndflPerson.setBirthDay(new LocalDateTime(1985, 1, 1, 0, 0));
 
             ndflPerson.setCitizenship("643");
 
@@ -333,9 +325,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome1.setOverholdingTax(BigDecimal.valueOf(9000L));
             ndflPersonIncome1.setNotHoldingTax(BigDecimal.valueOf(4000L));
 
-            Calendar calAccrued = Calendar.getInstance();
-            calAccrued.set(2014, 4, 1);
-            ndflPersonIncome1.setIncomeAccruedDate(calAccrued.getTime());
+            ndflPersonIncome1.setIncomeAccruedDate(new LocalDateTime(2014, 5, 1, 0, 0));
 
             ndflPersonIncome1.setTaxDate(taxDate);
             ndflPersonIncome1.setPaymentDate(paymentDate);
@@ -354,9 +344,8 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome2.setOverholdingTax(BigDecimal.valueOf(9000L));
             ndflPersonIncome2.setNotHoldingTax(BigDecimal.valueOf(4000L));
 
-            Calendar calAccrued2 = Calendar.getInstance();
-            calAccrued2.set(2014, 5, 1);
-            ndflPersonIncome2.setIncomeAccruedDate(calAccrued2.getTime());
+            LocalDateTime calAccrued = new LocalDateTime(2014, 6, 1, 0, 0);
+            ndflPersonIncome2.setIncomeAccruedDate(calAccrued);
 
             ndflPersonIncome2.setTaxDate(taxDate);
             ndflPersonIncome2.setPaymentDate(paymentDate);
@@ -369,7 +358,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
             NdflPersonDeduction ndflPersonDeduction1 = new NdflPersonDeduction();
             ndflPersonDeduction1.setOperationId("1");
-            ndflPersonDeduction1.setIncomeAccrued(calAccrued.getTime());
+            ndflPersonDeduction1.setIncomeAccrued(calAccrued);
             ndflPersonDeduction1.setTypeCode("501");
             ndflPersonDeduction1.setPeriodCurrDate(ndflPersonIncome1.getTaxDate());
             ndflPersonDeduction1.setPeriodCurrSumm(BigDecimal.valueOf(100000));
@@ -379,7 +368,7 @@ public class Ndfl2ScriptTest extends DeclarationScriptTestBase {
 
             NdflPersonDeduction ndflPersonDeduction2 = new NdflPersonDeduction();
             ndflPersonDeduction2.setOperationId("1");
-            ndflPersonDeduction2.setIncomeAccrued(calAccrued.getTime());
+            ndflPersonDeduction2.setIncomeAccrued(calAccrued);
             ndflPersonDeduction2.setTypeCode("101");
             ndflPersonDeduction2.setPeriodCurrDate(ndflPersonIncome1.getTaxDate());
             ndflPersonDeduction2.setPeriodCurrSumm(BigDecimal.valueOf(200000));

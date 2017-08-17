@@ -50,9 +50,6 @@ public class TaxPeriodDaoTest {
 	public void listAllPeriodsByTaxTypeSuccessfulTest() {
 		List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxType(TaxType.NDFL);
 		assertEquals(3, taxPeriodList.size());
-
-		taxPeriodList = taxPeriodDao.listByTaxType(TaxType.PFR);
-		assertEquals(1, taxPeriodList.size());
 	}
 
 	@Test

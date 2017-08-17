@@ -31,6 +31,7 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Service;
@@ -520,7 +521,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
+    public LocalDateTime getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
         try {
             String xmlUuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
@@ -888,8 +889,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 saxParser.parse(xmlFile, handler);
                 String decName = handler.getValues().get(TAG_FILE);
                 Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
-                if (decDate == null)
+                if (decDate == null) {
                     decDate = docDate;
+                }
 
                 //Архивирование перед сохраннеием в базу
                 File zipOutFile = null;
@@ -914,7 +916,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                     reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.XML_DEC));
                     reportService.createDec(declarationData.getId(),
-                            blobDataService.create(zipOutFile, decName + ".zip", decDate),
+                            blobDataService.create(zipOutFile, decName + ".zip", new LocalDateTime(decDate)),
                             DeclarationDataReportType.XML_DEC);
                     declarationDataDao.setFileName(declarationData.getId(), decName);
                 } finally {
@@ -1603,7 +1605,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream,
                                       String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
-                                      AttachFileType fileType, Date createDateFile) {
+                                      AttachFileType fileType, LocalDateTime createDateFile) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
         try {
             DeclarationData declarationData = get(declarationDataId, userInfo);
@@ -1633,7 +1635,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         stateLogger.updateState("Сохранение XML-файла в базе данных");
                     }
 
-                    createDateFile = createDateFile == null ? new Date() : createDateFile;
+                    createDateFile = createDateFile == null ? new LocalDateTime() : createDateFile;
                     fileUuid = blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", createDateFile);
 
                     reportService.deleteDec(declarationData.getId());
@@ -1644,7 +1646,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 }
             } else {
-                fileUuid = blobDataService.create(dataFile, fileName, new Date());
+                fileUuid = blobDataService.create(dataFile, fileName, new LocalDateTime());
             }
 
             TAUser user = userService.getSystemUserInfo().getUser();

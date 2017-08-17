@@ -28,13 +28,13 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> incomeAccruedDate = createDateTime("incomeAccruedDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> incomeAccruedDate = createDateTime("incomeAccruedDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<java.math.BigDecimal> incomeAccruedSumm = createNumber("incomeAccruedSumm", java.math.BigDecimal.class);
 
     public final StringPath incomeCode = createString("incomeCode");
 
-    public final DateTimePath<java.sql.Timestamp> incomePayoutDate = createDateTime("incomePayoutDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> incomePayoutDate = createDateTime("incomePayoutDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<java.math.BigDecimal> incomePayoutSumm = createNumber("incomePayoutSumm", java.math.BigDecimal.class);
 
@@ -52,7 +52,7 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<java.math.BigDecimal> overholdingTax = createNumber("overholdingTax", java.math.BigDecimal.class);
 
-    public final DateTimePath<java.sql.Timestamp> paymentDate = createDateTime("paymentDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> paymentDate = createDateTime("paymentDate", org.joda.time.LocalDateTime.class);
 
     public final StringPath paymentNumber = createString("paymentNumber");
 
@@ -64,13 +64,13 @@ public class QNdflPersonIncome extends com.querydsl.sql.RelationalPathBase<QNdfl
 
     public final NumberPath<java.math.BigDecimal> taxBase = createNumber("taxBase", java.math.BigDecimal.class);
 
-    public final DateTimePath<java.sql.Timestamp> taxDate = createDateTime("taxDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> taxDate = createDateTime("taxDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Integer> taxRate = createNumber("taxRate", Integer.class);
 
     public final NumberPath<Long> taxSumm = createNumber("taxSumm", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> taxTransferDate = createDateTime("taxTransferDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> taxTransferDate = createDateTime("taxTransferDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<java.math.BigDecimal> totalDeductionsSumm = createNumber("totalDeductionsSumm", java.math.BigDecimal.class);
 

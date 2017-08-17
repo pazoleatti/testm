@@ -5,11 +5,11 @@ import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import org.apache.poi.util.IOUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.Date;
 import java.util.UUID;
 
 @Service("blobDataServiceDaoImpl")
@@ -20,16 +20,16 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public BlobData get(String uuid) {
-        return blobDataDao.get(uuid);
+        return blobDataDao.fetch(uuid);
     }
 
     @Override
-    public String create(File file, String name, Date createDate) {
+    public String create(File file, String name, LocalDateTime createDate) {
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(file);
             BlobData data = initBlob("", fileInputStream, name, createDate);
-            return blobDataDao.createWithDate(data);
+            return blobDataDao.create(data);
         } catch (FileNotFoundException e) {
             throw new ServiceException("", e);
         } finally {
@@ -37,7 +37,7 @@ public class BlobDataServiceImpl implements BlobDataService {
         }
     }
 
-    private static BlobData initBlob(String blobId, InputStream is, String name, Date date){
+    private static BlobData initBlob(String blobId, InputStream is, String name, LocalDateTime date) {
         BlobData blobData = new BlobData();
         blobData.setName(name);
         try {

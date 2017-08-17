@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionException;
 
@@ -395,7 +396,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 for (Integer userId : waitingUsers) {
                     Notification notification = new Notification();
                     notification.setUserId(userId);
-                    notification.setCreateDate(new Date());
+                    notification.setCreateDate(new LocalDateTime());
                     notification.setText(msg);
                     notification.setLogId(uuid);
                     notification.setReportId(reportId);

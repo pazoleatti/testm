@@ -82,15 +82,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 	}
 
     public static List<DeclarationFormKind> getAvailableDeclarationFormKind(TaxType taxType, boolean isReports, TAUser taUser) {
-        if (taxType.equals(TaxType.PFR)) {
-            if (taUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
-                return Arrays.asList(DeclarationFormKind.PRIMARY, DeclarationFormKind.CONSOLIDATED, DeclarationFormKind.REPORTS);
-            } else if (taUser.hasRole(taxType, TARole.F_ROLE_OPER)) {
-                return Arrays.asList(DeclarationFormKind.PRIMARY);
-            } else {
-                return new ArrayList<DeclarationFormKind>();
-            }
-        } else if (taxType.equals(TaxType.NDFL)) {
+        if (taxType.equals(TaxType.NDFL)) {
             if (isReports) {
                 if (taUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                     return Arrays.asList(DeclarationFormKind.REPORTS);

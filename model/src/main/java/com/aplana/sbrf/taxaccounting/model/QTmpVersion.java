@@ -24,11 +24,11 @@ public class QTmpVersion extends com.querydsl.sql.RelationalPathBase<QTmpVersion
 
     public static final QTmpVersion tmpVersion = new QTmpVersion("TMP_VERSION");
 
-    public final DateTimePath<java.sql.Timestamp> calcDate = createDateTime("calcDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> calcDate = createDateTime("calcDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> recordId = createNumber("recordId", Long.class);
 
-    public final DateTimePath<java.sql.Timestamp> version = createDateTime("version", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> version = createDateTime("version", org.joda.time.LocalDateTime.class);
 
     public QTmpVersion(String variable) {
         super(QTmpVersion.class, forVariable(variable), "NDFL_UNSTABLE", "TMP_VERSION");

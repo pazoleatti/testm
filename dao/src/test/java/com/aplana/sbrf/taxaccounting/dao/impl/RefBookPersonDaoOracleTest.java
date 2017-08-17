@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimary1151111RowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper;
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
-import com.aplana.sbrf.taxaccounting.dao.raschsv.RaschsvPersSvStrahLicDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookSimpleDao;
@@ -41,9 +39,6 @@ public class RefBookPersonDaoOracleTest {
 
     @Autowired
     RefBookDao refBookDao;
-
-    @Autowired
-    RaschsvPersSvStrahLicDao raschsvPersSvStrahLicDao;
 
     @Autowired
     RefBookPersonDao refBookPersonDao;
@@ -153,66 +148,4 @@ public class RefBookPersonDaoOracleTest {
         List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFromNdfl(declarationDataId, rowMapper);
         printResult(time, result.size());
     }
-
-
-    //1151111
-    private static final Long decl_data115_id = 15143L; //вставка
-
-    @Test
-    public void testFindNaturalPersonPrimaryData1151111() {
-        long time = System.currentTimeMillis();
-
-        NaturalPersonPrimary1151111RowMapper rowMapper = new NaturalPersonPrimary1151111RowMapper();
-
-        Long declarationDataId = 15182L;
-        //Long declarationDataId = 14730L;
-
-        List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(declarationDataId, rowMapper);
-        printResult(time, result.size());
-    }
-
-    @Test
-    public void testFind115PersonFunc() {
-
-        List<NaturalPerson> result = refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(decl_data115_id, new NaturalPersonPrimaryRnuRowMapper());
-
-        System.out.println("Всего записей в ПНФ: decl_data_id=" + decl_data115_id + ", size=" + result.size());
-
-        long time = System.currentTimeMillis();
-
-        Date version = new Date();
-
-        refBookPersonDao.fillRecordVersions(version);
-
-        int size = 0;
-
-        List<NaturalPerson> insertRecords = refBookPersonDao.findPersonForInsertFromPrimary1151111(decl_data115_id, 1L, version, new NaturalPersonPrimaryRnuRowMapper());
-
-        size += insertRecords.size();
-
-        System.out.println("   insertRecords=" + insertRecords);
-
-
-        Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimary1151111(decl_data115_id, 1L, version, new NaturalPersonRefbookHandler());
-
-        size += updateRecords.size();
-
-        System.out.println("   updateRecords=" + updateRecords);
-
-
-        Map<Long, Map<Long, NaturalPerson>> checkRecords = refBookPersonDao.findPersonForCheckFromPrimary1151111(decl_data115_id, 1L, version, new NaturalPersonRefbookHandler());
-
-        size += checkRecords.size();
-
-        System.out.println("   checkRecords=" + checkRecords);
-
-        List<NaturalPerson> result2 = refBookPersonDao.findNaturalPersonPrimaryDataFrom1151111(decl_data115_id, new NaturalPersonPrimaryRnuRowMapper());
-
-        //System.out.println("Всего записей в ПНФ: decl_data_id=" + decl_data_id + ", size=" + result2.size());
-
-        printResult(time, size);
-
-    }
-
-
 }

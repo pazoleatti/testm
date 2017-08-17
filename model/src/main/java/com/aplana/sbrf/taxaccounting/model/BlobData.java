@@ -1,22 +1,30 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.io.InputStream;
-import java.util.Date;
 
 /**
- * User: avanteev
  * Модель для работы с файловым хранилищем.
  */
 public class BlobData {
-
-    /*Уникальный иденификатор записи. Формируется в сервисном слое.*/
+    /**
+     * Уникальный иденификатор записи.
+     * Сам класс его не генерирует.
+     */
     private String uuid;
-    /*Наименование файла вместе с расширением*/
+    /**
+     * Наименование файла вместе с расширением
+     */
     private String name;
-    /*Данные загружаемого файла*/
+    /**
+     * Данные в виде {@link InputStream}
+     */
     private InputStream inputStream;
-    /*Дата создания (sysdate в БД)*/
-    private Date creationDate;
+    /**
+     * Дата создания
+     */
+    private LocalDateTime creationDate;
 
     public String getUuid() {
         return uuid;
@@ -42,11 +50,11 @@ public class BlobData {
         this.inputStream = inputStream;
     }
 
-    public Date getCreationDate() {
+    public LocalDateTime getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
     }
 }

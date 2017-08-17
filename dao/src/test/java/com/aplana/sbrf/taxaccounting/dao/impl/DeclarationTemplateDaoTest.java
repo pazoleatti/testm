@@ -30,99 +30,98 @@ import static org.junit.Assert.assertNull;
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DeclarationTemplateDaoTest {
-	@Autowired
-	private DeclarationTemplateDao declarationTemplateDao;
+    @Autowired
+    private DeclarationTemplateDao declarationTemplateDao;
 
-	@Autowired
-	private DeclarationTypeDao declarationTypeDao;
+    @Autowired
+    private DeclarationTypeDao declarationTypeDao;
 
-	@Autowired
-	private BlobDataDao blobDataDao;
+    @Autowired
+    private BlobDataDao blobDataDao;
 
-	private static final String SAMPLE_BLOB_ID = UUID.randomUUID().toString();
+    private static final String SAMPLE_BLOB_ID = UUID.randomUUID().toString();
 
-	@Before
-	public void init() throws UnsupportedEncodingException {
-		// генерим тестовый блоб
-		String sampleBlobData = "sample text";
-		BlobData blob = new BlobData();
-		blob.setCreationDate(new Date());
-		blob.setUuid(SAMPLE_BLOB_ID);
-		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
-		blobDataDao.create(blob);
-	}
+    @Before
+    public void init() throws UnsupportedEncodingException {
+        // генерим тестовый блоб
+        String sampleBlobData = "sample text";
+        BlobData blob = new BlobData();
+        blob.setUuid(SAMPLE_BLOB_ID);
+        blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
+        blobDataDao.createWithSysdate(blob);
+    }
 
-	@Test
-	public void testListAll() {
-		assertEquals(6, declarationTemplateDao.listAll().size());
-	}
+    @Test
+    public void testListAll() {
+        assertEquals(6, declarationTemplateDao.listAll().size());
+    }
 
-	@Test
-	public void testGet() {
-		DeclarationTemplate d1 = declarationTemplateDao.get(1);
-		assertEquals(1, d1.getId().longValue());
-		/*assertFalse(d1.isActive());*/
+    @Test
+    public void testGet() {
+        DeclarationTemplate d1 = declarationTemplateDao.get(1);
+        assertEquals(1, d1.getId().longValue());
+        /*assertFalse(d1.isActive());*/
         assertEquals("Налоговая форма 1", d1.getName());
 
-		DeclarationTemplate d2 = declarationTemplateDao.get(2);
-		assertEquals(2, d2.getId().longValue());
-		/*assertTrue(d2.isActive());*/
-	}
-	
-	@Test(expected=DaoException.class)
-	public void testGetNotExisted() {
-		declarationTemplateDao.get(1000);
-	}
+        DeclarationTemplate d2 = declarationTemplateDao.get(2);
+        assertEquals(2, d2.getId().longValue());
+        /*assertTrue(d2.isActive());*/
+    }
 
-	@Test
-	public void testSaveNew() {
+    @Test(expected = DaoException.class)
+    public void testGetNotExisted() {
+        declarationTemplateDao.get(1000);
+    }
 
-		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
-		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
+    @Test
+    public void testSaveNew() {
+
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setName("Налоговая форма");
-		declarationTemplate.setVersion(new Date());
-		declarationTemplate.setCreateScript("MyScript");
-		DeclarationType declarationType = declarationTypeDao.get(1);
-		declarationTemplate.setType(declarationType);
+        declarationTemplate.setVersion(new Date());
+        declarationTemplate.setCreateScript("MyScript");
+        DeclarationType declarationType = declarationTypeDao.get(1);
+        declarationTemplate.setType(declarationType);
         declarationTemplate.setJrxmlBlobId("1");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.PRIMARY);
         declarationTemplate.setDeclarationFormTypeId(2L);
-		int id = declarationTemplateDao.create(declarationTemplate);
+        int id = declarationTemplateDao.create(declarationTemplate);
 
-		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
-		assertEquals(id, savedDeclarationTemplate.getId().intValue());
-		assertNull(savedDeclarationTemplate.getCreateScript());
-		assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
+        DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
+        assertEquals(id, savedDeclarationTemplate.getId().intValue());
+        assertNull(savedDeclarationTemplate.getCreateScript());
+        assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
 		/*assertTrue(savedDeclarationTemplate.isActive());*/
         assertEquals(null, savedDeclarationTemplate.getXsdId());
-	}
+    }
 
-	@Test
-	public void testSaveExist() {
+    @Test
+    public void testSaveExist() {
 
-		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
-		declarationTemplate.setId(1);
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setId(1);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setName("Налоговая форма");
-		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-		declarationTemplate.setVersion(new Date());
-		declarationTemplate.setCreateScript("MyScript");
+        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
+        declarationTemplate.setVersion(new Date());
+        declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setDeclarationFormTypeId(2L);
         declarationTemplate.setDeclarationFormKind(DeclarationFormKind.REPORTS);
         declarationTemplate.setSubreports(new ArrayList<DeclarationSubreport>());
-		DeclarationType declarationType = declarationTypeDao.get(1);
-		declarationTemplate.setType(declarationType);
+        DeclarationType declarationType = declarationTypeDao.get(1);
+        declarationTemplate.setType(declarationType);
 
-		int savedId = declarationTemplateDao.save(declarationTemplate);
+        int savedId = declarationTemplateDao.save(declarationTemplate);
 
-		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(savedId);
-		assertEquals(1, savedDeclarationTemplate.getId().intValue());
-		assertNull(savedDeclarationTemplate.getCreateScript());
-		assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
+        DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(savedId);
+        assertEquals(1, savedDeclarationTemplate.getId().intValue());
+        assertNull(savedDeclarationTemplate.getCreateScript());
+        assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
         assertEquals(VersionedObjectStatus.NORMAL, savedDeclarationTemplate.getStatus());
-	}
+    }
 
     @Test
     public void testSetJrxml() {
@@ -148,14 +147,14 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-	public void testUpdate() {
-		DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
-		declarationTemplate1.setId(1);
+    public void testUpdate() {
+        DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
+        declarationTemplate1.setId(1);
         declarationTemplate1.setName("");
         declarationTemplate1.setStatus(VersionedObjectStatus.FAKE);
-		declarationTemplate1.setVersion(new Date());
-		declarationTemplate1.setCreateScript("MyScript");
-		declarationTemplate1.setType(declarationTypeDao.get(1));
+        declarationTemplate1.setVersion(new Date());
+        declarationTemplate1.setCreateScript("MyScript");
+        declarationTemplate1.setType(declarationTypeDao.get(1));
         DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
         declarationTemplate2.setId(2);
         declarationTemplate2.setName("sfcxvxc");
@@ -164,27 +163,27 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate2.setCreateScript("MyScript");
         declarationTemplate2.setType(declarationTypeDao.get(2));
 
-		int[] updateIds = declarationTemplateDao.update(Arrays.asList(declarationTemplate1, declarationTemplate2));
+        int[] updateIds = declarationTemplateDao.update(Arrays.asList(declarationTemplate1, declarationTemplate2));
         Assert.assertArrayEquals(new int[]{1, 1}, updateIds);
-	}
-
-	@Test
-	public void getActiveDeclarationTemplateIdTest() {
-        assertEquals(1, declarationTemplateDao.getActiveDeclarationTemplateId(1, 1));
-	}
-
-	@Test(expected = DaoException.class)
-	public void getActiveDeclarationTemplateIdMoreThanOneTest() {
-        declarationTemplateDao.getActiveDeclarationTemplateId(3, 3);
-	}
-
-	@Test(expected = DaoException.class)
-	public void getActiveDeclarationTemplateIdEmptyTest() {
-        declarationTemplateDao.getActiveDeclarationTemplateId(3, 2);
-	}
+    }
 
     @Test
-    public void getDeclarationTemplateScriptTest(){
+    public void getActiveDeclarationTemplateIdTest() {
+        assertEquals(1, declarationTemplateDao.getActiveDeclarationTemplateId(1, 1));
+    }
+
+    @Test(expected = DaoException.class)
+    public void getActiveDeclarationTemplateIdMoreThanOneTest() {
+        declarationTemplateDao.getActiveDeclarationTemplateId(3, 3);
+    }
+
+    @Test(expected = DaoException.class)
+    public void getActiveDeclarationTemplateIdEmptyTest() {
+        declarationTemplateDao.getActiveDeclarationTemplateId(3, 2);
+    }
+
+    @Test
+    public void getDeclarationTemplateScriptTest() {
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(1);
         declarationTemplate.setName("Налоговая форма");
@@ -205,7 +204,7 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testGetDeclarationTemplateVersions(){
+    public void testGetDeclarationTemplateVersions() {
         List<Integer> list = new ArrayList<Integer>();
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
@@ -219,7 +218,7 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testGetDTVersionEndDate(){
+    public void testGetDTVersionEndDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2013, Calendar.JANUARY, 1);
         Date actualBeginVersion = new Date(calendar.getTime().getTime());
@@ -231,7 +230,7 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testGetNearestDTVersionIdRight(){
+    public void testGetNearestDTVersionIdRight() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2012, Calendar.JANUARY, 1);
         Date actualBeginVersion = new Date(calendar.getTime().getTime());
@@ -244,7 +243,7 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testVersionTemplateCount(){
+    public void testVersionTemplateCount() {
         List<Integer> list = new ArrayList<Integer>();
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
@@ -257,26 +256,26 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testVersionTemplateCountByType(){
+    public void testVersionTemplateCountByType() {
         List<Map<String, Object>> list = declarationTemplateDao.versionTemplateCountByType(Arrays.asList(1, 2));
         Assert.assertEquals(new BigDecimal(1), list.get(0).get("type_id"));
         Assert.assertEquals((long) 2, list.get(0).get("version_count"));
     }
 
     @Test
-    public void testGeAll(){
+    public void testGeAll() {
         Assert.assertEquals(6, declarationTemplateDao.getByFilter(null).size());
     }
 
     @Test
-    public void testGeByFilter(){
+    public void testGeByFilter() {
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.TRANSPORT);
         Assert.assertEquals(6, declarationTemplateDao.getByFilter(filter).size());
     }
 
     @Test
-    public void getBadDeclarationTemplateScriptTest(){
+    public void getBadDeclarationTemplateScriptTest() {
         assertEquals("", declarationTemplateDao.getDeclarationTemplateScript(100));
     }
 
@@ -290,17 +289,17 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testDeleteList(){
+    public void testDeleteList() {
         declarationTemplateDao.delete(Arrays.asList(1, 2));
     }
 
     @Test
-    public void testDeleteXsd(){
+    public void testDeleteXsd() {
         declarationTemplateDao.deleteXsd(1);
     }
 
     @Test
-    public void testDeleteJrxml(){
+    public void testDeleteJrxml() {
         declarationTemplateDao.deleteJrxml(1);
     }
 

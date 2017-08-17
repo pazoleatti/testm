@@ -1442,6 +1442,9 @@ def _importTF() {
         return;
     }
 
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
     // Создание экземпляра декларации
     declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null);
 

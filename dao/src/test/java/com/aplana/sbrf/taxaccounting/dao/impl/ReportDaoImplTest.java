@@ -133,7 +133,7 @@ public class ReportDaoImplTest {
         blobData.setUuid(uuid);
         blobData.setName("hello");
         blobData.setInputStream(new ByteArrayInputStream(new byte[]{'a'}));
-        blobDataDao.create(blobData);
+        blobDataDao.createWithSysdate(blobData);
         reportDao.createDec(3, uuid, DeclarationDataReportType.EXCEL_DEC);
     }
 
@@ -145,7 +145,7 @@ public class ReportDaoImplTest {
         blobData.setUuid(uuid);
         blobData.setName("hello");
         blobData.setInputStream(new ByteArrayInputStream(new byte[]{'a'}));
-        blobDataDao.create(blobData);
+        blobDataDao.createWithSysdate(blobData);
         reportDao.createAudit(2, uuid, ReportType.CSV);
     }
 

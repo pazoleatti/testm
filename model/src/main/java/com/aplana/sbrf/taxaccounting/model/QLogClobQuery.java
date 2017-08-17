@@ -30,7 +30,7 @@ public class QLogClobQuery extends com.querydsl.sql.RelationalPathBase<QLogClobQ
 
     public final NumberPath<Integer> id = createNumber("id", Integer.class);
 
-    public final DateTimePath<java.sql.Timestamp> logDate = createDateTime("logDate", java.sql.Timestamp.class);
+    public final DateTimePath<org.joda.time.LocalDateTime> logDate = createDateTime("logDate", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Long> sessionId = createNumber("sessionId", Long.class);
 

@@ -37,8 +37,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private static final long TABLE_NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getTableRefBookId();
     private static final long NDFL_REFBOOK_ID = RefBook.WithTable.NDFL.getRefBookId();
-    private static final long TABLE_FOND_REFBOOK_ID = RefBook.WithTable.FOND.getTableRefBookId();
-    private static final long FOND_REFBOOK_ID =  RefBook.WithTable.FOND.getRefBookId();
 
     private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
@@ -222,8 +220,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private Long getCurrentRefBookId() {
         if (getView().getTaxType() == TaxType.NDFL) {
             return NDFL_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.PFR) {
-            return FOND_REFBOOK_ID;
         }
 
         return null;
@@ -232,8 +228,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private Long getCurrentTableRefBookId() {
         if (getView().getTaxType() == TaxType.NDFL) {
             return TABLE_NDFL_REFBOOK_ID;
-        } else if (getView().getTaxType() == TaxType.PFR) {
-            return TABLE_FOND_REFBOOK_ID;
         }
 
         return null;

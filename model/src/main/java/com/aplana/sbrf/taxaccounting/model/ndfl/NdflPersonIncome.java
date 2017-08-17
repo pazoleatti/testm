@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
+import org.joda.time.LocalDateTime;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -19,10 +21,10 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private String incomeType;
 
     // Доход.Дата.Начисление (Графа 6)
-    private Date incomeAccruedDate;
+    private LocalDateTime incomeAccruedDate;
 
     // Доход.Дата.Выплата (Графа 7)
-    private Date incomePayoutDate;
+    private LocalDateTime incomePayoutDate;
 
     // Доход.Источник выплаты.ОКТМО (Графа 8)
     private String oktmo;
@@ -46,7 +48,7 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Integer taxRate;
 
     // НДФЛ.Расчет.Дата (Графа 15)
-    private Date taxDate;
+    private LocalDateTime taxDate;
 
     // НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
     private BigDecimal calculatedTax;
@@ -64,10 +66,10 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Long refoundTax;
 
     // НДФЛ.Перечисление в бюджет.Срок (Графа 21)
-    private Date taxTransferDate;
+    private LocalDateTime taxTransferDate;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Дата (Графа 22)
-    private Date paymentDate;
+    private LocalDateTime paymentDate;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Номер (Графа 23)
     private String paymentNumber;
@@ -148,19 +150,19 @@ public class NdflPersonIncome extends NdflPersonOperation {
         this.kpp = kpp;
     }
 
-    public Date getIncomeAccruedDate() {
+    public LocalDateTime getIncomeAccruedDate() {
         return incomeAccruedDate;
     }
 
-    public void setIncomeAccruedDate(Date incomeAccruedDate) {
+    public void setIncomeAccruedDate(LocalDateTime incomeAccruedDate) {
         this.incomeAccruedDate = incomeAccruedDate;
     }
 
-    public Date getIncomePayoutDate() {
+    public LocalDateTime getIncomePayoutDate() {
         return incomePayoutDate;
     }
 
-    public void setIncomePayoutDate(Date incomePayoutDate) {
+    public void setIncomePayoutDate(LocalDateTime incomePayoutDate) {
         this.incomePayoutDate = incomePayoutDate;
     }
 
@@ -204,11 +206,11 @@ public class NdflPersonIncome extends NdflPersonOperation {
         this.taxRate = taxRate;
     }
 
-    public Date getTaxDate() {
+    public LocalDateTime getTaxDate() {
         return taxDate;
     }
 
-    public void setTaxDate(Date taxDate) {
+    public void setTaxDate(LocalDateTime taxDate) {
         this.taxDate = taxDate;
     }
 
@@ -252,19 +254,19 @@ public class NdflPersonIncome extends NdflPersonOperation {
         this.refoundTax = refoundTax;
     }
 
-    public Date getTaxTransferDate() {
+    public LocalDateTime getTaxTransferDate() {
         return taxTransferDate;
     }
 
-    public void setTaxTransferDate(Date taxTransferDate) {
+    public void setTaxTransferDate(LocalDateTime taxTransferDate) {
         this.taxTransferDate = taxTransferDate;
     }
 
-    public Date getPaymentDate() {
+    public LocalDateTime getPaymentDate() {
         return paymentDate;
     }
 
-    public void setPaymentDate(Date paymentDate) {
+    public void setPaymentDate(LocalDateTime paymentDate) {
         this.paymentDate = paymentDate;
     }
 
