@@ -62,6 +62,7 @@ public class GlobalControllerExceptionHandler {
         } catch (IOException ioException) {
             LOG.error(ioException.getMessage(), ioException);
         }
+        //TODO https://jira.aplana.com/browse/SBRFNDFL-1833 добавить передачу сообщения на клиент
     }
 
     /**
