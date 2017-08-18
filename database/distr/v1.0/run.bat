@@ -7,6 +7,9 @@ SET ORA_BIN=C:\app\oracle\product\11.2.0\dbhome_1\BIN
 SET LOG_DIR=_logs
 SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
+REM логин и имя пользователя с правами администратора
+SET ADM_LOGIN=ADM_LOGIN1
+SET ADM_NAME=Administrator
 
 ECHO ## DB: %AUTH%
 

@@ -34,6 +34,7 @@ prompt states
 prompt roles and system user
 @@sec_user;
 @@sec_user_role;
+@@add_adm_user;
 
 prompt configuration
 @@configuration.sql;
