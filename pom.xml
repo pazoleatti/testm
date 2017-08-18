@@ -489,16 +489,46 @@
 				<groupId>com.querydsl</groupId>
 				<artifactId>querydsl-sql</artifactId>
 				<version>${querydsl.version}</version>
+				<exclusions>
+					<!--
+                        Фикс проблемы с запуском сборки на вебсфере
+                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
+                    -->
+					<exclusion>
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.querydsl</groupId>
 				<artifactId>querydsl-core</artifactId>
 				<version>${querydsl.version}</version>
+				<exclusions>
+					<!--
+                        Фикс проблемы с запуском сборки на вебсфере
+                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
+                    -->
+					<exclusion>
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.querydsl</groupId>
 				<artifactId>querydsl-sql-spring</artifactId>
 				<version>${querydsl.version}</version>
+				<exclusions>
+					<!--
+                        Фикс проблемы с запуском сборки на вебсфере
+                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
+                    -->
+					<exclusion>
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 		</dependencies>
