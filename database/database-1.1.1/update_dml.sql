@@ -4,5 +4,8 @@ prompt ref_book_attribute
 prompt delete event 
 @@delete_event.sql;
 
+prompt delete sec_role 
+@@delete_sec_role.sql;
+
 commit;
 exit;
