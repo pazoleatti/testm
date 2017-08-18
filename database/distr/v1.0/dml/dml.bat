@@ -1,1 +1,0 @@
-"%ORA_BIN%\sqlplus" %AUTH% @"dml.sql" > "../%LOG_DIR%/dml.txt"
