@@ -329,7 +329,7 @@ public class DeclarationDataController {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", declarationDataId);
                 params.put("docDate", new Date());
-                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, userInfo, logger, new AsyncTaskHandler() {
                     @Override
                     public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                         return lockDataService.lock(keyTask, userInfo.getUser().getId(),
@@ -400,7 +400,7 @@ public class DeclarationDataController {
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("declarationDataId", declarationDataId);
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
                         @Override
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
@@ -455,73 +455,11 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
-     * @return модель {@link AcceptDeclarationDataResult}, в которой содержаться данные о результате принятия декларации
+     * @return модель {@link AcceptDeclarationResult}, в которой содержаться данные о результате принятия декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/accept")
-    public AcceptDeclarationDataResult acceptDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
-        final AcceptDeclarationDataResult result = new AcceptDeclarationDataResult();
-        if (!declarationService.existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-            return result;
-        }
-        Logger logger = new Logger();
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        final TaxType taxType = TaxType.NDFL;
-        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
-        if (uuidXml != null) {
-            DeclarationData declarationData = declarationService.get(declarationDataId, userInfo);
-            if (!declarationData.getState().equals(State.ACCEPTED)) {
-                String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
-                if (restartStatus != null && restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                    result.setRestartMsg(restartStatus.getSecond());
-                } else if (restartStatus != null && !restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                } else {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("declarationDataId", declarationDataId);
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
-                        @Override
-                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    declarationService.getDeclarationFullName(declarationDataId, ddReportType),
-                                    LockData.State.IN_QUEUE.getText());
-                        }
-
-                        @Override
-                        public void executePostCheck() {
-                            result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
-                        }
-
-                        @Override
-                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                            return declarationService.checkExistTask(declarationDataId, reportType, logger);
-                        }
-
-                        @Override
-                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                            declarationService.interruptTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
-                        }
-
-                        @Override
-                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationService.getTaskName(ddReportType, taxType);
-                        }
-                    });
-                }
-            } else {
-                result.setStatus(CreateAsyncTaskStatus.EXIST);
-            }
-        } else {
-            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
-        }
-
-        result.setUuid(logEntryService.save(logger.getEntries()));
-        return result;
+    public AcceptDeclarationResult acceptDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
+        return asyncTaskManagerService.createAcceptDeclarationTask(securityService.currentUserInfo(), declarationDataId, force, cancelTask);
     }
 
     /**
