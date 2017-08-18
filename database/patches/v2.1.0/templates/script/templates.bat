@@ -11,6 +11,8 @@ SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
 )
 
+"%ORA_BIN%\sqlplus" %AUTH% @"clean.sql" > "../../%LOG_DIR%/clean.txt"
+
 "%ORA_BIN%\sqlplus" %AUTH% @"before_update_template.sql" > "../../%LOG_DIR%/before_update_template.txt"
 
 ECHO #################################

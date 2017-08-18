@@ -39,6 +39,8 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreate()
         break
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
+        checkAccept()
     case FormDataEvent.CHECK: //Проверить
         checkData()
         break
@@ -49,9 +51,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CALCULATE: // Формирование pdf-отчета формы
         declarationService.createPdfReport(logger, declarationData, userInfo)
-        break
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        checkAccept()
         break
     case FormDataEvent.GET_SOURCES: //формирование списка ПНФ для консолидации
         getSourcesListForTemporarySolution()
@@ -388,7 +387,7 @@ Map<Long, Map<String, RefBookValue>> getRefAddressByPersons(Map<Long, Map<String
 Map<Long, List<Map<String, RefBookValue>>> getActualRefDulByDeclarationDataIdList(List<Long> declarationDataIdList) {
     Map<Long, List<Map<String, RefBookValue>>> result = new HashMap<Long, List<Map<String, RefBookValue>>>();
     declarationDataIdList.each {
-        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id)"
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${it} AND ref_book_id_doc.person_id = np.person_id) AND ref_book_id_doc.status = 0"
         Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
         refBookMap.each { personId, refBookValues ->
@@ -536,8 +535,6 @@ List<NdflPerson> collectNdflPersonList(List<Relation> sourcesInfo) {
         result.addAll(ndflPersonList);
         i++;
     }
-
-    logger.info(String.format("НФ-источников выбрано для консолидации (" + i + calcTimeMillis(time)))
 
     return result;
 }
@@ -1688,11 +1685,8 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
 
         def declarationDataId = declarationData.id
 
-        String whereClause = """
-            JOIN ref_book_person p ON (frb.person_id = p.id)
-            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
-        """
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} AND ref_book_id_doc.person_id = np.person_id)"
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
         refBookMap.each { personId, refBookValues ->
             Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
@@ -1941,8 +1935,8 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String LOG_TYPE_PERSON_MSG = "Значение гр. \"%s\" (\"%s\") не соответствует справочнику \"%s\""
 @Field final String LOG_TYPE_PERSON_MSG_2 = "Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\""
 
-@Field final String LOG_TYPE_2_6 = "Дата начисления дохода указана некорректно"
-@Field final String LOG_TYPE_2_12 = "Сумма вычета указана некорректно"
+@Field final String LOG_TYPE_2_6 = "\"Дата начисления дохода\" указана некорректно"
+@Field final String LOG_TYPE_2_12 = "\"Сумма вычета\" указана некорректно"
 @Field final String LOG_TYPE_2_14 = "\"Налоговая ставка\" указана некорректно"
 @Field final String LOG_TYPE_2_14_MSG = "Значение гр. \"%s\" (\"%s\") указано некорректно. Для \"Кода дохода\" (\"%s\") и \"Статуса НП\" (\"%s\") предусмотрены ставки: %s"
 @Field final String LOG_TYPE_2_16 = "\"НДФЛ исчисленный\" рассчитан некорректно"
@@ -2472,7 +2466,7 @@ def checkDataReference(
 
         // Спр8 Код вычета (Обязательное поле)
         if (ndflPersonDeduction.typeCode != "000" && ndflPersonDeduction.typeCode != null && !deductionTypeList.contains(ndflPersonDeduction.typeCode)) {
-            String errMsg = String.format(LOG_TYPE_PERSON_MSG,
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                     C_TYPE_CODE, ndflPersonDeduction.typeCode ?: "",
                     R_TYPE_CODE
             )
@@ -2483,7 +2477,7 @@ def checkDataReference(
         // Спр9 Документ о праве на налоговый вычет.Код источника (Обязательное поле)
         if (ndflPersonDeduction.notifSource != null && !taxInspectionList.contains(ndflPersonDeduction.notifSource)) {
             //TODO turn_to_error
-            String errMsg = String.format(LOG_TYPE_PERSON_MSG,
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                     C_NOTIF_SOURCE, ndflPersonDeduction.notifSource ?: "",
                     R_NOTIF_SOURCE
             )
@@ -2504,7 +2498,7 @@ def checkDataReference(
         // Спр9 Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Обязательное поле)
         if (ndflPersonPrepayment.notifSource != null && !taxInspectionList.contains(ndflPersonPrepayment.notifSource)) {
             //TODO turn_to_error
-            String errMsg = String.format(LOG_TYPE_PERSON_MSG,
+            String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                     P_NOTIF_SOURCE, ndflPersonPrepayment.notifSource ?: "",
                     R_NOTIF_SOURCE
             )
@@ -2576,13 +2570,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPerson.citizenship == "643") {
             if (ndflPerson.innNp == null) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.warnExp("%s. %s.", "ИНН не указан", fioAndInp, pathError,
+                logger.warnExp("%s. %s.", "\"ИНН\" не указан", fioAndInp, pathError,
                         "Значение гр. \"ИНН в РФ\" не указано. Прием налоговым органом обеспечивается, может быть предупреждение")
             } else {
                 String checkInn = ScriptUtils.checkInn(ndflPerson.innNp)
                 if (checkInn != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.errorExp("%s. %s.", "ИНН не соответствует формату", fioAndInp, pathError,
+                    logger.errorExp("%s. %s.", "\"ИНН\" не соответствует формату", fioAndInp, pathError,
                             checkInn)
                 }
             }
@@ -2610,7 +2604,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String checkName = ScriptUtils.checkName(ndflPerson.lastName, "Фамилия")
                 if (checkName != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
                             checkName)
                 }
             }
@@ -2618,7 +2612,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                 String checkName = ScriptUtils.checkName(ndflPerson.firstName, "Имя")
                 if (checkName != null) {
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "Фамилия, Имя не соответствует формату", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "\"Фамилия\", \"Имя\" не соответствует формату", fioAndInp, pathError,
                             checkName)
                 }
             }
@@ -2627,7 +2621,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             String checkDul = ScriptUtils.checkDul(ndflPerson.idDocType, ndflPerson.idDocNumber, "ДУЛ Номер")
             if (checkDul != null) {
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.warnExp("%s. %s.", "ДУЛ не соответствует формату", fioAndInp, pathError,
+                logger.warnExp("%s. %s.", "\"ДУЛ\" не соответствует формату", fioAndInp, pathError,
                         checkDul)
             }
         }
@@ -2638,7 +2632,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     "СНИЛС", ndflPerson.snils?:""
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-            logger.warnExp("%s. %s.", "СНИЛС не соответствует формату", fioAndInp, pathError,
+            logger.warnExp("%s. %s.", "\"СНИЛС\" не соответствует формату", fioAndInp, pathError,
                     errMsg)
         }
     }
@@ -2664,7 +2658,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         // Общ7 Наличие или отсутствие значения в графе в зависимости от условий
         List<ColumnFillConditionData> columnFillConditionDataList = []
-        //1 Раздел 2. Графы 4,5 должны быть заполнены, если не заполнены Раздел 2. Графы 22,23,24
+        //1 Раздел 2. Графа 4 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column22And23And24NotFill(),
                 new Column4Fill(),
@@ -2676,12 +2670,13 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         C_TAX_SUMM
                 )
         )
+        //1 Раздел 2. Графа 5 должна быть заполнена, если не заполнены Раздел 2. Графы 22,23,24
         columnFillConditionDataList << new ColumnFillConditionData(
                 new Column22And23And24NotFill(),
                 new Column5Fill(),
                 String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                 String.format("Гр. \"%s\" должна быть заполнена, так как не заполнены гр. \"%s\", \"%s\", \"%s\"",
-                        C_INCOME_CODE,
+                        C_INCOME_TYPE,
                         C_PAYMENT_DATE,
                         C_PAYMENT_NUMBER,
                         C_TAX_SUMM
@@ -2966,7 +2961,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             department ? department.name : ""
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "КПП и ОКТМО не соответствуют Тербанку", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
                             errMsg)
                 } else {
                     String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
@@ -2975,7 +2970,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                             department ? department.name : ""
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "КПП и ОКТМО не соответствуют Тербанку", fioAndInp, pathError,
+                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
                             errMsg)
                 }
             }
@@ -4108,7 +4103,7 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
     BigDecimal sumNdflDeduction = new BigDecimal(0)
     for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
         if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                && ndflPersonIncome.incomeAccruedDate?.format(DATE_FORMAT) == ndflPersonDeduction.incomeAccrued?.format(DATE_FORMAT)
+                && ndflPersonIncome.incomeAccruedDate?.toLocalDate().equals(ndflPersonDeduction.incomeAccrued?.toLocalDate())
                 && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
             sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
         }
@@ -4196,8 +4191,8 @@ interface DateConditionChecker {
 class Column6EqualsColumn7 implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
-        String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
-        String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
+        String accrued = ndflPersonIncome.incomeAccruedDate?.toString("dd.MM.yyyy")
+        String payout = ndflPersonIncome.incomePayoutDate?.toString("dd.MM.yyyy")
         return accrued == payout
     }
 }
@@ -4218,7 +4213,7 @@ class MatchMask implements DateConditionChecker {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
-        String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
+        String accrued = ndflPersonIncome.incomeAccruedDate.toString("dd.MM.yyyy")
         Pattern pattern = Pattern.compile(maskRegex)
         Matcher matcher = pattern.matcher(accrued)
         if (matcher.matches()) {
@@ -4239,7 +4234,7 @@ class LastMonthCalendarDay implements DateConditionChecker {
             return true
         }
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
         int currentMonth = calendar.get(Calendar.MONTH)
         calendar.add(calendar.DATE, 1)
         int comparedMonth = calendar.get(Calendar.MONTH)
@@ -4258,7 +4253,7 @@ class Column7LastDayOfYear1 implements DateConditionChecker {
             return false
         }
         Calendar calendarPayout = Calendar.getInstance()
-        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
+        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 11) {
@@ -4280,7 +4275,7 @@ class Column7LastDayOfYear2 implements DateConditionChecker {
             return false
         }
         Calendar calendarPayout = Calendar.getInstance()
-        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
+        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 11) {
@@ -4302,14 +4297,14 @@ class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
             return false
         }
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
         // находим последний день месяца
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
         Date workDay = calendar.getTime()
         // если последний день месяца приходится на выходной, то следующий первый рабочий день
         int offset = 0
         workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-        return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
+        return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.toDate().getTime()
     }
 }
 
@@ -4324,11 +4319,11 @@ class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
         // "Графа 7" + "1 рабочий день"
         int offset = 1
-        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(workDay);
 
@@ -4347,11 +4342,11 @@ class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
         // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
         int offset = 30
-        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(workDay);
 
@@ -4370,10 +4365,10 @@ class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate);
+        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
         Calendar calendar7 = Calendar.getInstance();
-        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
+        calendar7.setTime(ndflPersonIncome.incomePayoutDate.toDate());
 
         // находим последний день месяца
         calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))
