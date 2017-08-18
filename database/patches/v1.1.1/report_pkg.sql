@@ -56,7 +56,8 @@ create or replace package body report_pkg as
   begin
     select to_number(extractValue(xmltype(report_pkg.blob_to_clob(bd.data)),'/Файл/Документ/НДФЛ6/ОбобщПоказ/@КолФЛДоход')) into v_result
       from declaration_data_file ddf left join blob_data bd on (bd.id=ddf.blob_data_id)
-     where ddf.declaration_data_id = p_declaration AND ddf.file_type_id = 183700;
+	  join ref_book_attach_file_type aft on ddf.file_type_id=aft.id
+     where ddf.declaration_data_id = p_declaration AND aft.code=2;
 
     return v_result;
   
