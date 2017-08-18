@@ -329,7 +329,7 @@ public class DeclarationDataController {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", declarationDataId);
                 params.put("docDate", new Date());
-                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, userInfo, logger, new AsyncTaskHandler() {
                     @Override
                     public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                         return lockDataService.lock(keyTask, userInfo.getUser().getId(),
@@ -400,7 +400,7 @@ public class DeclarationDataController {
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("declarationDataId", declarationDataId);
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
                         @Override
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
@@ -484,7 +484,7 @@ public class DeclarationDataController {
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("declarationDataId", declarationDataId);
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, userInfo, logger, new AsyncTaskHandler() {
                         @Override
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),

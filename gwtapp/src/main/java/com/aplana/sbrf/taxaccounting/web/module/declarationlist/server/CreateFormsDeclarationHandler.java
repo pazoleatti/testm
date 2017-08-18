@@ -71,7 +71,7 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
             result.setStatus(true);
         } else {
             result.setStatus(true);
-            asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+            asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
                 @Override
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),

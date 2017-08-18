@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.LockData;
@@ -106,7 +106,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 /*String uuid = blobDataService.get(userInfo);*/
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-				Long asyncTaskTypeId = PropertyLoader.isProductionMode() ? ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId() : ReportType.ARCHIVE_AUDIT.getDevModeAsyncTaskTypeId();
+				Long asyncTaskTypeId = ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId();
                 BalancingVariants balancingVariant = asyncManager.checkCreate(asyncTaskTypeId, params);
                 asyncManager.executeAsync(asyncTaskTypeId, params, balancingVariant);
 				LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());

@@ -31,5 +31,5 @@ public interface AsyncTaskManagerService {
     /**
      * Постановка задачи в очередь по постановке http://conf.aplana.com/pages/viewpage.action?pageId=19663772
      */
-    void createTask(String keyTask, ReportType reportType, Map<String, Object> params, boolean cancelTask, boolean isProductionMode, TAUserInfo userInfo, Logger logger, AsyncTaskHandler action);
+    void createTask(String keyTask, ReportType reportType, Map<String, Object> params, boolean cancelTask, TAUserInfo userInfo, Logger logger, AsyncTaskHandler action);
 }

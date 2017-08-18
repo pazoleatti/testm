@@ -42,27 +42,6 @@
         <profile>
             <id>production</id>
             <dependencies>
-                <dependency>
-                    <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>async-task</artifactId>
-                    <version>${project.version}</version>
-                    <type>ejb</type>
-                    <classifier>jar-with-dependencies</classifier>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>service</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>dao</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>core</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
 
                 <!-- Дополнительные ависимости исключенные вместе с другими -->
                 <dependency>
@@ -95,16 +74,6 @@
                                     <bundleFileName>gwtapp.war</bundleFileName>
                                     <contextRoot>/${releaseName}/gwtapp</contextRoot>
                                 </webModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>async-core</artifactId>
-                                    <bundleFileName>async-core.jar</bundleFileName>
-                                </ejbModule>
-                                <ejbModule>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>async-task</artifactId>
-                                    <bundleFileName>async-task.jar</bundleFileName>
-                                </ejbModule>
                             </modules>
                         </configuration>
                     </plugin>
@@ -119,12 +88,6 @@
             <artifactId>gwtapp</artifactId>
             <version>${project.version}</version>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
-            <artifactId>async-core</artifactId>
-            <version>${project.version}</version>
-            <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>

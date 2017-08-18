@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -18,6 +22,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +48,9 @@ public class SaveConfigurationHandler extends
     private LogEntryService logEntryService;
 
     @Autowired
+    private AsyncManager asyncManager;
+
+    @Autowired
     private LockDataService lockDataService;
 
     public SaveConfigurationHandler() {
@@ -52,43 +61,19 @@ public class SaveConfigurationHandler extends
     public SaveConfigurationResult execute(SaveConfigurationAction action,
                                            ExecutionContext context) throws ActionException {
 
-        if (!lockDataService.isLockExists(LockData.LockObjects.CONFIGURATION_PARAMS.name(), true)) {
-            Logger logger = new Logger();
 
-            // Дубли ТБ можно проверить только на клиенте, т.к. структура хранения уже не допкскает дубли, поэтому проверка
-            // на клиенте, а сообщения на сервере
-            if (!action.getDublicateDepartmentIdSet().isEmpty()) {
-                for (int departmentId : action.getDublicateDepartmentIdSet()) {
-                    Department department = departmentService.getDepartment(departmentId);
-                    logger.error(UNIQUE_DEPARTMENT_ERROR, department.getName());
-                }
-            }
 
-            for (Map.Entry<Integer, Set<String>> entry : action.getNotSetFields().entrySet()) {
-                Integer departmentId = entry.getKey();
-                if (departmentId != null) {
-                    Department department = departmentService.getDepartment(departmentId);
-                    for (String fieldName : entry.getValue()) {
-                        logger.error(NOT_SET_ERROR, fieldName, department.getName());
-                    }
-                } else {
-                    for (String fieldName : entry.getValue()) {
-                        logger.error(NOT_SET_DEPARTMENT_ERROR, fieldName);
-                    }
-                }
-            }
-
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-                configurationService.saveAllConfig(securityService.currentUserInfo(), action.getModel(),
-                        action.getEmailParams(), action.getAsyncParams(), logger);
-            }
-
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Ошибки при сохранении конфигурационных параметров.",
-                        logEntryService.save(logger.getEntries()));
-            }
-        } else {
-            throw new ActionException("Нельзя изменить конфигурационные параметры во время загрузки ТФ.");
+        String key = "testAsync_" + new Date().getTime();
+        lockDataService.lock(key, 1, "testAsync");
+        LockData lockData = lockDataService.getLock(key);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(AsyncTask.RequiredParams.USER_ID.name(), lockData.getUserId());
+        params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), lockData.getKey());
+        params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+        try {
+            asyncManager.executeAsync(300L, params, BalancingVariants.SHORT);
+        } catch (AsyncTaskException e) {
+            e.printStackTrace();
         }
         return new SaveConfigurationResult();
     }
