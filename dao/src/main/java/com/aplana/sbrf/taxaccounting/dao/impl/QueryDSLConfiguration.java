@@ -20,7 +20,7 @@ import java.sql.Connection;
 public class QueryDSLConfiguration extends AbstractDao {
     @Bean
     public com.querydsl.sql.Configuration querydslConfiguration() {
-        SQLTemplates templates = HSQLDBTemplates.builder().build();
+        SQLTemplates templates = OracleTemplates.builder().build();
         com.querydsl.sql.Configuration configuration = new com.querydsl.sql.Configuration(templates);
         configuration.setExceptionTranslator(new SpringExceptionTranslator());
         configuration.register(new LocalDateTimeType());
