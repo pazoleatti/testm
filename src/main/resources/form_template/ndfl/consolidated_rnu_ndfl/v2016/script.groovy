@@ -1687,11 +1687,8 @@ Map<Long, Map<String, RefBookValue>> getActualRefDulByDeclarationDataId() {
 
         def declarationDataId = declarationData.id
 
-        String whereClause = """
-            JOIN ref_book_person p ON (frb.person_id = p.id)
-            JOIN ndfl_person np ON (np.declaration_data_id = ${declarationDataId} AND p.id = np.person_id)
-        """
-        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordVersionWhere(REF_BOOK_ID_DOC_ID, whereClause, getReportPeriodEndDate() - 1)
+        String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} AND ref_book_id_doc.person_id = np.person_id)"
+        Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(REF_BOOK_ID_DOC_ID, whereClause)
 
         refBookMap.each { personId, refBookValues ->
             Long refBookPersonId = refBookValues.get("PERSON_ID").getReferenceValue();
