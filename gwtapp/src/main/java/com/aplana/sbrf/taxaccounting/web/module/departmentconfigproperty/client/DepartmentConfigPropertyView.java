@@ -518,10 +518,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @UiHandler("addLink")
     public void onAddRow(ClickEvent event) {
-        List<DataRow<Cell>> tempList = new ListDataProvider<DataRow<Cell>>().getList();
-        tempList.add(createDataRow());
-        tempList.addAll(model.getList());
-        model.setList(tempList);
+        model.getList().add(createDataRow());
         updateCheckBoxHeader(false);
         setIsFormModified(true);
     }
