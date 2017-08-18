@@ -1,12 +1,3 @@
---indexes
-prompt indexes
-@@indexes.sql;
-
--- alter ref_book_address and update attributes
-prompt alter ref_book_address and update attributes
-@@alter_ref_book_address.sql;
-commit;
-
 -- alter ref_book_person.old_id and update attributes
 prompt alter ref_book_person.old_id and update attributes
 @@alter_person_old_id.sql;
@@ -16,10 +7,6 @@ commit;
 prompt alter ref_book_calendar
 @@alter_ref_book_calendar.sql;
 commit;
-
--- changes fias_addrobj
-prompt drop unuseable columns from fias_addrobj
-@@fias_addrobj_drop_cols.sql
 
 prompt recreate indexes on fias_addrobj
 @@recreate_fias_idxs.sql;
