@@ -37,6 +37,8 @@
         <property name="defaultEncoding" value="UTF-8"/>
     </bean>
 
+    <bean id="errorService" class="com.aplana.sbrf.taxaccounting.service.impl.ErrorServiceImpl"/>
+
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/rest/**"/>

@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskHandler;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
@@ -31,5 +28,14 @@ public interface AsyncTaskManagerService {
     /**
      * Постановка задачи в очередь по постановке http://conf.aplana.com/pages/viewpage.action?pageId=19663772
      */
-    void createTask(String keyTask, ReportType reportType, Map<String, Object> params, boolean cancelTask, boolean isProductionMode, TAUserInfo userInfo, Logger logger, AsyncTaskHandler action);
+    void createTask(String keyTask, ReportType reportType, Map<String, Object> params, boolean cancelTask, TAUserInfo userInfo, Logger logger, AsyncTaskHandler action);
+
+    /**
+     * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
+     * @param userInfo
+     * @param declarationDataId
+     * @param force если true, то удаляем старую задачу(и оправляем оповещения подписавщимся пользователям), иначе, если задача уже запущена, вызываем диалог
+     * @param cancelTask если true, то удаляем задачи, которые должны удаляться при запуске текущей, иначе, если есть такие задачи, вызываем диалог
+     */
+    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, final long declarationDataId, final boolean force, final boolean cancelTask);
 }

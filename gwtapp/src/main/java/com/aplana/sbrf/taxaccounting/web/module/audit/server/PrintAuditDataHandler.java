@@ -101,7 +101,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
             params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter().convertTo());
             params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
             params.put(AuditService.AsyncNames.SEARCH_CRITERIA.name(), searchCriteria);
-            asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+            asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
                 @Override
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),

@@ -35,6 +35,8 @@
   "DIALOGS_CONFIRMATION_MSG": "Требуется подтвеждение.",
   "DIALOGS_NOTIFICATION": "Уведомление",
   "common.hint": "Заполните обязательные поля (отмечены желтым)",
+  "common.error.message.caption.stackTrace": "Ошибка",
+  "common.error.message.seemore": "Смотреть подробности",
 
   "common.button.search": "Найти",
   "common.button.clear": "Сбросить",

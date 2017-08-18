@@ -90,7 +90,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
                 result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.CREATE);
             } else {
                 result.setStatus(LoadRefBookResult.CreateAsyncTaskStatus.CREATE);
-                asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
                     @Override
                     public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                         return lockDataService.lock(keyTask, userInfo.getUser().getId(),

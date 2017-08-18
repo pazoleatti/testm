@@ -69,7 +69,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             declarationType.name.as("declarationType"),
             department.name.as("department"),
             refBookAsnu.name.as("asnuName"),
-            reportPeriod.name.as("repordPeriod"),
+            reportPeriod.name.as("reportPeriod"),
             state.name.as("state"),
             declarationData.fileName,
             logBusiness.logDate.as("creationDate"),
@@ -274,8 +274,36 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             where.and(declarationKind.id.in(filter.getFormKindIds()));
         }
+        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
+        OrderSpecifier ordering;
 
-        OrderSpecifier ordering = params.getDirection().equals("asc") ? declarationData.id.asc() : declarationData.id.desc();
+        String orderingProperty = params.getProperty();
+        boolean isAsc = params.getDirection().equals("asc");
+
+        if (orderingProperty.equals("declarationDataId")) {
+            ordering = isAsc ? declarationData.id.asc() : declarationData.id.desc();
+        } else if (orderingProperty.equals("declarationKind")) {
+            ordering = isAsc ? declarationKind.name.asc() : declarationKind.name.desc();
+        } else if (orderingProperty.equals("declarationType")) {
+            ordering = isAsc ? declarationType.name.asc() : declarationType.name.desc();
+        } else if (orderingProperty.equals("department")) {
+            ordering = isAsc ? department.name.asc() : department.name.desc();
+        } else if (orderingProperty.equals("asnuName")) {
+            ordering = isAsc ? refBookAsnu.name.asc() : refBookAsnu.name.desc();
+        } else if (orderingProperty.equals("reportPeriod")) {
+            ordering = isAsc ? reportPeriod.name.asc() : reportPeriod.name.desc();
+        } else if (orderingProperty.equals("state")) {
+            ordering = isAsc ? state.name.asc() : state.name.desc();
+        } else if (orderingProperty.equals("fileName")) {
+            ordering = isAsc ? declarationData.fileName.asc() : declarationData.fileName.desc();
+        } else if (orderingProperty.equals("creationDate")) {
+            ordering = isAsc ? logBusiness.logDate.asc() : logBusiness.logDate.desc();
+        } else if (orderingProperty.equals("creationUserName")) {
+            ordering = isAsc ? secUser.name.asc() : secUser.name.desc();
+        } else {
+            ordering = declarationData.id.desc();
+        }
+
 
         List<DeclarationDataJournalItem> items = sqlQueryFactory.select(
                 declarationData.id.as("declarationDataId"),

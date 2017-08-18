@@ -61,7 +61,7 @@
                 }
             };
         })
-        .factory("$alertService", ['$compile', '$rootScope', function ($compile, $rootScope) {
+        .factory("$alertService", ['$compile', '$rootScope', '$injector', '$filter', function ($compile, $rootScope, $injector, $filter) {
             var alertService = {};
 
             // безопасный apply. в тестах apply требуется, при реальном использовании - не всегда
@@ -77,7 +77,7 @@
             }
 
             function getOrCreateAlertContainer() {
-                if (document.getElementById('alertContainer') == null) {
+                if (document.getElementById('alertContainer') === null) {
                     var _alertContainer = $compile("<div id='alertContainer'></div>")($rootScope);
                     angular.element(document.body).append(_alertContainer);
                     return _alertContainer;
@@ -110,11 +110,44 @@
                     text = text.replace(new RegExp("\n", "g"), "<br>");
                     var element = $compile(
                         "<div data-aplana-alert data-close-on-click='true' data-on-click='" + clickCallback + "' data-type='" + (type || "warning") + "'>" + text +
-                            "</div>"
+                        "</div>"
                     )(scope);
 
                     angular.element(alertContainer).append(element);
                 });
+            };
+
+            /**
+             * Функция отображает сообщение aplana-alert с возможностью получить дополнительную информацию
+             * @param text текст сообщения
+             * @param stackTrace дополнительная информация
+             * @param type тип сообщения. Возможны значения: error, success, warning(по умолчанию)
+             */
+            alertService.showClickableDetails = function (type, text, stackTrace) {
+                var header = text + '<p class="btn-link">' + $filter('translate')('common.error.message.seemore') + '</p>';
+                var scope = $rootScope.$new();
+                scope.openDetails = function () {
+                    $injector.invoke(
+                        function ($uibModal) {
+                            $uibModal.open({
+                                animation: false,
+                                templateUrl: '/dialogs/stackTrace.html',
+                                controller: 'showStackTraceCtrl',
+                                size: 'lg',
+                                backdrop: 'static',
+                                resolve: {
+                                    errorInfo: function () {
+                                        return {
+                                            text: text,
+                                            stackTrace: stackTrace
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    )
+                };
+                alertService.showClickable(header, type, 'openDetails()', scope);
             };
 
             /**
@@ -127,7 +160,7 @@
                     text = text.replace(new RegExp("\n", "g"), "<br>");
                     var element = $compile(
                         "<div data-aplana-alert data-type='" + (type || "warning") + "'>" + text +
-                            "</div>"
+                        "</div>"
                     )($rootScope);
 
                     angular.element(alertContainer).append(element);
@@ -149,7 +182,54 @@
             alertService.notification = function (text) {
                 alertService.show(text, "notification");
             };
-            return  alertService;
+            return alertService;
+        }])
+        // контролер для модального окна со списком серверных ошибок
+        .controller('showStackTraceCtrl', function ($scope, $uibModalInstance, errorInfo) {
+                $scope.header = errorInfo.text;
+                $scope.stackTrace = errorInfo.stackTrace;
+
+                if (!Array.isArray($scope.stackTrace.exceptionCause)) {
+                    $scope.stackTrace.exceptionCause = [$scope.stackTrace.exceptionCause];
+                }
+                $scope.ok = function () {
+                    $uibModalInstance.close('ok')
+                }
+            }
+        )
+        .run(['$templateCache', '$interpolate', function ($templateCache, $interpolate) {
+            $templateCache.put('/dialogs/stackTrace.html',
+                '<div>' +
+                '    <div class="modal-header dialog-header-error">' +
+                '        <h4 class="modal-title">{{ header }}</h4>' +
+                '    </div>' +
+                '    <div class="modal-body">' +
+                '       <div>' +
+                '           <span>' +
+                '               {{:: stackTrace.additionInfo.serverDate| date: "dd.MM.yyyy HH:mm:ss"}} {{:: stackTrace.exceptionCause[0].errorClass}}: {{::stackTrace.exceptionCause[0].message | translate}}' +
+                '           </span>' +
+                '       </div>' +
+                '       <div class="stack-trace">' +
+                '           <div data-ng-repeat="arrayStack in stackTrace.exceptionCause track by $index" >' +
+                '               <div>' +
+                '                   <span data-ng-if="!$first" style="font-weight: bold;">' +
+                '                       Cause by: {{::arrayStack.errorClass}}: {{:: arrayStack.message |translate }}' +
+                '                   </span>' +
+                '                   <div style="padding-left: 10px;">' +
+                '                       <div data-ng-repeat="item in arrayStack.serverException track by $index" >' +
+                '                           at {{:: item }}' +
+                '                       </div>' +
+                '                   </div>' +
+                '               </div>' +
+                '           </div>' +
+                '       </div>' +
+                '    </div>' +
+                '    <div class="modal-footer">' +
+                '        <button class="btn btn-danger" type="button" ng-click="ok()" translate="button.close"></button>' +
+                '    </div>' +
+                '</div>'
+            )
+            ;
         }]);
 }());
 

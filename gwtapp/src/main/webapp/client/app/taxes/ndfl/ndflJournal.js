@@ -52,28 +52,14 @@
                         colModel: [
                             {name: 'declarationDataId', index: 'declarationDataId', width: 135, key: true},
                             {name: 'declarationKind', index: 'declarationKind', width: 175},
-                            {
-                                name: 'declarationType',
-                                index: 'declarationType',
-                                width: 175,
-                                sortable: false,
-                                formatter: linkformatter
-                            },
-                            {name: 'department', index: 'department', width: 150, sortable: false},
-                            {name: 'asnuName', index: 'asnuName', width: 176, sortable: false},
-                            {name: 'reportPeriod', index: 'reportPeriod', width: 110, sortable: false},
-                            {name: 'state', index: 'state', width: 100, sortable: false},
-                            {
-                                name: 'fileName', index: 'fileName', width: 400, sortable: false,
-                                formatter: linkFileFormatter
-                            },
-                            {
-                                name: 'creationDate',
-                                index: 'creationDate',
-                                width: 230, sortable: false,
-                                formatter: $filter('dateTimeFormatter')
-                            },
-                            {name: 'creationUserName', index: 'creationUserName', width: 175, sortable: false}
+                            {name: 'declarationType', index: 'declarationType', width: 175, formatter: linkformatter},
+                            {name: 'department', index: 'department', width: 150},
+                            {name: 'asnuName', index: 'asnuName', width: 176},
+                            {name: 'reportPeriod', index: 'reportPeriod', width: 110},
+                            {name: 'state', index: 'state', width: 100},
+                            {name: 'fileName', index: 'fileName', width: 400, formatter: linkFileFormatter},
+                            {name: 'creationDate', index: 'creationDate', width: 230, formatter: $filter('dateTimeFormatter')},
+                            {name: 'creationUserName', index: 'creationUserName', width: 175}
                         ],
                         rowNum: 100,
                         rowList: [10, 50, 100, 200],

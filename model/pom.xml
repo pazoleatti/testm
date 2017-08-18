@@ -30,7 +30,7 @@
             <artifactId>reflections</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.mysema.querydsl</groupId>
+            <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql</artifactId>
         </dependency>
         <dependency>

@@ -83,7 +83,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                         result.setStatus(CreateAsyncTaskStatus.CREATE);
                         Map<String, Object> params = new HashMap<String, Object>();
                         params.put("declarationDataId", action.getDeclarationId());
-                        asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, action.isCancelTask(), PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                        asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, action.isCancelTask(), userInfo, logger, new AsyncTaskHandler() {
                             @Override
                             public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                                 return lockDataService.lock(keyTask, userInfo.getUser().getId(),

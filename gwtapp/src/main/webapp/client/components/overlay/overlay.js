@@ -38,7 +38,7 @@
             function tryGetParentOverlayElement() {
                 if (parentOverlayElement) {
                     return parentOverlayElement;
-                } else if (document.getElementById('overlay-parent') != null) {
+                } else if (document.getElementById('overlay-parent') !== null) {
                     parentOverlayElement = $("#overlay-parent");
                     return parentOverlayElement;
                 } else {
@@ -65,7 +65,7 @@
                     parentOverlayElement = parentOverlay;
                 },
 
-                $get: ['$rootScope', '$injector', '$timeout', '$filter', 'ExceptionStorage', 'AplanaUtils', function ($rootScope, $injector, $timeout, $filter, ExceptionStorage, AplanaUtils) {
+                $get: ['$rootScope', '$injector', '$timeout', '$filter', 'AplanaUtils', function ($rootScope, $injector, $timeout, $filter, AplanaUtils) {
                     return {
                         showAlertText: function (status, addMessage) {
                             //Вариант решения проблемы с circular dependency
@@ -85,9 +85,9 @@
 
                             //jQuery возвращает число, а ангуляр - строку, !== не использовать
                             if (status === '413') {
-                                message = "<p translate=\'common.error.message.constraint.violation.exception\'></p>";
+                                message = $filter('translate')("common.error.message.constraint.violation.exception");
                             } else if (status !== '500') {
-                                message = '<p>' + $filter('translate')(status) + '</p>';
+                                message = $filter('translate')(status);
                                 if (addMessage) {
                                     message += addMessage;
                                 }
@@ -95,7 +95,7 @@
                                 //noinspection JSUnresolvedVariable
                                 messageType = addMessage.messageType;
                                 //noinspection JSUnresolvedVariable
-                                message = '<p>' + $filter('translate')(addMessage.messageCode) + '</p>';
+                                message = $filter('translate')(addMessage.messageCode);
                             }
 
                             var handled = false;
@@ -107,42 +107,31 @@
                                 }
                             }
 
-                            //ключ для хранения стека серверной ошибки
-                            var unique = _.uniqueId();
-                            // Слово "Подробнее" в сообщение
-                            //noinspection JSUnresolvedVariable
-                            if ((addMessage.exceptionCause) && (addMessage.exceptionCause.length > 0)){
-                                message += '<p class="btn-link">'+$filter('translate')('common.error.message.seemore')+'</p>';
-                                ExceptionStorage.set({id: unique, value: addMessage});
-                            }
+                            // Показывать или нет стектрейс
+                            var isShowException = function(message) {
+                                if (!message.exceptionCause) {
+                                    return false;
+                                }
 
-                            // другая scope, чтобы не засорять рут.
-                            var childScope =  $rootScope.$new();
-                            // модальное окно для оборажения стека ошибки с сервера
-                            childScope.openModalStackTrace = function (stackTrace) {
-                                $injector.invoke(['$aplanaModal', function ($aplanaModal) {
-                                    $aplanaModal.open({
-                                        title: $filter('translate')('common.error.message.caption.stackTrace'),
-                                        templateUrl: AplanaUtils.templatePath + 'overlay/stackTrace.html',
-                                        controller: 'StackTraceCtrl',
-                                        titleIcon: 'icon-cbr-windows-notice',
-                                        windowClass: 'modal1200',
-                                        resolve: {
-                                            stackTrace: function () {
-                                                return stackTrace;
-                                            }
+                                if (Array.isArray(message.exceptionCause)) {
+                                    for (var i = 0; i < message.exceptionCause.length; ++i) {
+                                        if (message.exceptionCause[i].serverException.length > 0) {
+                                            return true;
                                         }
-                                    }).result.then();
-                                }]);
+                                    }
+
+                                    return false;
+                                } else {
+                                    return message.exceptionCause.serverException.length > 0;
+                                }
                             };
 
                             if (!handled) {
                                 $injector.invoke(['$alertService', function ($alertService) {
-                                    //noinspection JSUnresolvedVariable
-                                    if ((addMessage.exceptionCause) &&(addMessage.exceptionCause.length > 0)) {
-                                        $alertService.showClickable(message, messageType, 'openModalStackTrace('+unique+')', childScope);
+                                    if (isShowException(addMessage)) {
+                                        $alertService.showClickableDetails(messageType.toLowerCase(), message, addMessage);
                                     } else {
-                                        $alertService.show(message, messageType);
+                                        $alertService.show(message, messageType.toLowerCase());
                                     }
                                 }]);
                             }
@@ -187,7 +176,7 @@
                          */
                         startOverlay: function (_fadeDelay, _showOverlayDelay, isMemorize) {
                             var overlayElement = tryGetParentOverlayElement();
-                            if (overlayElement == null) {
+                            if (overlayElement === null) {
                                 console.warn("overlayElement is null");
                                 return;
                             }
@@ -214,7 +203,7 @@
                         },
                         stopOverlay: function (_fadeDelay, _hideOverlayDelay, isMemorize) {
                             var overlayElement = tryGetParentOverlayElement();
-                            if (overlayElement == null) {
+                            if (overlayElement === null) {
                                 return;
                             }
 
@@ -446,30 +435,6 @@
 
             return  overlayService;
         }])
-        // контролер для модального окна со списком серверных ошибок
-        .controller('StackTraceCtrl', [ '$scope', '$modalInstance', 'ExceptionStorage', 'stackTrace',
-            function ( $scope,  $modalInstance, ExceptionStorage, stackTrace) {
-                $scope.stackTrace = ExceptionStorage.get(stackTrace);
-
-                $scope.closeFormUnread = function () {
-                    $modalInstance.close(false);
-                };
-                $scope.closeForm = function () {
-                    $modalInstance.close(true);
-                };
-            }
-        ])
-        // сервис для хранения серверной ошибки
-        .service('ExceptionStorage', function(){
-            var exeptionObject = {};
-            this.set = function(value){
-                exeptionObject[value.id] = value.value;
-            };
-            this.get = function(index){
-                return exeptionObject[index];
-            };
-        }
-        )
         .config([
             '$httpProvider',
             function ($httpProvider) {
@@ -489,7 +454,7 @@
                  * т.к. в случае первичной загрузки страницы оверлей должен быть создан иначе он не сможет появится.
                  */
                 function createOverlayElement() {
-                    if (document.getElementById('overlay-parent') == null) {
+                    if (document.getElementById('overlay-parent') === null) {
                         var _overlayElement = "<div id='overlay-preloader'></div>"+
                              "<div id='overlay-parent' style='display: none;'>"+
                              "<div id='overlay-child'>"+
