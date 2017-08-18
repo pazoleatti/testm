@@ -5,8 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
 import com.querydsl.core.types.dsl.Expressions;
@@ -15,7 +17,6 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQueryFactory;
 import org.joda.time.LocalDateTime;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -188,7 +189,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     public List<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
         StringPath rn = Expressions.stringPath("rn");
         StringPath notificationTable = Expressions.stringPath("notification");
-        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
+
         OrderSpecifier orderForRowNumber;
         switch (filter.getSortColumn()) {
             case DATE:
@@ -224,17 +225,13 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
             whereOut.and(rn.between(filter.getStartIndex().toString(), String.valueOf(filter.getStartIndex() + filter.getCountOfRecords())));
         }
-        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
-        OrderSpecifier orderForSubQuery;
-        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
-        Sort sort = new Sort(sortOrder);
-        if (sort.getOrderFor("createDate") != null) {
-            orderForSubQuery = sort.getOrderFor("createDate").isAscending() ? notification.createDate.asc() : notification.createDate.desc();
-        } else if (sort.getOrderFor("text") != null) {
-            orderForSubQuery = sort.getOrderFor("text").isAscending() ? notification.text.asc() : notification.text.desc();
-        } else {
-            orderForSubQuery = notification.createDate.desc();
-        }
+
+        //Оперделяем способ сортировки
+        String orderingProperty = pagingParams.getProperty();
+        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+
+        OrderSpecifier orderForSubQuery = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
+                notificationBean, orderingProperty, ascDescOrder, notification.createDate.desc());
 
         SimpleExpression subQuery = sqlQueryFactory.select(notification.id, notification.reportPeriodId, notification.senderDepartmentId, notification.receiverDepartmentId, notification.isRead
                 , notification.text, notification.logId, notification.createDate, notification.deadline, notification.userId, notification.roleId, notification.reportId, notification.type
