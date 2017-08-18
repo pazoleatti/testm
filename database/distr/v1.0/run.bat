@@ -8,8 +8,8 @@ SET LOG_DIR=_logs
 SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
 REM логин и имя пользователя с правами администратора
-SET ADM_LOGIN=ADM_LOGIN1
-SET ADM_NAME=Administrator
+SET ADM_LOGIN=ADMIN_NDFL
+SET ADM_NAME=ADMIN_NDFL
 
 ECHO ## DB: %AUTH%
 
