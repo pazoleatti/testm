@@ -84,10 +84,12 @@ public class AsyncTaskThreadContainer {
         public void run() {
             final ExecutorService executorService = Executors.newFixedThreadPool(getThreadCount());
             while (true) {
+                Long taskId = null;
                 try {
                     //Получаем первую в списке незарезирвированную задачу и резервируем ее под текущий узел
                     final AsyncTaskData taskData = getNextTask(TASK_TIMEOUT);
                     if (taskData != null) {
+                        taskId = taskData.getId();
                         //Запускаем выполнение бина-обработчика задачи в новом потоке
                         LOG.debug("Запускается задача: " + taskData);
                         final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getTypeId());
@@ -107,6 +109,10 @@ public class AsyncTaskThreadContainer {
                 } catch (Exception e) {
                     LOG.error("Непредвиденная ошибка во время выполнения асинхронной задачи", e);
                 } finally {
+                    if (taskId != null) {
+                        LOG.debug("Освобождается задача: " + taskId);
+                        asyncTaskDao.releaseTask(taskId);
+                    }
                     try {
                         Thread.sleep(QUEUE_MONITORING_TIMEOUT);
                     } catch (InterruptedException e1) {
@@ -123,7 +129,7 @@ public class AsyncTaskThreadContainer {
     private final class AsyncTaskShortQueueProcessor extends AbstractQueueProcessor {
         @Override
         protected AsyncTaskData getNextTask(int taskTimeout) {
-            return asyncTaskDao.reserveTask(serverInfo.getServerName(), taskTimeout, BalancingVariants.SHORT, getThreadCount());
+            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, BalancingVariants.SHORT, getThreadCount());
         }
 
         @Override
@@ -138,7 +144,7 @@ public class AsyncTaskThreadContainer {
     private final class AsyncTaskLongQueueProcessor extends AbstractQueueProcessor {
         @Override
         protected AsyncTaskData getNextTask(int taskTimeout) {
-            return asyncTaskDao.reserveTask(serverInfo.getServerName(), taskTimeout, BalancingVariants.LONG, getThreadCount());
+            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, BalancingVariants.LONG, getThreadCount());
         }
 
         @Override

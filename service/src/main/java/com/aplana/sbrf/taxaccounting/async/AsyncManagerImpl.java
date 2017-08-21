@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import org.apache.commons.logging.Log;
@@ -11,16 +12,16 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Реализация менеджера асинхронных задач на Spring и без использования ejb и jms
- * При добавлении асинхронной задачи, сохраняет ее параметры в БД в сериализованном виде, а выполнением задач занимается специализированный класс {@link AsyncTaskThreadContainer.AsyncTaskQueueProcessor}
+ * При добавлении асинхронной задачи, сохраняет ее параметры в БД в сериализованном виде, а выполнением задач занимается специализированный класс {@link AsyncTaskThreadContainer.AsyncTaskLongQueueProcessor} или {@link AsyncTaskThreadContainer.AsyncTaskShortQueueProcessor}
  * @author dloshkarev
  */
-@Service
 public class AsyncManagerImpl implements AsyncManager {
     private static final Log LOG = LogFactory.getLog(AsyncManagerImpl.class);
 
@@ -29,6 +30,8 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    private boolean devMode;
 
     @Override
     public AsyncTask getAsyncTaskBean(Long taskTypeId) throws AsyncTaskException {
@@ -61,9 +64,14 @@ public class AsyncManagerImpl implements AsyncManager {
             // Проверка параметров
             checkParams(params);
             // Получение и проверка класса обработчика задачи
-            getAsyncTaskBean(taskTypeId);
-            // Сохранение в очереди асинхронных задач - запись в БД
-            asyncTaskDao.addTask(taskTypeId, balancingVariant, params);
+            AsyncTask task = getAsyncTaskBean(taskTypeId);
+            if (devMode) {
+                //Сразу запускаем класс-обработчик чтобы не сбивать очередь на стендах
+                task.execute(params);
+            } else {
+                // Сохранение в очереди асинхронных задач - запись в БД
+                asyncTaskDao.addTask(taskTypeId, balancingVariant, params);
+            }
 
             LOG.info(String.format("Задача с ключом %s помещена в очередь %s", params.get(AsyncTask.RequiredParams.LOCKED_OBJECT.name()), balancingVariant.name()));
             LOG.debug("Async task creation has been finished successfully");
@@ -80,6 +88,20 @@ public class AsyncManagerImpl implements AsyncManager {
         } catch (Exception e) {
             throw new AsyncTaskException(e);
         }
+    }
+
+    @Transactional
+    @Override
+    public AsyncTaskData reserveTask(String node, int timeout, BalancingVariants balancingVariants, int maxTasksPerNode) {
+        int rowsUpdated = asyncTaskDao.lockTask(node, timeout, balancingVariants, maxTasksPerNode);
+        LOG.debug(String.format("На узел %s зарезервировано задач: %s", node, rowsUpdated));
+        if (rowsUpdated > 1) {
+            throw new IllegalArgumentException("Зарезервировано некорректное число задач на узел. Количество не может быть > 1!");
+        }
+        if (rowsUpdated == 1) {
+            return asyncTaskDao.getLockedTask(node, balancingVariants);
+        }
+        return null;
     }
 
     /**
@@ -106,5 +128,9 @@ public class AsyncManagerImpl implements AsyncManager {
                 throw new AsyncTaskSerializationException("Параметр \"" + param.getKey() + "\" не поддерживает сериализацию!");
             }
         }
+    }
+
+    public void setDevMode(boolean devMode) {
+        this.devMode = devMode;
     }
 }

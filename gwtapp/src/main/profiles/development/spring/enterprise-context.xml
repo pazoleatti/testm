@@ -10,4 +10,8 @@
 
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.common"/>
     <tx:jta-transaction-manager/>
+
+    <bean id="asyncManager" class="com.aplana.sbrf.taxaccounting.async.AsyncManagerImpl">
+        <property name="devMode" value="true"/>
+    </bean>
 </beans>

@@ -75,15 +75,16 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    @Transactional
-    public AsyncTaskData reserveTask(String node, int timeout, BalancingVariants balancingVariants, int maxTasksPerNode) {
+    public int lockTask(String node, int timeout, BalancingVariants balancingVariants, int maxTasksPerNode) {
         int rowsAffected = getJdbcTemplate().update("update async_task set node = ?, start_process_date = sysdate where (select count(*) from async_task where node = ?) < ? and id = (select id from (" +
                         "select * from async_task where balancing_variant = ? and (node is null or sysdate > start_process_date + interval '" + timeout + "' hour) order by create_date" +
                         ") where rownum = 1)",
                 node, node, maxTasksPerNode, balancingVariants.getId());
-        if (rowsAffected == 0) {
-            return null;
-        }
+        return rowsAffected;
+    }
+
+    @Override
+    public AsyncTaskData getLockedTask(String node, BalancingVariants balancingVariants) {
         try {
             return getJdbcTemplate().queryForObject("select * from (" +
                     "select id, type_id, create_date, node, serialized_params from async_task where node = ? and balancing_variant = ? order by start_process_date desc" +
@@ -123,6 +124,11 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     @Override
     public void finishTask(Long taskId) {
         getJdbcTemplate().update("delete from async_task where id = ?", taskId);
+    }
+
+    @Override
+    public void releaseTask(long taskId) {
+        getJdbcTemplate().update("update async_task set node = null where id = ?", taskId);
     }
 
 }
