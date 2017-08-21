@@ -53,12 +53,6 @@ public class SaveUserHandler extends AbstractActionHandler<SaveUserAction, SaveU
         if (!fields.isEmpty()) {
             throw new ActionException(String.format(fields.size()==1?"Поле %s обязательно для заполнения.":"Поля %s обязательны для заполнения.", StringUtils.join(fields.toArray(), ", ", "\"")));
         }
-
-        if (action.getTaUserView().getId() == null) {
-            taUserService.createUser(action.getTaUserView());
-        } else {
-            taUserService.updateUser(action.getTaUserView());
-        }
         return result;
     }
 

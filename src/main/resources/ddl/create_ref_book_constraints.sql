@@ -73,6 +73,8 @@ alter table report_period add constraint report_period_fk_dtp_id foreign key(dic
 alter table ref_book_deduction_type add constraint fk_ref_book_deduc_type_mark foreign key (deduction_mark) references ref_book_deduction_mark(id);
 alter table sec_user_asnu add constraint fk_sec_user_asnu_user foreign key(user_id) references sec_user(id) on delete cascade;
 alter table sec_user_asnu add constraint fk_sec_user_asnu_asnu foreign key(asnu_id) references ref_book_asnu(id);
+alter table ref_book_asnu add constraint fk_ref_book_asnu_role_alias foreign key (role_alias) references sec_role(id);
+alter table ref_book_asnu add constraint fk_ref_book_asnu_role_name foreign key (role_name) references sec_role(id);
 ------
 alter table department add constraint fk_department_region_id foreign key (region_id) references ref_book_region(id);
 alter table ref_book_address add constraint fk_ref_book_address_country foreign key (country_id) references ref_book_country(id);

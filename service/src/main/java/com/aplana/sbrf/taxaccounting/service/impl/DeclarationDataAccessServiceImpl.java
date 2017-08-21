@@ -386,13 +386,12 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
     /**
      * Проверяет есть у пользователя права на АСНУ декларации.
-     * Если табличка SEC_USER_ASNU пустая, то права есть на все записи.
      *
      * @param userInfo пользователь
      * @param asnuId АСНУ НФ, для ПНФ значение должно быть задано, для остальных форм null
      */
     private boolean checkUserAsnu(TAUserInfo userInfo, Long asnuId) {
-        if (userInfo.getUser().getAsnuIds() == null || userInfo.getUser().getAsnuIds().isEmpty()) {
+        if (userInfo.getUser().hasRole(TARole.N_ROLE_OPER_ALL)) {
             return true;
         }
 

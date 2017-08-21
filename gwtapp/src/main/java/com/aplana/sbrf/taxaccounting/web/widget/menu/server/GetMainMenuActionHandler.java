@@ -148,12 +148,6 @@ public class GetMainMenuActionHandler extends
                 adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             }
 
-
-            if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_ADMIN)) {
-                adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
-                        + MembersTokens.MEMBERS));
-            }
-
             if (currentUser.hasRole(TARole.N_ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
                         + ConfigurationPresenter.TOKEN));

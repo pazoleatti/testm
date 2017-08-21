@@ -8,6 +8,10 @@ public class TARole implements Serializable {
      */
     public static final String N_ROLE_OPER = "N_ROLE_OPER";
     /**
+     * Алиас роли "Все АСНУ (НДФЛ)"
+     */
+    public static final String N_ROLE_OPER_ALL = "N_ROLE_OPER_ALL";
+    /**
      * Алиас роли "Контролёр УНП (НДФЛ)"
      */
     public static final String N_ROLE_CONTROL_UNP = "N_ROLE_CONTROL_UNP";
