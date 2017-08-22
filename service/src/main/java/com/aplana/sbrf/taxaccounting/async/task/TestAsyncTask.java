@@ -38,7 +38,11 @@ public class TestAsyncTask extends AbstractAsyncTask {
     protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException {
         for (int i = 0; i < 20; i ++) {
             System.out.println("TestAsyncTaskImpl started: " + new Date().getTime() + ". Thread: " + Thread.currentThread().getName());
-            Thread.sleep(1000);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
         }
         return new TaskStatus(true, null);
     }

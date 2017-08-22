@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Executor;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
 import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
@@ -63,6 +64,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private BlobDataService blobDataService;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private AsyncTaskThreadContainer asyncTaskThreadContainer;
 
     /**
      * Инициализация планировщика
@@ -231,6 +234,18 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
             Long seconds = Long.parseLong(secCountParam);
             lockDataService.unlockIfOlderThan(seconds);
             LOG.info("LOCK_DATA cleaning finished");
+        }
+    }
+
+    /**
+     * Задача для удаления блокировок, которые старше заданого времени
+     */
+    @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
+    public void asyncTasksMonitoring() {
+        SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
+        if (schedulerTask.isActive()) {
+            configurationService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
+            asyncTaskThreadContainer.processQueues();
         }
     }
 }
