@@ -521,6 +521,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         model.getList().add(createDataRow());
         updateCheckBoxHeader(false);
         setIsFormModified(true);
+        pager.setPage((model.getList().size() - 1)/pager.getPageSize());
     }
 
     private void updateCheckBoxHeader(boolean value) {
