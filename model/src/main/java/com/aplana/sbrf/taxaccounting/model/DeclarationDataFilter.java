@@ -42,7 +42,7 @@ public class DeclarationDataFilter implements Serializable {
 
     private Long asnuId;
 
-    private Long docStateId;
+    private List<Long> docStateIds;
 
     private List<Long> formKindIds;
 
@@ -210,12 +210,12 @@ public class DeclarationDataFilter implements Serializable {
         this.fileName = fileName;
     }
 
-    public Long getDocStateId() {
-        return docStateId;
+    public List<Long> getDocStateIds() {
+        return docStateIds;
     }
 
-    public void setDocStateId(Long docStateId) {
-        this.docStateId = docStateId;
+    public void setDocStateIds(List<Long> docStateIds) {
+        this.docStateIds = docStateIds;
     }
 
     public String getNote() {

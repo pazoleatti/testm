@@ -628,20 +628,6 @@ comment on column ref_book_fond_detail.signatory_lastname is 'Отчество �
 comment on column ref_book_fond_detail.approve_doc_name is 'Наименование документа, подтверждающего полномочия';
 comment on column ref_book_fond_detail.approve_org_name is 'Наименование организации-представителя налогоплательщика';
 
---Ограничение доступа по АСНУ
-create table sec_user_asnu
-(
-  id number(18) not null,
-  user_id number(9) not null,
-  asnu_id number(18) not null
-);
-comment on table sec_user_asnu is 'Ограничение доступа по АСНУ';
-comment on column sec_user_asnu.id is 'Уникальный идентификатор';
-comment on column sec_user_asnu.user_id is 'Пользователь, для которого предоставляется доступ к АС НУ';
-comment on column sec_user_asnu.asnu_id is 'АСНУ, к которой предоставляется доступ';
-
-create sequence seq_sec_user_asnu_id start with 10000;
-
 --Признак возложения обязанности по уплате налога на обособленное подразделение
 create table ref_book_detach_tax_pay
 (

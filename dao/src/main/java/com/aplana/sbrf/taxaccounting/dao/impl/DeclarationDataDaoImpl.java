@@ -412,10 +412,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             sql.append(" AND dec.asnu_id = ").append(filter.getAsnuId());
         }
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
-            sql.append(" AND ( dec.asnu_id is NULL ");
-            sql.append(" or ");
-            sql.append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));
-            sql.append(" ) ");
+            sql.append(" AND ")
+                .append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));
         }
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             sql.append(" AND ")
@@ -445,8 +443,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             values.put("note", "%" + filter.getNote() + "%");
         }
 
-        if (filter.getDocStateId() != null) {
-            sql.append(" AND dec.doc_state_id = ").append(filter.getDocStateId());
+        if (filter.getDocStateIds() != null && !filter.getDocStateIds().isEmpty()) {
+            sql.append(" AND ")
+                    .append(SqlUtils.transformToSqlInStatement("dec.doc_state_id", filter.getDocStateIds()));
         }
 
         if (!StringUtils.isBlank(filter.getDeclarationDataIdStr())) {
