@@ -1348,6 +1348,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             : "",
                     department.getName(),
                     declarationTemplate.getType().getName(),
+                    ", № " + declaration.getId(),
                     declaration.getTaxOrganCode() != null
                             ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                             : "",
@@ -1372,6 +1373,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         department.getName(),
                         declarationTemplate.getType().getName(),
+                        ", № " + declaration.getId(),
                         declaration.getTaxOrganCode() != null
                                 ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                                 : "",
@@ -1390,6 +1392,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         department.getName(),
                         declarationTemplate.getType().getName(),
+                        ", № " + declaration.getId(),
                         declaration.getTaxOrganCode() != null
                                 ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                                 : "",
@@ -1408,6 +1411,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         department.getName(),
                         declarationTemplate.getType().getName(),
+                        ", № " + declaration.getId(),
                         declaration.getTaxOrganCode() != null
                                 ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                                 : "",
@@ -1426,6 +1430,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "",
                         department.getName(),
                         declarationTemplate.getType().getName(),
+                        ", № " + declaration.getId(),
                         declaration.getTaxOrganCode() != null
                                 ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                                 : "",
