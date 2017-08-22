@@ -222,7 +222,7 @@ def importTF() {
     ) {
         importAnswer1151111()
     } else {
-        logger.error("Не удалось определить тип файла ответа \"%s\"", UploadFileName)
+        logger.error("Некорректное количество символов в имени файла \"%s\"", UploadFileName)
     }
 }
 
