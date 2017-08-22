@@ -11,8 +11,10 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLQueryFactory;
@@ -22,7 +24,6 @@ import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -37,9 +38,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
-import java.util.Date;
 
 import static com.aplana.sbrf.taxaccounting.model.QNdflPerson.ndflPerson;
 import static com.aplana.sbrf.taxaccounting.model.QNdflPersonDeduction.ndflPersonDeduction;
@@ -185,61 +188,12 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.loe(ndflPersonIncomeFilter.getPaymentDateTo())));
             }
         }
-        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
-        OrderSpecifier order;
-        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
-        Sort sort = new Sort(sortOrder);
-        if (sort.getOrderFor("rowNum") != null) {
-            order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonIncome.rowNum.asc() : ndflPersonIncome.rowNum.desc();
-        } else if (sort.getOrderFor("inp") != null) {
-            order = sort.getOrderFor("inp").isAscending() ? ndflPerson.inp.asc() : ndflPerson.inp.desc();
-        } else if (sort.getOrderFor("operationId") != null) {
-            order = sort.getOrderFor("operationId").isAscending() ? ndflPersonIncome.operationId.asc() : ndflPersonIncome.operationId.desc();
-        } else if (sort.getOrderFor("incomeCode") != null) {
-            order = sort.getOrderFor("incomeCode").isAscending() ? ndflPersonIncome.incomeCode.asc() : ndflPersonIncome.incomeCode.desc();
-        } else if (sort.getOrderFor("incomeType") != null) {
-            order = sort.getOrderFor("incomeType").isAscending() ? ndflPersonIncome.incomeType.asc() : ndflPersonIncome.incomeType.desc();
-        } else if (sort.getOrderFor("incomeAccruedDate") != null) {
-            order = sort.getOrderFor("incomeAccruedDate").isAscending() ? ndflPersonIncome.incomeAccruedDate.asc() : ndflPersonIncome.incomeAccruedDate.desc();
-        } else if (sort.getOrderFor("incomePayoutDate") != null) {
-            order = sort.getOrderFor("incomePayoutDate").isAscending() ? ndflPersonIncome.incomePayoutDate.asc() : ndflPersonIncome.incomePayoutDate.desc();
-        } else if (sort.getOrderFor("kpp") != null) {
-            order = sort.getOrderFor("kpp").isAscending() ? ndflPersonIncome.kpp.asc() : ndflPersonIncome.kpp.desc();
-        } else if (sort.getOrderFor("oktmo") != null) {
-            order = sort.getOrderFor("oktmo").isAscending() ? ndflPersonIncome.oktmo.asc() : ndflPersonIncome.oktmo.desc();
-        } else if (sort.getOrderFor("incomeAccruedSumm") != null) {
-            order = sort.getOrderFor("incomeAccruedSumm").isAscending() ? ndflPersonIncome.incomeAccruedSumm.asc() : ndflPersonIncome.incomeAccruedSumm.desc();
-        } else if (sort.getOrderFor("incomePayoutSumm") != null) {
-            order = sort.getOrderFor("incomePayoutSumm").isAscending() ? ndflPersonIncome.incomePayoutSumm.asc() : ndflPersonIncome.incomePayoutSumm.desc();
-        } else if (sort.getOrderFor("totalDeductionsSumm") != null) {
-            order = sort.getOrderFor("totalDeductionsSumm").isAscending() ? ndflPersonIncome.totalDeductionsSumm.asc() : ndflPersonIncome.totalDeductionsSumm.desc();
-        } else if (sort.getOrderFor("taxBase") != null) {
-            order = sort.getOrderFor("taxBase").isAscending() ? ndflPersonIncome.taxBase.asc() : ndflPersonIncome.taxBase.desc();
-        } else if (sort.getOrderFor("taxRate") != null) {
-            order = sort.getOrderFor("taxRate").isAscending() ? ndflPersonIncome.taxRate.asc() : ndflPersonIncome.taxRate.desc();
-        } else if (sort.getOrderFor("taxDate") != null) {
-            order = sort.getOrderFor("taxDate").isAscending() ? ndflPersonIncome.taxDate.asc() : ndflPersonIncome.taxDate.desc();
-        } else if (sort.getOrderFor("calculatedTax") != null) {
-            order = sort.getOrderFor("calculatedTax").isAscending() ? ndflPersonIncome.calculatedTax.asc() : ndflPersonIncome.calculatedTax.desc();
-        } else if (sort.getOrderFor("withholdingTax") != null) {
-            order = sort.getOrderFor("withholdingTax").isAscending() ? ndflPersonIncome.withholdingTax.asc() : ndflPersonIncome.withholdingTax.desc();
-        } else if (sort.getOrderFor("notHoldingTax") != null) {
-            order = sort.getOrderFor("notHoldingTax").isAscending() ? ndflPersonIncome.notHoldingTax.asc() : ndflPersonIncome.notHoldingTax.desc();
-        } else if (sort.getOrderFor("overholdingTax") != null) {
-            order = sort.getOrderFor("overholdingTax").isAscending() ? ndflPersonIncome.overholdingTax.asc() : ndflPersonIncome.overholdingTax.desc();
-        } else if (sort.getOrderFor("refoundTax") != null) {
-            order = sort.getOrderFor("refoundTax").isAscending() ? ndflPersonIncome.refoundTax.asc() : ndflPersonIncome.refoundTax.desc();
-        } else if (sort.getOrderFor("taxTransferDate") != null) {
-            order = sort.getOrderFor("taxTransferDate").isAscending() ? ndflPersonIncome.taxTransferDate.asc() : ndflPersonIncome.taxTransferDate.desc();
-        } else if (sort.getOrderFor("paymentDate") != null) {
-            order = sort.getOrderFor("paymentDate").isAscending() ? ndflPersonIncome.paymentDate.asc() : ndflPersonIncome.paymentDate.desc();
-        } else if (sort.getOrderFor("paymentNumber") != null) {
-            order = sort.getOrderFor("paymentNumber").isAscending() ? ndflPersonIncome.paymentNumber.asc() : ndflPersonIncome.paymentNumber.desc();
-        } else if (sort.getOrderFor("taxSumm") != null) {
-            order = sort.getOrderFor("taxSumm").isAscending() ? ndflPersonIncome.taxSumm.asc() : ndflPersonIncome.taxSumm.desc();
-        } else {
-            order = ndflPersonIncome.rowNum.asc();
-        }
+        //Оперделяем способ сортировки
+        String orderingProperty = pagingParams.getProperty();
+        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+
+        OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
+                ndflPersonIncomeBean, orderingProperty, ascDescOrder, ndflPersonIncome.rowNum.asc());
 
         List<NdflPersonIncome> ndflPersonIncomeList = sqlQueryFactory.from(ndflPersonIncome)
                 .innerJoin(ndflPersonIncome.ndflPersonIFkNp, ndflPerson)
@@ -310,45 +264,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.loe(ndflPersonDeductionFilter.getDeductionDateTo())));
             }
         }
-        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
-        OrderSpecifier order;
-        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
-        Sort sort = new Sort(sortOrder);
-        if (sort.getOrderFor("rowNum") != null) {
-            order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonDeduction.rowNum.asc() : ndflPersonDeduction.rowNum.desc();
-        } else if (sort.getOrderFor("inp") != null) {
-            order = sort.getOrderFor("inp").isAscending() ? ndflPerson.inp.asc() : ndflPerson.inp.desc();
-        } else if (sort.getOrderFor("typeCode") != null) {
-            order = sort.getOrderFor("typeCode").isAscending() ? ndflPersonDeduction.typeCode.asc() : ndflPersonDeduction.typeCode.desc();
-        } else if (sort.getOrderFor("notifType") != null) {
-            order = sort.getOrderFor("notifType").isAscending() ? ndflPersonDeduction.notifType.asc() : ndflPersonDeduction.notifType.desc();
-        } else if (sort.getOrderFor("notifDate") != null) {
-            order = sort.getOrderFor("notifDate").isAscending() ? ndflPersonDeduction.notifDate.asc() : ndflPersonDeduction.notifDate.desc();
-        } else if (sort.getOrderFor("notifNum") != null) {
-            order = sort.getOrderFor("notifNum").isAscending() ? ndflPersonDeduction.notifNum.asc() : ndflPersonDeduction.notifNum.desc();
-        } else if (sort.getOrderFor("notifSource") != null) {
-            order = sort.getOrderFor("notifSource").isAscending() ? ndflPersonDeduction.notifSource.asc() : ndflPersonDeduction.notifSource.desc();
-        } else if (sort.getOrderFor("notifSumm") != null) {
-            order = sort.getOrderFor("notifSumm").isAscending() ? ndflPersonDeduction.notifSumm.asc() : ndflPersonDeduction.notifSumm.desc();
-        } else if (sort.getOrderFor("operationId") != null) {
-            order = sort.getOrderFor("operationId").isAscending() ? ndflPersonDeduction.operationId.asc() : ndflPersonDeduction.operationId.desc();
-        } else if (sort.getOrderFor("incomeAccrued") != null) {
-            order = sort.getOrderFor("incomeAccrued").isAscending() ? ndflPersonDeduction.incomeAccrued.asc() : ndflPersonDeduction.incomeAccrued.desc();
-        } else if (sort.getOrderFor("incomeCode") != null) {
-            order = sort.getOrderFor("incomeCode").isAscending() ? ndflPersonDeduction.incomeCode.asc() : ndflPersonDeduction.incomeCode.desc();
-        } else if (sort.getOrderFor("incomeSumm") != null) {
-            order = sort.getOrderFor("incomeSumm").isAscending() ? ndflPersonDeduction.incomeSumm.asc() : ndflPersonDeduction.incomeSumm.desc();
-        } else if (sort.getOrderFor("periodPrevDate") != null) {
-            order = sort.getOrderFor("periodPrevDate").isAscending() ? ndflPersonDeduction.periodPrevDate.asc() : ndflPersonDeduction.periodPrevDate.desc();
-        } else if (sort.getOrderFor("periodPrevSumm") != null) {
-            order = sort.getOrderFor("periodPrevSumm").isAscending() ? ndflPersonDeduction.periodPrevSumm.asc() : ndflPersonDeduction.periodPrevSumm.desc();
-        } else if (sort.getOrderFor("periodCurrDate") != null) {
-            order = sort.getOrderFor("periodCurrDate").isAscending() ? ndflPersonDeduction.periodCurrDate.asc() : ndflPersonDeduction.periodCurrDate.desc();
-        } else if (sort.getOrderFor("periodCurrSumm") != null) {
-            order = sort.getOrderFor("periodCurrSumm").isAscending() ? ndflPersonDeduction.periodCurrSumm.asc() : ndflPersonDeduction.periodCurrSumm.desc();
-        } else {
-            order = ndflPersonDeduction.rowNum.asc();
-        }
+
+        //Оперделяем способ сортировки
+        String orderingProperty = pagingParams.getProperty();
+        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+
+        OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
+                ndflPersonDeductionBean, orderingProperty, ascDescOrder, ndflPersonDeduction.rowNum.asc());
 
         List<NdflPersonDeduction> ndflPersonDeductionList = sqlQueryFactory.from(ndflPersonDeduction)
                 .innerJoin(ndflPersonDeduction.ndflPdFkNp, ndflPerson)
@@ -410,27 +332,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.loe(ndflPersonPrepaymentFilter.getNotifDateTo())));
             }
         }
-        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
-        OrderSpecifier order;
-        Sort.Order sortOrder = new Sort.Order(pagingParams.getDirection().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, pagingParams.getProperty());
-        Sort sort = new Sort(sortOrder);
-        if (sort.getOrderFor("rowNum") != null) {
-            order = sort.getOrderFor("rowNum").isAscending() ? ndflPersonPrepayment.rowNum.asc() : ndflPersonPrepayment.rowNum.desc();
-        } else if (sort.getOrderFor("inp") != null) {
-            order = sort.getOrderFor("inp").isAscending() ? ndflPerson.inp.asc() : ndflPerson.inp.desc();
-        } else if (sort.getOrderFor("operationId") != null) {
-            order = sort.getOrderFor("operationId").isAscending() ? ndflPersonPrepayment.operationId.asc() : ndflPersonPrepayment.operationId.desc();
-        } else if (sort.getOrderFor("summ") != null) {
-            order = sort.getOrderFor("summ").isAscending() ? ndflPersonPrepayment.summ.asc() : ndflPersonPrepayment.summ.desc();
-        } else if (sort.getOrderFor("notifNum") != null) {
-            order = sort.getOrderFor("notifNum").isAscending() ? ndflPersonPrepayment.notifNum.asc() : ndflPersonPrepayment.notifNum.desc();
-        } else if (sort.getOrderFor("notifDate") != null) {
-            order = sort.getOrderFor("notifDate").isAscending() ? ndflPersonPrepayment.notifDate.asc() : ndflPersonPrepayment.notifDate.desc();
-        } else if (sort.getOrderFor("notifSource") != null) {
-            order = sort.getOrderFor("notifSource").isAscending() ? ndflPersonPrepayment.notifSource.asc() : ndflPersonPrepayment.notifSource.desc();
-        } else {
-            order = ndflPersonPrepayment.rowNum.asc();
-        }
+
+        //Оперделяем способ сортировки
+        String orderingProperty = pagingParams.getProperty();
+        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+
+        OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
+                ndflPersonPrepaymentBean, orderingProperty, ascDescOrder, ndflPersonPrepayment.rowNum.asc());
 
         List<NdflPersonPrepayment> ndflPersonPrepaymentList = sqlQueryFactory.from(ndflPersonPrepayment)
                 .innerJoin(ndflPersonPrepayment.ndflPpFkNp, ndflPerson)
@@ -1083,7 +991,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             if (fieldsSet.contains(paramName)) {
                 Object value = defaultSource.getValue(paramName);
                 if (value instanceof LocalDateTime) {
-                    value = ((LocalDateTime)value).toDate();
+                    value = ((LocalDateTime) value).toDate();
                 }
                 result.addValue(paramName, value);
             }
@@ -1428,6 +1336,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         call.declareParameters(new SqlOutParameter("personCnt", Types.INTEGER), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
-        return (Integer)call.execute(params).get("personCnt");
+        return (Integer) call.execute(params).get("personCnt");
     }
 }
