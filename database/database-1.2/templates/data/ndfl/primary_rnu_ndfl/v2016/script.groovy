@@ -4256,7 +4256,7 @@ class ColumnFillConditionData {
             new Column21EqualsColumn7LastDayOfMonth(), "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца выплаты дохода")
 
     // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
-    dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+    dateConditionDataListForBudget << new DateConditionData(["2740", "2750", "2790", "4800"], ["13"],
             new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
 
     // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
@@ -4748,7 +4748,7 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                if (["2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
+                if (["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
                     // 11 подпункт "Графа 21" = "Графа 7" + "1 рабочий день"
                     /*
                         Найти следующую за текущей строкой, удовлетворяющую условиям:

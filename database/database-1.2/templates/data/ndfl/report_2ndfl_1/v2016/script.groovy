@@ -698,8 +698,10 @@ def buildXml(def writer, boolean isForSpecificReport, Long xmlPartNumber, Long p
         }
         if (!presentNotHoldingTax && priznakF == "2") {
             logger.info("\"Для подразделения: $depName, КПП: $kpp, ОКТМО: $oktmo за период $otchetGod $reportPeriod.name отсутствуют сведения о не удержанном налоге.\"")
-            calculateParams.put("notReplaceXml", true)
-            calculateParams.put("createForm", false)
+            if(calculateParams != null) {
+                calculateParams.put("notReplaceXml", true)
+                calculateParams.put("createForm", false)
+            }
         }
     }
     ScriptUtils.checkInterrupted();
