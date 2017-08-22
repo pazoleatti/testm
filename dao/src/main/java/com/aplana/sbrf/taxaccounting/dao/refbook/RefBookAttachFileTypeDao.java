@@ -8,6 +8,10 @@ import java.util.List;
  * Дао для работы со справочником Категории прикрепленных файлов
  */
 public interface RefBookAttachFileTypeDao {
-
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     List<RefBookAttachFileType> fetchAll();
 }

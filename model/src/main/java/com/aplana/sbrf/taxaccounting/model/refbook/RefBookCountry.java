@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-
 /**
  * @author Andrey Drunk
  */
 public class RefBookCountry extends RefBookSimple<Long> {
-
+    //Код
     private String code;
 
     public RefBookCountry() {

@@ -2,23 +2,29 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * Подразделения
  *
  * @author dloshkarev
  */
 public class RefBookDepartment extends RefBookSimple<Integer> {
+    //Наименование
     private String name;
+    //Сокращенное наименование
     private String shortName;
+    //Идентификатор родительского подразделения
     private Integer parentId;
+    //Тип подразделения (1 - Банк, 2- ТБ, 3- ЦСКО, ПЦП, 4- Управление, 5- Не передается в СУДИР)
     private DepartmentType type;
+    //Индекс территориального банка
     private String tbIndex;
+    //Код подразделения в нотации Сбербанка
     private String sbrfCode;
+    //Код региона
     private Long regionId;
+    //Действующее подразделение
     private boolean isActive;
+    //Код подразделения
     private Long code;
 
     public String getName() {

@@ -5,8 +5,13 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
 import java.util.List;
 
 /**
- * Created by aokunev on 09.08.2017.
+ * Сервис для работы со справочником Виды форм
  */
 public interface RefBookDeclarationTypeService {
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     List<RefBookDeclarationType> fetchAllDeclarationTypes();
 }

@@ -119,19 +119,19 @@ public class RefBookUtils extends AbstractDao {
         }
     }
 
-public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
+    public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
 
-    @Override
-    public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
-        RefBookRecordVersion result = new RefBookRecordVersion();
-        result.setRecordId(SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS));
-        result.setVersionStart(rs.getDate("versionStart"));
-        result.setVersionEnd(rs.getDate("versionEnd"));
-        result.setVersionEndFake(rs.getBoolean("endIsFake"));
-        return result;
+        @Override
+        public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RefBookRecordVersion result = new RefBookRecordVersion();
+            result.setRecordId(SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS));
+            result.setVersionStart(rs.getDate("versionStart"));
+            result.setVersionEnd(rs.getDate("versionEnd"));
+            result.setVersionEndFake(rs.getBoolean("endIsFake"));
+            return result;
+        }
+
     }
-
-}
 
     /**
      * Проверка контрольной суммы ИНН (физлица или организации)
@@ -170,47 +170,5 @@ public static class RecordVersionMapper implements RowMapper<RefBookRecordVersio
                     (sum12 % 11) % 10 == Character.getNumericValue(inn.charAt(11));
         }
         return false;
-    }
-
-    private static RefBookValue getValue(Map<String, RefBookValue> record, String alias) {
-        if (record == null || record.get(alias) == null) {
-            return null;
-        }
-        return record.get(alias);
-    }
-
-    public static String getStringValue(Map<String, RefBookValue> record, String alias) {
-        RefBookValue value = getValue(record, alias);
-        return value != null ? value.getStringValue() : null;
-    }
-
-    public static Integer getIntValue(Map<String, RefBookValue> record, String alias) {
-        RefBookValue value = getValue(record, alias);
-        return value != null ? value.getNumberValue().intValue() : null;
-    }
-
-    public static Long getLongValue(Map<String, RefBookValue> record, String alias) {
-        RefBookValue value = getValue(record, alias);
-        return value != null ? value.getNumberValue().longValue() : null;
-    }
-
-    public static Long getRefValue(Map<String, RefBookValue> record, String alias) {
-        RefBookValue value = getValue(record, alias);
-        return value != null ? value.getReferenceValue() : null;
-    }
-
-    public static Byte getByteValue(Map<String, RefBookValue> record, String alias) {
-        RefBookValue value = getValue(record, alias);
-        return value != null ? value.getNumberValue().byteValue() : null;
-    }
-
-    public static boolean getBooleanValue(Map<String, RefBookValue> record, String alias) {
-        RefBookValue value = getValue(record, alias);
-        return value != null && value.getNumberValue().intValue() == 1;
-    }
-
-    public static Date getDateValue(Map<String, RefBookValue> record, String alias) {
-        RefBookValue value = getValue(record, alias);
-        return value != null ? value.getDateValue() : null;
     }
 }

@@ -1,29 +1,44 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-
 import java.util.Date;
 
 /**
  * Физические лица
+ *
  * @author dloshkarev
  */
 public class RefBookPerson extends RefBookSimple<Long> {
+    //Имя
     private String firstName;
+    //Фамилия
     private String lastName;
+    //Отчество
     private String middleName;
+    //Пол
     private Byte sex;
+    //ИНН в РФ
     private String inn;
+    //ИНН в стране гражданства
     private String innForeign;
+    //СНИЛС
     private String snils;
+    //Статус налогоплательщика
     private RefBookTaxpayerState taxpayerState;
+    //Дата рождения
     private Date birthDate;
+    //Место рождения
     private String birthPlace;
+    //Гражданство
     private RefBookCountry citizenship;
+    //Место жительства
     private RefBookAddress address;
+    //Признак застрахованного лица в системе обязательного пенсионного страхования
     private Boolean pension;
+    //Признак застрахованного лица в системе обязательного медицинского страхования
     private Boolean medical;
+    //Признак застрахованного лица в системе обязательного социального страхования
     private Boolean social;
+    //Признак, показывающий, является ли ФЛ сотрудником Сбербанка
     private Boolean employee;
 
 

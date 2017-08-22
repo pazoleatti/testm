@@ -24,8 +24,9 @@ public class RefBookAttachFileTypeDaoTest {
     @Autowired
     private RefBookAttachFileTypeDao refBookAttachFileTypeDao;
 
+    //Проверка получения всех значений справочника
     @Test
-    public void getRecordData() {
+    public void testFetchAll() {
         List<RefBookAttachFileType> attachFileTypes = refBookAttachFileTypeDao.fetchAll();
         assertTrue(attachFileTypes.size() == ATTACH_FILE_TYPE_COUNT);
     }

@@ -9,10 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Created by aokunev on 10.08.2017.
+ * Реализация сервиса для работы со справочником Виды форм
  */
 @Service
-@Transactional
 public class RefBookDeclarationTypeServiceImpl implements RefBookDeclarationTypeService {
     private RefBookDeclarationTypeDao refBookDeclarationTypeDao;
 
@@ -20,7 +19,13 @@ public class RefBookDeclarationTypeServiceImpl implements RefBookDeclarationType
         this.refBookDeclarationTypeDao = refBookDeclarationTypeDao;
     }
 
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     @Override
+    @Transactional(readOnly = true)
     public List<RefBookDeclarationType> fetchAllDeclarationTypes() {
         return refBookDeclarationTypeDao.fetchAll();
     }

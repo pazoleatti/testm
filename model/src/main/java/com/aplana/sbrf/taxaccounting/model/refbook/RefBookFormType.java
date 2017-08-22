@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-
 /**
  * Виды налоговых форм
  * @author dloshkarev
  */
 public class RefBookFormType extends RefBookSimple<Long> {
+    //Наименование
     private String name;
 
     public String getName() {

@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-
 /**
  * АСНУ
+ *
  * @author dloshkarev
  */
 public class RefBookAsnu extends RefBookSimple<Integer> {
+    //Наименование АСНУ
     private String name;
+    //Код АСНУ
     private String code;
+    //Тип дохода
     private String type;
 
     public String getName() {

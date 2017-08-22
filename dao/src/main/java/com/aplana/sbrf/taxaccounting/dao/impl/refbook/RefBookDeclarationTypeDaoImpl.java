@@ -13,7 +13,7 @@ import static com.aplana.sbrf.taxaccounting.model.QDeclarationType.declarationTy
 import static com.querydsl.core.types.Projections.bean;
 
 /**
- * Created by aokunev on 10.08.2017.
+ * Реализация дао для работы со справочником Виды форм
  */
 @Repository
 public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao {
@@ -26,6 +26,11 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
     final private QBean<RefBookDeclarationType> refBookDeclarationTypeBean = bean(RefBookDeclarationType.class, declarationType.id,
             declarationType.ifrsName, declarationType.isIfrs, declarationType.name, declarationType.status.as("versionStatusId"), declarationType.taxType.charAt(0).as("taxType"));
 
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     @Override
     public List<RefBookDeclarationType> fetchAll() {
         BooleanBuilder where = new BooleanBuilder();

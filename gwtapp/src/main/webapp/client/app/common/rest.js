@@ -71,7 +71,9 @@
             });
         }])
 
-        // Справочник Категории прикрепленных файлов
+        /**
+         * @description Справочники
+         */
         .factory('RefBookValuesResource', ['$resource', function ($resource) {
             return $resource('/controller/rest/refBookValues/:refBookId', {}, {
                 query: {method: 'GET', isArray: true, cache: false}

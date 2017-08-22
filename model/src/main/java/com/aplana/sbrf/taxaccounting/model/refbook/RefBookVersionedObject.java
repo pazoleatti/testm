@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 /**
+ * Справочник с версией
  * Created by aokunev on 08.08.2017.
  */
 public class RefBookVersionedObject<IdType extends Number> extends RefBookSimple<IdType> {

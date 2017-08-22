@@ -12,7 +12,7 @@ import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
 import static com.querydsl.core.types.Projections.bean;
 
 /**
- * Created by aokunev on 09.08.2017.
+ * Реализация дао для работы со справочником АСНУ
  */
 @Repository
 public class RefBookAsnuDaoImpl implements RefBookAsnuDao {
@@ -24,6 +24,11 @@ public class RefBookAsnuDaoImpl implements RefBookAsnuDao {
 
     final private QBean<RefBookAsnu> refBookAsnuBean = bean(RefBookAsnu.class, refBookAsnu.all());
 
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     @Override
     public List<RefBookAsnu> fetchAll() {
         return sqlQueryFactory

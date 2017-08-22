@@ -11,6 +11,9 @@ import java.util.List;
 import static com.aplana.sbrf.taxaccounting.model.QRefBookAttachFileType.refBookAttachFileType;
 import static com.querydsl.core.types.Projections.bean;
 
+/**
+ * Реализация дао для работы со справочником Категории прикрепленных файлов
+ */
 @Repository
 public class RefBookAttachFileTypeDaoImpl implements RefBookAttachFileTypeDao {
 
@@ -22,6 +25,11 @@ public class RefBookAttachFileTypeDaoImpl implements RefBookAttachFileTypeDao {
 
     final private QBean<RefBookAttachFileType> refBookAttachFileTypeBean = bean(RefBookAttachFileType.class, refBookAttachFileType.all());
 
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     @Override
     public List<RefBookAttachFileType> fetchAll() {
         return sqlQueryFactory

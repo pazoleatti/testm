@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
-import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 
+/**
+ * Реализация сервиса для работы со справочником Подразделения
+ */
 @Service
-@Transactional(readOnly = true)
 public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataService {
     private RefBookDepartmentDataDao refBookDepartmentDataDao;
 
@@ -21,8 +20,13 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
         this.refBookDepartmentDataDao = refBookDepartmentDataDao;
     }
 
-
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     @Override
+    @Transactional(readOnly = true)
     public List<RefBookDepartment> fetchDepartments() {
         return refBookDepartmentDataDao.fetchDepartments();
     }

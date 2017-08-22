@@ -9,10 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Created by aokunev on 09.08.2017.
+ * Реализация сервиса для работы со справочником АСНУ
  */
 @Service
-@Transactional
 public class RefBookAsnuServiceImpl implements RefBookAsnuService {
     final private RefBookAsnuDao refBookAsnuDao;
 
@@ -20,7 +19,13 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
         this.refBookAsnuDao = refBookAsnuDao;
     }
 
+    /**
+     * Получение всех значений справочника
+     *
+     * @return Список значений справочника
+     */
     @Override
+    @Transactional(readOnly = true)
     public List<RefBookAsnu> fetchAllAsnu() {
         return refBookAsnuDao.fetchAll();
     }

@@ -1,31 +1,35 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.IdentityObject;
-
 /**
+ * Адреса физических лиц
+ *
  * @author Andrey Drunk
  */
-public class RefBookAddress extends RefBookSimple<Long>{
+public class RefBookAddress extends RefBookSimple<Long> {
 
-    /**
-     * Адрес физлица
-     */
+    //Тип адреса
     private Integer addressType;
-
+    //Код региона
     private String regionCode;
+    //Почтовый индекс
     private String postalCode;
-    private String district; //Район
+    //Район
+    private String district;
+    //Город
     private String city;
+    //Населенный пункт
     private String locality;
+    //Улица
     private String street;
+    //Номер дома
     private String house;
+    //Номер корпуса (строения)
     private String build;
+    //Номер квартиры
     private String appartment;
-
-    /**
-     * Адрес вне РФ
-     */
+    //Страна проживания
     private RefBookCountry country;
+    //Адрес
     private String address;
 
 

@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 /**
+ * Категории прикрепляемых файлов
  * Created by aokunev on 08.08.2017.
  */
 public class RefBookAttachFileType extends RefBookSimple<Long> {
+    //Код категории
     byte code;
+    //Наименование
     String name;
 
     public byte getCode() {

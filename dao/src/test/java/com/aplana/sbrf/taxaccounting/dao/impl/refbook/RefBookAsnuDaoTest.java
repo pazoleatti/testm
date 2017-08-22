@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookAsnuDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +24,9 @@ public class RefBookAsnuDaoTest {
     @Autowired
     private RefBookAsnuDao refBookAsnuDao;
 
+    //Проверка получения всех значений справочника
     @Test
-    public void getRecordData() {
+    public void testFetchAll() {
         List<RefBookAsnu> asnuList = refBookAsnuDao.fetchAll();
         assertTrue(asnuList.size() == ASNU_COUNT);
     }
