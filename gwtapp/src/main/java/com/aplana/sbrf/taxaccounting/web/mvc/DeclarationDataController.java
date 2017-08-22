@@ -22,9 +22,12 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.GetDeclar
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,12 +72,13 @@ public class DeclarationDataController {
     private LogEntryService logEntryService;
     private LockDataService lockDataService;
     private SourceService sourceService;
+    private DeclarationDataPermissionSetter declarationDataPermissionSetter;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
                                      TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
                                      LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService,
-                                     DeclarationDataSearchService declarationDataSearchService) {
+                                     DeclarationDataSearchService declarationDataSearchService, DeclarationDataPermissionSetter declarationDataPermissionSetter) {
         this.declarationDataSearchService = declarationDataSearchService;
         this.declarationService = declarationService;
         this.securityService = securityService;
@@ -90,6 +94,7 @@ public class DeclarationDataController {
         this.logEntryService = logEntryService;
         this.lockDataService = lockDataService;
         this.sourceService = sourceService;
+        this.declarationDataPermissionSetter = declarationDataPermissionSetter;
     }
 
     /**
@@ -179,7 +184,7 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/pageImage/{pageId}/*", produces = MediaType.IMAGE_PNG_VALUE)
     public void getPageImage(@PathVariable int declarationDataId, @PathVariable int pageId,
-                             HttpServletResponse response) throws IOException {
+                             HttpServletResponse response) throws Exception {
 
         InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
         OutputStream out = response.getOutputStream();
@@ -233,6 +238,9 @@ public class DeclarationDataController {
         DeclarationResult result = new DeclarationResult();
 
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
+        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.ACCEPTED,
+                DeclarationDataPermission.CHECK, DeclarationDataPermission.RETURN_TO_CREATED, DeclarationDataPermission.DELETE);
+        result.setPermissions(declaration.getPermissions());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
 

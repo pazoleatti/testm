@@ -10,7 +10,7 @@ import java.util.Date;
  * исключения возможны в случае использования корректирующих периодов.
  * @author dsultanbekov
  */
-public class ReportPeriod implements Serializable {
+public class ReportPeriod implements Serializable, AuthorisableEntity {
 	private static final long serialVersionUID = 1L;
 
 	/** Уникальный идентификатор отчетного периода */
@@ -31,6 +31,7 @@ public class ReportPeriod implements Serializable {
 	private Date calendarStartDate;
 	/** Ссылка на федеральный справочника для классификации отчетных периодов */
 	private long dictTaxPeriodId;
+	private long permissions;
 
 	/**
 	 * Получить идентификатор отчётного периода
@@ -129,4 +130,14 @@ public class ReportPeriod implements Serializable {
     public void setAccName(String accName) {
         this.accName = accName;
     }
+
+	@Override
+	public long getPermissions() {
+		return permissions;
+	}
+
+	@Override
+	public void setPermissions(long permissions) {
+		this.permissions = permissions;
+	}
 }

@@ -166,7 +166,7 @@
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
-                            }).then(function () {
+                            }).success(function () {
                                 $window.location.assign('/index.html#/taxes/ndflJournal');
                             })
                         });

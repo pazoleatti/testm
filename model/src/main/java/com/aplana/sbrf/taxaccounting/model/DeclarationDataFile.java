@@ -8,7 +8,7 @@ import java.util.Date;
  *
  * @author lhaziev
  */
-public class DeclarationDataFile implements Serializable {
+public class DeclarationDataFile implements Serializable, AuthorisableEntity {
 	private static final long serialVersionUID = -1566841683151489811L;
 
     private long declarationDataId;
@@ -20,6 +20,7 @@ public class DeclarationDataFile implements Serializable {
     private String note;
     private long fileTypeId;
     private String fileTypeName;
+    private long permissions;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -91,6 +92,16 @@ public class DeclarationDataFile implements Serializable {
 
     public void setFileTypeName(String fileTypeName) {
         this.fileTypeName = fileTypeName;
+    }
+
+    @Override
+    public long getPermissions() {
+        return permissions;
+    }
+
+    @Override
+    public void setPermissions(long permissions) {
+        this.permissions = permissions;
     }
 
     @Override

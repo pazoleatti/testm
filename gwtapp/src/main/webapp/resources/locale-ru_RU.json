@@ -295,5 +295,6 @@
   "filesComment.comment": "Комментарий:",
   "filesComment.files": "Файлы:",
   "filesComment.button.add": "Добавить",
-  "filesComment.button.remove": "Удалить"
+  "filesComment.button.remove": "Удалить",
+  "filesComment.system": "Система"
 }

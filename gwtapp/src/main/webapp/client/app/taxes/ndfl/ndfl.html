@@ -7,7 +7,8 @@
         </div>
         <div class="header-col w200" style="float: right; margin-top: 20px; margin-bottom: -14px;">
             <div class="btn-group" data-uib-dropdown style="float: right;" >
-                <button id="single-button" type="button" class="btn btn-danger" data-uib-dropdown-toggle>
+                <button id="single-button" type="button" class="btn btn-danger" data-uib-dropdown-toggle
+                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.VIEW)">
                     <span data-translate-once="link.ndfl.reporting"></span>
                 </button>
                 <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button"
@@ -76,7 +77,7 @@
                             <span data-translate-once="link.ndfl.historyOfChange"></span>
                         </button>
                         <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px; float: right;"
-                                data-ng-click="filesAndComments()">
+                                data-ng-click="filesAndComments()" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.VIEW)">
                             <span data-translate-once="link.ndfl.filesAndComment"></span>
                         </button>
                         <button type="button" class="btn btn-danger" style="margin-top: 5px; width: 145px; float: right;"
@@ -92,35 +93,35 @@
                     <!--Рассчитать -->
                     <span>
                         <button type="button" class="btn btn-danger"
-                                data-ng-click="calculate()">
+                                data-ng-click="calculate()" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CALCULATE)">
                             <span data-translate-once="button.calculate"></span>
                         </button>
                     </span>
                     <!--Принять -->
                     <span>
                         <button type="button" class="btn btn-danger"
-                                data-ng-click="accept()">
+                                data-ng-click="accept()" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
                             <span data-translate-once="button.accept"></span>
                         </button>
                     </span>
                     <!--Проверить -->
                     <span>
                         <button type="button" class="btn btn-danger"
-                                data-ng-click="check()">
+                                data-ng-click="check()" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
                             <span data-translate-once="button.check"></span>
                         </button>
                     </span>
                     <!--Вернуть в Создана -->
                     <span>
                         <button type="button" class="btn btn-danger"
-                                data-ng-click="returnToCreated()">
+                                data-ng-click="returnToCreated()" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)">
                             <span data-translate-once="button.return"></span>
                         </button>
                     </span>
                     <!--Удалить-->
                     <span>
                         <button type="button" class="btn btn-danger"
-                                data-ng-click="delete()">
+                                data-ng-click="delete()" data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
                             <span data-translate-once="button.delete"></span>
                         </button>
                     </span>

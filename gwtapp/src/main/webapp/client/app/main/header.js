@@ -22,8 +22,8 @@
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter', 'APP_CONSTANTS', 'PermissionChecker',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter, APP_CONSTANTS, PermissionChecker) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter) {
 
                 $scope.security = {
                     user: $rootScope.user
@@ -45,14 +45,14 @@
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
 
                         var subtree = [];
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {subtree.push({
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.forms'),
                             onClick: function () {
                                 $state.go('ndflJournal');
                             }
                         });
                         }
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {subtree.push({
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {subtree.push({
                             name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
                             href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
                         });
@@ -65,7 +65,7 @@
                             href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
                         });}
 
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_REPORTS)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_REPORTS)) {
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.accountability'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!declarationList;nType=NDFL;isReports=true"
@@ -85,7 +85,7 @@
                                 }
                             }]
                         }];
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
                             $scope.treeTaxes.push({
                                 name: $filter('translate')('menu.taxes.commonParameters'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!commonParameter"
@@ -98,7 +98,7 @@
                         }];
 
                         $scope.treeAdministration = [];
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK_AND_AUDIT)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK_AND_AUDIT)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.blockList'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!lockList"
@@ -108,14 +108,14 @@
                             });
                         }
 
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_USERS)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_USERS)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.usersList'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!members"
                             });
                         }
 
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.configParams'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!configuration"
@@ -125,7 +125,7 @@
                             });
                         }
 
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_SETTINGS)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_SETTINGS)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.settings'),
                                 subtree: [{
@@ -148,13 +148,13 @@
                         }
 
                         $scope.treeManual = [];
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_USER)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_USER)) {
                             $scope.treeManual.push({
                                 name: $filter('translate')('menu.manuals.manualUser'),
                                 href: "resources/help_ndfl.pdf"
                             });
                         }
-                        if (PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_DESIGNER)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_MANUAL_DESIGNER)) {
                             $scope.treeManual.push({
                                 name: $filter('translate')('menu.manuals.manualLayoutDesigner'),
                                 href: "resources/help_conf.pdf"
