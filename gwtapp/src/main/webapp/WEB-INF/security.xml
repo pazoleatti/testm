@@ -103,7 +103,7 @@
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.ReportPeriod" value-ref="reportPeriodPermissionFactory"/>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.Department" value-ref="departmentPermissionFactory"/>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.LockData" value-ref="lockDataPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.LockData" value-ref="declarationDataFilePermissionFactory"/>
+				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationDataFile" value-ref="declarationDataFilePermissionFactory"/>
 			</beans:map>
 		</beans:property>
 	</beans:bean>
