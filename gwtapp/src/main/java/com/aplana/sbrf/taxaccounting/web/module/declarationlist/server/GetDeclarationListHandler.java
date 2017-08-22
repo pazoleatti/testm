@@ -102,7 +102,13 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
             }
         }
 
-        action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
+        List<Long> asnuIds = action.getDeclarationFilter().getAsnuIds();
+        if (asnuIds != null && !asnuIds.isEmpty()) {
+            action.getDeclarationFilter().setAsnuIds(new ArrayList<Long>(currentUser.getAsnuIds()));
+            action.getDeclarationFilter().getAsnuIds().retainAll(asnuIds);
+        } else if (currentUser.hasRole(TARole.N_ROLE_OPER)) {
+            action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
+        }
 
         if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
             action.getDeclarationFilter().setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());

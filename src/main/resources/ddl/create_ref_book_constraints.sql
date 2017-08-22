@@ -33,7 +33,6 @@ alter table ref_book_doc_type add constraint pk_ref_book_doc_type primary key (i
 alter table ref_book_tax_place_type add constraint pk_ref_book_tax_place_type primary key (id);
 alter table ref_book_signatory_mark add constraint pk_ref_book_signatory_mark primary key (id);
 alter table ref_book_person_category add constraint pk_ref_book_person_category primary key(id);
-alter table sec_user_asnu add constraint pk_sec_user_asnu primary key(id);
 alter table ref_book_detach_tax_pay add constraint pk_ref_book_detach_tax_pay primary key(id);
 alter table ref_book_make_calc add constraint pk_ref_book_make_calc primary key(id);
 alter table ref_book_calendar add constraint pk_ref_book_calendar primary key (cdate);
@@ -71,8 +70,6 @@ alter table declaration_template add constraint fk_declaration_template_ftype fo
 alter table declaration_data add constraint fk_decl_data_doc_state foreign key(doc_state_id) references ref_book_doc_state(id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key(dict_tax_period_id) references report_period_type(id);
 alter table ref_book_deduction_type add constraint fk_ref_book_deduc_type_mark foreign key (deduction_mark) references ref_book_deduction_mark(id);
-alter table sec_user_asnu add constraint fk_sec_user_asnu_user foreign key(user_id) references sec_user(id) on delete cascade;
-alter table sec_user_asnu add constraint fk_sec_user_asnu_asnu foreign key(asnu_id) references ref_book_asnu(id);
 alter table ref_book_asnu add constraint fk_ref_book_asnu_role_alias foreign key (role_alias) references sec_role(id);
 alter table ref_book_asnu add constraint fk_ref_book_asnu_role_name foreign key (role_name) references sec_role(id);
 ------
