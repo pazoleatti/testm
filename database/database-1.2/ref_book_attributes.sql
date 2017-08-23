@@ -17,3 +17,9 @@ values (b.id, b.ref_book_id, b.name, b.alias, b.type, b.ord, b.reference_id, b.a
 
 
 delete from ref_book_attribute where ref_book_id=30 and alias='REGION_ID';
+
+update REF_BOOK_ATTRIBUTE set ord=7 where id=870;
+update REF_BOOK_ATTRIBUTE set ord=8 where id=167;
+update REF_BOOK_ATTRIBUTE set ord=9 where id=168;
+
+update ref_book set read_only=1 where id=30;
