@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -45,7 +46,7 @@ import java.util.concurrent.Executors;
  */
 @Component
 @EnableScheduling
-public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerService {
+public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerService, DisposableBean {
     private static final Log LOG = LogFactory.getLog(SchedulerServiceImpl.class);
 
     private static final long DAY_TIME = 24 * 60 * 60 * 1000;
@@ -96,7 +97,21 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
                 }
             }
         });
+    }
 
+    @Override
+    public void destroy() throws Exception {
+        shutdownAllTasks();
+    }
+
+    @Override
+    public void shutdownAllTasks() {
+        for (String settingCode : tasks.keySet()) {
+            LOG.debug("Shutdown task with code: " + settingCode);
+            tasks.get(settingCode).cancel();
+            crons.remove(settingCode);
+            cronTasks.remove(settingCode);
+        }
     }
 
     /**
@@ -242,6 +257,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
     public void asyncTasksMonitoring() {
+        LOG.info("ASYNC_TASK_MONITORING started by scheduler");
         SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
         if (schedulerTask.isActive()) {
             configurationService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
