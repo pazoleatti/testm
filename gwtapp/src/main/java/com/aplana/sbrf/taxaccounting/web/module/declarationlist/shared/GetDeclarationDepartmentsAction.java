@@ -7,6 +7,7 @@ public class GetDeclarationDepartmentsAction extends UnsecuredActionImpl<GetDecl
     private TaxType taxType;
     private int reportPeriodId;
     private boolean isReports;
+    private boolean isCreate = true;
 
     public TaxType getTaxType() {
         return taxType;
@@ -30,5 +31,13 @@ public class GetDeclarationDepartmentsAction extends UnsecuredActionImpl<GetDecl
 
     public void setReports(boolean isReports) {
         this.isReports = isReports;
+    }
+
+    public boolean isCreate() {
+        return isCreate;
+    }
+
+    public void setCreate(boolean create) {
+        isCreate = create;
     }
 }
