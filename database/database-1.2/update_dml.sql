@@ -3,5 +3,10 @@ prompt mig sec_user_asnu
 
 prompt ref_book_attributes
 @@ref_book_attributes.sql;
+
+-- synonym_department
+prompt synonym department
+@@synonym_department.sql;
+
 commit;
 exit;

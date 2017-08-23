@@ -14,3 +14,6 @@ merge into ref_book_attribute a using
 	when not matched then
 insert (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, read_only, max_length)
 values (b.id, b.ref_book_id, b.name, b.alias, b.type, b.ord, b.reference_id, b.attribute_id, b.visible, b.precision, b.width, b.required, b.is_unique, b.sort_order, b.read_only, b.max_length);
+
+
+delete from ref_book_attribute where ref_book_id=30 and alias='REGION_ID';
