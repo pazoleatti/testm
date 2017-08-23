@@ -73,23 +73,27 @@ public class AsyncTaskThreadContainer {
                 try {
                     if (taskData != null) {
                         //Запускаем выполнение бина-обработчика задачи в новом потоке
-                        LOG.debug("Task started: " + taskData);
+                        LOG.info("Task started: " + taskData);
                         final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getTypeId());
                         executorService.submit(new Thread() {
                             @Override
                             public void run() {
                                 Thread.currentThread().setName("AsyncTask-" + taskData.getId());
-                                task.execute(taskData.getParams());
-                                asyncTaskDao.finishTask(taskData.getId());
+                                try {
+                                    task.execute(taskData.getParams());
+                                    asyncTaskDao.finishTask(taskData.getId());
+                                } catch (Exception e) {
+                                    LOG.error("Unexpected error during async task execution", e);
+                                    asyncTaskDao.finishTask(taskData.getId());
+                                }
                             }
                         });
                     }
                     Thread.sleep(500);
                 } catch (Exception e) {
-                    LOG.error("Unexpected error during async task execution", e);
+                    LOG.info("Unexpected error during startup async task execution", e);
                     if (taskData != null) {
-                        LOG.debug("Releasing task: " + taskData);
-                        asyncTaskDao.releaseTask(taskData.getId());
+                        asyncTaskDao.finishTask(taskData.getId());
                     }
                 }
             }
