@@ -8,7 +8,10 @@
        http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <import resource="classpath:async-mock-context.xml" />
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.common"/>
     <tx:jta-transaction-manager/>
+
+    <bean id="asyncManager" class="com.aplana.sbrf.taxaccounting.async.AsyncManagerImpl">
+        <property name="devMode" value="true"/>
+    </bean>
 </beans>

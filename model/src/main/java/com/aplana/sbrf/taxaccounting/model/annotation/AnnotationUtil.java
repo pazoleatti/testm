@@ -2,15 +2,12 @@ package com.aplana.sbrf.taxaccounting.model.annotation;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
-import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.Collection;
 import java.util.Set;
 
 /**

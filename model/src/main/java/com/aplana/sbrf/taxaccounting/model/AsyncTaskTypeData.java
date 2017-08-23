@@ -15,9 +15,9 @@ public class AsyncTaskTypeData {
      */
     private String name;
     /**
-     * JNDI класса-обработчика задачи
+     * Класс-обработчик задачи
      */
-    private String handlerJndi;
+    private String handlerClassName;
     /**
      * Ограничение на выполнение задачи в очереди быстрых задач
      */
@@ -43,12 +43,12 @@ public class AsyncTaskTypeData {
         this.name = name;
     }
 
-    public String getHandlerJndi() {
-        return handlerJndi;
+    public String getHandlerClassName() {
+        return handlerClassName;
     }
 
-    public void setHandlerJndi(String handlerJndi) {
-        this.handlerJndi = handlerJndi;
+    public void setHandlerClassName(String handlerClassName) {
+        this.handlerClassName = handlerClassName;
     }
 
     public long getShortQueueLimit() {

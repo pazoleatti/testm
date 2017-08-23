@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -98,9 +98,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
         BalancingVariants balancingVariant;
         try {
             LOG.info(String.format("Определение очереди для задачи с ключом %s", keyTask));
-            balancingVariant = asyncManager.checkCreate(
-					isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
-					params);
+            balancingVariant = asyncManager.checkCreate(reportType.getAsyncTaskTypeId(), params);
         } catch (AsyncTaskException e) {
             int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
             if (i != -1) {
@@ -130,9 +128,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), queue);
-                    asyncManager.executeAsync(
-							isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
-							params, balancingVariant);
+                    asyncManager.executeAsync(reportType.getAsyncTaskTypeId(), params, balancingVariant);
 
                     // Шаг 8
                     Object declarationDataId = params.get("declarationDataId");

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -34,11 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.management.MBeanServer;
 import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -64,7 +60,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     @Autowired
     private RefBookDao refBookDao;
     @Autowired
-    private AsyncTaskTypeDao asyncTaskTypeDao;
+    private AsyncTaskDao asyncTaskTypeDao;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -211,7 +207,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
         long maxFileSize = 0;
         if (isAsync) {
-            maxFileSize = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId()).getTaskLimit();
+            maxFileSize = asyncTaskTypeDao.getTaskData(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId()).getTaskLimit();
         }
 
         ImportCounter wrongImportCounter = new ImportCounter();

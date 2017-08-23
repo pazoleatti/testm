@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.LockData;
@@ -93,8 +93,7 @@ public class TransportDataController {
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     try {
                         lockDataService.addUserWaitingForLock(key, userId);
-                        asyncManager.executeAsync(
-                                PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
+                        asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
                                 params, balancingVariant);
                         LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                         lockDataService.updateQueue(key, lockData.getDateLock(), queue);
@@ -147,8 +146,7 @@ public class TransportDataController {
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
                     lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(
-                            PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
+                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
                             params, balancingVariant);
                     LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                     lockDataService.updateQueue(key, lockData.getDateLock(), queue);

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.RefBookAsyncConfigDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
@@ -32,7 +32,7 @@ public class RefBookAsyncConfigDaoTest {
     RefBookAsyncConfigDao refBookAsyncConfigDao;
 
     @Autowired
-    AsyncTaskTypeDao asyncTaskTypeDao;
+    AsyncTaskDao asyncTaskTypeDao;
 
     @Test
     public void getRecords() {
@@ -68,8 +68,8 @@ public class RefBookAsyncConfigDaoTest {
 
     @Test
     public void get() {
-        AsyncTaskTypeData asyncTaskTypeData1 = asyncTaskTypeDao.get(1L);
-        AsyncTaskTypeData asyncTaskTypeData2 = asyncTaskTypeDao.get(2L);
+        AsyncTaskTypeData asyncTaskTypeData1 = asyncTaskTypeDao.getTaskData(1L);
+        AsyncTaskTypeData asyncTaskTypeData2 = asyncTaskTypeDao.getTaskData(2L);
 
         assertEquals(1, asyncTaskTypeData1.getId());
         assertEquals("task1", asyncTaskTypeData1.getName());
