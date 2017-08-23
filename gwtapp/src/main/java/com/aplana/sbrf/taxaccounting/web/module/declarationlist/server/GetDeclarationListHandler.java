@@ -107,7 +107,11 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
             action.getDeclarationFilter().setAsnuIds(new ArrayList<Long>(currentUser.getAsnuIds()));
             action.getDeclarationFilter().getAsnuIds().retainAll(asnuIds);
         } else if (currentUser.hasRole(TARole.N_ROLE_OPER)) {
-            action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
+            if (currentUser.getAsnuIds().isEmpty()) {
+                action.getDeclarationFilter().setAsnuIds(Arrays.asList(-1L));
+            } else {
+                action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
+            }
         }
 
         if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {

@@ -67,7 +67,13 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
         dataFilter.setTaxType(action.getTaxType());
         res.setDefaultDecFilterData(dataFilter);
         res.setUserDepartmentId(currentUser.getUser().getDepartmentId());
-        res.setAsnuIds(currentUser.getUser().getAsnuIds());
+        if (currentUser.getUser().hasRole(TARole.N_ROLE_OPER)) {
+            if (currentUser.getUser().getAsnuIds().isEmpty()) {
+                res.setAsnuIds(Arrays.asList(0L));
+            } else {
+                res.setAsnuIds(currentUser.getUser().getAsnuIds());
+            }
+        }
 
         List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
         for(DeclarationType declarationType: declarationFilterValues.getDeclarationTypes()) {
