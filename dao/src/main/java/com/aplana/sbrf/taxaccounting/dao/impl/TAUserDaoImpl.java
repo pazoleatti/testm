@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.cache.annotation.Cacheable;
+//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -75,7 +75,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     };
 
 	@Override
-	@Cacheable(value = "User", key = "#userId")
+	//@Cacheable(value = "User", key = "#userId")
 	public TAUser getUser(int userId) {
 		TAUser user;
 		try {
@@ -94,7 +94,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 	
 	@Override
-    @Cacheable(value = "User", key = "'login_'+#login")
+    //@Cacheable(value = "User", key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForObject("select id from sec_user where lower(login) = lower(?)", new Object[] {login.toLowerCase()}, Integer.class);
