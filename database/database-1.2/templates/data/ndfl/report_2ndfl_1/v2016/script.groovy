@@ -1889,7 +1889,7 @@ List<PairKppOktmo> getPairKppOktmoList() {
         }
         referencesOktmoList.removeAll([null])
         if (referencesOktmoList.isEmpty()) {
-            logger.error("Отчетность %s  для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", reportType, depName, "$otchetGod ${reportPeriod.name}")
+            logger.error("Отчетность %s для %s за период %s не сформирована. Отсутствуют настройки указанного подразделения в справочнике \"Настройки подразделений", reportType, depName, "$otchetGod ${reportPeriod.name}")
             return null
         }
         def oktmoForDepartment = getOktmoByIdList(referencesOktmoList)
