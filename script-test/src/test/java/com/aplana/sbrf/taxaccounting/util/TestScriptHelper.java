@@ -138,7 +138,7 @@ public class TestScriptHelper {
         this.mockHelper = mockHelper;
         // Id подразделения пользователя совпадает c Id подразделения НФ
         userDepartment.setId(formData.getDepartmentId());
-        userDepartment.setRegionId(DEPARTMENT_REGION_ID);
+        //userDepartment.setRegionId(DEPARTMENT_REGION_ID);
         userDepartment.setName(DEPARTMENT_NAME);
         // Шаблон НФ из файла
         FormType formType = formData.getFormType();

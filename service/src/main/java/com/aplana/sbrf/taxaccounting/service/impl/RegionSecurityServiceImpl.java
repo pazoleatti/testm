@@ -39,100 +39,102 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
     /** Общий метод для проврки. */
     private boolean check(TAUser user, Long refBookId, Long uniqueRecordId, Long recordCommonId,
                          Map<String, RefBookValue> values, Date start, Date end, Boolean isDeleteVersion) {
-        // если роль пользователя "контролер УНП", то завершить разрешив изменения
-        if (user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-            return true;
-        }
-
-        // получить справочник и проверить региональный атрибут
-        RefBook refBook = refBookFactory.get(refBookId);
-
-        // если справочник не региональный или пользователь не "контролел НС", то завершить запретив изменения
-        if (refBook.getRegionAttribute() == null || !user.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
-            return false;
-        }
-
-        // получить подразделение пользователя, получить регион подразделения
-        RefBookDataProvider departmentProvider = refBookFactory.getDataProvider(DEPARTMENT_REF_BOOK_ID);
-        Map<String, RefBookValue> department = departmentProvider.getRecordData((long) user.getDepartmentId());
-        Set<Long> availableRegions = new HashSet<Long>();
-        for (Department dep : departmentService.getBADepartments(user, TaxType.NDFL)) {
-            availableRegions.add(dep.getRegionId());
-        }
-
-        // проверить новые значения
-        if (values != null && !values.isEmpty()) {
-            RefBookValue newRecordRegion = values.get(refBook.getRegionAttribute().getAlias());
-            if (newRecordRegion == null || newRecordRegion.getReferenceValue() == null) {
-                // не заполнен регион записи, завершить разрешив изменения, далее при проверках обязательных атрибутов выдаст ошибку
-                return false;
-            }
-            // если новый регион не соотвествует региону пользователя, то завершить запретив изменения
-            Long newRecordRegionId = newRecordRegion.getReferenceValue();
-            if (!availableRegions.contains(newRecordRegionId)) {
-                return false;
-            }
-        }
-
-        // если новая версия то проверить предыдущую версию относительно даты актуальности новой
-        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
-        if (uniqueRecordId == null && recordCommonId != null && start != null) {
-            // проверка при добавлении новой версии, новая версия может быть не в конец записана,
-            // а где нибудь между существующими версиями (от дат актуальности зависит),
-            // одна из существующих версии может принадлежать региону пользователя, другая нет, или наоборот
-
-            // получить все записи справочника на дату
-            List<Pair<Long, Long>> pairs = provider.getRecordIdPairs(refBookId, start, false, null);
-            // найти версии редактируемой записи
-            List<Long> list = new ArrayList<Long>();
-            for (Pair<Long, Long> pair : pairs) {
-                if (recordCommonId.equals(pair.getSecond())) {
-                    list.add(pair.getFirst());
-                }
-            }
-            if (!list.isEmpty()) {
-                // если есть версии у добавляемой записи, то проверить регион у предыдущей версии
-                Map<Long, Date> versionDateMap = provider.getRecordsVersionStart(list);
-                Long preRecordId = getActualRecordId(versionDateMap, start);
-                Long preRecordRegionId = getRegionId(preRecordId, refBook.getRegionAttribute().getAlias(), provider);
-                if (!availableRegions.contains(preRecordRegionId)) {
-                    return false;
-                }
-            }
-        }
-
-        // если запись редактируется или удаляется, получить старые значения и проверить регион
-        if (uniqueRecordId != null) {
-            Long recordRegionId = getRegionId(uniqueRecordId, refBook.getRegionAttribute().getAlias(), provider);
-            if (recordRegionId == null) {
-                return false;
-            }
-
-            // проверить соответствие региона старой записи региону пользователя
-            boolean isAllowed = availableRegions.contains(recordRegionId);
-
-            if (isDeleteVersion != null && !isDeleteVersion) {
-                // удаление записи - проверить все версии записи
-                if (!isAllowed) {
-                    return false;
-                }
-                PagingResult<Map<String, RefBookValue>> versions = provider.getRecordVersionsById(uniqueRecordId, null, null, null);
-                for (Map<String, RefBookValue> version : versions) {
-                    RefBookValue region = version.get(refBook.getRegionAttribute().getAlias());
-                    // если регион версии не указан или он не равен региону пользователя, то проверка не проходит
-                    if (region == null || region.getReferenceValue() == null || !availableRegions.contains(region.getReferenceValue())) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                // редактрирование или удаление версии - вернуть результат
-                return isAllowed;
-            }
-        } else {
-            // запись новая, не имеет версии
-            return true;
-        }
+        return true;
+        // Сейчас нет региаональных справочников
+//        // если роль пользователя "контролер УНП", то завершить разрешив изменения
+//        if (user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
+//            return true;
+//        }
+//
+//        // получить справочник и проверить региональный атрибут
+//        RefBook refBook = refBookFactory.get(refBookId);
+//
+//        // если справочник не региональный или пользователь не "контролел НС", то завершить запретив изменения
+//        if (refBook.getRegionAttribute() == null || !user.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
+//            return false;
+//        }
+//
+//        // получить подразделение пользователя, получить регион подразделения
+//        RefBookDataProvider departmentProvider = refBookFactory.getDataProvider(DEPARTMENT_REF_BOOK_ID);
+//        Map<String, RefBookValue> department = departmentProvider.getRecordData((long) user.getDepartmentId());
+//        Set<Long> availableRegions = new HashSet<Long>();
+//        for (Department dep : departmentService.getBADepartments(user, TaxType.NDFL)) {
+//            availableRegions.add(dep.getRegionId());
+//        }
+//
+//        // проверить новые значения
+//        if (values != null && !values.isEmpty()) {
+//            RefBookValue newRecordRegion = values.get(refBook.getRegionAttribute().getAlias());
+//            if (newRecordRegion == null || newRecordRegion.getReferenceValue() == null) {
+//                // не заполнен регион записи, завершить разрешив изменения, далее при проверках обязательных атрибутов выдаст ошибку
+//                return false;
+//            }
+//            // если новый регион не соотвествует региону пользователя, то завершить запретив изменения
+//            Long newRecordRegionId = newRecordRegion.getReferenceValue();
+//            if (!availableRegions.contains(newRecordRegionId)) {
+//                return false;
+//            }
+//        }
+//
+//        // если новая версия то проверить предыдущую версию относительно даты актуальности новой
+//        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
+//        if (uniqueRecordId == null && recordCommonId != null && start != null) {
+//            // проверка при добавлении новой версии, новая версия может быть не в конец записана,
+//            // а где нибудь между существующими версиями (от дат актуальности зависит),
+//            // одна из существующих версии может принадлежать региону пользователя, другая нет, или наоборот
+//
+//            // получить все записи справочника на дату
+//            List<Pair<Long, Long>> pairs = provider.getRecordIdPairs(refBookId, start, false, null);
+//            // найти версии редактируемой записи
+//            List<Long> list = new ArrayList<Long>();
+//            for (Pair<Long, Long> pair : pairs) {
+//                if (recordCommonId.equals(pair.getSecond())) {
+//                    list.add(pair.getFirst());
+//                }
+//            }
+//            if (!list.isEmpty()) {
+//                // если есть версии у добавляемой записи, то проверить регион у предыдущей версии
+//                Map<Long, Date> versionDateMap = provider.getRecordsVersionStart(list);
+//                Long preRecordId = getActualRecordId(versionDateMap, start);
+//                Long preRecordRegionId = getRegionId(preRecordId, refBook.getRegionAttribute().getAlias(), provider);
+//                if (!availableRegions.contains(preRecordRegionId)) {
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        // если запись редактируется или удаляется, получить старые значения и проверить регион
+//        if (uniqueRecordId != null) {
+//            Long recordRegionId = getRegionId(uniqueRecordId, refBook.getRegionAttribute().getAlias(), provider);
+//            if (recordRegionId == null) {
+//                return false;
+//            }
+//
+//            // проверить соответствие региона старой записи региону пользователя
+//            boolean isAllowed = availableRegions.contains(recordRegionId);
+//
+//            if (isDeleteVersion != null && !isDeleteVersion) {
+//                // удаление записи - проверить все версии записи
+//                if (!isAllowed) {
+//                    return false;
+//                }
+//                PagingResult<Map<String, RefBookValue>> versions = provider.getRecordVersionsById(uniqueRecordId, null, null, null);
+//                for (Map<String, RefBookValue> version : versions) {
+//                    RefBookValue region = version.get(refBook.getRegionAttribute().getAlias());
+//                    // если регион версии не указан или он не равен региону пользователя, то проверка не проходит
+//                    if (region == null || region.getReferenceValue() == null || !availableRegions.contains(region.getReferenceValue())) {
+//                        return false;
+//                    }
+//                }
+//                return true;
+//            } else {
+//                // редактрирование или удаление версии - вернуть результат
+//                return isAllowed;
+//            }
+//        } else {
+//            // запись новая, не имеет версии
+//            return true;
+//        }
     }
 
     /**

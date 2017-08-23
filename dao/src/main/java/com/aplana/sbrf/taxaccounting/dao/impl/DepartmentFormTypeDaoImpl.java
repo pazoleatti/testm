@@ -307,7 +307,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "dft.department_full_name, \n" +
                     "dft.department_tb_index, \n" +
                     "dft.department_sbrf_code, \n" +
-                    "dft.department_region_id, \n" +
+//                    "dft.department_region_id, \n" +
                     "dft.department_is_active, \n" +
                     "dft.department_code, \n" +
                     "dft.department_garant_use,\n" +
@@ -320,7 +320,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "dp.SHORTNAME AS performer_short_name,\n" +
                     "dp.TB_INDEX  AS performer_tb_index,\n" +
                     "dp.SBRF_CODE AS performer_sbrf_code,\n" +
-                    "dp.REGION_ID AS performer_region_id,\n" +
+//                    "dp.REGION_ID AS performer_region_id,\n" +
                     "dp.IS_ACTIVE AS performer_is_active,\n" +
                     "dp.CODE      AS performer_code,\n" +
                     //"-- Для сортировки\n" +
@@ -342,7 +342,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "  d.SHORTNAME  AS department_short_name,\n" +
                     "  d.TB_INDEX   AS department_tb_index,\n" +
                     "  d.SBRF_CODE  AS department_sbrf_code,\n" +
-                    "  d.REGION_ID  AS department_region_id,\n" +
+//                    "  d.REGION_ID  AS department_region_id,\n" +
                     "  d.IS_ACTIVE  AS department_is_active,\n" +
                     "  d.CODE       AS department_code,\n" +
                     "  d.GARANT_USE AS department_garant_use,\n" +
@@ -479,10 +479,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             department.setFullName(rs.getString("department_full_name"));
             department.setTbIndex(rs.getString("department_tb_index"));
             department.setSbrfCode(rs.getString("department_sbrf_code"));
-            department.setRegionId(SqlUtils.getLong(rs, "department_region_id"));
-            if (rs.wasNull()) {
-                department.setRegionId(null);
-            }
             department.setActive(rs.getBoolean("department_is_active"));
             department.setCode(rs.getLong("department_code"));
             department.setGarantUse(rs.getBoolean("department_garant_use"));
@@ -511,10 +507,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 performer.setFullName(rs.getString("performer_full_name"));
                 performer.setTbIndex(rs.getString("performer_tb_index"));
                 performer.setSbrfCode(rs.getString("performer_sbrf_code"));
-                performer.setRegionId(SqlUtils.getLong(rs, "performer_region_id"));
-                if (rs.wasNull()) {
-                    performer.setRegionId(null);
-                }
                 performer.setActive(rs.getBoolean("performer_is_active"));
                 performer.setCode(rs.getLong("performer_code"));
                 department.setGarantUse(rs.getBoolean("department_garant_use"));
