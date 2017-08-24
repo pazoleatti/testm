@@ -227,7 +227,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         if (asnuPickerValues != null && !asnuPickerValues.isEmpty()) {
             formDataFilter.setAsnuIds(asnuPickerValues);
         } else {
-            formDataFilter.setAsnuId(null);
+            formDataFilter.setAsnuIds(null);
         }
         List<Long> kindPickerValues = declarationKindPicker.getValue();
         if (kindPickerValues != null && !kindPickerValues.isEmpty()) {

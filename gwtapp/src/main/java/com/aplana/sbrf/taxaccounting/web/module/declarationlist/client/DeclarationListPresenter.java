@@ -271,7 +271,7 @@ public class DeclarationListPresenter extends
         cloneFilter.setDeclarationTypeIds(filter.getDeclarationTypeIds());
         cloneFilter.setFormState(filter.getFormState());
         cloneFilter.setCorrectionTag(filter.getCorrectionTag());
-        cloneFilter.setAsnuId(filter.getAsnuId());
+        cloneFilter.setAsnuIds(filter.getAsnuIds());
         cloneFilter.setFormKindIds(filter.getFormKindIds());
         cloneFilter.setFileName(filter.getFileName());
         cloneFilter.setDeclarationDataIdStr(filter.getDeclarationDataIdStr());
