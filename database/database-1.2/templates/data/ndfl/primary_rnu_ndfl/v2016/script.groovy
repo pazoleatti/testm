@@ -691,7 +691,7 @@ import java.util.regex.Pattern
 
                     def recordId = refBookPerson.getRecordId();
 
-                    logForDebug(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
+                    logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
                             refBookPerson.getLastName(),
                             refBookPerson.getFirstName(),
                             refBookPerson.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
