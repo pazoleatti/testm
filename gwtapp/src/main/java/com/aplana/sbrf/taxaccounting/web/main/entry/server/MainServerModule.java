@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.server.AdminServerM
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server.TemplateVersionListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.server.IfrsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.lock.server.LockServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.members.server.MembersServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
@@ -43,7 +42,7 @@ import org.springframework.context.annotation.Import;
         FormDataServerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
         AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
-        HistoryServerModule.class, TemplateVersionListServerModule.class, MembersServerModule.class,
+        HistoryServerModule.class, TemplateVersionListServerModule.class,
         ConfigurationServerModule.class, AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
         SourcesServerModule.class, DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,
