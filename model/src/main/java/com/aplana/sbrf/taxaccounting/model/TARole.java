@@ -24,9 +24,9 @@ public class TARole implements Serializable {
      */
     public static final String N_ROLE_CONF = "N_ROLE_CONF";
     /**
-     * Алиас роли "Администратор (НДФЛ)"
+     * Алиас роли "Администратор"
      */
-    public static final String N_ROLE_ADMIN = "N_ROLE_ADMIN";
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     /**
      * Алиас роли "Оператор (Сборы)"

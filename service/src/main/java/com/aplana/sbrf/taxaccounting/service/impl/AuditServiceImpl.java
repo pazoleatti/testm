@@ -189,7 +189,7 @@ public class AuditServiceImpl implements AuditService {
             TAUser user = userInfo.getUser();
             HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
                     new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
-            if (user.hasRole(TARole.N_ROLE_ADMIN)) {
+            if (user.hasRole(TARole.ROLE_ADMIN)) {
                 return auditDao.getLogsForAdmin(filter);
             } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
 
@@ -216,7 +216,7 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public long getCountRecords(LogSystemFilter filter, TAUserInfo userInfo) {
         TAUser user = userInfo.getUser();
-        if (user.hasRole(TARole.N_ROLE_ADMIN)) {
+        if (user.hasRole(TARole.ROLE_ADMIN)) {
             return auditDao.getCount(filter);
         } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
             HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =

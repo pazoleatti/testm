@@ -10,7 +10,6 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -73,7 +72,7 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
         result.setLocks(locks);
         result.setTotalCountOfRecords(records.getTotalCount());
         result.setCurrentUserId(currentUser.getId());
-        result.setHasRoleAdmin(currentUser.hasRole(TARole.N_ROLE_ADMIN));
+        result.setHasRoleAdmin(currentUser.hasRole(TARole.ROLE_ADMIN));
         return result;
     }
 

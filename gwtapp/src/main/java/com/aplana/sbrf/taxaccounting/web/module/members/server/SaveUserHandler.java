@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 public class SaveUserHandler extends AbstractActionHandler<SaveUserAction, SaveUserResult> {
 
 	@Autowired

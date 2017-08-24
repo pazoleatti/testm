@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
  * @author dkoshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 public class ResumeTaskHandler extends AbstractActionHandler<ResumeTaskAction, ResumeTaskResult> {
 
     @Autowired

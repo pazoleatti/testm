@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-@PreAuthorize("hasAnyRole('N_ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValues, FilterValues> {
 
 	@Autowired
@@ -39,7 +39,7 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
-        result.setCanEdit(currentUser.hasRole(TARole.N_ROLE_ADMIN));
+        result.setCanEdit(currentUser.hasRole(TARole.ROLE_ADMIN));
 
         List<TARole> allRoles = taRoleService.getAll();
 
@@ -47,7 +47,7 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 
 		Set<Integer> depIds = new HashSet<Integer>();
 
-		if (currentUser.hasRole(TARole.N_ROLE_ADMIN)) {
+		if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
             depIds.addAll(departmentService.listIdAll());
         } else {
             depIds.addAll(departmentService.getBADepartmentIds(currentUser));
