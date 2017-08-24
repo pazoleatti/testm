@@ -1,0 +1,21 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-star-empty"></span>&nbsp;{{header}}
+    </h4>
+</div>
+<div class="modal-body">
+    <form name="messageDialogForm" novalidate>
+        <div class="form-group input-group-lg required">
+            <label class="control-label" for="inputMessage">{{msg}}</label>
+            <input id="inputMessage" type="text" class="form-control" ng-model="inputMessage" ng-keyup="hitEnter($event)" required>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" ng-click="save()"
+            data-ng-disabled="(messageDialogForm.$dirty && messageDialogForm.$invalid) || messageDialogForm.$pristine">
+        {{labelYes ? labelYes : "DIALOGS_OK" | translate}}
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">{{labelNo ? labelNo : "DIALOGS_CLOSE" | translate}}</button>
+</div>

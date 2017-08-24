@@ -34,7 +34,8 @@
                         angularResource: DeclarationDataResource,
                         requestParameters: function () {
                             return {
-                                projection: 'declarations'
+                                projection: 'declarations',
+                                isReport: false
                             };
                         },
                         value: [],

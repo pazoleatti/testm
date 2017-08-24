@@ -55,6 +55,27 @@ public class DeclarationDataJournalItem implements Serializable {
      */
     private String creationUserName;
 
+    /**
+     * КПП
+     */
+    private String kpp;
+    /**
+     * ОКТМО
+     */
+    private String oktmo;
+    /**
+     * Налоговый орган
+     */
+    private String taxOrganCode;
+    /**
+     * Статус документа
+     */
+    private String docState;
+    /**
+     * Примечание
+     */
+    private String note;
+
     public Long getDeclarationDataId() {
         return declarationDataId;
     }
@@ -133,5 +154,45 @@ public class DeclarationDataJournalItem implements Serializable {
 
     public void setCreationUserName(String creationUserName) {
         this.creationUserName = creationUserName;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
+    }
+
+    public String getOktmo() {
+        return oktmo;
+    }
+
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getDocState() {
+        return docState;
+    }
+
+    public void setDocState(String docState) {
+        this.docState = docState;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

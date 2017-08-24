@@ -19,11 +19,16 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDecl
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.GetDeclarationFilterDataHandler;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.AcceptDeclarationListResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CheckDeclarationListResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.DeleteDeclarationListResult;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +49,9 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
  */
 @RestController
 public class DeclarationDataController {
+
+    private static final Log LOG = LogFactory.getLog(DeclarationDataController.class);
+
     /**
      * Привязка данных из параметров запроса
      *
@@ -69,12 +77,14 @@ public class DeclarationDataController {
     private LogEntryService logEntryService;
     private LockDataService lockDataService;
     private SourceService sourceService;
+    private NotificationService notificationService;
+    private PeriodService periodService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
                                      TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
                                      LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService,
-                                     DeclarationDataSearchService declarationDataSearchService) {
+                                     DeclarationDataSearchService declarationDataSearchService, NotificationService notificationService, PeriodService periodService) {
         this.declarationDataSearchService = declarationDataSearchService;
         this.declarationService = declarationService;
         this.securityService = securityService;
@@ -90,6 +100,8 @@ public class DeclarationDataController {
         this.logEntryService = logEntryService;
         this.lockDataService = lockDataService;
         this.sourceService = sourceService;
+        this.notificationService = notificationService;
+        this.periodService = periodService;
     }
 
     /**
@@ -559,10 +571,10 @@ public class DeclarationDataController {
      * Получение списка налоговых форм
      *
      * @param pagingParams параметры для пагинации
-     * @return список налоговых форм {@link DeclarationDataSearchResultItem}
+     * @return список налоговых форм {@link DeclarationDataJournalItem}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
-    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam PagingParams pagingParams, @RequestParam boolean isReport) {
 
         //TODO: переместить реализацию в сервис
         TAUser currentUser = securityService.currentUserInfo().getUser();
@@ -571,7 +583,8 @@ public class DeclarationDataController {
         receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(currentUser, TaxType.NDFL, null, null));
 
         List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
-        for (DeclarationFormKind declarationFormKind : GetDeclarationFilterDataHandler.getAvailableDeclarationFormKind(TaxType.NDFL, false, currentUser)) {
+
+        for (DeclarationFormKind declarationFormKind : GetDeclarationFilterDataHandler.getAvailableDeclarationFormKind(TaxType.NDFL, isReport, currentUser)) {
             availableDeclarationFormKindIds.add(declarationFormKind.getId());
         }
 
@@ -588,12 +601,316 @@ public class DeclarationDataController {
             dataFilter.setControlNs(false);
         }
 
-        PagingResult<DeclarationDataJournalItem>   pagingResult =  declarationDataSearchService.findDeclarationDataJournalItems(dataFilter,pagingParams);
+        PagingResult<DeclarationDataJournalItem> pagingResult = declarationDataSearchService.findDeclarationDataJournalItems(dataFilter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,
                 pagingResult.getTotalCount(),
                 pagingParams
         );
+    }
+
+    /**
+     * Проверить список деклараций
+     *
+     * @param declarationDataIds идентификаторы деклараций
+     * @return модель {@link CheckDeclarationListResult}, в которой содержаться данные о результате проверки декларации
+     */
+    @PostMapping(value = "/actions/declarationData/checkDeclarationDataList")
+    public CheckDeclarationListResult checkDeclarationDataList(@RequestParam final long[] declarationDataIds) {
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
+        final CheckDeclarationListResult result = new CheckDeclarationListResult();
+
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        final TaxType taxType = TaxType.NDFL;
+        final String taskName = declarationService.getTaskName(ddReportType, taxType);
+        Logger logger = new Logger();
+        for (Long id : declarationDataIds) {
+            if (declarationService.existDeclarationData(id)) {
+                final Long declarationId = id;
+                final String prefix = String.format("Постановка операции \"%s\" для формы № %d в очередь на исполнение: ", taskName, declarationId);
+                try {
+                    LockData lockDataAccept = lockDataService.getLock(declarationService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.ACCEPT_DEC));
+                    if (lockDataAccept == null) {
+                        String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
+                        if (uuidXml != null) {
+                            String keyTask = declarationService.generateAsyncTaskKey(declarationId, ddReportType);
+                            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, false, logger);
+                            if (restartStatus != null && restartStatus.getFirst()) {
+                                logger.warn(prefix + "Данная операция уже запущена");
+                            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                                // задача уже была создана, добавляем пользователя в получатели
+                            } else {
+                                Map<String, Object> params = new HashMap<String, Object>();
+                                params.put("declarationDataId", declarationId);
+                                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+                                    @Override
+                                    public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                                declarationService.getDeclarationFullName(declarationId, ddReportType),
+                                                LockData.State.IN_QUEUE.getText());
+                                    }
+
+                                    @Override
+                                    public void executePostCheck() {
+                                    }
+
+                                    @Override
+                                    public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                                    }
+
+                                    @Override
+                                    public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                                        return declarationService.getTaskName(ddReportType, taxType);
+                                    }
+                                });
+                            }
+                        } else {
+                            logger.error(prefix + "Экземпляр налоговой формы не заполнен данными.");
+                        }
+                    } else {
+                        try {
+                            lockDataService.addUserWaitingForLock(lockDataAccept.getKey(), userInfo.getUser().getId());
+                        } catch (Exception e) {
+                        }
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                        logger.error(
+                                String.format(
+                                        LockData.LOCK_CURRENT,
+                                        sdf.format(lockDataAccept.getDateLock()),
+                                        taUserService.getUser(lockDataAccept.getUserId()).getName(),
+                                        declarationService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, taxType))
+                        );
+                        logger.error(prefix + "Запущена операция, при которой выполнение данной операции невозможно");
+                    }
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                    logger.error(prefix + e.getMessage());
+                }
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
+            }
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    /**
+     * Удаление списка деклараций
+     *
+     * @param declarationDataIds идентификаторы деклараций
+     * @return модель {@link DeleteDeclarationListResult}, в которой содержаться данные о результате удаления деклараций
+     */
+    @PostMapping(value = "/actions/declarationData/deleteDeclarationDataList")
+    public DeleteDeclarationListResult deleteDeclarationDataList(@RequestParam long[] declarationDataIds) {
+        DeleteDeclarationListResult result = new DeleteDeclarationListResult();
+        TAUserInfo taUserInfo = securityService.currentUserInfo();
+        Logger logger = new Logger();
+        for (Long declarationId : declarationDataIds) {
+            if (declarationService.existDeclarationData(declarationId)) {
+                try {
+                    Date startDate = new Date();
+                    String declarationFullName = declarationService.getDeclarationFullName(declarationId, null);
+                    declarationService.delete(declarationId, taUserInfo);
+                    Date endDate = new Date();
+                    Long divTime = endDate.getTime() - startDate.getTime();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                    String msg = String.format("Длительность выполнения операции: %d мс (%s - %s)", divTime, sdf.format(startDate), sdf.format(endDate));
+                    logger.info("Успешно удалён объект: %s, № %d.", declarationFullName, declarationId);
+                    logger.info(msg);
+                    sendNotifications("Успешно удалён объект: " + declarationFullName + ", № " + declarationId, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                    logger.clear();
+                } catch (Exception e) {
+                    logger.error("При удалении объекта: %s возникли ошибки:", declarationService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));
+                    if (e instanceof ServiceLoggerException) {
+                        logger.getEntries().addAll(logEntryService.getAll(((ServiceLoggerException) e).getUuid()));
+                    } else {
+                        logger.error(e);
+                    }
+                }
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationId);
+            }
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    /**
+     * Принятие списка деклараций
+     *
+     * @param declarationDataIds идентификаторы деклараций
+     * @return модель {@link AcceptDeclarationListResult}, в которой содержаться данные о результате принятия деклараций
+     */
+    @PostMapping(value = "/actions/declarationData/acceptDeclarationDataList")
+    public AcceptDeclarationListResult acceptDeclarationDataList(@RequestParam long[] declarationDataIds) {
+        final DeclarationDataReportType ddToAcceptedReportType = DeclarationDataReportType.ACCEPT_DEC;
+        AcceptDeclarationListResult result = new AcceptDeclarationListResult();
+
+        final Logger logger = new Logger();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        final TaxType taxType = TaxType.NDFL;
+
+        final String acceptTaskName = declarationService.getTaskName(ddToAcceptedReportType, taxType);
+        for (Long id : declarationDataIds) {
+            if (declarationService.existDeclarationData(id)) {
+                final Long declarationId = id;
+                final String prefix = String.format("Постановка операции \"%s\" для формы № %d в очередь на исполнение: ", acceptTaskName, declarationId);
+                try {
+                    String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
+                    if (uuidXml != null) {
+                        DeclarationData declarationData = declarationService.get(declarationId, userInfo);
+                        if (!declarationData.getState().equals(State.ACCEPTED)) {
+                            String keyTask = declarationService.generateAsyncTaskKey(declarationId, ddToAcceptedReportType);
+                            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddToAcceptedReportType, taxType), userInfo, false, logger);
+                            if (restartStatus != null && restartStatus.getFirst()) {
+                                logger.warn(prefix + "Данная операция уже запущена");
+                            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                                // задача уже была создана, добавляем пользователя в получатели
+                            } else {
+                                Map<String, Object> params = new HashMap<String, Object>();
+                                params.put("declarationDataId", declarationId);
+                                asyncTaskManagerService.createTask(keyTask, ddToAcceptedReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+                                    @Override
+                                    public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                                declarationService.getDeclarationFullName(declarationId, ddToAcceptedReportType),
+                                                LockData.State.IN_QUEUE.getText());
+                                    }
+
+                                    @Override
+                                    public void executePostCheck() {
+                                        logger.error(prefix + "Найдена запущенная задача, которая блокирует выполнение операции.");
+                                    }
+
+                                    @Override
+                                    public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                                        return declarationService.checkExistTask(declarationId, reportType, logger);
+                                    }
+
+                                    @Override
+                                    public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                                        declarationService.interruptTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
+                                    }
+
+                                    @Override
+                                    public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                                        return declarationService.getTaskName(ddToAcceptedReportType, taxType);
+                                    }
+                                });
+                            }
+                        } else {
+                            logger.error(prefix + "Налоговая форма уже находиться в статусе \"%s\".", State.ACCEPTED.getTitle());
+                        }
+                    } else {
+                        logger.error(prefix + "Экземпляр налоговой формы не заполнен данными.");
+                    }
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                    logger.error(prefix + e.getMessage());
+                }
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
+            }
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    /**
+     * Вернуть в статус "Создана" список делкараций
+     *
+     * @param declarationDataIds идентификаторы декларациий
+     * @return модель {@link AcceptDeclarationListResult}, в которой содержаться данные о результате возврате деклараций в статус "Создана"
+     */
+    @PostMapping(value = "/actions/declarationData/returnToCreatedDeclarationDataList")
+    public AcceptDeclarationListResult returnToCreatedDeclarationDataList(@RequestParam long[] declarationDataIds, @RequestParam String reasonForReturn) {
+        AcceptDeclarationListResult result = new AcceptDeclarationListResult();
+
+        final Logger logger = new Logger();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        for (Long id : declarationDataIds) {
+            if (declarationService.existDeclarationData(id)) {
+                String declarationFullName = declarationService.getDeclarationFullName(id, DeclarationDataReportType.TO_CREATE_DEC);
+
+                // Блокировка формы
+                LockData lockData = lockDataService.lock(declarationService.generateAsyncTaskKey(id, DeclarationDataReportType.TO_CREATE_DEC),
+                        userInfo.getUser().getId(), declarationFullName);
+
+                if (lockData != null) {
+                    DeclarationData declaration = declarationService.get(id, userInfo);
+                    Department department = departmentService.getDepartment(declaration.getDepartmentId());
+                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+                    logger.error("Форма \"%s\" из \"%s\" заблокирована", declarationTemplate.getType().getName(), department.getName());
+                    continue;
+                }
+                logger.info("Операция \"Возврат в Создана\" для налоговой формы № %d поставлена в очередь на исполнение", id);
+                String message = "";
+                try {
+                    List<Long> receiversIdList = declarationService.getReceiversAcceptedPrepared(id, logger, userInfo);
+                    if (!receiversIdList.isEmpty()) {
+                        StringBuilder sb = new StringBuilder("Отмена принятия текущей формы невозможна. Формы-приёмники ");
+                        for (Long receiver : receiversIdList) {
+                            sb.append(receiver)
+                                    .append(", ");
+                        }
+                        sb.delete(sb.length() - 2, sb.length());
+                        sb.append(" имеют состояние, отличное от \"Создана\". Выполните \"Возврат в Создана\" для перечисленных форм и повторите операцию.");
+                        message = sb.toString();
+                        logger.error(message);
+                        sendNotifications(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                        logger.clear();
+                        continue;
+                    }
+                    declarationService.cancel(logger, id, reasonForReturn, securityService.currentUserInfo());
+                    message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", id, State.CREATED.getTitle()).toString();
+                    logger.info(message);
+                    sendNotifications("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                    logger.clear();
+                } catch (Exception e) {
+                    logger.error(e);
+                } finally {
+                    lockDataService.unlock(declarationService.generateAsyncTaskKey(id, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
+                }
+            } else {
+                logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, id);
+            }
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    /**
+     * Получение открытых периодов
+     *
+     * @return Список объектов {@link ReportPeriod}
+     */
+    @PostMapping(value = "/actions/declarationData/getReportPeriods")
+    public List<ReportPeriod> getReportPeriods() {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
+        reportPeriods.addAll(periodService.getOpenForUser(userInfo.getUser(), TaxType.NDFL));
+        return reportPeriods;
+    }
+
+    private void sendNotifications(String msg, String uuid, Integer userId, NotificationType notificationType, String reportId) {
+        if (msg != null && !msg.isEmpty()) {
+            List<Notification> notifications = new ArrayList<Notification>();
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setCreateDate(new LocalDateTime());
+            notification.setText(msg);
+            notification.setLogId(uuid);
+            notification.setReportId(reportId);
+            notification.setNotificationType(notificationType);
+            notifications.add(notification);
+            notificationService.saveList(notifications);
+        }
     }
 }

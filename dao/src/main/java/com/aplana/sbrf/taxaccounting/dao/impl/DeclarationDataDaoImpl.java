@@ -40,6 +40,7 @@ import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
 import static com.aplana.sbrf.taxaccounting.model.QDepartmentReportPeriod.departmentReportPeriod;
 import static com.aplana.sbrf.taxaccounting.model.QLogBusiness.logBusiness;
 import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
+import static com.aplana.sbrf.taxaccounting.model.QRefBookDocState.refBookDocState;
 import static com.aplana.sbrf.taxaccounting.model.QReportPeriod.reportPeriod;
 import static com.aplana.sbrf.taxaccounting.model.QSecUser.secUser;
 import static com.aplana.sbrf.taxaccounting.model.QState.state;
@@ -75,7 +76,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             state.name.as("state"),
             declarationData.fileName,
             logBusiness.logDate.as("creationDate"),
-            secUser.name.as("creationUserName"));
+            secUser.name.as("creationUserName"),
+            declarationData.kpp.as("kpp"),
+            declarationData.oktmo.as("oktmo"),
+            declarationData.taxOrganCode.as("taxOrganCode"),
+            refBookDocState.name.as("docState"),
+            declarationData.note.as("note"));
 
     public DeclarationDataDaoImpl(SQLQueryFactory sqlQueryFactory) {
         this.sqlQueryFactory = sqlQueryFactory;
@@ -295,7 +301,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 state.name.as("state"),
                 declarationData.fileName,
                 logBusiness.logDate.as("creationDate"),
-                secUser.name.as("creationUserName"))
+                secUser.name.as("creationUserName"),
+                declarationData.kpp.as("kpp"),
+                declarationData.oktmo.as("oktmo"),
+                declarationData.taxOrganCode.as("taxOrganCode"),
+                refBookDocState.name.as("docState"),
+                declarationData.note.as("note"))
                 .from(declarationData)
                 .leftJoin(declarationData.declarationDataFkAsnuId, refBookAsnu)
                 .leftJoin(declarationData._logBusinessFkDeclarationId, logBusiness).on(logBusiness.eventId.eq((short) 1))
@@ -307,6 +318,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .innerJoin(declarationData.declarationDataStateFk, state)
                 .innerJoin(departmentReportPeriod.depRepPerFkDepartmentId, department)
                 .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
+                .leftJoin(declarationData.declDataDocStateFk, refBookDocState)
                 .orderBy(ordering)
                 .where(where)
                 .offset(params.getStartIndex())

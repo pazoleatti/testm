@@ -30,9 +30,9 @@
          */
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', 'appModals', '$rootScope',
-            'RefBookValuesResource', 'APP_CONSTANTS',
+            'RefBookValuesResource', 'APP_CONSTANTS', '$state',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appModals, $rootScope,
-                      RefBookValuesResource, APP_CONSTANTS) {
+                      RefBookValuesResource, APP_CONSTANTS, $state) {
 
                 /**
                  * @description Инициализация первичных данных на странице
@@ -196,7 +196,7 @@
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).then(function () {
-                                $window.location.assign('/index.html#/taxes/ndflJournal');
+                                $state.go("ndflJournal", {});
                             });
                         });
                 };
