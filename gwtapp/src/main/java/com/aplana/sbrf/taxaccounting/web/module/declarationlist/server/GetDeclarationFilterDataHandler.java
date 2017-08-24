@@ -73,6 +73,8 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
             } else {
                 res.setAsnuIds(currentUser.getUser().getAsnuIds());
             }
+        } else {
+            res.setAsnuIds(currentUser.getUser().getAsnuIds());
         }
 
         List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
