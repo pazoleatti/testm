@@ -40,8 +40,6 @@ public class DeclarationDataFilter implements Serializable {
 
 	private String oktmo;
 
-    private Long asnuId;
-
     private List<Long> docStateIds;
 
     private List<Long> formKindIds;
@@ -184,14 +182,6 @@ public class DeclarationDataFilter implements Serializable {
      */
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
-    }
-
-    public Long getAsnuId() {
-        return asnuId;
-    }
-
-    public void setAsnuId(Long asnuId) {
-        this.asnuId = asnuId;
     }
 
     public List<Long> getFormKindIds() {
