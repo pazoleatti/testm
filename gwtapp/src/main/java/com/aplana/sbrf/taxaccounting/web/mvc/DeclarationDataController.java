@@ -21,7 +21,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.Recalcula
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.GetDeclarationFilterDataHandler;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.MediaType;

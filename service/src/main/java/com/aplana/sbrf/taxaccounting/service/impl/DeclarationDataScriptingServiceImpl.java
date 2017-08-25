@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -12,12 +11,12 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import groovy.lang.Binding;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,6 @@ import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Реализация сервиса для запуска скриптов по декларациями
@@ -43,8 +41,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    @Qualifier("versionInfoProperties")
-    private Properties versionInfoProperties;
+    private ApplicationInfo applicationInfo;
     @Autowired
     private TransactionHelper tx;
 
@@ -87,7 +84,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
         LOG.debug("Starting processing request to run create script");
         String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
 		String scriptFilePath = null;
-		if (versionInfoProperties != null && versionInfoProperties.getProperty("productionMode").equals("false")) {
+		if (!applicationInfo.isProductionMode()) {
 			scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger);
 			if (scriptFilePath != null) {
 				script = getScript(scriptFilePath);
@@ -137,9 +134,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		b.put("declarationData", declarationData);
 
 		String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
-        if (versionInfoProperties != null) {
-            applicationVersion += " " + versionInfoProperties.getProperty("version");
-        }
+		applicationVersion += " " + applicationInfo.getVersion();
         b.put("applicationVersion", applicationVersion);
 
 		if (exchangeParams != null) {
@@ -150,7 +145,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			}
 		}
 
-		if (scriptFilePath == null || versionInfoProperties == null || versionInfoProperties.getProperty("productionMode").equals("true")) {
+		if (scriptFilePath == null || applicationInfo.isProductionMode()) {
 			executeScript(b, declarationTemplate.getCreateScript(), logger);
 		} else {
 			executeLocalScript(toBinding(b), scriptFilePath, logger);
