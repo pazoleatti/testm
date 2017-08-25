@@ -36,7 +36,7 @@ public abstract class CreateReportsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected ReportType getReportType() {
-        return ReportType.CREATE_FORMS_DEC;
+        return ReportType.CREATE_REPORTS_DEC;
     }
 
     @Override
@@ -72,7 +72,7 @@ public abstract class CreateReportsAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Формирование отчетности";
+        return "Выгрузка отчетности";
     }
 
     @Override
