@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import groovy.lang.Binding;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -61,8 +62,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Autowired
     private TemplateChangesService templateChangesService;
     @Autowired
-    @Qualifier("versionInfoProperties")
-    private Properties versionInfoProperties;
+    private ApplicationInfo applicationInfo;
     @Autowired
     private TransactionHelper tx;
     @Autowired
@@ -90,7 +90,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
         String script = writer.toString();
         String scriptFilePath = null;
-        if (versionInfoProperties != null && versionInfoProperties.getProperty("productionMode").equals("false")) {
+        if (!applicationInfo.isProductionMode()) {
             scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger);
             if (scriptFilePath != null) {
                 script = getScript(scriptFilePath);
@@ -163,9 +163,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("refBookFactory", refBookFactory);
 
         String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
-        if (versionInfoProperties != null) {
-            applicationVersion += " " + versionInfoProperties.getProperty("version");
-        }
+        applicationVersion += " " + applicationInfo.getVersion();
         bindings.put("applicationVersion", applicationVersion);
 
         if (userInfo != null && userInfo.getUser() != null) {
@@ -182,7 +180,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
 
         // Выполнение импорта скрипта справочника
-        if (scriptFilePath == null || versionInfoProperties == null || versionInfoProperties.getProperty("productionMode").equals("true")) {
+        if (scriptFilePath == null || applicationInfo.isProductionMode()) {
             executeScript(bindings, script, scriptLogger);
         } else {
             executeLocalScript(toBinding(bindings), scriptFilePath, logger);

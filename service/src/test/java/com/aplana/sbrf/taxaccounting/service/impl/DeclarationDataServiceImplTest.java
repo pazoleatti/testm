@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
@@ -374,6 +375,12 @@ public class DeclarationDataServiceImplTest {
         when(declarationTemplateDao.getDeclarationTemplateScript(declarationTemplate.getId())).thenReturn(declarationTemplate.getCreateScript());
 
         ReflectionTestUtils.setField(scriptingService, "declarationTemplateDao", declarationTemplateDao);
+        Properties versionInfoProperties = new Properties();
+        versionInfoProperties.put("productionMode", "true");
+        versionInfoProperties.put("version", "test");
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        ReflectionTestUtils.setField(scriptingService, "applicationInfo", applicationInfo);
+        ReflectionTestUtils.setField(applicationInfo, "versionInfoProperties", versionInfoProperties);
 
         ApplicationContext ctx = mock(ApplicationContext.class);
         when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());

@@ -81,10 +81,10 @@ public class AsyncTaskThreadContainer {
                                 Thread.currentThread().setName("AsyncTask-" + taskData.getId());
                                 try {
                                     task.execute(taskData.getParams());
-                                    asyncTaskDao.finishTask(taskData.getId());
                                 } catch (Exception e) {
                                     LOG.error("Unexpected error during async task execution", e);
-                                    asyncTaskDao.finishTask(taskData.getId());
+                                } finally {
+                                    asyncTaskDao.finishTask(taskData);
                                 }
                             }
                         });
@@ -92,9 +92,7 @@ public class AsyncTaskThreadContainer {
                     Thread.sleep(500);
                 } catch (Exception e) {
                     LOG.info("Unexpected error during startup async task execution", e);
-                    if (taskData != null) {
-                        asyncTaskDao.finishTask(taskData.getId());
-                    }
+                    asyncTaskDao.finishTask(taskData);
                 }
             }
         }

@@ -26,14 +26,12 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Класс, реализующий логику определения доступности пунктов меню навигации
@@ -55,10 +53,6 @@ public class GetMainMenuActionHandler extends
 
 	@Autowired
 	private SecurityService securityService;
-
-    @Autowired
-    @Qualifier("versionInfoProperties")
-    private Properties versionInfoProperties;
 
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,

@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -103,7 +104,9 @@ public class DeclarationDataScriptingServiceImplTest {
 		Properties versionInfoProperties = new Properties();
 		versionInfoProperties.put("productionMode", "true");
 		versionInfoProperties.put("version", "test");
-		ReflectionTestUtils.setField(service, "versionInfoProperties", versionInfoProperties);
+		ApplicationInfo applicationInfo = new ApplicationInfo();
+		ReflectionTestUtils.setField(service, "applicationInfo", applicationInfo);
+		ReflectionTestUtils.setField(applicationInfo, "versionInfoProperties", versionInfoProperties);
 	}
 
 	@Test

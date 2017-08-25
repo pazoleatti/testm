@@ -1,14 +1,17 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,7 +21,6 @@ import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -28,6 +30,8 @@ import java.util.Map;
  */
 @Repository
 public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
+
+    private static final Log LOG = LogFactory.getLog(AsyncTaskDaoImpl.class);
 
     private static final class AsyncTaskTypeMapper implements RowMapper<AsyncTaskTypeData> {
 
@@ -77,11 +81,10 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
 
     @Override
     public int lockTask(String node, int timeout, BalancingVariants balancingVariants, int maxTasksPerNode) {
-        int rowsAffected = getJdbcTemplate().update("update async_task set node = ?, start_process_date = current_timestamp where (select count(*) from async_task where node = ?) < ? and id = (select id from (" +
+        return getJdbcTemplate().update("update async_task set node = ?, start_process_date = current_timestamp where (select count(*) from async_task where node = ?) < ? and id = (select id from (" +
                         "select * from async_task where balancing_variant = ? and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) order by create_date" +
                         ") where rownum = 1)",
                 node, node, maxTasksPerNode, balancingVariants.getId());
-        return rowsAffected;
     }
 
     @Override
@@ -123,8 +126,12 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public void finishTask(Long taskId) {
-        getJdbcTemplate().update("delete from async_task where id = ?", taskId);
+    public void finishTask(AsyncTaskData taskData) {
+        if (taskData != null) {
+            LOG.info("Finishing task: " + taskData);
+            getJdbcTemplate().update("delete from async_task where id = ?", taskData.getId());
+            getJdbcTemplate().update("delete from lock_data where key = ?", taskData.getParams().get(AsyncTask.RequiredParams.LOCKED_OBJECT));
+        }
     }
 
     @Override

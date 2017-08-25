@@ -46,10 +46,10 @@ public interface AsyncTaskDao {
     AsyncTaskData getLockedTask(String node, BalancingVariants balancingVariants);
 
     /**
-     * Удаляет задачу с указанным id
-     * @param taskId id задачи
+     * Удаляет задачу и связанную с ней блокировку
+     * @param taskData данные задачи
      */
-    void finishTask(Long taskId);
+    void finishTask(AsyncTaskData taskData);
 
     /**
      * Освобождает задачу от резервирования узлом
