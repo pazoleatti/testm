@@ -8,5 +8,12 @@ prompt ref_book_attributes
 prompt synonym department
 @@synonym_department.sql;
 
+-- synonym user role 
+prompt synonym user role
+@@synonym_user_role.sql;
+
+prompt ref_book_income_kind
+@@ref_book_income_kind.sql;
+
 commit;
 exit;
