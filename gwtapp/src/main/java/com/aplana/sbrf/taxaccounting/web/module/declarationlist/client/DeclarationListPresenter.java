@@ -53,6 +53,10 @@ public class DeclarationListPresenter extends
      */
     private Map<String, DeclarationDataFilter> filterStates = new HashMap<String, DeclarationDataFilter>();
     private List<Long> selectedItemIds;
+    /**
+     * Выбранная в таблице запись
+     */
+    private Long selectedItemDeclarationDataId;
     private TaxType taxType;
     private Boolean isReports;
     private boolean ready = false;
@@ -154,6 +158,7 @@ public class DeclarationListPresenter extends
             if (taxTypeOld == null || !taxType.equals(taxTypeOld) || isReportsOld == null || !isReportsOld.equals(isReports)) {
                 getView().updateTitle(taxType);
                 selectedItemIds = null;
+                selectedItemDeclarationDataId = null;
             }
             //String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
             filterPresenter.setDeclarationListPresenter(this);
@@ -206,7 +211,7 @@ public class DeclarationListPresenter extends
             return;
         }
         DeclarationDataFilter filter = filterPresenter.getFilterData();
-        filter.setDeclarationDataId((selectedItemIds != null && !selectedItemIds.isEmpty()) ? selectedItemIds.get(0) : null);
+        filter.setDeclarationDataId(selectedItemDeclarationDataId);
         filter.setCountOfRecords(length);
         filter.setStartIndex(start);
         filter.setAscSorting(getView().isAscSorting());
@@ -237,6 +242,7 @@ public class DeclarationListPresenter extends
                                     result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
                                     selectedItemIds);
                             selectedItemIds = null;
+                            selectedItemDeclarationDataId = null;
                         }
                     }
                 }, DeclarationListPresenter.this));
@@ -297,6 +303,7 @@ public class DeclarationListPresenter extends
     protected void onHide() {
         super.onHide();
         selectedItemIds = getView().getSelectedIds();
+        selectedItemDeclarationDataId = getView().getSelectedItemDeclarationDataId();
         eventBus.fireEvent(new FocusActionEvent(true));
     }
 

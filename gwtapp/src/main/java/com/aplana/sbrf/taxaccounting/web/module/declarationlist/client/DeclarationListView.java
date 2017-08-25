@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.TableWithCheckedColumn;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -20,6 +21,7 @@ import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.view.client.*;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -31,10 +33,6 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -118,6 +116,8 @@ public class DeclarationListView extends
     @UiField
     ResizeLayoutPanel tableWrapper;
 
+    private Long selectedItemDeclarationDataId = null;
+
     //private ListDataProvider<DeclarationDataSearchResultItem> model;
     private Column<DeclarationDataSearchResultItem, Boolean> checkColumn;
     private Header<Boolean> checkBoxHeader;
@@ -162,6 +162,17 @@ public class DeclarationListView extends
         declarationTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(declarationTable));
 
         declarationTable.getColumnSortList().setLimit(1);       // сортировка только по одной колонке
+
+        declarationTable.addCellPreviewHandler(new CellPreviewEvent.Handler<DeclarationDataSearchResultItem>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<DeclarationDataSearchResultItem> event) {
+                if (event.getValue() != null) {
+                    selectedItemDeclarationDataId = event.getValue().getDeclarationDataId();
+                } else {
+                    selectedItemDeclarationDataId = null;
+                }
+            }
+        });
     }
 
     /**
@@ -762,5 +773,10 @@ public class DeclarationListView extends
     @Override
     public void showDelete(boolean show) {
         deleteButton.setVisible(show);
+    }
+
+    @Override
+    public Long getSelectedItemDeclarationDataId() {
+        return selectedItemDeclarationDataId;
     }
 }
