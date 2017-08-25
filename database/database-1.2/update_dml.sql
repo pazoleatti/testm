@@ -12,5 +12,8 @@ prompt synonym department
 prompt synonym user role
 @@synonym_user_role.sql;
 
+prompt ref_book_income_kind
+@@ref_book_income_kind.sql;
+
 commit;
 exit;
