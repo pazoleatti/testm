@@ -15,5 +15,8 @@ prompt synonym user role
 prompt ref_book_income_kind
 @@ref_book_income_kind.sql;
 
+prompt async_task
+@@async_task.sql;
+
 commit;
 exit;
