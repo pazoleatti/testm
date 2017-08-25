@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,19 +27,16 @@ import java.util.Map;
  * При добавлении асинхронной задачи, сохраняет ее параметры в БД в сериализованном виде, а выполнением задач занимается специализированный класс {@link AsyncTaskThreadContainer.AsyncTaskLongQueueProcessor} или {@link AsyncTaskThreadContainer.AsyncTaskShortQueueProcessor}
  * @author dloshkarev
  */
-public class AsyncManagerImpl implements AsyncManager, ApplicationContextAware {
+@Component
+public class AsyncManagerImpl implements AsyncManager {
     private static final Log LOG = LogFactory.getLog(AsyncManagerImpl.class);
 
     @Autowired
-    private AsyncTaskDao asyncTaskDao;
-
     private ApplicationContext applicationContext;
-    private boolean devMode;
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
+    @Autowired
+    private ApplicationInfo applicationInfo;
+    @Autowired
+    private AsyncTaskDao asyncTaskDao;
 
     @Override
     public AsyncTask getAsyncTaskBean(Long taskTypeId) throws AsyncTaskException {
@@ -71,12 +70,12 @@ public class AsyncManagerImpl implements AsyncManager, ApplicationContextAware {
             checkParams(params);
             // Получение и проверка класса обработчика задачи
             AsyncTask task = getAsyncTaskBean(taskTypeId);
-            if (devMode) {
-                //Сразу запускаем класс-обработчик чтобы не сбивать очередь на стендах
-                task.execute(params);
-            } else {
+            if (applicationInfo.isProductionMode()) {
                 // Сохранение в очереди асинхронных задач - запись в БД
                 asyncTaskDao.addTask(taskTypeId, balancingVariant, params);
+            } else {
+                //Сразу запускаем класс-обработчик чтобы не сбивать очередь на стендах
+                task.execute(params);
             }
 
             LOG.info(String.format("Task with key %s was put in queue %s", params.get(AsyncTask.RequiredParams.LOCKED_OBJECT.name()), balancingVariant.name()));
@@ -136,9 +135,5 @@ public class AsyncManagerImpl implements AsyncManager, ApplicationContextAware {
                 throw new AsyncTaskSerializationException("Attribute \"" + param.getKey() + "\" doesn't support serialization!");
             }
         }
-    }
-
-    public void setDevMode(boolean devMode) {
-        this.devMode = devMode;
     }
 }

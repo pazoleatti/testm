@@ -1,25 +1,23 @@
 package com.aplana.sbrf.taxaccounting.web.widget.version.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersionResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 @Service
 public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVersion, GetProjectVersionResult> {
 
     @Autowired
-    @Qualifier("versionInfoProperties")
-    private Properties versionInfoProperties;
+    private ApplicationInfo applicationInfo;
 
 	@Autowired
 	private ServerInfo serverInfo;
@@ -31,17 +29,8 @@ public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVe
 	@Override
 	public GetProjectVersionResult execute(GetProjectVersion action, ExecutionContext executionContext) throws ActionException {
 		
-		String version = "?";
-		String revision = "?";
-		String serverName = serverInfo.getServerName();
-
-        if (versionInfoProperties != null) {
-            version = versionInfoProperties.getProperty("version");
-            revision = versionInfoProperties.getProperty("revision");
-        }
-
 		GetProjectVersionResult result = new GetProjectVersionResult();
-		result.setProjectVersion(String.format("Версия: %s; Ревизия: %s; Сервер: %s", version, revision, serverName));
+		result.setProjectVersion(String.format("Версия: %s; Ревизия: %s; Сервер: %s", applicationInfo.getVersion(), applicationInfo.getRevision(), serverInfo.getServerName()));
         return result;
 
 	}
@@ -55,11 +44,9 @@ public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVe
 
 	public Map<String, String> getProjectVersionProperties(){
 		Map<String, String> result = new HashMap<String, String>();
-		if (versionInfoProperties != null) {
-			result.put("version", versionInfoProperties.getProperty("version"));
-			result.put("revision", versionInfoProperties.getProperty("revision"));
-			result.put("serverName", serverInfo.getServerName());
-		}
+		result.put("version", applicationInfo.getVersion());
+		result.put("revision", applicationInfo.getRevision());
+		result.put("serverName", serverInfo.getServerName());
 		return result;
 	}
 }

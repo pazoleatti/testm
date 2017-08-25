@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +68,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private LockDataService lockDataService;
     @Autowired
     private AsyncTaskThreadContainer asyncTaskThreadContainer;
+    @Autowired
+    private ApplicationInfo applicationInfo;
 
     /**
      * Инициализация планировщика
@@ -257,11 +260,13 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
     public void asyncTasksMonitoring() {
-        LOG.info("ASYNC_TASK_MONITORING started by scheduler");
-        SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
-        if (schedulerTask.isActive()) {
-            configurationService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
-            asyncTaskThreadContainer.processQueues();
+        if (applicationInfo.isProductionMode()) {
+            LOG.info("ASYNC_TASK_MONITORING started by scheduler");
+            SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
+            if (schedulerTask.isActive()) {
+                configurationService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
+                asyncTaskThreadContainer.processQueues();
+            }
         }
     }
 }
