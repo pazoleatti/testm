@@ -12,10 +12,7 @@ import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -46,7 +43,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	}
 	
 	@Override
-	public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType) {
+	public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType, boolean isReport) {
 		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
 		if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER,
                 TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_OPER)) {
@@ -57,7 +54,22 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 			throw new AccessDeniedException("Недостаточно прав для поиска налоговых форм");
 		}
         // Все типы деклараций, соответствующие виду налога
-        result.setDeclarationTypes(declarationTypeDao.listAllByTaxType(taxType));
+        List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
+		for(DeclarationType declarationType: declarationTypeDao.listAllByTaxType(taxType)) {
+            if (isReport && (declarationType.getId() == 102 || declarationType.getId() == 103 || declarationType.getId() == 104)
+                    && userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                declarationTypes.add(declarationType);
+            } else if (!isReport) {
+                if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)
+                        && (declarationType.getId() == 100 || declarationType.getId() == 101)) {
+                    declarationTypes.add(declarationType);
+                } else if (userInfo.getUser().hasRole(taxType, TARole.N_ROLE_OPER)
+                        && (declarationType.getId() == 100)) {
+                    declarationTypes.add(declarationType);
+                }
+            }
+        }
+        result.setDeclarationTypes(declarationTypes);
 
 		result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
 		Collections.sort(result.getDeclarationTypes(), new DeclarationTypeAlphanumericComparator());

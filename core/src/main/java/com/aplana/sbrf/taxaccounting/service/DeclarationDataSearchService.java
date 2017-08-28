@@ -23,10 +23,11 @@ public interface DeclarationDataSearchService {
 	 * Получить информацию о значениях, допустимых в фильтрах по декларациям для пользователя по виду налога
 	 * @param userInfo информация о пользователе
 	 * @param taxType вид налога
+	 * @param isReport
 	 * @return объект, содержащий информацию о допустимых значениях фильтров для поиска по декларациям
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет ролей, необходимых для поиска деклараций
 	 */
-	DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType);
+	DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType, boolean isReport);
 
     /**
      * Получние id для всех деклараций по фильтру.
