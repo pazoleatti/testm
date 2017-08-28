@@ -72,16 +72,18 @@ public class ReaderAndGeneratorXMLFiles {
 
 
             if (countTF != 0 && countTF > doc.getElementsByTagName("ИнфЧасть").getLength()){
-                Node infoPeace = doc.getElementsByTagName("ИнфЧасть").item(0);
-                System.out.println("Количество новых объектов = " + (countTF - doc.getElementsByTagName("ИнфЧасть").getLength()));
-                for (int i = 0; i < countTF - doc.getElementsByTagName("ИнфЧасть").getLength(); i++){
-                    Node nodeForInsert = infoPeace.cloneNode(true);
-                    infoPeace.getParentNode().insertBefore(nodeForInsert, infoPeace);
+                Node infoPiece = doc.getElementsByTagName("ИнфЧасть").item(0);
+                int countNewNode = countTF - doc.getElementsByTagName("ИнфЧасть").getLength();
+                System.out.println("Количество новых объектов = " + countNewNode);
+                for (int i = 0; i < countNewNode; i++){
+                    Node nodeForInsert = infoPiece.cloneNode(true);
+                    infoPiece.getParentNode().insertBefore(nodeForInsert, infoPiece);
                 }
             }
 
             System.out.println("Началось изменение атрибутов " + new Date());
             NodeList nList = doc.getElementsByTagName("ПолучДох");
+            System.out.println("Количество ПолучДох = " + nList.getLength());
 
             Random r = new Random(System.currentTimeMillis());
             String alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
