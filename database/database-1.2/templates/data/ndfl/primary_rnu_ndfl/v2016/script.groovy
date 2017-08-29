@@ -945,34 +945,36 @@ import java.util.regex.Pattern
         return values;
     }
 
-    def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
+    def insertBatchRecords(refBookId, List identityObjectList, refBookMapper) {
 
         //подготовка записей
-        if (identityObjectList != null && !identityObjectList.isEmpty()) {
+        identityObjectList.collate(1000).each { identityObjectSubList ->
+            if (identityObjectSubList != null && !identityObjectSubList.isEmpty()) {
 
-            def refBookName = getProvider(refBookId).refBook.name
-            logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
+                def refBookName = getProvider(refBookId).refBook.name
+                logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectSubList.size()}")
 
-            List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
-            for (IdentityObject identityObject : identityObjectList) {
+                List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
+                for (IdentityObject identityObject : identityObjectSubList) {
 
-                ScriptUtils.checkInterrupted();
+                    ScriptUtils.checkInterrupted();
 
-                def values = refBookMapper(identityObject);
-                recordList.add(createRefBookRecord(values));
-            }
+                    def values = refBookMapper(identityObject);
+                    recordList.add(createRefBookRecord(values));
+                }
 
-            //создание записей справочника
-            List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
+                //создание записей справочника
+                List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
 
-            //установка id
-            for (int i = 0; i < identityObjectList.size(); i++) {
+                //установка id
+                for (int i = 0; i < identityObjectSubList.size(); i++) {
 
-                ScriptUtils.checkInterrupted();
+                    ScriptUtils.checkInterrupted();
 
-                Long id = generatedIds.get(i);
-                IdentityObject identityObject = identityObjectList.get(i);
-                identityObject.setId(id);
+                    Long id = generatedIds.get(i);
+                    IdentityObject identityObject = identityObjectSubList.get(i);
+                    identityObject.setId(id);
+                }
             }
         }
 
@@ -3493,10 +3495,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             ScriptUtils.checkInterrupted();
 
-            boolean applyTemporalySolution = false
-            if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
-                applyTemporalySolution = true
-            }
+            boolean applyTemporalySolution = true
+//            if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+//                applyTemporalySolution = true
+//            }
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
