@@ -41,15 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Универсальный провайдер данных
@@ -620,6 +612,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId) {
         return refBookDao.getUniqueAttributeValues(refBookId, uniqueRecordId);
+    }
+
+    @Override
+    public void updateRecordVersions(Logger logger, Date versionFrom, Date versionTo, Set<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

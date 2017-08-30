@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.FormLink;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -9,10 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Интерфейс провайдеров данных для справочников.
@@ -300,6 +296,15 @@ public interface RefBookDataProvider {
      * @param records        список обновленных значений атрибутов записи справочника
      */
     void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records);
+
+    /**
+     * Массовое обновление данных версии записей справочника
+     * Если был изменен период актуальности, выполняются дополнительные проверки пересечений
+     *  @param versionFrom    дата начала актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
+     * @param versionTo      дата конца актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
+     * @param records        список обновленных значений атрибутов записи справочника
+     */
+    void updateRecordVersions(Logger logger, Date versionFrom, Date versionTo, Set<Map<String, RefBookValue>> records);
 
     /**
      * То же самое что и {@link RefBookDataProvider#updateRecordVersion(com.aplana.sbrf.taxaccounting.model.log.Logger, java.lang.Long, java.util.Date, java.util.Date, java.util.Map<java.lang.String,com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue>)}

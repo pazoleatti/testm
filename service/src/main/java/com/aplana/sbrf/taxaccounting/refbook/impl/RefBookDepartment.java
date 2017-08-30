@@ -330,6 +330,11 @@ public class RefBookDepartment implements RefBookDataProvider {
         return new HashMap<Integer, List<Pair<RefBookAttribute, RefBookValue>>>();
     }
 
+    @Override
+    public void updateRecordVersions(Logger logger, Date versionFrom, Date versionTo, Set<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
     //http://conf.aplana.com/pages/viewpage.action?pageId=11378355
     //После изменения в 0.7 метод для подразеделений делает ТОЛЬКО проверку, без сохранения
     //Сохранение происходит в UnitEditingHandler

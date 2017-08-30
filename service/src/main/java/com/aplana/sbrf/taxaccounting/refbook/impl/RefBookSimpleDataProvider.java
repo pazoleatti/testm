@@ -54,7 +54,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     private RefBook refBook;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Date version, PagingParams pagingParams, String filter,
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
                                                               RefBookAttribute sortAttribute, boolean isSortAscending) {
         return dao.getRecords(getRefBook(), version, pagingParams, filter, sortAttribute, isSortAscending);
     }
@@ -284,6 +284,38 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     @Override
     public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordVersions(@NotNull Logger logger, Date versionFrom, Date versionTo, Set<Map<String, RefBookValue>> records) {
+        checkIfRefBookIsEditable();
+        if (logger.getTaUserInfo() == null) {
+            throw new ServiceException(CURRENT_USER_NOT_SET);
+        }
+        List<String> lockedObjects = new ArrayList<String>();
+        int userId = logger.getTaUserInfo().getUser().getId();
+        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId(), ReportType.EDIT_REF_BOOK);
+        if (isNotLocked(getRefBook(), userId, lockKey)) {
+            try {
+                lockedObjects.add(lockKey);
+                lockReferencedBooks(logger, lockedObjects);
+                try {
+                    for(Map<String, RefBookValue> record: records) {
+                        updateRecordVersionWithoutLock(logger, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), versionFrom, versionTo, record);
+                    }
+                } catch (Exception e) {
+                    ServiceLoggerException exception = new ServiceLoggerException(e.getLocalizedMessage(),
+                            logEntryService.save(logger.getEntries()));
+                    exception.initCause(e);
+                    throw exception;
+                }
+            } finally {
+                unlockObjects(lockedObjects, userId);
+            }
+        } else {
+            throw new ServiceLoggerException(String.format(LOCK_MESSAGE, getRefBook().getName()),
+                    logEntryService.save(logger.getEntries()));
+        }
     }
 
     @Override
