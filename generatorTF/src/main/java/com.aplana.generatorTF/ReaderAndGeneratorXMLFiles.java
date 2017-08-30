@@ -75,8 +75,9 @@ public class ReaderAndGeneratorXMLFiles {
                 Node infoPiece = doc.getElementsByTagName("ИнфЧасть").item(0);
                 int countNewNode = countTF - doc.getElementsByTagName("ИнфЧасть").getLength();
                 System.out.println("Количество новых объектов = " + countNewNode);
+                Node nodeForInsert;
                 for (int i = 0; i < countNewNode; i++){
-                    Node nodeForInsert = infoPiece.cloneNode(true);
+                    nodeForInsert = infoPiece.cloneNode(true);
                     infoPiece.getParentNode().insertBefore(nodeForInsert, infoPiece);
                 }
             }

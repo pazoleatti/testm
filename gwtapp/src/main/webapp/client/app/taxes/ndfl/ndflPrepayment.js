@@ -27,6 +27,12 @@
                     }
                 });
 
+                $scope.$on('tabSelected', function(event, data) {
+                    if (_.isEqual(data, 'prepayment')){
+                        $scope.submitSearch();
+                    }
+                });
+
                 /**
                  * @description Обновление грида
                  * @param page

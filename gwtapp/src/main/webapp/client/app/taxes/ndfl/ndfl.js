@@ -210,5 +210,9 @@
                 };
 
                 initPage();
+
+                $scope.selectTab = function(tab) {
+                    $rootScope.$broadcast('tabSelected', tab);
+                };
             }]);
 }());

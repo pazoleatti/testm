@@ -16,13 +16,17 @@
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
                         $scope.searchFilter.params.inp = data;
-                        $scope.submitSearch();
                     }
                 });
 
                 $scope.$on('OPERATION_ID_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.operationId, data)){
                         $scope.searchFilter.params.operationId = data;
+                    }
+                });
+
+                $scope.$on('tabSelected', function(event, data) {
+                    if (_.isEqual(data, 'incomesAndTax')){
                         $scope.submitSearch();
                     }
                 });
