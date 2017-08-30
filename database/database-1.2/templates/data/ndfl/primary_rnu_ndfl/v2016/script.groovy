@@ -948,32 +948,34 @@ import java.util.regex.Pattern
     def insertBatchRecords(refBookId, List identityObjectList, refBookMapper) {
 
         //подготовка записей
-        identityObjectList.collate(1000).each { identityObjectSubList ->
-            if (identityObjectSubList != null && !identityObjectSubList.isEmpty()) {
+        if (identityObjectList != null && !identityObjectList.isEmpty()) {
+            def refBookName = getProvider(refBookId).refBook.name
+            logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
 
-                def refBookName = getProvider(refBookId).refBook.name
-                logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectSubList.size()}")
+            identityObjectList.collate(1000).each { identityObjectSubList ->
+                if (identityObjectSubList != null && !identityObjectSubList.isEmpty()) {
 
-                List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
-                for (IdentityObject identityObject : identityObjectSubList) {
+                    List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
+                    for (IdentityObject identityObject : identityObjectSubList) {
 
-                    ScriptUtils.checkInterrupted();
+                        ScriptUtils.checkInterrupted();
 
-                    def values = refBookMapper(identityObject);
-                    recordList.add(createRefBookRecord(values));
-                }
+                        def values = refBookMapper(identityObject);
+                        recordList.add(createRefBookRecord(values));
+                    }
 
-                //создание записей справочника
-                List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
+                    //создание записей справочника
+                    List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
 
-                //установка id
-                for (int i = 0; i < identityObjectSubList.size(); i++) {
+                    //установка id
+                    for (int i = 0; i < identityObjectSubList.size(); i++) {
 
-                    ScriptUtils.checkInterrupted();
+                        ScriptUtils.checkInterrupted();
 
-                    Long id = generatedIds.get(i);
-                    IdentityObject identityObject = identityObjectSubList.get(i);
-                    identityObject.setId(id);
+                        Long id = generatedIds.get(i);
+                        IdentityObject identityObject = identityObjectSubList.get(i);
+                        identityObject.setId(id);
+                    }
                 }
             }
         }
