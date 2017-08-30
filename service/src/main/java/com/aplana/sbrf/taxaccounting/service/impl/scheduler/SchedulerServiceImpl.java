@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Executor;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
 import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
@@ -15,9 +16,11 @@ import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -44,7 +47,7 @@ import java.util.concurrent.Executors;
  */
 @Component
 @EnableScheduling
-public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerService {
+public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerService, DisposableBean {
     private static final Log LOG = LogFactory.getLog(SchedulerServiceImpl.class);
 
     private static final long DAY_TIME = 24 * 60 * 60 * 1000;
@@ -63,6 +66,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private BlobDataService blobDataService;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private AsyncTaskThreadContainer asyncTaskThreadContainer;
+    @Autowired
+    private ApplicationInfo applicationInfo;
 
     /**
      * Инициализация планировщика
@@ -93,7 +100,21 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
                 }
             }
         });
+    }
 
+    @Override
+    public void destroy() throws Exception {
+        shutdownAllTasks();
+    }
+
+    @Override
+    public void shutdownAllTasks() {
+        for (String settingCode : tasks.keySet()) {
+            LOG.debug("Shutdown task with code: " + settingCode);
+            tasks.get(settingCode).cancel();
+            crons.remove(settingCode);
+            cronTasks.remove(settingCode);
+        }
     }
 
     /**
@@ -231,6 +252,21 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
             Long seconds = Long.parseLong(secCountParam);
             lockDataService.unlockIfOlderThan(seconds);
             LOG.info("LOCK_DATA cleaning finished");
+        }
+    }
+
+    /**
+     * Задача для удаления блокировок, которые старше заданого времени
+     */
+    @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
+    public void asyncTasksMonitoring() {
+        if (applicationInfo.isProductionMode()) {
+            LOG.info("ASYNC_TASK_MONITORING started by scheduler");
+            SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
+            if (schedulerTask.isActive()) {
+                configurationService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
+                asyncTaskThreadContainer.processQueues();
+            }
         }
     }
 }

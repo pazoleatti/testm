@@ -15,7 +15,8 @@
             'app.logBusines',
             'app.logPanel',
             'app.modals',
-            'app.filesComments'])
+            'app.filesComments',
+            'app.rest'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}',
@@ -29,7 +30,26 @@
          */
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', 'appModals', '$rootScope',
-            function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appModals, $rootScope) {
+            'RefBookValuesResource', 'APP_CONSTANTS',
+            function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appModals, $rootScope,
+                      RefBookValuesResource, APP_CONSTANTS) {
+
+                /**
+                 * @description Инициализация первичных данных на странице
+                 */
+                function initPage() {
+                    DeclarationDataResource.query({
+                            declarationDataId: $stateParams.declarationDataId,
+                            projection: "declarationData"
+                        },
+                        function (data) {
+                            if (data) {
+                                $scope.declarationData = data;
+                                $scope.declarationDataId = $stateParams.declarationDataId;
+                            }
+                        }
+                    );
+                }
 
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();
@@ -45,7 +65,16 @@
                  * @description Открытие модального окна "Файлы и комментарии"
                  */
                 $scope.filesAndComments = function () {
-                    appModals.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsCtrl', {declarationDataId: $scope.declarationDataId});
+                    RefBookValuesResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.ATTACH_FILE_TYPE
+                    }, function (data) {
+                        var attachFileTypes = {};
+                        angular.forEach(data, function (fileType) {
+                            attachFileTypes[fileType.id] = fileType.name;
+                        });
+                        appModals.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsCtrl',
+                            {declarationDataId: $scope.declarationDataId, attachFileTypes: attachFileTypes}, {copy: true});
+                    });
                 };
 
                 /**
@@ -77,7 +106,7 @@
                                     });
                             }
                         }
-                    })
+                    });
                 };
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
@@ -111,7 +140,7 @@
                                 $window.alert($filter('translate')('title.acceptImpossible'));
                             }
                         }
-                    })
+                    });
                 };
 
                 /**
@@ -138,7 +167,7 @@
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }
                         }
-                    })
+                    });
                 };
 
                 /**
@@ -153,7 +182,7 @@
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/returnToCreated"
                             }).then(function () {
                                 initPage();
-                            })
+                            });
                         });
                 };
                 /**
@@ -168,7 +197,7 @@
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).success(function () {
                                 $window.location.assign('/index.html#/taxes/ndflJournal');
-                            })
+                            });
                         });
                 };
 
@@ -179,23 +208,6 @@
                 $scope.showSourcesClick = function () {
                     appModals.create('client/app/taxes/ndfl/formSources.html', 'sourcesFormCtrl');
                 };
-
-                /**
-                 * @description Инициализация первичных данных на странице
-                 */
-                function initPage() {
-                    DeclarationDataResource.query({
-                            declarationDataId: $stateParams.declarationDataId,
-                            projection: "declarationData"
-                        },
-                        function (data) {
-                            if (data) {
-                                $scope.declarationData = data;
-                                $scope.declarationDataId = $stateParams.declarationDataId;
-                            }
-                        }
-                    );
-                }
 
                 initPage();
             }]);

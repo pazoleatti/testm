@@ -17,18 +17,10 @@
             'appModals',
             'DeclarationDataResource',
             'Upload',
-            function ($scope, $http, $uibModalInstance, $filter, $logPanel, appModals, DeclarationDataResource, Upload) {
+            'data',
+            function ($scope, $http, $uibModalInstance, $filter, $logPanel, appModals, DeclarationDataResource, Upload, data) {
 
-                // TODO: https://jira.aplana.com/browse/SBRFNDFL-1669
-                // получать данные о типах приаттаченных файлов с сервера.
-                var attachFileType = {
-                    268574299: "ТФ",
-                    268574399: "Исходящий в ФНС",
-                    268574499: "Входящий из ФНС",
-                    268574599: "Отчет",
-                    268574699: "Протокол ошибок",
-                    268574799: "Прочее"
-                };
+                var attachFileType = data.attachFileTypes;
 
                 $scope.fileCommentGrid = {
                     ctrl: {},
@@ -75,7 +67,7 @@
                  **/
                 function initPage() {
                     DeclarationDataResource.query({
-                            declarationDataId: $scope.$resolve.data.declarationDataId,
+                            declarationDataId: data.declarationDataId,
                             projection: "filesComments"
                         },
                         function (data) {
@@ -157,7 +149,7 @@
                         {
                             declarationDataFiles: files,
                             comment: $scope.comment,
-                            declarationDataId: $scope.$resolve.data.declarationDataId
+                            declarationDataId: data.declarationDataId
                         },
                         function (data) {
                             if (data) {

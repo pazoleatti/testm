@@ -302,6 +302,7 @@ create sequence seq_report_period start with 100;
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table declaration_type (
   id        number(9)           not null,
+  tax_type  char(1)             not null,
   name      varchar2(1000)      not null,
   status    number(1) default 0 not null,
   is_ifrs   number(1) default 0 not null,
@@ -756,21 +757,19 @@ create table async_task_type
 (
   id                number(18)          not null,
   name              varchar2(300)       not null,
-  handler_jndi      varchar2(500)       not null,
+  handler_bean      varchar2(500)       not null,
   short_queue_limit number(18),
   task_limit        number(18),
-  limit_kind        varchar2(400),
-  dev_mode          number(1) default 0 not null
+  limit_kind        varchar2(400)
 );
 
 comment on table async_task_type is 'Типы асинхронных задач';
 comment on column async_task_type.id is 'Идентификатор строки';
 comment on column async_task_type.name is 'Название типа задачи';
-comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';
+comment on column async_task_type.handler_bean is 'Имя spring бина-обработчика задачи';
 comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
 comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
 comment on column async_task_type.limit_kind is 'Вид ограничения';
-comment on column async_task_type.dev_mode is 'Признак задачи для dev-мода';
 
 --------------------------------------------------------------------------------------------------------
 create table form_data_report

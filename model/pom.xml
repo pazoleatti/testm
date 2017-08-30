@@ -28,6 +28,22 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--
+            Фикс проблемы с запуском сборки на вебсфере
+            https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
+        -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+            <classifier>cdi1.0</classifier>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>

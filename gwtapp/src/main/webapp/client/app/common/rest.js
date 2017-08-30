@@ -70,5 +70,14 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        /**
+         * @description Справочники
+         */
+        .factory('RefBookValuesResource', ['$resource', function ($resource) {
+            return $resource('/controller/rest/refBookValues/:refBookId', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
     ;
 }());

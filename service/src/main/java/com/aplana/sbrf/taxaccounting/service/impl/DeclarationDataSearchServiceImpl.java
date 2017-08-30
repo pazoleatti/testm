@@ -48,7 +48,9 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 
         List<DeclarationDataJournalItem> declarationDataList = declarationDao.findPage(declarationFilter, pagingParams);
 
-        return new PagingResult<DeclarationDataJournalItem>(declarationDataList, pagingParams.getCount());
+        int count = declarationDao.getCount(declarationFilter);
+
+        return new PagingResult<DeclarationDataJournalItem>(declarationDataList, count);
     }
 
     @Override

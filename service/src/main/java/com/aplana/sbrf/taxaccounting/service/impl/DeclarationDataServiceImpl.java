@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
@@ -121,7 +121,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private SourceService sourceService;
     @Autowired
-    private AsyncTaskTypeDao asyncTaskTypeDao;
+    private AsyncTaskDao asyncTaskTypeDao;
     @Autowired
     private RefBookFactory rbFactory;
     @Autowired
@@ -1439,7 +1439,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public Long getTaskLimit(ReportType reportType) {
-        return asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId()).getTaskLimit();
+        return asyncTaskTypeDao.getTaskData(reportType.getAsyncTaskTypeId()).getTaskLimit();
     }
 
     @Override

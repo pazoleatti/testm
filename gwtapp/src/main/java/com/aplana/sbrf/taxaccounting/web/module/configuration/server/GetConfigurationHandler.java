@@ -16,11 +16,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class GetConfigurationHandler extends
@@ -64,7 +60,7 @@ public class GetConfigurationHandler extends
             dereferenceValue.put(departmentId, map.get("NAME").getStringValue());
         }
         result.setDereferenceDepartmentNameMap(dereferenceValue);
-        return result;
+		return result;
     }
 
 	@Override

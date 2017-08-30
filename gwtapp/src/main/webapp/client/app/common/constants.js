@@ -29,6 +29,13 @@
                 VIEW_REF_BOOK: 1 << 17,
                 EDIT_REF_BOOK: 1 << 18
             },
+            REFBOOK: {
+                DEPARTMENT: 30,
+                DECLARATION_TYPE: 207,
+                ASNU: 900,
+                ATTACH_FILE_TYPE: 934,
+                PERIOD: "reportPeriod"
+            },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
                 VIEW: 1 << 1,

@@ -119,19 +119,19 @@ public class RefBookUtils extends AbstractDao {
         }
     }
 
-public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
+    public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
 
-    @Override
-    public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
-        RefBookRecordVersion result = new RefBookRecordVersion();
-        result.setRecordId(SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS));
-        result.setVersionStart(rs.getDate("versionStart"));
-        result.setVersionEnd(rs.getDate("versionEnd"));
-        result.setVersionEndFake(rs.getBoolean("endIsFake"));
-        return result;
+        @Override
+        public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RefBookRecordVersion result = new RefBookRecordVersion();
+            result.setRecordId(SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS));
+            result.setVersionStart(rs.getDate("versionStart"));
+            result.setVersionEnd(rs.getDate("versionEnd"));
+            result.setVersionEndFake(rs.getBoolean("endIsFake"));
+            return result;
+        }
+
     }
-
-}
 
     /**
      * Проверка контрольной суммы ИНН (физлица или организации)

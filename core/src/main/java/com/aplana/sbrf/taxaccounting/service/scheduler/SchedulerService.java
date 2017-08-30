@@ -9,6 +9,8 @@ import java.util.Date;
  */
 public interface SchedulerService {
 
+    void shutdownAllTasks();
+
     /**
      * Добавляет/обновляет выполнение методов помеченных {@link AplanaScheduled} в планировщик
      */

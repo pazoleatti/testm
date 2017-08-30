@@ -6,8 +6,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLQueryFactory;
@@ -274,35 +276,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             where.and(declarationKind.id.in(filter.getFormKindIds()));
         }
-        //TODO: https://jira.aplana.com/browse/SBRFNDFL-1829 изменить механизм определения порядка сортировки
-        OrderSpecifier ordering;
 
+        //Оперделяем способ сортировки
         String orderingProperty = params.getProperty();
-        boolean isAsc = params.getDirection().equals("asc");
+        Order ascDescOrder = Order.valueOf(params.getDirection().toUpperCase());
 
-        if (orderingProperty.equals("declarationDataId")) {
-            ordering = isAsc ? declarationData.id.asc() : declarationData.id.desc();
-        } else if (orderingProperty.equals("declarationKind")) {
-            ordering = isAsc ? declarationKind.name.asc() : declarationKind.name.desc();
-        } else if (orderingProperty.equals("declarationType")) {
-            ordering = isAsc ? declarationType.name.asc() : declarationType.name.desc();
-        } else if (orderingProperty.equals("department")) {
-            ordering = isAsc ? department.name.asc() : department.name.desc();
-        } else if (orderingProperty.equals("asnuName")) {
-            ordering = isAsc ? refBookAsnu.name.asc() : refBookAsnu.name.desc();
-        } else if (orderingProperty.equals("reportPeriod")) {
-            ordering = isAsc ? reportPeriod.name.asc() : reportPeriod.name.desc();
-        } else if (orderingProperty.equals("state")) {
-            ordering = isAsc ? state.name.asc() : state.name.desc();
-        } else if (orderingProperty.equals("fileName")) {
-            ordering = isAsc ? declarationData.fileName.asc() : declarationData.fileName.desc();
-        } else if (orderingProperty.equals("creationDate")) {
-            ordering = isAsc ? logBusiness.logDate.asc() : logBusiness.logDate.desc();
-        } else if (orderingProperty.equals("creationUserName")) {
-            ordering = isAsc ? secUser.name.asc() : secUser.name.desc();
-        } else {
-            ordering = declarationData.id.desc();
-        }
+        OrderSpecifier ordering = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
+                dataJournalItemQBean, orderingProperty, ascDescOrder, declarationData.id.desc());
 
 
         List<DeclarationDataJournalItem> items = sqlQueryFactory.select(

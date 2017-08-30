@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateReportsDeclarationAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateReportsDeclarationResult;
-import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -99,7 +98,7 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
             result.setStatus(true);
         } else {
             result.setStatus(true);
-            asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+            asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
                 @Override
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),

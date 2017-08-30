@@ -1,13 +1,15 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.querydsl.sql.HSQLDBTemplates;
 import com.querydsl.sql.OracleTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.spring.SpringConnectionProvider;
 import com.querydsl.sql.spring.SpringExceptionTranslator;
+import com.querydsl.sql.types.EnumByOrdinalType;
 import com.querydsl.sql.types.InputStreamType;
 import com.querydsl.sql.types.LocalDateTimeType;
-import com.querydsl.sql.types.LocalDateType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,6 +25,7 @@ public class QueryDSLConfiguration extends AbstractDao {
         configuration.setExceptionTranslator(new SpringExceptionTranslator());
         configuration.register(new LocalDateTimeType());
         configuration.register(new InputStreamType());
+        configuration.register(new EnumByOrdinalType<DepartmentType>(DepartmentType.class));
         return configuration;
     }
 

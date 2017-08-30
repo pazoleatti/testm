@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.LockData;
@@ -13,10 +13,11 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.model.ActionResult;
-import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +34,11 @@ import java.util.UUID;
  */
 @RestController
 public class TransportDataController {
+
     private static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
+
+    @Autowired
+    private ApplicationInfo applicationInfo;
 
     private final LogEntryService logEntryService;
     private final SecurityService securityService;
@@ -93,8 +98,7 @@ public class TransportDataController {
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     try {
                         lockDataService.addUserWaitingForLock(key, userId);
-                        asyncManager.executeAsync(
-                                PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
+                        asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
                                 params, balancingVariant);
                         LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                         lockDataService.updateQueue(key, lockData.getDateLock(), queue);
@@ -147,8 +151,7 @@ public class TransportDataController {
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
                     lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(
-                            PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
+                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
                             params, balancingVariant);
                     LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                     lockDataService.updateQueue(key, lockData.getDateLock(), queue);
@@ -161,7 +164,7 @@ public class TransportDataController {
                 try {
                     lockDataService.unlock(key, userId);
                 } catch (ServiceException e2) {
-                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
+                    if (applicationInfo.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
                         throw e2;
                     }
                 }

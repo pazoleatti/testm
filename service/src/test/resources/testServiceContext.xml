@@ -89,10 +89,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.RefBookAsyncConfigDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao"/>

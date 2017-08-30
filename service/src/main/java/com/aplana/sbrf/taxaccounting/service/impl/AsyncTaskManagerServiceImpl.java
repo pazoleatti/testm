@@ -1,24 +1,27 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author lhaziev
@@ -33,6 +36,15 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
     private TAUserService userService;
     @Autowired
     private AsyncManager asyncManager;
+    @Autowired
+    private DeclarationDataService declarationService;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private LogEntryService logEntryService;
+    @Autowired
+    @Qualifier("versionInfoProperties")
+    private Properties versionInfoProperties;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -78,16 +90,15 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
     }
 
     @Override
-    public void createTask(String keyTask, ReportType reportType, Map<String, Object> params, boolean cancelTask, boolean isProductionMode, TAUserInfo userInfo, Logger logger, AsyncTaskHandler handler) {
+    public void createTask(String keyTask, ReportType reportType, Map<String, Object> params, boolean cancelTask, TAUserInfo userInfo, Logger logger, AsyncTaskHandler handler) {
+        boolean isProductionMode = versionInfoProperties.getProperty("productionMode").equals("true");
         params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
         params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), keyTask);
         // Шаги 1, 2, 5
         BalancingVariants balancingVariant;
         try {
             LOG.info(String.format("Определение очереди для задачи с ключом %s", keyTask));
-            balancingVariant = asyncManager.checkCreate(
-					isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
-					params);
+            balancingVariant = asyncManager.checkCreate(reportType.getAsyncTaskTypeId(), params);
         } catch (AsyncTaskException e) {
             int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
             if (i != -1) {
@@ -117,9 +128,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), queue);
-                    asyncManager.executeAsync(
-							isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
-							params, balancingVariant);
+                    asyncManager.executeAsync(reportType.getAsyncTaskTypeId(), params, balancingVariant);
 
                     // Шаг 8
                     Object declarationDataId = params.get("declarationDataId");
@@ -152,4 +161,74 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
             }
         }
     }
+
+    @Override
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_NS', 'N_ROLE_CONTROL_UNP')")
+    public AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, final long declarationDataId, final boolean force, final boolean cancelTask) {
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.ACCEPT_DEC;
+        final AcceptDeclarationResult result = new AcceptDeclarationResult();
+        if (!declarationService.existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+        Logger logger = new Logger();
+        final TaxType taxType = TaxType.NDFL;
+        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        if (uuidXml != null) {
+            DeclarationData declarationData = declarationService.get(declarationDataId, userInfo);
+            if (!declarationData.getState().equals(State.ACCEPTED)) {
+                String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
+                    createTask(keyTask, ddReportType.getReportType(), params, cancelTask, userInfo, logger, new AsyncTaskHandler() {
+                        @Override
+                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    declarationService.getDeclarationFullName(declarationDataId, ddReportType),
+                                    LockData.State.IN_QUEUE.getText());
+                        }
+
+                        @Override
+                        public void executePostCheck() {
+                            result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
+                        }
+
+                        @Override
+                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                            return declarationService.checkExistTask(declarationDataId, reportType, logger);
+                        }
+
+                        @Override
+                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                            declarationService.interruptTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
+                        }
+
+                        @Override
+                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                            return declarationService.getTaskName(ddReportType, taxType);
+                        }
+                    });
+                }
+            } else {
+                result.setStatus(CreateAsyncTaskStatus.EXIST);
+            }
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+        }
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+
+
 }

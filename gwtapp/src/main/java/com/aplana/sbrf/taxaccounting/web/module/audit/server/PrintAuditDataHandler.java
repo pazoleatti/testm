@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataResult;
-import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -101,7 +100,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
             params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter().convertTo());
             params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
             params.put(AuditService.AsyncNames.SEARCH_CRITERIA.name(), searchCriteria);
-            asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+            asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
                 @Override
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),

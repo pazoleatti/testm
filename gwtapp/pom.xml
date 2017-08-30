@@ -176,11 +176,14 @@
             <artifactId>spring-jms</artifactId>
         </dependency>
 
-        <!-- Асинхронные задачи -->
+        <!-- Logging -->
         <dependency>
-            <groupId>com.aplana.taxaccounting</groupId>
-            <artifactId>async-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
 
         <!-- Tester component -->
@@ -398,21 +401,8 @@
                     <artifactId>btm</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </dependency>
-                <dependency>
                     <groupId>org.apache.openejb</groupId>
                     <artifactId>openejb-core</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>async-mock</artifactId>
-                    <version>${project.version}</version>
                 </dependency>
             </dependencies>
         </profile>
