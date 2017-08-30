@@ -4,26 +4,26 @@
          * @description Вспомогательные утилиты для фильтров в журналах
          */
         angular.module('app.filterUtils', [])
-            /**
-             * @description Стандартный контроллер фильтра.
-             *
-             * Родительский контроллер журнала должен иметь следующий код:         *
-             * $scope.refreshGrid = function(page) {
+        /**
+         * @description Стандартный контроллер фильтра.
+         *
+         * Родительский контроллер журнала должен иметь следующий код:         *
+         * $scope.refreshGrid = function(page) {
                     $scope.referencesGrid.ctrl.refreshGrid(page);
                 };         *
-             * $scope.searchFilter = {};
-             *
-             * В конфиге грида:
-             * ...
-             * requestParameters: function () {
+         * $scope.searchFilter = {};
+         *
+         * В конфиге грида:
+         * ...
+         * requestParameters: function () {
              *               return {
              *                   filter: $scope.searchFilter.ajaxFilter
              *               };
              *           },
-             * ...
-             */
-            .controller('CommonFilterCtrl', ['$scope', '$webStorage',
-                function ($scope, $webStorage) {
+         * ...
+         */
+            .controller('CommonFilterCtrl', ['$scope', '$webStorage', '$rootScope',
+                function ($scope, $webStorage, $rootScope) {
                     // Фильтр по умолчанию свернут
                     $scope.searchFilter.hideExtendedFilter = true;
 
@@ -75,7 +75,7 @@
                     /**
                      * @param searchFilter.isClearByFilterParams
                      */
-                    $scope.updateIsClear = function() {
+                    $scope.updateIsClear = function () {
                         if ($scope.searchFilter.isClearByFilterParams) {
                             $scope.searchFilter.isClearByFilterParams();
                         } else {
@@ -84,7 +84,7 @@
                     };
 
                     // Если следует выводить надпись "сброс", то isClear становится true
-                    $scope.updateHideExtended = function() {
+                    $scope.updateHideExtended = function () {
                         $scope.searchFilter.hideExtendedFilter = !$scope.searchFilter.isClear;
                     };
 
@@ -114,12 +114,20 @@
                     };
 
                     // Выполнение поиска
-                    $scope.submitSearch = function () {
+                    $scope.submitSearch = function (pageName) {
+                        if (pageName && pageName === "ndfl") {
+                            $rootScope.$broadcast('INP_CHANGED', $scope.searchFilter.params.inp);
+                            $rootScope.$broadcast('OPERATION_ID_CHANGED', $scope.searchFilter.params.operationId);
+                        }
                         $scope.fillSearchFilter();
                     };
 
                     // Сброс фильтра
-                    $scope.resetFilter = function () {
+                    $scope.resetFilter = function (pageName) {
+                        if (pageName && pageName === "ndfl") {
+                            $rootScope.$broadcast('INP_CHANGED', $scope.searchFilter.params.inp);
+                            $rootScope.$broadcast('OPERATION_ID_CHANGED', $scope.searchFilter.params.operationId);
+                        }
                         // Очищаем фильтр
                         $scope.searchFilter.ajaxFilter = [];
                         $scope.searchFilter.params = {};
