@@ -11,7 +11,7 @@ BEGIN
 	EXECUTE IMMEDIATE 'drop table REF_BOOK_FOND_DETAIL';
   END IF;
   
-  select count(1) into v_count from user_tables where table_name='REF_BOOK_FOND_DETAIL';
+  select count(1) into v_count from user_tables where table_name='REF_BOOK_FOND';
   IF v_count>0 THEN
 	EXECUTE IMMEDIATE 'drop table REF_BOOK_FOND';
   END IF;
