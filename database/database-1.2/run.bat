@@ -1,7 +1,7 @@
 ﻿@ECHO OFF
 REM url for connect to oracle database
 REM for example: user_name/password@host:port/service_name
-SET AUTH=ndfl_psi/ndfl_psi@172.19.214.46:1521/orcl.aplana.local
+SET AUTH=ndfl_psi/ndfl_psi@172.19.214.45:1521/orcl.aplana.local
 REM system url for connect to oracle database
 SET DBA_AUTH=SYSTEM/oracle@sbrfndfl
 REM path to oracle bin folder: ORACLE_HOME\BIN
