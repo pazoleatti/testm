@@ -3057,10 +3057,7 @@ def getRefNotifSource() {
 
 
 def check() {
-    //List<DeclarationData> declarationDataList = declarationService.find(declarationData.declarationTemplateId, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo);
-    if (false) {
-        logger.warnExp();
-    }
+
     ScriptUtils.checkInterrupted()
     ZipInputStream xmlStream = declarationService.getXmlStream(declarationData.id)
 
@@ -3821,13 +3818,13 @@ def interdocumentary6ndflCheckData() {
     if (ndfl6declarationDataList.isEmpty()) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
         Department department = departmentService.get(departmentReportPeriod.departmentId)
-        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
+        logger.warn("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
         return
     }
     if (ndfl6declarationDataList.size() > 1) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
         Department department = departmentService.get(departmentReportPeriod.departmentId)
-        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. В Системе должна быть только одна форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
+        logger.warn("Выполнить проверку междокументных контрольных соотношений невозможно. В Системе должна быть только одна форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
         return
     }
     DeclarationData ndfl6declarationData = ndfl6declarationDataList.get(0)
@@ -3865,6 +3862,12 @@ def interdocumentary6ndflCheckData() {
     def kolFl2 = 0
 
     def ndfl6Stream = declarationService.getXmlStream(ndfl6declarationData.id)
+    if (ndfl6Stream == null) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        Department department = departmentService.get(departmentReportPeriod.departmentId)
+        logger.warn("Выполнить проверку междокументных контрольных соотношений невозможно. Заблокирована форма 6-НДФЛ для подразделения: \"${department.name}\", КПП: ${ndfl6declarationData.kpp}, ОКТМО: ${ndfl6declarationData.oktmo}, Код НО: ${ndfl6declarationData.taxOrganCode}, период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}. Форма находится в процессе создания.")
+        return
+    }
     def fileNode6Ndfl = new XmlSlurper().parse(ndfl6Stream);
     def sumStavkaNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
     sumStavkaNodes6.each { sumStavkaNode6 ->
@@ -3948,14 +3951,14 @@ def interdocumentary6ndflCheckData() {
 
         if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
             def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода»") + " по «Ставке» " + stavka6
-            logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
+            logger.warnExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
         }
     }
 
     // МежДок5
     if (ScriptUtils.round(nachislDohDiv6, 2) != ScriptUtils.round(sumDohDivObch2, 2)) {
         def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода» в виде дивидендов")
-        logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
+        logger.warnExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
     }
 
     // МежДок6
@@ -3964,20 +3967,20 @@ def interdocumentary6ndflCheckData() {
         def nalIschisl2 = mapNalIschisl2.get(stavka6)
         if (ischislNal6 != nalIschisl2) {
             def msgErrorRes = sprintf(msgError, "«Сумме налога исчисленного»") + " по «Ставке» " + stavka6
-            logger.errorExp(msgErrorRes, "«Сумма налога исчисленного» рассчитана некорректно", "")
+            logger.warnExp(msgErrorRes, "«Сумма налога исчисленного» рассчитана некорректно", "")
         }
     }
 
     // МежДок7
     if (neUderzNalIt6 != nalNeUderz2) {
         def msgErrorRes = sprintf(msgError, "«Сумме налога, не удержанной налоговым агентом»")
-        logger.errorExp(msgErrorRes, "«Сумма налога, не удержанная налоговым агентом» рассчитана некорректно", "")
+        logger.warnExp(msgErrorRes, "«Сумма налога, не удержанная налоговым агентом» рассчитана некорректно", "")
     }
 
     // МежДок8
     if (kolFl6 != kolFl2) {
         def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
-        logger.errorExp(msgErrorRes, "«Количество физических лиц, получивших доход» рассчитано некорректно", "")
+        logger.warnExp(msgErrorRes, "«Количество физических лиц, получивших доход» рассчитано некорректно", "")
     }
 }
 
