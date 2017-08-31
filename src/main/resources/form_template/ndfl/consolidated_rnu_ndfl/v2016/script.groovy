@@ -294,7 +294,7 @@ void consolidation() {
     }
 
     logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
-
+    logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") +" (всего " + declarationDataIdList.size() + " форм)")
 }
 
 String getVal(Map<String, RefBookValue> refBookPersonRecord, String attrName) {
