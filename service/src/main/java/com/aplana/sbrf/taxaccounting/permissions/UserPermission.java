@@ -197,7 +197,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
                 if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_ADMIN)) {
+                        || grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
                     return true;
                 }
             }
@@ -220,7 +220,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
             for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
                 if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_ADMIN)) {
+                        || grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
                     return true;
                 }
             }
@@ -243,7 +243,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
             for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_ADMIN)) {
+                if (grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
                     return true;
                 }
             }
@@ -288,7 +288,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
                 if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_ADMIN)) {
+                        || grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
                     return true;
                 }
             }

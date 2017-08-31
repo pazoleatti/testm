@@ -64,7 +64,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 			throws GenericAccountManagementException_Exception {
 		try {
             validationService.validate(userService.getUser(accountId));
-			userService.setUserIsActive(accountId, false);
+			//userService.setUserIsActive(accountId, false);
             TAUserInfo userInfo = userService.getSystemUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, "Успешный обмен данными с вебсервисом СУДИР.", null);
@@ -88,7 +88,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
-			userService.createUser(user);
+			//userService.createUser(user);
             TAUserInfo userInfo = userService.getSystemUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, "Успешный обмен данными с вебсервисом СУДИР.", null);
@@ -113,7 +113,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
             validationService.validate(userService.getUser(user.getLogin()));
-			userService.updateUser(user);
+			//userService.updateUser(user);
             TAUserInfo userInfo = userService.getSystemUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, "Успешный обмен данными с вебсервисом СУДИР.", null);
@@ -136,7 +136,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 
         try {
             validationService.validate(userService.getUser(accountId));
-			userService.setUserIsActive(accountId, true);
+			//userService.setUserIsActive(accountId, true);
             TAUserInfo userInfo = userService.getSystemUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(),
                     null, null, null, null, "Успешный обмен данными с вебсервисом СУДИР.", null);

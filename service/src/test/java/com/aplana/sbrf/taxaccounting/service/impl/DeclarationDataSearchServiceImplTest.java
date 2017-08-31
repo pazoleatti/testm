@@ -32,8 +32,8 @@ public class DeclarationDataSearchServiceImplTest {
 	private static final int CONTROL_USER_ID = 2;
 	private static final int OPERATOR_USER_ID = 3;
 	
-	private final static int INCOME_DECLARATION_TYPE_ID_1 = 21;
-	private final static int INCOME_DECLARATION_TYPE_ID_2 = 22;
+	private final static int INCOME_DECLARATION_TYPE_ID_1 = 102;
+	private final static int INCOME_DECLARATION_TYPE_ID_2 = 103;
 
 	private final static String LOCAL_IP = "127.0.0.1";
 
@@ -83,7 +83,7 @@ public class DeclarationDataSearchServiceImplTest {
 		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(CONTROL_UNP_USER_ID, 1, TARole.N_ROLE_CONTROL_UNP));
 
-		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(userInfo, TaxType.NDFL);
+		DeclarationDataFilterAvailableValues valuesIncome = service.getFilterAvailableValues(userInfo, TaxType.NDFL, true);
 		assertEquals(2, valuesIncome.getDeclarationTypes().size());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_2, valuesIncome.getDeclarationTypes().get(1).getId());
@@ -98,6 +98,6 @@ public class DeclarationDataSearchServiceImplTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp(LOCAL_IP);
 		userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.N_ROLE_OPER));
-		service.getFilterAvailableValues(userInfo, TaxType.NDFL);
+		service.getFilterAvailableValues(userInfo, TaxType.NDFL, true);
 	}
 }

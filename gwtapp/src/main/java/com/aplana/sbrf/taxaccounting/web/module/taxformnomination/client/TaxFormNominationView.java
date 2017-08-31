@@ -525,27 +525,4 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         }
         return new Pair<TaxNominationColumnEnum, Boolean>(sort, asc);
     }
-
-	@Override
-	public void addEnterNativePreviewHandler() {
-		nativePreviewHandler = Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-			@Override
-			public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-				if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER && !enterEventDisabled) {
-					if (isForm) {
-						formPager.firstPage();
-						reloadFormTableData();
-					} else {
-						reloadDeclarationTableData();
-						declarationPager.firstPage();
-					}
-				}
-			}
-		});
-	}
-
-	@Override
-	public void removeEnterNativePreviewHandler() {
-		nativePreviewHandler.removeHandler();
-	}
 }

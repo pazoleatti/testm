@@ -29,24 +29,6 @@ public interface TAUserDao {
 	int getUserIdByLogin(String login);
 	
 	/**
-	 * Создает нового пользователя
-	 */
-	int createUser(TAUser user);
-	
-	/**
-	 * Активирует/блокирует существующего пользователя
-	 * @param {@link TAUser} user идентификатор пользователя
-	 */
-	void setUserIsActive(int userId, int isActive);
-
-	/**
-	 * Обновляет существующего пользователя. Sql строка формируется в вызывающем сервисе, 
-	 * чтобы определить на какие поля пришел запрос на обновление.
-	 * @param {@link TAUser} user идентификатор пользователя
-	 */
-	void updateUser(TAUser user);
-	
-	/**
 	 * Возвращает полный список пользователей, включая заблокированных.
 	 * @return {@link List<TAUser>}
 	 */
@@ -76,10 +58,4 @@ public interface TAUserDao {
 	 * @return true если пользователь с таким логином есть, false если нет
 	 */
 	boolean existsUser(String login);
-
-	/**
-	 * Обновляет запись в справочнике "Ограничение доступа по АСНУ"
-	 * @param user
-	 */
-	void updateUserAsnu(TAUser user);
 }

@@ -94,11 +94,6 @@ public class TaxFormNominationPresenter
         void reloadFormTableData();
 
         void reloadDeclarationTableData();
-
-
-        void addEnterNativePreviewHandler();
-
-        void removeEnterNativePreviewHandler();
     }
 
     private TaxType taxType;
@@ -223,14 +218,12 @@ public class TaxFormNominationPresenter
     protected void onReveal() {
         super.onReveal();
         getView().onReveal();
-        getView().addEnterNativePreviewHandler();
     }
 
     @Override
     protected void onHide() {
         super.onHide();
         getView().clearFilter();
-        getView().removeEnterNativePreviewHandler();
     }
 
     @Override

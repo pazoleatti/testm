@@ -26,7 +26,7 @@ public enum ReportType {
     TO_CREATE_DEC(6, "MOVE_TO_CREATE", "Возврат в Создана", 0L),
 
     CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 28L),
-    CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Формирование отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L),
+    CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Выгрузка отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L),
 
     CONSOLIDATE_FD(0, "CONSOLIDATE_FORM_DATA", "Консолидация %s", 16L),
     CALCULATE_FD(1, "CALCULATE_FORM_DATA", "Расчет %s", 17L),

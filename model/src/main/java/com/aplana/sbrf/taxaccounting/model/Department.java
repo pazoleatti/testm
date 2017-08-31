@@ -22,7 +22,6 @@ public class Department implements Serializable {
 	private DepartmentType type;
 	private String tbIndex;
 	private String sbrfCode;
-    private Long regionId;
     private boolean isActive;
     private Long code;
     /* Поле признак указывающее что подразделение используется в модуле гарантий */
@@ -175,14 +174,6 @@ public class Department implements Serializable {
 		this.sbrfCode = sbrfCode;
 	}
 
-    public Long getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(Long regionId) {
-        this.regionId = regionId;
-    }
-
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
@@ -226,7 +217,6 @@ public class Department implements Serializable {
 		if (type != that.type) return false;
 		if (tbIndex != null ? !tbIndex.equals(that.tbIndex) : that.tbIndex != null) return false;
 		if (sbrfCode != null ? !sbrfCode.equals(that.sbrfCode) : that.sbrfCode != null) return false;
-		if (regionId != null ? !regionId.equals(that.regionId) : that.regionId != null) return false;
 		if (code != null ? !code.equals(that.code) : that.code != null) return false;
 		return fullName != null ? fullName.equals(that.fullName) : that.fullName == null;
 

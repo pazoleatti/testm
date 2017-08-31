@@ -441,7 +441,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public void setTableData(int startIndex, long count, List<Map<String, TableCell>> itemList) {
         model.getList().clear();
         model.getList().addAll(makeDataRowsFromModel(itemList));
-        pager.setPage(0);
         table.redraw();
     }
 
@@ -489,6 +488,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         model.getList().add(createDataRow());
         updateCheckBoxHeader(false);
         setIsFormModified(true);
+        pager.setPage((model.getList().size() - 1)/pager.getPageSize());
     }
 
     private void updateCheckBoxHeader(boolean value) {
@@ -652,6 +652,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
             if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
                     periodPickerPopup.getValue() != null && !periodPickerPopup.getValue().isEmpty()) {
+                pager.setPage(0);
                 getUiHandlers().onFind();
             } else if (showError) {
                 Dialog.errorMessage("Не заполнены обязательные поля", "Для поиска должно быть заполнено поле \"Подразделение\" и \"Период\"");

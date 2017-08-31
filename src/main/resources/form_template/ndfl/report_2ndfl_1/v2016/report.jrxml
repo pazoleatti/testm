@@ -142,7 +142,7 @@
 	<detail>
 		<band height="14">
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="7bf3a416-9008-4a86-8704-f1157826f3c9" stretchType="RelativeToTallestObject" x="0" y="0" width="45" height="14"/>
+				<reportElement uuid="7bf3a416-9008-4a86-8704-f1157826f3c9" stretchType="RelativeToTallestObject" x="0" y="0" width="45" height="14" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -157,7 +157,7 @@
 				<textFieldExpression><![CDATA[$F{NUM}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="0985cf55-18ce-4118-99e3-f8ebb261db09" stretchType="RelativeToBandHeight" mode="Transparent" x="45" y="0" width="128" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="0985cf55-18ce-4118-99e3-f8ebb261db09" stretchType="RelativeToTallestObject" mode="Transparent" x="45" y="0" width="128" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -172,7 +172,7 @@
 				<textFieldExpression><![CDATA[$F{SURNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="62d6111c-801d-4a47-bce2-16905870813d" stretchType="RelativeToTallestObject" mode="Transparent" x="261" y="0" width="85" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="62d6111c-801d-4a47-bce2-16905870813d" stretchType="RelativeToTallestObject" mode="Transparent" x="261" y="0" width="85" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -187,7 +187,7 @@
 				<textFieldExpression><![CDATA[$F{LASTNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="dd.MM.yyyy" isBlankWhenNull="false">
-				<reportElement uuid="43cbecc3-8c84-43a7-a66a-0815dafc9454" stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="0" width="55" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="43cbecc3-8c84-43a7-a66a-0815dafc9454" stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="0" width="55" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -212,13 +212,13 @@
 				</box>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" leftIndent="5" spacingAfter="5"/>
+					<paragraph lineSpacing="Single" leftIndent="5" rightIndent="5" spacingAfter="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ERRTEXT}.length()>50)?
 $F{ERRTEXT0} : $F{ERRTEXT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="f983376d-0191-44bc-815f-ede3acabe9bf" stretchType="RelativeToTallestObject" mode="Transparent" x="173" y="0" width="88" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f983376d-0191-44bc-815f-ede3acabe9bf" stretchType="RelativeToTallestObject" mode="Transparent" x="173" y="0" width="88" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>

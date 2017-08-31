@@ -134,7 +134,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> getTBDepartments(TAUser tAUser, TaxType taxType) {
         List<Department> retList = new ArrayList<Department>();
 
-        if (tAUser.hasRole(TARole.N_ROLE_ADMIN)
+        if (tAUser.hasRole(TARole.ROLE_ADMIN)
          || tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
