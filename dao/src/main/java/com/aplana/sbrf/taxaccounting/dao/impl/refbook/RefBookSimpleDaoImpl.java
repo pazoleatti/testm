@@ -39,13 +39,7 @@ import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -68,6 +62,8 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     private BDUtils dbUtils;
     @Autowired
     private ApplicationContext applicationContext;
+
+    private static int IN_CLAUSE_LIMIT = 10000;
 
     private RowMapper<Map<String, RefBookValue>> getRowMapper(RefBook refBook) {
         if (refBook.getId().equals(RefBook.Id.CALENDAR.getId())) {
@@ -142,6 +138,23 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      */
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(RefBook refBook, List<Long> recordIds) {
+        if (recordIds.size() > IN_CLAUSE_LIMIT) {
+            Map<Long, Map<String, RefBookValue>> result = new HashMap<Long, Map<String, RefBookValue>>();
+            int n = (recordIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<Long> subList = getSubList(recordIds, i);
+                Map<Long, Map<String, RefBookValue>> subResult = getRecordData(refBook, subList);
+                if (subResult != null) {
+                    result.putAll(subResult);
+                }
+            }
+            if (result.isEmpty()) {
+                return null;
+            } else {
+                return result;
+            }
+        }
+
         PreparedStatementData ps = queryBuilder.psGetRecordsData(refBook, recordIds);
 
         try {
@@ -813,6 +826,15 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
      */
     @Override
     public List<Long> getRelatedVersions(RefBook refBook, List<Long> uniqueRecordIds) {
+        if (uniqueRecordIds.size() > IN_CLAUSE_LIMIT) {
+            List<Long> result = new ArrayList<Long>();
+            int n = (uniqueRecordIds.size() - 1) / IN_CLAUSE_LIMIT + 1;
+            for (int i = 0; i < n; i++) {
+                List<Long> subList = getSubList(uniqueRecordIds, i);
+                result.addAll(getRelatedVersions(refBook, subList));
+            }
+            return result;
+        }
         String partition = isSupportOver() ? SQL_GET_RELATED_VERSIONS_PARTITION : "";
         String sql = String.format(SQL_GET_RELATED_VERSIONS,
                 refBook.getTableName(), transformToSqlInStatement("id", uniqueRecordIds), partition, VersionedObjectStatus.FAKE.getId());
@@ -822,6 +844,10 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         }
+    }
+
+    private List<Long> getSubList(List<Long> list, int i) {
+        return list.subList(i * IN_CLAUSE_LIMIT, Math.min((i + 1) * IN_CLAUSE_LIMIT, list.size()));
     }
 
     /**

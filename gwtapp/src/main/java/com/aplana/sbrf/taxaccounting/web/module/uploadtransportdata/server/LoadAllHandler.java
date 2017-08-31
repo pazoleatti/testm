@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'ROLE_ADMIN')")
 public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAllResult> {
 
     @Autowired

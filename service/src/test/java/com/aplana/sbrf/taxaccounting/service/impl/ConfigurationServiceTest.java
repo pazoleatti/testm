@@ -565,7 +565,7 @@ public class ConfigurationServiceTest {
         user.setDepartmentId(1);
         userInfo.setUser(user);
         TARole role = new TARole();
-        role.setAlias(TARole.N_ROLE_ADMIN);
+        role.setAlias(TARole.ROLE_ADMIN);
         user.setRoles(asList(role));
         return userInfo;
     }

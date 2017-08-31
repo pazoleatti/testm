@@ -67,6 +67,11 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showDelete(boolean show);
 
+		/**
+		 * Поледняя выбранная в таблице запись
+		 * @return
+		 */
+		Long getSelectedItemDeclarationDataId();
     }
 
 	protected final DispatchAsync dispatcher;

@@ -197,6 +197,7 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
         action.setTaxType(taxType);
         action.setReportPeriodId(getView().getSelectedReportPeriod().get(0));
         action.setReports(true);
+        action.setCreate(false);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationDepartmentsResult>() {
             @Override
             public void onSuccess(GetDeclarationDepartmentsResult result) {

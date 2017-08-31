@@ -90,10 +90,6 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
 
     @Override
     void create() throws BadValueException {
-        if (currentRefBookId == RefBook.Id.SEC_USER_ASNU.getId()) {
-            save();
-            return;
-        }
         AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
         action.setRefBookId(currentRefBookId);
         if (isVersionMode) {

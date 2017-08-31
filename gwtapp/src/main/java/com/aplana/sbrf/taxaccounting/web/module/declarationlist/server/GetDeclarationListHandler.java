@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -104,7 +101,21 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
             }
         }
 
-        action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
+        List<Long> asnuIds = action.getDeclarationFilter().getAsnuIds();
+        if (asnuIds != null && !asnuIds.isEmpty()) {
+            action.getDeclarationFilter().setAsnuIds(new ArrayList<Long>(currentUser.getAsnuIds()));
+            action.getDeclarationFilter().getAsnuIds().retainAll(asnuIds);
+        } else if (asnuIds == null) {
+            action.getDeclarationFilter().setAsnuIds(new ArrayList<Long>());
+        }
+        if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)
+                && action.getDeclarationFilter().getAsnuIds().isEmpty()) {
+            if (currentUser.getAsnuIds().isEmpty()) {
+                action.getDeclarationFilter().setAsnuIds(Arrays.asList(-1L));
+            } else {
+                action.getDeclarationFilter().setAsnuIds(currentUser.getAsnuIds());
+            }
+        }
 
         if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
             action.getDeclarationFilter().setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());

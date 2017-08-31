@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server.De
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentConfigServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server.DepartmentConfigPropertyServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.lock.server.LockServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.members.server.MembersServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
@@ -37,7 +36,7 @@ import org.springframework.context.annotation.Import;
 @Import(value = {MainHandlerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
         DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
-        HistoryServerModule.class, MembersServerModule.class,
+        HistoryServerModule.class,
         ConfigurationServerModule.class, AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
         SourcesServerModule.class, DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,

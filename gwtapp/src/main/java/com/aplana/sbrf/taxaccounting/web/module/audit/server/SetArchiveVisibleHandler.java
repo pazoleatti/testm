@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_ADMIN', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class SetArchiveVisibleHandler extends AbstractActionHandler<SetArchiveVisibleAction, SetArchiveVisibleResult> {
 
     @Autowired
@@ -28,7 +28,7 @@ public class SetArchiveVisibleHandler extends AbstractActionHandler<SetArchiveVi
     @Override
     public SetArchiveVisibleResult execute(SetArchiveVisibleAction action, ExecutionContext executionContext) throws ActionException {
         SetArchiveVisibleResult result = new SetArchiveVisibleResult();
-        result.setVisible(securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_ADMIN));
+        result.setVisible(securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_ADMIN));
         return result;
     }
 

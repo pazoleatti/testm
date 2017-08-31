@@ -79,7 +79,7 @@ public class AuditServiceImplTest {
         user.setLogin("user1");
         user.setRoles(new ArrayList<TARole>(){{
             add(new TARole(){{
-                setName(TARole.N_ROLE_ADMIN);
+                setName(TARole.ROLE_ADMIN);
             }});
             add(new TARole(){{
                 setName(TARole.N_ROLE_CONTROL_NS);
@@ -111,7 +111,7 @@ public class AuditServiceImplTest {
         verify(auditDao, times(2)).add(argument.capture());
 
         assertEquals(argument.getAllValues().get(0).getFormDepartmentName(), "Открытое акционерное общество \"Сбербанк России\"");
-        assertEquals(argument.getAllValues().get(0).getRoles(), TARole.N_ROLE_ADMIN + ", " + TARole.N_ROLE_CONTROL_NS);
+        assertEquals(argument.getAllValues().get(0).getRoles(), TARole.ROLE_ADMIN + ", " + TARole.N_ROLE_CONTROL_NS);
 
         assertEquals(argument.getAllValues().get(1).getFormDepartmentName(), "Центральный аппарат/Управление налогового планирования");
         assertEquals(argument.getAllValues().get(1).getUserDepartmentName(), "Центральный аппарат/Управление налогового планирования");

@@ -121,14 +121,14 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationTypePicker.setManualUpdate(false);
         declarationTypePicker.setMultiSelect(true);
 
-        asnuPicker = new RefBookPickerWidget(false, false);
+        asnuPicker = new RefBookPickerWidget(false, true);
         asnuPicker.setVersionEnabled(false);
         asnuPicker.setAttributeId(9003L);
         asnuPicker.setWidth("100%");
         asnuPicker.setPeriodDates(new Date(), new Date());
         asnuPicker.setManualUpdate(true);
 
-        docStatePicker = new RefBookPickerWidget(false, false);
+        docStatePicker = new RefBookPickerWidget(false, true);
         docStatePicker.setVersionEnabled(false);
         docStatePicker.setAttributeId(9292L);
         docStatePicker.setWidth("100%");
@@ -192,7 +192,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         this.formDataFilter = formDataFilter;
         departmentPicker.setValue(formDataFilter.getDepartmentIds());
         reportPeriodPicker.setValue(formDataFilter.getReportPeriodIds());
-        asnuPicker.setSingleValue(formDataFilter.getAsnuId());
+        asnuPicker.setValue(formDataFilter.getAsnuIds());
         declarationKindPicker.setValue(formDataFilter.getFormKindIds());
         declarationDataIdPicker.setValue(formDataFilter.getDeclarationDataIdStr());
         taxOrganisationPicker.setText(formDataFilter.getTaxOrganCode());
@@ -200,7 +200,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         oktmoPicker.setText(formDataFilter.getOktmo());
         fileNamePicker.setText(formDataFilter.getFileName());
         notePicker.setText(formDataFilter.getNote());
-        docStatePicker.setSingleValue(formDataFilter.getDocStateId());
+        docStatePicker.setValue(formDataFilter.getDocStateIds());
         declarationTypePicker.setValue(formDataFilter.getDeclarationTypeIds());
         formStatePicker.setValue(formDataFilter.getFormState());
         correctionTag.setValue(formDataFilter.getCorrectionTag());
@@ -225,9 +225,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         formDataFilter.setDeclarationDataIdStr(declarationDataIdPicker.getValue());
         List<Long> asnuPickerValues = asnuPicker.getValue();
         if (asnuPickerValues != null && !asnuPickerValues.isEmpty()) {
-            formDataFilter.setAsnuId(asnuPickerValues.get(0));
+            formDataFilter.setAsnuIds(asnuPickerValues);
         } else {
-            formDataFilter.setAsnuId(null);
+            formDataFilter.setAsnuIds(null);
         }
         List<Long> kindPickerValues = declarationKindPicker.getValue();
         if (kindPickerValues != null && !kindPickerValues.isEmpty()) {
@@ -236,7 +236,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             formDataFilter.setFormKindIds(null);
         }
         formDataFilter.setFileName(fileNamePicker.getValue());
-        formDataFilter.setDocStateId(docStatePicker.getSingleValue());
+        formDataFilter.setDocStateIds(docStatePicker.getValue());
 
 		return formDataFilter;
 	}

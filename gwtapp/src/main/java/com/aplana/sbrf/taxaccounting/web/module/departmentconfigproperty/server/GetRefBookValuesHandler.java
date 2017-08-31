@@ -90,7 +90,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         }
         RefBookAttribute sortAttr = rbFactory.get(action.getSlaveRefBookId()).getAttribute("ROW_ORD");
         PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(
-                addDayToDate(reportPeriod.getEndDate(), -1), null, filterSlave, sortAttr);
+                null, null, filterSlave, sortAttr);
         result.setTableValues(convert(paramsSlave, action.getSlaveRefBookId(), true, refProviders, refAliases));
 
         //Проверяем справочные значения для полученной таблицы

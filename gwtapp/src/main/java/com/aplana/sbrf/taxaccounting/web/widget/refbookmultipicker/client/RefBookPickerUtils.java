@@ -99,24 +99,26 @@ public final class RefBookPickerUtils {
     }
 
     public static String buildRegionFilterForUser(List<Department> departments, RefBook refBook) {
-        if (departments == null || departments.isEmpty()) return null;
-        if (refBook == null) return null;
-        if (refBook.getRegionAttribute() == null) return null;
-
-        String attrAlias = refBook.getRegionAttribute().getAlias();
-        StringBuilder regions = new StringBuilder("(");
-        boolean haveRegion = false;
-        for (Department dep : departments) {
-            if (dep.getRegionId() != null) {
-                regions.append(attrAlias).append(" = ").append(dep.getRegionId()).append(" or ");
-                haveRegion = true;
-            }
-        }
-        if (!haveRegion) {
-            return NO_REGION_MATCHES_FLAG;
-        }
-        regions.delete(regions.length() - 4, regions.length() - 1);
-        regions.append(")");
-        return regions.toString();
+        return null;
+        // Сейчас нет региаональных спровочников
+//        if (departments == null || departments.isEmpty()) return null;
+//        if (refBook == null) return null;
+//        if (refBook.getRegionAttribute() == null) return null;
+//
+//        String attrAlias = refBook.getRegionAttribute().getAlias();
+//        StringBuilder regions = new StringBuilder("(");
+//        boolean haveRegion = false;
+//        for (Department dep : departments) {
+//            if (dep.getRegionId() != null) {
+//                regions.append(attrAlias).append(" = ").append(dep.getRegionId()).append(" or ");
+//                haveRegion = true;
+//            }
+//        }
+//        if (!haveRegion) {
+//            return NO_REGION_MATCHES_FLAG;
+//        }
+//        regions.delete(regions.length() - 4, regions.length() - 1);
+//        regions.append(")");
+//        return regions.toString();
     }
 }
