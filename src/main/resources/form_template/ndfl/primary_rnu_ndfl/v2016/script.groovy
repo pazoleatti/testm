@@ -686,7 +686,7 @@ import org.joda.time.format.DateTimeFormat
 
                     def recordId = refBookPerson.getRecordId();
 
-                    logForDebug(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
+                    logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
                             refBookPerson.getLastName(),
                             refBookPerson.getFirstName(),
                             refBookPerson.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
@@ -940,34 +940,38 @@ import org.joda.time.format.DateTimeFormat
         return values;
     }
 
-    def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
+    def insertBatchRecords(refBookId, List identityObjectList, refBookMapper) {
 
         //подготовка записей
         if (identityObjectList != null && !identityObjectList.isEmpty()) {
-
             def refBookName = getProvider(refBookId).refBook.name
             logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
 
-            List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
-            for (IdentityObject identityObject : identityObjectList) {
+            identityObjectList.collate(1000).each { identityObjectSubList ->
+                if (identityObjectSubList != null && !identityObjectSubList.isEmpty()) {
 
-                ScriptUtils.checkInterrupted();
+                    List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
+                    for (IdentityObject identityObject : identityObjectSubList) {
 
-                def values = refBookMapper(identityObject);
-                recordList.add(createRefBookRecord(values));
-            }
+                        ScriptUtils.checkInterrupted();
 
-            //создание записей справочника
-            List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
+                        def values = refBookMapper(identityObject);
+                        recordList.add(createRefBookRecord(values));
+                    }
 
-            //установка id
-            for (int i = 0; i < identityObjectList.size(); i++) {
+                    //создание записей справочника
+                    List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
 
-                ScriptUtils.checkInterrupted();
+                    //установка id
+                    for (int i = 0; i < identityObjectSubList.size(); i++) {
 
-                Long id = generatedIds.get(i);
-                IdentityObject identityObject = identityObjectList.get(i);
-                identityObject.setId(id);
+                        ScriptUtils.checkInterrupted();
+
+                        Long id = generatedIds.get(i);
+                        IdentityObject identityObject = identityObjectSubList.get(i);
+                        identityObject.setId(id);
+                    }
+                }
             }
         }
 
@@ -3492,10 +3496,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             ScriptUtils.checkInterrupted();
 
-            boolean applyTemporalySolution = false
-            if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
-                applyTemporalySolution = true
-            }
+            boolean applyTemporalySolution = true
+//            if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+//                applyTemporalySolution = true
+//            }
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -4255,7 +4259,7 @@ class ColumnFillConditionData {
             new Column21EqualsColumn7LastDayOfMonth(), "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца выплаты дохода")
 
     // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
-    dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+    dateConditionDataListForBudget << new DateConditionData(["2740", "2750", "2790", "4800"], ["13"],
             new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
 
     // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
@@ -4748,7 +4752,7 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                if (["2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
+                if (["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
                     // 11 подпункт "Графа 21" = "Графа 7" + "1 рабочий день"
                     /*
                         Найти следующую за текущей строкой, удовлетворяющую условиям:

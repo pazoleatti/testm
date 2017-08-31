@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -48,13 +49,18 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
         result.setDepartmentReportPeriods(departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter));
 
         // Доступные подразделения
-        List<Integer> departments =
-                departmentService.getOpenPeriodDepartments(userInfo.getUser(), action.getTaxType(), action.getReportPeriodId());
+        List<Integer> departments;
+        if (action.isCreate()) {
+            departments = departmentService.getOpenPeriodDepartments(userInfo.getUser(), action.getTaxType(), action.getReportPeriodId());
+        } else {
+            departments = departmentService.getTaxFormDepartments(userInfo.getUser(), TaxType.NDFL, null, null);
+        }
         if (departments.isEmpty()){
             result.setDepartments(new ArrayList<Department>());
             result.setDepartmentIds(new HashSet<Integer>());
         } else {
             if (action.isReports()) {
+                // Отчеты создаются в только в ТБ
                 Set<Integer> departmentIds = new HashSet<Integer>(departmentService.getTBDepartmentIds(userInfo.getUser(), action.getTaxType()));
                 result.setDepartments(new ArrayList<Department>(
                         departmentService.getRequiredForTreeDepartments(departmentIds).values()));

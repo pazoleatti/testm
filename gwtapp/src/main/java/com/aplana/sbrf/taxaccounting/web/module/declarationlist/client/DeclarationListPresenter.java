@@ -53,6 +53,10 @@ public class DeclarationListPresenter extends
      */
     private Map<String, DeclarationDataFilter> filterStates = new HashMap<String, DeclarationDataFilter>();
     private List<Long> selectedItemIds;
+    /**
+     * Выбранная в таблице запись
+     */
+    private Long selectedItemDeclarationDataId;
     private TaxType taxType;
     private Boolean isReports;
     private boolean ready = false;
@@ -151,6 +155,7 @@ public class DeclarationListPresenter extends
             if (taxTypeOld == null || !taxType.equals(taxTypeOld) || isReportsOld == null || !isReportsOld.equals(isReports)) {
                 getView().updateTitle(taxType);
                 selectedItemIds = null;
+                selectedItemDeclarationDataId = null;
             }
             //String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
             filterPresenter.setDeclarationListPresenter(this);
@@ -203,7 +208,7 @@ public class DeclarationListPresenter extends
             return;
         }
         DeclarationDataFilter filter = filterPresenter.getFilterData();
-        filter.setDeclarationDataId((selectedItemIds != null && !selectedItemIds.isEmpty()) ? selectedItemIds.get(0) : null);
+        filter.setDeclarationDataId(selectedItemDeclarationDataId);
         filter.setCountOfRecords(length);
         filter.setStartIndex(start);
         filter.setAscSorting(getView().isAscSorting());
@@ -234,6 +239,7 @@ public class DeclarationListPresenter extends
                                     result.getRecords(), result.getDepartmentFullNames(), result.getAsnuNames(),
                                     selectedItemIds);
                             selectedItemIds = null;
+                            selectedItemDeclarationDataId = null;
                         }
                     }
                 }, DeclarationListPresenter.this));
@@ -265,11 +271,11 @@ public class DeclarationListPresenter extends
         cloneFilter.setDeclarationTypeIds(filter.getDeclarationTypeIds());
         cloneFilter.setFormState(filter.getFormState());
         cloneFilter.setCorrectionTag(filter.getCorrectionTag());
-        cloneFilter.setAsnuId(filter.getAsnuId());
+        cloneFilter.setAsnuIds(filter.getAsnuIds());
         cloneFilter.setFormKindIds(filter.getFormKindIds());
         cloneFilter.setFileName(filter.getFileName());
         cloneFilter.setDeclarationDataIdStr(filter.getDeclarationDataIdStr());
-        cloneFilter.setDocStateId(filter.getDocStateId());
+        cloneFilter.setDocStateIds(filter.getDocStateIds());
         cloneFilter.setNote(filter.getNote());
         cloneFilter.setOktmo(filter.getOktmo());
         cloneFilter.setTaxOrganCode(filter.getTaxOrganCode());
@@ -291,6 +297,7 @@ public class DeclarationListPresenter extends
     protected void onHide() {
         super.onHide();
         selectedItemIds = getView().getSelectedIds();
+        selectedItemDeclarationDataId = getView().getSelectedItemDeclarationDataId();
         eventBus.fireEvent(new FocusActionEvent(true));
     }
 

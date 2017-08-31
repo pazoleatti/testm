@@ -130,8 +130,7 @@ public class RefBook implements Serializable {
 		PERSON_CATEGORY(941),						// Категорий застрахованных лиц
 		NDFL(950), 									// Настройки подразделений по НДФЛ
 		NDFL_DETAIL(951), 							// Настройки подразделений по НДФЛ (таблица)
-		NDFL_REFERENCES(964),                       // Реестр справок
-		SEC_USER_ASNU(942);							// Ограничение доступа по АСНУ
+		NDFL_REFERENCES(964);							// Ограничение доступа по АСНУ
 
         private final long id;
 

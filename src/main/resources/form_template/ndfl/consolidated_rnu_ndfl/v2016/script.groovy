@@ -2646,10 +2646,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         ScriptUtils.checkInterrupted();
 
-        boolean applyTemporalySolution = false
-        if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
-            applyTemporalySolution = true
-        }
+        boolean applyTemporalySolution = true
+//        if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+//            applyTemporalySolution = true
+//        }
 
         NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -2953,26 +2953,15 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPersonIncome.oktmo != null) {
             def kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
             if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-
-                if (kppList == null) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
-                            R_DETAIL,
-                            department ? department.name : ""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
-                            errMsg)
-                } else {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_KPP, ndflPersonIncome.kpp ?: "",
-                            R_DETAIL,
-                            department ? department.name : ""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
-                            errMsg)
-                }
+                String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                        C_KPP, ndflPersonIncome.kpp ?: "",
+                        C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                        R_DETAIL,
+                        department ? department.name : ""
+                )
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
+                        errMsg)
             }
         }
     }
@@ -3128,7 +3117,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             new Column21EqualsColumn7LastDayOfMonth(), "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца выплаты дохода")
 
     // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
-    dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+    dateConditionDataListForBudget << new DateConditionData(["2740", "2750", "2790", "4800"], ["13"],
             new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
 
     // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
@@ -3621,7 +3610,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         }
                     }
                 }
-                if (["2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
+                if (["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
                     // 11 подпункт "Графа 21" = "Графа 7" + "1 рабочий день"
                     /*
                         Найти следующую за текущей строкой, удовлетворяющую условиям:

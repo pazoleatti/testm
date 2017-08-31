@@ -2016,7 +2016,7 @@
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

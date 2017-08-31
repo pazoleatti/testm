@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('N_ROLE_ADMIN', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataListAction, GetAuditDataListResult> {
 
     @Autowired
@@ -39,7 +39,7 @@ public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataL
         LogSystemAuditFilter auditFilter = action.getLogSystemFilter();
         TAUserInfo userInfo = securityService.currentUserInfo();
         PagingResult<LogSearchResultItem> records;
-        if (userInfo.getUser().hasRole(TARole.N_ROLE_ADMIN))
+        if (userInfo.getUser().hasRole(TARole.ROLE_ADMIN))
 		    records = auditService.getLogsByFilter(auditFilter.convertTo());
         else
             records = auditService.getLogsBusiness(auditFilter.convertTo(), userInfo);

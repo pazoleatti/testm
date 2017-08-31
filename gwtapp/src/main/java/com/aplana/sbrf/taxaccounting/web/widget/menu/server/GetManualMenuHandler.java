@@ -43,7 +43,7 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
         TAUser currentUser = securityService.currentUserInfo().getUser();
 
         // Руководство пользователя
-        if (currentUser.hasRoles(TARole.N_ROLE_ADMIN,
+        if (currentUser.hasRoles(TARole.ROLE_ADMIN,
                 TARole.N_ROLE_OPER, TARole.F_ROLE_OPER,
                 TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                 TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
@@ -51,7 +51,7 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
 
             MenuItem manualMenu = new MenuItem("");
 
-            if (currentUser.hasRoles(TARole.N_ROLE_ADMIN,
+            if (currentUser.hasRoles(TARole.ROLE_ADMIN,
                     TARole.N_ROLE_OPER, TARole.F_ROLE_OPER,
                     TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                     TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {

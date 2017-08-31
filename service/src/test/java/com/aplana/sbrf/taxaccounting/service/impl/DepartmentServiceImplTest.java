@@ -127,7 +127,7 @@ public class DepartmentServiceImplTest {
 
         // Роли
         taRoles = new ArrayList<TARole>();
-        for (String alias : asList(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_ADMIN, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
+        for (String alias : asList(TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
             TARole taRole = new TARole();
             taRole.setAlias(alias);
             taRoles.add(taRole);

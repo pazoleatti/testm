@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+//import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
@@ -9,8 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+//import org.springframework.cache.annotation.CacheEvict;
+//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -33,7 +33,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	private static final Log LOG = LogFactory.getLog(DepartmentDaoImpl.class);
 
 	@Override
-	@Cacheable(CacheConstants.DEPARTMENT)
+	//@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Fetching department with id = " + id  + " from database");
@@ -160,10 +160,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 department.setShortName(rs.getString("shortname"));
                 department.setTbIndex(rs.getString("tb_index"));
                 department.setSbrfCode(rs.getString("sbrf_code"));
-                department.setRegionId(SqlUtils.getLong(rs, "region_id"));
-                if (rs.wasNull()) {
-                    department.setRegionId(null);
-                }
                 department.setActive(rs.getBoolean("is_active"));
                 department.setCode(rs.getLong("code"));
                 department.setGarantUse(rs.getBoolean("garant_use"));
@@ -473,7 +469,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        String sql = String.format("select id, name, parent_id, type, shortname, tb_index, sbrf_code, region_id, is_active, code, garant_use, sunr_use" +
+        String sql = String.format("select id, name, parent_id, type, shortname, tb_index, sbrf_code, is_active, code, garant_use, sunr_use" +
                 " from department where id in " +
                 "   (select distinct dft.department_id from FORM_DATA_SOURCE fds " +
                 "   join DEPARTMENT_FORM_TYPE dft on dft.id = fds.department_form_type_id " +
@@ -512,7 +508,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     @Transactional(readOnly = false)
-    @CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
+    //@CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
     public void setUsedByGarant(int depId, boolean used) {
         if (LOG.isDebugEnabled()) {
 			LOG.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);
