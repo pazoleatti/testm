@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -34,7 +33,9 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             result.setOrd(rs.getInt("ord"));
             result.setDate(new Date(rs.getTimestamp("creation_date").getTime()));
             result.setLevel(LogLevel.fromId(rs.getInt("log_level")));
-            result.setMessage(rs.getString("message"));
+
+            String msg = rs.getString("message");
+            result.setMessage(msg != null ? msg : "");
             result.setType(rs.getString("type"));
             result.setObject(rs.getString("object"));
 
@@ -98,8 +99,8 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
      * {@link LogEntry#ord} проставляется с учетом сдвига.
      *
      * @param logEntries список сообщений
-     * @param logId идентификатор группы сообщений
-     * @param shift сдвиг для {@link LogEntry#ord}
+     * @param logId      идентификатор группы сообщений
+     * @param shift      сдвиг для {@link LogEntry#ord}
      */
     private void saveShift(List<LogEntry> logEntries, final String logId, final int shift) {
         final List<LogEntry> splitLogEntries = splitBigMessage(logEntries);
@@ -154,11 +155,11 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         List<LogEntry> records = getJdbcTemplate().query(
                 "select " +
                         "t.log_id, t.ord, t.creation_date, t.log_level, t.message, t.type, t.object " +
-                "from " +
-                        "(select l.*, row_number() " + (isSupportOver()?"over(order by l.ord)":"over()") +  " as rn from log_entry l where l.log_id = ?) t " +
-                "where " +
+                        "from " +
+                        "(select l.*, row_number() " + (isSupportOver() ? "over(order by l.ord)" : "over()") + " as rn from log_entry l where l.log_id = ?) t " +
+                        "where " +
                         "t.rn between ? and ? " +
-                "order by t.rn ",
+                        "order by t.rn ",
                 new Object[]{logId, offset + 1, offset + length},
                 new int[]{Types.VARCHAR, Types.INTEGER, Types.INTEGER},
                 new LogEntryMapper()
@@ -177,25 +178,25 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
     @Override
     public Map<LogLevel, Integer> countLogLevel(@NotNull String logId) {
-        Map<String, Object> paramMap =  new HashMap<String, Object>();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("logId", logId);
 
         Map<String, Object> countMap = getNamedParameterJdbcTemplate().queryForMap(
                 "select " +
-                    "count(case when l.log_level = 0 then 1 end) INFO, " +
-                    "count(case when l.log_level = 1 then 1 end) WARN, " +
-                    "count(case when l.log_level = 2 then 1 end) ERROR " +
-                "from " +
-                    "log_entry l " +
-                "where " +
-                    "log_id = :logId",
+                        "count(case when l.log_level = 0 then 1 end) INFO, " +
+                        "count(case when l.log_level = 1 then 1 end) WARN, " +
+                        "count(case when l.log_level = 2 then 1 end) ERROR " +
+                        "from " +
+                        "log_entry l " +
+                        "where " +
+                        "log_id = :logId",
                 paramMap
         );
 
         Map<LogLevel, Integer> result = new HashMap<LogLevel, Integer>();
-        result.put(LogLevel.INFO, ((Number)countMap.get("INFO")).intValue());
-        result.put(LogLevel.WARNING, ((Number)countMap.get("WARN")).intValue());
-        result.put(LogLevel.ERROR, ((Number)countMap.get("ERROR")).intValue());
+        result.put(LogLevel.INFO, ((Number) countMap.get("INFO")).intValue());
+        result.put(LogLevel.WARNING, ((Number) countMap.get("WARN")).intValue());
+        result.put(LogLevel.ERROR, ((Number) countMap.get("ERROR")).intValue());
 
         return result;
     }
