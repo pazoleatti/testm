@@ -116,8 +116,16 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     @Override
     public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId) {
-		return validate(data, userInfo, logger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, VALIDATION_TIMEOUT);
-	}
+
+        // Создаём локальный логгер на случай,
+        // если в пришедшем логгере есть нефатальные ошибки или предупреждения с предыдущего этапа
+        Logger localLogger = new Logger();
+		boolean result = validate(data, userInfo, localLogger, isErrorFatal, xmlFile, fileName, xsdBlobDataId, VALIDATION_TIMEOUT);
+
+		// Переносим записи из локального логгера
+		logger.getEntries().addAll(localLogger.getEntries());
+		return result;
+    }
 
 	boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId, long timeout) {
         if (xsdBlobDataId == null) {
