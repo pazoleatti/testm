@@ -4,8 +4,10 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
@@ -18,14 +20,15 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataServic
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.GetDeclarationFilterDataHandler;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
+import com.gwtplatform.dispatch.shared.ActionException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -55,7 +58,9 @@ public class DeclarationDataController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
-        binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
+        binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
+        binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
+        binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
 
     private DeclarationDataSearchService declarationDataSearchService;
@@ -73,14 +78,19 @@ public class DeclarationDataController {
     private LogEntryService logEntryService;
     private LockDataService lockDataService;
     private SourceService sourceService;
+    private NdflPersonService ndflPersonService;
+    private DeclarationDataService declarationDataService;
+    private RefBookFactory refBookFactory;
     private RefBookAsnuService refBookAsnuService;
     private RefBookDepartmentDataService refBookDepartmentDataService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
-                                     LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService,
-                                     DeclarationDataSearchService declarationDataSearchService, RefBookAsnuService refBookAsnuService, RefBookDepartmentDataService refBookDepartmentDataService) {
+                                     TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService,
+                                     RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService, LogEntryService logEntryService, LockDataService lockDataService,
+                                     SourceService sourceService, DeclarationDataSearchService declarationDataSearchService, RefBookAsnuService refBookAsnuService,
+                                     RefBookDepartmentDataService refBookDepartmentDataService, NdflPersonService ndflPersonService, DeclarationDataService declarationDataService,
+                                     RefBookFactory refBookFactory) {
         this.declarationDataSearchService = declarationDataSearchService;
         this.declarationService = declarationService;
         this.securityService = securityService;
@@ -96,6 +106,9 @@ public class DeclarationDataController {
         this.logEntryService = logEntryService;
         this.lockDataService = lockDataService;
         this.sourceService = sourceService;
+        this.ndflPersonService = ndflPersonService;
+        this.declarationDataService = declarationDataService;
+        this.refBookFactory = refBookFactory;
         this.refBookAsnuService = refBookAsnuService;
         this.refBookDepartmentDataService = refBookDepartmentDataService;
     }
@@ -617,5 +630,143 @@ public class DeclarationDataController {
                 pagingResult.getTotalCount(),
                 pagingParams
         );
+    }
+
+    /**
+     * Формирование рну ндфл для отдельного физ лица`
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param personId          идентификатор физ лица
+     * @param ndflPersonFilter  заполненные поля при поиске
+     * @return источники и приемники декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
+    public CreateReportResult creteReportRnu(@PathVariable("declarationDataId") final long declarationDataId, @RequestParam long personId, @RequestParam final NdflPersonFilter ndflPersonFilter) throws ActionException {
+
+        Map<String, Object> filterParams = new HashMap<String, Object>();
+
+        if ((ndflPersonFilter.getInp() != null) && (ndflPersonFilter.getInp() != "")) {
+            filterParams.put("inp", ndflPersonFilter.getInp());
+        }
+        if ((ndflPersonFilter.getInnNp() != null) && (ndflPersonFilter.getInnNp() != "")) {
+            filterParams.put("innNp", ndflPersonFilter.getInnNp());
+        }
+
+        if ((ndflPersonFilter.getSnils() != null) && (ndflPersonFilter.getSnils() != "")) {
+            filterParams.put("snils", ndflPersonFilter.getSnils());
+        }
+        if ((ndflPersonFilter.getIdDocNumber() != null) && (ndflPersonFilter.getIdDocNumber() != "")) {
+            filterParams.put("idDocNumber", ndflPersonFilter.getIdDocNumber());
+        }
+        if ((ndflPersonFilter.getLastName() != null) && (ndflPersonFilter.getLastName() != "")) {
+            filterParams.put("lastName", ndflPersonFilter.getLastName());
+        }
+        if ((ndflPersonFilter.getFirstName() != null) && (ndflPersonFilter.getFirstName() != "")) {
+            filterParams.put("firstName", ndflPersonFilter.getFirstName());
+        }
+        if ((ndflPersonFilter.getMiddleName() != null) && ndflPersonFilter.getMiddleName() != "") {
+            filterParams.put("middleName", ndflPersonFilter.getMiddleName());
+        }
+        if (ndflPersonFilter.getDateFrom() != null) {
+            filterParams.put("fromBirthDay", ndflPersonFilter.getDateFrom());
+        }
+
+        if (ndflPersonFilter.getDateTo() != null) {
+            filterParams.put("toBirthDay", ndflPersonFilter.getDateTo());
+        }
+
+        NdflPerson ndflPerson = null;
+        for (NdflPerson itemNdflPerson : ndflPersonService.findPersonByFilter(declarationDataId, filterParams, new PagingParams())) {
+            if (itemNdflPerson.getPersonId().equals(personId)) {
+                ndflPerson = itemNdflPerson;
+            }
+        }
+        filterParams.put("PERSON_ID", ndflPerson.getId());
+        ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
+                get("NAME").getValue().toString());
+
+        final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName("NDFL");
+        CreateReportResult result = new CreateReportResult();
+        if (!declarationDataService.existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        if (ddReportType.isSubreport()) {
+            DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
+            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), "rnu_ndfl_person_db"));
+        } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && !declarationDataService.isVisiblePDF(declarationDataService.get(declarationDataId, userInfo), userInfo)) {
+            throw new ActionException("Данное действие недоступно");
+        }
+        Logger logger = new Logger();
+        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        if (uuidXml != null) {
+            final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            if (uuid != null && !true) {
+                result.setStatus(CreateAsyncTaskStatus.EXIST);
+                return result;
+            } else {
+                String keyTask = declarationDataService.generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, TaxType.NDFL), userInfo, false, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
+                    if (ddReportType.isSubreport()) {
+                        params.put("alias", ddReportType.getReportAlias());
+                        params.put("viewParamValues", new LinkedHashMap<String, String>());
+                        if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+                            params.put("subreportParamValues", filterParams);
+
+                            if (ndflPerson != null) {
+                                params.put("PERSON_ID", new Long("128055"));
+                            }
+                        }
+                    }
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+
+                        /*asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, , userInfo, logger, new AsyncTaskHandler() {*/
+                        @Override
+                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    declarationDataService.getDeclarationFullName(declarationDataId, ddReportType),
+                                    LockData.State.IN_QUEUE.getText());
+                        }
+
+                        @Override
+                        public void executePostCheck() {
+                        }
+
+                        @Override
+                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                            return false;
+                        }
+
+                        @Override
+                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                            if (uuid != null) {
+                                reportService.deleteDec(uuid);
+                            }
+                        }
+
+                        @Override
+                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                            return declarationDataService.getTaskName(ddReportType, TaxType.NDFL);
+                        }
+                    });
+                }
+            }
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 }
