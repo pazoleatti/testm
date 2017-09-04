@@ -43,6 +43,7 @@ import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
 import static com.aplana.sbrf.taxaccounting.model.QReportPeriod.reportPeriod;
 import static com.aplana.sbrf.taxaccounting.model.QSecUser.secUser;
 import static com.aplana.sbrf.taxaccounting.model.QState.state;
+import static com.aplana.sbrf.taxaccounting.model.QTaxPeriod.taxPeriod;
 import static com.querydsl.core.types.Projections.bean;
 
 /**
@@ -71,7 +72,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             declarationType.name.as("declarationType"),
             department.name.as("department"),
             refBookAsnu.name.as("asnuName"),
-            reportPeriod.name.as("reportPeriod"),
+            taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).as("reportPeriod"),
             state.name.as("state"),
             declarationData.fileName,
             logBusiness.logDate.as("creationDate"),
@@ -255,6 +256,20 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return new PagingResult<DeclarationDataSearchResultItem>(records, getCount(declarationFilter));
     }
 
+    /**
+     * Преобразует список long в список int
+     *
+     * @param longList
+     * @return
+     */
+    private List<Integer> toIntegerList(List<Long> longList) {
+        List<Integer> intList = new LinkedList<Integer>();
+        for (long elem : longList) {
+            intList.add((int) elem);
+        }
+        return intList;
+    }
+
     @Override
     public List<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams params) {
 
@@ -262,19 +277,47 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         // id в REF_BOOK_ASNU - тип int, а AsnuId в фильтре - тип long
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
-            List<Integer> list = new ArrayList<Integer>();
-            for (Long l : filter.getAsnuIds()) {
-                list.add(l.intValue());
+            where.and(refBookAsnu.id.in(toIntegerList(filter.getAsnuIds())));
+        } else {
+            where.and(refBookAsnu.id.in(Collections.EMPTY_LIST));
+        }
+
+        if (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()) {
+            filter.setDepartmentIds(Collections.EMPTY_LIST);
+        }
+        where.and(department.id.in(filter.getDepartmentIds()));
+
+        if (filter.getFormKindIds() == null || filter.getFormKindIds().isEmpty()) {
+            filter.setFormKindIds(Collections.EMPTY_LIST);
+        }
+        where.and(declarationKind.id.in(filter.getFormKindIds()));
+
+        if (filter.getDeclarationDataId() != null) {
+            where.and(declarationData.id.stringValue().contains(filter.getDeclarationDataId().toString()));
+        }
+
+        if (filter.getDeclarationTypeIds() != null && !filter.getDeclarationTypeIds().isEmpty()) {
+            where.and(declarationType.id.in(toIntegerList(filter.getDeclarationTypeIds())));
+        }
+
+        if (filter.getFormState() != null) {
+            where.and(declarationData.state.eq(filter.getFormState().getId().byteValue()));
+        }
+
+        if(filter.getFileName() != null && StringUtils.isNotBlank(filter.getFileName())) {
+            where.and(declarationData.fileName.containsIgnoreCase(StringUtils.trim(filter.getFileName())));
+        }
+
+        if(filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
+            where.and(reportPeriod.id.in(filter.getReportPeriodIds()));
+        }
+
+        if(filter.getCorrectionTag() != null) {
+            if(filter.getCorrectionTag()) {
+                where.and(departmentReportPeriod.correctionDate.isNotNull());
+            } else {
+                where.and(departmentReportPeriod.correctionDate.isNull());
             }
-            where.and(refBookAsnu.id.in(list));
-        }
-
-        if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-            where.and(department.id.in(filter.getDepartmentIds()));
-        }
-
-        if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
-            where.and(declarationKind.id.in(filter.getFormKindIds()));
         }
 
         //Оперделяем способ сортировки
@@ -291,7 +334,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 declarationType.name.as("declarationType"),
                 department.name.as("department"),
                 refBookAsnu.name.as("asnuName"),
-                reportPeriod.name.as("reportPeriod"),
+                taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).as("reportPeriod"),
                 state.name.as("state"),
                 declarationData.fileName,
                 logBusiness.logDate.as("creationDate"),
@@ -306,6 +349,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .innerJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
                 .innerJoin(declarationData.declarationDataStateFk, state)
                 .innerJoin(departmentReportPeriod.depRepPerFkDepartmentId, department)
+                .innerJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
                 .orderBy(ordering)
                 .where(where)

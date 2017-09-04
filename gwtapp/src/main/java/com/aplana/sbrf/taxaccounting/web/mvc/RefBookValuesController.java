@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookDepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
@@ -13,13 +13,18 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAttachFileTypeServic
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
+import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,14 +53,29 @@ public class RefBookValuesController {
     private SecurityService securityService;
 
     /**
+     * Привязка данных из параметров запроса
+     *
+     * @param binder спец. DataBinder для привязки
+     */
+    @InitBinder
+    public void init(WebDataBinder binder) {
+        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(RefBookDepartmentFilter.class, new RequestParamEditor(RefBookDepartmentFilter.class));
+    }
+
+    /**
      * Получение всех значений справочника Подразделения
      *
-     * @return Значения справочника
+     * @param filter       Фильтр
+     * @param pagingParams Параметры пейджинга
+     * @return
      */
     @GetMapping(value = "/rest/refBookValues/30")
-    public List<RefBookDepartment> fetchAllDepartments() {
+    public JqgridPagedList<RefBookDepartment> fetchDepartments(@RequestParam RefBookDepartmentFilter filter, @RequestParam PagingParams pagingParams) {
         LOG.info("Fetch records for refbook DEPARTMENT");
-        return refBookDepartmentDataService.fetchDepartments();
+        TAUser user = securityService.currentUserInfo().getUser();
+        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchAvailableDepartments(user, filter, pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
     }
 
     /**
@@ -77,7 +97,7 @@ public class RefBookValuesController {
     @GetMapping(value = "/rest/refBookValues/900")
     public List<RefBookAsnu> fetchAllAsnu() {
         LOG.info("Fetch records for refbook ASNU");
-        return refBookAsnuService.fetchAllAsnu();
+        return refBookAsnuService.fetchAvailableAsnu(securityService.currentUserInfo());
     }
 
     /**
@@ -100,6 +120,7 @@ public class RefBookValuesController {
     public List<ReportPeriod> fetchReportPeriods() {
         LOG.info("Fetch periods");
         TAUser user = securityService.currentUserInfo().getUser();
-        return new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
+        List<ReportPeriod> periods = periodService.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, Arrays.asList(user.getDepartmentId()));
+        return periods;
     }
 }

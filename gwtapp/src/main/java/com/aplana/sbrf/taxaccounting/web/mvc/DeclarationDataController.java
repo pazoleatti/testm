@@ -7,10 +7,14 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
@@ -51,6 +55,7 @@ public class DeclarationDataController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
     }
 
     private DeclarationDataSearchService declarationDataSearchService;
@@ -68,12 +73,14 @@ public class DeclarationDataController {
     private LogEntryService logEntryService;
     private LockDataService lockDataService;
     private SourceService sourceService;
+    private RefBookAsnuService refBookAsnuService;
+    private RefBookDepartmentDataService refBookDepartmentDataService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
                                      TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
                                      LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService,
-                                     DeclarationDataSearchService declarationDataSearchService) {
+                                     DeclarationDataSearchService declarationDataSearchService, RefBookAsnuService refBookAsnuService, RefBookDepartmentDataService refBookDepartmentDataService) {
         this.declarationDataSearchService = declarationDataSearchService;
         this.declarationService = declarationService;
         this.securityService = securityService;
@@ -89,6 +96,8 @@ public class DeclarationDataController {
         this.logEntryService = logEntryService;
         this.lockDataService = lockDataService;
         this.sourceService = sourceService;
+        this.refBookAsnuService = refBookAsnuService;
+        this.refBookDepartmentDataService = refBookDepartmentDataService;
     }
 
     /**
@@ -561,33 +570,47 @@ public class DeclarationDataController {
      * @return список налоговых форм {@link DeclarationDataSearchResultItem}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
-    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
-
+    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam DeclarationDataFilter filter, @RequestParam PagingParams pagingParams) {
         //TODO: переместить реализацию в сервис
-        TAUser currentUser = securityService.currentUserInfo().getUser();
-        Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        TAUser currentUser = userInfo.getUser();
 
-        receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(currentUser, TaxType.NDFL, null, null));
-
-        List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
-        for (DeclarationFormKind declarationFormKind : GetDeclarationFilterDataHandler.getAvailableDeclarationFormKind(TaxType.NDFL, false, currentUser)) {
-            availableDeclarationFormKindIds.add(declarationFormKind.getId());
+        if (filter.getAsnuIds() == null || filter.getAsnuIds().isEmpty()) {
+            filter.setAsnuIds(new LinkedList<Long>());
+            for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
+                filter.getAsnuIds().add((long) asnu.getId());
+            }
         }
 
-        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
-        dataFilter.setAsnuIds(currentUser.getAsnuIds());
-        dataFilter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
-        dataFilter.setFormKindIds(availableDeclarationFormKindIds);
+        if (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()) {
+            Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
+            for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
+                receiverDepartmentIds.add(department.getId());
+            }
+            filter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
+        }
+
+        if (filter.getFormKindIds() == null || filter.getFormKindIds().isEmpty()) {
+            List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
+            if (currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                availableDeclarationFormKindIds.addAll(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
+            } else if (currentUser.hasRole(TaxType.NDFL, TARole.N_ROLE_OPER)) {
+                availableDeclarationFormKindIds.add(DeclarationFormKind.PRIMARY.getId());
+            }
+            filter.setFormKindIds(availableDeclarationFormKindIds);
+        }
+
+        filter.setTaxType(TaxType.NDFL);
 
         if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
-            dataFilter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
-            dataFilter.setControlNs(true);
+            filter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
+            filter.setControlNs(true);
         } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
-            dataFilter.setUserDepartmentId(currentUser.getDepartmentId());
-            dataFilter.setControlNs(false);
+            filter.setUserDepartmentId(currentUser.getDepartmentId());
+            filter.setControlNs(false);
         }
 
-        PagingResult<DeclarationDataJournalItem>   pagingResult =  declarationDataSearchService.findDeclarationDataJournalItems(dataFilter,pagingParams);
+        PagingResult<DeclarationDataJournalItem> pagingResult = declarationDataSearchService.findDeclarationDataJournalItems(filter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,

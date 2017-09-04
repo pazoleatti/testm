@@ -37,4 +37,19 @@ public class RefBookAsnuDaoImpl implements RefBookAsnuDao {
                 .where(refBookAsnu.id.gt(0))
                 .fetch();
     }
+
+    /**
+     * Получение всех значений справочника по идентификаторам
+     *
+     * @param ids Идентификаторы
+     * @return Список значений справочника
+     */
+    @Override
+    public List<RefBookAsnu> fetchByIds(List<Integer> ids) {
+        return sqlQueryFactory
+                .select(refBookAsnuBean)
+                .from(refBookAsnu)
+                .where(refBookAsnu.id.gt(0).and(refBookAsnu.id.in(ids)))
+                .fetch();
+    }
 }

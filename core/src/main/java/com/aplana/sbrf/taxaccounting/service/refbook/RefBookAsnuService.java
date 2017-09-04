@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 
 import java.util.List;
@@ -9,9 +10,10 @@ import java.util.List;
  */
 public interface RefBookAsnuService {
     /**
-     * Получение всех значений справочника
+     * Получение доступных значений справочника
      *
-     * @return Список значений справочника
+     * @param userInfo Информация о пользователей
+     * @return Список доступных значений справочника
      */
-    List<RefBookAsnu> fetchAllAsnu();
+    List<RefBookAsnu> fetchAvailableAsnu(TAUserInfo userInfo);
 }

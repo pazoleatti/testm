@@ -2,14 +2,19 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookDepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.QBean;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.sql.SQLQueryFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
@@ -29,6 +34,8 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
 
     //TODO https://jira.aplana.com/browse/SBRFNDFL-1880
 
+    //TODO https://jira.aplana.com/browse/SBRFNDFL-2008
+
     final private Expression<DepartmentType> departmentTypeExpression = new CaseBuilder()
             .when(department.type.eq(1)).then(DepartmentType.ROOT_BANK)
             .when(department.type.eq(2)).then(DepartmentType.TERR_BANK)
@@ -41,18 +48,55 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
             departmentTypeExpression, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code);
 
     /**
-     * Получение всех значений справочника
+     * Получение значений справочника по идентификаторам
      *
+     * @param ids Список идентификаторов
      * @return Список значений справочника
      */
     @Override
-    public List<RefBookDepartment> fetchDepartments() {
+    public List<RefBookDepartment> fetchDepartments(Collection<Integer> ids) {
         BooleanBuilder where = new BooleanBuilder();
-        where.and(department.isActive.eq((byte) 1));
+        where.and(department.isActive.eq((byte) 1).and(department.id.in(ids)));
         return sqlQueryFactory
                 .select(refBookDepartmentBean)
                 .from(department)
                 .where(where)
                 .fetch();
+    }
+
+    /**
+     * Получение значений справочника по идентификаторам с фильтрацией и пейджингом
+     *
+     * @param ids          Список идентификаторов
+     * @param filter       Фильтр
+     * @param pagingParams Параметры пейджинга
+     * @return Список значений справочника
+     */
+    @Override
+    public PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, RefBookDepartmentFilter filter, PagingParams pagingParams) {
+        BooleanBuilder where = new BooleanBuilder();
+        where.and(department.isActive.eq((byte) 1).and(department.id.in(ids)));
+
+        if (!StringUtils.isBlank(filter.getName())) {
+            where = where.and(department.name.containsIgnoreCase(filter.getName()));
+        }
+
+        int offset = pagingParams.getCount() * (pagingParams.getPage() - 1);
+
+        long totalCount = sqlQueryFactory
+                .select(refBookDepartmentBean)
+                .from(department)
+                .where(where)
+                .fetchCount();
+
+        List<RefBookDepartment> departments = sqlQueryFactory
+                .select(refBookDepartmentBean)
+                .from(department)
+                .where(where)
+                .limit(pagingParams.getCount())
+                .offset(offset)
+                .fetch();
+
+        return new PagingResult<RefBookDepartment>(departments, (int) totalCount);
     }
 }

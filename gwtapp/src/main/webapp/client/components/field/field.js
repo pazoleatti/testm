@@ -245,9 +245,8 @@
                                         // позиционируем ошибку далеко, где ее не видно
                                         // Игнорируем, если объект в коллапсе, т.к. при его сворачивании
                                         // ошибку не видно без переноса
-                                        if (((bounds.top === 0) && (bounds.left === 0) ||
-                                            angular.isUndefined(bounds.top) || angular.isUndefined(bounds.left)) &&
-                                            !isInCollapse) {
+                                        if ((bounds.top === 0) && (bounds.left === 0) ||
+                                            angular.isUndefined(bounds.top) || angular.isUndefined(bounds.left)) {
 
                                             hint.css('position', 'fixed');
                                             hint.css('left', 2000);

@@ -68,6 +68,8 @@
   "filterPanelLabel": "Фильтр",
   "infoPanelLabel": "Информация",
   "filter.placeholder.search": "Введите строку",
+  "filter.placeholder.select": "Значение не выбрано",
+  "filter.placeholder.empty": "",
   "theNumberOfSelectedItems": "Выбрано значений:",
 
   "menu.taxes": "Налоги",
@@ -295,5 +297,14 @@
   "filesComment.comment": "Комментарий:",
   "filesComment.files": "Файлы:",
   "filesComment.button.add": "Добавить",
-  "filesComment.button.remove": "Удалить"
+  "filesComment.button.remove": "Удалить",
+
+  "ndflJournal.filter.period": "Период",
+  "ndflJournal.filter.department": "Подразделение",
+  "ndflJournal.filter.declarationNumber": "Номер формы",
+  "ndflJournal.filter.declarationKind": "Тип налоговой формы",
+  "ndflJournal.filter.declarationType": "Вид налоговой формы",
+  "ndflJournal.filter.asnu": "Наименование АСНУ",
+  "ndflJournal.filter.state": "Состояние",
+  "ndflJournal.filter.file": "Файл"
 }
