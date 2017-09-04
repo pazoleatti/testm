@@ -2045,7 +2045,7 @@ def createXlsxReport() {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
                     C_TYPE_CODE, personDeduction.typeCode ?: "",
-                    R_INCOME_CODE
+                    R_TYPE_CODE
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, personDeduction.rowNum ?: "")
             logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_TYPE_CODE), fioAndInp, pathError,
