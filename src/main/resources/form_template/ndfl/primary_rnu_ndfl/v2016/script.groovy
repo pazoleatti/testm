@@ -2700,7 +2700,7 @@ class NdflPersonFL {
     @Field final String T_PERSON_PREPAYMENT_NAME  = "Сведения о доходах в виде авансовых платежей"
 
     // Справочники
-    @Field final String R_FIAS = "КЛАДР" //TODO замена
+    @Field final String R_FIAS = "ФИАС"
     @Field final String R_PERSON = "Физические лица"
     @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
     @Field final String R_ID_DOC_TYPE = "Коды документов"
@@ -3379,12 +3379,12 @@ class NdflPersonFL {
     }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
-            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"КЛАДР\"")
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
+            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"ФИАС\"")
 }
 
 void logFiasIndexError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
                     "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") не соответствует требуемому формату")
 }
 

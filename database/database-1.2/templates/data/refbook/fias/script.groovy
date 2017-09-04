@@ -32,7 +32,7 @@ def calcTimeMillis(long time) {
 void importData() {
 
     long time = System.currentTimeMillis();
-    logger.info("Начало импорта данных справочника КЛАДР");
+    logger.info("Начало импорта данных справочника ФИАС");
 
     //Очистка данных перед импортом
     importFiasDataService.clearAll()
@@ -69,7 +69,7 @@ void importData() {
     // Обновление материализованных представлений
     fiasRefBookService.refreshViews()
 
-    logger.info("Завершение импорта данных справочника КЛАДР. Записей загружено: "+addressObjectGuidsMap.size() + calcTimeMillis(time));
+    logger.info("Завершение импорта данных справочника ФИАС. Записей загружено: "+addressObjectGuidsMap.size() + calcTimeMillis(time));
 
 }
 
@@ -138,7 +138,7 @@ InputStream getInputStream(final IInArchive inArchive, itemsMap, prefix) throws 
     def path = itemsMap.keySet().find { it.startsWith(prefix) }
 
     if (path == null) {
-        throw new ServiceException("В архиве выбранном для загрузки данных КЛАДР, отсутствует XML файл с префиксом ${prefix}")
+        throw new ServiceException("В архиве выбранном для загрузки данных ФИАС, отсутствует XML файл с префиксом ${prefix}")
     }
 
 
