@@ -112,9 +112,12 @@ BEGIN
   IF v_count=0 THEN
     EXECUTE IMMEDIATE 'alter table LOG add constraint FK_LOG_USER foreign key (USER_ID) references SEC_USER(ID)';
   END IF;
-  select count(1) into v_count from user_constraints where constraint_name='LOG_SYSTEM_REPORT_FK_SEC_USER' AND table_name='LOG_SYSTEM_REPORT';
-  IF v_count=0 THEN
-    EXECUTE IMMEDIATE 'alter table LOG_SYSTEM_REPORT add constraint LOG_SYSTEM_REPORT_FK_SEC_USER foreign key (SEC_USER_ID) references SEC_USER(ID)';
+  select count(1) into v_count from user_tables where table_name='LOG_SYSTEM_REPORT';
+  IF v_count>0 THEN
+	select count(1) into v_count from user_constraints where constraint_name='LOG_SYSTEM_REPORT_FK_SEC_USER' AND table_name='LOG_SYSTEM_REPORT';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'alter table LOG_SYSTEM_REPORT add constraint LOG_SYSTEM_REPORT_FK_SEC_USER foreign key (SEC_USER_ID) references SEC_USER(ID)';
+	END IF;
   END IF;
   select count(1) into v_count from user_constraints where constraint_name='TASK_CONTEXT_FK_USER_ID' AND table_name='TASK_CONTEXT';
   IF v_count=0 THEN
