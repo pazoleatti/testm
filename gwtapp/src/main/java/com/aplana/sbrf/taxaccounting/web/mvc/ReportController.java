@@ -54,20 +54,6 @@ public class ReportController {
     }
 
     /**
-     * Получает отчет по ЖА
-     * @param uuid
-     * @param request
-     * @param response
-     * @throws IOException
-     */
-    @RequestMapping(value = "/processLogDownload/{uuid}", method = RequestMethod.GET)
-    public void processLogDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        BlobData blobData = blobDataService.get(uuid);
-        reportService.deleteAudit(uuid);
-        createResponse(request, response, blobData);
-    }
-
-    /**
      * Получает архив ЖА
      * @param uuid
      * @param request

@@ -20,7 +20,6 @@ ALTER TABLE declaration_template ENABLE CONSTRAINT dec_tem_fk_blob_data_jrxml;
 --ALTER TABLE notification ENABLE CONSTRAINT notification_fk_blob_data_id;
 ALTER TABLE notification ENABLE CONSTRAINT notification_fk_report_id;
 --ALTER TABLE log_system ENABLE CONSTRAINT log_system_fk_blob_data;
-ALTER TABLE log_system_report ENABLE CONSTRAINT log_system_report_fk_blob_data;
 ALTER TABLE declaration_subreport ENABLE CONSTRAINT decl_subrep_fk_blob_data;
 ALTER TABLE declaration_report ENABLE CONSTRAINT decl_report_fk_blob_data;
 ALTER TABLE declaration_data_file ENABLE CONSTRAINT decl_data_file_pk;

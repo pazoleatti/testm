@@ -44,12 +44,6 @@ public class ReportDaoImplTest {
     }
 
     @Test
-    public void getAudit() {
-        String id = reportDao.getAudit(1, ReportType.EXCEL);
-        assertEquals("uuid_6", id);
-    }
-
-    @Test
     @Transactional(readOnly = false)
     public void delete(){
         String id = reportDao.get(1, "Excel", false, false, false);
@@ -119,30 +113,6 @@ public class ReportDaoImplTest {
 
     @Test
     @Transactional(readOnly = false)
-    public void deleteAuditTest1(){
-        String id = reportDao.getAudit(1, ReportType.EXCEL);
-        assertEquals("uuid_6", id);
-
-        reportDao.deleteAudit(1, ReportType.EXCEL);
-
-        id = reportDao.getAudit(1, ReportType.EXCEL);
-        assertEquals(null, id);
-    }
-
-    @Test
-    @Transactional(readOnly = false)
-    public void deleteAuditTest2(){
-        String id = reportDao.getAudit(1, ReportType.EXCEL);
-        assertEquals("uuid_6", id);
-
-        reportDao.deleteAudit("uuid_6");
-
-        id = reportDao.getAudit(1, ReportType.EXCEL);
-        assertEquals(null, id);
-    }
-
-    @Test
-    @Transactional(readOnly = false)
     public void create() {
         String id = reportDao.get(11, "Excel", true, true, true);
         assertEquals(null, id);
@@ -162,18 +132,6 @@ public class ReportDaoImplTest {
         blobData.setInputStream(new ByteArrayInputStream(new byte[]{'a'}));
         blobDataDao.create(blobData);
         reportDao.createDec(3, uuid, DeclarationDataReportType.EXCEL_DEC);
-    }
-
-    @Test
-    @Transactional(readOnly = false)
-    public void createAuditTest(){
-        BlobData blobData = new BlobData();
-        String uuid = UUID.randomUUID().toString();
-        blobData.setUuid(uuid);
-        blobData.setName("hello");
-        blobData.setInputStream(new ByteArrayInputStream(new byte[]{'a'}));
-        blobDataDao.create(blobData);
-        reportDao.createAudit(2, uuid, ReportType.CSV);
     }
 
     @Test

@@ -80,8 +80,6 @@ public enum FormDataEvent implements Serializable {
     EXTERNAL_INTERACTION(503, "Взаимодействие с внешней АС"),
 	SUNR_USER_ACTION(504, "Действия пользователя в ФП СУНР"),
 
-	LOG_SYSTEM_BACKUP(601, "Архивация журнала аудита"),
-
     SEND_EMAIL(650, "Отправка email"),
 
     TEMPLATE_CREATED(701, "Версия макета создана"),

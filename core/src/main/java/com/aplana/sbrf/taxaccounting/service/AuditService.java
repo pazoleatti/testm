@@ -8,20 +8,6 @@ import java.util.Date;
  * Сервис для работы с журналом аудита
  */
 public interface AuditService {
-    public enum AsyncNames{
-        LOG_FILTER,
-        LOG_COUNT,
-        LOG_FIRST_DATE,
-        LOG_LAST_DATE,
-        SEARCH_CRITERIA
-    }
-
-	/**
-	 * Получить информацию из журнала аудита по фильтру
-	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных
-	 * @return объект, представляющий искомую информацию из журанала аудита
-	 * */
-	PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter logSystemFilter);
 
 	/**
 	 * Добавить информацию об логировании.
@@ -96,32 +82,4 @@ public interface AuditService {
      * @param blobDataId
      */
     void add(FormDataEvent event, TAUserInfo userInfo, DeclarationData declarationData, FormData formData, String note, String blobDataId);
-
-    /**
-     * Удаляем набор записей из журнала по фильтру
-     * @param filter фильтр для удаления записей
-     * @param firstRecord первая запись
-     */
-    void removeRecords(LogSystemFilter filter, LogSearchResultItem firstRecord, LogSearchResultItem lastRecord, TAUserInfo userInfo);
-
-    /**
-     * Получение даты последней архивации
-     * @return дата ахивации
-     */
-    Date getLastArchiveDate();
-
-    /**
-     * Получить информацию об изменениях в НФ/декларациях из журнала аудита по фильтру
-     * @param filter фильтр
-     * @return записи из ЖА
-     */
-    PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo);
-
-    long getCountRecords(LogSystemFilter filter,  TAUserInfo userInfo);
-
-    /**
-     * Получение даты первой записи в журнале аудита
-     * @return дата первой записи
-     */
-    Date getFirstDateOfLog();
 }

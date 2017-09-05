@@ -8,7 +8,6 @@
 
 	<!-- TaxAccounting Modules -->
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.about.AboutModule" />
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.configuration.Configuration"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationdata.DeclarationData" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationlist.DeclarationList"/>

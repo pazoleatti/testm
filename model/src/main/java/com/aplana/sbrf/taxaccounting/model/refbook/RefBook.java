@@ -89,7 +89,6 @@ public class RefBook implements Serializable {
 		SEC_ROLE(95), 								// Роли
 		OKTMO(96),                                  // Территорий муниципальных образований (ОКТМО)
 		DEPARTMENT_TYPE(103),						// Типы подразделений
-		AUDIT_FIELD(104), 							// Список полей для журнала аудита
 		CONFIGURATION_PARAM(105), 					// Конфигурационные параметры
 		DECLARATION_TEMPLATE(207), 		            // Макеты налоговых форм
 		ASNU(900), 									// АСНУ

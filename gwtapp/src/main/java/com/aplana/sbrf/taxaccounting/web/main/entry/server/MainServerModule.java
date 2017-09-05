@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
-import com.aplana.sbrf.taxaccounting.web.module.audit.server.AuditFormServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.server.CommonParameterServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.server.ConfigurationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.DeclarationDataServerModule;
@@ -43,7 +42,7 @@ import org.springframework.context.annotation.Import;
         AdminServerModule.class, DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
         HistoryServerModule.class, TemplateVersionListServerModule.class,
-        ConfigurationServerModule.class, AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
+        ConfigurationServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
         SourcesServerModule.class, DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,

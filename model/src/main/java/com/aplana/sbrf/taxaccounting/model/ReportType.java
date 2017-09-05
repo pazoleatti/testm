@@ -42,9 +42,6 @@ public enum ReportType {
 
     ZIP_IFRS(0, "Zip", "", 9L, 109L),
 
-    ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", "", 10L, 110L),
-    CSV_AUDIT(1, "CSV_AUDIT", "Формирование файла с данными журнала аудита по параметрам поиска", 11L, 111L),
-
     LOAD_ALL_TF(1, "LoadAllTF", "Импорт транспортного файла из каталога загрузки", 13L, 113L),
 
     EXCEL_REF_BOOK(0, "XLSX", "Формирование отчета справочника \"%s\" в XLSX-формате", 23L, 123L),
