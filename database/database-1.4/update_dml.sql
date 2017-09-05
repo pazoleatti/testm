@@ -12,6 +12,10 @@ prompt synonym department
 prompt synonym user role
 @@synonym_user_role.sql;
 
+-- synonym add_log_system_ndfl
+prompt synonym add_log_system_ndfl
+@@synonym_add_log_system_ndfl.sql;
+
 prompt ref_book_income_kind
 @@ref_book_income_kind.sql;
 
