@@ -63,19 +63,19 @@ BEGIN
     UPDATE REF_BOOK_ASNU SET ROLE_NAME=5 WHERE ROLE_NAME=14;
     UPDATE ROLE_EVENT SET ROLE_ID=5 WHERE ROLE_ID=14;
 
-    EXECUTE IMMEDIATE 'alter table SEC_ROLE rename to SEC_ROLE_';
+    EXECUTE IMMEDIATE 'drop table SEC_ROLE';
     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_ROLE FOR &1..SEC_ROLE';
   END IF;
 
   select count(1) into v_count from user_synonyms where synonym_name='SEC_USER';
   IF v_count=0 THEN
-    EXECUTE IMMEDIATE 'alter table SEC_USER rename to SEC_USER_';
+    EXECUTE IMMEDIATE 'drop table SEC_USER';
     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_USER FOR &1..SEC_USER';
   END IF;
 
   select count(1) into v_count from user_synonyms where synonym_name='SEC_USER_ROLE';
   IF v_count=0 THEN
-    EXECUTE IMMEDIATE 'alter table SEC_USER_ROLE rename to SEC_USER_ROLE_';
+    EXECUTE IMMEDIATE 'drop table SEC_USER_ROLE';
     EXECUTE IMMEDIATE 'CREATE SYNONYM SEC_USER_ROLE FOR &1..SEC_USER_ROLE';
   END IF;
 
