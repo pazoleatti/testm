@@ -97,7 +97,7 @@ public class FileWrapperTest {
         Assert.assertTrue(FileWrapper.canReadFile(fileFile.getPath()));
     }
 
-    //@Test
+    @Test
     public void canWriteFolderTest() {
         Assert.assertTrue(FileWrapper.canWriteFolder(folderFile.getPath()));
         Assert.assertFalse(FileWrapper.canWriteFolder(fileFile.getPath()));
