@@ -10,7 +10,7 @@ import java.util.List;
  * Dao-объект для работы с {@link DeclarationData декларациями}
  * @author dsultanbekov
  */
-public interface DeclarationDataDao {
+public interface DeclarationDataDao extends PermissionDao {
 	String DECLARATION_NOT_FOUND_MESSAGE = "Налоговая форма с номером = %d не существует либо была удалена";
 
 	/**

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
@@ -10,7 +11,7 @@ import java.util.List;
  * Интерфейс DAO для работы с {@link ReportPeriod отчётными периодами} 
  * @author dsultanbekov
  */
-public interface ReportPeriodDao {
+public interface ReportPeriodDao extends PermissionDao {
 	
 	/**
 	 * Получить объект отчётного периода по идентификатору периода

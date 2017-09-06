@@ -9,7 +9,7 @@ import java.util.Date;
  * @since 17.07.14 13:51
  */
 
-public final class LockData implements AuthorisableEntity {
+public final class LockData implements SecuredEntity {
 	/* Идентификатор блокировки */
 	private String key;
 	/* Код пользователя, установившего блокировку*/

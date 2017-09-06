@@ -470,4 +470,9 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	public boolean existsUser(String login) {
 		return getJdbcTemplate().queryForObject("select count(id) from sec_user where lower(login) = ?", new Object[]{login.toLowerCase()}, Integer.class) == 1;
 	}
+
+	@Override
+	public SecuredEntity getSecuredEntity(long id) {
+		return getUser((int) id);
+	}
 }

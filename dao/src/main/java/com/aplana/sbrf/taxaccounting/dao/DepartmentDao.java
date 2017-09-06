@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * DAO для работы с информацией по подразделениям банка 
  */
-public interface DepartmentDao {
+public interface DepartmentDao extends PermissionDao {
 	/**
 	 * Получить подразделение по коду
 	 * @param id идентфикатор подразделения

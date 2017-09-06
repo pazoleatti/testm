@@ -8,7 +8,7 @@ import java.util.Date;
  *
  * @author lhaziev
  */
-public class DeclarationDataFile implements Serializable, AuthorisableEntity {
+public class DeclarationDataFile implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = -1566841683151489811L;
 
     private long declarationDataId;

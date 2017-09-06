@@ -11,7 +11,7 @@ import java.io.Serializable;
  * 
  * @author dsultanbekov
  */
-public class Department implements Serializable, AuthorisableEntity {
+public class Department implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = 2144891300700432727L;
     public static final Long REF_BOOK_ID = 30L;
 

@@ -5,7 +5,7 @@ package com.aplana.sbrf.taxaccounting.model;
  *
  * @author <a href="mailto:ogalkin@aplana.com>Олег Галкин</a>
  */
-public interface AuthorisableEntity {
+public interface SecuredEntity {
     /**
      * Возвращает битовую маску текущих прав.
      */

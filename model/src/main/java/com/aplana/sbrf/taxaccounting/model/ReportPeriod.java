@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -10,7 +9,7 @@ import java.util.Date;
  * исключения возможны в случае использования корректирующих периодов.
  * @author dsultanbekov
  */
-public class ReportPeriod implements Serializable, AuthorisableEntity {
+public class ReportPeriod implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = 1L;
 
 	/** Уникальный идентификатор отчетного периода */

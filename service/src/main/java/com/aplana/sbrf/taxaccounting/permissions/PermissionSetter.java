@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
-import com.aplana.sbrf.taxaccounting.model.AuthorisableEntity;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 
 import java.util.Collection;
 
@@ -9,14 +9,14 @@ import java.util.Collection;
  *
  * @author <a href="mailto:ogalkin@aplana.com>Олег Галкин</a>
  */
-public interface PermissionSetter<T extends AuthorisableEntity> {
+public interface PermissionSetter<T extends SecuredEntity> {
     /**
      * Устанавливает права текущего пользователя на указанный объект.
      *
      * @param targetDomainObject объект, для которого нужно установить права
      * @param permissions        массив прав, которые должны быть определены. Если {@code null},
      *                           то определяются все зарегистрированные права
-     * @see AuthorisableEntity#setPermissions(long)
+     * @see SecuredEntity#setPermissions(long)
      */
     void setPermissions(T targetDomainObject, Permission<T>... permissions);
 
@@ -25,7 +25,7 @@ public interface PermissionSetter<T extends AuthorisableEntity> {
      *
      * @param targetDomainObject объект, для которого нужно установить права
      * @param mask               битовая маска прав, которые должны быть определены
-     * @see AuthorisableEntity#setPermissions(long)
+     * @see SecuredEntity#setPermissions(long)
      */
     void setPermissions(T targetDomainObject, long mask);
 

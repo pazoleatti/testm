@@ -81,6 +81,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         this.sqlQueryFactory = sqlQueryFactory;
     }
 
+    @Override
+    public SecuredEntity getSecuredEntity(long id) {
+        return get(id);
+    }
+
     private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
         @Override
         public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
