@@ -57,41 +57,10 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
                     }
                 }
                 if (canAssign) {
-                    // Фильтр для проверки привязки подразделения к периоду
-                    DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-                    filter.setDepartmentIdList(Arrays.asList(depId));
-
-                    List<DepartmentReportPeriod> currDepDrpList = departmentReportPeriodService.getListByFilter(filter);
-
-                    // Находим все периоды для ПАО "Сбербанк"
-                    DepartmentReportPeriodFilter filterAll = new DepartmentReportPeriodFilter();
-                    filterAll.setDepartmentIdList(Arrays.asList(0));
-                    List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filterAll);
-
-                    List<DepartmentReportPeriod> drpForSave = new LinkedList<DepartmentReportPeriod>(drpList);
-
-                    // Удаляем периоды имеющиеся у текущего подразеления
-                    outer: for (DepartmentReportPeriod drp : drpList) {
-                        for (DepartmentReportPeriod currDepDrp : currDepDrpList) {
-                            if (currDepDrp.getReportPeriod().getId().equals(drp.getReportPeriod().getId())
-                                    && currDepDrp.isActive() == drp.isActive()
-                                    && currDepDrp.isBalance() == drp.isBalance()
-                                    && ((currDepDrp.getCorrectionDate() == null && drp.getCorrectionDate() == null) || (currDepDrp.getCorrectionDate() != null && currDepDrp.getCorrectionDate().equals(drp.getCorrectionDate())))) {
-                                drpForSave.remove(drp);
-                                continue outer;
-                            }
-                        }
+                    List<Integer> childrenDepartmentIdList = departmentService.getAllChildrenIds(depId);
+                    for (Integer childrenDepartmentId : childrenDepartmentIdList) {
+                        addPeriod(childrenDepartmentId);
                     }
-                    for (DepartmentReportPeriod drp : drpForSave) {
-                        DepartmentReportPeriod newDrp = new DepartmentReportPeriod();
-                        newDrp.setReportPeriod(drp.getReportPeriod());
-                        newDrp.setActive(drp.isActive());
-                        newDrp.setBalance(drp.isBalance());
-                        newDrp.setCorrectionDate(drp.getCorrectionDate());
-                        newDrp.setDepartmentId(depId);
-                        departmentReportPeriodService.save(newDrp);
-                    }
-
                     departmentFormTypeService.saveDDT((long) depId, dt.intValue(), action.getPerformers());
                 }
             }
@@ -104,5 +73,42 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 
     @Override
     public void undo(AddDeclarationSourceAction addDeclarationSourceAction, AddDeclarationSourceResult addDeclarationSourceResult, ExecutionContext executionContext) throws ActionException {
+    }
+
+    private void addPeriod(int depId) {
+        // Фильтр для проверки привязки подразделения к периоду
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setDepartmentIdList(Arrays.asList(depId));
+
+        List<DepartmentReportPeriod> currDepDrpList = departmentReportPeriodService.getListByFilter(filter);
+
+        // Находим все периоды для ПАО "Сбербанк"
+        DepartmentReportPeriodFilter filterAll = new DepartmentReportPeriodFilter();
+        filterAll.setDepartmentIdList(Arrays.asList(0));
+        List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filterAll);
+
+        List<DepartmentReportPeriod> drpForSave = new LinkedList<DepartmentReportPeriod>(drpList);
+
+        // Удаляем периоды имеющиеся у текущего подразеления
+        outer: for (DepartmentReportPeriod drp : drpList) {
+            for (DepartmentReportPeriod currDepDrp : currDepDrpList) {
+                if (currDepDrp.getReportPeriod().getId().equals(drp.getReportPeriod().getId())
+                        && currDepDrp.isActive() == drp.isActive()
+                        && currDepDrp.isBalance() == drp.isBalance()
+                        && ((currDepDrp.getCorrectionDate() == null && drp.getCorrectionDate() == null) || (currDepDrp.getCorrectionDate() != null && currDepDrp.getCorrectionDate().equals(drp.getCorrectionDate())))) {
+                    drpForSave.remove(drp);
+                    continue outer;
+                }
+            }
+        }
+        for (DepartmentReportPeriod drp : drpForSave) {
+            DepartmentReportPeriod newDrp = new DepartmentReportPeriod();
+            newDrp.setReportPeriod(drp.getReportPeriod());
+            newDrp.setActive(drp.isActive());
+            newDrp.setBalance(drp.isBalance());
+            newDrp.setCorrectionDate(drp.getCorrectionDate());
+            newDrp.setDepartmentId(depId);
+            departmentReportPeriodService.save(newDrp);
+        }
     }
 }
