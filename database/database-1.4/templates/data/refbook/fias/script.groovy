@@ -44,21 +44,33 @@ void importData() {
     //Строим карту Guid адресных объектов, заранее так как будет нужна иерархия
     def addressObjectGuidsMap = buidGuidsMap(getInputStream(archive, itemsMap, "AS_ADDROBJ_"), QName.valueOf('Object'), QName.valueOf('AOGUID'));
 
-    def FIAS_SOCRBASE_TABLE_NAME = "FIAS_SOCRBASE"; //RefBook.Table.FIAS_SOCRBASE.getTable()
-    startImport(getInputStream(archive, itemsMap, "AS_SOCRBASE_"),
-            QName.valueOf('AddressObjectType'),
-            FIAS_SOCRBASE_TABLE_NAME,
-            { generatedId, attr ->
-                addressObjectTypeRowMapper(generatedId, attr)
-            })
+    //Удаляем индексы для улучшения производительности
+    try {
+        importFiasDataService.dropIndexes()
+    } catch (Exception e) {
+        println "Cannot drop indexes!"
+    }
 
-    //Начинаем заливать данные из таблиц справочника
-    startImport(getInputStream(archive, itemsMap, "AS_ADDROBJ_"),
-            QName.valueOf('Object'),
-            RefBook.Table.FIAS_ADDR_OBJECT.getTable(),
-            { generatedId, attr ->
-                addressObjectRowMapper(generatedId, addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
-            })
+    try {
+        def FIAS_SOCRBASE_TABLE_NAME = "FIAS_SOCRBASE"; //RefBook.Table.FIAS_SOCRBASE.getTable()
+        startImport(getInputStream(archive, itemsMap, "AS_SOCRBASE_"),
+                QName.valueOf('AddressObjectType'),
+                FIAS_SOCRBASE_TABLE_NAME,
+                { generatedId, attr ->
+                    addressObjectTypeRowMapper(generatedId, attr)
+                })
+
+        //Начинаем заливать данные из таблиц справочника
+        startImport(getInputStream(archive, itemsMap, "AS_ADDROBJ_"),
+                QName.valueOf('Object'),
+                RefBook.Table.FIAS_ADDR_OBJECT.getTable(),
+                { generatedId, attr ->
+                    addressObjectRowMapper(generatedId, addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
+                })
+    } finally {
+        println "Indexes restoring..."
+        importFiasDataService.createIndexes()
+    }
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
