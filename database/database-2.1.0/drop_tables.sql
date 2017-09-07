@@ -56,5 +56,11 @@ begin
 	if v_count>0 then
 		execute immediate 'DROP TABLE IFRS_DATA';
 	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'DEPARTMENT_CHANGE';
+	if v_count>0 then
+		execute immediate 'DROP TABLE DEPARTMENT_CHANGE';
+	end if;
 end;
 /
