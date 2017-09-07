@@ -1668,7 +1668,7 @@ def createForm() {
                 def note = "Часть ${indexFrom1} из ${partTotal}"
                 params = new HashMap<String, Object>()
                 ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                        departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, note.toString())
+                        departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, note.toString(), false)
                 //appendNdflPersonsToDeclarationData(ddId, part)
                 params.put(PART_NUMBER, indexFrom1)
                 params.put(PART_TOTAL, partTotal)

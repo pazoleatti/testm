@@ -327,7 +327,7 @@ def importPrimary1151111() {
     // Создание экземпляра декларации
     declarationDataId = declarationService.create(
             logger, declarationTemplateId, userInfo, departmentReportPeriod,
-            null, kpp, null, null, UploadFileName, null
+            null, kpp, null, null, UploadFileName, null, true
     )
 
     InputStream inputStream = new FileInputStream(dataFile)
@@ -1446,7 +1446,7 @@ def _importTF() {
         return
     }
     // Создание экземпляра декларации
-    declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null);
+    declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null, true);
 
     InputStream inputStream = new FileInputStream(dataFile)
     try {
