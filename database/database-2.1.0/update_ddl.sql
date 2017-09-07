@@ -2,14 +2,16 @@
 prompt alter table notification.id
 alter table notification modify id number(18);
 
-
--- indexes
-prompt add indexes
-@@indexes.sql;
+--drop tables
+prompt drop tmp tables
+@@drop_tables.sql;
 
 -- compile source
-prompt compile source
+prompt compile DEP_REP_PER_BEFORE_DELETE
+@@DEP_REP_PER_BEFORE_DELETE.sql;
+
+-- compile source
+prompt compile person_pkg
 @@person_pkg.sql;
-@@fias_pkg.sql;
 
 exit;

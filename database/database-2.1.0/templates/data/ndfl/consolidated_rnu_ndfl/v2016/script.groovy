@@ -83,6 +83,8 @@ final DepartmentService departmentService = getProperty("departmentService")
 @Field
 final RefBookService refBookService = getProperty("refBookService")
 @Field
+final FormDataService formDataService = getProperty("formDataService")
+@Field
 final String DATE_FORMAT = "dd.MM.yyyy"
 @Field
 final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
@@ -1824,7 +1826,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String T_PERSON_PREPAYMENT_NAME  = "Сведения о доходах в виде авансовых платежей"
 
 // Справочники
-@Field final String R_FIAS = "КЛАДР"
+@Field final String R_FIAS = "ФИАС"
 @Field final String R_PERSON = "Физические лица"
 @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
 @Field final String R_ID_DOC_TYPE = "Коды документов"
@@ -2510,12 +2512,12 @@ def checkDataReference(
 }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
-            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"КЛАДР\"")
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
+            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"ФИАС\"")
 }
 
 void logFiasIndexError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
             "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") не соответствует требуемому формату")
 }
 
@@ -2646,10 +2648,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         ScriptUtils.checkInterrupted();
 
-        boolean applyTemporalySolution = false
-        if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
-            applyTemporalySolution = true
-        }
+        boolean applyTemporalySolution = true
+//        if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+//            applyTemporalySolution = true
+//        }
 
         NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -2953,26 +2955,15 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPersonIncome.oktmo != null) {
             def kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
             if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-
-                if (kppList == null) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
-                            R_DETAIL,
-                            department ? department.name : ""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
-                            errMsg)
-                } else {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_KPP, ndflPersonIncome.kpp ?: "",
-                            R_DETAIL,
-                            department ? department.name : ""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
-                            errMsg)
-                }
+                String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                        C_KPP, ndflPersonIncome.kpp ?: "",
+                        C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                        R_DETAIL,
+                        department ? department.name : ""
+                )
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
+                        errMsg)
             }
         }
     }
@@ -3007,7 +2998,7 @@ boolean checkRequiredAttribute(def ndflPerson, String fioAndInp, String alias, S
  */
 @TypeChecked
 Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
-    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /**
@@ -3128,7 +3119,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             new Column21EqualsColumn7LastDayOfMonth(), "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца выплаты дохода")
 
     // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
-    dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+    dateConditionDataListForBudget << new DateConditionData(["2740", "2750", "2790", "4800"], ["13"],
             new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
 
     // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
@@ -3620,7 +3611,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         }
                     }
                 }
-                if (["2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
+                if (["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
                     // 11 подпункт "Графа 21" = "Графа 7" + "1 рабочий день"
                     /*
                         Найти следующую за текущей строкой, удовлетворяющую условиям:
@@ -4103,7 +4094,7 @@ BigDecimal getDeductionSumForIncome(NdflPersonIncome ndflPersonIncome, List<Ndfl
     BigDecimal sumNdflDeduction = new BigDecimal(0)
     for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
         if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                && ndflPersonIncome.incomeAccruedDate?.toLocalDate().equals(ndflPersonDeduction.incomeAccrued?.toLocalDate())
+                && ndflPersonIncome.incomeAccruedDate?.format(DATE_FORMAT) == ndflPersonDeduction.incomeAccrued?.format(DATE_FORMAT)
                 && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
             sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
         }
@@ -4191,8 +4182,8 @@ interface DateConditionChecker {
 class Column6EqualsColumn7 implements DateConditionChecker {
     @Override
     boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
-        String accrued = ndflPersonIncome.incomeAccruedDate?.toString("dd.MM.yyyy")
-        String payout = ndflPersonIncome.incomePayoutDate?.toString("dd.MM.yyyy")
+        String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
+        String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
         return accrued == payout
     }
 }
@@ -4213,7 +4204,7 @@ class MatchMask implements DateConditionChecker {
         if (ndflPersonIncome.incomeAccruedDate == null) {
             return false
         }
-        String accrued = ndflPersonIncome.incomeAccruedDate.toString("dd.MM.yyyy")
+        String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
         Pattern pattern = Pattern.compile(maskRegex)
         Matcher matcher = pattern.matcher(accrued)
         if (matcher.matches()) {
@@ -4234,7 +4225,7 @@ class LastMonthCalendarDay implements DateConditionChecker {
             return true
         }
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
         int currentMonth = calendar.get(Calendar.MONTH)
         calendar.add(calendar.DATE, 1)
         int comparedMonth = calendar.get(Calendar.MONTH)
@@ -4253,7 +4244,7 @@ class Column7LastDayOfYear1 implements DateConditionChecker {
             return false
         }
         Calendar calendarPayout = Calendar.getInstance()
-        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 11) {
@@ -4275,7 +4266,7 @@ class Column7LastDayOfYear2 implements DateConditionChecker {
             return false
         }
         Calendar calendarPayout = Calendar.getInstance()
-        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+        calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
         int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
         int month = calendarPayout.get(Calendar.MONTH)
         if (dayOfMonth != 31 || month != 11) {
@@ -4297,14 +4288,14 @@ class LastMonthWorkDayIncomeAccruedDate implements DateConditionChecker {
             return false
         }
         Calendar calendar = Calendar.getInstance()
-        calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+        calendar.setTime(ndflPersonIncome.incomeAccruedDate)
         // находим последний день месяца
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
         Date workDay = calendar.getTime()
         // если последний день месяца приходится на выходной, то следующий первый рабочий день
         int offset = 0
         workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-        return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.toDate().getTime()
+        return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
     }
 }
 
@@ -4319,11 +4310,11 @@ class Column21EqualsColumn7Plus1WorkingDay implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+        calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
         // "Графа 7" + "1 рабочий день"
         int offset = 1
-        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(workDay);
 
@@ -4342,11 +4333,11 @@ class Column21EqualsColumn7Plus30WorkingDays implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+        calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
         // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
         int offset = 30
-        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+        Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
         Calendar calendar7 = Calendar.getInstance();
         calendar7.setTime(workDay);
 
@@ -4365,10 +4356,10 @@ class Column21EqualsColumn7LastDayOfMonth implements DateConditionChecker {
             return false
         }
         Calendar calendar21 = Calendar.getInstance();
-        calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+        calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
         Calendar calendar7 = Calendar.getInstance();
-        calendar7.setTime(ndflPersonIncome.incomePayoutDate.toDate());
+        calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
         // находим последний день месяца
         calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))
