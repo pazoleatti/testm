@@ -67,6 +67,16 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
         getJdbcTemplate().execute("call fias_pkg.RefreshViews()");
     }
 
+    @Override
+    public void dropIndexes() {
+        getJdbcTemplate().execute("drop index IDX_FIAS_ADDR_CURRST_AOLEV");
+    }
+
+    @Override
+    public void createIndexes() {
+        getJdbcTemplate().execute("CREATE INDEX IDX_FIAS_ADDR_CURRST_AOLEV ON FIAS_ADDROBJ (CURRSTATUS ASC, AOLEVEL ASC, REPLACE(LOWER(FORMALNAME), ' ', '') ASC)");
+    }
+
     /**
      * [ID, POST_INDEX, REGION_CODE, AREA, CITY, LOCALITY, STREET, NDFL_FULL_ADDR, AREA_TYPE, AREA_FNAME, CITY_TYPE, CITY_FNAME, LOC_TYPE, LOC_FNAME, STREET_TYPE, STREET_FNAME, CHK_INDEX, CHK_REGION, CHK_AREA, CHK_CITY, CHK_LOC, CHK_STREET]
      */

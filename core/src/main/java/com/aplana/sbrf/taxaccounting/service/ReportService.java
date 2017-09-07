@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.FormDataReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.Collection;
@@ -22,12 +22,15 @@ public interface ReportService {
     void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type);
 
     /**
-     * Создание записи об отчете журнала аудита
-     * @param userId ссылка на пользователя
-     * @param blobDataId ссылка на отчет
-     * @param type тип
+     * Получение записи об отчете НФ
+     * @param formDataId
+     * @param type
+     * @param checking
+     * @param manual
+     * @param absolute
+     * @return uuid
      */
-    void createAudit(Integer userId, String blobDataId, ReportType type);
+	String get(TAUserInfo userInfo, long formDataId, FormDataReportType type, boolean checking, boolean manual, boolean absolute);
 
     /**
      * Получение записи об отчете декларации
@@ -39,12 +42,11 @@ public interface ReportService {
     String getDec(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType type);
 
     /**
-     * Получение записи об отчете журнала аудита
-     * @param userInfo
-     * @param type
-     * @return uuid
+     * Удаление всех отчетов по id НФ
+     * @param formDataId
+     * @param manual
      */
-    String getAudit(TAUserInfo userInfo, ReportType type);
+    void delete(long formDataId, Boolean manual);
 
     /**
      * Удаление всех отчетов по id декларации
@@ -61,15 +63,4 @@ public interface ReportService {
      * @param uuid
      */
     void deleteDec(String uuid);
-
-    /**
-     * @param declarationDataId
-     */
-    void deleteAudit(TAUserInfo userInfo, ReportType reportType);
-
-    /**
-     * Удаление всех отчетов по id blobdata
-     * @param declarationDataId
-     */
-    void deleteAudit(String blobDataId);
 }

@@ -552,60 +552,6 @@ comment on column log_business.user_department_name is 'Подразделени
 
 create sequence seq_log_business;
 ------------------------------------------------------------------------------------------------------
-create table audit_form_type
-(
-  id   number(9, 0)   not null,
-  name varchar2(1000) not null
-);
-
-comment on table audit_form_type is 'Типы форм для журнала аудита';
-comment on column audit_form_type.id is 'Код записи';
-comment on column audit_form_type.name is 'Наименование типа';
-------------------------------------------------------------------------------------------------------
-create table log_system (
-  id                    number(18, 0),
-  log_date              date                not null,
-  ip                    varchar2(39),
-  event_id              number(3, 0)        not null,
-  user_login            varchar2(255)       not null,
-  roles                 varchar2(2000 char),
-  department_name       varchar2(4000 byte),
-  report_period_name    varchar2(100),
-  form_kind_id          number(9, 0),
-  note                  varchar2(4000 byte),
-  user_department_name  varchar2(4000 byte),
-  declaration_type_name varchar2(1000),
-  form_type_name        varchar2(1000),
-  form_department_id    number(9),
-  form_type_id          number(9, 0),
-  is_error              number(1) default 0 not null,
-  audit_form_type_id    number(9, 0),
-  server                varchar2(200),
-  log_id                 varchar2(36)
-);
-comment on table log_system is 'Системный журнал';
-comment on column log_system.id is 'Код записи';
-comment on column log_system.log_date is 'Дата события';
-comment on column log_system.ip is 'IP-адрес пользователя';
-comment on column log_system.event_id is 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
-comment on column log_system.user_login is 'Логин пользователя';
-comment on column log_system.roles is 'Список ролей пользователя';
-comment on column log_system.department_name is 'Наименование подразделения налоговой формы';
-comment on column log_system.report_period_name is 'Наименование отчетного периода';
-comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
-comment on column log_system.note is 'Текст сообщения';
-comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
-comment on column log_system.declaration_type_name is 'Вид налоговой формы';
-comment on column log_system.form_type_name is 'Вид налоговой формы';
-comment on column log_system.form_department_id is 'Идентификатор подразделения налоговой формы';
-comment on column log_system.form_type_id is 'Идентификатор вида налоговой формы';
-comment on column log_system.is_error is 'Признак ошибки';
-comment on column log_system.audit_form_type_id is 'Тип формы';
-comment on column log_system.server is 'Сервер';
-comment on column log_system.log_id is '';
-
-create sequence seq_log_system start with 10000;
-------------------------------------------------------------------------------------------------------
 create table department_report_period (
   id                number(18, 0)       not null,
   department_id     number(9)           not null,
@@ -885,19 +831,6 @@ create table declaration_data_consolidation
 comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм';
 comment on column declaration_data_consolidation.source_declaration_data_id is 'Идентификатор источника';
 comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор приемника';
-
---------------------------------------------------------------------------------------------------------
-create table log_system_report
-(
-  blob_data_id varchar2(36) not null,
-  type         number(1)    not null,
-  sec_user_id  number(9)
-);
-
-comment on table log_system_report is 'Выгрузки журнала аудита';
-comment on column log_system_report.blob_data_id is 'Идентификатор таблицы BLOB_DATA, в которой хранятся файлы';
-comment on column log_system_report.type is 'Тип выгрузки (0 - архивация журнала аудита, 1 - генерация zip-файла для журнала аудита)';
-comment on column log_system_report.sec_user_id is 'Идентификатор пользователя, инициировавшего выгрузку типа 1';
 
 --------------------------------------------------------------------------------------------------------
 create table tax_type

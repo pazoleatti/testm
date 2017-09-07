@@ -44,4 +44,14 @@ public interface FiasRefBookDao {
      */
     public void refreshViews();
 
+    /**
+     * Удаляет индексы из таблицы FIAS_ADDROBJ для ускорения импорта
+     */
+    void dropIndexes();
+
+    /**
+     * Восстанавливает индексы из таблицы FIAS_ADDROBJ для ускорения импорта
+     */
+    void createIndexes();
+
 }

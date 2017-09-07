@@ -19,12 +19,15 @@ public interface ReportDao {
     void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type);
 
     /**
-     * Создание записи об отчете ЖА
-     * @param userId
-     * @param blobDataId
+     * Получение записи об отчете НФ
+     * @param formDataId
      * @param type
+     * @param checking
+     * @param manual
+     * @param absolute
+     * @return uuid
      */
-    void createAudit(Integer userId, String blobDataId, ReportType type);
+    String get(long formDataId, String type, boolean checking, boolean manual, boolean absolute);
 
     /**
      * Получение записи об отчете декларации
@@ -35,13 +38,11 @@ public interface ReportDao {
     String getDec(long declarationDataId, DeclarationDataReportType type);
 
     /**
-     * Получение записи об отчете журнала аудита
-     * @param userInfo
-     * @param declarationDataId
-     * @param type
-     * @return uuid
+     * Удаление всех отчетов для НФ
+     * @param formDataId
+     * @param manual
      */
-    String getAudit(Integer userId, ReportType type);
+    void delete(long formDataId, Boolean manual);
 
     /**
      * Удаление всех отчетов по id декларации
@@ -58,10 +59,6 @@ public interface ReportDao {
      * @param uuid
      */
     void deleteDec(String uuid);
-
-    void deleteAudit(int userId, ReportType reportType);
-
-    void deleteAudit(String blobDataId);
 
     /**
      * Удаление ненужных/устаревших отчетов

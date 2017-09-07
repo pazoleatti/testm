@@ -1,1 +1,0 @@
-update async_task_type set name = 'Выгрузка отчетности' where id = 29; 

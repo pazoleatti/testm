@@ -114,16 +114,6 @@ Begin
         execute immediate 'Alter sequence seq_log_business INCREMENT BY 1';
      END IF;
   END IF;
-
-  Select max(id) into v_id from log_system;
-  IF (v_id IS NOT NULL) THEN 
-     Select seq_log_system.NEXTVAL into v_seq from dual;
-     IF (v_id > v_seq) THEN         
-        execute immediate 'alter sequence seq_log_system INCREMENT BY '||TO_CHAR(v_id-v_seq); 
-        Select seq_log_system.NEXTVAL into v_seq from dual;
-        execute immediate 'Alter sequence seq_log_system INCREMENT BY 1';
-     END IF;
-  END IF;
   
   Select max(id) into v_id from task_context;
   IF (v_id IS NOT NULL) THEN 

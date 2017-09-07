@@ -26,7 +26,6 @@ create index i_decl_report_blob_data_id on declaration_report(blob_data_id);
 create index i_ref_book_script_id on ref_book(script_id);
 create index i_declaration_template_xsd on declaration_template(xsd);
 create index i_declaration_template_jrxml on declaration_template(jrxml);
-create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 create index i_decl_subrep_blob_data_id on declaration_subreport(blob_data_id);
 create index i_notification_report_id on notification (report_id);
@@ -75,7 +74,6 @@ create index srch_ref_book_person_inn on ref_book_person(replace(inn, ' ', ''));
 create index srch_ref_book_person_inn_f on ref_book_person(replace(inn_foreign, ' ', ''));
 create index srch_full_ref_pers_duble on ref_book_person (replace(lower(nvl(last_name,'empty')),' ',''), replace(lower(nvl(first_name,'empty')),' ',''), replace(lower(nvl(middle_name,'empty')),' ',''), birth_date, replace(replace(nvl(snils,'empty'),' ',''),'-',''), replace(nvl(inn,'empty'),' ',''), replace(nvl(inn_foreign,'empty'),' ',''));
 
-create index i_log_system_log_id on log_system(log_id);
 create index i_notification_log_id on notification(log_id);
 create index fk_log_entry_log on log_entry(log_id);
 

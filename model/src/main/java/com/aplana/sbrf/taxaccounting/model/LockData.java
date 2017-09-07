@@ -38,8 +38,6 @@ public final class LockData {
         FORM_DATA_CREATE,      //Блокировка при создании вручную, через интерфейс
         DECLARATION_TEMPLATE,
         FORM_TEMPLATE,
-        LOG_SYSTEM_BACKUP,
-        LOG_SYSTEM_CSV,
         IFRS,
         FILE,
         CONFIGURATION_PARAMS,
@@ -56,8 +54,6 @@ public final class LockData {
         FILE("Загрузка ТФ \"%s\""),
         DECLARATION_TEMPLATE("Редактирование версии макета налоговой формы \"%s\" (%s) за период с %s по %s"),
         FORM_TEMPLATE("Редактирование версии макета \"%s\" (%s) за период с %s по %s"),
-        LOG_SYSTEM_BACKUP("Архивация журнала аудита с %s по %s"),
-        LOG_SYSTEM_CSV("Формирование файла с данными журнала аудита по параметрам поиска \"%s\""),
         IFRS("Формирование отчетности МСФО за период \"%s %s\""),
         CONFIGURATION_PARAMS("Блокировка конфигурационных параметров при загрузке ТФ"),
         SCHEDULER_TASK("Выполнение задачи планировщика \"%s\""),

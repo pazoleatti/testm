@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,7 +48,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
     @Autowired
     private ReportService reportService;
     @Autowired
-    private ValidateXMLServiceImpl validateService;
+    private ValidateXMLService validateService;
 
     private String uuidXsd1;
     @Before
@@ -186,8 +187,9 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
+        // Приводим интерфейс к текущей реализации
 		// при маленьком таймауте проверка не должна пройти
-		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, null, null, 1000L));
+		Assert.assertFalse(((ValidateXMLServiceImpl)validateService).validate(data, userInfo, logger, true, null, null, null, 1000L));
         Assert.assertEquals(4, logger.getEntries().size());
     }
 

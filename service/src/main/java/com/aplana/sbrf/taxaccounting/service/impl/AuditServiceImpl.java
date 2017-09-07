@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -14,9 +12,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static com.aplana.sbrf.taxaccounting.dao.AuditDao.SAMPLE_NUMBER;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,11 +48,6 @@ public class AuditServiceImpl implements AuditService {
             return new SimpleDateFormat("dd.MM.yyyy");
         }
     };
-
-    @Override
-	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
-		return auditDao.getLogsForAdmin(filter);
-	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -153,90 +145,6 @@ public class AuditServiceImpl implements AuditService {
         });
     }
 
-    @Override
-    public void removeRecords(LogSystemFilter filter, LogSearchResultItem firstRecord, LogSearchResultItem lastRecord, TAUserInfo userInfo) {
-        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-        Date startDate = firstRecord.getLogDate();
-        Date endDate = lastRecord.getLogDate();
-        auditDao.removeRecords(filter);
-        add(
-                FormDataEvent.LOG_SYSTEM_BACKUP,
-                userInfo,
-                userInfo.getUser().getDepartmentId(),
-                null, null, null, null,
-                "Архивация событий ЖА за период: " + format.format(startDate) + " - " + format.format(endDate),
-                null, null);
-    }
-
-    @Override
-    public Date getLastArchiveDate() {
-        try {
-            return auditDao.lastArchiveDate();
-        } catch (DaoException e){
-            throw new ServiceException("Ошибка при получении последней даты архивации.", e);
-        }
-    }
-
-    @Override
-    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
-        try {
-            TAUser user = userInfo.getUser();
-            HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
-                    new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
-            if (user.hasRole(TARole.ROLE_ADMIN)) {
-                return auditDao.getLogsForAdmin(filter);
-            } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
-
-                sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
-                sampleVal.put(SAMPLE_NUMBER.S_45, departmentService.getSourcesDepartmentIds(userInfo.getUser(), null, null));
-                sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
-
-                return auditDao.getLogsBusinessForControl(filter, sampleVal);
-            } else if (user.hasRole(TARole.N_ROLE_OPER)) {
-                sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
-                sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
-                return auditDao.getLogsBusinessForOper(filter, sampleVal);
-            } else if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)){
-                return auditDao.getLogsBusinessForControlUnp(filter);
-            }
-        } catch (DaoException e) {
-            throw new ServiceException("Поиск по налоговым формам.", e);
-        }
-
-
-        return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(0));
-    }
-
-    @Override
-    public long getCountRecords(LogSystemFilter filter, TAUserInfo userInfo) {
-        TAUser user = userInfo.getUser();
-        if (user.hasRole(TARole.ROLE_ADMIN)) {
-            return auditDao.getCount(filter);
-        } else if (user.hasRole(TARole.N_ROLE_CONTROL_NS)) {
-            HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
-                    new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
-            sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
-            sampleVal.put(SAMPLE_NUMBER.S_45, departmentService.getSourcesDepartmentIds(userInfo.getUser(), null, null));
-            sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
-
-            return auditDao.getCountForControl(filter, sampleVal);
-        } else if (user.hasRole(TARole.N_ROLE_OPER)) {
-            HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
-                    new HashMap<SAMPLE_NUMBER, Collection<Integer>>(2);
-            sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
-            sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
-            return auditDao.getCountForOper(filter, sampleVal);
-        } else if (user.hasRole(TARole.N_ROLE_CONTROL_UNP)){
-            return auditDao.getCountForControlUnp(filter);
-        }
-        return auditDao.getCount(filter);
-    }
-
-    @Override
-    public Date getFirstDateOfLog() {
-        return auditDao.firstDateOfLog();
-    }
-
     // TODO в метод add передавать параметр AuditFormType извне, а не вычислять как тут
     private AuditFormType getAuditFormType(String formTypeName, String declarationTypeName, String departmentName){
         if (formTypeName != null) {
@@ -258,7 +166,7 @@ public class AuditServiceImpl implements AuditService {
         LogSystem log = new LogSystem();
         log.setIp(userInfo.getIp());
         log.setEventId(event.getCode());
-		log.setUserLogin((userInfo.getUser().getName() != null ? userInfo.getUser().getName() + " " : "") + "(" + userInfo.getUser().getLogin() + ")");
+		log.setUserLogin(userInfo.getUser().getLogin());
 
         StringBuilder roles = new StringBuilder();
         List<TARole> taRoles = userInfo.getUser().getRoles();
