@@ -9,13 +9,14 @@
 	<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1"/>
 	<property name="net.sf.jasperreports.export.xls.one.page.no.pagination" value="apply"/>
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.rows" value="true"/>
+	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="true"/>
 	<parameter name="declarationId" class="java.lang.Long">
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[select r.num,r.surname,r.name,r.lastname,r.birthday,
-       r.errtext,
-       r.errtext||chr(10) errtext0,
+       nvl(r.errtext,' ') errtext,
+      nvl( r.errtext||chr(10),' ')  errtext0,
        replace(r.errtext,';',';'||chr(10))||chr(10) errtext1,
        substr(r.errtext,1,instr(r.errtext,';',50))||chr(10)||
        substr(r.errtext,instr(r.errtext,';',50)+1)||chr(10) errtext2
@@ -140,9 +141,9 @@
 		</band>
 	</title>
 	<detail>
-		<band height="14">
+		<band height="10" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="7bf3a416-9008-4a86-8704-f1157826f3c9" stretchType="RelativeToTallestObject" x="0" y="0" width="45" height="14" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="7bf3a416-9008-4a86-8704-f1157826f3c9" stretchType="RelativeToTallestObject" x="0" y="0" width="45" height="10" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -150,14 +151,14 @@
 					<bottomPen lineWidth="0.5"/>
 					<rightPen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right">
+				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="Arial" size="8"/>
-					<paragraph rightIndent="5"/>
+					<paragraph lineSpacing="1_1_2" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NUM}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="0985cf55-18ce-4118-99e3-f8ebb261db09" stretchType="RelativeToTallestObject" mode="Transparent" x="45" y="0" width="128" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="0985cf55-18ce-4118-99e3-f8ebb261db09" stretchType="RelativeToTallestObject" mode="Transparent" x="45" y="0" width="128" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -167,12 +168,12 @@
 				</box>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" leftIndent="5"/>
+					<paragraph lineSpacing="1_1_2" leftIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SURNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="62d6111c-801d-4a47-bce2-16905870813d" stretchType="RelativeToTallestObject" mode="Transparent" x="261" y="0" width="85" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="62d6111c-801d-4a47-bce2-16905870813d" stretchType="RelativeToTallestObject" mode="Transparent" x="261" y="0" width="85" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -182,12 +183,12 @@
 				</box>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" leftIndent="5"/>
+					<paragraph lineSpacing="1_1_2" leftIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{LASTNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="dd.MM.yyyy" isBlankWhenNull="false">
-				<reportElement uuid="43cbecc3-8c84-43a7-a66a-0815dafc9454" stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="0" width="55" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="43cbecc3-8c84-43a7-a66a-0815dafc9454" stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="0" width="55" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -197,12 +198,12 @@
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" leftIndent="5" rightIndent="5"/>
+					<paragraph lineSpacing="1_1_2" leftIndent="5" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BIRTHDAY}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement uuid="5e1ad161-87f3-4bfd-94ce-1d64817a6813" stretchType="RelativeToTallestObject" mode="Transparent" x="401" y="0" width="154" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
+				<reportElement uuid="f983376d-0191-44bc-815f-ede3acabe9bf" stretchType="RelativeToTallestObject" mode="Transparent" x="173" y="0" width="88" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -212,25 +213,25 @@
 				</box>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" leftIndent="5" rightIndent="5" spacingAfter="5"/>
+					<paragraph lineSpacing="1_1_2" leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
+				<reportElement uuid="62471f7a-c754-4148-956c-c6c42052e65c" stretchType="RelativeToBandHeight" mode="Transparent" x="401" y="0" width="154" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="1_1_2" lineSpacingSize="1.4" leftIndent="5" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ERRTEXT}.length()>50)?
 $F{ERRTEXT0} : $F{ERRTEXT}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="f983376d-0191-44bc-815f-ede3acabe9bf" stretchType="RelativeToTallestObject" mode="Transparent" x="173" y="0" width="88" height="14" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
-				<box>
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single" leftIndent="5"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

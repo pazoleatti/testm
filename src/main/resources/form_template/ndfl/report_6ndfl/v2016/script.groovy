@@ -256,14 +256,14 @@ def buildXml(def writer, boolean isForSpecificReport) {
             declarationData.kpp,
             declarationData.oktmo)
     if (poMestuParam == null) {
-        logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
+        logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\"." )
         calculateParams.put("notReplaceXml", true)
         calculateParams.put("createForm", false)
         return
     }
     def taxPlaceTypeCode = poMestuParam?.CODE?.value
     if(taxPlaceTypeCode == null){
-        logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\".")
+        logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
         calculateParams.put("notReplaceXml", true)
         calculateParams.put("createForm", false)
         return
