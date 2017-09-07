@@ -39,16 +39,6 @@ public class ReportDaoImplTest {
 
     @Test
     @Transactional(readOnly = false)
-    public void delete(){
-        String id = reportDao.get(1, "Excel", false, false, false);
-        assertEquals("uuid_5", id);
-        reportDao.delete(1, false);
-        id = reportDao.get(1, "Excel", false, false, false);
-        assertEquals(null, id);
-    }
-
-    @Test
-    @Transactional(readOnly = false)
     public void deleteDecTest1(){
         DeclarationDataReportType type = new DeclarationDataReportType(ReportType.PDF_DEC, null);
 
@@ -103,17 +93,6 @@ public class ReportDaoImplTest {
 
         id = reportDao.getDec(1, type);
         assertEquals(null, id);
-    }
-
-    @Test
-    @Transactional(readOnly = false)
-    public void create() {
-        String id = reportDao.get(11, "Excel", true, true, true);
-        assertEquals(null, id);
-
-        reportDao.create(11, "uuid_2", "Excel", true, true, true);
-        id = reportDao.get(11, "Excel", true, true, true);
-        assertEquals("uuid_2", id);
     }
 
     @Test

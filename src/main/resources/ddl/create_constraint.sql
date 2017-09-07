@@ -234,7 +234,6 @@ alter table notification add constraint notification_chk_isread check (is_read i
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
 alter table template_changes add constraint template_changes_chk_event check (event in (701, 702, 703, 704, 705, 904));
 alter table template_changes add constraint template_changes_chk_template check ((form_template_id is not null and declaration_template_id is null and ref_book_id is null) or (form_template_id is null and declaration_template_id is not null and ref_book_id is null) or (form_template_id is null and declaration_template_id is null and ref_book_id is not null));
-alter table async_task_type add constraint async_task_type_chk_dev_mode check (dev_mode in (0, 1));
 alter table form_data_report add constraint form_data_rep_chk_manual check (manual in (0,1));
 alter table form_data_report add constraint form_data_rep_chk_checking check (checking in (0,1));
 alter table form_data_report add constraint form_data_rep_chk_absolute check (absolute in (0,1));

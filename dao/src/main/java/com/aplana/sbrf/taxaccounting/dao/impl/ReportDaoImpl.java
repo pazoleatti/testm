@@ -60,25 +60,6 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public String get(final long formDataId, final String type, final boolean checking, final boolean manual, final boolean absolute) {
-        try{
-            PreparedStatementData ps = new PreparedStatementData();
-            ps.appendQuery("SELECT BLOB_DATA_ID FROM FORM_DATA_REPORT " +
-                            "WHERE FORM_DATA_ID = ? AND TYPE = ? AND CHECKING = ? AND MANUAL = ? AND ABSOLUTE = ?");
-            ps.addParam(formDataId);
-            ps.addParam(type);
-            ps.addParam(checking);
-            ps.addParam(manual);
-            ps.addParam(absolute);
-            return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), String.class);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        } catch (DataAccessException e) {
-            throw new DaoException("Не удалось получить данные." + e.toString());
-        }
-    }
-
-    @Override
     public String getDec(final long declarationDataId, final DeclarationDataReportType type) {
         try{
             PreparedStatementData ps = new PreparedStatementData();
@@ -98,20 +79,6 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
             throw new DaoException("Не удалось получить данные." + e.toString());
         }
     }
-
-    @Override
-    public void delete(long formDataId, Boolean manual) {
-        try {
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("formDataId", formDataId);
-            params.put("manual", manual);
-            getNamedParameterJdbcTemplate().update("DELETE FROM FORM_DATA_REPORT WHERE FORM_DATA_ID = :formDataId and (:manual IS NULL OR MANUAL = :manual)",
-                    params);
-        } catch (DataAccessException e){
-            throw new DaoException(String.format("Не удалось удалить записи с form_data_id = %d", formDataId), e);
-        }
-    }
-
 
     @Override
     public void deleteDec(long declarationDataId) {
