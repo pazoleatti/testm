@@ -713,7 +713,7 @@
 			<staticText>
 				<reportElement uuid="49c78ad1-c2ef-4016-91a7-21ab82e89016" x="217" y="0" width="292" height="20"/>
 				<textElement>
-					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[СПРАВКА О ДОХОДАХ ФИЗИЧЕСКОГО ЛИЦА]]></text>
 			</staticText>
@@ -723,7 +723,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ОтчетГод}==null) ? "" : $F{ОтчетГод}]]></textFieldExpression>
@@ -734,7 +734,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НомСпр}==null) ? "" : $F{НомСпр}]]></textFieldExpression>
@@ -742,7 +742,7 @@
 			<staticText>
 				<reportElement uuid="6df61c61-4ce0-4fdd-86b3-c1792176c495" mode="Transparent" x="267" y="20" width="58" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[год       №]]></text>
@@ -750,7 +750,7 @@
 			<staticText>
 				<reportElement uuid="a5a04e7d-3770-4c63-b1cf-95f426ad82c0" mode="Transparent" x="208" y="20" width="20" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[за ]]></text>
@@ -758,7 +758,7 @@
 			<staticText>
 				<reportElement uuid="c4651bb1-4bc0-4050-889f-3367ac98be47" mode="Transparent" x="359" y="20" width="30" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[от]]></text>
@@ -769,39 +769,39 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ДатаДок}==null) ? "" : $F{ДатаДок}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="e9fc52f4-f74e-4843-91fa-f73eb62531df" mode="Transparent" x="152" y="35" width="50" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<reportElement uuid="e9fc52f4-f74e-4843-91fa-f73eb62531df" mode="Transparent" x="113" y="35" width="74" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Признак]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="45b1fb5e-3fea-488d-a70e-3929a10cb1ec" mode="Transparent" x="216" y="35" width="133" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<reportElement uuid="45b1fb5e-3fea-488d-a70e-3929a10cb1ec" mode="Transparent" x="216" y="35" width="104" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[номер корректировки]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="80e9729a-dd08-4165-a87a-35810c783c67" mode="Transparent" x="375" y="35" width="93" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<reportElement uuid="80e9729a-dd08-4165-a87a-35810c783c67" mode="Transparent" x="375" y="35" width="60" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[в ИФНС (код)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="3590249d-761e-4119-b3f4-c4849d7ca28a" mode="Transparent" x="456" y="50" width="143" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="3590249d-761e-4119-b3f4-c4849d7ca28a" mode="Transparent" x="442" y="50" width="143" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Форма 2-НДФЛ]]></text>
@@ -812,56 +812,56 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Признак}==null) ? "" : $F{Признак}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="b12131c1-c764-46e7-9677-280232a7daf2" mode="Transparent" x="303" y="35" width="72" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="b12131c1-c764-46e7-9677-280232a7daf2" mode="Transparent" x="320" y="35" width="55" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НомКорр}==null) ? "" : $F{НомКорр}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="912565fb-18ab-4307-9b43-bd80254ce883" mode="Transparent" x="430" y="35" width="66" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="912565fb-18ab-4307-9b43-bd80254ce883" mode="Transparent" x="435" y="35" width="61" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{КодНО}==null) ? "" : $F{КодНО}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="2e09a726-e9ec-45f9-a4c9-e09d9c542460" mode="Transparent" x="432" y="63" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="2e09a726-e9ec-45f9-a4c9-e09d9c542460" mode="Transparent" x="418" y="63" width="167" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код по КНД 1151078]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e2e31ca3-2926-472a-851d-1bd9b0aaf91a" mode="Transparent" x="0" y="96" width="113" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="e2e31ca3-2926-472a-851d-1bd9b0aaf91a" mode="Transparent" x="0" y="96" width="68" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Налоговый агент]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="2c10635b-baca-4f05-b28d-366b82562897" mode="Transparent" x="68" y="96" width="531" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="2c10635b-baca-4f05-b28d-366b82562897" mode="Transparent" x="68" y="96" width="517" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НаимОрг}==null) ? "" : $F{НаимОрг}]]></textFieldExpression>
@@ -869,83 +869,83 @@
 			<staticText>
 				<reportElement uuid="8df279b6-6b94-421c-ae06-9e4907849df6" mode="Transparent" x="0" y="61" width="385" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[1. Данные о налоговом агенте]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="1c6efbcd-ea29-4488-8e66-4f79da87343c" mode="Transparent" x="0" y="76" width="84" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="1c6efbcd-ea29-4488-8e66-4f79da87343c" mode="Transparent" x="0" y="76" width="59" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код по ОКТМО]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="3c32b9e4-244e-4101-8a50-eccdadbe8103" mode="Transparent" x="68" y="76" width="119" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="3c32b9e4-244e-4101-8a50-eccdadbe8103" mode="Transparent" x="59" y="76" width="116" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ОКТМО}==null) ? "" : $F{ОКТМО}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="9f2e53d4-5e33-4db4-8d54-9e1d63bf1406" mode="Transparent" x="187" y="76" width="62" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="9f2e53d4-5e33-4db4-8d54-9e1d63bf1406" mode="Transparent" x="175" y="76" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Телефон]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="f2f028aa-8cc3-4969-af72-0c0b6bdd15fa" mode="Transparent" x="228" y="76" width="142" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f2f028aa-8cc3-4969-af72-0c0b6bdd15fa" mode="Transparent" x="215" y="76" width="134" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Тлф}==null) ? "" : $F{Тлф}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="5db9a1cb-478f-4628-b6d2-56455e470d4e" mode="Transparent" x="370" y="76" width="31" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="5db9a1cb-478f-4628-b6d2-56455e470d4e" mode="Transparent" x="349" y="76" width="23" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ИНН]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="236924e8-a844-4ca1-9e42-e2b83580e125" mode="Transparent" x="393" y="76" width="97" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="236924e8-a844-4ca1-9e42-e2b83580e125" mode="Transparent" x="375" y="76" width="97" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ИННЮЛ}==null) ? "" : $F{ИННЮЛ}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="2db5d430-f15c-43b5-a632-ed4a7889c42c" mode="Transparent" x="490" y="76" width="38" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="2db5d430-f15c-43b5-a632-ed4a7889c42c" mode="Transparent" x="472" y="76" width="23" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[КПП]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="e55c3e10-7b0d-4529-b3de-f8df4e343b5d" mode="Transparent" x="513" y="76" width="86" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="e55c3e10-7b0d-4529-b3de-f8df4e343b5d" mode="Transparent" x="496" y="76" width="86" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{КПП}==null) ? "" : $F{КПП}]]></textFieldExpression>
@@ -953,118 +953,118 @@
 			<staticText>
 				<reportElement uuid="70b84abc-18d3-4d8e-9910-780099d91d01" mode="Transparent" x="0" y="116" width="431" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[2. Данные о физическом лице - получателе дохода]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="bf20ffff-fef6-43dd-9d3a-a40cdc1d3d95" mode="Transparent" x="0" y="141" width="166" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="bf20ffff-fef6-43dd-9d3a-a40cdc1d3d95" mode="Transparent" x="0" y="141" width="120" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ИНН в Российской Федерации]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="270260c3-4f6f-471b-8ac8-4a6e9a66ecd7" mode="Transparent" x="126" y="141" width="170" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="270260c3-4f6f-471b-8ac8-4a6e9a66ecd7" mode="Transparent" x="120" y="141" width="176" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ИННФЛ}==null) ? "" : $F{ИННФЛ}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="8f7881a0-6f12-4768-bf61-5ec4d18cc41e" mode="Transparent" x="296" y="141" width="160" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="8f7881a0-6f12-4768-bf61-5ec4d18cc41e" mode="Transparent" x="296" y="141" width="117" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ИНН в стране гражданства]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="07f4a815-d021-40ba-90b0-aa84eafade6d" mode="Transparent" x="432" y="141" width="167" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="07f4a815-d021-40ba-90b0-aa84eafade6d" mode="Transparent" x="413" y="141" width="172" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ИННИно}==null) ? "" : $F{ИННИно}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="11d2d6af-d36f-4241-a02a-a055effa6d23" mode="Transparent" x="0" y="156" width="56" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="11d2d6af-d36f-4241-a02a-a055effa6d23" mode="Transparent" x="0" y="156" width="37" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Фамилия]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="1fa2e6b4-0c8b-40ca-8d98-054b2007eb71" mode="Transparent" x="40" y="156" width="177" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="1fa2e6b4-0c8b-40ca-8d98-054b2007eb71" mode="Transparent" x="37" y="156" width="161" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Фамилия}==null) ? "" : $F{Фамилия}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="83305b69-b6c8-4b5f-a9f0-9b3df4c26c5d" mode="Transparent" x="217" y="156" width="40" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="83305b69-b6c8-4b5f-a9f0-9b3df4c26c5d" mode="Transparent" x="198" y="156" width="22" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Имя]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="22f7258f-703a-4f43-9aab-8ad4ebe5ed0e" mode="Transparent" x="249" y="156" width="152" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="22f7258f-703a-4f43-9aab-8ad4ebe5ed0e" mode="Transparent" x="220" y="156" width="161" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Имя}==null) ? "" : $F{Имя}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="2311dece-6232-4ccc-83db-2a0129be6bdf" mode="Transparent" x="390" y="156" width="59" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="2311dece-6232-4ccc-83db-2a0129be6bdf" mode="Transparent" x="381" y="156" width="42" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Отчество]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="4332d3df-10c1-4f8c-bb58-b595c2d9e8d8" mode="Transparent" x="440" y="156" width="159" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="4332d3df-10c1-4f8c-bb58-b595c2d9e8d8" mode="Transparent" x="423" y="156" width="162" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Отчество}==null) ? "" : $F{Отчество}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="ecba3bb4-7a2d-4bea-b339-f110fe186f6c" mode="Transparent" x="0" y="171" width="178" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="ecba3bb4-7a2d-4bea-b339-f110fe186f6c" mode="Transparent" x="0" y="171" width="105" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Статус налогоплательщика]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="07054ae7-c7d8-49bf-bdb8-5fe224ba460a" mode="Transparent" x="215" y="171" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="07054ae7-c7d8-49bf-bdb8-5fe224ba460a" mode="Transparent" x="215" y="171" width="81" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Дата рождения]]></text>
@@ -1075,91 +1075,91 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ДатаРожд}==null) ? "" : $F{ДатаРожд}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="6febe7e9-6fd1-40bf-9cde-000e8b4919ea" mode="Transparent" x="377" y="171" width="151" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="6febe7e9-6fd1-40bf-9cde-000e8b4919ea" mode="Transparent" x="377" y="171" width="116" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Гражданство (код страны)]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="f274cf79-8bff-4792-a30f-5d810252e937" mode="Transparent" x="509" y="171" width="90" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f274cf79-8bff-4792-a30f-5d810252e937" mode="Transparent" x="495" y="171" width="90" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Гражд}==null) ? "" : $F{Гражд}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="c9a0a61e-68b9-4ea4-9b06-82ce66e1c240" mode="Transparent" x="0" y="186" width="215" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="c9a0a61e-68b9-4ea4-9b06-82ce66e1c240" mode="Transparent" x="0" y="186" width="169" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код документа, удостоверяющего личность]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="178ce4e6-4cab-4ae8-ba43-e9efdd8344db" mode="Transparent" x="169" y="186" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="178ce4e6-4cab-4ae8-ba43-e9efdd8344db" mode="Transparent" x="170" y="186" width="87" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{КодУдЛичн}==null) ? "" : $F{КодУдЛичн}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="16bc0315-d297-4921-a657-4048b95ab609" mode="Transparent" x="257" y="186" width="149" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="16bc0315-d297-4921-a657-4048b95ab609" mode="Transparent" x="257" y="186" width="132" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Серия и номер документа]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="bc4e74aa-dd63-4e0c-b081-1e3e86f1ec57" mode="Transparent" x="389" y="186" width="210" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="bc4e74aa-dd63-4e0c-b081-1e3e86f1ec57" mode="Transparent" x="389" y="186" width="196" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{СерНомДок}==null) ? "" : $F{СерНомДок}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="b338851c-e583-445a-970b-3d8509b4cb55" mode="Transparent" x="0" y="201" width="349" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="b338851c-e583-445a-970b-3d8509b4cb55" mode="Transparent" x="0" y="201" width="193" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<text><![CDATA[Адрес места жительства в Росийской Федерации:       Почтовый индекс]]></text>
+				<text><![CDATA[Адрес места жительства в Росийской Федерации:]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="c0b614a6-13be-4dca-a52f-4caf340b915a" mode="Transparent" x="273" y="201" width="183" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="c0b614a6-13be-4dca-a52f-4caf340b915a" mode="Transparent" x="273" y="201" width="164" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Индекс}==null) ? "" : $F{Индекс}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="d4c706ea-4aec-4aba-a0c9-70441a07502b" mode="Transparent" x="0" y="216" width="47" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="d4c706ea-4aec-4aba-a0c9-70441a07502b" mode="Transparent" x="0" y="216" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Район]]></text>
@@ -1170,72 +1170,72 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Район}==null) ? "" : $F{Район}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="9445df8b-f2d7-4cda-91f5-a9f90837cfb0" mode="Transparent" x="0" y="231" width="44" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="9445df8b-f2d7-4cda-91f5-a9f90837cfb0" mode="Transparent" x="0" y="231" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Улица]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="f749102d-deb1-4932-ba02-e2213621fa74" mode="Transparent" x="30" y="231" width="359" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f749102d-deb1-4932-ba02-e2213621fa74" mode="Transparent" x="30" y="231" width="355" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Улица}==null) ? "" : $F{Улица}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="5a6c1952-422c-4427-9f54-9793be21481d" mode="Transparent" x="0" y="246" width="126" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="5a6c1952-422c-4427-9f54-9793be21481d" mode="Transparent" x="0" y="246" width="95" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код страны проживания]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="0cfd55c9-5e51-4f12-9573-90fca4738d00" mode="Transparent" x="101" y="246" width="105" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="0cfd55c9-5e51-4f12-9573-90fca4738d00" mode="Transparent" x="95" y="246" width="111" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{КодСтр}=="000"||$F{КодСтр}==null? "":$F{КодСтр})]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="d88e4405-f7e1-4210-8529-89b52420d9da" mode="Transparent" x="456" y="201" width="72" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="d88e4405-f7e1-4210-8529-89b52420d9da" mode="Transparent" x="437" y="201" width="72" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код субъекта]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="a006e3e8-df06-4d61-b81e-85be1d2e4af9" mode="Transparent" x="523" y="201" width="76" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="a006e3e8-df06-4d61-b81e-85be1d2e4af9" mode="Transparent" x="509" y="201" width="76" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{КодРегион}==null) ? "" : $F{КодРегион}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="1faf2ea8-701b-47f1-a86d-6c9b512c1856" mode="Transparent" x="177" y="216" width="40" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="1faf2ea8-701b-47f1-a86d-6c9b512c1856" mode="Transparent" x="177" y="216" width="29" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Город]]></text>
@@ -1246,34 +1246,34 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Город}==null) ? "" : $F{Город}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="2dd4ca00-feb2-4580-80c6-ba4a4a609aa0" mode="Transparent" x="353" y="216" width="105" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="2dd4ca00-feb2-4580-80c6-ba4a4a609aa0" mode="Transparent" x="353" y="216" width="77" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Населенный пункт]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="085db3e6-6ccc-47bb-a313-f713672c8a6d" mode="Transparent" x="430" y="216" width="169" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="085db3e6-6ccc-47bb-a313-f713672c8a6d" mode="Transparent" x="430" y="216" width="155" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НаселПункт}==null) ? "" : $F{НаселПункт}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="4b94bcea-d6f7-45ea-a03e-1330126d2bbd" mode="Transparent" x="389" y="231" width="29" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="4b94bcea-d6f7-45ea-a03e-1330126d2bbd" mode="Transparent" x="385" y="231" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Дом]]></text>
@@ -1284,15 +1284,15 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Дом}==null) ? "" : $F{Дом}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="b487b27e-aa47-4e5b-a9ec-ae89f17eef1c" mode="Transparent" x="447" y="231" width="46" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="b487b27e-aa47-4e5b-a9ec-ae89f17eef1c" mode="Transparent" x="447" y="231" width="33" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Корпус]]></text>
@@ -1303,45 +1303,45 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Корпус}==null) ? "" : $F{Корпус}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="b6ec1d04-5087-4f8a-8c50-978826cef045" mode="Transparent" x="513" y="231" width="57" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="b6ec1d04-5087-4f8a-8c50-978826cef045" mode="Transparent" x="513" y="231" width="39" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Квартира]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="b3c1ebf3-cb35-4e4e-8d15-7797a21ebab8" mode="Transparent" x="552" y="231" width="47" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="b3c1ebf3-cb35-4e4e-8d15-7797a21ebab8" mode="Transparent" x="552" y="231" width="33" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Кварт}==null) ? "" : $F{Кварт}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="3e83b5f6-8183-461e-8c59-9b49bb33cd4d" mode="Transparent" x="206" y="246" width="40" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="3e83b5f6-8183-461e-8c59-9b49bb33cd4d" mode="Transparent" x="206" y="246" width="35" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Адрес]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="087b5763-b5da-41bf-a6a0-21af28ed3bc1" mode="Transparent" x="241" y="246" width="358" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="087b5763-b5da-41bf-a6a0-21af28ed3bc1" mode="Transparent" x="241" y="246" width="344" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{КодСтр}=="000" || $F{КодСтр}==null ? "":$F{АдрТекст})]]></textFieldExpression>
@@ -1351,12 +1351,12 @@
 				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage}).processString() )]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement uuid="3931da5d-c87e-49b3-b0f9-9c81b2458f8c" mode="Transparent" x="113" y="171" width="102" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="3931da5d-c87e-49b3-b0f9-9c81b2458f8c" mode="Transparent" x="105" y="171" width="110" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Статус}==null) ? "" : $F{Статус}]]></textFieldExpression>
@@ -1371,6 +1371,14 @@
 от «__»  ___________
 № ________________]]></text>
 			</staticText>
+			<staticText>
+				<reportElement uuid="9f53886d-7135-472c-8a17-626d301e4016" mode="Transparent" x="193" y="201" width="80" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Почтовый индекс]]></text>
+			</staticText>
 		</band>
 	</title>
 	<pageHeader>
@@ -1383,7 +1391,7 @@
 			<staticText>
 				<reportElement uuid="f6d1b9a8-cdd4-4b20-a38a-f11318e1f4eb" mode="Transparent" x="334" y="20" width="27" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[от]]></text>
@@ -1391,7 +1399,7 @@
 			<staticText>
 				<reportElement uuid="6755da85-96b6-4805-a7c1-b5b7b7a9b16a" mode="Transparent" x="237" y="20" width="45" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[год  №]]></text>
@@ -1402,7 +1410,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НомСпр}==null) ? "" : $F{НомСпр}]]></textFieldExpression>
@@ -1413,7 +1421,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ОтчетГод}==null) ? "" : $F{ОтчетГод}]]></textFieldExpression>
@@ -1421,7 +1429,7 @@
 			<staticText>
 				<reportElement uuid="0b452fc8-6a3f-4349-9aa7-2ce5513adab8" mode="Transparent" x="169" y="20" width="24" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[за ]]></text>
@@ -1429,7 +1437,7 @@
 			<staticText>
 				<reportElement uuid="05942fbc-c054-4ccd-bc77-c9d96916482d" x="169" y="0" width="262" height="20"/>
 				<textElement>
-					<font fontName="Arial" size="8" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[СПРАВКА О ДОХОДАХ ФИЗИЧЕСКОГО ЛИЦА]]></text>
 			</staticText>
@@ -1439,13 +1447,13 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{ДатаДок}==null) ? "" : $F{ДатаДок}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="44b4c338-5fe9-4801-8541-2fcb668a707f" mode="Transparent" x="552" y="20" width="47" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="44b4c338-5fe9-4801-8541-2fcb668a707f" mode="Transparent" x="552" y="20" width="33" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.0"/>
@@ -1454,7 +1462,7 @@
 					<rightPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
@@ -1462,7 +1470,7 @@
 			<staticText>
 				<reportElement uuid="855d4c06-d3ce-47ab-96ba-1876f311bc91" mode="Transparent" x="506" y="20" width="46" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[страница]]></text>
@@ -1475,7 +1483,7 @@
 			<staticText>
 				<reportElement uuid="9193aaac-9375-4f08-b972-00512d2d0f18" mode="Transparent" x="0" y="0" width="256" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[3. Доходы, облагаемые по ставке]]></text>
@@ -1486,7 +1494,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Ставка}==null) ? "" : $F{Ставка}]]></textFieldExpression>
@@ -1494,13 +1502,13 @@
 			<staticText>
 				<reportElement uuid="4454369b-c2d6-46e0-a4b3-0122b1888a62" mode="Transparent" x="285" y="0" width="32" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[%]]></text>
 			</staticText>
 			<componentElement>
-				<reportElement uuid="594b3115-9cd5-4ed9-b67e-48ef1516c289" key="tabIncomes2" x="310" y="27" width="290" height="23" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="594b3115-9cd5-4ed9-b67e-48ef1516c289" key="tabIncomes2" x="308" y="27" width="275" height="23" isPrintWhenDetailOverflows="true"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
 					<datasetRun subDataset="dsIncomes" uuid="9e1d1a87-98fb-4cd4-a329-869ceca978aa">
 						<datasetParameter name="pPage">
@@ -1508,14 +1516,14 @@
 						</datasetParameter>
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/СведДох/ДохВыч/СвСумДох/СвСумВыч")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:columnGroup width="289" uuid="29a9846e-cdc5-4991-b569-bb9a6490efdf">
+					<jr:columnGroup width="277" uuid="29a9846e-cdc5-4991-b569-bb9a6490efdf">
 						<jr:column width="40" uuid="76ec41d8-d17e-4dd7-b838-048738e6d021">
 							<jr:groupHeader groupName="grRate">
 								<jr:cell style="table 1_TH" height="23" rowSpan="1">
 									<staticText>
 										<reportElement uuid="088e1439-4eaf-4146-8011-e2569e5063d6" mode="Transparent" x="0" y="0" width="40" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Месяц]]></text>
@@ -1529,7 +1537,7 @@
 										<printWhenExpression><![CDATA[$V{vCount}==1]]></printWhenExpression>
 									</reportElement>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{Месяц}]]></textFieldExpression>
@@ -1542,7 +1550,7 @@
 									<staticText>
 										<reportElement uuid="b6163896-5627-4501-a3da-563ae2588166" mode="Transparent" x="0" y="0" width="40" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Код
@@ -1557,7 +1565,7 @@
 										<printWhenExpression><![CDATA[$V{vCount}==1]]></printWhenExpression>
 									</reportElement>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{КодДоход}]]></textFieldExpression>
@@ -1570,7 +1578,7 @@
 									<staticText>
 										<reportElement uuid="5cc37d6f-3253-47c6-b4e9-69afe65c23ab" mode="Transparent" x="0" y="0" width="80" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Сумма дохода]]></text>
@@ -1584,7 +1592,7 @@
 										<printWhenExpression><![CDATA[$V{vCount}==1]]></printWhenExpression>
 									</reportElement>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{СумДоход}]]></textFieldExpression>
@@ -1597,7 +1605,7 @@
 									<staticText>
 										<reportElement uuid="85e85ebf-9d22-48fd-8d2e-13cc05bc41cd" mode="Transparent" x="0" y="0" width="49" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Код вычета]]></text>
@@ -1609,20 +1617,20 @@
 								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="dd2b6448-bb45-4be6-aacc-df63f5b2e837" mode="Transparent" x="0" y="0" width="49" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{КодВычет}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="80" uuid="00c9e3cd-ec86-4e64-919c-11eb3a39c775">
+						<jr:column width="68" uuid="00c9e3cd-ec86-4e64-919c-11eb3a39c775">
 							<jr:groupHeader groupName="grRate">
 								<jr:cell style="table 1_TH" height="23" rowSpan="1">
 									<staticText>
-										<reportElement uuid="8fec4ce5-a291-4831-8868-cfbbf88d6f1f" mode="Transparent" x="0" y="0" width="80" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+										<reportElement uuid="8fec4ce5-a291-4831-8868-cfbbf88d6f1f" mode="Transparent" x="0" y="0" width="68" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Сумма вычета]]></text>
@@ -1632,9 +1640,9 @@
 							<jr:columnHeader height="1" rowSpan="1"/>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
 								<textField isBlankWhenNull="true">
-									<reportElement uuid="cf518599-c470-4eb1-9329-792e30f61ae0" mode="Transparent" x="0" y="0" width="80" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="cf518599-c470-4eb1-9329-792e30f61ae0" mode="Transparent" x="0" y="0" width="68" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{СумВычет}]]></textFieldExpression>
@@ -1653,14 +1661,14 @@
 						</datasetParameter>
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/СведДох/ДохВыч/СвСумДох/СвСумВыч")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:columnGroup width="289" uuid="b72ad12e-dc26-4c80-8f90-bbcabef41dae">
+					<jr:columnGroup width="277" uuid="b72ad12e-dc26-4c80-8f90-bbcabef41dae">
 						<jr:column width="40" uuid="b5f667b1-c793-4ce0-8f37-4bd7dd9ddf63">
 							<jr:groupHeader groupName="grRate">
 								<jr:cell style="table 1_TH" height="23" rowSpan="1">
 									<staticText>
 										<reportElement uuid="4992ef5a-00aa-4c9c-a85a-0679cbe438a6" mode="Transparent" x="0" y="0" width="40" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Месяц]]></text>
@@ -1673,7 +1681,7 @@
 										<printWhenExpression><![CDATA[$V{vCount}==1]]></printWhenExpression>
 									</reportElement>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{Месяц}]]></textFieldExpression>
@@ -1686,7 +1694,7 @@
 									<staticText>
 										<reportElement uuid="d6cb3ef1-0406-413d-83f0-ffe450ef3b09" mode="Transparent" x="0" y="0" width="40" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Код
@@ -1700,7 +1708,7 @@
 										<printWhenExpression><![CDATA[$V{vCount}==1]]></printWhenExpression>
 									</reportElement>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{КодДоход}]]></textFieldExpression>
@@ -1713,7 +1721,7 @@
 									<staticText>
 										<reportElement uuid="59057bce-bd65-4c7d-8500-8eb1be5fd9d0" mode="Transparent" x="0" y="0" width="80" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Сумма дохода]]></text>
@@ -1726,7 +1734,7 @@
 										<printWhenExpression><![CDATA[$V{vCount}==1]]></printWhenExpression>
 									</reportElement>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{СумДоход}]]></textFieldExpression>
@@ -1739,7 +1747,7 @@
 									<staticText>
 										<reportElement uuid="cfa67081-000c-45e4-9a72-49c5c191de34" mode="Transparent" x="0" y="0" width="49" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Код вычета]]></text>
@@ -1750,20 +1758,20 @@
 								<textField pattern="" isBlankWhenNull="true">
 									<reportElement uuid="103641d0-08bd-4b6e-a865-6e6ee412a611" mode="Transparent" x="0" y="0" width="49" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{КодВычет}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="80" uuid="bc84816d-89b4-43ee-bea0-bb6a2e0306d8">
+						<jr:column width="68" uuid="bc84816d-89b4-43ee-bea0-bb6a2e0306d8">
 							<jr:groupHeader groupName="grRate">
 								<jr:cell style="table 1_TH" height="23" rowSpan="1">
 									<staticText>
-										<reportElement uuid="9f6dc249-0583-4131-9878-496a5707e705" mode="Transparent" x="0" y="0" width="80" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
+										<reportElement uuid="9f6dc249-0583-4131-9878-496a5707e705" mode="Transparent" x="0" y="0" width="68" height="23" forecolor="#000000" backcolor="#FFFFFF"/>
 										<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-											<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+											<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 											<paragraph lineSpacing="Single"/>
 										</textElement>
 										<text><![CDATA[Сумма вычета]]></text>
@@ -1772,9 +1780,9 @@
 							</jr:groupHeader>
 							<jr:detailCell style="table 1_TH" height="12" rowSpan="1">
 								<textField isBlankWhenNull="true">
-									<reportElement uuid="b40c4a82-0a90-4699-8d4d-387ff8ebe122" mode="Transparent" x="0" y="0" width="80" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="b40c4a82-0a90-4699-8d4d-387ff8ebe122" mode="Transparent" x="0" y="0" width="68" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{СумВычет}]]></textFieldExpression>
@@ -1785,7 +1793,7 @@
 				</jr:table>
 			</componentElement>
 			<componentElement>
-				<reportElement uuid="48109ac6-7f66-4901-a560-250c009c36e7" positionType="Float" x="310" y="50" width="289" height="12">
+				<reportElement uuid="48109ac6-7f66-4901-a560-250c009c36e7" positionType="Float" x="308" y="50" width="277" height="12">
 					<printWhenExpression><![CDATA[$F{numrows_Page1}>$F{numrows_Page2}]]></printWhenExpression>
 				</reportElement>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
@@ -1795,7 +1803,7 @@
 						</datasetParameter>
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource($V{vEmptyDataSource})]]></dataSourceExpression>
 					</datasetRun>
-					<jr:listContents height="12" width="289">
+					<jr:listContents height="12" width="277">
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="da026d38-8580-458f-91f5-7506d32eecf0" x="0" y="0" width="40" height="12">
 								<printWhenExpression><![CDATA[$V{vNum}<=$P{pCount}]]></printWhenExpression>
@@ -1822,7 +1830,7 @@
 								<rightPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{КодДоход3}]]></textFieldExpression>
@@ -1839,7 +1847,7 @@
 								<rightPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{СумДоход3}]]></textFieldExpression>
@@ -1856,13 +1864,13 @@
 								<rightPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{КодВычет3}]]></textFieldExpression>
 						</textField>
 						<textField pattern="" isBlankWhenNull="true">
-							<reportElement uuid="3e5d4758-4b2f-4288-9532-a4f7e16b6b87" mode="Transparent" x="209" y="0" width="80" height="12" forecolor="#000000" backcolor="#FFFFFF">
+							<reportElement uuid="3e5d4758-4b2f-4288-9532-a4f7e16b6b87" mode="Transparent" x="209" y="0" width="68" height="12" forecolor="#000000" backcolor="#FFFFFF">
 								<printWhenExpression><![CDATA[$V{vNum}<=$P{pCount}]]></printWhenExpression>
 							</reportElement>
 							<box>
@@ -1873,7 +1881,7 @@
 								<rightPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$F{СумВычет3}]]></textFieldExpression>
@@ -1887,7 +1895,7 @@
 			<staticText>
 				<reportElement uuid="ccf7eea9-2fc4-4b1c-8de5-6ab52e37ba73" mode="Transparent" x="283" y="0" width="32" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[%]]></text>
@@ -1898,7 +1906,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{Ставка}==null) ? "" : $F{Ставка}]]></textFieldExpression>
@@ -1906,7 +1914,7 @@
 			<staticText>
 				<reportElement uuid="625678e6-4482-4b11-a5cd-bc88250dd475" mode="Transparent" x="0" y="0" width="254" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[3. Доходы, облагаемые по ставке]]></text>
@@ -1988,7 +1996,7 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Месяц]]></text>
@@ -2003,7 +2011,7 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код
@@ -2019,7 +2027,7 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма дохода]]></text>
@@ -2034,7 +2042,7 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код вычета]]></text>
@@ -2049,13 +2057,13 @@
 					<rightPen lineWidth="0.75"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма вычета]]></text>
 			</staticText>
 			<textField pattern="" isBlankWhenNull="true">
-				<reportElement uuid="988a7951-c82c-442d-8d6d-e6a993034073" mode="Transparent" x="519" y="45" width="80" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="988a7951-c82c-442d-8d6d-e6a993034073" mode="Transparent" x="519" y="45" width="66" height="12" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2069,7 +2077,7 @@
 				</textElement>
 			</textField>
 			<staticText>
-				<reportElement uuid="c70089ad-7cf4-4859-a910-cd1e48f82279" mode="Transparent" x="519" y="20" width="80" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="c70089ad-7cf4-4859-a910-cd1e48f82279" mode="Transparent" x="519" y="20" width="66" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2078,7 +2086,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма вычета]]></text>
@@ -2093,7 +2101,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код вычета]]></text>
@@ -2119,7 +2127,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код
@@ -2163,7 +2171,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Месяц]]></text>
@@ -2192,7 +2200,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма дохода]]></text>
@@ -2201,18 +2209,18 @@
 		<band height="40" splitType="Prevent">
 			<printWhenExpression><![CDATA[$F{КодВычет2}!="" && $F{КодВычет2}!=null]]></printWhenExpression>
 			<componentElement>
-				<reportElement uuid="f921249d-cd64-462b-bff8-90874a3de42f" key="tabMinuces" x="0" y="21" width="600" height="15"/>
+				<reportElement uuid="f921249d-cd64-462b-bff8-90874a3de42f" key="tabMinuces" x="0" y="21" width="585" height="15"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
 					<datasetRun subDataset="dsMinuces" uuid="d9f2e864-ca2b-4656-96be-c0b53195c516">
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/СведДох/НалВычССИ/Строка")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:columnGroup width="154" uuid="08d13726-73f2-4694-b829-074264c6a0c7">
-						<jr:column width="54" uuid="414d0641-aba2-46aa-a08d-f4adae033884">
+					<jr:columnGroup width="150" uuid="08d13726-73f2-4694-b829-074264c6a0c7">
+						<jr:column width="50" uuid="414d0641-aba2-46aa-a08d-f4adae033884">
 							<jr:columnHeader style="table 1_TH" height="27" rowSpan="1">
 								<staticText>
-									<reportElement uuid="916a14b9-04e0-4c3e-899f-b62e91827be9" mode="Transparent" x="0" y="0" width="54" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="916a14b9-04e0-4c3e-899f-b62e91827be9" mode="Transparent" x="0" y="0" width="50" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<text><![CDATA[Код
@@ -2221,9 +2229,9 @@
 							</jr:columnHeader>
 							<jr:detailCell style="table 1_TH" height="16" rowSpan="1">
 								<textField isBlankWhenNull="true">
-									<reportElement uuid="9c490037-eebe-4884-9e2d-6a35cb88ea2e" mode="Transparent" x="0" y="0" width="54" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
+									<reportElement uuid="9c490037-eebe-4884-9e2d-6a35cb88ea2e" mode="Transparent" x="0" y="0" width="50" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{КодВычет1}]]></textFieldExpression>
@@ -2235,7 +2243,7 @@
 								<staticText>
 									<reportElement uuid="a80bfb8e-c027-432a-9810-0ee2b46acd5e" mode="Transparent" x="0" y="0" width="100" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single"/>
 									</textElement>
 									<text><![CDATA[Сумма вычета]]></text>
@@ -2245,7 +2253,7 @@
 								<textField pattern="" isBlankWhenNull="false">
 									<reportElement uuid="855c8caf-f2c1-4d9d-b105-83b99357e81f" mode="Transparent" x="0" y="0" width="100" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+										<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 										<paragraph lineSpacing="Single" rightIndent="5"/>
 									</textElement>
 									<textFieldExpression><![CDATA[($F{СумВычет1}==null?
@@ -2265,7 +2273,7 @@
 							<staticText>
 								<reportElement uuid="641ada09-ba87-40da-9cb6-197beebce289" mode="Transparent" x="0" y="0" width="50" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<text><![CDATA[Код
@@ -2277,7 +2285,7 @@
 							<textField pattern="" isBlankWhenNull="true">
 								<reportElement uuid="4160e268-1f57-407a-b29d-fc49a3a0e80b" mode="Transparent" x="0" y="0" width="50" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{КодВычет2}]]></textFieldExpression>
@@ -2294,7 +2302,7 @@
 							<staticText>
 								<reportElement uuid="7ca06c1c-a508-466c-95d2-4bdff95e76ab" mode="Transparent" x="0" y="0" width="100" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<text><![CDATA[Сумма вычета]]></text>
@@ -2305,7 +2313,7 @@
 							<textField pattern="" isBlankWhenNull="false">
 								<reportElement uuid="1b8ee02b-55c8-40f7-ab23-123dac3d26e6" mode="Transparent" x="0" y="0" width="100" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
 								<textFieldExpression><![CDATA[($F{СумВычет2}==null?
@@ -2321,7 +2329,7 @@
 							<staticText>
 								<reportElement uuid="e079b33b-7320-49d9-abd5-f976c2339c37" mode="Transparent" x="0" y="0" width="50" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<text><![CDATA[Код
@@ -2333,21 +2341,21 @@
 							<textField pattern="" isBlankWhenNull="true">
 								<reportElement uuid="adf98827-7adf-43c9-859a-7bf071c369cb" mode="Transparent" x="0" y="0" width="50" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{КодВычет3}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="100" uuid="ba617ff4-5527-40cc-9ea1-145a07b09fe2">
+					<jr:column width="97" uuid="ba617ff4-5527-40cc-9ea1-145a07b09fe2">
 						<jr:tableHeader height="0" rowSpan="1"/>
 						<jr:tableFooter height="0" rowSpan="1"/>
 						<jr:columnHeader style="table 1_TH" height="27" rowSpan="1">
 							<staticText>
-								<reportElement uuid="380a7096-343b-456a-ab54-ed2e953493ab" mode="Transparent" x="0" y="0" width="100" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="380a7096-343b-456a-ab54-ed2e953493ab" mode="Transparent" x="0" y="0" width="97" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<text><![CDATA[Сумма вычета]]></text>
@@ -2356,9 +2364,9 @@
 						<jr:columnFooter height="0" rowSpan="1"/>
 						<jr:detailCell style="table 1_TH" height="16" rowSpan="1">
 							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="d4aeb2d5-f638-41ea-a51e-837efb0dcc0f" mode="Transparent" x="0" y="0" width="100" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="d4aeb2d5-f638-41ea-a51e-837efb0dcc0f" mode="Transparent" x="0" y="0" width="97" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
 								<textFieldExpression><![CDATA[($F{СумВычет3}==null?
@@ -2374,7 +2382,7 @@
 							<staticText>
 								<reportElement uuid="2b7984f6-61ea-494b-a642-16c9137340e1" mode="Transparent" x="0" y="0" width="50" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<text><![CDATA[Код
@@ -2386,21 +2394,21 @@
 							<textField pattern="" isBlankWhenNull="true">
 								<reportElement uuid="1ed35cac-e41d-42f5-a347-d75cad5a1199" mode="Transparent" x="0" y="0" width="50" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{КодВычет4}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="100" uuid="eba53a5f-7533-46e5-a9d8-c742eff0ecd4">
+					<jr:column width="88" uuid="eba53a5f-7533-46e5-a9d8-c742eff0ecd4">
 						<jr:tableHeader height="0" rowSpan="1"/>
 						<jr:tableFooter height="0" rowSpan="1"/>
 						<jr:columnHeader style="table 1_TH" height="27" rowSpan="1">
 							<staticText>
-								<reportElement uuid="ac19dbcc-1f6d-4701-8658-8340de53a0de" mode="Transparent" x="0" y="0" width="100" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="ac19dbcc-1f6d-4701-8658-8340de53a0de" mode="Transparent" x="0" y="0" width="88" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
 								<text><![CDATA[Сумма вычета]]></text>
@@ -2409,9 +2417,9 @@
 						<jr:columnFooter height="0" rowSpan="1"/>
 						<jr:detailCell style="table 1_TH" height="16" rowSpan="1">
 							<textField pattern="" isBlankWhenNull="false">
-								<reportElement uuid="96f62913-7e85-49ce-bd5c-21f1dba88ff2" mode="Transparent" x="0" y="0" width="100" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
+								<reportElement uuid="96f62913-7e85-49ce-bd5c-21f1dba88ff2" mode="Transparent" x="0" y="0" width="88" height="16" forecolor="#000000" backcolor="#FFFFFF"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+									<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single" rightIndent="5"/>
 								</textElement>
 								<textFieldExpression><![CDATA[($F{СумВычет4}==null?
@@ -2425,7 +2433,7 @@
 			<staticText>
 				<reportElement uuid="43649fab-d70f-4ad6-a831-6df252fbe3e9" mode="Transparent" x="0" y="0" width="555" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single" spacingBefore="5"/>
 				</textElement>
 				<text><![CDATA[4. Стандартные, социальные, инвестиционные и имущественные налоговые вычеты(3)]]></text>
@@ -2443,7 +2451,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма вычета]]></text>
@@ -2458,7 +2466,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код
@@ -2474,7 +2482,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма вычета]]></text>
@@ -2489,7 +2497,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код
@@ -2505,7 +2513,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма вычета]]></text>
@@ -2520,14 +2528,14 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код
 вычета]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="bd97b6f1-f1a6-4277-92fb-ea17e1afc7ae" mode="Transparent" x="497" y="27" width="102" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="bd97b6f1-f1a6-4277-92fb-ea17e1afc7ae" mode="Transparent" x="497" y="27" width="88" height="27" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2536,7 +2544,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Сумма вычета]]></text>
@@ -2551,7 +2559,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
@@ -2566,7 +2574,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
@@ -2581,13 +2589,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="3051c3a3-5834-426a-83aa-bcd82256d1ee" mode="Transparent" x="497" y="54" width="102" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="3051c3a3-5834-426a-83aa-bcd82256d1ee" mode="Transparent" x="497" y="54" width="88" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2596,7 +2604,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
@@ -2611,7 +2619,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
@@ -2626,7 +2634,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
@@ -2634,7 +2642,7 @@
 			<staticText>
 				<reportElement uuid="597a0223-f348-4d73-937f-70430eb119e7" mode="Transparent" x="0" y="3" width="555" height="21" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[4. Стандартные, социальные, инвестиционные и имущественные налоговые вычеты]]></text>
@@ -2649,7 +2657,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код
@@ -2665,7 +2673,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
@@ -2680,7 +2688,7 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[ ]]></text>
@@ -2689,70 +2697,77 @@
 		<band height="16">
 			<printWhenExpression><![CDATA[$F{СНомерУвед}!="" && $F{СНомерУвед}!=null && $F{Месяц}!="" && $F{Месяц} !=null]]></printWhenExpression>
 			<componentElement>
-				<reportElement uuid="54ea2188-0f52-4a11-a289-9b5ee8fee29b" x="-5" y="-1" width="604" height="16">
+				<reportElement uuid="54ea2188-0f52-4a11-a289-9b5ee8fee29b" x="0" y="-1" width="585" height="16">
 					<printWhenExpression><![CDATA[$F{СНомерУвед}!="" && $F{СНомерУвед}!=null]]></printWhenExpression>
 				</reportElement>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="dsUvedSocMinuces" uuid="4c936e4c-c026-4b0b-b185-df4fc2594d8e">
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/СведДох/НалВычССИ/УведСоцВыч")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:listContents height="16" width="604">
+					<jr:listContents height="16" width="585">
 						<staticText>
-							<reportElement uuid="068e3819-3646-4f6f-b440-a90b319fd6ed" mode="Transparent" x="423" y="0" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="068e3819-3646-4f6f-b440-a90b319fd6ed" mode="Transparent" x="407" y="0" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<text><![CDATA[Дата]]></text>
 						</staticText>
 						<textField>
-							<reportElement uuid="a526e989-38b2-411c-a86e-afd9d837a75f" mode="Transparent" x="569" y="1" width="35" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="a526e989-38b2-411c-a86e-afd9d837a75f" mode="Transparent" x="555" y="0" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{СИФНСУвед}==null) ? "" : $F{СИФНСУвед}]]></textFieldExpression>
 						</textField>
 						<staticText>
-							<reportElement uuid="cf405881-795c-42a8-8a38-21a2e42db892" x="6" y="0" width="388" height="15"/>
+							<reportElement uuid="cf405881-795c-42a8-8a38-21a2e42db892" x="0" y="0" width="296" height="15"/>
 							<textElement verticalAlignment="Bottom">
-								<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+								<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
 							</textElement>
-							<text><![CDATA[Уведомление, подтверждающее право на социальный налоговый вычет:            №]]></text>
+							<text><![CDATA[Уведомление, подтверждающее право на социальный налоговый вычет:]]></text>
 						</staticText>
 						<staticText>
-							<reportElement uuid="948ac713-3ea6-451c-9bed-de9cd80c8d93" mode="Transparent" x="507" y="0" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+							<reportElement uuid="948ac713-3ea6-451c-9bed-de9cd80c8d93" mode="Transparent" x="492" y="0" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<text><![CDATA[Код ИФНС]]></text>
 						</staticText>
 						<textField>
-							<reportElement uuid="a7d7c699-fdc3-4e85-bcc1-ced7b6262ca2" mode="Transparent" x="322" y="0" width="101" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="a7d7c699-fdc3-4e85-bcc1-ced7b6262ca2" mode="Transparent" x="311" y="0" width="95" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{СНомерУвед}==null) ? "" : $F{СНомерУвед}]]></textFieldExpression>
 						</textField>
 						<textField>
-							<reportElement uuid="e7205405-6010-40c8-a718-d91f10c393d9" mode="Transparent" x="452" y="0" width="55" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="e7205405-6010-40c8-a718-d91f10c393d9" mode="Transparent" x="436" y="0" width="55" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{СДатаУвед}==null) ? "" : $F{СДатаУвед}]]></textFieldExpression>
 						</textField>
+						<staticText>
+							<reportElement uuid="8df7f19b-66ef-4aee-b7ea-a0716d62a5b4" x="297" y="0" width="14" height="15"/>
+							<textElement textAlignment="Right" verticalAlignment="Bottom">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[№]]></text>
+						</staticText>
 					</jr:listContents>
 				</jr:list>
 			</componentElement>
@@ -2760,54 +2775,61 @@
 		<band height="16">
 			<printWhenExpression><![CDATA[!($F{СНомерУвед}!="" && $F{СНомерУвед}!=null && $F{Месяц}!="" && $F{Месяц} !=null)]]></printWhenExpression>
 			<staticText>
-				<reportElement uuid="31ef6f0f-4f94-4883-891a-699b580febd0" x="1" y="1" width="376" height="15"/>
+				<reportElement uuid="31ef6f0f-4f94-4883-891a-699b580febd0" x="0" y="0" width="296" height="15"/>
 				<textElement verticalAlignment="Bottom">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
 				</textElement>
-				<text><![CDATA[Уведомление, подтверждающее право на социальный налоговый вычет:            №]]></text>
+				<text><![CDATA[Уведомление, подтверждающее право на социальный налоговый вычет:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="71815b99-8bc2-4fac-a1e6-a590945598f6" x="297" y="0" width="14" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[№]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="932e4b4b-ff66-42d1-81dd-644ace933c92" mode="Transparent" x="317" y="1" width="101" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="932e4b4b-ff66-42d1-81dd-644ace933c92" mode="Transparent" x="311" y="0" width="95" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<staticText>
-				<reportElement uuid="1963e788-a261-4887-9c1d-0930064515cd" mode="Transparent" x="418" y="1" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="1963e788-a261-4887-9c1d-0930064515cd" mode="Transparent" x="407" y="0" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Дата]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="88724186-0d44-4a68-8158-f63faef43e97" mode="Transparent" x="447" y="1" width="55" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="88724186-0d44-4a68-8158-f63faef43e97" mode="Transparent" x="436" y="0" width="55" height="14" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="dbc6e199-ab63-4272-b484-053b9b77a03f" mode="Transparent" x="564" y="0" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="dbc6e199-ab63-4272-b484-053b9b77a03f" mode="Transparent" x="555" y="0" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<staticText>
-				<reportElement uuid="19214bf3-b6cb-4559-8d2a-1a546481d321" mode="Transparent" x="502" y="1" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="19214bf3-b6cb-4559-8d2a-1a546481d321" mode="Transparent" x="492" y="1" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код ИФНС]]></text>
@@ -2816,67 +2838,74 @@
 		<band height="16">
 			<printWhenExpression><![CDATA[$F{ИНомерУвед}!="" && $F{ИНомерУвед}!=null && $F{Месяц}!="" && $F{Месяц} !=null]]></printWhenExpression>
 			<componentElement>
-				<reportElement uuid="a4c00b99-8617-4d89-97aa-00a907aa6d3f" x="0" y="0" width="599" height="16"/>
+				<reportElement uuid="a4c00b99-8617-4d89-97aa-00a907aa6d3f" x="0" y="0" width="585" height="16"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="dsUvedImuschMinuces" uuid="a3a2cec6-eef8-4eb6-ae31-df6f42e2030f">
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/СведДох/НалВычССИ/УведИмущВыч")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:listContents height="16" width="599">
+					<jr:listContents height="16" width="585">
 						<textField>
-							<reportElement uuid="4c29cc95-f663-4bf3-9018-7140a5f4192d" mode="Transparent" x="564" y="1" width="35" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="4c29cc95-f663-4bf3-9018-7140a5f4192d" mode="Transparent" x="555" y="0" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{ИИФНСУвед}==null) ? "" : $F{ИИФНСУвед}]]></textFieldExpression>
 						</textField>
 						<staticText>
-							<reportElement uuid="2de187a5-433c-4e39-8097-3cd96812d403" x="1" y="0" width="388" height="15"/>
+							<reportElement uuid="2de187a5-433c-4e39-8097-3cd96812d403" x="0" y="0" width="296" height="15"/>
 							<textElement verticalAlignment="Bottom">
-								<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+								<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
 							</textElement>
-							<text><![CDATA[Уведомление, подтверждающее право на имущественный налоговый вычет:     №]]></text>
+							<text><![CDATA[Уведомление, подтверждающее право на имущественный налоговый вычет:]]></text>
 						</staticText>
 						<textField pattern="">
-							<reportElement uuid="8a9eeded-5814-4f4d-a54b-8caa3cdcdabb" mode="Transparent" x="317" y="0" width="100" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="8a9eeded-5814-4f4d-a54b-8caa3cdcdabb" mode="Transparent" x="311" y="0" width="95" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{ИНомерУвед}==null) ? "" : $F{ИНомерУвед}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="false">
-							<reportElement uuid="771f6096-5254-4d9e-8757-8c0ba69cb34f" mode="Transparent" x="447" y="0" width="55" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="771f6096-5254-4d9e-8757-8c0ba69cb34f" mode="Transparent" x="436" y="0" width="55" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{ИДатаУвед}==null) ? "" : $F{ИДатаУвед}]]></textFieldExpression>
 						</textField>
 						<staticText>
-							<reportElement uuid="511b5567-4404-4e69-b878-930cd63bb795" mode="Transparent" x="418" y="1" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="511b5567-4404-4e69-b878-930cd63bb795" mode="Transparent" x="407" y="0" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<text><![CDATA[Дата]]></text>
 						</staticText>
 						<staticText>
-							<reportElement uuid="8d796214-89af-4a11-a22b-cc34dec40fbe" mode="Transparent" x="502" y="1" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+							<reportElement uuid="8d796214-89af-4a11-a22b-cc34dec40fbe" mode="Transparent" x="492" y="1" width="60" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<text><![CDATA[Код ИФНС]]></text>
+						</staticText>
+						<staticText>
+							<reportElement uuid="13c6e543-4682-4ea5-ba97-f6b42f4fbded" x="297" y="0" width="14" height="15"/>
+							<textElement textAlignment="Right" verticalAlignment="Bottom">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[№]]></text>
 						</staticText>
 					</jr:listContents>
 				</jr:list>
@@ -2885,54 +2914,61 @@
 		<band height="16">
 			<printWhenExpression><![CDATA[!($F{ИНомерУвед}!="" && $F{ИНомерУвед}!=null && $F{Месяц}!="" && $F{Месяц} !=null)]]></printWhenExpression>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="7af0cd00-2eee-414a-8982-36b5ef423293" mode="Transparent" x="448" y="0" width="54" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="7af0cd00-2eee-414a-8982-36b5ef423293" mode="Transparent" x="436" y="0" width="55" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<staticText>
-				<reportElement uuid="bbd98418-6bd2-4a7e-9f01-ed9b985fcd97" x="0" y="1" width="375" height="15"/>
-				<textElement verticalAlignment="Bottom">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+				<reportElement uuid="31193c87-e277-4915-b7e9-a6507c041b7d" x="297" y="0" width="14" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
 				</textElement>
-				<text><![CDATA[Уведомление, подтверждающее право на имущественный налоговый вычет:      №]]></text>
+				<text><![CDATA[№]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="e1fcb307-c9f3-41aa-9f63-d79da36698f2" mode="Transparent" x="317" y="0" width="97" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="e1fcb307-c9f3-41aa-9f63-d79da36698f2" mode="Transparent" x="311" y="0" width="95" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<staticText>
-				<reportElement uuid="fa80f548-11bb-4e2e-afa1-92b321ad5f27" mode="Transparent" x="417" y="0" width="23" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="bbd98418-6bd2-4a7e-9f01-ed9b985fcd97" x="0" y="0" width="296" height="15"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[Уведомление, подтверждающее право на имущественный налоговый вычет:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="fa80f548-11bb-4e2e-afa1-92b321ad5f27" mode="Transparent" x="407" y="0" width="28" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Дата]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="f598dfa3-13d3-4272-903d-5f9623d61c56" mode="Transparent" x="564" y="0" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f598dfa3-13d3-4272-903d-5f9623d61c56" mode="Transparent" x="555" y="0" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<staticText>
-				<reportElement uuid="6f668e7f-1f0b-4b28-9a3a-d11da24117b3" mode="Transparent" x="502" y="1" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="6f668e7f-1f0b-4b28-9a3a-d11da24117b3" mode="Transparent" x="492" y="0" width="61" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код ИФНС]]></text>
@@ -2940,7 +2976,7 @@
 		</band>
 		<band height="125">
 			<staticText>
-				<reportElement uuid="b8f09e37-3203-4248-9abb-37b93a0216b6" mode="Transparent" x="0" y="51" width="180" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="b8f09e37-3203-4248-9abb-37b93a0216b6" mode="Transparent" x="0" y="51" width="169" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2949,13 +2985,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Налоговая база]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="7fe718b6-1d15-412c-bcf2-1cfe5141d549" mode="Transparent" x="180" y="51" width="120" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="7fe718b6-1d15-412c-bcf2-1cfe5141d549" mode="Transparent" x="169" y="51" width="120" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2964,13 +3000,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НалБаза}==null) ? "" : $F{НалБаза}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="7af6c45d-0f6b-468c-ba34-bc5c4f1a3a43" mode="Transparent" x="0" y="71" width="180" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="7af6c45d-0f6b-468c-ba34-bc5c4f1a3a43" mode="Transparent" x="0" y="71" width="169" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2979,13 +3015,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Сумма налога исчисленная]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="f11560e2-c350-46ab-888c-529765fe98c3" mode="Transparent" x="180" y="71" width="120" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f11560e2-c350-46ab-888c-529765fe98c3" mode="Transparent" x="169" y="71" width="120" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -2994,13 +3030,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НалИсчисл}==null) ? "" : $F{НалИсчисл}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="072a7210-a920-4f62-9c11-35b166776bd9" mode="Transparent" x="0" y="96" width="180" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="072a7210-a920-4f62-9c11-35b166776bd9" mode="Transparent" x="0" y="96" width="169" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3009,14 +3045,14 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Сумма фиксированных
 авансовых платежей]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="043292a8-38f4-4f82-9076-4d326cf72022" mode="Transparent" x="180" y="96" width="120" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="043292a8-38f4-4f82-9076-4d326cf72022" mode="Transparent" x="169" y="96" width="120" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3025,13 +3061,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{АвансПлатФикс}==null) ? "" : $F{АвансПлатФикс}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="f8a5bb88-c1b5-49b5-a136-47614a0ec3a0" mode="Transparent" x="300" y="96" width="180" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="f8a5bb88-c1b5-49b5-a136-47614a0ec3a0" mode="Transparent" x="289" y="96" width="179" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3040,14 +3076,14 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Сумма налога, не удержанная
 налоговым агентом]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="d59d3b05-9488-4cb8-9fe0-dfca10ef3444" mode="Transparent" x="480" y="51" width="120" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="d59d3b05-9488-4cb8-9fe0-dfca10ef3444" mode="Transparent" x="468" y="51" width="117" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3056,13 +3092,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НалПеречисл}==null) ? "" : $F{НалПеречисл}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="fa0dd473-f5de-4482-b059-84063703d12e" mode="Transparent" x="480" y="96" width="120" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="fa0dd473-f5de-4482-b059-84063703d12e" mode="Transparent" x="468" y="96" width="117" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3071,13 +3107,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НалНеУдерж}==null) ? "" : $F{НалНеУдерж}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="7c48f35a-0901-49e9-82d8-6581c8ec4595" mode="Transparent" x="300" y="71" width="180" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="7c48f35a-0901-49e9-82d8-6581c8ec4595" mode="Transparent" x="289" y="71" width="179" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3086,14 +3122,14 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Сумма налога, излишне удержанная
 налоговым агентом ]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="8b8314d0-f7fd-4209-b002-04250b052155" mode="Transparent" x="480" y="71" width="120" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="8b8314d0-f7fd-4209-b002-04250b052155" mode="Transparent" x="468" y="71" width="117" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3102,13 +3138,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НалУдержЛиш}==null) ? "" : $F{НалУдержЛиш}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="4173955c-edaa-40c2-8250-c743900f063a" mode="Transparent" x="480" y="31" width="120" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="4173955c-edaa-40c2-8250-c743900f063a" mode="Transparent" x="468" y="31" width="117" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3117,13 +3153,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НалУдерж}==null) ? "" : $F{НалУдерж}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="258c2f38-38da-4d28-8a5b-d67b6e7368ac" mode="Transparent" x="300" y="51" width="180" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="258c2f38-38da-4d28-8a5b-d67b6e7368ac" mode="Transparent" x="289" y="51" width="179" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3132,13 +3168,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Сумма налога перечисленная]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="1a36b74a-12df-4a4d-9286-1f2a5f407129" mode="Transparent" x="300" y="31" width="180" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="1a36b74a-12df-4a4d-9286-1f2a5f407129" mode="Transparent" x="289" y="31" width="179" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3147,21 +3183,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Сумма налога удержанная]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a7c01d43-8c6b-4cd2-8441-c3c53423d958" mode="Transparent" x="0" y="0" width="556" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<text><![CDATA[5. Общие суммы дохода и налога]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="dd068f43-1ad2-4fc5-8f3c-3e4691935b6c" mode="Transparent" x="0" y="31" width="180" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="dd068f43-1ad2-4fc5-8f3c-3e4691935b6c" mode="Transparent" x="0" y="31" width="169" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3170,13 +3198,13 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Общая сумма дохода]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="4287a25c-b9ff-4591-856d-50fae7a70b69" mode="Transparent" x="180" y="31" width="120" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="4287a25c-b9ff-4591-856d-50fae7a70b69" mode="Transparent" x="169" y="31" width="120" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -3185,79 +3213,95 @@
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single" rightIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{СумДохОбщ}==null) ? "" : $F{СумДохОбщ}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement uuid="a7c01d43-8c6b-4cd2-8441-c3c53423d958" mode="Transparent" x="2" y="3" width="556" height="25" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[5. Общие суммы дохода и налога]]></text>
+			</staticText>
 		</band>
 		<band height="30">
 			<printWhenExpression><![CDATA[$F{ФНомерУвед}!="" && $F{ФНомерУвед}!=null && $F{Месяц}!="" && $F{Месяц} !=null]]></printWhenExpression>
 			<componentElement>
-				<reportElement uuid="827a8d81-b526-4542-8db3-b070dd9abdb5" x="0" y="1" width="602" height="29">
+				<reportElement uuid="827a8d81-b526-4542-8db3-b070dd9abdb5" x="0" y="1" width="585" height="29">
 					<printWhenExpression><![CDATA[$F{ФНомерУвед}!="" && $F{ФНомерУвед}!=null && $F{Месяц}!="" && $F{Месяц} !=null]]></printWhenExpression>
 				</reportElement>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="dsUvedAvans" uuid="4b19e807-c86b-4f1e-ad52-96a693b86eca">
 						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/СведДох/СумИтНалПер/УведФиксПлат")]]></dataSourceExpression>
 					</datasetRun>
-					<jr:listContents height="29" width="602">
+					<jr:listContents height="29" width="585">
 						<staticText>
-							<reportElement uuid="8bf7dded-1e56-4dce-99f8-488af10b653a" mode="Transparent" x="417" y="12" width="33" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+							<reportElement uuid="8bf7dded-1e56-4dce-99f8-488af10b653a" mode="Transparent" x="399" y="12" width="33" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<text><![CDATA[Дата]]></text>
 						</staticText>
 						<textField>
-							<reportElement uuid="96da6e2a-d1a7-4e20-bf86-cb5dc6165e1a" mode="Transparent" x="450" y="12" width="59" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="96da6e2a-d1a7-4e20-bf86-cb5dc6165e1a" mode="Transparent" x="432" y="12" width="59" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{ФДатаУвед}==null) ? "" : $F{ФДатаУвед}]]></textFieldExpression>
 						</textField>
 						<staticText>
-							<reportElement uuid="5469ce01-c630-46d0-8727-95eacc7cd222" mode="Transparent" x="509" y="12" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+							<reportElement uuid="5469ce01-c630-46d0-8727-95eacc7cd222" mode="Transparent" x="492" y="12" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<text><![CDATA[Код ИФНС]]></text>
 						</staticText>
 						<textField>
-							<reportElement uuid="e0ad14aa-eab9-4fc4-bba0-718691a88bf3" mode="Transparent" x="571" y="12" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="e0ad14aa-eab9-4fc4-bba0-718691a88bf3" mode="Transparent" x="555" y="12" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{ФИФНСУвед}==null) ? "" : $F{ФИФНСУвед}]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="false">
-							<reportElement uuid="409dcafb-9c15-46cc-b071-b2ad8672ab42" mode="Transparent" x="273" y="12" width="144" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<reportElement uuid="409dcafb-9c15-46cc-b071-b2ad8672ab42" mode="Transparent" x="255" y="12" width="142" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 							<box>
 								<bottomPen lineWidth="0.5"/>
 							</box>
-							<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-								<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+							<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 								<paragraph lineSpacing="Single"/>
 							</textElement>
 							<textFieldExpression><![CDATA[($F{ФНомерУвед}==null) ? "" : $F{ФНомерУвед}]]></textFieldExpression>
 						</textField>
 						<staticText>
-							<reportElement uuid="58c39680-48fc-419c-a9fe-bc9f6c432803" x="0" y="0" width="369" height="27"/>
+							<reportElement uuid="58c39680-48fc-419c-a9fe-bc9f6c432803" x="0" y="0" width="241" height="27"/>
 							<textElement verticalAlignment="Bottom">
-								<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+								<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
 							</textElement>
 							<text><![CDATA[Уведомление, подтверждающее право
-на уменьшение налога на фиксированные авансовые платежи:       №]]></text>
+на уменьшение налога на фиксированные авансовые платежи:]]></text>
+						</staticText>
+						<staticText>
+							<reportElement uuid="abe88a0a-96fd-40da-9f4f-3161dfe5d471" mode="Transparent" x="241" y="12" width="13" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+							<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+								<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+								<paragraph lineSpacing="Single"/>
+							</textElement>
+							<text><![CDATA[№]]></text>
 						</staticText>
 					</jr:listContents>
 				</jr:list>
@@ -3266,59 +3310,67 @@
 		<band height="27">
 			<printWhenExpression><![CDATA[!($F{ФНомерУвед}!="" && $F{ФНомерУвед}!=null && $F{Месяц}!="" && $F{Месяц} !=null)]]></printWhenExpression>
 			<staticText>
-				<reportElement uuid="24f63394-768a-45ac-8fc9-49c7d4e3c3eb" x="0" y="0" width="369" height="27"/>
+				<reportElement uuid="24f63394-768a-45ac-8fc9-49c7d4e3c3eb" x="0" y="0" width="241" height="27"/>
 				<textElement verticalAlignment="Bottom">
-					<font fontName="Arial" size="8" pdfEncoding="Identity-H"/>
+					<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
 				</textElement>
 				<text><![CDATA[Уведомление, подтверждающее право
-на уменьшение налога на фиксированные авансовые платежи:       №]]></text>
+на уменьшение налога на фиксированные авансовые платежи:]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="ace3b2ac-10f2-46ca-a327-1732a8f4d2d1" mode="Transparent" x="450" y="12" width="59" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="ace3b2ac-10f2-46ca-a327-1732a8f4d2d1" mode="Transparent" x="432" y="12" width="59" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="7b5bc35a-c90a-4a8d-b912-8d138ebb3c08" mode="Transparent" x="273" y="12" width="144" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="7b5bc35a-c90a-4a8d-b912-8d138ebb3c08" mode="Transparent" x="255" y="12" width="142" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<textElement textAlignment="Left" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
 			<staticText>
-				<reportElement uuid="9a012ee1-0fdd-4e7d-abef-d5d004030473" mode="Transparent" x="509" y="12" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="9a012ee1-0fdd-4e7d-abef-d5d004030473" mode="Transparent" x="492" y="12" width="62" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Код ИФНС]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="e5537081-b722-4e79-bbc4-0568c7a2f9ea" mode="Transparent" x="417" y="12" width="33" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+				<reportElement uuid="e5537081-b722-4e79-bbc4-0568c7a2f9ea" mode="Transparent" x="399" y="12" width="33" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Дата]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="2662b9b6-2b5d-4cbc-b5c9-47d43eaa0a37" mode="Transparent" x="571" y="12" width="30" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="2662b9b6-2b5d-4cbc-b5c9-47d43eaa0a37" mode="Transparent" x="556" y="12" width="29" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 			</textField>
+			<staticText>
+				<reportElement uuid="5fded389-701f-450f-befc-7fe1fd5024b2" mode="Transparent" x="241" y="12" width="13" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom" rotation="None" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[№]]></text>
+			</staticText>
 		</band>
 	</detail>
 	<pageFooter>
@@ -3334,7 +3386,7 @@
 			<staticText>
 				<reportElement uuid="eadead55-9792-43ef-8fde-f834f893b4fb" mode="Transparent" x="0" y="0" width="419" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Налоговый агент (1 - налоговый агент, 2 - уполномоченный представитель):]]></text>
@@ -3342,7 +3394,7 @@
 			<staticText>
 				<reportElement uuid="057f818d-74a4-4669-b50e-0ec88a34ffff" mode="Transparent" x="0" y="35" width="401" height="15" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<text><![CDATA[Наименование документа, подтверждающего полномочия представителя]]></text>
@@ -3353,7 +3405,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[($F{НаимДок}==null) ? "" : $F{НаимДок}]]></textFieldExpression>
@@ -3364,7 +3416,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ПрПодп}]]></textFieldExpression>
@@ -3375,7 +3427,7 @@
 					<bottomPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Bottom" rotation="None" markup="none">
-					<font fontName="Arial" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{vSignerFIO}]]></textFieldExpression>
