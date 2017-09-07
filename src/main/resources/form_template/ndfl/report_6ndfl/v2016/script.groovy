@@ -1342,7 +1342,7 @@ def createForm() {
             Long ddId
             params = new HashMap<String, Object>()
             ddId = declarationService.create(logger, declarationData.declarationTemplateId, userInfo,
-                    departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, null)
+                    departmentReportPeriodService.get(declarationData.departmentReportPeriodId), taxOrganCode, kpp.toString(), oktmo.toString(), null, null, null, false)
 
             params.put(NDFL_PERSON_KNF_ID, npGropSourcesIdList)
             formMap.put(ddId, params)
