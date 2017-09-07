@@ -15,8 +15,8 @@
 	</parameter>
 	<queryString>
 		<![CDATA[select r.num,r.surname,r.name,r.lastname,r.birthday,
-       r.errtext,
-       r.errtext||chr(10) errtext0,
+       nvl(r.errtext,' ') errtext,
+      nvl( r.errtext||chr(10),' ')  errtext0,
        replace(r.errtext,';',';'||chr(10))||chr(10) errtext1,
        substr(r.errtext,1,instr(r.errtext,';',50))||chr(10)||
        substr(r.errtext,instr(r.errtext,';',50)+1)||chr(10) errtext2
