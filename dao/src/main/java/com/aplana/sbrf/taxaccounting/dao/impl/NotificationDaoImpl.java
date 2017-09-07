@@ -57,13 +57,14 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         jt.update(
                 "insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
                         "IS_READ, TEXT, CREATE_DATE, DEADLINE, LOG_ID, REPORT_ID, TYPE)" +
-                        " values (?, ?, ?, ?, ?, ?, sysdate, ?, ?, ?, ?)",
+                        " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 notification.getReportPeriodId(),
                 notification.getSenderDepartmentId(),
                 notification.getReceiverDepartmentId(),
                 notification.isRead() ? 1 : 0,
                 notification.getText(),
+                notification.getCreateDate(),
                 notification.getDeadline(),
                 notification.getLogId(),
                 notification.getReportId(),
@@ -97,7 +98,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     public void saveList(final List<Notification> notifications) {
         getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
                 "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, LOG_ID, TYPE, REPORT_ID)" +
-                " values (?, ?, ?, ?, ?, ?, sysdate, ?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+                " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
 
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -125,37 +126,43 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 ps.setInt(5, elem.isRead() ? 1 : 0);
                 //Текст
                 ps.setString(6, elem.getText());
+                //Дата создания
+                if(elem.getCreateDate() != null){
+                    ps.setTimestamp(7,new java.sql.Timestamp(elem.getCreateDate().getTime()));
+                } else {
+                    ps.setNull(7,Types.TIMESTAMP);
+                }
                 //Срок сдачи отчетности
                 if (elem.getDeadline() != null) {
-                    ps.setDate(7, new java.sql.Date(elem.getDeadline().getTime()));
+                    ps.setDate(8, new java.sql.Date(elem.getDeadline().getTime()));
                 } else {
-                    ps.setNull(7, Types.DATE);
+                    ps.setNull(8, Types.DATE);
                 }
                 //Пользователь-получатель  сообщения
                 if (elem.getUserId() != null) {
-                    ps.setInt(8, elem.getUserId());
-                } else {
-                    ps.setNull(8, Types.NUMERIC);
-                }
-                //Роль пользователей-получателей сообщения
-                if (elem.getRoleId() != null) {
-                    ps.setInt(9, elem.getRoleId());
+                    ps.setInt(9, elem.getUserId());
                 } else {
                     ps.setNull(9, Types.NUMERIC);
                 }
-
-                if (elem.getLogId() != null) {
-                    ps.setString(10, elem.getLogId());
+                //Роль пользователей-получателей сообщения
+                if (elem.getRoleId() != null) {
+                    ps.setInt(10, elem.getRoleId());
                 } else {
-                    ps.setNull(10, Types.VARCHAR);
+                    ps.setNull(10, Types.NUMERIC);
                 }
 
-                ps.setInt(11, new Integer(elem.getNotificationType().getId()));
+                if (elem.getLogId() != null) {
+                    ps.setString(11, elem.getLogId());
+                } else {
+                    ps.setNull(11, Types.VARCHAR);
+                }
+
+                ps.setInt(12, new Integer(elem.getNotificationType().getId()));
 
                 if (elem.getReportId() != null) {
-                    ps.setString(12, elem.getReportId());
+                    ps.setString(13, elem.getReportId());
                 } else {
-                    ps.setNull(12, Types.VARCHAR);
+                    ps.setNull(13, Types.VARCHAR);
                 }
             }
 

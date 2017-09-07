@@ -109,6 +109,7 @@ public class LogBusinessDaoTest {
 		LogBusiness logBusiness = new LogBusiness();
 		logBusiness.setId(id);
 		logBusiness.setFormId(1l);
+		logBusiness.setLogDate(new Date());
 		logBusiness.setEventId(event_id);
 		logBusiness.setUserLogin(LOGIN_CONTROL_BANK);
 		logBusiness.setRoles("operator");
