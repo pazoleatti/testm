@@ -7,7 +7,11 @@ prompt drop tmp tables
 @@drop_tables.sql;
 
 -- compile source
-prompt compile source
+prompt compile DEP_REP_PER_BEFORE_DELETE
+@@DEP_REP_PER_BEFORE_DELETE.sql;
+
+-- compile source
+prompt compile person_pkg
 @@person_pkg.sql;
 
 exit;
