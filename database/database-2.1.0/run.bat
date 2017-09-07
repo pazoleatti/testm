@@ -1,9 +1,9 @@
 @ECHO OFF
 REM ����� ��������� ��� � ������ ��������� ����� � ����� ���� ������
 REM ������: user_name/password@host:port/service_name
-SET AUTH=ndfl_unstable/ndfl_unstable@172.19.214.45:1521/orcl.aplana.local
+SET AUTH=NDFL_UNSTABLE/ndfl_unstable@sbrf_un
 REM ����� ��������� ���� � ����� ORACLE_HOME\BIN
-SET ORA_BIN=C:\app\oracle\product\11.2.0\dbhome_1\BIN
+SET ORA_BIN=D:\app\client\RNurgaleev\product\12.1.0\client_1\BIN
 SET LOG_DIR=_logs
 REM SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
@@ -20,12 +20,12 @@ REM DEL /s /q /f %BAD_DIR%\*.*
 ECHO ## ddl
 "%ORA_BIN%\sqlplus" %AUTH% @"update_ddl.sql" > "%LOG_DIR%/update_ddl.txt"
 
-REM ECHO ## dml
-REM "%ORA_BIN%\sqlplus" %AUTH% @"update_dml.sql" > "%LOG_DIR%/update_dml.txt"
+ECHO ## dml
+"%ORA_BIN%\sqlplus" %AUTH% @"update_dml.sql" > "%LOG_DIR%/update_dml.txt"
 
-REM ECHO ## dml: templates
-REM CD templates/script
-REM CALL templates.bat
+ECHO ## dml: templates
+CD templates/script
+CALL templates.bat
 CD ../..
 
 rem �������� ������ ���������� �������������������

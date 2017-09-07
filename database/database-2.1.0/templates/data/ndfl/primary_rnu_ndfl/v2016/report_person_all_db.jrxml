@@ -173,7 +173,7 @@
 		<queryString>
 			<![CDATA[select /*+rule*/pers.inp,
        inc.row_num,
-       row_number() over(partition by pers.id order by inc.income_accrued_date,inc.income_payout_date,inc.id) rn,
+      row_number() over(partition by pers.id order by inc.income_accrued_date,inc.income_payout_date,inc.id) rn,
        inc.operation_id,
        inc.income_code,
        inc.income_type,
@@ -1238,7 +1238,7 @@
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -2080,7 +2080,7 @@
 									<font fontName="Times New Roman" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 									<paragraph lineSpacing="Single"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{RN}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
