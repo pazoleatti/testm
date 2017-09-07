@@ -87,7 +87,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final String REGION_NAME = "справочника «Субъекты РФ»";
     private static final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
     private static final String DIASOFT_NAME = "справочников Diasoft";
-    private static final String FIAS_NAME = "справочника КЛАДР";
+    private static final String FIAS_NAME = "справочника ФИАС";
     private static final String NSI_NAME = "справочников ЦАС НСИ";
     private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
@@ -667,7 +667,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         log(userInfo, LogData.L23, logger, lockId);
         if (checkPathArchiveError(userInfo, logger, lockId)){
             // ФИАС
-            lockService.updateState(lockId, lockDate, "Импорт справочника КЛАДР");
+            lockService.updateState(lockId, lockDate, "Импорт справочника ФИАС");
             importRefBookFias(userInfo, null, logger, lockId, isAsync);
         }
     }
