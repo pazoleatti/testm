@@ -10,5 +10,9 @@ prompt add constraint
 prompt drop constraint
 @@drop_constraint.sql;
 
+-- compile fias_pkg
+prompt compile fias_pkg
+@@fias_pkg.sql;
+
 commit;
 exit;
