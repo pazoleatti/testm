@@ -47,6 +47,5 @@ public interface FiasRefBookService {
     /**
      * Вызывает процедуру обновляющую материальные представления после импорта в ФИАС
      */
-    public void refreshViews();
-
+    void refreshViews();
 }

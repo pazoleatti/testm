@@ -42,16 +42,15 @@ public interface FiasRefBookDao {
     /**
      * Вызывает процедуру обновляющую материальные представления после импорта в ФИАС
      */
-    public void refreshViews();
+    void refreshViews();
 
     /**
-     * Удаляет индексы из таблицы FIAS_ADDROBJ для ускорения импорта
+     * Удаляет индексы из таблицы FIAS_ADDROBJ для ускорения импорта и очищает её содержимое
      */
-    void dropIndexes();
+    void beforeImport();
 
     /**
-     * Восстанавливает индексы из таблицы FIAS_ADDROBJ для ускорения импорта
+     * Восстанавливает индексы в таблице FIAS_ADDROBJ после импорта данных для ускорения импорта
      */
-    void createIndexes();
-
+    void afterImport();
 }

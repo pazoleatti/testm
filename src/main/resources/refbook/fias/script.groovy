@@ -34,8 +34,12 @@ void importData() {
     long time = System.currentTimeMillis();
     logger.info("Начало импорта данных справочника ФИАС");
 
-    //Очистка данных перед импортом
-    importFiasDataService.clearAll()
+    // Очистка данных и удаление индексов перед импортом
+    try {
+        importFiasDataService.beforeImport()
+    } catch (Exception e) {
+        println "Error before import FIAS"
+    }
 
     logger.info("Предварительная очистка таблиц справочника " + calcTimeMillis(time));
 
@@ -43,13 +47,6 @@ void importData() {
 
     //Строим карту Guid адресных объектов, заранее так как будет нужна иерархия
     def addressObjectGuidsMap = buidGuidsMap(getInputStream(archive, itemsMap, "AS_ADDROBJ_"), QName.valueOf('Object'), QName.valueOf('AOGUID'));
-
-    //Удаляем индексы для улучшения производительности
-    try {
-        importFiasDataService.dropIndexes()
-    } catch (Exception e) {
-        println "Cannot drop indexes!"
-    }
 
     try {
         def FIAS_SOCRBASE_TABLE_NAME = "FIAS_SOCRBASE"; //RefBook.Table.FIAS_SOCRBASE.getTable()
@@ -68,8 +65,12 @@ void importData() {
                     addressObjectRowMapper(generatedId, addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
                 })
     } finally {
-        println "Indexes restoring..."
-        importFiasDataService.createIndexes()
+        try {
+            // Создание индексов после импорта данных
+            importFiasDataService.afterImport()
+        } catch (Exception e) {
+            println "Error after import FIAS"
+        }
     }
 
     if (logger.containsLevel(LogLevel.ERROR)) {

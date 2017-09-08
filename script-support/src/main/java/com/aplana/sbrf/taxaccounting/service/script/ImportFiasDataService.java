@@ -19,17 +19,12 @@ public interface ImportFiasDataService {
     void insertRecords(String table, List<Map<String, Object>> records);
 
     /**
-     * Удаляет данные из всех справочников
+     * Удаляет индексы из таблицы FIAS_ADDROBJ для ускорения импорта и очищает её содержимое
      */
-    void clearAll();
+    void beforeImport();
 
     /**
-     * Удаляет индексы из таблицы FIAS_ADDROBJ для ускорения импорта
+     * Восстанавливает индексы в таблице FIAS_ADDROBJ после импорта данных для ускорения импорта
      */
-    void dropIndexes();
-
-    /**
-     * Восстанавливает индексы из таблицы FIAS_ADDROBJ для ускорения импорта
-     */
-    void createIndexes();
+    void afterImport();
 }
