@@ -795,22 +795,41 @@ begin
   ------------------------------------------------------------------------------
   -- Удаление индекса IDX_FIAS_ADDR_CURRST_AOLEV
   ------------------------------------------------------------------------------
-  procedure BeforeImport
+  procedure BeforeImport 
   is
+    PRAGMA AUTONOMOUS_TRANSACTION;
     v_count number;
   begin
     select count(1) into v_count from user_indexes where index_name='IDX_FIAS_ADDR_CURRST_AOLEV';
     if v_count>0 then
       execute immediate 'drop index IDX_FIAS_ADDR_CURRST_AOLEV';
     end if;
-    ClearFiasAddrObj;
+    
+    for c in (select fk.table_name,fk.constraint_name
+        from user_constraints pk left join user_constraints fk on fk.r_constraint_name=pk.constraint_name
+       where pk.table_name='FIAS_ADDROBJ'
+         and pk.constraint_type='P')
+    loop
+      execute immediate 'alter table '||lower(c.table_name)||' disable constraint '||lower(c.constraint_name);
+    end loop;
+    
+    delete from fias_addrobj;
+    
+    for c in (select fk.table_name,fk.constraint_name
+        from user_constraints pk left join user_constraints fk on fk.r_constraint_name=pk.constraint_name
+       where pk.table_name='FIAS_ADDROBJ'
+         and pk.constraint_type='P')
+    loop
+      execute immediate 'alter table '||lower(c.table_name)||' enable constraint '||lower(c.constraint_name);
+    end loop;
   end BeforeImport;
   
   ------------------------------------------------------------------------------
   -- Создание индекса IDX_FIAS_ADDR_CURRST_AOLEV
   ------------------------------------------------------------------------------
-  procedure AfterImport
+  procedure AfterImport 
   is
+    PRAGMA AUTONOMOUS_TRANSACTION;
     v_count number;
   begin
     select count(1) into v_count from user_indexes where index_name='IDX_FIAS_ADDR_CURRST_AOLEV';
