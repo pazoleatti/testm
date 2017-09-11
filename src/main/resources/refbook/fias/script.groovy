@@ -80,7 +80,7 @@ void importData() {
     }
 
     // Обновление материализованных представлений
-    fiasRefBookService.refreshViews()
+    //fiasRefBookService.refreshViews()
 
     logger.info("Завершение импорта данных справочника ФИАС. Записей загружено: "+addressObjectGuidsMap.size() + calcTimeMillis(time));
 
