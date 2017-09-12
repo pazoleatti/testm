@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_2ndfl" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="585" leftMargin="10" rightMargin="0" topMargin="10" bottomMargin="10" uuid="969dd503-187a-4dd0-a41d-4c67eb3cc794">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="690"/>
+	<property name="ireport.y" value="191"/>
 	<property name="ireport.callouts" value="##Tue Jan 10 08:55:51 VET 2017"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="TestXML"/>
 	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
@@ -1005,7 +1005,7 @@
 				<text><![CDATA[Фамилия]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="1fa2e6b4-0c8b-40ca-8d98-054b2007eb71" mode="Transparent" x="37" y="156" width="161" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="1fa2e6b4-0c8b-40ca-8d98-054b2007eb71" mode="Transparent" x="37" y="156" width="158" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -1016,7 +1016,7 @@
 				<textFieldExpression><![CDATA[($F{Фамилия}==null) ? "" : $F{Фамилия}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="83305b69-b6c8-4b5f-a9f0-9b3df4c26c5d" mode="Transparent" x="198" y="156" width="22" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="83305b69-b6c8-4b5f-a9f0-9b3df4c26c5d" mode="Transparent" x="195" y="156" width="22" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -1024,7 +1024,7 @@
 				<text><![CDATA[Имя]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="22f7258f-703a-4f43-9aab-8ad4ebe5ed0e" mode="Transparent" x="220" y="156" width="161" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="22f7258f-703a-4f43-9aab-8ad4ebe5ed0e" mode="Transparent" x="217" y="156" width="161" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<bottomPen lineWidth="0.5"/>
 				</box>
@@ -1035,12 +1035,12 @@
 				<textFieldExpression><![CDATA[($F{Имя}==null) ? "" : $F{Имя}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="2311dece-6232-4ccc-83db-2a0129be6bdf" mode="Transparent" x="381" y="156" width="42" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement uuid="2311dece-6232-4ccc-83db-2a0129be6bdf" mode="Transparent" x="378" y="156" width="45" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" markup="none">
 					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<text><![CDATA[Отчество]]></text>
+				<text><![CDATA[Отчество*]]></text>
 			</staticText>
 			<textField>
 				<reportElement uuid="4332d3df-10c1-4f8c-bb58-b595c2d9e8d8" mode="Transparent" x="423" y="156" width="162" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
