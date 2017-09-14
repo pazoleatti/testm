@@ -92,7 +92,7 @@ public class RefBook implements Serializable {
 		DECLARATION_TEMPLATE(207), 		            // Макеты налоговых форм
 		ASNU(900), 									// АСНУ
 		CALENDAR(945),								// Календарь
-		//DEDUCTION_MARK(927),
+		DEDUCTION_MARK(927),						// Признак кода вычета
 		DOC_STATE(929),								// Состояние ЭД
 		DECLARATION_DATA_TYPE_REF_BOOK(931), 		// Випы налоговых форм (declaration)
 		DECLARATION_DATA_KIND_REF_BOOK(932), 		// Типы форм (declaration)

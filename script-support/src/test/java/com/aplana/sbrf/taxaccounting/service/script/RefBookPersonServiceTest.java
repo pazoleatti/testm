@@ -34,8 +34,8 @@ public class RefBookPersonServiceTest {
     @Autowired
     RefBookPersonService personService;
 
-    private List<IdentityPerson> getList() {
-        List<IdentityPerson> personDataList = new ArrayList<IdentityPerson>();
+    private List<NaturalPerson> getList() {
+        List<NaturalPerson> personDataList = new ArrayList<NaturalPerson>();
         personDataList.add(createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null));
         personDataList.add(createNaturalPerson(2L, "888", "2", "", "33", null, "2222", "Сидорова", "Наталья", "Викторовна", "12.10.1954"));
         personDataList.add(createNaturalPerson(3L, "777", "", "5", "45", "", "1111", "Кулькина", "Василина", null, ""));

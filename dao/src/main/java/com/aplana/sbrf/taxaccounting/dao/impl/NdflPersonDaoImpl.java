@@ -381,7 +381,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Override
     public List<NdflPersonIncome> findIncomesForPersonByKppOktmoAndPeriod(List<Long> ndflPersonId, String kpp, String oktmo, Date startDate, Date endDate) {
         String sql = "select /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") +
-                ", null inp from NDFL_PERSON_INCOME npi where " +
+                " from NDFL_PERSON_INCOME npi where " +
                 "npi.NDFL_PERSON_ID in (:ndflPersonId) and npi.OKTMO = :oktmo and npi.KPP = :kpp " +
                 "AND npi.INCOME_ACCRUED_DATE between :startDate AND :endDate " +
                 "UNION SELECT /*+index(npi idx_ndfl_person_inc_oktmo_kpp)*/ " + createColumns(NdflPersonIncome.COLUMNS, "npi") + " FROM ndfl_person_income npi" +
@@ -1252,7 +1252,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personIncome.setPaymentNumber(rs.getString("payment_number"));
             personIncome.setTaxSumm(SqlUtils.getLong(rs, "tax_summ"));
             personIncome.setSourceId(SqlUtils.getLong(rs, "source_id"));
-            personIncome.setInp(rs.getString("inp"));
 
             return personIncome;
         }
