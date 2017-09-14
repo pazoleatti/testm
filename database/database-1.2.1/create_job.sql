@@ -7,7 +7,7 @@ BEGIN
 		job_name           =>  'refresh_fias_views',
 		job_type           =>  'PLSQL_BLOCK',
 		job_action         =>  'BEGIN RefreshFiasViews; END;',
-		repeat_interval    =>  'FREQ=DAILY;BYHOUR=15',
+		repeat_interval    =>  'FREQ=DAILY;BYHOUR=1',
 		comments           =>  'refresh fias views',
 		enabled            =>  TRUE);
 	end if;
