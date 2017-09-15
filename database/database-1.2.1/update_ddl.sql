@@ -2,6 +2,10 @@
 prompt create RefreshFiasViews
 @@RefreshFiasViews.sql;
 
+-- drop index
+prompt drop index
+@@drop_index.sql;
+
 -- create job
 prompt create job
 @@create_job.sql;
