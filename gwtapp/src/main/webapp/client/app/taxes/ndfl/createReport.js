@@ -13,10 +13,6 @@
             '$scope', '$filter', 'appModals', '$uibModalInstance', 'RefBookValuesResource', 'APP_CONSTANTS',
             function ($scope, $filter, appModals, $uibModalInstance, RefBookValuesResource, APP_CONSTANTS) {
             $scope.save = function () {
-                console.log($scope.createReportFilter.period);
-                console.log($scope.createReportFilter.department);
-                console.log($scope.createReportFilter.declarationType);
-                console.log(checkFields());
                 if (checkFields()) {
                     $uibModalInstance.close({
                         period: $scope.createReportFilter.period,
