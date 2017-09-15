@@ -5,6 +5,36 @@
     </h4>
 </div>
 <div class="modal-body">
+    <div class="row">
+        <div class="form-group" style="height: 15px;">
+            <div class="col-md-4">
+                <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
+            </div>
+            <div data-ui-select2="periodSelect.options"
+                 data-ng-model="createReportFilter.period"
+                 class="col-md-8">
+            </div>
+        </div>
+        <div class="form-group" style="height: 15px;">
+            <div class="col-md-4">
+                <label class="control-label">{{::'ndflJournal.filter.department' | translate}}:</label>
+            </div>
+            <div data-ui-select2="departmentsSelect.options"
+                 data-ng-model="createReportFilter.department"
+                 class="col-md-8">
+            </div>
+        </div>
+        <div class="form-group" style="height: 15px;">
+            <div class="col-md-4">
+                <label class="control-label">{{::'ndflJournal.filter.declarationType' |
+                    translate}}:</label>
+            </div>
+            <div data-ui-select2="declarationTypeSelect.options"
+                 data-ng-model="createReportFilter.declarationType"
+                 class="col-md-8">
+            </div>
+        </div>
+    </div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-danger" ng-click="save()">

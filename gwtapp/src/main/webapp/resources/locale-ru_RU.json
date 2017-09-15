@@ -41,6 +41,7 @@
   "common.error.message.seemore": "Смотреть подробности",
 
   "common.button.search": "Найти",
+  "common.button.create": "Сформировать",
   "common.button.clear": "Сбросить",
   "common.button.add": "Добавить",
   "common.button.cancel": "Отменить",
@@ -122,6 +123,7 @@
 
   "ndflReportJournal.button.createReport": "Создать отчетность",
   "ndflReportJournal.button.downloadReport": "Выгрузить отчетность",
+  "ndflReportJournal.message.emptyFilterFields": "Заполнены не все поля отчетности",
 
   "field.ndfl.requiredField": "Обязательно поле",
   "field.ndfl.isNumber": "В поле должны вводиться только цифры",
@@ -309,5 +311,9 @@
   "filesComment.comment": "Комментарий:",
   "filesComment.files": "Файлы:",
   "filesComment.button.add": "Добавить",
-  "filesComment.button.remove": "Удалить"
+  "filesComment.button.remove": "Удалить",
+  "ndflJournal.filter.period": "Период",
+  "ndflJournal.filter.department": "Подразделение",
+  "ndflJournal.filter.declarationType": "Вид налоговой формы",
+  "filter.placeholder.select": "Значение не выбрано"
 }
