@@ -179,7 +179,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
             DeclarationData declarationData = declarationService.get(declarationDataId, userInfo);
             if (!declarationData.getState().equals(State.ACCEPTED)) {
                 String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
-                Pair<Boolean, String> restartStatus = restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
+                Pair<Boolean, String> restartStatus = restartTask(keyTask, declarationService.getAsyncTaskName(ddReportType, taxType), userInfo, force, logger);
                 if (restartStatus != null && restartStatus.getFirst()) {
                     result.setStatus(CreateAsyncTaskStatus.LOCKED);
                     result.setRestartMsg(restartStatus.getSecond());
@@ -204,17 +204,17 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
 
                         @Override
                         public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                            return declarationService.checkExistTask(declarationDataId, reportType, logger);
+                            return declarationService.checkExistAsyncTask(declarationDataId, reportType, logger);
                         }
 
                         @Override
                         public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                            declarationService.interruptTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
+                            declarationService.interruptAsyncTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
                         }
 
                         @Override
                         public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationService.getTaskName(ddReportType, taxType);
+                            return declarationService.getAsyncTaskName(ddReportType, taxType);
                         }
                     });
                 }

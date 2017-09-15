@@ -45,7 +45,7 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
             throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
         }
 
-        String taskName = declarationDataService.getTaskName(ddReportType, TaxType.NDFL);
+        String taskName = declarationDataService.getAsyncTaskName(ddReportType, TaxType.NDFL);
         return checkTask(getReportType(), value, taskName, getTaskLimitMsg(value, params));
     }
 

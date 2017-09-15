@@ -475,7 +475,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getTaskName(DeclarationDataReportType ddReportType) {
-        return declarationDataService.getTaskName(ddReportType, TaxType.NDFL);
+        return declarationDataService.getAsyncTaskName(ddReportType, TaxType.NDFL);
     }
 
 

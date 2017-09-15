@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.gwtplatform.dispatch.shared.Result;
 

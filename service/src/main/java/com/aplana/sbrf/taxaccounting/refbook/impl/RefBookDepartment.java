@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
+import static com.aplana.sbrf.taxaccounting.model.DepartmentType.fromCode;
 
 /**
  * Провайдер для работы со справочником подразделений

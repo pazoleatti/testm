@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.TableWithCheckedColumn;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;

@@ -62,7 +62,7 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
         params.put("departmentReportPeriodId", departmentReportPeriod.getId());
 
         String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationTypeId(), action.getReportPeriodId(), action.getDepartmentId());
-        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType(), params), userInfo, action.isForce(), logger);
+        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(reportType, action.getTaxType(), params), userInfo, action.isForce(), logger);
         if (restartStatus != null && restartStatus.getFirst()) {
             result.setStatus(false);
             result.setRestartMsg(restartStatus.getSecond());
@@ -74,7 +74,7 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
                 @Override
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            declarationDataService.getTaskName(reportType, action.getTaxType(), params),
+                            declarationDataService.getAsyncTaskName(reportType, action.getTaxType(), params),
                             LockData.State.IN_QUEUE.getText());
                 }
 
@@ -93,7 +93,7 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
 
                 @Override
                 public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                    return declarationDataService.getTaskName(reportType, action.getTaxType(), params);
+                    return declarationDataService.getAsyncTaskName(reportType, action.getTaxType(), params);
                 }
             });
         }

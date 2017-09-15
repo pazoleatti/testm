@@ -1,8 +1,6 @@
-package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
+package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
-
-public class CheckDeclarationDataResult extends DeclarationDataResult {
+public class CheckDeclarationResult extends DeclarationDataResult {
 
     private String uuid;
     private CreateAsyncTaskStatus status;

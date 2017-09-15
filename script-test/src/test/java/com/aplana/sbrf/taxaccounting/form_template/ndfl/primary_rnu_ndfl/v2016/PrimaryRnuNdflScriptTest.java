@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEvent;
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEventType;
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener;

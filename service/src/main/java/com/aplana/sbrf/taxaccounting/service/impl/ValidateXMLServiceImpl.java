@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -115,7 +118,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     }
 
     @Override
-    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId) {
+    public boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, String fileName, String xsdBlobDataId) {
 
         // Создаём локальный логгер на случай,
         // если в пришедшем логгере есть нефатальные ошибки или предупреждения с предыдущего этапа

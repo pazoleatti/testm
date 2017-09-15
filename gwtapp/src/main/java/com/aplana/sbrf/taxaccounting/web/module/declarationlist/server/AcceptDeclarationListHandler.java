@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -67,8 +70,8 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
         final AcceptDeclarationListResult result = new AcceptDeclarationListResult();
         final Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        final String acceptTaskName = declarationDataService.getTaskName(ddToAcceptedReportType, action.getTaxType());
-        final String toCreateTaskName = declarationDataService.getTaskName(toCreatedReportType, action.getTaxType());
+        final String acceptTaskName = declarationDataService.getAsyncTaskName(ddToAcceptedReportType, action.getTaxType());
+        final String toCreateTaskName = declarationDataService.getAsyncTaskName(toCreatedReportType, action.getTaxType());
         String uuid = "";
         for (Long id: action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
@@ -81,7 +84,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                             DeclarationData declarationData = declarationDataService.get(declarationId, userInfo);
                             if (!declarationData.getState().equals(State.ACCEPTED)) {
                                 String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddToAcceptedReportType);
-                                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddToAcceptedReportType, action.getTaxType()), userInfo, false, logger);
+                                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddToAcceptedReportType, action.getTaxType()), userInfo, false, logger);
                                 if (restartStatus != null && restartStatus.getFirst()) {
                                     logger.warn(prefix + "Данная операция уже запущена");
                                 } else if (restartStatus != null && !restartStatus.getFirst()) {
@@ -104,17 +107,17 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
 
                                         @Override
                                         public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                                            return declarationDataService.checkExistTask(declarationId, reportType, logger);
+                                            return declarationDataService.checkExistAsyncTask(declarationId, reportType, logger);
                                         }
 
                                         @Override
                                         public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                                            declarationDataService.interruptTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
+                                            declarationDataService.interruptAsyncTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
                                         }
 
                                         @Override
                                         public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                            return declarationDataService.getTaskName(ddToAcceptedReportType, action.getTaxType());
+                                            return declarationDataService.getAsyncTaskName(ddToAcceptedReportType, action.getTaxType());
                                         }
                                     });
                                 }

@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParam;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParamType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;

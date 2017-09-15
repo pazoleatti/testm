@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -123,7 +124,84 @@ public interface DeclarationDataService {
 	 */
 	void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
-    /**
+	/**
+	 * Рассчитать декларацию
+	 *
+	 * @param userInfo информация о пользователе, выполняющего действие
+	 * @param declarationDataId идентификатор декларации
+	 * @param force             признак для перезапуска задачи
+	 * @param cancelTask        признак для отмены задачи
+	 * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
+	 */
+	RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
+
+	/**
+	 * Формирует DeclarationResult
+	 *
+	 * @param userInfo информация о пользователе, выполняющего действие
+	 * @param declarationDataId идентификатор декларации
+	 * @return модель {@link DeclarationResult}, в которой содержаться данные о декларации
+	 */
+	DeclarationResult fetchDeclarationData(TAUserInfo userInfo, long declarationDataId);
+
+
+	/**
+	 * Проверить декларацию
+	 *
+	 * @param userInfo информация о пользователе, выполняющего действие
+	 * @param declarationDataId идентификатор декларации
+	 * @param force             признак для перезапуска задачи
+	 * @return модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
+	 */
+	CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force);
+
+	/**
+	 * Получение дополнительной информации о файлах декларации с комментариями
+	 *
+	 * @param declarationDataId идентификатор декларации
+	 * @return объект модели {@link DeclarationDataFileComment}, в которой содержаться данные о файлах
+	 * и комментарий для текущей декларации.
+	 */
+	DeclarationDataFileComment fetchFilesComments(long declarationDataId);
+
+	/**
+	 * Сохранение дополнительной информации о файлах декларации с комментариями
+	 *
+	 * @param dataFileComment сохраняемый объект декларации, в котором содержаться
+	 *                        данные о файлах и комментарий для текущей декларации.
+	 * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
+	 * о файлах и комментарий для текущей декларации.
+	 */
+	DeclarationDataFileComment saveDeclarationFilesComment(DeclarationDataFileComment dataFileComment);
+
+
+	/**
+	 * Получение источников и приемников декларации
+	 *
+	 * @param declarationDataId идентификатор декларации
+	 * @return источники и приемники декларации {@link Relation}
+	 */
+	List<Relation> getDeclarationSourcesAndDestinations(TAUserInfo userInfo, long declarationDataId);
+
+	/**
+	 * Получение списка налоговых форм
+	 *
+	 * @param pagingParams параметры для пагинации
+	 * @return список налоговых форм {@link DeclarationDataSearchResultItem}
+	 */
+	PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams);
+
+	/**
+	 * Формирование рну ндфл для отдельного физ лица`
+	 *
+	 * @param declarationDataId идентификатор декларации
+	 * @param personId          идентификатор физ лица
+	 * @param ndflPersonFilter  заполненные поля при поиске
+	 * @return источники и приемники декларации
+	 */
+	CreateDeclarationReportResult creteReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+
+	/**
      * метод запускает скрипты с событием предрасчетные проверки
      * @param declarationDataId идентификатор декларации
      * @param userInfo информация о пользователе, выполняющего действие
@@ -289,7 +367,7 @@ public interface DeclarationDataService {
      * @param logger
      * @return
      */
-    boolean checkExistTask(long declarationDataId, ReportType reportType, Logger logger);
+    boolean checkExistAsyncTask(long declarationDataId, ReportType reportType, Logger logger);
 
     /**
      * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
@@ -298,7 +376,7 @@ public interface DeclarationDataService {
 	 * @param reportType
 	 * @param cause причина остановки задачи
 	 */
-    void interruptTask(long declarationDataId, TAUserInfo userInfo, ReportType reportType, TaskInterruptCause cause);
+    void interruptAsyncTask(long declarationDataId, TAUserInfo userInfo, ReportType reportType, TaskInterruptCause cause);
 
     /**
      * Метод для очитски blob-ов у деклараций.
@@ -314,7 +392,7 @@ public interface DeclarationDataService {
      * @param taxType
      * @return
      */
-    String getTaskName(DeclarationDataReportType ddReportType, TaxType taxType);
+    String getAsyncTaskName(DeclarationDataReportType ddReportType, TaxType taxType);
 
     /**
      * Формирует название операции
@@ -322,7 +400,7 @@ public interface DeclarationDataService {
      * @param taxType
      * @return
      */
-    String getTaskName(ReportType reportType, TaxType taxType, Map<String, Object> params);
+    String getAsyncTaskName(ReportType reportType, TaxType taxType, Map<String, Object> params);
 
     /**
      * Формирование jasper-отчета
