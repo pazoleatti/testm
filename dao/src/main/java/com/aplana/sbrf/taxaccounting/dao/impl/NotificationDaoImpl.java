@@ -94,7 +94,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                             , notification.roleId, notification.logId, notification.reportId, notification.type)
                     .values(id, tmpNotification.getReportPeriodId(), tmpNotification.getSenderDepartmentId()
                             , tmpNotification.getReceiverDepartmentId(), tmpNotification.isRead() ? 1 : 0, tmpNotification.getText()
-                            , ?, tmpNotification.getDeadline(), tmpNotification.getUserId()
+                            , tmpNotification.getCreateDate(), tmpNotification.getDeadline(), tmpNotification.getUserId()
                             , tmpNotification.getRoleId(), tmpNotification.getLogId(), tmpNotification.getReportId(), tmpNotification.getNotificationType().getId())
                     .execute();
         }

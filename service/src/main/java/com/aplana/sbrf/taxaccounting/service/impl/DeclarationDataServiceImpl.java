@@ -1775,7 +1775,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else {
                     success++;
                     DeclarationData declaration = declarationDataDao.get(entry.getKey());
-                    auditService.add(FormDataEvent.CREATE, userInfo, declaration, null, "Налоговая форма создана", null);
+                    auditService.add(FormDataEvent.CREATE, userInfo, declaration, "Налоговая форма создана", null);
                     String message = getDeclarationFullName(entry.getKey(), null);
                     logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"));
                 }
