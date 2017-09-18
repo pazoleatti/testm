@@ -80,7 +80,7 @@ void save() {
             if (isChangeType && oldType in departmentTypes && !(type in departmentTypes)) {
                 MembersFilterData membersFilter = new MembersFilterData()
                 membersFilter.setDepartmentIds(new HashSet<Integer>(Arrays.asList(recordId)))
-                def users = formDataService.getUsersByFilter(membersFilter)
+                def users = refBookService.getUsersByFilter(membersFilter)
                 if (!users.isEmpty()) {
                     for (def user : users) {
                         logger.error("Пользователь %s назначен подразделению %s", user.getName(), record?.NAME?.value)
