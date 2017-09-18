@@ -717,6 +717,8 @@ comment on column async_task_type.task_limit is 'Ограничение на в�
 comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
 comment on column async_task_type.limit_kind is 'Вид ограничения';
 
+create sequence seq_async_task start with 100000 increment by 100;
+
 --------------------------------------------------------------------------------------------------------
 create table form_data_report
 (
