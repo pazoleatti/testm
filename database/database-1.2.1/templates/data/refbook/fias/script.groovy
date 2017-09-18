@@ -36,6 +36,7 @@ void importData() {
 
     // Очистка данных и удаление индексов перед импортом
     try {
+        println "Before import FIAS"
         importFiasDataService.beforeImport()
     } catch (Exception e) {
         println "Error before import FIAS"
@@ -65,12 +66,6 @@ void importData() {
                     addressObjectRowMapper(generatedId, addressObjectGuidsMap, attr) //здесь для получения id используем подготовленную карту
                 })
     } finally {
-        try {
-            // Создание индексов после импорта данных
-            importFiasDataService.afterImport()
-        } catch (Exception e) {
-            println "Error after import FIAS"
-        }
     }
 
     if (logger.containsLevel(LogLevel.ERROR)) {
@@ -78,9 +73,6 @@ void importData() {
     } else {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
     }
-
-    // Обновление материализованных представлений
-    //fiasRefBookService.refreshViews()
 
     logger.info("Завершение импорта данных справочника ФИАС. Записей загружено: "+addressObjectGuidsMap.size() + calcTimeMillis(time));
 
