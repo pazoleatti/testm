@@ -102,7 +102,7 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
         Map<String, Object> valueMap = new HashMap<String, Object>();
         valueMap.put("taskId", taskId);
         getNamedParameterJdbcTemplate().update(
-                "UPDATE CONFIGURATION_SCHEDULER SET START_DATE = CURRENT_DATE WHERE id = :taskId",
+                "UPDATE CONFIGURATION_SCHEDULER SET last_fire_date = CURRENT_DATE WHERE id = :taskId",
                 valueMap
         );
     }
