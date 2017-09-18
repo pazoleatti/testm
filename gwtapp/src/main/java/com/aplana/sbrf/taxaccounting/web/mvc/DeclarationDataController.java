@@ -333,7 +333,7 @@ public class DeclarationDataController {
      * Получение списка налоговых форм
      *
      * @param pagingParams параметры для пагинации
-     * @return список налоговых форм {@link DeclarationDataSearchResultItem}
+     * @return список налоговых форм {@link DeclarationDataJournalItem}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
     public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam DeclarationDataFilter filter, @RequestParam PagingParams pagingParams) {
