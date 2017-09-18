@@ -1,0 +1,3 @@
+alter table fias_addrobj disable constraint CHK_FIAS_ADDROBJ_CURRSTATUS;
+alter table fias_addrobj disable constraint CHK_FIAS_ADDROBJ_LIVESTATUS;
+alter table fias_addrobj disable constraint FK_FIAS_ADDROBJ_PARENTID;

@@ -20,6 +20,8 @@ import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
 import java.util.regex.Pattern
 
+import org.joda.time.LocalDateTime;
+
 /**
  * Created by lhaziev on 09.02.2017.
  */
@@ -137,13 +139,6 @@ String ATTR_YEAR = "ОтчетГод";
 @Field String ERROR_NOT_FOUND_FILE_NAME = "Не найдено имя отчетного файла в файле ответа «%s»!";
 @Field String ERROR_NOT_FOUND_FORM = "Не найдена форма, содержащая «%s», для файла ответа «%s»";
 
-// Шаблоны имен файлов
-@Field final String NO_RASCHSV_PATTERN = "NO_RASCHSV_(.*)_(.*)_(.{10})(.{9})_(.*)_(.*)\\.(xml|XML)";
-@Field final String KV_PATTERN = "KV_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String UO_PATTERN = "UO_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String IV_PATTERN = "IV_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-@Field final String UU_PATTERN = "UU_NONDFL6_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)";
-
 @Field final String NDFL2_PATTERN_PROT_1 = "PROT_NO_NDFL2"
 @Field final String NDFL2_PATTERN_PROT_2 = "прот_NO_NDFL2"
 @Field final String NDFL2_PATTERN_REESTR_1 = "REESTR_NO_NDFL2"
@@ -168,14 +163,13 @@ String ATTR_YEAR = "ОтчетГод";
 @Field final String NDFL2_2 = "2 НДФЛ (2)"
 @Field final String NDFL6 = "6 НДФЛ"
 
-@Field final KND_ACCEPT = 1166002    // Принят
-@Field final KND_REFUSE = 1166006    // Отклонен
-@Field final KND_SUCCESS = 1166007 //	Успешно отработан
+@Field final KND_ACCEPT = 1166002 // Принят
+@Field final KND_REFUSE = 1166006 // Отклонен
+@Field final KND_SUCCESS = 1166007 // Успешно отработан
 @Field final KND_REQUIRED = 1166009 // Требует уточнения
 
 // Идентификаторы видов деклараций
 @Field final long DECLARATION_TYPE_RNU_NDFL_ID = 100
-@Field final long DECLARATION_TYPE_RASCHSV_NDFL_ID = 200
 
 @Field
 String NAME_EXTENSION_DEC = ".xml";
@@ -197,30 +191,15 @@ def getPeriodNdflMap() {
 }
 
 def importTF() {
-    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN)
-    Pattern patternKvOtch = Pattern.compile(KV_PATTERN)
-    Pattern patternUoOtch = Pattern.compile(UO_PATTERN)
-    Pattern patternIvOtch = Pattern.compile(IV_PATTERN)
-    Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
-
     if (UploadFileName != null
             && UploadFileName.toLowerCase().endsWith(NAME_EXTENSION_DEC)
             && UploadFileName.length() == NAME_LENGTH_QUARTER_DEC
     ) {
         importNDFL()
-    } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
-        importPrimary1151111()
     } else if (isNdfl6Response(UploadFileName)) {
         importNdflResponse()
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
-    } else if (
-    patternKvOtch.matcher(UploadFileName).matches() ||
-            patternUoOtch.matcher(UploadFileName).matches() ||
-            patternIvOtch.matcher(UploadFileName).matches() ||
-            patternUuOtch.matcher(UploadFileName).matches()
-    ) {
-        importAnswer1151111()
     } else {
         logger.error("Некорректное количество символов в имени файла \"%s\"", UploadFileName)
     }
@@ -232,326 +211,6 @@ def importTF() {
 def importNDFL() {
     //TODO при правке НДФЛ: скопировать содержимое _importTF и удалить лишнее
     _importTF()
-}
-
-/**
- * Импорт ТФ 1151111
- */
-def importPrimary1151111() {
-    // 2. Разбор имени файла
-    String tranNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$1")
-    String endNalog = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$2")
-    String inn = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$3")
-    String kpp = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$4")
-    String dateStr = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$5")
-    String guid = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$6")
-
-    // 3. Выполнить извлечение из ТФ элементы
-    def periodYearTuple = readXml1151111()
-    if (periodYearTuple == null) {
-        return
-    }
-    def (reportPeriodTypeCode, year) = periodYearTuple
-
-    // 4. Определение <Отчетный/корректирующий периода>
-    def reportPeriodTypeDataProvider = refBookFactory.getDataProvider(RefBook.Id.PERIOD_CODE.getId())
-    if (reportPeriodTypeDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodTypeCode'") == 0) {
-        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" отсутствует в справочнике \"Коды. определяющие налоговый (отчетный) период", UploadFileName, reportPeriodTypeCode)
-        return
-    }
-
-    if (reportPeriodTypeDataProvider.getRecordsCount(new Date(), "CODE = '$reportPeriodTypeCode' AND F = 1 ") == 0) {
-        logger.error("Файл «%s» не загружен: Значение элемента Файл.Документ.Период \"%s\" не разрешен для ФП \"Сборы, взносы\" ", UploadFileName, reportPeriodTypeCode)
-        return
-    }
-
-    DeclarationType declarationType = declarationService.getTemplateType(DECLARATION_TYPE_RASCHSV_NDFL_ID.intValue())
-    ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodTypeCode, year)
-    if (reportPeriod == null) {
-        logger.error("Файл «%s» не загружен: " +
-                "Для 1151111 (первичная) в системе не создан период с кодом «%s», календарный год «%s»!",
-                UploadFileName, reportPeriodCode, year)
-        return
-    }
-
-    def reportPeriodTypeId = reportPeriodTypeDataProvider.getUniqueRecordIds(new Date(), "CODE = '$reportPeriodTypeCode' AND F = 1").get(0).intValue()
-    def reportPeriodType = reportPeriodTypeDataProvider.getRecordData(reportPeriodTypeId)
-
-    // 5. Определение подразделения
-    def fondDetailProvider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId())
-    def departmentParamTable = fondDetailProvider.getRecords(null, null, "kpp = '$kpp'", null)
-    if (departmentParamTable.size() == 0) {
-        logger.error("Файл «%s» не загружен: Не найдено Подразделение, для которого указан КПП \"%s\" в настройках подразделения", UploadFileName, kpp)
-        return
-    }
-    // Для одного подразделения может быть несколько настроек, каждая настройка на свой отчетный период
-    def departmentId = departmentParamTable.get(0).DEPARTMENT_ID.getReferenceValue().intValue()
-    def departmentName = departmentService.get(departmentId)
-
-    // 4. Для <Подразделения>, <Период>, <Календаный год> открыт отчетный либо корректирующий период
-    def departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, reportPeriod.id)
-    if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-        logger.error("Файл «%s» не загружен: Не найден период код \"%s\" %s %s", UploadFileName, reportPeriodType.NAME, reportPeriodTypeCode, year)
-        return
-    }
-
-    // 6. Определение <Макета> (версии макета), по которому необходимо создать форму
-    Integer declarationTemplateId
-    try {
-        declarationTemplateId = declarationService.getActiveDeclarationTemplateId(declarationType.getId(), reportPeriod.id)
-    } catch (Exception ignored) {
-        logger.error("Файл «%s» не загружен: " +
-                "В подразделении %s не назначено ни одного актуального макета с параметрами: Вид = 1151111, Тип = Первичная либо Отчетная",
-                UploadFileName, departmentName
-        )
-        return
-    }
-
-    // Проверка не загружен ли уже такой файл в систему
-    if (UploadFileName != null && !UploadFileName.isEmpty()) {
-        DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
-
-        declarationFilter.setFileName(UploadFileName);
-        declarationFilter.setTaxType(TaxType.NDFL);
-        declarationFilter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
-
-        List<Long> declarationDataSearchResultItems = declarationService.getDeclarationIds(declarationFilter, declarationFilter.getSearchOrdering(), false);
-        if (!declarationDataSearchResultItems.isEmpty()) {
-            logger.error("ТФ с именем «%s» уже загружен в систему.", UploadFileName)
-        }
-    }
-
-    createDateFile = new Date().parse("yyyyMMdd", dateStr)
-    attachFileType = AttachFileType.TYPE_1
-
-    // Создание экземпляра декларации
-    declarationDataId = declarationService.create(
-            logger, declarationTemplateId, userInfo, departmentReportPeriod,
-            null, kpp, null, null, UploadFileName, null
-    )
-
-    InputStream inputStream = new FileInputStream(dataFile)
-    try {
-        // Запуск события скрипта для разбора полученного файла
-        declarationService.importDeclarationData(
-                logger, userInfo, declarationService.getDeclarationData(declarationDataId),
-                inputStream, UploadFileName, dataFile, attachFileType, createDateFile
-        )
-    } finally {
-        IOUtils.closeQuietly(inputStream)
-    }
-    msgBuilder.append("Выполнено создание налоговой формы: ")
-            .append("№: \"").append(declarationDataId).append("\"")
-            .append(", Период: \"").append(reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName()).append("\"")
-            .append(getCorrectionDateString(departmentReportPeriod))
-            .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
-            .append(", Вид: \"").append(declarationType.getName()).append("\"")
-}
-
-/**
- * Загрузка ответов ФНС по ТФ 1151111 (первичная)
- * @return
- */
-def importAnswer1151111() {
-
-    Pattern patternKvOtch = Pattern.compile(KV_PATTERN)
-    Pattern patternUoOtch = Pattern.compile(UO_PATTERN)
-    Pattern patternIvOtch = Pattern.compile(IV_PATTERN)
-    Pattern patternUuOtch = Pattern.compile(UU_PATTERN)
-
-    // Дата создания файла
-    Date fileDate = null
-
-    // 1. Определим тип документа по имени файла
-    def String nodeNameFind = null
-    def String parentNodeNameFind = null
-    def String attrNameFind = null
-    if (patternKvOtch.matcher(UploadFileName).matches()) {
-        // Квитанция о приеме налоговой декларации
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(KV_PATTERN, "\$5").substring(0, 8));
-        nodeNameFind = "ИмяОбрабФайла"
-        parentNodeNameFind = "СвКвит"
-    } else if (patternUoOtch.matcher(UploadFileName).matches()) {
-        // Уведомление об отказе в приеме налоговой декларации
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UO_PATTERN, "\$5").substring(0, 8));
-        nodeNameFind = "ИмяОбрабФайла"
-        parentNodeNameFind = "ОбщСвУвед"
-    } else if (patternIvOtch.matcher(UploadFileName).matches()) {
-        // Извещение о вводе
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(IV_PATTERN, "\$5").substring(0, 8));
-        nodeNameFind = "СвИзвещВ"
-        attrNameFind = "ИмяОбрабФайла"
-    } else if (patternUuOtch.matcher(UploadFileName).matches()) {
-        // 	Уведомление об уточнении
-        fileDate = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(UU_PATTERN, "\$5").substring(0, 8));
-        nodeNameFind = "ОбщСвУвед"
-        attrNameFind = "ИмяОбрабФайла"
-    }
-
-    // 3. Выполним чтение Имени отчетного файла из элемента файла ответа
-    def declarationDataFileNameReportList = []
-    try {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser saxParser = factory.newSAXParser();
-        if (attrNameFind != null) {
-            // Ищем по имени атрибута
-            def sett = new HashMap<String, List<String>>();
-            sett.put(nodeNameFind, [attrNameFind]);
-            SAXHandler handler = new SAXHandler(sett);
-            saxParser.parse(ImportInputStream, handler);
-            declarationDataFileNameReportList.add(handler.getAttrValues().get(nodeNameFind).get(attrNameFind));
-        } else {
-            // Ищем по имени узла
-            SAXHandler handler = new SAXHandler(nodeNameFind, parentNodeNameFind);
-            saxParser.parse(ImportInputStream, handler);
-            declarationDataFileNameReportList = handler.getNodeValueList()
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-        logger.error("Ошибка чтения файла \"%s\".", UploadFileName);
-        return
-    } catch (ParserConfigurationException e) {
-        e.printStackTrace();
-        logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
-        return
-    } catch (SAXException e) {
-        e.printStackTrace();
-        logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
-        return
-    } finally {
-        IOUtils.closeQuietly(ImportInputStream);
-    }
-
-    // Не найдено имя файла, для которого сформирован ответ, в файле ответа
-    if (!declarationDataFileNameReportList && declarationDataFileNameReportList?.isEmpty()) {
-        throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FILE_NAME, UploadFileName));
-    }
-
-    declarationDataFileNameReportList.each { declarationDataFileNameReport ->
-        // 4. Поиск НФ, для которой пришел файл ответа по условию
-        def declarationDataList = declarationService.find(declarationDataFileNameReport)
-        if (declarationDataList == null || declarationDataList.size() == 0) {
-            // Ошибка: Не найдена форма, соответсвующая имени отчетного файла
-            throw new IllegalArgumentException(String.format(ERROR_NOT_FOUND_FORM, declarationDataFileNameReport, UploadFileName));
-        } else if (declarationDataList.size() != 1) {
-            // Ошибка: Найдено несколько форм, соответствующих имени отчетного файла
-
-            // Выведем ошибку
-            def msgError = "Файл ответа \"" + declarationDataFileNameReport + "\" найден в формах: %s"
-            def msgErrorList = []
-            declarationDataList.each { declarationData ->
-                def declarationTypeName = declarationService.getTypeByTemplateId(declarationData.declarationTemplateId)?.name
-                def departmentName = departmentService.get(declarationData.departmentId)?.name
-                def reportPeriodName = reportPeriodService.get(declarationData.reportPeriodId)?.name
-                msgErrorList.add("\"" + declarationTypeName + "\".\"" + departmentName + "\".\"" + reportPeriodName + "\"")
-            }
-            throw new IllegalArgumentException(String.format(msgError, msgErrorList.join(", ")));
-        }
-        def declarationData = declarationDataList.get(0)
-
-        // 2. Выполним проверку структуры файла ответа на соответствие XSD
-        def declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
-        def templateFile = null
-        if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_1)
-            }
-        }
-        if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_2)
-            }
-        }
-        if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_3)
-            }
-        }
-        if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
-            templateFile = declarationTemplate.declarationTemplateFiles.find { it ->
-                it.fileName.startsWith(ANSWER_PATTERN_4)
-            }
-        }
-        if (!templateFile) {
-            logger.error("Для файла ответа \"%s\" не найдена xsd схема", UploadFileName)
-            return
-        }
-        declarationService.validateDeclaration(userInfo, logger, dataFile, UploadFileName, templateFile.blobDataId)
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            return
-        }
-
-        // 5. Проверка того, что файл ответа не был загружен ранее
-        def beforeUploadDeclarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(UploadFileName, null)
-        if (!beforeUploadDeclarationDataList.isEmpty()) {
-            logger.error("Файл ответа \"%s\" уже загружен", UploadFileName)
-            return
-        }
-
-        // 6. Сохранение файла ответа в форме
-        def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
-
-        def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
-        def createUser = declarationService.getSystemUserInfo().getUser()
-
-        def declarationDataFile = new DeclarationDataFile()
-        declarationDataFile.setDeclarationDataId(declarationData.id)
-        declarationDataFile.setUuid(fileUuid)
-        declarationDataFile.setUserName(createUser.getName())
-        declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(createUser.getDepartmentId()))
-        declarationDataFile.setFileTypeId(fileTypeId)
-        declarationDataFile.setDate(fileDate)
-
-        declarationService.saveFile(declarationDataFile)
-
-        def declarationDataFileMaxWeight = declarationService.findFileWithMaxWeight(declarationData.id)
-        def prevWeight
-
-        if (declarationDataFileMaxWeight != null) {
-            prevWeight = getDocWeight(declarationDataFileMaxWeight.fileName)
-        }
-
-        def docWeight = getDocWeight(UploadFileName)
-        if (prevWeight == null || prevWeight <= docWeight) {
-            def nextKnd
-
-            //Принят
-            if (UploadFileName.startsWith(ANSWER_PATTERN_1)) {
-                nextKnd = KND_ACCEPT
-            }
-
-            //Отклонен
-            if (UploadFileName.startsWith(ANSWER_PATTERN_2)) {
-                nextKnd = KND_REFUSE
-            }
-
-            //Успешно обработан
-            if (UploadFileName.startsWith(ANSWER_PATTERN_3)) {
-                nextKnd = KND_SUCCESS
-            }
-
-            //Требует уточнения
-            if (UploadFileName.startsWith(ANSWER_PATTERN_4)) {
-                nextKnd = KND_REQUIRED
-            }
-
-            if (nextKnd != null) {
-                def docStateProvider = refBookFactory.getDataProvider(RefBook.Id.DOC_STATE.getId())
-                def docStateId = docStateProvider.getUniqueRecordIds(new Date(), "KND = '${nextKnd}'").get(0)
-                declarationService.setDocStateId(declarationData.id, docStateId)
-            }
-        }
-
-        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-        def departmentName = departmentService.get(declarationData.departmentId)
-
-        msgBuilder.append("Выполнена загрузка ответа ФНС для формы: ")
-                .append("№: \"").append(declarationData.id).append("\"")
-                .append(", Период: \"").append(departmentReportPeriod.reportPeriod.getTaxPeriod().getYear() + " - " + departmentReportPeriod.reportPeriod.getName()).append("\"")
-                .append(", Подразделение: \"").append(departmentName.getName()).append("\"")
-                .append(", Вид: \"").append(declarationTemplate.type.getName()).append("\"");
-    }
 }
 
 /**
@@ -585,39 +244,6 @@ def isNdfl6Response(fileName) {
             fileName.startsWith(ANSWER_PATTERN_NDFL_2) ||
             fileName.startsWith(ANSWER_PATTERN_NDFL_3) ||
             fileName.startsWith(ANSWER_PATTERN_NDFL_4)
-}
-
-/**
- * Проверяет что файл ответа принадлежит 6 НФДЛ и не пренадлежит 1151111
- * Для этого надо проверить содеражание файла
- */
-def isNdfl6AndNot11151111(fileName) {
-    def contentMap = readNdfl6ResponseContent()
-
-    if (contentMap == null) {
-        return false
-    }
-
-    def reportFileName = getFileName(contentMap, fileName)
-
-    if (reportFileName == null) {
-        return false
-    }
-
-    // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
-    def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-    def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
-
-    def declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
-    if (declarationDataList.isEmpty()) {
-        return false
-    }
-
-    if (declarationDataList.size() > 1) {
-        return false
-    }
-
-    return true
 }
 
 /**
@@ -1116,7 +742,7 @@ def importNdflResponse() {
     }
 
     // Сохранение файла ответа в форме
-    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
+    def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new LocalDateTime())
     def createUser = declarationService.getSystemUserInfo().getUser()
     def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
 
@@ -1206,12 +832,6 @@ def _importTF() {
     // Категория прикрепленного файла
     AttachFileType attachFileType = null
 
-    Pattern patternNoRaschsv = Pattern.compile(NO_RASCHSV_PATTERN);
-    Pattern patternKvOtch = Pattern.compile(KV_PATTERN);
-    Pattern patternUoOtch = Pattern.compile(UO_PATTERN);
-    Pattern patternIvOtch = Pattern.compile(IV_PATTERN);
-    Pattern patternUuOtch = Pattern.compile(UU_PATTERN);
-
     Long declarationDataId = null
 
     // Имя файла, для которого сформирован ответ
@@ -1242,42 +862,6 @@ def _importTF() {
             logger.error("Ошибка заполнения атрибутов транспортного файла \"%s\".", UploadFileName)
             return
         }
-    } else if (patternNoRaschsv.matcher(UploadFileName).matches()) {
-        // ТФ 1151111 (первичная)
-        declarationTypeId = DECLARATION_TYPE_RASCHSV_NDFL_ID;
-        kpp = UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$4");
-        reportPeriodCode = null;
-        createDateFile = new Date().parse("yyyyMMdd", UploadFileName.replaceAll(NO_RASCHSV_PATTERN, "\$5").substring(0, 8));
-        attachFileType = AttachFileType.TYPE_1
-        try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            def sett = new HashMap<String, List<String>>();
-            sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR]);
-            SAXHandler handler = new SAXHandler(sett);
-            saxParser.parse(ImportInputStream, handler);
-            reportPeriodCode = handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_PERIOD);
-            try {
-                year = Integer.parseInt(handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_YEAR));
-            } catch (NumberFormatException nfe) {
-                logger.error("Ошибка заполнения атрибутов транспортного файла \"%s\".", UploadFileName)
-                return
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("Ошибка чтения файла \"%s\".", UploadFileName);
-            return
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
-            return
-        } catch (SAXException e) {
-            e.printStackTrace();
-            logger.error("Некорректное имя или формат файла \"%s\".", UploadFileName);
-            return
-        } finally {
-            IOUtils.closeQuietly(ImportInputStream);
-        }
     } else {
         // Неизвестный формат имени загружаемого файла
         throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName));
@@ -1290,18 +874,6 @@ def _importTF() {
     if (reportPeriod == null) {
         logger.error("Для вида налога «%s» в Системе не создан период с кодом «%s», календарный год «%s»! Загрузка файла «%s» не выполнена.", TaxType.NDFL.getName(), reportPeriodCode, year, UploadFileName);
         return;
-    }
-
-    if (declarationTypeId == DECLARATION_TYPE_RASCHSV_NDFL_ID) {
-        def fondDetailProvider = refBookFactory.getDataProvider(RefBook.Id.FOND_DETAIL.getId());
-        // Настройки подразделений сборов
-        def departmentParamTable = fondDetailProvider.getRecords(null, null, "kpp = '$kpp'", null);
-        if (departmentParamTable.size() == 0) {
-            logger.error("Не удалось определить подразделение для транспортного файла \"%s\"", UploadFileName)
-            return
-        }
-        departmentId = departmentParamTable.get(0).DEPARTMENT_ID.getReferenceValue()
-        kpp = null
     }
 
     Department formDepartment = departmentService.get(departmentId);
@@ -1381,15 +953,15 @@ def _importTF() {
 
     //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
     if (!departmentCode.equals(handler.getListValueAttributesTag().get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())) {
-        logger.error("В ТФ не совпадают значения параметров имени «Код подразделения» = «%s» и содержимого «Код подразделения» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
+        logger.error("В ТФ не совпадают значения параметров имени «Код подразделения» = «%s» и содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
     }
 
     if (!asnuCode.equals(handler.getListValueAttributesTag().get(KOD_ASNU))) {
-        logger.error("В ТФ не совпадают значения параметров имени «Код АСНУ» = «%s» и содержимого «Код АСНУ» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
+        logger.error("В ТФ не совпадают значения параметров имени «Код АСНУ» = «%s» и содержимого «Файл.СлЧасть.КодАС» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
     }
 
     if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))) {
-        logger.error("В ТФ не совпадают значения параметров имени «Имя файла» = «%s» и содержимого «Имя ТФ без расширения» = «%s»", UploadFileName, handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
+        logger.error("В ТФ не совпадают значения параметров имени «Имя ТФ без расширения» = «%s» и содержимого «Файл.СлЧасть.ИдФайл» = «%s»", UploadFileName.trim()[0..-5], handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
     }
 
     //достать из XML файла атрибуты тега СлЧасть
@@ -1405,7 +977,7 @@ def _importTF() {
 
     //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
     if (!reportPeriodCode.equals(handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))) {
-        logger.error("В ТФ не совпадают значения параметров имени «Код периода» = «%s» и содержимого «Код периода» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
+        logger.error("В ТФ не совпадают значения параметров имени «Код периода» = «%s» и содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
     }
 
     Integer reportYear;
@@ -1416,7 +988,7 @@ def _importTF() {
     }
 
     if (!year.equals(reportYear)) {
-        logger.error("В ТФ не совпадают значения параметров имени «Год» = «%s» и содержимого «Год» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
+        logger.error("В ТФ не совпадают значения параметров имени «Год» = «%s» и содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
     }
 
 
@@ -1446,7 +1018,7 @@ def _importTF() {
         return
     }
     // Создание экземпляра декларации
-    declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null);
+    declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null, true);
 
     InputStream inputStream = new FileInputStream(dataFile)
     try {
@@ -1462,41 +1034,6 @@ def _importTF() {
             .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
             .append(", Вид: \"").append(declarationType.getName()).append("\"")
             .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
-}
-
-def readXml1151111() {
-    def sett = [:]
-    sett.put(TAG_DOCUMENT, [ATTR_PERIOD, ATTR_YEAR])
-
-    try {
-        SAXParserFactory factory = SAXParserFactory.newInstance()
-        SAXParser saxParser = factory.newSAXParser()
-        SAXHandler handler = new SAXHandler(sett)
-        saxParser.parse(ImportInputStream, handler)
-        reportPeriodCode = handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_PERIOD)
-        try {
-            year = Integer.parseInt(handler.getAttrValues().get(TAG_DOCUMENT).get(ATTR_YEAR))
-        } catch (NumberFormatException nfe) {
-            logger.error("Файл «%s» не загружен: Не удалось извлечь данные о календарном годе из элемента Файл.Документ.ОтчетГод", UploadFileName)
-            return null
-        }
-    } catch (IOException e) {
-        e.printStackTrace()
-        logger.error("Файл «%s» не загружен: Ошибка чтения файла", UploadFileName)
-        return null
-    } catch (ParserConfigurationException e) {
-        e.printStackTrace()
-        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
-        return null
-    } catch (SAXException e) {
-        e.printStackTrace()
-        logger.error("Файл «%s» не загружен: Некорректное формат файла", UploadFileName)
-        return null
-    } finally {
-        IOUtils.closeQuietly(ImportInputStream)
-    }
-
-    return [reportPeriodCode, year]
 }
 
 String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {

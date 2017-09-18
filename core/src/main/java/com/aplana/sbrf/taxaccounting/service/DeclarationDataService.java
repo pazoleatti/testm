@@ -39,7 +39,7 @@ public interface DeclarationDataService {
      */
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo,
-                Long asunId, String fileName, String note);
+                Long asunId, String fileName, String note, boolean writeAudit);
 
 	/**
 	 * Рассчитать декларацию
