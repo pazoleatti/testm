@@ -56,8 +56,8 @@
                                 };
                             },
                             results: function (data, page) {
-                                var more = (page * 50) < data.length;
-                                return {results: data, more: more};
+                                var more = (page * 50) < data.records;
+                                return {results: data.rows, more: more};
                             }
                         },
                         formatSelection: $filter('nameFormatter'),
