@@ -51,7 +51,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                         , notification.reportId, notification.type)
                 .values(id, notificationForSave.getReportPeriodId(), notificationForSave.getSenderDepartmentId()
                         , notificationForSave.getReceiverDepartmentId(), notificationForSave.isRead() ? 1 : 0, notificationForSave.getText()
-                        , sysdate, notificationForSave.getDeadline(), notificationForSave.getLogId()
+                        , notificationForSave.getCreateDate(), notificationForSave.getDeadline(), notificationForSave.getLogId()
                         , notificationForSave.getReportId(), notificationForSave.getNotificationType().getId())
                 .execute();
         notificationForSave.setId(id);
@@ -94,7 +94,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                             , notification.roleId, notification.logId, notification.reportId, notification.type)
                     .values(id, tmpNotification.getReportPeriodId(), tmpNotification.getSenderDepartmentId()
                             , tmpNotification.getReceiverDepartmentId(), tmpNotification.isRead() ? 1 : 0, tmpNotification.getText()
-                            , sysdate, tmpNotification.getDeadline(), tmpNotification.getUserId()
+                            , ?, tmpNotification.getDeadline(), tmpNotification.getUserId()
                             , tmpNotification.getRoleId(), tmpNotification.getLogId(), tmpNotification.getReportId(), tmpNotification.getNotificationType().getId())
                     .execute();
         }

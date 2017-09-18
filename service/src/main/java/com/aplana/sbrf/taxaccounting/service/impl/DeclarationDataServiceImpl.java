@@ -191,7 +191,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note) {
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode + "_" + fileName;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -272,7 +272,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataDao.updateNote(id, note);
 
                 logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
-                auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
+                if (writeAudit) {
+                    auditService.add(FormDataEvent.CREATE, userInfo, newDeclaration, "Налоговая форма создана", null);
+                }
                 return id;
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
@@ -313,7 +315,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         sourceService.addDeclarationConsolidationInfo(id, declarationDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
-        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, "Налоговая форма обновлена", null);
+        auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
         return createForm;
     }
 
@@ -1772,6 +1774,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationDataDao.delete(entry.getKey());
                 } else {
                     success++;
+                    DeclarationData declaration = declarationDataDao.get(entry.getKey());
+                    auditService.add(FormDataEvent.CREATE, userInfo, declaration, null, "Налоговая форма создана", null);
                     String message = getDeclarationFullName(entry.getKey(), null);
                     logger.info("Успешно выполнено создание " + message.replace("Налоговая форма", "налоговой формы"));
                 }

@@ -1018,7 +1018,7 @@ def _importTF() {
         return
     }
     // Создание экземпляра декларации
-    declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null);
+    declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null, true);
 
     InputStream inputStream = new FileInputStream(dataFile)
     try {
