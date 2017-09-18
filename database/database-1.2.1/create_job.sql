@@ -6,7 +6,7 @@ BEGIN
 		DBMS_SCHEDULER.CREATE_JOB (
 		job_name           =>  'refresh_fias_views',
 		job_type           =>  'PLSQL_BLOCK',
-		job_action         =>  'BEGIN RefreshFiasViews; END;',
+		job_action         =>  'BEGIN DropAndCreateFiasViews; END;',
 		repeat_interval    =>  'FREQ=DAILY;BYHOUR=1',
 		comments           =>  'refresh fias views',
 		enabled            =>  TRUE);

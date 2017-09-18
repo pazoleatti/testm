@@ -1,10 +1,14 @@
--- create procedure RefreshFiasViews
-prompt create RefreshFiasViews
-@@RefreshFiasViews.sql;
+-- create procedure DropAndCreateFiasViews
+prompt create DropAndCreateFiasViews
+@@DropAndCreateFiasViews.sql;
 
 -- drop index
 prompt drop index
 @@drop_index.sql;
+
+-- disable constraints
+prompt disable constraints
+@@disable_constraints.sql;
 
 -- create job
 prompt create job
