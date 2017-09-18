@@ -58,6 +58,7 @@ public class DeclarationDataController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
         binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
         binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
