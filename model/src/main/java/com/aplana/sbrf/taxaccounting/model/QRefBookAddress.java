@@ -26,6 +26,8 @@ public class QRefBookAddress extends com.querydsl.sql.RelationalPathBase<QRefBoo
 
     public final StringPath address = createString("address");
 
+    public final StringPath addressFull = createString("addressFull");
+
     public final NumberPath<Byte> addressType = createNumber("addressType", Byte.class);
 
     public final StringPath appartment = createString("appartment");
@@ -84,21 +86,22 @@ public class QRefBookAddress extends com.querydsl.sql.RelationalPathBase<QRefBoo
 
     public void addMetadata() {
         addMetadata(address, ColumnMetadata.named("ADDRESS").withIndex(16).ofType(Types.VARCHAR).withSize(255));
-        addMetadata(addressType, ColumnMetadata.named("ADDRESS_TYPE").withIndex(2).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(appartment, ColumnMetadata.named("APPARTMENT").withIndex(12).ofType(Types.VARCHAR).withSize(20));
-        addMetadata(build, ColumnMetadata.named("BUILD").withIndex(11).ofType(Types.VARCHAR).withSize(20));
-        addMetadata(city, ColumnMetadata.named("CITY").withIndex(7).ofType(Types.VARCHAR).withSize(50));
-        addMetadata(countryId, ColumnMetadata.named("COUNTRY_ID").withIndex(3).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(district, ColumnMetadata.named("DISTRICT").withIndex(6).ofType(Types.VARCHAR).withSize(50));
-        addMetadata(house, ColumnMetadata.named("HOUSE").withIndex(10).ofType(Types.VARCHAR).withSize(20));
+        addMetadata(addressFull, ColumnMetadata.named("ADDRESS_FULL").withIndex(17).ofType(Types.VARCHAR).withSize(255));
+        addMetadata(addressType, ColumnMetadata.named("ADDRESS_TYPE").withIndex(5).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(appartment, ColumnMetadata.named("APPARTMENT").withIndex(15).ofType(Types.VARCHAR).withSize(20));
+        addMetadata(build, ColumnMetadata.named("BUILD").withIndex(14).ofType(Types.VARCHAR).withSize(20));
+        addMetadata(city, ColumnMetadata.named("CITY").withIndex(10).ofType(Types.VARCHAR).withSize(50));
+        addMetadata(countryId, ColumnMetadata.named("COUNTRY_ID").withIndex(6).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(district, ColumnMetadata.named("DISTRICT").withIndex(9).ofType(Types.VARCHAR).withSize(50));
+        addMetadata(house, ColumnMetadata.named("HOUSE").withIndex(13).ofType(Types.VARCHAR).withSize(20));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(locality, ColumnMetadata.named("LOCALITY").withIndex(8).ofType(Types.VARCHAR).withSize(50));
-        addMetadata(postalCode, ColumnMetadata.named("POSTAL_CODE").withIndex(5).ofType(Types.VARCHAR).withSize(6));
-        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(15).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(regionCode, ColumnMetadata.named("REGION_CODE").withIndex(4).ofType(Types.VARCHAR).withSize(2));
-        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(14).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(street, ColumnMetadata.named("STREET").withIndex(9).ofType(Types.VARCHAR).withSize(50));
-        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(13).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(locality, ColumnMetadata.named("LOCALITY").withIndex(11).ofType(Types.VARCHAR).withSize(50));
+        addMetadata(postalCode, ColumnMetadata.named("POSTAL_CODE").withIndex(8).ofType(Types.VARCHAR).withSize(6));
+        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(regionCode, ColumnMetadata.named("REGION_CODE").withIndex(7).ofType(Types.VARCHAR).withSize(2));
+        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(street, ColumnMetadata.named("STREET").withIndex(12).ofType(Types.VARCHAR).withSize(50));
+        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
     }
 
 }

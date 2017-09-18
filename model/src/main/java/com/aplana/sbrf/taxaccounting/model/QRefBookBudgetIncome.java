@@ -61,13 +61,13 @@ public class QRefBookBudgetIncome extends com.querydsl.sql.RelationalPathBase<QR
     }
 
     public void addMetadata() {
-        addMetadata(code, ColumnMetadata.named("CODE").withIndex(2).ofType(Types.VARCHAR).withSize(20).notNull());
+        addMetadata(code, ColumnMetadata.named("CODE").withIndex(5).ofType(Types.VARCHAR).withSize(20).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(lev, ColumnMetadata.named("LEV").withIndex(4).ofType(Types.VARCHAR).withSize(1).notNull());
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(3).ofType(Types.VARCHAR).withSize(1000).notNull());
-        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(5).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(7).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(6).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(lev, ColumnMetadata.named("LEV").withIndex(7).ofType(Types.VARCHAR).withSize(1).notNull());
+        addMetadata(name, ColumnMetadata.named("NAME").withIndex(6).ofType(Types.VARCHAR).withSize(1000).notNull());
+        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
     }
 
 }

@@ -38,8 +38,6 @@ public class QRefBookSignatoryMark extends com.querydsl.sql.RelationalPathBase<Q
 
     public final com.querydsl.sql.PrimaryKey<QRefBookSignatoryMark> refBookSignatoryMarkPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetSignatoryFk = createInvForeignKey(id, "SIGNATORY_ID");
-
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetSignatoryFk = createInvForeignKey(id, "SIGNATORY_ID");
 
     public QRefBookSignatoryMark(String variable) {

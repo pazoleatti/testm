@@ -40,8 +40,6 @@ public class QRefBookReorganization extends com.querydsl.sql.RelationalPathBase<
 
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetReCodeFk = createInvForeignKey(id, "REORG_FORM_CODE");
 
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetReCodeFk = createInvForeignKey(id, "REORG_FORM_CODE");
-
     public QRefBookReorganization(String variable) {
         super(QRefBookReorganization.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_REORGANIZATION");
         addMetadata();

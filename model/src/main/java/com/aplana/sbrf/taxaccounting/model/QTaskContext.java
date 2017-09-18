@@ -65,14 +65,14 @@ public class QTaskContext extends com.querydsl.sql.RelationalPathBase<QTaskConte
     }
 
     public void addMetadata() {
-        addMetadata(customParamsExist, ColumnMetadata.named("CUSTOM_PARAMS_EXIST").withIndex(5).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(customParamsExist, ColumnMetadata.named("CUSTOM_PARAMS_EXIST").withIndex(6).ofType(Types.DECIMAL).withSize(9).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(modificationDate, ColumnMetadata.named("MODIFICATION_DATE").withIndex(7).ofType(Types.TIMESTAMP).withSize(7).notNull());
-        addMetadata(serializedParams, ColumnMetadata.named("SERIALIZED_PARAMS").withIndex(6).ofType(Types.BLOB).withSize(4000));
+        addMetadata(modificationDate, ColumnMetadata.named("MODIFICATION_DATE").withIndex(4).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(serializedParams, ColumnMetadata.named("SERIALIZED_PARAMS").withIndex(7).ofType(Types.BLOB).withSize(4000));
         addMetadata(taskId, ColumnMetadata.named("TASK_ID").withIndex(2).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(taskName, ColumnMetadata.named("TASK_NAME").withIndex(3).ofType(Types.VARCHAR).withSize(100).notNull());
         addMetadata(userId, ColumnMetadata.named("USER_ID").withIndex(8).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(userTaskJndi, ColumnMetadata.named("USER_TASK_JNDI").withIndex(4).ofType(Types.VARCHAR).withSize(500).notNull());
+        addMetadata(userTaskJndi, ColumnMetadata.named("USER_TASK_JNDI").withIndex(5).ofType(Types.VARCHAR).withSize(500).notNull());
     }
 
 }

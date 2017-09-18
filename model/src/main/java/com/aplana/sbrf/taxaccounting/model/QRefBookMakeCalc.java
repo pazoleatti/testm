@@ -38,8 +38,6 @@ public class QRefBookMakeCalc extends com.querydsl.sql.RelationalPathBase<QRefBo
 
     public final com.querydsl.sql.PrimaryKey<QRefBookMakeCalc> refBookMakeCalcPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetTypeFk = createInvForeignKey(id, "TYPE");
-
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetTypeFk = createInvForeignKey(id, "TYPE");
 
     public QRefBookMakeCalc(String variable) {

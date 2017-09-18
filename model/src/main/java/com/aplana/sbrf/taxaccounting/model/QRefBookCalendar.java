@@ -28,6 +28,8 @@ public class QRefBookCalendar extends com.querydsl.sql.RelationalPathBase<QRefBo
 
     public final NumberPath<Byte> ctype = createNumber("ctype", Byte.class);
 
+    public final NumberPath<Long> id = createNumber("id", Long.class);
+
     public final com.querydsl.sql.PrimaryKey<QRefBookCalendar> refBookCalendarPk = createPrimaryKey(cdate);
 
     public QRefBookCalendar(String variable) {
@@ -53,6 +55,7 @@ public class QRefBookCalendar extends com.querydsl.sql.RelationalPathBase<QRefBo
     public void addMetadata() {
         addMetadata(cdate, ColumnMetadata.named("CDATE").withIndex(1).ofType(Types.TIMESTAMP).withSize(7).notNull());
         addMetadata(ctype, ColumnMetadata.named("CTYPE").withIndex(2).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(id, ColumnMetadata.named("ID").withIndex(3).ofType(Types.DECIMAL).withSize(18));
     }
 
 }

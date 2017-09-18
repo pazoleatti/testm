@@ -66,11 +66,7 @@ public class QRefBookAttribute extends com.querydsl.sql.RelationalPathBase<QRefB
 
     public final com.querydsl.sql.ForeignKey<QRefBookAttribute> refBookAttrFkAttributeId = createForeignKey(attributeId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QFormColumn> _formColumnFkAttributeId2 = createInvForeignKey(id, "ATTRIBUTE_ID2");
-
     public final com.querydsl.sql.ForeignKey<QDeclarationSubreportParams> _declSubrepParsAttribIdFk = createInvForeignKey(id, "ATTRIBUTE_ID");
-
-    public final com.querydsl.sql.ForeignKey<QFormColumn> _formColumnFkAttributeId = createInvForeignKey(id, "ATTRIBUTE_ID");
 
     public final com.querydsl.sql.ForeignKey<QRefBookValue> _refBookValueFkAttributeId = createInvForeignKey(id, "ATTRIBUTE_ID");
 

@@ -38,19 +38,11 @@ public class QBlobData extends com.querydsl.sql.RelationalPathBase<QBlobData> {
 
     public final com.querydsl.sql.ForeignKey<QDeclarationSubreport> _declSubrepFkBlobData = createInvForeignKey(id, "BLOB_DATA_ID");
 
-    public final com.querydsl.sql.ForeignKey<QLogSystemReport> _logSystemReportFkBlobData = createInvForeignKey(id, "BLOB_DATA_ID");
-
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> _declarationTemFkBlobData = createInvForeignKey(id, "XSD");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationDataFile> _declDataFileFkBlobData = createInvForeignKey(id, "BLOB_DATA_ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> _decTemFkBlobDataJrxml = createInvForeignKey(id, "JRXML");
-
-    public final com.querydsl.sql.ForeignKey<QIfrsData> _ifrsDataFkBlobData = createInvForeignKey(id, "BLOB_DATA_ID");
-
-    public final com.querydsl.sql.ForeignKey<QFormDataReport> _formDataRepFkBlobDataId = createInvForeignKey(id, "BLOB_DATA_ID");
-
-    public final com.querydsl.sql.ForeignKey<QFormDataFile> _formDataFileFkBlobData = createInvForeignKey(id, "BLOB_DATA_ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationReport> _declReportFkBlobData = createInvForeignKey(id, "BLOB_DATA_ID");
 

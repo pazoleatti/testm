@@ -121,33 +121,33 @@ public class QRefBookNdflDetail extends com.querydsl.sql.RelationalPathBase<QRef
     }
 
     public void addMetadata() {
-        addMetadata(approveDocName, ColumnMetadata.named("APPROVE_DOC_NAME").withIndex(23).ofType(Types.VARCHAR).withSize(120));
-        addMetadata(approveOrgName, ColumnMetadata.named("APPROVE_ORG_NAME").withIndex(24).ofType(Types.VARCHAR).withSize(1000));
-        addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(4).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(approveDocName, ColumnMetadata.named("APPROVE_DOC_NAME").withIndex(26).ofType(Types.VARCHAR).withSize(120));
+        addMetadata(approveOrgName, ColumnMetadata.named("APPROVE_ORG_NAME").withIndex(27).ofType(Types.VARCHAR).withSize(1000));
+        addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(7).ofType(Types.DECIMAL).withSize(18));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(kpp, ColumnMetadata.named("KPP").withIndex(6).ofType(Types.VARCHAR).withSize(9));
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(9).ofType(Types.VARCHAR).withSize(1000));
-        addMetadata(obligation, ColumnMetadata.named("OBLIGATION").withIndex(14).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(oktmo, ColumnMetadata.named("OKTMO").withIndex(12).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(okved, ColumnMetadata.named("OKVED").withIndex(10).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(phone, ColumnMetadata.named("PHONE").withIndex(13).ofType(Types.VARCHAR).withSize(25));
-        addMetadata(presentPlace, ColumnMetadata.named("PRESENT_PLACE").withIndex(8).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(25).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(refBookNdflId, ColumnMetadata.named("REF_BOOK_NDFL_ID").withIndex(2).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(region, ColumnMetadata.named("REGION").withIndex(11).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(reorgFormCode, ColumnMetadata.named("REORG_FORM_CODE").withIndex(16).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(reorgInn, ColumnMetadata.named("REORG_INN").withIndex(17).ofType(Types.VARCHAR).withSize(12));
-        addMetadata(reorgKpp, ColumnMetadata.named("REORG_KPP").withIndex(18).ofType(Types.VARCHAR).withSize(9));
-        addMetadata(rowOrd, ColumnMetadata.named("ROW_ORD").withIndex(3).ofType(Types.DECIMAL).withSize(4).notNull());
-        addMetadata(signatoryFirstname, ColumnMetadata.named("SIGNATORY_FIRSTNAME").withIndex(21).ofType(Types.VARCHAR).withSize(60));
-        addMetadata(signatoryId, ColumnMetadata.named("SIGNATORY_ID").withIndex(19).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(signatoryLastname, ColumnMetadata.named("SIGNATORY_LASTNAME").withIndex(22).ofType(Types.VARCHAR).withSize(60));
-        addMetadata(signatorySurname, ColumnMetadata.named("SIGNATORY_SURNAME").withIndex(20).ofType(Types.VARCHAR).withSize(60));
-        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(27).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(taxOrganCode, ColumnMetadata.named("TAX_ORGAN_CODE").withIndex(5).ofType(Types.VARCHAR).withSize(4));
-        addMetadata(taxOrganCodeMid, ColumnMetadata.named("TAX_ORGAN_CODE_MID").withIndex(7).ofType(Types.VARCHAR).withSize(4));
-        addMetadata(type, ColumnMetadata.named("TYPE").withIndex(15).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(26).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(kpp, ColumnMetadata.named("KPP").withIndex(9).ofType(Types.VARCHAR).withSize(9));
+        addMetadata(name, ColumnMetadata.named("NAME").withIndex(12).ofType(Types.VARCHAR).withSize(1000));
+        addMetadata(obligation, ColumnMetadata.named("OBLIGATION").withIndex(17).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(oktmo, ColumnMetadata.named("OKTMO").withIndex(15).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(okved, ColumnMetadata.named("OKVED").withIndex(13).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(phone, ColumnMetadata.named("PHONE").withIndex(16).ofType(Types.VARCHAR).withSize(25));
+        addMetadata(presentPlace, ColumnMetadata.named("PRESENT_PLACE").withIndex(11).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(refBookNdflId, ColumnMetadata.named("REF_BOOK_NDFL_ID").withIndex(5).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(region, ColumnMetadata.named("REGION").withIndex(14).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(reorgFormCode, ColumnMetadata.named("REORG_FORM_CODE").withIndex(19).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(reorgInn, ColumnMetadata.named("REORG_INN").withIndex(20).ofType(Types.VARCHAR).withSize(12));
+        addMetadata(reorgKpp, ColumnMetadata.named("REORG_KPP").withIndex(21).ofType(Types.VARCHAR).withSize(9));
+        addMetadata(rowOrd, ColumnMetadata.named("ROW_ORD").withIndex(6).ofType(Types.DECIMAL).withSize(4).notNull());
+        addMetadata(signatoryFirstname, ColumnMetadata.named("SIGNATORY_FIRSTNAME").withIndex(24).ofType(Types.VARCHAR).withSize(60));
+        addMetadata(signatoryId, ColumnMetadata.named("SIGNATORY_ID").withIndex(22).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(signatoryLastname, ColumnMetadata.named("SIGNATORY_LASTNAME").withIndex(25).ofType(Types.VARCHAR).withSize(60));
+        addMetadata(signatorySurname, ColumnMetadata.named("SIGNATORY_SURNAME").withIndex(23).ofType(Types.VARCHAR).withSize(60));
+        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(taxOrganCode, ColumnMetadata.named("TAX_ORGAN_CODE").withIndex(8).ofType(Types.VARCHAR).withSize(4));
+        addMetadata(taxOrganCodeMid, ColumnMetadata.named("TAX_ORGAN_CODE_MID").withIndex(10).ofType(Types.VARCHAR).withSize(4));
+        addMetadata(type, ColumnMetadata.named("TYPE").withIndex(18).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
     }
 
 }

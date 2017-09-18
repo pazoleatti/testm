@@ -85,16 +85,16 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
     }
 
     public void addMetadata() {
-        addMetadata(createScript, ColumnMetadata.named("CREATE_SCRIPT").withIndex(2).ofType(Types.CLOB).withSize(4000));
-        addMetadata(declarationTypeId, ColumnMetadata.named("DECLARATION_TYPE_ID").withIndex(3).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(createScript, ColumnMetadata.named("CREATE_SCRIPT").withIndex(5).ofType(Types.CLOB).withSize(4000));
+        addMetadata(declarationTypeId, ColumnMetadata.named("DECLARATION_TYPE_ID").withIndex(7).ofType(Types.DECIMAL).withSize(9).notNull());
         addMetadata(formKind, ColumnMetadata.named("FORM_KIND").withIndex(9).ofType(Types.DECIMAL).withSize(18));
         addMetadata(formType, ColumnMetadata.named("FORM_TYPE").withIndex(10).ofType(Types.DECIMAL).withSize(18));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(jrxml, ColumnMetadata.named("JRXML").withIndex(8).ofType(Types.VARCHAR).withSize(36));
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(6).ofType(Types.VARCHAR).withSize(512).notNull());
-        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(7).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(5).ofType(Types.TIMESTAMP).withSize(7).notNull());
-        addMetadata(xsd, ColumnMetadata.named("XSD").withIndex(4).ofType(Types.VARCHAR).withSize(36));
+        addMetadata(jrxml, ColumnMetadata.named("JRXML").withIndex(6).ofType(Types.VARCHAR).withSize(36));
+        addMetadata(name, ColumnMetadata.named("NAME").withIndex(4).ofType(Types.VARCHAR).withSize(512).notNull());
+        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(2).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(xsd, ColumnMetadata.named("XSD").withIndex(8).ofType(Types.VARCHAR).withSize(36));
     }
 
 }

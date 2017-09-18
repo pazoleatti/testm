@@ -41,10 +41,10 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
 		} else {
 			PagingResult<Map<String, RefBookValue>> pagingResult = new PagingResult<Map<String, RefBookValue>>();
 			int rightBound = Math.min(pagingParams.getStartIndex() + pagingParams.getCount(), filteredRecords.size());
-			for (int i = pagingParams.getStartIndex(); i <= rightBound; ++i) {
-				pagingResult.add(filteredRecords.get(i-1)); // индекс в пейджинге идет с 1, а не с 0
+			for (int i = pagingParams.getStartIndex(); i < rightBound; ++i) {
+				pagingResult.add(filteredRecords.get(i));
 			}
-			pagingResult.setTotalCount(rightBound - pagingParams.getStartIndex() + 1);
+			pagingResult.setTotalCount(rightBound - pagingParams.getStartIndex());
 			return pagingResult;
 		}
     }

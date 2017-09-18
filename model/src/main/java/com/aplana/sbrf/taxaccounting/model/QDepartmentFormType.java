@@ -36,14 +36,6 @@ public class QDepartmentFormType extends com.querydsl.sql.RelationalPathBase<QDe
 
     public final com.querydsl.sql.ForeignKey<QDepartment> deptFormTypeFkDepId = createForeignKey(departmentId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QFormType> deptFormTypeFkTypeId = createForeignKey(formTypeId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QFormKind> deptFormTypeFkKind = createForeignKey(kind, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QFormDataSource> _formDataSourceFkSrcDepId = createInvForeignKey(id, "SRC_DEPARTMENT_FORM_TYPE_ID");
-
-    public final com.querydsl.sql.ForeignKey<QFormDataSource> _formDataSourceFkDepId = createInvForeignKey(id, "DEPARTMENT_FORM_TYPE_ID");
-
     public final com.querydsl.sql.ForeignKey<QDepartmentFormTypePerformer> _deptFormTypePerfFkId = createInvForeignKey(id, "DEPARTMENT_FORM_TYPE_ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationSource> _declSourceFkDeptFormtype = createInvForeignKey(id, "SRC_DEPARTMENT_FORM_TYPE_ID");

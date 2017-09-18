@@ -24,7 +24,7 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
     }
 
     final private QBean<RefBookDeclarationType> refBookDeclarationTypeBean = bean(RefBookDeclarationType.class, declarationType.id,
-            declarationType.ifrsName, declarationType.isIfrs, declarationType.name, declarationType.status.as("versionStatusId"), declarationType.taxType.charAt(0).as("taxType"));
+            declarationType.ifrsName, declarationType.isIfrs, declarationType.name, declarationType.status.as("versionStatusId"));
 
     /**
      * Получение всех значений справочника
@@ -35,7 +35,6 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
     public List<RefBookDeclarationType> fetchAll() {
         BooleanBuilder where = new BooleanBuilder();
         where.and(declarationType.status.eq((byte) 0));
-        where.and(declarationType.taxType.eq("N"));
         return sqlQueryFactory
                 .select(refBookDeclarationTypeBean)
                 .from(declarationType)

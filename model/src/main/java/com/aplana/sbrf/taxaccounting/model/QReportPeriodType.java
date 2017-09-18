@@ -30,11 +30,7 @@ public class QReportPeriodType extends com.querydsl.sql.RelationalPathBase<QRepo
 
     public final DateTimePath<org.joda.time.LocalDateTime> endDate = createDateTime("endDate", org.joda.time.LocalDateTime.class);
 
-    public final NumberPath<Byte> f = createNumber("f", Byte.class);
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
-
-    public final NumberPath<Byte> n = createNumber("n", Byte.class);
 
     public final StringPath name = createString("name");
 
@@ -65,14 +61,12 @@ public class QReportPeriodType extends com.querydsl.sql.RelationalPathBase<QRepo
     }
 
     public void addMetadata() {
-        addMetadata(calendarStartDate, ColumnMetadata.named("CALENDAR_START_DATE").withIndex(8).ofType(Types.TIMESTAMP).withSize(7));
+        addMetadata(calendarStartDate, ColumnMetadata.named("CALENDAR_START_DATE").withIndex(6).ofType(Types.TIMESTAMP).withSize(7));
         addMetadata(code, ColumnMetadata.named("CODE").withIndex(2).ofType(Types.VARCHAR).withSize(2).notNull());
-        addMetadata(endDate, ColumnMetadata.named("END_DATE").withIndex(7).ofType(Types.TIMESTAMP).withSize(7));
-        addMetadata(f, ColumnMetadata.named("F").withIndex(5).ofType(Types.DECIMAL).withSize(1));
+        addMetadata(endDate, ColumnMetadata.named("END_DATE").withIndex(5).ofType(Types.TIMESTAMP).withSize(7));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(n, ColumnMetadata.named("N").withIndex(4).ofType(Types.DECIMAL).withSize(1));
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(3).ofType(Types.VARCHAR).withSize(255).notNull());
-        addMetadata(startDate, ColumnMetadata.named("START_DATE").withIndex(6).ofType(Types.TIMESTAMP).withSize(7));
+        addMetadata(startDate, ColumnMetadata.named("START_DATE").withIndex(4).ofType(Types.TIMESTAMP).withSize(7));
     }
 
 }
