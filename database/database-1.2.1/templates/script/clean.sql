@@ -11,6 +11,12 @@ DELETE FROM blob_data bd WHERE id NOT IN
             SELECT jrxml FROM declaration_template
             UNION
             SELECT blob_data_id FROM declaration_report
+			UNION
+            SELECT blob_data_id FROM form_data_report
+            UNION
+            SELECT blob_data_id FROM ifrs_data
+            UNION
+            SELECT blob_data_id FROM form_data_file
             UNION
             SELECT blob_data_id FROM declaration_data_file
             UNION
