@@ -88,7 +88,6 @@ public class RefBook implements Serializable {
 		SEC_ROLE(95), 								// Роли
 		OKTMO(96),                                  // Территорий муниципальных образований (ОКТМО)
 		DEPARTMENT_TYPE(103),						// Типы подразделений
-		AUDIT_FIELD(104), 							// Список полей для журнала аудита
 		CONFIGURATION_PARAM(105), 					// Конфигурационные параметры
 		DECLARATION_TEMPLATE(207), 		            // Макеты налоговых форм
 		ASNU(900), 									// АСНУ
@@ -130,8 +129,7 @@ public class RefBook implements Serializable {
 		PERSON_CATEGORY(941),						// Категорий застрахованных лиц
 		NDFL(950), 									// Настройки подразделений по НДФЛ
 		NDFL_DETAIL(951), 							// Настройки подразделений по НДФЛ (таблица)
-		NDFL_REFERENCES(964),                       // Реестр справок
-		SEC_USER_ASNU(942);							// Ограничение доступа по АСНУ
+		NDFL_REFERENCES(964);							// Ограничение доступа по АСНУ
 
         private final long id;
 

@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 
@@ -12,14 +10,6 @@ import java.util.List;
 
 public interface PrintingService {
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
-    String generateExcelUsers(List<TAUserView> taUserViewList);
-    String generateExcelLogSystem(List<LogSearchResultItem> resultItems);
-
-    /**
-     * Формирует csv-отчет и архивирует его в zip.
-     * @return идентификатор в таблице BLOB_DATA
-     */
-    String generateAuditZip(List<LogSearchResultItem> resultItems);
 
     /**
      * Формирует специфический отчет по справочнику

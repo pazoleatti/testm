@@ -43,11 +43,10 @@ import javax.xml.ws.LogicalMessage
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.SQLSyntaxErrorException
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import org.joda.time.LocalDateTime
-import org.joda.time.format.DateTimeFormat
 
     /**
      * Скрипт макета декларации РНУ-НДФЛ(первичная)
@@ -352,8 +351,14 @@ import org.joda.time.format.DateTimeFormat
     }
 
     def updatePrimaryToRefBookPersonReferences(primaryDataRecords){
+
         ScriptUtils.checkInterrupted();
-        ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
+
+        if (FORM_TYPE == 100){
+            ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
+        } else {
+            raschsvPersSvStrahLicService.updateRefBookPersonReferences(primaryDataRecords)
+        }
     }
 
     def calculate() {
@@ -686,7 +691,7 @@ import org.joda.time.format.DateTimeFormat
 
                     def recordId = refBookPerson.getRecordId();
 
-                    logForDebug(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
+                    logger.info(String.format("Обновлена запись в справочнике 'Физические лица': %d, %s %s %s", recordId,
                             refBookPerson.getLastName(),
                             refBookPerson.getFirstName(),
                             refBookPerson.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
@@ -940,34 +945,38 @@ import org.joda.time.format.DateTimeFormat
         return values;
     }
 
-    def insertBatchRecords(refBookId, identityObjectList, refBookMapper) {
+    def insertBatchRecords(refBookId, List identityObjectList, refBookMapper) {
 
         //подготовка записей
         if (identityObjectList != null && !identityObjectList.isEmpty()) {
-
             def refBookName = getProvider(refBookId).refBook.name
             logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
 
-            List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
-            for (IdentityObject identityObject : identityObjectList) {
+            identityObjectList.collate(1000).each { identityObjectSubList ->
+                if (identityObjectSubList != null && !identityObjectSubList.isEmpty()) {
 
-                ScriptUtils.checkInterrupted();
+                    List<RefBookRecord> recordList = new ArrayList<RefBookRecord>();
+                    for (IdentityObject identityObject : identityObjectSubList) {
 
-                def values = refBookMapper(identityObject);
-                recordList.add(createRefBookRecord(values));
-            }
+                        ScriptUtils.checkInterrupted();
 
-            //создание записей справочника
-            List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
+                        def values = refBookMapper(identityObject);
+                        recordList.add(createRefBookRecord(values));
+                    }
 
-            //установка id
-            for (int i = 0; i < identityObjectList.size(); i++) {
+                    //создание записей справочника
+                    List<Long> generatedIds = getProvider(refBookId).createRecordVersionWithoutLock(logger, getRefBookPersonVersionFrom(), null, recordList);
 
-                ScriptUtils.checkInterrupted();
+                    //установка id
+                    for (int i = 0; i < identityObjectSubList.size(); i++) {
 
-                Long id = generatedIds.get(i);
-                IdentityObject identityObject = identityObjectList.get(i);
-                identityObject.setId(id);
+                        ScriptUtils.checkInterrupted();
+
+                        Long id = generatedIds.get(i);
+                        IdentityObject identityObject = identityObjectSubList.get(i);
+                        identityObject.setId(id);
+                    }
+                }
             }
         }
 
@@ -1923,9 +1932,9 @@ def createXlsxReport() {
     NdflPersonIncome transformNdflPersonIncome(NodeChild node, NdflPerson ndflPerson, String kpp, String oktmo, String inp, String fio, def incomeCodeMap) {
         def operationNode = node.parent();
 
-        LocalDateTime incomeAccruedDate = toDate(node.'@ДатаДохНач')
-        LocalDateTime incomePayoutDate = toDate(node.'@ДатаДохВыпл')
-        LocalDateTime taxDate = toDate(node.'@ДатаНалог')
+        Date incomeAccruedDate = toDate(node.'@ДатаДохНач')
+        Date incomePayoutDate = toDate(node.'@ДатаДохВыпл')
+        Date taxDate = toDate(node.'@ДатаНалог')
 
         NdflPersonIncome personIncome = new NdflPersonIncome()
         personIncome.rowNum = toBigDecimal(node.'@НомСтр')
@@ -1980,7 +1989,7 @@ def createXlsxReport() {
 
     // Проверка на принадлежность операций периоду при загрузке ТФ
     @TypeChecked
-    boolean operationNotRelateToCurrentPeriod(LocalDateTime incomeAccruedDate, LocalDateTime incomePayoutDate, LocalDateTime taxDate,
+    boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
                                               String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         // Доход.Дата.Начисление
         boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(C_INCOME_ACCRUED_DATE, incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
@@ -1995,9 +2004,9 @@ def createXlsxReport() {
     }
 
     @TypeChecked
-    boolean dateRelateToCurrentPeriod(String paramName, LocalDateTime date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+    boolean dateRelateToCurrentPeriod(String paramName, Date date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-        if (date == null || (date.toDate() >= getReportPeriodStartDate() && date.toDate() <= getReportPeriodEndDate())) {
+        if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
             return true
         }
         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, (ndflPersonIncome.rowNum ?ndflPersonIncome.rowNum.longValue(): ""))
@@ -2036,7 +2045,7 @@ def createXlsxReport() {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
                     C_TYPE_CODE, personDeduction.typeCode ?: "",
-                    R_INCOME_CODE
+                    R_TYPE_CODE
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, personDeduction.rowNum ?: "")
             logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_TYPE_CODE), fioAndInp, pathError,
@@ -2093,11 +2102,12 @@ def createXlsxReport() {
         }
     }
 
-    LocalDateTime toDate(xmlNode) {
+    Date toDate(xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
+            SimpleDateFormat format = new java.text.SimpleDateFormat(DATE_FORMAT)
             if (xmlNode.text() != null && !xmlNode.text().isEmpty()) {
-                LocalDateTime date = LocalDateTime.parse(xmlNode.text(), DateTimeFormat.forPattern(DATE_FORMAT));
-                if (date.toString(DATE_FORMAT) != xmlNode.text()) {
+                Date date = format.parse(xmlNode.text())
+                if (format.format(date) != xmlNode.text()) {
                     throw new ServiceException("Значения атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не существует.")
                 }
                 return date
@@ -2118,12 +2128,7 @@ def createXlsxReport() {
     }
 
     def formatDate(date) {
-        if (date instanceof LocalDateTime) {
-            return date.toString(DATE_FORMAT)
-        }
-        else {
-            return ScriptUtils.formatDate(date, DATE_FORMAT)
-        }
+        return ScriptUtils.formatDate(date, DATE_FORMAT)
     }
 
     def ndflPersonAttr(ndflPerson) {
@@ -2695,7 +2700,7 @@ class NdflPersonFL {
     @Field final String T_PERSON_PREPAYMENT_NAME  = "Сведения о доходах в виде авансовых платежей"
 
     // Справочники
-    @Field final String R_FIAS = "КЛАДР" //TODO замена
+    @Field final String R_FIAS = "ФИАС"
     @Field final String R_PERSON = "Физические лица"
     @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
     @Field final String R_ID_DOC_TYPE = "Коды документов"
@@ -3262,8 +3267,8 @@ class NdflPersonFL {
             // Спр5 Код вида дохода (Необязательное поле)
             if (ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
                 value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
-                        ndflPersonIncome.incomeAccruedDate.toDate() >= value.record_version_from?.dateValue &&
-                        ndflPersonIncome.incomeAccruedDate.toDate() <= value.record_version_to?.dateValue
+                        ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                        ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
             }) {
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                         C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
@@ -3374,12 +3379,12 @@ class NdflPersonFL {
     }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
-            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"КЛАДР\"")
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
+            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"ФИАС\"")
 }
 
 void logFiasIndexError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
                     "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") не соответствует требуемому формату")
 }
 
@@ -3492,10 +3497,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
             ScriptUtils.checkInterrupted();
 
-            boolean applyTemporalySolution = false
-            if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
-                applyTemporalySolution = true
-            }
+            boolean applyTemporalySolution = true
+//            if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+//                applyTemporalySolution = true
+//            }
 
             NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -4255,7 +4260,7 @@ class ColumnFillConditionData {
             new Column21EqualsColumn7LastDayOfMonth(), "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца выплаты дохода")
 
     // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
-    dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+    dateConditionDataListForBudget << new DateConditionData(["2740", "2750", "2790", "4800"], ["13"],
             new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
 
     // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
@@ -4747,7 +4752,7 @@ class ColumnFillConditionData {
                         }
                     }
                 }
-                if (["2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
+                if (["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
                     // 11 подпункт "Графа 21" = "Графа 7" + "1 рабочий день"
                     /*
                         Найти следующую за текущей строкой, удовлетворяющую условиям:
@@ -4875,7 +4880,7 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
         BigDecimal sumNdflDeduction = new BigDecimal(0)
         for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
             if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                    && ndflPersonIncome.incomeAccruedDate?.toLocalDate().equals(ndflPersonDeduction.incomeAccrued?.toLocalDate())
+                    && ndflPersonIncome.incomeAccruedDate?.format(DATE_FORMAT) == ndflPersonDeduction.incomeAccrued?.format(DATE_FORMAT)
                     && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
                 sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
             }
@@ -4963,8 +4968,8 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
     class Column6EqualsColumn7 implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
-            String accrued = ndflPersonIncome.incomeAccruedDate?.toString("dd.MM.yyyy")
-            String payout = ndflPersonIncome.incomePayoutDate?.toString("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
+            String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
             return accrued == payout
         }
     }
@@ -4985,7 +4990,7 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
             if (ndflPersonIncome.incomeAccruedDate == null) {
                 return false
             }
-            String accrued = ndflPersonIncome.incomeAccruedDate.toString("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
             Pattern pattern = Pattern.compile(maskRegex)
             Matcher matcher = pattern.matcher(accrued)
             if (matcher.matches()) {
@@ -5006,7 +5011,7 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 return true
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
             int currentMonth = calendar.get(Calendar.MONTH)
             calendar.add(calendar.DATE, 1)
             int comparedMonth = calendar.get(Calendar.MONTH)
@@ -5025,7 +5030,7 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -5047,7 +5052,7 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -5069,14 +5074,14 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 return false
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
             // находим последний день месяца
             calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
             Date workDay = calendar.getTime()
             // если последний день месяца приходится на выходной, то следующий первый рабочий день
             int offset = 0
             workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.toDate().getTime()
+            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
         }
     }
 
@@ -5091,11 +5096,11 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             // "Графа 7" + "1 рабочий день"
             int offset = 1
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -5114,11 +5119,11 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
             int offset = 30
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -5137,10 +5142,10 @@ boolean isPresentedByTempSolution(BigDecimal checkingValue, BigDecimal incomeAcc
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             Calendar calendar7 = Calendar.getInstance();
-            calendar7.setTime(ndflPersonIncome.incomePayoutDate.toDate());
+            calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
             // находим последний день месяца
             calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))

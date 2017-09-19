@@ -10,7 +10,7 @@ ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_temp
 
 --declaration_subreport
 ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_decl_subreport;
---ALTER TABLE declaration_subreport_params DISABLE CONSTRAINT fk_decl_subrep_pars_subrep_id; -- пусть удаляются каскадно
+--ALTER TABLE declaration_subreport_params DISABLE CONSTRAINT fk_decl_subrep_pars_subrep_id; -- пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 --blob_data
 ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_script_id;
@@ -19,7 +19,6 @@ ALTER TABLE declaration_template DISABLE CONSTRAINT dec_tem_fk_blob_data_jrxml;
 --ALTER TABLE notification DISABLE CONSTRAINT notification_fk_blob_data_id;
 ALTER TABLE notification DISABLE CONSTRAINT notification_fk_report_id;
 --ALTER TABLE log_system DISABLE CONSTRAINT log_system_fk_blob_data;
-ALTER TABLE log_system_report DISABLE CONSTRAINT log_system_report_fk_blob_data;
 ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_blob_data;
 ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_blob_data;
 ALTER TABLE declaration_data_file DISABLE CONSTRAINT decl_data_file_pk;

@@ -181,7 +181,7 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/pageImage/{pageId}/*", produces = MediaType.IMAGE_PNG_VALUE)
     public void getPageImage(@PathVariable int declarationDataId, @PathVariable int pageId,
-                             HttpServletResponse response) throws Exception {
+                             HttpServletResponse response) throws IOException {
 
         InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
         OutputStream out = response.getOutputStream();
@@ -235,9 +235,6 @@ public class DeclarationDataController {
         DeclarationResult result = new DeclarationResult();
 
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
-        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.ACCEPTED,
-                DeclarationDataPermission.CHECK, DeclarationDataPermission.RETURN_TO_CREATED, DeclarationDataPermission.DELETE);
-        result.setPermissions(declaration.getPermissions());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
 
@@ -247,6 +244,11 @@ public class DeclarationDataController {
         if (userLogin != null && !userLogin.isEmpty()) {
             result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
+
+        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
+
+        result.setPermissions(declaration.getPermissions());
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());

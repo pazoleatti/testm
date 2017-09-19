@@ -38,8 +38,6 @@ public class QRefBookDetachTaxPay extends com.querydsl.sql.RelationalPathBase<QR
 
     public final com.querydsl.sql.PrimaryKey<QRefBookDetachTaxPay> refBookDetachTaxPayPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetObligFk = createInvForeignKey(id, "OBLIGATION");
-
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetObligFk = createInvForeignKey(id, "OBLIGATION");
 
     public QRefBookDetachTaxPay(String variable) {

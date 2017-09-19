@@ -242,11 +242,32 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    String strCorrPeriod = ""
+    if (departmentReportPeriod.getCorrectionDate() != null) {
+        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+    }
+    def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
+            FORM_NAME_NDFL6,
+            "${departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()} ${departmentReportPeriod.getReportPeriod().getName()}${strCorrPeriod}",
+            department.getName(),
+            declarationData.kpp,
+            declarationData.oktmo)
     if (poMestuParam == null) {
-        logger.error("Код места в настройках подразделений не соответствует справочнику")
+        logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\"." )
+        calculateParams.put("notReplaceXml", true)
+        calculateParams.put("createForm", false)
         return
     }
     def taxPlaceTypeCode = poMestuParam?.CODE?.value
+    if(taxPlaceTypeCode == null){
+        logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
+        calculateParams.put("notReplaceXml", true)
+        calculateParams.put("createForm", false)
+        return
+    }
 
     // Признак лица, подписавшего документ
     def signatoryId = getRefBookValue(REF_BOOK_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
@@ -450,6 +471,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 if (pairOperationIdMap.size() != 0) {
 
                     ДохНал() {
+                        Set groups = []
+                        def payoutSumByGroup = [:]
+                        def withholdingTaxSumByGroup = [:]
                         pairOperationIdMap.values().each { listIncomes ->
                             ScriptUtils.checkInterrupted()
                             def incomeAccruedDate
@@ -482,12 +506,27 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                     withholdingTax += it.withholdingTax
                                 }
                             }
+                            def grouping = [
+                                    'incomeAccruedDate' : incomeAccruedDate,
+                                    'taxDate' : taxDate,
+                                    'transferDate' : transferDate
+                            ]
+                            groups.add(grouping)
+                            def payoutfromMap = payoutSumByGroup.get(grouping,new BigDecimal(0))
+                            payoutfromMap = payoutfromMap.add(incomePayoutSumm)
+                            payoutSumByGroup.put(grouping,payoutfromMap)
+
+                            def withholdingTaxfromMap = withholdingTaxSumByGroup.get(grouping,0)
+                            withholdingTaxfromMap += withholdingTax
+                            withholdingTaxSumByGroup.put(grouping,withholdingTaxfromMap)
+                        }
+                        groups.each { grouping ->
                             СумДата(
-                                    ДатаФактДох: incomeAccruedDate?.toString(DATE_FORMAT_DOTTED),
-                                    ДатаУдержНал: taxDate?.toString(DATE_FORMAT_DOTTED),
-                                    СрокПрчслНал: transferDate?.toString(DATE_FORMAT_DOTTED),
-                                    ФактДоход: ScriptUtils.round(incomePayoutSumm, 2),
-                                    УдержНал: withholdingTax
+                                    ДатаФактДох: grouping.incomeAccruedDate?.format(DATE_FORMAT_DOTTED),
+                                    ДатаУдержНал: grouping.taxDate?.format(DATE_FORMAT_DOTTED),
+                                    СрокПрчслНал: grouping.transferDate?.format(DATE_FORMAT_DOTTED),
+                                    ФактДоход: ScriptUtils.round(payoutSumByGroup.get(grouping), 2),
+                                    УдержНал: withholdingTaxSumByGroup.get(grouping)
                             ) {}
                         }
                     }
@@ -788,7 +827,7 @@ def getNdfl2DeclarationDataId() {
     if (result.isEmpty()) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
         Department department = departmentService.get(departmentReportPeriod.departmentId)
-        logger.error("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 2-НДФЛ (1) для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
+        logger.warn("Выполнить проверку междокументных контрольных соотношений невозможно. Отсутствует форма 2-НДФЛ (1) для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, Период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}")
     }
     return result
 }
@@ -862,9 +901,15 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
     }
 
     // Суммы значений всех 2-НДФЛ сравниваются с одним 6-НДФЛ
-    ndfl2DeclarationDataIds.each { ndfl2DeclarationDataId ->
+    for (def ndfl2DeclarationDataId : ndfl2DeclarationDataIds) {
         ScriptUtils.checkInterrupted()
         def ndfl2Stream = declarationService.getXmlStream(ndfl2DeclarationDataId)
+        if (ndfl2Stream == null) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            Department department = departmentService.get(departmentReportPeriod.departmentId)
+            logger.warn("Выполнить проверку междокументных контрольных соотношений невозможно. Заблокирована форма 2-НДФЛ (1) для подразделения: \"${department.name}\", КПП: ${declarationData.kpp}, ОКТМО: ${declarationData.oktmo}, Код НО: ${declarationData.taxOrganCode}, период: ${departmentReportPeriod.reportPeriod.name} ${departmentReportPeriod.reportPeriod.taxPeriod.year} ${departmentReportPeriod.correctionDate ? " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format(DATE_FORMAT_DOTTED) : ""}. Форма находится в процессе создания.")
+            continue
+        }
         def fileNode2Ndfl = new XmlSlurper().parse(ndfl2Stream);
 
         // МежДок8
@@ -914,14 +959,14 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
 
         if (ScriptUtils.round(nachislDoh6, 2) != ScriptUtils.round(sumDohObch2, 2)) {
             def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода»") + " по «Ставке» " + stavka6
-            logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
+            logger.warnExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
         }
     }
 
     // МежДок5
     if (ScriptUtils.round(nachislDohDiv6, 2) != ScriptUtils.round(sumDohDivObch2, 2)) {
         def msgErrorRes = sprintf(msgError, "«Сумме начисленного дохода» в виде дивидендов")
-        logger.errorExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
+        logger.warnExp(msgErrorRes, "«Сумма начисленного дохода» рассчитана некорректно", "")
     }
 
     // МежДок6
@@ -930,20 +975,20 @@ def checkBetweenDocumentXml(def ndfl2DeclarationDataIds) {
         def nalIschisl2 = mapNalIschisl2.get(stavka6)
         if (ischislNal6 != nalIschisl2) {
             def msgErrorRes = sprintf(msgError, "«Сумме налога исчисленного»") + " по «Ставке» " + stavka6
-            logger.errorExp(msgErrorRes, "«Сумма налога исчисленного» рассчитана некорректно", "")
+            logger.warnExp(msgErrorRes, "«Сумма налога исчисленного» рассчитана некорректно", "")
         }
     }
 
     // МежДок7
     if (neUderzNalIt6 != nalNeUderz2) {
         def msgErrorRes = sprintf(msgError, "«Сумме налога, не удержанной налоговым агентом»")
-        logger.errorExp(msgErrorRes, "«Сумма налога, не удержанная налоговым агентом» рассчитана некорректно", "")
+        logger.warnExp(msgErrorRes, "«Сумма налога, не удержанная налоговым агентом» рассчитана некорректно", "")
     }
 
     // МежДок8
     if (kolFl6 != kolFl2) {
         def msgErrorRes = sprintf(msgError, "количеству физических лиц, получивших доход")
-        logger.errorExp(msgErrorRes, "«Количество физических лиц, получивших доход» рассчитано некорректно", "")
+        logger.warnExp(msgErrorRes, "«Количество физических лиц, получивших доход» рассчитано некорректно", "")
     }
 }
 

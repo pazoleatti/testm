@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditToken;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.client.CommonParameterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
@@ -12,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
 import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockTokens;
-import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
@@ -66,7 +64,7 @@ public class GetMainMenuActionHandler extends
         // НАЛОГИ
         if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
                 TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_ADMIN)) {
+                TARole.ROLE_ADMIN)) {
             // тут важен порядок, поэтому мы не можем просто пробежаться по значениям
             MenuItem taxMenu = new MenuItem("Налоги");
             if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
@@ -130,23 +128,16 @@ public class GetMainMenuActionHandler extends
 
         // АДМИНИСТРИРОВАНИЕ
         if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF, TARole.N_ROLE_ADMIN)) {
+                TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF, TARole.ROLE_ADMIN)) {
 
             MenuItem adminMenuItem = new MenuItem("Администрирование");
             if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                    TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_ADMIN)) {
+                    TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", NUMBER_SIGN
                         + LockTokens.lockList));
-                adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             }
 
-
-            if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_ADMIN)) {
-                adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
-                        + MembersTokens.MEMBERS));
-            }
-
-            if (currentUser.hasRole(TARole.N_ROLE_ADMIN)) {
+            if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
                         + ConfigurationPresenter.TOKEN));
                 adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN

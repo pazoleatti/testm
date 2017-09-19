@@ -46,10 +46,6 @@ public class QRefBookRegion extends com.querydsl.sql.RelationalPathBase<QRefBook
 
     public final com.querydsl.sql.ForeignKey<QRefBookOktmo> refBookRegionOktmoFk = createForeignKey(oktmo, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetRegionFk = createInvForeignKey(id, "REGION");
-
-    public final com.querydsl.sql.ForeignKey<QDepartment> _departmentRegionIdFk = createInvForeignKey(id, "REGION_ID");
-
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetRegionFk = createInvForeignKey(id, "REGION");
 
     public QRefBookRegion(String variable) {

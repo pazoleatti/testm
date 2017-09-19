@@ -63,14 +63,14 @@ public class QRefBookTariffPayer extends com.querydsl.sql.RelationalPathBase<QRe
     }
 
     public void addMetadata() {
-        addMetadata(code, ColumnMetadata.named("CODE").withIndex(2).ofType(Types.VARCHAR).withSize(2).notNull());
+        addMetadata(code, ColumnMetadata.named("CODE").withIndex(5).ofType(Types.VARCHAR).withSize(2).notNull());
         addMetadata(forOpsDop, ColumnMetadata.named("FOR_OPS_DOP").withIndex(8).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(forOpsOms, ColumnMetadata.named("FOR_OPS_OMS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(forOpsOms, ColumnMetadata.named("FOR_OPS_OMS").withIndex(7).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(3).ofType(Types.VARCHAR).withSize(2000).notNull());
-        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(6).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(7).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(5).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(name, ColumnMetadata.named("NAME").withIndex(6).ofType(Types.VARCHAR).withSize(2000).notNull());
+        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
     }
 
 }

@@ -35,7 +35,7 @@
                 </executions>
                 <configuration>
                     <jdbcDriver>oracle.jdbc.OracleDriver</jdbcDriver>
-                    <jdbcUrl>jdbc:oracle:thin:@//172.19.214.46:1521/ORCL.APLANA.LOCAL</jdbcUrl>
+                    <jdbcUrl>jdbc:oracle:thin:@//172.19.214.45:1521/ORCL.APLANA.LOCAL</jdbcUrl>
                     <jdbcUser>ndfl_unstable</jdbcUser>
                     <jdbcPassword>ndfl_unstable</jdbcPassword>
                     <schemaPattern>NDFL_UNSTABLE</schemaPattern>

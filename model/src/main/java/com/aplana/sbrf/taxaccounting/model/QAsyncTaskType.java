@@ -24,9 +24,7 @@ public class QAsyncTaskType extends com.querydsl.sql.RelationalPathBase<QAsyncTa
 
     public static final QAsyncTaskType asyncTaskType = new QAsyncTaskType("ASYNC_TASK_TYPE");
 
-    public final NumberPath<Byte> devMode = createNumber("devMode", Byte.class);
-
-    public final StringPath handlerJndi = createString("handlerJndi");
+    public final StringPath handlerBean = createString("handlerBean");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -39,6 +37,8 @@ public class QAsyncTaskType extends com.querydsl.sql.RelationalPathBase<QAsyncTa
     public final NumberPath<Long> taskLimit = createNumber("taskLimit", Long.class);
 
     public final com.querydsl.sql.PrimaryKey<QAsyncTaskType> asyncTaskTypePk = createPrimaryKey(id);
+
+    public final com.querydsl.sql.ForeignKey<QAsyncTask> _asyncTaskFkType = createInvForeignKey(id, "TYPE_ID");
 
     public QAsyncTaskType(String variable) {
         super(QAsyncTaskType.class, forVariable(variable), "NDFL_UNSTABLE", "ASYNC_TASK_TYPE");
@@ -61,8 +61,7 @@ public class QAsyncTaskType extends com.querydsl.sql.RelationalPathBase<QAsyncTa
     }
 
     public void addMetadata() {
-        addMetadata(devMode, ColumnMetadata.named("DEV_MODE").withIndex(7).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(handlerJndi, ColumnMetadata.named("HANDLER_JNDI").withIndex(3).ofType(Types.VARCHAR).withSize(500).notNull());
+        addMetadata(handlerBean, ColumnMetadata.named("HANDLER_BEAN").withIndex(3).ofType(Types.VARCHAR).withSize(500).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(limitKind, ColumnMetadata.named("LIMIT_KIND").withIndex(6).ofType(Types.VARCHAR).withSize(400));
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(2).ofType(Types.VARCHAR).withSize(300).notNull());

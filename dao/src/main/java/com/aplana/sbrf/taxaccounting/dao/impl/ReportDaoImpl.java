@@ -4,18 +4,19 @@ import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 @Repository
@@ -59,18 +60,6 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void createAudit(Integer userId, String blobDataId, ReportType type) {
-        try{
-            getJdbcTemplate().update(
-                    "INSERT INTO LOG_SYSTEM_REPORT (SEC_USER_ID, BLOB_DATA_ID, TYPE) VALUES (?,?,?)",
-                    userId, blobDataId, type.getId());
-        } catch (DataIntegrityViolationException e){
-			LOG.error("", e);
-            throw new DaoException("Возможно для этого пользователя уже есть отчет по ЖА, проверьте выгрузку.", e);
-        }
-    }
-
-    @Override
     public String getDec(final long declarationDataId, final DeclarationDataReportType type) {
         try{
             PreparedStatementData ps = new PreparedStatementData();
@@ -88,24 +77,6 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
             return null;
         } catch (DataAccessException e) {
             throw new DaoException("Не удалось получить данные." + e.toString());
-        }
-    }
-
-    @Override
-    public String getAudit(Integer userId, ReportType type) {
-        try{
-            String sql = (userId != null ?
-                    "select blob_data_id from log_system_report where type=? and sec_user_id=?" :
-                    "select blob_data_id from log_system_report where type=? and sec_user_id is null");
-            Object[] objects = (userId != null ? new Object[] {type.getId(), userId} : new Object[] { type.getId() });
-            return getJdbcTemplate().queryForObject(
-                    sql,
-                    objects,
-                    String.class);
-        } catch (EmptyResultDataAccessException e){
-            return null;
-        } catch (DataAccessException e){
-            throw new DaoException("Не удалось получить отчет ЖА", e);
         }
     }
 
@@ -157,25 +128,6 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     new int[]{Types.VARCHAR});
         } catch (DataAccessException e){
             throw new DaoException(String.format("Не удалось удалить записи с BLOB_DATA_ID = %s", uuid), e);
-        }
-    }
-
-    @Override
-    public void deleteAudit(int userId, ReportType reportType) {
-        try{
-            getJdbcTemplate().update("delete from log_system_report where type=? and sec_user_id=?",
-                    reportType.getId(), userId);
-        } catch (DataAccessException e){
-            throw new DaoException(String.format("Не удалось удалить записи ЖА пользователя с идентификатором %d ", userId), e);
-        }
-    }
-
-    @Override
-    public void deleteAudit(String blobDataId) {
-        try{
-            getJdbcTemplate().update("delete from log_system_report where blob_data_id=?", blobDataId);
-        } catch (DataAccessException e){
-            throw new DaoException("Не удалось удалить записи ЖА", e);
         }
     }
 

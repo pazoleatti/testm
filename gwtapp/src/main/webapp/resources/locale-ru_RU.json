@@ -39,6 +39,7 @@
   "common.error.message.seemore": "Смотреть подробности",
 
   "common.button.search": "Найти",
+  "common.button.create": "Сформировать",
   "common.button.clear": "Сбросить",
   "common.button.add": "Добавить",
   "common.button.cancel": "Отменить",
@@ -68,6 +69,8 @@
   "filterPanelLabel": "Фильтр",
   "infoPanelLabel": "Информация",
   "filter.placeholder.search": "Введите строку",
+  "filter.placeholder.select": "Значение не выбрано",
+  "filter.placeholder.empty": "",
   "theNumberOfSelectedItems": "Выбрано значений:",
 
   "menu.taxes": "Налоги",
@@ -151,9 +154,11 @@
   "title.document": "Документ",
   "title.document.code": "Код",
   "title.document.number": "Номер",
+  "title.status.taxpayer": "Статус налогоплательщика",
   "title.codeDul": "ДУЛ Код",
   "title.numberDul": "ДУЛ Номер",
   "title.registrationAddress": "Адрес регистрации в РФ",
+  "title.inn": "ИНН",
   "title.innNp": "ИНН РФ",
   "title.innForeign": "ИНН Ино",
   "title.subject": "Субьект",
@@ -245,6 +250,9 @@
   "logBusiness.title.rolesUser": "Роли пользователя",
   "logBusiness.title.departmentUser": "Подразделение пользователя",
   "logBusiness.title.note": "Текст события",
+  "rnuPersonFace.title": "РНУ НДФЛ по физическому лицу",
+  "rnuPersonFace.": "РНУ НДФЛ по физическому лицу",
+
   "notifications.title.listNotifications": "Список оповещений",
   "notifications.title.createDate": "Дата оповещения",
   "notifications.title.content": "Содержание",
@@ -260,6 +268,8 @@
   "logPanel.title.message": "Сообщение",
   "logPanel.header.message": "Сообщения (всего: {0}; фатальных ошибок: {1})",
   "logPanel.header.print": "Печать",
+  "title.link.download": "Скачать",
+  "title.link.reportDelete": "Отчет удален",
 
   "sources.title.sourcesList": "Источники и приемники формы",
   "sources.checkbox.sources": "Источники",
@@ -296,5 +306,14 @@
   "filesComment.files": "Файлы:",
   "filesComment.button.add": "Добавить",
   "filesComment.button.remove": "Удалить",
-  "filesComment.system": "Система"
+  "filesComment.system": "Система",
+
+  "ndflJournal.filter.period": "Период",
+  "ndflJournal.filter.department": "Подразделение",
+  "ndflJournal.filter.declarationNumber": "Номер формы",
+  "ndflJournal.filter.declarationKind": "Тип налоговой формы",
+  "ndflJournal.filter.declarationType": "Вид налоговой формы",
+  "ndflJournal.filter.asnu": "Наименование АСНУ",
+  "ndflJournal.filter.state": "Состояние",
+  "ndflJournal.filter.file": "Файл"
 }

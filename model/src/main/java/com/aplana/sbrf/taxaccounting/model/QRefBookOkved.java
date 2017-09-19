@@ -38,8 +38,6 @@ public class QRefBookOkved extends com.querydsl.sql.RelationalPathBase<QRefBookO
 
     public final com.querydsl.sql.PrimaryKey<QRefBookOkved> refBookOkvedPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetOkvedFk = createInvForeignKey(id, "OKVED");
-
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetOkvedFk = createInvForeignKey(id, "OKVED");
 
     public QRefBookOkved(String variable) {

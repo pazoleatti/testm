@@ -85,7 +85,14 @@
                     name: data.taUserInfo.user.name,
                     login: data.taUserInfo.user.login,
                     department: data.department,
-                    permissions: data.taUserInfo.user.permissions
+                    permissions: data.taUserInfo.user.permissions,
+                    roles: data.taUserInfo.user.roles,
+                    hasRole: function (role) {
+                        var roleAliasList = data.taUserInfo.user.roles.map(function (userRole) {
+                            return userRole.alias;
+                        });
+                        return roleAliasList.indexOf(role) >= 0;
+                    }
                 };
                 $rootScope.permissionChecker = angular.injector(['app.permissionUtils']).get('PermissionChecker');
                 $rootScope.APP_CONSTANTS = angular.injector(['app.constants']).get('APP_CONSTANTS');

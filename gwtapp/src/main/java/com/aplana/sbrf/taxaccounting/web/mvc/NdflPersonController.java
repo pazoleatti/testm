@@ -7,7 +7,10 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -31,8 +34,16 @@ public class NdflPersonController {
 
     private NdflPersonService ndflPersonService;
 
-    public NdflPersonController(NdflPersonService ndflPersonService) {
+    private TAUserService taUserService;
+
+    private RefBookFactory refBookFactory;
+
+
+    public NdflPersonController(NdflPersonService ndflPersonService, TAUserService taUserService, RefBookFactory refBookFactory) {
         this.ndflPersonService = ndflPersonService;
+        this.taUserService = taUserService;
+        this.refBookFactory = refBookFactory;
+
     }
 
     /**
@@ -50,6 +61,8 @@ public class NdflPersonController {
         binder.registerCustomEditor(NdflPersonIncomeFilter.class, new RequestParamEditor(NdflPersonIncomeFilter.class));
         binder.registerCustomEditor(NdflPersonDeductionFilter.class, new RequestParamEditor(NdflPersonDeductionFilter.class));
         binder.registerCustomEditor(NdflPersonPrepaymentFilter.class, new RequestParamEditor(NdflPersonPrepaymentFilter.class));
+
+
     }
 
     /**
@@ -159,5 +172,62 @@ public class NdflPersonController {
                 ndflPersonService.findPersonPrepaymentCount(ndflPersonPrepaymentFilter.getDeclarationDataId()),
                 pagingParams
         );
+    }
+
+
+    /**
+     * Возвращает список лиц подходящих условиям поиска для формирования рну ндфл
+     *
+     * @param ndflPersonFilter параметры фильтра
+     * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
+     */
+
+    @GetMapping(value = "/rest/getListPerson/rnuPerson", params = "projection=rnuPersons")
+    public JqgridPagedList<NdflPerson> getPersonList(@RequestParam NdflPersonFilter ndflPersonFilter) {
+
+        Map<String, Object> filterParams = new HashMap<String, Object>();
+
+        if (ndflPersonFilter.getInp() != null) {
+            filterParams.put("inp", ndflPersonFilter.getInp());
+        }
+        if (ndflPersonFilter.getInnNp() != null) {
+            filterParams.put("innNp", ndflPersonFilter.getInnNp());
+        }
+
+        if (ndflPersonFilter.getSnils() != null) {
+            filterParams.put("snils", ndflPersonFilter.getSnils());
+        }
+        if (ndflPersonFilter.getIdDocNumber() != null) {
+            filterParams.put("idDocNumber", ndflPersonFilter.getIdDocNumber());
+        }
+        if (ndflPersonFilter.getLastName() != null) {
+            filterParams.put("lastName", ndflPersonFilter.getLastName());
+        }
+        if (ndflPersonFilter.getFirstName() != null) {
+            filterParams.put("firstName", ndflPersonFilter.getFirstName());
+        }
+        if (ndflPersonFilter.getMiddleName() != null) {
+            filterParams.put("middleName", ndflPersonFilter.getMiddleName());
+        }
+        if (ndflPersonFilter.getDateFrom() != null) {
+            filterParams.put("fromBirthDay", ndflPersonFilter.getDateFrom());
+        }
+
+        if (ndflPersonFilter.getDateTo() != null) {
+            filterParams.put("toBirthDay", ndflPersonFilter.getDateTo());
+        }
+
+        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter.getDeclarationDataId(), filterParams, new PagingParams());
+        JqgridPagedList<NdflPerson> resultPerson = JqgridPagedResourceAssembler.buildPagedList(
+                ndflPersons,
+                ndflPersonService.findPersonCount(ndflPersonFilter.getDeclarationDataId()),
+                new PagingParams()
+        );
+        for (NdflPerson ndflPerson : resultPerson.getRows()) {
+            ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
+                    get("NAME").getValue().toString());
+        }
+        return resultPerson;
     }
 }

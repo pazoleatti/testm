@@ -29,4 +29,14 @@ public class ImportFiasDataServiceImpl implements ImportFiasDataService {
         fiasRefBookDao.clearAll();
     }
 
+    @Override
+    public void dropIndexes() {
+        fiasRefBookDao.dropIndexes();
+    }
+
+    @Override
+    public void createIndexes() {
+        fiasRefBookDao.createIndexes();
+    }
+
 }

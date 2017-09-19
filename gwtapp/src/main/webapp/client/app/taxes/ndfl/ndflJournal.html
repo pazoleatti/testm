@@ -2,6 +2,10 @@
     <div class="page-top-content">
         <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
     </div>
+    <!-- Фильтр -->
+    <div class='container-grid-top'>
+        <span data-ng-include="'client/app/taxes/ndfl/ndflDeclarationFilter.html'"></span>
+    </div>
     <!-- Таблица -->
     <div data-aplana-grid
          data-grid-fill-space="true"

@@ -41,8 +41,7 @@ public class UserDataController {
                 UserPermission.VIEW_ADMINISTRATION_BLOCK_AND_AUDIT, UserPermission.VIEW_ADMINISTRATION_USERS,
                 UserPermission.VIEW_ADMINISTRATION_CONFIG, UserPermission.VIEW_ADMINISTRATION_SETTINGS,
                 UserPermission.VIEW_MANUAL_USER, UserPermission.VIEW_MANUAL_DESIGNER, UserPermission.VIEW_JOURNAL, UserPermission.CREATE_DECLARATION_REPORT,
-                UserPermission.CREATE_DECLARATION_TAX, UserPermission.CREATE_UPLOAD_REPORT, UserPermission.HANDLING_FILE, UserPermission.UPLOAD_FILE,
-                UserPermission.EDIT_GENERAL_PARAMS, UserPermission.VIEW_REF_BOOK, UserPermission.EDIT_REF_BOOK);
+                UserPermission.CREATE_DECLARATION_TAX, UserPermission.CREATE_UPLOAD_REPORT);
 
         return new UserDataModel(userInfo, department.getName());
     }

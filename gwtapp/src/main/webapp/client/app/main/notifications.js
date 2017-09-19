@@ -25,7 +25,8 @@
                         colNames: [
                             $filter('translate')('notifications.title.createDate'),
                             $filter('translate')('notifications.title.content'),
-                            $filter('translate')('notifications.title.link')
+                            $filter('translate')('notifications.title.link'),
+                            ""
                         ],
                         colModel: [
                             {
@@ -40,7 +41,21 @@
                                 width: 520,
                                 formatter: $filter('notificationTextFormatter')
                             },
-                            {name: 'reportId', index: 'reportId', width: 175, sortable: false}
+                            {
+                                name: 'link',
+                                index: 'link',
+                                width: 175,
+                                sortable: false,
+                                formatter: linkFileFormatter,
+                            },
+                            {
+                                name: 'reportId',
+                                index: 'reportId',
+                                hidden: true,
+                                width: 175,
+                                sortable: false,
+                            },
+
                         ],
                         rowNum: 10,
                         rowList: [10, 20, 30],
@@ -51,6 +66,23 @@
                         multiselect: true
                     }
                 };
+
+
+                /**
+                 * @description форматтер для поля 'Ссылка' для получения файла
+                 * @param row строка таблицы
+                 * @param cellValue значение ячейки
+                 * * @param options данные таблицы
+                 */
+                function linkFileFormatter(cellValue, options, row) {
+                    if (row.reportId != null) {
+                        return "<a target='_blank' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
+
+                    } else {
+                        return "";
+                    }
+                }
+
 
                 /**
                  * @description Удаление выбранных в гриде оповещений
@@ -89,11 +121,14 @@
                 });
             }])
         /**
-         * @description Фильтр для формирования ссылки на панель уведомлений
+         * @description Фильтр для формирования ссылки на оповещение
          */
         .filter('notificationTextFormatter', ['$filter', function ($filter) {
             return function (value, row, notification) {
                 return '<a class="notification-link" data-log-id="' + notification.logId + '">' + value + '</a>';
+
             };
         }]);
+
+
 }());

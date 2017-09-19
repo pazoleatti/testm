@@ -16,7 +16,8 @@
             'app.logPanel',
             'app.modals',
             'app.filesComments',
-            'app.rest'])
+            'app.rest',
+            'app.rnuNdflPersonFace'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}',
@@ -78,6 +79,13 @@
                 };
 
                 /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
+                 */
+                $scope.createReport = function () {
+                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html', 'rnuNdflPersonFaceFormCtrl', {declarationDataId: $scope.declarationDataId});
+                };
+
+                /**
                  * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
                  */
                 $scope.calculate = function (force, cancelTask) {
@@ -108,6 +116,7 @@
                         }
                     });
                 };
+
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
@@ -210,5 +219,9 @@
                 };
 
                 initPage();
+
+                $scope.selectTab = function(tab) {
+                    $rootScope.$broadcast('tabSelected', tab);
+                };
             }]);
 }());

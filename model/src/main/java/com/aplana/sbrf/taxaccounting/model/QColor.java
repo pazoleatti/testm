@@ -38,10 +38,6 @@ public class QColor extends com.querydsl.sql.RelationalPathBase<QColor> {
 
     public final com.querydsl.sql.PrimaryKey<QColor> colorPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QFormStyle> _formStyleFkBackColor = createInvForeignKey(id, "BACK_COLOR");
-
-    public final com.querydsl.sql.ForeignKey<QFormStyle> _formStyleFkFontColor = createInvForeignKey(id, "FONT_COLOR");
-
     public QColor(String variable) {
         super(QColor.class, forVariable(variable), "NDFL_UNSTABLE", "COLOR");
         addMetadata();

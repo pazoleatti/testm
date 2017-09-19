@@ -30,8 +30,6 @@ public class QDepartmentType extends com.querydsl.sql.RelationalPathBase<QDepart
 
     public final com.querydsl.sql.PrimaryKey<QDepartmentType> departmentTypePk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QDepartment> _departmentFkType = createInvForeignKey(id, "TYPE");
-
     public QDepartmentType(String variable) {
         super(QDepartmentType.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_TYPE");
         addMetadata();

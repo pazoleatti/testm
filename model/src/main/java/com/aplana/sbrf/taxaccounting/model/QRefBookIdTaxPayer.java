@@ -65,13 +65,13 @@ public class QRefBookIdTaxPayer extends com.querydsl.sql.RelationalPathBase<QRef
     }
 
     public void addMetadata() {
-        addMetadata(asNu, ColumnMetadata.named("AS_NU").withIndex(4).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(asNu, ColumnMetadata.named("AS_NU").withIndex(7).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(inp, ColumnMetadata.named("INP").withIndex(3).ofType(Types.VARCHAR).withSize(25).notNull());
-        addMetadata(personId, ColumnMetadata.named("PERSON_ID").withIndex(2).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(5).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(7).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(6).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(inp, ColumnMetadata.named("INP").withIndex(6).ofType(Types.VARCHAR).withSize(25).notNull());
+        addMetadata(personId, ColumnMetadata.named("PERSON_ID").withIndex(5).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
     }
 
 }

@@ -45,7 +45,7 @@ public abstract class LockDataPermission extends AbstractPermission<LockData>{
         @Override
         protected boolean isGrantedInternal(User currentUser, LockData targetDomainObject) {
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
-            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_ADMIN) || (targetDomainObject.getUserId() == taUser.getId());
+            return PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN) || (targetDomainObject.getUserId() == taUser.getId());
         }
     }
 

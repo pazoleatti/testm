@@ -79,19 +79,19 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
     }
 
     public void addMetadata() {
-        addMetadata(birthday, ColumnMetadata.named("BIRTHDAY").withIndex(8).ofType(Types.TIMESTAMP).withSize(7).notNull());
-        addMetadata(declarationDataId, ColumnMetadata.named("DECLARATION_DATA_ID").withIndex(2).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(errtext, ColumnMetadata.named("ERRTEXT").withIndex(9).ofType(Types.VARCHAR).withSize(4000));
+        addMetadata(birthday, ColumnMetadata.named("BIRTHDAY").withIndex(11).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(declarationDataId, ColumnMetadata.named("DECLARATION_DATA_ID").withIndex(5).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(errtext, ColumnMetadata.named("ERRTEXT").withIndex(12).ofType(Types.VARCHAR).withSize(4000));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(lastname, ColumnMetadata.named("LASTNAME").withIndex(7).ofType(Types.VARCHAR).withSize(60));
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(6).ofType(Types.VARCHAR).withSize(60).notNull());
+        addMetadata(lastname, ColumnMetadata.named("LASTNAME").withIndex(10).ofType(Types.VARCHAR).withSize(60));
+        addMetadata(name, ColumnMetadata.named("NAME").withIndex(9).ofType(Types.VARCHAR).withSize(60).notNull());
         addMetadata(ndflPersonId, ColumnMetadata.named("NDFL_PERSON_ID").withIndex(13).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(num, ColumnMetadata.named("NUM").withIndex(4).ofType(Types.DECIMAL).withSize(10).notNull());
-        addMetadata(personId, ColumnMetadata.named("PERSON_ID").withIndex(3).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(10).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(12).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(surname, ColumnMetadata.named("SURNAME").withIndex(5).ofType(Types.VARCHAR).withSize(60).notNull());
-        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(11).ofType(Types.TIMESTAMP).withSize(7).notNull());
+        addMetadata(num, ColumnMetadata.named("NUM").withIndex(7).ofType(Types.DECIMAL).withSize(10).notNull());
+        addMetadata(personId, ColumnMetadata.named("PERSON_ID").withIndex(6).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(status, ColumnMetadata.named("STATUS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(surname, ColumnMetadata.named("SURNAME").withIndex(8).ofType(Types.VARCHAR).withSize(60).notNull());
+        addMetadata(version, ColumnMetadata.named("VERSION").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
     }
 
 }

@@ -26,10 +26,6 @@ public class QRefBookPresentPlace extends com.querydsl.sql.RelationalPathBase<QR
 
     public final StringPath code = createString("code");
 
-    public final NumberPath<Byte> forFond = createNumber("forFond", Byte.class);
-
-    public final NumberPath<Byte> forNdfl = createNumber("forNdfl", Byte.class);
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath name = createString("name");
@@ -43,8 +39,6 @@ public class QRefBookPresentPlace extends com.querydsl.sql.RelationalPathBase<QR
     public final com.querydsl.sql.PrimaryKey<QRefBookPresentPlace> refBookPresentPlacePk = createPrimaryKey(id);
 
     public final com.querydsl.sql.ForeignKey<QRefBookNdflDetail> _refBookNdflDetPresPlFk = createInvForeignKey(id, "PRESENT_PLACE");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetPresPlFk = createInvForeignKey(id, "PRESENT_PLACE");
 
     public QRefBookPresentPlace(String variable) {
         super(QRefBookPresentPlace.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_PRESENT_PLACE");
@@ -68,8 +62,6 @@ public class QRefBookPresentPlace extends com.querydsl.sql.RelationalPathBase<QR
 
     public void addMetadata() {
         addMetadata(code, ColumnMetadata.named("CODE").withIndex(5).ofType(Types.VARCHAR).withSize(3).notNull());
-        addMetadata(forFond, ColumnMetadata.named("FOR_FOND").withIndex(8).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(forNdfl, ColumnMetadata.named("FOR_NDFL").withIndex(7).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(6).ofType(Types.VARCHAR).withSize(255).notNull());
         addMetadata(recordId, ColumnMetadata.named("RECORD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());

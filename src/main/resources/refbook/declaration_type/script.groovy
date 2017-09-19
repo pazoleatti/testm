@@ -201,7 +201,7 @@ def importTF() {
     } else if (isNdfl2Response(UploadFileName)) {
         importNdflResponse()
     } else {
-        logger.error("Не удалось определить тип файла ответа \"%s\"", UploadFileName)
+        logger.error("Некорректное количество символов в имени файла \"%s\"", UploadFileName)
     }
 }
 
@@ -953,15 +953,15 @@ def _importTF() {
 
     //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
     if (!departmentCode.equals(handler.getListValueAttributesTag().get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())) {
-        logger.error("В ТФ не совпадают значения параметров имени «Код подразделения» = «%s» и содержимого «Код подразделения» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
+        logger.error("В ТФ не совпадают значения параметров имени «Код подразделения» = «%s» и содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
     }
 
     if (!asnuCode.equals(handler.getListValueAttributesTag().get(KOD_ASNU))) {
-        logger.error("В ТФ не совпадают значения параметров имени «Код АСНУ» = «%s» и содержимого «Код АСНУ» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
+        logger.error("В ТФ не совпадают значения параметров имени «Код АСНУ» = «%s» и содержимого «Файл.СлЧасть.КодАС» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
     }
 
     if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))) {
-        logger.error("В ТФ не совпадают значения параметров имени «Имя файла» = «%s» и содержимого «Имя ТФ без расширения» = «%s»", UploadFileName, handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
+        logger.error("В ТФ не совпадают значения параметров имени «Имя ТФ без расширения» = «%s» и содержимого «Файл.СлЧасть.ИдФайл» = «%s»", UploadFileName.trim()[0..-5], handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
     }
 
     //достать из XML файла атрибуты тега СлЧасть
@@ -977,7 +977,7 @@ def _importTF() {
 
     //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
     if (!reportPeriodCode.equals(handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))) {
-        logger.error("В ТФ не совпадают значения параметров имени «Код периода» = «%s» и содержимого «Код периода» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
+        logger.error("В ТФ не совпадают значения параметров имени «Код периода» = «%s» и содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
     }
 
     Integer reportYear;
@@ -988,7 +988,7 @@ def _importTF() {
     }
 
     if (!year.equals(reportYear)) {
-        logger.error("В ТФ не совпадают значения параметров имени «Год» = «%s» и содержимого «Год» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
+        logger.error("В ТФ не совпадают значения параметров имени «Год» = «%s» и содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
     }
 
 

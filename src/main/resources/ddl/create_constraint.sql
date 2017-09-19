@@ -40,8 +40,6 @@ alter table event add constraint event_pk primary key (id);
 alter table log_clob_query add constraint log_clob_query_pk primary key (id);
 alter table role_event add constraint role_event_pk primary key (event_id, role_id);
 alter table template_changes add constraint template_changes_pk primary key (id);
-alter table audit_form_type add constraint audit_form_type_pk primary key (id);
-alter table log_system add constraint log_system_pk primary key (id);
 alter table lock_data add constraint lock_data_pk primary key (key);
 alter table lock_data_subscribers add constraint lock_data_subscribers_pk primary key (lock_key, user_id);
 alter table async_task_type add constraint async_task_type_pk primary key (id);
@@ -77,7 +75,6 @@ alter table task_context add constraint task_context_uniq_task_name unique (task
 alter table declaration_subreport add constraint decl_subrep_unq_combo unique (declaration_template_id, alias);
 alter table declaration_report add constraint declaration_report_unq_combo unique (declaration_data_id, type, subreport_id);
 alter table configuration_email add constraint configuration_email_unqname unique (name);
-alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
 --foreign keys
 alter table form_type add constraint form_type_fk_taxtype foreign key (tax_type) references tax_type(id);
@@ -149,10 +146,6 @@ alter table role_event add constraint role_event_fk_role_id foreign key (role_id
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
 alter table template_changes add constraint template_changes_fk_event foreign key (event) references event(id);
 alter table template_changes add constraint template_changes_fk_dec_t foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
-alter table log_system add constraint log_system_fk_event_id foreign key (event_id) references event(id);
-alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
-alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
-alter table log_system add constraint log_system_fk_audit_form_type foreign key (audit_form_type_id) references audit_form_type (id);
 alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
 alter table lock_data_subscribers add constraint lock_data_subscr_fk_lock_data foreign key (lock_key) references lock_data(key) on delete cascade;
 alter table lock_data_subscribers add constraint lock_data_subscr_fk_sec_user foreign key (user_id) references sec_user(id) on delete cascade;
@@ -169,8 +162,6 @@ alter table form_data_consolidation add constraint form_data_consolidation_fk_sr
 alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id) on delete cascade;
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id)  on delete cascade;
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_declaration_data_id) references declaration_data(id) on delete cascade;
-alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
-alter table log_system_report add constraint log_system_report_fk_sec_user foreign key (sec_user_id) references sec_user (id) on delete cascade;
 alter table form_search_result add constraint form_search_result_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table declaration_data_file add constraint decl_data_file_fk_decl_data foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 alter table declaration_data_file add constraint decl_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);
@@ -243,17 +234,12 @@ alter table notification add constraint notification_chk_isread check (is_read i
 alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
 alter table template_changes add constraint template_changes_chk_event check (event in (701, 702, 703, 704, 705, 904));
 alter table template_changes add constraint template_changes_chk_template check ((form_template_id is not null and declaration_template_id is null and ref_book_id is null) or (form_template_id is null and declaration_template_id is not null and ref_book_id is null) or (form_template_id is null and declaration_template_id is null and ref_book_id is not null));
-alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 504,  601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 504, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904, 951, 960) or report_period_name is not null);
-alter table log_system add constraint log_system_chk_aft check (audit_form_type_id = 1 and not event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is not null or audit_form_type_id = 2 and not event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is not null or audit_form_type_id = 3 and event_id in (701,702,703,704,705,904) and form_type_name is not null and department_name is null or audit_form_type_id = 4 and event_id in (701,702,703,704,705,904) and declaration_type_name is not null and department_name is null or audit_form_type_id in (5,6) and event_id in (7) and form_type_name is null and declaration_type_name is null or audit_form_type_id is null or event_id in (402));
-alter table log_system add constraint log_system_chk_is_error check (is_error in (0, 1));
 alter table form_data_report add constraint form_data_rep_chk_manual check (manual in (0,1));
 alter table form_data_report add constraint form_data_rep_chk_checking check (checking in (0,1));
 alter table form_data_report add constraint form_data_rep_chk_absolute check (absolute in (0,1));
 alter table declaration_subreport add constraint chk_decl_subrep_sel_record check(select_record in (0,1));
 alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3, 4));
 alter table declaration_report add constraint decl_report_chk_subreport_id check ((type = 4 and subreport_id is not null) or (type in (0, 1, 2, 3) and subreport_id is null));
-alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 alter table department_change add constraint dep_change_chk_op_type check ((operationtype in (0,1) and hier_level is not null and name is not null and type is not null and is_active is not null and garant_use is not null and sunr_use is not null and code is not null) or (operationtype = 2 and hier_level is null and name is null and type is null and is_active is null and garant_use is null and sunr_use is null and code is null));
 alter table department_change add constraint dep_change_chk_is_active check (is_active in (0, 1));
 alter table department_change add constraint dep_change_chk_garant_use check (garant_use in (0, 1));
@@ -343,7 +329,6 @@ alter table log_entry add constraint pk_log_entry primary key(log_id,ord);
 alter table log add constraint fk_log_user foreign key(user_id) references sec_user(id);
 alter table log_entry add constraint fk_log_entry_log foreign key(log_id) references log(id) on delete cascade;
 alter table notification add constraint fk_notification_log foreign key(log_id) references log(id);
-alter table log_system add constraint fk_log_system_log foreign key(log_id) references log(id);
 
 --checks
 alter table log_entry add constraint chk_log_entry_lev check(log_level in (0,1,2));

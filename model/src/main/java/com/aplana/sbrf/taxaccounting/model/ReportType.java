@@ -26,7 +26,7 @@ public enum ReportType {
     TO_CREATE_DEC(6, "MOVE_TO_CREATE", "Возврат в Создана", 0L),
 
     CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 28L),
-    CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Формирование отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L),
+    CREATE_REPORTS_DEC(4, "CREATE_REPORTS_DEC", "Выгрузка отчетности: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 29L),
 
     CONSOLIDATE_FD(0, "CONSOLIDATE_FORM_DATA", "Консолидация %s", 16L),
     CALCULATE_FD(1, "CALCULATE_FORM_DATA", "Расчет %s", 17L),
@@ -42,19 +42,13 @@ public enum ReportType {
 
     ZIP_IFRS(0, "Zip", "", 9L),
 
-    ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", "", 10L),
-    CSV_AUDIT(1, "CSV_AUDIT", "Формирование файла с данными журнала аудита по параметрам поиска", 11L),
-
     LOAD_ALL_TF(1, "LoadAllTF", "Импорт транспортного файла из каталога загрузки", 13L),
 
     EXCEL_REF_BOOK(0, "XLSX", "Формирование отчета справочника \"%s\" в XLSX-формате", 23L),
     CSV_REF_BOOK(1, "CSV", "Формирование отчета справочника \"%s\" в CSV-формате", 24L),
     SPECIFIC_REPORT_REF_BOOK(3, "SPECIFIC", "Формирование специфического отчета \"%s\" справочника \"%s\"", 25L),
     IMPORT_REF_BOOK(4, "IMPORT_REF_BOOK", "Загрузка данных из файла в справочник \"%s\"", 27L),
-    EDIT_REF_BOOK(5, "EDIT_REF_BOOK", "Редактирование справочника \"%s\"", 0L), //формально является задачей
-
-    GET_ALL_DEPARTMENT_CHANGES(0, "GET_ALL_CHANGES", "Получение списка всех изменений ", 0L), //формально является задачей
-    SEND_DEPARTMENT_CHANGE(1, "SEND_CHANGE", "Отправка текущего изменения подразделения", 0L); //формально является задачей
+    EDIT_REF_BOOK(5, "EDIT_REF_BOOK", "Редактирование справочника \"%s\"", 0L); //формально является задачей
 
     private int id;
     private String name;

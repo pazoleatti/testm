@@ -29,6 +29,17 @@
                 VIEW_REF_BOOK: 1 << 17,
                 EDIT_REF_BOOK: 1 << 18
             },
+            USER_ROLE: {
+                N_ROLE_OPER: "N_ROLE_OPER",
+                N_ROLE_CONTROL_UNP: "N_ROLE_CONTROL_UNP",
+                N_ROLE_CONTROL_NS: "N_ROLE_CONTROL_NS",
+                N_ROLE_CONF: "N_ROLE_CONF",
+                N_ROLE_ADMIN: "N_ROLE_ADMIN",
+                F_ROLE_OPER: "F_ROLE_OPER",
+                F_ROLE_CONTROL_UNP: "F_ROLE_CONTROL_UNP",
+                F_ROLE_CONTROL_NS: "F_ROLE_CONTROL_NS",
+                F_ROLE_CONF: "F_ROLE_CONF"
+            },
             REFBOOK: {
                 DEPARTMENT: 30,
                 DECLARATION_TYPE: 207,
@@ -59,19 +70,23 @@
                 VIEW: 1 << 0,
                 DELETE: 1 << 1
             },
-            NDFL_STATS: {
-                CREATED: "Создана",
-                PREPARED: "Подготовлена",
-                ACCEPTED: "Принята",
-                NOT_EXIST: "Не создана"
+            NDFL_STATE: {
+                CREATED: {id: 1, name: "Создана"},
+                PREPARED: {id: 2, name: "Подготовлена"},
+                ACCEPTED: {id: 3, name: "Принята"}
             },
-            NDFL_FORMKIND: {
-                PRIMARY: "Первичная",
-                CONSOLIDATED: "Консолидированная",
-                SUMMARY: "Сводная",
-                UNP: "Форма УНП",
-                ADDITIONAL: "Выходная",
-                CALCULATED: "Расчетная"
+            NDFL_DECLARATION_KIND: {
+                ADDITIONAL: {id: 1, name: "Выходная"},
+                CONSOLIDATED: {id: 2, name: "Консолидированная"},
+                PRIMARY: {id: 3, name: "Первичная"},
+                SUMMARY: {id: 4, name: "Сводная"},
+                UNP: {id: 5, name: "Форма УНП"},
+                CALCULATED: {id: 6, name: "Расчетная"}
+            },
+            CORRETION_TAG: {
+                ALL: {id: 0, name: "Все периоды"},
+                ONLY_PRIMARY: {id: 1, name: "Только не корректирующие"},
+                ONLY_CORRECTIVE: {id: 2, name: "Только корректирующие"},
             }
         });
 }());

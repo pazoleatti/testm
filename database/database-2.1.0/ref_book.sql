@@ -1,0 +1,2 @@
+delete from ref_book_attribute where ref_book_id in (select id from ref_book where table_name in ('REF_BOOK_FOND','REF_BOOK_FOND_DETAIL'));
+delete from ref_book where table_name in ('REF_BOOK_FOND','REF_BOOK_FOND_DETAIL');

@@ -10,8 +10,29 @@
      * @description Контроллер вкладки "Сведения о вычетах"
      */
         .controller('deductionCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter',
-            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', '$rootScope',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $rootScope) {
+
+                $scope.$on('INP_CHANGED', function(event, data) {
+                    if (!_.isEqual($scope.searchFilter.params.inp, data)){
+                        $scope.searchFilter.params.inp = data;
+                        $scope.submitSearch();
+                    }
+                });
+
+                $scope.$on('OPERATION_ID_CHANGED', function(event, data) {
+                    if (!_.isEqual($scope.searchFilter.params.operationId, data)){
+                        $scope.searchFilter.params.operationId = data;
+                        $scope.submitSearch();
+                    }
+                });
+
+                $scope.$on('tabSelected', function(event, data) {
+                    if (_.isEqual(data, 'deductions')){
+                        $scope.submitSearch();
+                    }
+                });
+
                 /**
                  * @description Обновление грида
                  * @param page
@@ -120,14 +141,18 @@
                  * @description Поиск по фильтру
                  */
                 $scope.submitSearch = function () {
-                    fillSearchFilter();
+                    $scope.searchFilter.ajaxFilter = [];
+                    $scope.searchFilter.fillFilterParams();
                     $scope.refreshGrid(1);
+                    $scope.searchFilter.isClear = !_.isEmpty($scope.searchFilter.ajaxFilter);
                 };
 
                 /**
                  * @description сброс фильтра
                  */
                 $scope.resetFilter = function () {
+                    $rootScope.$broadcast('INP_CHANGED', $scope.searchFilter.params.inp);
+                    $rootScope.$broadcast('OPERATION_ID_CHANGED', $scope.searchFilter.params.operationId);
                     /* очистка всех инпутов на форме */
                     $scope.searchFilter.params = {};
 
@@ -189,7 +214,7 @@
                             value: $scope.searchFilter.params.deductionDateTo
                         });
                     }
-                }
+                };
             }])
 
 }());

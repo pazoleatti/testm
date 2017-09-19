@@ -64,8 +64,6 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
 
     public final com.querydsl.sql.ForeignKey<QDeclarationDataConsolidation> _declDataConsolidationFkTgt = createInvForeignKey(id, "TARGET_DECLARATION_DATA_ID");
 
-    public final com.querydsl.sql.ForeignKey<QRaschsvPersSvStrahLic> _persSvStrahFaceDeclaratFk = createInvForeignKey(id, "DECLARATION_DATA_ID");
-
     public final com.querydsl.sql.ForeignKey<QNdflPerson> _ndflPersonFkD = createInvForeignKey(id, "DECLARATION_DATA_ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationReport> _declReportFkDeclData = createInvForeignKey(id, "DECLARATION_DATA_ID");
@@ -73,10 +71,6 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
     public final com.querydsl.sql.ForeignKey<QDeclarationDataFile> _declDataFileFkDeclData = createInvForeignKey(id, "DECLARATION_DATA_ID");
 
     public final com.querydsl.sql.ForeignKey<QNdflReferences> _ndflRefersDeclDataFk = createInvForeignKey(id, "DECLARATION_DATA_ID");
-
-    public final com.querydsl.sql.ForeignKey<QRaschsvSvnpPodpisant> _raschsvSvnpPodpDeclaratFk = createInvForeignKey(id, "DECLARATION_DATA_ID");
-
-    public final com.querydsl.sql.ForeignKey<QRaschsvObyazPlatSv> _raschsvObyazPlatDeclaratFk = createInvForeignKey(id, "DECLARATION_DATA_ID");
 
     public QDeclarationData(String variable) {
         super(QDeclarationData.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_DATA");
@@ -99,16 +93,16 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
     }
 
     public void addMetadata() {
-        addMetadata(asnuId, ColumnMetadata.named("ASNU_ID").withIndex(6).ofType(Types.DECIMAL).withSize(18));
+        addMetadata(asnuId, ColumnMetadata.named("ASNU_ID").withIndex(7).ofType(Types.DECIMAL).withSize(18));
         addMetadata(declarationTemplateId, ColumnMetadata.named("DECLARATION_TEMPLATE_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(departmentReportPeriodId, ColumnMetadata.named("DEPARTMENT_REPORT_PERIOD_ID").withIndex(5).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(departmentReportPeriodId, ColumnMetadata.named("DEPARTMENT_REPORT_PERIOD_ID").withIndex(6).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(docStateId, ColumnMetadata.named("DOC_STATE_ID").withIndex(11).ofType(Types.DECIMAL).withSize(18));
-        addMetadata(fileName, ColumnMetadata.named("FILE_NAME").withIndex(9).ofType(Types.VARCHAR).withSize(255));
+        addMetadata(fileName, ColumnMetadata.named("FILE_NAME").withIndex(10).ofType(Types.VARCHAR).withSize(255));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(kpp, ColumnMetadata.named("KPP").withIndex(4).ofType(Types.VARCHAR).withSize(9));
-        addMetadata(note, ColumnMetadata.named("NOTE").withIndex(7).ofType(Types.VARCHAR).withSize(512));
-        addMetadata(oktmo, ColumnMetadata.named("OKTMO").withIndex(10).ofType(Types.VARCHAR).withSize(11));
-        addMetadata(state, ColumnMetadata.named("STATE").withIndex(8).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(note, ColumnMetadata.named("NOTE").withIndex(8).ofType(Types.VARCHAR).withSize(512));
+        addMetadata(oktmo, ColumnMetadata.named("OKTMO").withIndex(5).ofType(Types.VARCHAR).withSize(11));
+        addMetadata(state, ColumnMetadata.named("STATE").withIndex(9).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(taxOrganCode, ColumnMetadata.named("TAX_ORGAN_CODE").withIndex(3).ofType(Types.VARCHAR).withSize(4));
     }
 

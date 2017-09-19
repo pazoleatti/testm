@@ -87,7 +87,7 @@ public class TestScriptHelper {
         super();
         this.mockHelper = mockHelper;
         // Id подразделения пользователя совпадает c Id подразделения НФ
-        userDepartment.setRegionId(DEPARTMENT_REGION_ID);
+        //userDepartment.setRegionId(DEPARTMENT_REGION_ID);
         userDepartment.setName(DEPARTMENT_NAME);
 
         this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;

@@ -242,11 +242,32 @@ def buildXml(def writer, boolean isForSpecificReport) {
 
     // Коды представления налоговой декларации по месту нахождения (учёта)
     def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+
+    def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    String strCorrPeriod = ""
+    if (departmentReportPeriod.getCorrectionDate() != null) {
+        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+    }
+    def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
+            FORM_NAME_NDFL6,
+            "${departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()} ${departmentReportPeriod.getReportPeriod().getName()}${strCorrPeriod}",
+            department.getName(),
+            declarationData.kpp,
+            declarationData.oktmo)
     if (poMestuParam == null) {
-        logger.error("Код места в настройках подразделений не соответствует справочнику")
+        logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\"." )
+        calculateParams.put("notReplaceXml", true)
+        calculateParams.put("createForm", false)
         return
     }
     def taxPlaceTypeCode = poMestuParam?.CODE?.value
+    if(taxPlaceTypeCode == null){
+        logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
+        calculateParams.put("notReplaceXml", true)
+        calculateParams.put("createForm", false)
+        return
+    }
 
     // Признак лица, подписавшего документ
     def signatoryId = getRefBookValue(REF_BOOK_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
@@ -450,6 +471,9 @@ def buildXml(def writer, boolean isForSpecificReport) {
                 if (pairOperationIdMap.size() != 0) {
 
                     ДохНал() {
+                        Set groups = []
+                        def payoutSumByGroup = [:]
+                        def withholdingTaxSumByGroup = [:]
                         pairOperationIdMap.values().each { listIncomes ->
                             ScriptUtils.checkInterrupted()
                             def incomeAccruedDate
@@ -482,12 +506,27 @@ def buildXml(def writer, boolean isForSpecificReport) {
                                     withholdingTax += it.withholdingTax
                                 }
                             }
+                            def grouping = [
+                                    'incomeAccruedDate' : incomeAccruedDate,
+                                    'taxDate' : taxDate,
+                                    'transferDate' : transferDate
+                            ]
+                            groups.add(grouping)
+                            def payoutfromMap = payoutSumByGroup.get(grouping,new BigDecimal(0))
+                            payoutfromMap = payoutfromMap.add(incomePayoutSumm)
+                            payoutSumByGroup.put(grouping,payoutfromMap)
+
+                            def withholdingTaxfromMap = withholdingTaxSumByGroup.get(grouping,0)
+                            withholdingTaxfromMap += withholdingTax
+                            withholdingTaxSumByGroup.put(grouping,withholdingTaxfromMap)
+                        }
+                        groups.each { grouping ->
                             СумДата(
-                                    ДатаФактДох: incomeAccruedDate?.toString(DATE_FORMAT_DOTTED),
-                                    ДатаУдержНал: taxDate?.toString(DATE_FORMAT_DOTTED),
-                                    СрокПрчслНал: transferDate?.toString(DATE_FORMAT_DOTTED),
-                                    ФактДоход: ScriptUtils.round(incomePayoutSumm, 2),
-                                    УдержНал: withholdingTax
+                                    ДатаФактДох: grouping.incomeAccruedDate?.format(DATE_FORMAT_DOTTED),
+                                    ДатаУдержНал: grouping.taxDate?.format(DATE_FORMAT_DOTTED),
+                                    СрокПрчслНал: grouping.transferDate?.format(DATE_FORMAT_DOTTED),
+                                    ФактДоход: ScriptUtils.round(payoutSumByGroup.get(grouping), 2),
+                                    УдержНал: withholdingTaxSumByGroup.get(grouping)
                             ) {}
                         }
                     }
@@ -1011,7 +1050,7 @@ def getProvider(def long providerId) {
  * Разыменование записи справочника
  */
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/

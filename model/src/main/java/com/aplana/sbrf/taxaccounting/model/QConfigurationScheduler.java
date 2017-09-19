@@ -34,8 +34,6 @@ public class QConfigurationScheduler extends com.querydsl.sql.RelationalPathBase
 
     public final StringPath schedule = createString("schedule");
 
-    public final DateTimePath<org.joda.time.LocalDateTime> startDate = createDateTime("startDate", org.joda.time.LocalDateTime.class);
-
     public final StringPath taskName = createString("taskName");
 
     public final com.querydsl.sql.PrimaryKey<QConfigurationScheduler> confSchedulerPk = createPrimaryKey(id);
@@ -65,11 +63,10 @@ public class QConfigurationScheduler extends com.querydsl.sql.RelationalPathBase
     public void addMetadata() {
         addMetadata(active, ColumnMetadata.named("ACTIVE").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(lastFireDate, ColumnMetadata.named("LAST_FIRE_DATE").withIndex(7).ofType(Types.TIMESTAMP).withSize(7));
+        addMetadata(lastFireDate, ColumnMetadata.named("LAST_FIRE_DATE").withIndex(6).ofType(Types.TIMESTAMP).withSize(7));
         addMetadata(modificationDate, ColumnMetadata.named("MODIFICATION_DATE").withIndex(5).ofType(Types.TIMESTAMP).withSize(7).notNull());
-        addMetadata(schedule, ColumnMetadata.named("SCHEDULE").withIndex(3).ofType(Types.VARCHAR).withSize(1000));
-        addMetadata(startDate, ColumnMetadata.named("START_DATE").withIndex(6).ofType(Types.TIMESTAMP).withSize(7));
-        addMetadata(taskName, ColumnMetadata.named("TASK_NAME").withIndex(2).ofType(Types.VARCHAR).withSize(1000).notNull());
+        addMetadata(schedule, ColumnMetadata.named("SCHEDULE").withIndex(3).ofType(Types.VARCHAR).withSize(100));
+        addMetadata(taskName, ColumnMetadata.named("TASK_NAME").withIndex(2).ofType(Types.VARCHAR).withSize(200).notNull());
     }
 
 }

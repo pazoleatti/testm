@@ -57,8 +57,6 @@ alter table state add constraint pk_state primary key(id);
 alter table state_change add constraint pk_state_change primary key(id);
 alter table declaration_template_file add constraint pk_declaration_template_file primary key (blob_data_id,declaration_template_id);
 alter table department_decl_type_performer add constraint pk_department_decl_type_perf primary key (department_decl_type_id, performer_dep_id);
-alter table configuration_scheduler add constraint conf_scheduler_pk primary key (id);
-alter table configuration_scheduler_param add constraint conf_scheduler_param_pk primary key (id);
 
 --unique
 alter table tax_period add constraint tax_period_uniq_taxtype_year unique (tax_type, year);
@@ -184,7 +182,6 @@ alter table declaration_template_file add constraint fk_decl_templ_file_template
 alter table declaration_template_file add constraint fk_decl_templ_file_blob foreign key (blob_data_id) references blob_data(id);
 alter table department_decl_type_performer add constraint fk_dept_decl_type_perf_perf foreign key (performer_dep_id) references department (id);
 alter table department_decl_type_performer add constraint fk_dept_decl_type_perf_id foreign key (department_decl_type_id) references department_declaration_type (id) on delete cascade; 
-alter table configuration_scheduler_param add constraint conf_scheduler_param_fk_conf foreign key (task_id) references configuration_scheduler(id) on delete cascade;
 
 --checks
 alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
@@ -267,8 +264,6 @@ alter table department_change add constraint dep_change_chk_sunr_use check (sunr
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars_type check (type in ('S','N','D','R'));
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars__attr_r  check ((type<>'R' and attribute_id is null) or (type='R' and attribute_id is not null));
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars_filter_r check ((type<>'R' and filter is null) or (type='R'));
-alter table configuration_scheduler add constraint conf_scheduler_chk_active check(active in (0, 1));
-alter table configuration_scheduler_param add constraint conf_scheduler_param_chk_type check(type in (1, 2, 3));
 
 --------------------------------------------------------------------------------------------------------------------------
 -- Справочники физических лиц и статусов налогоплательщиков

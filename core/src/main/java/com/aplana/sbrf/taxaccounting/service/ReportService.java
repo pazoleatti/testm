@@ -22,14 +22,6 @@ public interface ReportService {
     void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type);
 
     /**
-     * Создание записи об отчете журнала аудита
-     * @param userId ссылка на пользователя
-     * @param blobDataId ссылка на отчет
-     * @param type тип
-     */
-    void createAudit(Integer userId, String blobDataId, ReportType type);
-
-    /**
      * Получение записи об отчете декларации
      * @param userInfo
      * @param declarationDataId
@@ -37,14 +29,6 @@ public interface ReportService {
      * @return uuid
      */
     String getDec(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType type);
-
-    /**
-     * Получение записи об отчете журнала аудита
-     * @param userInfo
-     * @param type
-     * @return uuid
-     */
-    String getAudit(TAUserInfo userInfo, ReportType type);
 
     /**
      * Удаление всех отчетов по id декларации
@@ -61,15 +45,4 @@ public interface ReportService {
      * @param uuid
      */
     void deleteDec(String uuid);
-
-    /**
-     * @param declarationDataId
-     */
-    void deleteAudit(TAUserInfo userInfo, ReportType reportType);
-
-    /**
-     * Удаление всех отчетов по id blobdata
-     * @param declarationDataId
-     */
-    void deleteAudit(String blobDataId);
 }

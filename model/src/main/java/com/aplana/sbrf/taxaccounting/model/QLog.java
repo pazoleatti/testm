@@ -34,8 +34,6 @@ public class QLog extends com.querydsl.sql.RelationalPathBase<QLog> {
 
     public final com.querydsl.sql.ForeignKey<QSecUser> logUserFk = createForeignKey(userId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QLogSystem> _logSystemLogFk = createInvForeignKey(id, "LOG_ID");
-
     public final com.querydsl.sql.ForeignKey<QNotification> _notificationLogFk = createInvForeignKey(id, "LOG_ID");
 
     public final com.querydsl.sql.ForeignKey<QLogEntry> _logEntryLogFk = createInvForeignKey(id, "LOG_ID");

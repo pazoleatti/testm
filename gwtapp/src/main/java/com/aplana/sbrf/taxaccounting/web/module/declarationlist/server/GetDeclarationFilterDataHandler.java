@@ -47,7 +47,7 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		TAUserInfo currentUser = securityService.currentUserInfo();
 
         DeclarationDataFilterAvailableValues declarationFilterValues =
-                declarationDataSearchService.getFilterAvailableValues(currentUser, action.getTaxType());
+                declarationDataSearchService.getFilterAvailableValues(currentUser, action.getTaxType(), action.isReports());
 
         res.setDataKinds(getAvailableDeclarationFormKind(action.getTaxType(), action.isReports(), currentUser.getUser()));
 
@@ -67,17 +67,15 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
         dataFilter.setTaxType(action.getTaxType());
         res.setDefaultDecFilterData(dataFilter);
         res.setUserDepartmentId(currentUser.getUser().getDepartmentId());
-        res.setAsnuIds(currentUser.getUser().getAsnuIds());
-
-        List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
-        for(DeclarationType declarationType: declarationFilterValues.getDeclarationTypes()) {
-            if (!action.isReports() && (declarationType.getId() == 100 || declarationType.getId() == 101) ||
-                    action.isReports() && (declarationType.getId() == 102 || declarationType.getId() == 103 || declarationType.getId() == 104) ) {
-                declarationTypes.add(declarationType);
+        if (currentUser.getUser().hasRole(TARole.N_ROLE_OPER)) {
+            if (currentUser.getUser().getAsnuIds().isEmpty()) {
+                res.setAsnuIds(Arrays.asList(0L));
+            } else {
+                res.setAsnuIds(currentUser.getUser().getAsnuIds());
             }
+        } else {
+            res.setAsnuIds(currentUser.getUser().getAsnuIds());
         }
-        declarationFilterValues.setDeclarationTypes(declarationTypes);
-
 		return res;
 	}
 

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.server;
 
-import com.aplana.sbrf.taxaccounting.web.module.audit.server.AuditFormServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.server.CommonParameterServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.server.ConfigurationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.DeclarationDataServerModule;
@@ -10,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server.De
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentConfigServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server.DepartmentConfigPropertyServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.lock.server.LockServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.members.server.MembersServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
@@ -37,8 +35,8 @@ import org.springframework.context.annotation.Import;
 @Import(value = {MainHandlerModule.class, SigninControlServerModule.class, MainMenuServerModule.class,
         DeclarationTemplateServerModule.class, DeclarationDataServerModule.class,
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
-        HistoryServerModule.class, MembersServerModule.class,
-        ConfigurationServerModule.class, AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
+        HistoryServerModule.class,
+        ConfigurationServerModule.class, PeriodsServerModule.class, LogAreaModule.class,
         SourcesServerModule.class, DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,

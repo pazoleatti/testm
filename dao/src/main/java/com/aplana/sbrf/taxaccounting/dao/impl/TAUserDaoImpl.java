@@ -6,19 +6,12 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -82,7 +75,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     };
 
 	@Override
-	@Cacheable(value = "User", key = "#userId")
+	//@Cacheable(value = "User", key = "#userId")
 	public TAUser getUser(int userId) {
 		TAUser user;
 		try {
@@ -101,7 +94,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 	
 	@Override
-    @Cacheable(value = "User", key = "'login_'+#login")
+    //@Cacheable(value = "User", key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForObject("select id from sec_user where lower(login) = lower(?)", new Object[] {login.toLowerCase()}, Integer.class);
@@ -119,9 +112,18 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
         );
     }
 
-    private List<Long> getAsnuIds(int userId) {
+	private List<Long> getAllAsnuIds() {
+		return getJdbcTemplate().queryForList(
+				"select rba.id asnu_id from ref_book_asnu rba where id <> -1", Long.class);
+	}
+
+	private List<Long> getAsnuIds(int userId) {
         return getJdbcTemplate().query(
-                "select asnu_id from sec_user_asnu sua where sua.user_id = ?",
+                "select rba.id asnu_id \n" +
+						"from sec_role r \n" +
+						"join ref_book_asnu rba on rba.role_alias = r.id \n" +
+						"where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) \n" +
+						"order by rba.id",
                 new Object[] { userId },
                 new int[] { Types.NUMERIC },
                 new RowMapper<Long>() {
@@ -140,143 +142,14 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			}
 
 			user.setRoles(getRoles(user.getId()));
-            user.setAsnuIds(getAsnuIds(user.getId()));
+			if (user.hasRoles(TARole.N_ROLE_OPER_ALL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+				user.setAsnuIds(getAllAsnuIds());
+			} else {
+				user.setAsnuIds(getAsnuIds(user.getId()));
+			}
         }
 	}
 
-	@Override
-	public int createUser(final TAUser user) {
-		final KeyHolder keyHolder = new GeneratedKeyHolder();
-		try {
-			PreparedStatementCreator psc = new PreparedStatementCreator() {
-				
-				@Override
-				public PreparedStatement createPreparedStatement(Connection con)
-						throws SQLException {
-
-					//prepareStatement(sql, string_field) Only for ORACLE using
-					PreparedStatement ps = con
-							.prepareStatement(
-									"insert into sec_user (id, name, login, department_id, is_active, email) values (seq_sec_user.nextval,?,?,?,?,?)",
-									new String[]{"ID"});
-					ps.setString(1, user.getName());
-					ps.setString(2, user.getLogin());
-					ps.setInt(3, user.getDepartmentId());
-					ps.setBoolean(4, user.isActive());
-					ps.setString(5, user.getEmail());
-					return ps;
-				}
-			}; 
-			getJdbcTemplate().update(psc, keyHolder);
-
-            user.setId(keyHolder.getKey().intValue());
-			updateUserRoles(user);
-            updateUserAsnu(user);
-            return keyHolder.getKey().intValue();
-		} catch (DataAccessException e) {
-			throw new DaoException("Пользователя с login = " + user.getLogin() + " не удалось сохранить." + e.getLocalizedMessage());
-		}
-	}
-
-	@Override
-	@CacheEvict(value="User", key="#userId", beforeInvocation=true)
-	public void setUserIsActive(int userId, int isActive) {
-		int rows = getJdbcTemplate().update("update sec_user set is_active=? where id = ?", 
-				new Object[]{isActive, userId},
-				new int[]{Types.NUMERIC, Types.NUMERIC});
-		if(rows == 0)
-			throw new DaoException("Пользователя с id = " + userId + " не существует. Не удалось выставить флаг active.");
-	}
-
-	@Override
-	@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
-	public void updateUser(final TAUser user) {
-		try {
-			List<Object> array = new ArrayList<Object>();
-			StringBuilder sb = new StringBuilder("update sec_user set");
-			if(user.getDepartmentId() != 0){
-				sb.append(" department_id=?,");
-				array.add(user.getDepartmentId());
-			}	
-			if(user.getEmail() != null){
-				sb.append(" email=?,");
-				array.add(user.getEmail());
-			}	
-			if(user.getName() != null){
-				sb.append(" name=?,");
-				array.add(user.getName());
-			}
-			sb.deleteCharAt(sb.toString().trim().length() - 1); //delete separator
-			sb.append(" where lower(login) = ?");
-			array.add(user.getLogin().toLowerCase());
-			int rows = getJdbcTemplate().update(sb.toString(),	array.toArray());
-			if(rows == 0)
-				throw new DaoException("Пользователя с login = " + user.getLogin() + " не существует.");
-			LOG.debug("Update user meta info " + user);
-		} catch (DataAccessException e) {
-			throw new DaoException("Не удалось обновить метаинформацию о пользователе с login = " + user.getLogin() + "."
-            + e.getLocalizedMessage());
-		}
-       	updateUserRoles(user);
-        updateUserAsnu(user);
-	}
-	
-	private void updateUserRoles(final TAUser user) {
-		try {
-            getJdbcTemplate().update("delete from sec_user_role where user_id=" +
-                    "(select id from sec_user where lower(login)=?)",user.getLogin().toLowerCase());
-
-            if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-				getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
-								"select ?, id from sec_role where alias = ?",
-						new BatchPreparedStatementSetter() {
-
-							@Override
-							public void setValues(PreparedStatement ps, int i) throws SQLException {
-								TARole role = user.getRoles().get(i);
-								ps.setInt(1, user.getId());
-								ps.setString(2, role.getAlias());
-							}
-
-							@Override
-							public int getBatchSize() {
-								return user.getRoles().size();
-							}
-						});
-			}
-			LOG.debug("User update roles success " + user);
-		} catch (DataAccessException e) {
-			throw new DaoException("Не удалось обновить роли для пользователя с login = " + user.getLogin() + "." + e.getLocalizedMessage());
-		}
-	}
-
-	@Override
-    public void updateUserAsnu(final TAUser user) {
-        try {
-            getJdbcTemplate().update("delete from sec_user_asnu where user_id=?", user.getId());
-
-            if (user.getAsnuIds() != null && !user.getAsnuIds().isEmpty()) {
-                getJdbcTemplate().batchUpdate("insert into sec_user_asnu (user_id, asnu_id, id) values " +
-                                "(?, ?, seq_sec_user_asnu_id.nextval)",
-                        new BatchPreparedStatementSetter() {
-                            @Override
-                            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                                Long asnuId = user.getAsnuIds().get(i);
-                                ps.setInt(1, user.getId());
-                                ps.setLong(2, asnuId);
-                            }
-
-                            @Override
-                            public int getBatchSize() {
-                                return user.getAsnuIds().size();
-                            }
-                        });
-            }
-            LOG.debug("User update roles success " + user);
-        } catch (DataAccessException e) {
-            throw new DaoException("Не удалось обновить АСНУ для пользователя с login = " + user.getLogin() + "." + e.getLocalizedMessage(), e);
-        }
-    }
 	@Override
 	public List<Integer> getUserIds() {
 		try {
@@ -407,10 +280,11 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                     "group by cov_rls.user_id\n" +
                 "),\n" +
                 "cov_asnu as (\n" +
-                    "select ua.user_id user_id, rba.name\n" +
-                    "from sec_user_asnu ua\n" +
-                    "join ref_book_asnu rba on ua.asnu_id=rba.id \n" +
-                    "order by user_id\n" +
+					"select ur.user_id user_id, r.name \n" +
+					"from sec_role r \n" +
+					"join sec_user_role ur on ur.role_id = r.id \n" +
+					"join ref_book_asnu rba on rba.role_alias = r.id\n" +
+					"order by ur.user_id" +
                 "),\n" +
                 "arg_asnu as (\n" +
                     "select cov_asnu.user_id, listagg(cov_asnu.name, ', ') within group(order by cov_asnu.name) as asnu_concat\n" +

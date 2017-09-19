@@ -34,8 +34,6 @@ public class QEvent extends com.querydsl.sql.RelationalPathBase<QEvent> {
 
     public final com.querydsl.sql.ForeignKey<QRoleEvent> _roleEventFkEventId = createInvForeignKey(id, "EVENT_ID");
 
-    public final com.querydsl.sql.ForeignKey<QLogSystem> _logSystemFkEventId = createInvForeignKey(id, "EVENT_ID");
-
     public final com.querydsl.sql.ForeignKey<QTemplateChanges> _templateChangesFkEvent = createInvForeignKey(id, "EVENT");
 
     public QEvent(String variable) {

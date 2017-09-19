@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -486,7 +485,7 @@ public class RefBookHelperImpl implements RefBookHelper {
             }
         }
 
-        PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(rp.getCalendarStartDate(), null, filterSlave, sortAttr);
+        PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(null, null, filterSlave, sortAttr);
 
         Set<Map<String, RefBookValue>> toUpdate = new HashSet<Map<String, RefBookValue>>();
         Set<Map<String, RefBookValue>> toAdd = new HashSet<Map<String, RefBookValue>>();
@@ -553,8 +552,8 @@ public class RefBookHelperImpl implements RefBookHelper {
                 providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), recordsToAdd);
             }
 
-            for (Map<String, RefBookValue> up : toUpdate) {
-                providerSlave.updateRecordVersion(logger, up.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), rp.getCalendarStartDate(), recordVersion.getVersionEnd(), up);
+            if (!toUpdate.isEmpty()) {
+                providerSlave.updateRecordVersions(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), toUpdate);
             }
 
             if (!deleteIds.isEmpty()) {

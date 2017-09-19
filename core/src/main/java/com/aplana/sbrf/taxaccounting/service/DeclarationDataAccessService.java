@@ -31,10 +31,11 @@ public interface DeclarationDataAccessService {
 	 * @param userInfo - информация о пользователе
 	 * @param declarationTemplateId - id шаблона декларации
 	 * @param departmentReportPeriod Отчетный период подразделения
+	 * @param asnuId id АСНУ ТФ
 	 * @param scriptEvent - событие (действие)
      * @param logger логгер (может быть null, тогда будет выбрасываться исключение)
 	 */
-	void checkEvents(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod,
+	void checkEvents(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod, Long asnuId,
                      FormDataEvent scriptEvent, Logger logger);
 	
 	/**

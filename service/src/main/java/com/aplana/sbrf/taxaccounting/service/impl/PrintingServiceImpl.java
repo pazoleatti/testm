@@ -4,11 +4,9 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -21,34 +19,18 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemCsvBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemXlsxReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
-import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 @Service
 public class PrintingServiceImpl implements PrintingService {
@@ -91,52 +73,6 @@ public class PrintingServiceImpl implements PrintingService {
             cleanTmp(reportPath);
         }
 	}
-
-    @Override
-    public String generateExcelUsers(List<TAUserView> taUserViewList) {
-        String reportPath = null;
-        try {
-            TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserViewList);
-            reportPath = taBuilder.createReport();
-            return blobDataService.create(reportPath, "Список_пользователей.xlsx");
-        }catch (IOException e){
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при создании печатной формы." + TAUsersReportBuilder.class);
-        }finally {
-            cleanTmp(reportPath);
-        }
-    }
-
-    @Override
-    public String generateExcelLogSystem(List<LogSearchResultItem> resultItems) {
-        String reportPath = null;
-        try {
-            LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(resultItems);
-            reportPath = builder.createReport();
-            return blobDataService.create(reportPath, "Журнал_аудита.xlsx");
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при создании печатной формы." + LogSystemXlsxReportBuilder.class);
-        } finally {
-            cleanTmp(reportPath);
-        }
-    }
-
-    @Override
-    public String generateAuditZip(List<LogSearchResultItem> resultItems) {
-        String reportPath = null;
-        try {
-            LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
-            reportPath = logSystemCsvBuilder.createReport();
-            String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
-            return blobDataService.create(reportPath, fileName);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);
-        } finally {
-            cleanTmp(reportPath);
-        }
-    }
 
     private void cleanTmp(String filePath){
         if (filePath != null){
@@ -235,7 +171,7 @@ public class PrintingServiceImpl implements PrintingService {
             return blobDataService.create(reportPath, fileName);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при формировании отчета по справочнику." + LogSystemXlsxReportBuilder.class);
+            throw new ServiceException("Ошибка при формировании отчета по справочнику.");
         } finally {
             cleanTmp(reportPath);
         }
@@ -290,7 +226,7 @@ public class PrintingServiceImpl implements PrintingService {
             return blobDataService.create(reportPath, fileName);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new ServiceException("Ошибка при формировании отчета по справочнику." + LogSystemXlsxReportBuilder.class);
+            throw new ServiceException("Ошибка при формировании отчета по справочнику.");
         } finally {
             cleanTmp(reportPath);
         }

@@ -99,14 +99,17 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void lock(String key, int userId, String description, String state, String serverNode) {
         try {
-            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, description, state, state_date, server_node) VALUES (?, ?, ?, ?, sysdate, ?)",
+            Date lockDate = new Date();
+            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_lock, description, state, state_date, server_node) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     new Object[] {key,
                             userId,
+                            lockDate,
                             description,
                             state,
+                            lockDate,
                             serverNode
                     },
-                    new int[] {Types.VARCHAR, Types.NUMERIC, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR});
+                    new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP, Types.VARCHAR});
         } catch (DataAccessException e) {
             throw new LockException("Ошибка при создании блокировки (%s, %s). %s", key, userId, e.getMessage());
         }
@@ -228,16 +231,16 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     @Override
     public void updateState(String key, Date lockDate, String state, String serverNode) {
-        getJdbcTemplate().update("UPDATE lock_data SET state = ?, state_date = sysdate, server_node = ? WHERE KEY = ? AND date_lock = ?",
-                new Object[] {state, serverNode, key, lockDate},
-                new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
+        getJdbcTemplate().update("UPDATE lock_data SET state = ?, state_date = ?, server_node = ? WHERE KEY = ? AND date_lock = ?",
+                new Object[] {state, new Date(), serverNode, key, lockDate},
+                new int[] {Types.VARCHAR, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
     }
 
     @Override
     public void updateQueue(String key, Date lockDate, LockData.LockQueues queue) {
-        getJdbcTemplate().update("UPDATE lock_data SET queue = ?, state_date = sysdate WHERE key = ? AND date_lock = ?",
-                new Object[] {queue.getId(), key, lockDate},
-                new int[] {Types.INTEGER, Types.VARCHAR, Types.TIMESTAMP});
+        getJdbcTemplate().update("UPDATE lock_data SET queue = ?, state_date = ? WHERE key = ? AND date_lock = ?",
+                new Object[] {queue.getId(), new Date(), key, lockDate},
+                new int[] {Types.INTEGER, Types.TIMESTAMP, Types.VARCHAR, Types.TIMESTAMP});
     }
 
     @Override

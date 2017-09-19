@@ -63,9 +63,9 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
                     Date endDate = new Date();
                     Long divTime = endDate.getTime() - startDate.getTime();
                     String msg = String.format("Длительность выполнения операции: %d мс (%s - %s)",divTime,sdf_time.get().format(startDate), sdf_time.get().format(endDate));
-                    logger.info("Успешно удалён объект: %s, № %d.", declarationFullName, declarationId);
+                    logger.info("Успешно удалён объект: %s.", declarationFullName);
                     logger.info(msg);
-                    sendNotifications("Успешно удалён объект: " + declarationFullName + ", № " + declarationId, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
+                    sendNotifications("Успешно удалён объект: " + declarationFullName, logEntryService.save(logger.getEntries()), taUserInfo.getUser().getId(), NotificationType.DEFAULT, null);
                     logger.clear();
                 } catch (Exception e) {
                     logger.error("При удалении объекта: %s возникли ошибки:", declarationDataService.getDeclarationFullName(declarationId, DeclarationDataReportType.DELETE_DEC));

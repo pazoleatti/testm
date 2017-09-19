@@ -40,8 +40,6 @@ public final class LockData implements SecuredEntity {
         FORM_DATA_CREATE,      //Блокировка при создании вручную, через интерфейс
         DECLARATION_TEMPLATE,
         FORM_TEMPLATE,
-        LOG_SYSTEM_BACKUP,
-        LOG_SYSTEM_CSV,
         IFRS,
         FILE,
         CONFIGURATION_PARAMS,
@@ -54,12 +52,10 @@ public final class LockData implements SecuredEntity {
     public enum DescriptionTemplate {
         REF_BOOK("Редактирование справочника \"%s\""),
         FORM_DATA_TASK("%s: Период: \"%s%s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\""),
-        DECLARATION_TASK("%s: Период: \"%s%s\", Подразделение: \"%s\", Вид: \"%s\"%s%s%s"),
+        DECLARATION_TASK("%s: Период: \"%s%s\", Подразделение: \"%s\", Вид: \"%s\"%s%s%s%s"),
         FILE("Загрузка ТФ \"%s\""),
         DECLARATION_TEMPLATE("Редактирование версии макета налоговой формы \"%s\" (%s) за период с %s по %s"),
         FORM_TEMPLATE("Редактирование версии макета \"%s\" (%s) за период с %s по %s"),
-        LOG_SYSTEM_BACKUP("Архивация журнала аудита с %s по %s"),
-        LOG_SYSTEM_CSV("Формирование файла с данными журнала аудита по параметрам поиска \"%s\""),
         IFRS("Формирование отчетности МСФО за период \"%s %s\""),
         CONFIGURATION_PARAMS("Блокировка конфигурационных параметров при загрузке ТФ"),
         SCHEDULER_TASK("Выполнение задачи планировщика \"%s\""),

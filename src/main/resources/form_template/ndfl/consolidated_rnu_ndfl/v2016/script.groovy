@@ -294,7 +294,7 @@ void consolidation() {
     }
 
     logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
-
+    logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") +" (всего " + declarationDataIdList.size() + " форм)")
 }
 
 String getVal(Map<String, RefBookValue> refBookPersonRecord, String attrName) {
@@ -1219,13 +1219,7 @@ def createSpecificReport() {
  */
 def createSpecificReportPersonDb() {
     def row = scriptSpecificReportHolder.getSelectedRecord()
-    def ndflPerson = ndflPersonService.get(Long.parseLong(row.id))
-    def subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
-    subReportViewParams['Фамилия'] = row.lastName
-    subReportViewParams['Имя'] = row.firstName
-    subReportViewParams['Отчество'] = row.middleName
-    subReportViewParams['Дата рождения'] = row.birthDay ? row.birthDay?.format(DATE_FORMAT) : ""
-    subReportViewParams['№ ДУЛ'] = row.idDocNumber
+    def ndflPerson = ndflPersonService.get(scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
     if (ndflPerson != null) {
         def params = [NDFL_PERSON_ID: ndflPerson.id];
         def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, null);
@@ -1824,7 +1818,7 @@ RefBookDataProvider getProvider(def long providerId) {
 @Field final String T_PERSON_PREPAYMENT_NAME  = "Сведения о доходах в виде авансовых платежей"
 
 // Справочники
-@Field final String R_FIAS = "КЛАДР"
+@Field final String R_FIAS = "ФИАС"
 @Field final String R_PERSON = "Физические лица"
 @Field final String R_CITIZENSHIP = "ОК 025-2001 (Общероссийский классификатор стран мира)"
 @Field final String R_ID_DOC_TYPE = "Коды документов"
@@ -2510,12 +2504,12 @@ def checkDataReference(
 }
 
 void logFiasError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
-            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"КЛАДР\"")
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
+            "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") отсутствует в справочнике \"ФИАС\"")
 }
 
 void logFiasIndexError (fioAndInp, pathError, name, value) {
-    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "КЛАДР"), fioAndInp, pathError,
+    logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, "ФИАС"), fioAndInp, pathError,
             "Значение гр. \"" + name + "\" (\""+ (value?:"") + "\") не соответствует требуемому формату")
 }
 
@@ -2646,10 +2640,10 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
 
         ScriptUtils.checkInterrupted();
 
-        boolean applyTemporalySolution = false
-        if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
-            applyTemporalySolution = true
-        }
+        boolean applyTemporalySolution = true
+//        if (ndflPersonIncome.incomeAccruedSumm == ndflPersonIncome.totalDeductionsSumm) {
+//            applyTemporalySolution = true
+//        }
 
         NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
         String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
@@ -2953,26 +2947,15 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
         if (ndflPersonIncome.oktmo != null) {
             def kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
             if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-
-                if (kppList == null) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
-                            R_DETAIL,
-                            department ? department.name : ""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
-                            errMsg)
-                } else {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_KPP, ndflPersonIncome.kpp ?: "",
-                            R_DETAIL,
-                            department ? department.name : ""
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
-                            errMsg)
-                }
+                String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                        C_KPP, ndflPersonIncome.kpp ?: "",
+                        C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                        R_DETAIL,
+                        department ? department.name : ""
+                )
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
+                        errMsg)
             }
         }
     }
@@ -3128,7 +3111,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             new Column21EqualsColumn7LastDayOfMonth(), "Значение гр. \"%s\" (\"%s\") должно быть равно последнему календарному дню месяца выплаты дохода")
 
     // 10 "Графа 21" = "Графа 7" + "1 рабочий день"
-    dateConditionDataListForBudget << new DateConditionData(["2520", "2740", "2750", "2790", "4800"], ["13"],
+    dateConditionDataListForBudget << new DateConditionData(["2740", "2750", "2790", "4800"], ["13"],
             new Column21EqualsColumn7Plus1WorkingDay(), "Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день")
 
     // 12,13,14 "Графа 21" = "Графа 7" + "1 рабочий день"
@@ -3170,7 +3153,8 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
             }
 
             // СведДох2 Сумма вычета (Графа 12)
-            if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0) {
+            if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0
+                    && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {
                 BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
                 if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
                     // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
@@ -3620,7 +3604,7 @@ def checkDataIncome(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                         }
                     }
                 }
-                if (["2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
+                if (["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14") {
                     // 11 подпункт "Графа 21" = "Графа 7" + "1 рабочий день"
                     /*
                         Найти следующую за текущей строкой, удовлетворяющую условиям:

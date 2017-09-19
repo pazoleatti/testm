@@ -27,10 +27,15 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
     private static final Log LOG = LogFactory.getLog(BasePermissionEvaluator.class);
 
-    @Autowired
-    private PermissionDaoFactory permissionDaoFactory;
+    private final PermissionDaoFactory permissionDaoFactory;
 
     private Map<Class<?>, PermissionFactory<?>> permissionFactoryRegistry;
+
+    @Autowired
+    public BasePermissionEvaluator(PermissionDaoFactory permissionDaoFactory) {
+        this.permissionDaoFactory = permissionDaoFactory;
+    }
+
     /**
      * Устанавливает используемый регистр {@link PermissionFactory}.
      */

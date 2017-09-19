@@ -27,9 +27,7 @@ public class LogDaoImpl extends AbstractDao implements LogDao {
     public int clean() {
         try {
             return getJdbcTemplate().update("delete from LOG where id not in " +
-                    "(select distinct LOG_ID from " +
-                    "(select LOG_ID from NOTIFICATION " +
-                    "union select LOG_ID from LOG_SYSTEM) where LOG_ID is not null) " +
+                    "(select LOG_ID from NOTIFICATION) " +
                     "and (systimestamp - LOG.creation_date) > numtodsinterval(24, 'hour')");
         } catch (DataAccessException e){
             throw new DaoException(String.format("Ошибка при удалении устаревших записей таблицы LOG. %s.", e.getMessage()));

@@ -23,5 +23,13 @@ public interface ImportFiasDataService {
      */
     void clearAll();
 
+    /**
+     * Удаляет индексы из таблицы FIAS_ADDROBJ для ускорения импорта
+     */
+    void dropIndexes();
 
+    /**
+     * Восстанавливает индексы из таблицы FIAS_ADDROBJ для ускорения импорта
+     */
+    void createIndexes();
 }

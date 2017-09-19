@@ -85,25 +85,6 @@ public class BlobDataController {
     }
 
     /**
-     * Получает отчет по ЖА
-     *
-     * @param uuid     идентификатор
-     * @param request  запрос
-     * @param response ответ
-     * @throws IOException IOException
-     */
-    @GetMapping(value = "/rest/blobData/{uuid}/processLogDownload")
-    public void processLogDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        BlobData blobData = blobDataService.get(uuid);
-        reportService.deleteAudit(uuid);
-        if (blobData != null) {
-            ResponseUtils.createBlobResponse(request, response, blobData);
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
-    }
-
-    /**
      * Загрузка файла
      *
      * @param file файл

@@ -44,10 +44,6 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
 
     public final com.querydsl.sql.ForeignKey<QDeclarationData> _declDataFkDepRepPerId = createInvForeignKey(id, "DEPARTMENT_REPORT_PERIOD_ID");
 
-    public final com.querydsl.sql.ForeignKey<QFormData> _formDataFkDepRepPerId = createInvForeignKey(id, "DEPARTMENT_REPORT_PERIOD_ID");
-
-    public final com.querydsl.sql.ForeignKey<QFormData> _formDataFkCoDepRepPerId = createInvForeignKey(id, "COMPARATIVE_DEP_REP_PER_ID");
-
     public QDepartmentReportPeriod(String variable) {
         super(QDepartmentReportPeriod.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_REPORT_PERIOD");
         addMetadata();
@@ -69,12 +65,12 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
     }
 
     public void addMetadata() {
-        addMetadata(correctionDate, ColumnMetadata.named("CORRECTION_DATE").withIndex(5).ofType(Types.TIMESTAMP).withSize(7));
-        addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(id, ColumnMetadata.named("ID").withIndex(6).ofType(Types.DECIMAL).withSize(18).notNull());
-        addMetadata(isActive, ColumnMetadata.named("IS_ACTIVE").withIndex(3).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(isBalancePeriod, ColumnMetadata.named("IS_BALANCE_PERIOD").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(reportPeriodId, ColumnMetadata.named("REPORT_PERIOD_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(correctionDate, ColumnMetadata.named("CORRECTION_DATE").withIndex(6).ofType(Types.TIMESTAMP).withSize(7));
+        addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
+        addMetadata(isActive, ColumnMetadata.named("IS_ACTIVE").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(isBalancePeriod, ColumnMetadata.named("IS_BALANCE_PERIOD").withIndex(5).ofType(Types.DECIMAL).withSize(1).notNull());
+        addMetadata(reportPeriodId, ColumnMetadata.named("REPORT_PERIOD_ID").withIndex(3).ofType(Types.DECIMAL).withSize(9).notNull());
     }
 
 }
