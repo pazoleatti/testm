@@ -11,6 +11,10 @@ begin
 		EXECUTE IMMEDIATE 'alter table async_task_type rename column handler_jndi to handler_bean';
 		EXECUTE IMMEDIATE 'comment on column async_task_type.handler_bean is ''Имя spring бина-обработчика задачи''';
 	END IF; 
-
+	
+	EXECUTE IMMEDIATE 'alter table configuration add value2 varchar2(2048 char) null';
+	EXECUTE IMMEDIATE 'update configuration set value2=value';
+	EXECUTE IMMEDIATE 'alter table configuration drop column value';
+	EXECUTE IMMEDIATE 'alter table configuration rename column value2 to value';
 end;
 /
