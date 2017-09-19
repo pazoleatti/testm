@@ -50,8 +50,6 @@ public class QMvFiasLocalityAct extends com.querydsl.sql.RelationalPathBase<QMvF
 
     public final StringPath shortname = createString("shortname");
 
-    public final com.querydsl.sql.PrimaryKey<QMvFiasLocalityAct> mvFiasLocalityActPk = createPrimaryKey(id);
-
     public QMvFiasLocalityAct(String variable) {
         super(QMvFiasLocalityAct.class, forVariable(variable), "NDFL_UNSTABLE", "MV_FIAS_LOCALITY_ACT");
         addMetadata();
