@@ -24,7 +24,19 @@ import java.util.Map;
  * @author dsultanbekov
  */
 public interface DeclarationDataService {
-    /**
+	/**
+	 * Создание декларации в заданном отчетном периоде подразделения
+     *
+	 * @param userInfo          Информация о текущем пользователе
+	 * @param logger            Логгер
+	 * @param declarationTypeId ID вида налоговой формы
+	 * @param departmentId      ID подразделения
+	 * @param periodId          ID отчетного периода
+	 * @return ID налоговой формы
+	 */
+	Long create(TAUserInfo userInfo, Logger logger, Long declarationTypeId, Integer departmentId, Integer periodId);
+
+	/**
      * Создание декларации в заданном отчетном периоде подразделения
      * @param logger - объект журнала
      * @param declarationTemplateId идентификатор шаблона декларации

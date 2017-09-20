@@ -18,7 +18,12 @@
                 VIEW_ADMINISTRATION_CONFIG: 1 << 6,
                 VIEW_ADMINISTRATION_SETTINGS: 1 << 7,
                 VIEW_MANUAL_USER: 1 << 8,
-                VIEW_MANUAL_DESIGNER: 1 << 9
+                VIEW_MANUAL_DESIGNER: 1 << 9,
+                VIEW_JOURNAL: 1 << 10,
+                CREATE_DECLARATION_REPORT: 1 << 11,
+                CREATE_DECLARATION_PRIMARY: 1 << 12,
+                CREATE_DECLARATION_CONSOLIDATED: 1 << 13,
+                CREATE_UPLOAD_REPORT: 1 << 14
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

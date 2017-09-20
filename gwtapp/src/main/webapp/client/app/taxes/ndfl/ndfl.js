@@ -20,7 +20,7 @@
             'app.rnuNdflPersonFace'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
-                url: '/taxes/ndfl/{declarationDataId}',
+                url: '/taxes/ndfl/{declarationDataId}?uuid',
                 templateUrl: 'client/app/taxes/ndfl/ndfl.html',
                 controller: 'ndflCtrl'
             });
@@ -34,6 +34,10 @@
             'RefBookValuesResource', 'APP_CONSTANTS', '$state',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appModals, $rootScope,
                       RefBookValuesResource, APP_CONSTANTS, $state) {
+
+                if ($stateParams.uuid) {
+                    $logPanel.open('log-panel-container', $stateParams.uuid);
+                }
 
                 /**
                  * @description Инициализация первичных данных на странице

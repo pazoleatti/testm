@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
@@ -205,8 +206,49 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    /**
+     * Создание декларации в заданном отчетном периоде подразделения
+     *
+     * @param userInfo          Информация о текущем пользователе
+     * @param logger            Логгер
+     * @param declarationTypeId ID вида налоговой формы
+     * @param departmentId      ID подразделения
+     * @param periodId          ID отчетного периода
+     * @return ID налоговой формы
+     */
     @Override
-    @Transactional(readOnly = false)
+    //TODO:https://jira.aplana.com/browse/SBRFNDFL-2071
+    public Long create(TAUserInfo userInfo, Logger logger, Long declarationTypeId, Integer departmentId, Integer periodId) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, periodId);
+        if (departmentReportPeriod != null) {
+            int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId.intValue(), periodId);
+            Long declarationId = null;
+            try {
+                declarationId = create(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, null, null, null, true);
+            } catch (DaoException e) {
+                DeclarationTemplate dt = declarationTemplateService.get(activeTemplateId);
+                if (dt.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()) {
+                    Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                    String strCorrPeriod = "";
+                    if (departmentReportPeriod.getCorrectionDate() != null) {
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+                        strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
+                    }
+                    logger.error("Консолидированная налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\" уже существует",
+                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                            department.getName());
+                } else {
+                    throw new ServiceException(e.getMessage());
+                }
+            }
+            return declarationId;
+        } else {
+            throw new ServiceException("Не удалось определить налоговый период.");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                        DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode + "_" + fileName;
@@ -829,7 +871,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
                 declarationDataDao.delete(id);
 
-                auditService.add(FormDataEvent.DELETE , userInfo, declarationData, "Налоговая форма удалена", null);
+                auditService.add(FormDataEvent.DELETE, userInfo, declarationData, "Налоговая форма удалена", null);
             } finally {
                 if (createLock) {
                     lockDataService.unlock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId());
@@ -2103,7 +2145,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
                 logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, null);
                 String note = "Загрузка данных из файла \"" + fileName + "\" в налоговую форму";
-                auditService.add(formDataEvent, userInfo, declarationData,  note, null);
+                auditService.add(formDataEvent, userInfo, declarationData, note, null);
             } finally {
                 IOUtils.closeQuietly(dataFileInputStream);
             }

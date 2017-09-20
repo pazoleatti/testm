@@ -72,13 +72,18 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> CREATE_DECLARATION_REPORT = new CreateDeclarationReportPermission(1 << 11);
     /**
-     * Право на создание декларации вручную (журнал = налоговые формы)
+     * Право на создание первичной формы вручную (журнал = налоговые формы)
      */
-    public static final Permission<TAUser> CREATE_DECLARATION_TAX = new CreateDeclarationTaxPermission(1 << 12);
+    public static final Permission<TAUser> CREATE_DECLARATION_PRIMARY = new CreatePrimaryDeclarationPermission(1 << 12);
+
+    /**
+     * Право на создание консолидированный формы вручную (журнал = налоговые формы)
+     */
+    public static final Permission<TAUser> CREATE_DECLARATION_CONSOLIDATED = new CreateConsolidatedDeclarationPermission(1 << 13);
     /**
      * Право на создание и выгрузку отчетности
      */
-    public static final Permission<TAUser> CREATE_UPLOAD_REPORT = new CreateAndUploadReportPermission(1 << 13);
+    public static final Permission<TAUser> CREATE_UPLOAD_REPORT = new CreateAndUploadReportPermission(1 << 14);
 
 
     public UserPermission(long mask) {
@@ -364,11 +369,32 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
     }
 
     /**
-     * Право на создание декларации вручную (журнал = налоговые формы)
+     * Право на создание консолидированной формы вручную (журнал = налоговые формы)
      */
-    public static final class CreateDeclarationTaxPermission extends UserPermission {
+    public static final class CreateConsolidatedDeclarationPermission extends UserPermission {
 
-        public CreateDeclarationTaxPermission(long mask) {
+        public CreateConsolidatedDeclarationPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
+                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS) || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * Право на создание первичной формы вручную (журнал = налоговые формы)
+     */
+    public static final class CreatePrimaryDeclarationPermission extends UserPermission {
+
+        public CreatePrimaryDeclarationPermission(long mask) {
             super(mask);
         }
 

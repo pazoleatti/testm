@@ -283,7 +283,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         // id в REF_BOOK_ASNU - тип int, а AsnuId в фильтре - тип long
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
-            where.and(refBookAsnu.id.in(toIntegerList(filter.getAsnuIds())));
+            where.and(refBookAsnu.id.isNull().or(refBookAsnu.id.in(toIntegerList(filter.getAsnuIds()))));
         } else {
             where.and(refBookAsnu.id.in(Collections.EMPTY_LIST));
         }

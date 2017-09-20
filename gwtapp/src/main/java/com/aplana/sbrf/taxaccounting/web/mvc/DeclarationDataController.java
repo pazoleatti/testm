@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
@@ -56,10 +57,12 @@ public class DeclarationDataController {
     private TAUserService taUserService;
     private AsyncTaskManagerService asyncTaskManagerService;
     private DeclarationDataService declarationDataService;
+    private LogEntryService logEntryService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService, DeclarationDataService declarationDataService) {
+                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService, DeclarationDataService declarationDataService,
+                                     LogEntryService LogEntryService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -69,6 +72,7 @@ public class DeclarationDataController {
         this.taUserService = taUserService;
         this.asyncTaskManagerService = asyncTaskManagerService;
         this.declarationDataService = declarationDataService;
+        this.logEntryService = LogEntryService;
     }
 
     /**
@@ -216,6 +220,29 @@ public class DeclarationDataController {
         if (declarationService.existDeclarationData(declarationDataId)) {
             declarationService.delete(declarationDataId, securityService.currentUserInfo());
         }
+    }
+
+
+    /**
+     * Создание налоговой формы
+     *
+     * @param declarationTypeId ID вида налоговой формы
+     * @param departmentId      ID подразделения
+     * @param periodId          ID периода
+     * @return Результат создания
+     */
+    @PostMapping(value = "/actions/declarationData/create")
+    public CreateDeclarationResult createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
+        Logger logger = new Logger();
+        CreateDeclarationResult result = new CreateDeclarationResult();
+
+        Long declarationId = declarationDataService.create(securityService.currentUserInfo(), logger, declarationTypeId, departmentId, periodId);
+        result.setDeclarationId(declarationId);
+        if (!logger.getEntries().isEmpty()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+
+        return result;
     }
 
     /**

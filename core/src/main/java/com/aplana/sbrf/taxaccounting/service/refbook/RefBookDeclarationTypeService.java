@@ -14,4 +14,14 @@ public interface RefBookDeclarationTypeService {
      * @return Список значений справочника
      */
     List<RefBookDeclarationType> fetchAllDeclarationTypes();
+
+    /**
+     * Получение значений справочника для создания налоговой формы
+     *
+     * @param declarationKind     Вид налоговой формы
+     * @param departmentId Подразделение
+     * @param periodId ID отчетного периода
+     * @return Список значений справочника
+     */
+    List<RefBookDeclarationType> fetchDeclarationTypesForCreate(Long declarationKind, Integer departmentId, Integer periodId);
 }
