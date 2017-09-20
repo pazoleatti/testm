@@ -16,5 +16,8 @@ begin
 	EXECUTE IMMEDIATE 'update configuration set value2=value';
 	EXECUTE IMMEDIATE 'alter table configuration drop column value';
 	EXECUTE IMMEDIATE 'alter table configuration rename column value2 to value';
+	
+	EXECUTE IMMEDIATE 'alter table declaration_type modify id number(18,0)';
+	EXECUTE IMMEDIATE 'alter table ref_book_asnu modify id number(18,0)';
 end;
 /
