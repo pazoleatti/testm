@@ -94,7 +94,6 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
             for (DepartmentReportPeriod currDepDrp : currDepDrpList) {
                 if (currDepDrp.getReportPeriod().getId().equals(drp.getReportPeriod().getId())
                         && currDepDrp.isActive() == drp.isActive()
-                        && currDepDrp.isBalance() == drp.isBalance()
                         && ((currDepDrp.getCorrectionDate() == null && drp.getCorrectionDate() == null) || (currDepDrp.getCorrectionDate() != null && currDepDrp.getCorrectionDate().equals(drp.getCorrectionDate())))) {
                     drpForSave.remove(drp);
                     continue outer;
