@@ -78,10 +78,6 @@
             <artifactId>spring-security-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
@@ -174,16 +170,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-        </dependency>
-
-        <!-- Logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
         </dependency>
 
         <!-- Tester component -->
@@ -384,6 +370,16 @@
                 </plugins>
             </build>
             <dependencies>
+                <!-- Logging -->
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </dependency>
+
                 <dependency>
                     <groupId>com.oracle</groupId>
                     <artifactId>ojdbc6</artifactId>
@@ -415,6 +411,17 @@
                 <dependency>
                     <groupId>javax</groupId>
                     <artifactId>javaee-api</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <!-- Logging - отключено на вебсфере, иначе проблемы с кодировкой -->
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
                     <scope>provided</scope>
                 </dependency>
             </dependencies>

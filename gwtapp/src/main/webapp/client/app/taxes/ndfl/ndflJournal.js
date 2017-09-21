@@ -4,13 +4,40 @@
     /**
      * @description Модуль для работы со формами ндфл
      */
-    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.modals', 'app.rest'])
+    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.modals', 'app.rest', 'app.createDeclaration', 'app.logPanel'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflJournal', {
                 url: '/taxes/ndflJournal',
                 templateUrl: 'client/app/taxes/ndfl/ndflJournal.html',
                 controller: 'ndflJournalCtrl',
-                resolve: {}
+                resolve: {
+                    periods: function (APP_CONSTANTS, RefBookValuesResource) {
+                        return RefBookValuesResource.query({
+                            refBookId: APP_CONSTANTS.REFBOOK.PERIOD,
+                            projection: "allPeriods"
+                        }, function (data) {
+                            return data;
+                        }).$promise;
+                    },
+                    openPeriods: function (APP_CONSTANTS, RefBookValuesResource) {
+                        return RefBookValuesResource.query({
+                            refBookId: APP_CONSTANTS.REFBOOK.PERIOD,
+                            projection: "openPeriods"
+                        }, function (data) {
+                            return data;
+                        }).$promise;
+                    },
+                    declarationTypes: function (APP_CONSTANTS, RefBookValuesResource) {
+                        return RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
+                            return data;
+                        }).$promise;
+                    },
+                    asnu: function (APP_CONSTANTS, RefBookValuesResource) {
+                        return RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
+                            return data;
+                        }).$promise;
+                    }
+                }
             });
         }])
 
@@ -18,11 +45,15 @@
          * @description Контроллер списка форм
          */
         .controller('ndflJournalCtrl', [
-            '$scope', '$state', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', 'appModals', 'RefBookValuesResource',
-            function ($scope, $state, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, appModals, RefBookValuesResource) {
+            '$scope', '$state', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', 'appModals', 'periods', 'openPeriods', 'declarationTypes',
+            'asnu', '$logPanel', 'PermissionChecker',
+            function ($scope, $state, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, appModals, periods, openPeriods, declarationTypes,
+                      asnu, $logPanel, PermissionChecker) {
                 $scope.security = {
                     user: $rootScope.user
                 };
+
+                $scope.declarationCreateAllowed = PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
 
                 /**
                  * @description форматтер для поля 'Вид налоговой формы' для перехода на конкретную НФ
@@ -116,7 +147,15 @@
 
                 $scope.searchFilter.resetFilterParams = function () {
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
-                }
+                };
+
+                $scope.$watch('searchFilter.params.periods', function (periods) {
+                    if (periods.length > 0) {
+                        $scope.latestSelectedPeriod = periods[periods.length - 1];
+                    } else {
+                        $scope.latestSelectedPeriod = null;
+                    }
+                });
 
                 $scope.correctionTagSelect = {
                     options: {
@@ -132,7 +171,7 @@
                 $scope.periodSelect = {
                     options: {
                         data: {
-                            results: [],
+                            results: periods,
                             text: $filter('periodFormatter')
                         },
                         formatSelection: $filter('periodFormatter'),
@@ -142,18 +181,15 @@
                         placeholder: $filter('translate')('filter.placeholder.select')
                     }
                 };
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.PERIOD}, function (data) {
-                    $scope.periodSelect.options.data.results = data;
-                });
 
                 $scope.departmentsSelect = {
                     options: {
                         ajax: {
-                            url: "controller/rest/refBookValues/30",
+                            url: "controller/rest/refBookValues/30?projection=allDepartments",
                             quietMillis: 200,
                             data: function (term, page) {
                                 return {
-                                    filter: JSON.stringify({name: term}),
+                                    name: term,
                                     pagingParams: JSON.stringify({count: 50, page: page})
                                 };
                             },
@@ -187,7 +223,7 @@
                 $scope.declarationTypeSelect = {
                     options: {
                         data: {
-                            results: [],
+                            results: declarationTypes,
                             text: $filter('nameFormatter')
                         },
                         formatSelection: $filter('nameFormatter'),
@@ -197,14 +233,11 @@
                         placeholder: $filter('translate')('filter.placeholder.select')
                     }
                 };
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                    $scope.declarationTypeSelect.options.data.results = data;
-                });
 
                 $scope.asnuSelect = {
                     options: {
                         data: {
-                            results: [],
+                            results: asnu,
                             text: $filter('nameFormatter')
                         },
                         formatSelection: $filter('nameFormatter'),
@@ -214,9 +247,6 @@
                         placeholder: $filter('translate')('filter.placeholder.select')
                     }
                 };
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
-                    $scope.asnuSelect.options.data.results = data;
-                });
 
                 $scope.stateSelect = {
                     options: {
@@ -308,6 +338,28 @@
                         onSelectAll: function () {
                             $scope.selectedItems = ctrl.getAllSelectedRows();
                             $scope.$apply();
+                        }
+                    });
+                };
+
+                /**
+                 * Показ МО "Создание налоговой формы"
+                 */
+                $scope.showCreateDeclarationModal = function () {
+                    var modal = appModals.create('client/app/taxes/ndfl/createDeclaration.html', 'createDeclarationFormCtrl', {
+                        periods: openPeriods,
+                        latestSelectedPeriod: $scope.latestSelectedPeriod
+                    }, {size: 'md'});
+                    modal.result.then(function (response) {
+                        if (response.data && response.data.declarationId && response.data.declarationId !== null) {
+                            $state.go('ndfl', {
+                                declarationDataId: response.data.declarationId,
+                                uuid: response.data.uuid
+                            });
+                        } else {
+                            if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
                         }
                     });
                 };

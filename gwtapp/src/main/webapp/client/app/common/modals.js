@@ -45,7 +45,7 @@
                         };
 
                         opts = _setOpts(opts);
-                        return dialogs.create('client/lib/templates/confirmDialog.html', 'confirmCtrl', data, opts)
+                        return dialogs.create('client/lib/templates/confirmDialog.html', 'confirmCtrl', data, opts);
                     },
                     /**
                      * Создает произвольное модальное окно
@@ -61,10 +61,10 @@
                         } else {
                             opts = {
                                 size: "lg"
-                            }
+                            };
                         }
                         opts = _setOpts(opts);
-                        return dialogs.create(url, ctrlr, data, opts)
+                        return dialogs.create(url, ctrlr, data, opts);
                     },
                     /**
                      * Модальное окно-уведомление. Сообщает пользователю информацию.
@@ -75,7 +75,18 @@
                      */
                     message: function (header, msg, opts) {
                         opts = _setOpts(opts);
-                        return dialogs.message(header, msg, opts)
+                        return dialogs.message(header, msg, opts);
+                    },
+                    /**
+                     * Сообщение об ошибке
+                     *
+                     * @param header строка, заголовок
+                     * @param msg строка, текст сообщения
+                     * @param opts объект, параметры диалогового окна
+                     */
+                    error: function (header, msg, opts) {
+                        opts = _setOpts(opts);
+                        return dialogs.error(header, msg, opts);
                     },
                     /**
                      * Диалог для ввода строки
@@ -91,15 +102,15 @@
                         var data = {
                             header: angular.copy(header),
                             msg: angular.copy(msg),
-                            labelYes : opts && opts.labelYes ? opts.labelYes : $translate.instant('DIALOGS_CONTINUE'),
+                            labelYes: opts && opts.labelYes ? opts.labelYes : $translate.instant('DIALOGS_CONTINUE'),
                             labelNo: opts && opts.labelNo ? opts.labelNo : $translate.instant('DIALOGS_CANCEL')
                         };
 
                         opts = _setOpts(opts);
-                        return dialogs.create('client/app/common/templateModal/input-message.html', 'inputMessageCtrl', data, opts)
+                        return dialogs.create('client/app/common/templateModal/input-message.html', 'inputMessageCtrl', data, opts);
                     }
-                }
-            }
+                };
+            };
         }])
         .controller('confirmCtrl', ['$scope', '$uibModalInstance', '$translate', 'data',
             function ($scope, $uibModalInstance, $translate, data) {
@@ -125,16 +136,16 @@
                 $scope.labelNo = data.labelNo;
                 $scope.inputMessage = '';
                 $scope.save = function () {
-                    $uibModalInstance.close($scope.inputMessage)
+                    $uibModalInstance.close($scope.inputMessage);
                 };
                 $scope.cancel = function () {
-                    $uibModalInstance.dismiss('Canceled')
+                    $uibModalInstance.dismiss('Canceled');
                 };
                 $scope.hitEnter = function (evt) {
-                    if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.inputMessage, null) || angular.equals($scope.inputMessage, '')))
-
+                    if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.inputMessage, null) || angular.equals($scope.inputMessage, ''))) {
                         $scope.save();
-                }
+                    }
+                };
             }])
         // Add default templates via $templateCache
         .run(['$templateCache', '$interpolate', function ($templateCache, $interpolate) {
