@@ -24,7 +24,7 @@ public class QDepartmentDeclarationType extends com.querydsl.sql.RelationalPathB
 
     public static final QDepartmentDeclarationType departmentDeclarationType = new QDepartmentDeclarationType("DEPARTMENT_DECLARATION_TYPE");
 
-    public final NumberPath<Integer> declarationTypeId = createNumber("declarationTypeId", Integer.class);
+    public final NumberPath<Long> declarationTypeId = createNumber("declarationTypeId", Long.class);
 
     public final NumberPath<Integer> departmentId = createNumber("departmentId", Integer.class);
 
@@ -61,7 +61,7 @@ public class QDepartmentDeclarationType extends com.querydsl.sql.RelationalPathB
     }
 
     public void addMetadata() {
-        addMetadata(declarationTypeId, ColumnMetadata.named("DECLARATION_TYPE_ID").withIndex(3).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(declarationTypeId, ColumnMetadata.named("DECLARATION_TYPE_ID").withIndex(3).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());
     }

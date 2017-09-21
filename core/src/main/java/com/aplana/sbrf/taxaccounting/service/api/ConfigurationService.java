@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.api;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
@@ -90,6 +87,14 @@ public interface ConfigurationService {
      * @return
      */
     List<SchedulerTaskData> getAllSchedulerTask();
+
+
+    /**
+     * Получение параметров всех задач планировщика
+     * @param pagingParams параметры пагиинации
+     * @return Список задач {@link SchedulerTaskData}
+     */
+    PagingResult<SchedulerTaskData> getAllSchedulerTaskWithPaging(PagingParams pagingParams);
 
     /**
      * Изменение признака активности задач

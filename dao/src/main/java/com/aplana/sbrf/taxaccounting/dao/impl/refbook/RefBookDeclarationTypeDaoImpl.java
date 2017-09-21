@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.QBean;
@@ -65,8 +64,7 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
         subqueryWhere.and(declarationTemplate.formKind.eq(declarationKind));
         subqueryWhere.andNot(SQLExpressions.date(declarationTemplate.version).after(LocalDateTime.fromCalendarFields(DateUtils.toCalendar(periodStartDate))));
 
-        SQLQuery<Integer> declarationTypesWithTemplates = sqlQueryFactory
-                .select(declarationTemplate.declarationTypeId)
+        SQLQuery<Long> declarationTypesWithTemplates = sqlQueryFactory.select(declarationTemplate.declarationTypeId)
                 .distinct()
                 .from(declarationTemplate)
                 .where(subqueryWhere);
@@ -76,13 +74,11 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
         where.and(declarationType.id.in(declarationTypesWithTemplates));
         where.and(departmentDeclarationType.departmentId.eq(departmentId));
 
-        List<RefBookDeclarationType> declarationTypes = sqlQueryFactory
+        return sqlQueryFactory
                 .select(refBookDeclarationTypeBean)
                 .from(declarationType)
                 .join(departmentDeclarationType).on(declarationType.id.eq(departmentDeclarationType.declarationTypeId))
                 .where(where)
                 .fetch();
-
-        return declarationTypes;
     }
 }
