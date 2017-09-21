@@ -169,6 +169,7 @@
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {
                             $logPanel.open('log-panel-container', response.data.uuid);
+                            initPage();
                         } else {
                             if (response.data.status === "LOCKED" && !force) {
                                 appModals.confirm($filter('translate')('title.confirm'), response.data.restartMsg)
