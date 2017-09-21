@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.paging;
 import java.util.Collection;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import org.springframework.data.domain.Pageable;
 
 public class JqgridPagedResourceAssembler {
 
