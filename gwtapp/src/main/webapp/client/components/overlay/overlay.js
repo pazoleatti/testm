@@ -96,6 +96,12 @@
                                 messageType = addMessage.messageType;
                                 //noinspection JSUnresolvedVariable
                                 message = $filter('translate')(addMessage.messageCode);
+                                if (messageType == 'MULTI_ERROR'){
+                                    //Отображаем список ошибок
+                                    $injector.invoke(['$logPanel', function ($logPanel) {
+                                        $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);
+                                    }]);
+                                }
                             }
 
                             var handled = false;
