@@ -89,12 +89,6 @@ public interface ConfigurationService {
     List<SchedulerTaskData> getAllSchedulerTask();
 
 
-    /**
-     * Получение параметров всех задач планировщика
-     * @param pagingParams параметры пагиинации
-     * @return Список задач {@link SchedulerTaskData}
-     */
-    PagingResult<SchedulerTaskData> getAllSchedulerTaskWithPaging(PagingParams pagingParams);
 
     /**
      * Изменение признака активности задач
