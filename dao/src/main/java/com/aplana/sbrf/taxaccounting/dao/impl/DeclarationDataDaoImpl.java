@@ -262,20 +262,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return new PagingResult<DeclarationDataSearchResultItem>(records, getCount(declarationFilter));
     }
 
-    /**
-     * Преобразует список long в список int
-     *
-     * @param longList
-     * @return
-     */
-    private List<Integer> toIntegerList(List<Long> longList) {
-        List<Integer> intList = new LinkedList<Integer>();
-        for (long elem : longList) {
-            intList.add((int) elem);
-        }
-        return intList;
-    }
-
     @Override
     public List<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams params) {
 
@@ -283,7 +269,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         // id в REF_BOOK_ASNU - тип int, а AsnuId в фильтре - тип long
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
-            where.and(refBookAsnu.id.in(toIntegerList(filter.getAsnuIds())));
+            where.and(refBookAsnu.id.in(filter.getAsnuIds()));
         } else {
             where.and(refBookAsnu.id.in(Collections.EMPTY_LIST));
         }
@@ -303,7 +289,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         if (filter.getDeclarationTypeIds() != null && !filter.getDeclarationTypeIds().isEmpty()) {
-            where.and(declarationType.id.in(toIntegerList(filter.getDeclarationTypeIds())));
+            where.and(declarationType.id.in(filter.getDeclarationTypeIds()));
         }
 
         if (filter.getFormState() != null) {

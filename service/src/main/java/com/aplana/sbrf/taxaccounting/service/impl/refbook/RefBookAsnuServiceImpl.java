@@ -34,11 +34,7 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
         if (userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
             return refBookAsnuDao.fetchAll();
         } else {
-            List<Integer> asnuIds = new LinkedList<Integer>();
-            for (long asnuId : userInfo.getUser().getAsnuIds()) {
-                asnuIds.add((int) asnuId);
-            }
-            return refBookAsnuDao.fetchByIds(asnuIds);
+            return refBookAsnuDao.fetchByIds(userInfo.getUser().getAsnuIds());
         }
     }
 

@@ -64,6 +64,8 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
 
     public final com.querydsl.sql.ForeignKey<QTemplateChanges> _templateChangesFkDecT = createInvForeignKey(id, "DECLARATION_TEMPLATE_ID");
 
+    public final com.querydsl.sql.ForeignKey<QDeclTemplateEventScript> _decTempEventScrDecTempFk = createInvForeignKey(id, "DECLARATION_TEMPLATE_ID");
+
     public QDeclarationTemplate(String variable) {
         super(QDeclarationTemplate.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_TEMPLATE");
         addMetadata();

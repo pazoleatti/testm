@@ -45,7 +45,7 @@ public class RefBookAsnuDaoImpl implements RefBookAsnuDao {
      * @return Список значений справочника
      */
     @Override
-    public List<RefBookAsnu> fetchByIds(List<Integer> ids) {
+    public List<RefBookAsnu> fetchByIds(List<Long> ids) {
         return sqlQueryFactory
                 .select(refBookAsnuBean)
                 .from(refBookAsnu)

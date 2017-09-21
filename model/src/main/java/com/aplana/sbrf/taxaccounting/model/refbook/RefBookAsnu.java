@@ -5,7 +5,7 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
  *
  * @author dloshkarev
  */
-public class RefBookAsnu extends RefBookSimple<Integer> {
+public class RefBookAsnu extends RefBookSimple<Long> {
     //Наименование АСНУ
     private String name;
     //Код АСНУ

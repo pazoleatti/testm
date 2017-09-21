@@ -24,7 +24,7 @@ public class QDeclarationType extends com.querydsl.sql.RelationalPathBase<QDecla
 
     public static final QDeclarationType declarationType = new QDeclarationType("DECLARATION_TYPE");
 
-    public final NumberPath<Integer> id = createNumber("id", Integer.class);
+    public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath ifrsName = createString("ifrsName");
 
@@ -61,7 +61,7 @@ public class QDeclarationType extends com.querydsl.sql.RelationalPathBase<QDecla
     }
 
     public void addMetadata() {
-        addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(ifrsName, ColumnMetadata.named("IFRS_NAME").withIndex(5).ofType(Types.VARCHAR).withSize(200));
         addMetadata(isIfrs, ColumnMetadata.named("IS_IFRS").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(2).ofType(Types.VARCHAR).withSize(1000).notNull());

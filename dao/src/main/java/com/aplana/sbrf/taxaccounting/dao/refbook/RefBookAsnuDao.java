@@ -21,5 +21,5 @@ public interface RefBookAsnuDao {
      * @param ids Идентификаторы
      * @return Список значений справочника
      */
-    List<RefBookAsnu> fetchByIds(List<Integer> ids);
+    List<RefBookAsnu> fetchByIds(List<Long> ids);
 }
