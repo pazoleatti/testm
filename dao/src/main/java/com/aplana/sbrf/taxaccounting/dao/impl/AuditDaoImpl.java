@@ -18,8 +18,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     public void add(LogSystem logSystem) {
         try {
             JdbcTemplate jt = getJdbcTemplate();
-            //TODO убрать перед пушем
-/*            jt.update(
+            jt.update(
                     "call Add_Log_System_NDFL (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     logSystem.getIp(),
                     logSystem.getEventId(),
@@ -37,7 +36,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     0,
                     logSystem.getAuditFormTypeId(),
                     logSystem.getServer()
-            );*/
+            );
         } catch (DataAccessException e) {
             LOG.error("Ошибки при логировании.", e);
             throw new DaoException("Ошибки при логировании.", e);
