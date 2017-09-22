@@ -27,9 +27,9 @@ public interface RefBookPersonService {
      */
     void clearRnuNdflPerson(Long declarationDataId);
 
-    NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger);
+    NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, Logger logger);
 
-    NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
+    NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
 
     List<BaseWeigthCalculator> getBaseCalculateList();
 

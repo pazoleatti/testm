@@ -61,15 +61,15 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     // ----------------------------- identification -----------------------------
 
     @Override
-    public NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, Logger logger) {
+    public NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, Logger logger) {
         return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeightCalculator(getBaseCalculateList()), logger);
     }
 
     @Override
-    public NaturalPerson identificatePerson(IdentityPerson personData, List<IdentityPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
+    public NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
 
         double treshold = tresholdValue / 1000D;
-        List<IdentityPerson> personDataList = refBookPersonList;
+        List<NaturalPerson> personDataList = refBookPersonList;
         if (personDataList != null && !personDataList.isEmpty()) {
 
             calculateWeigth(personData, personDataList, weigthComporators);
@@ -115,7 +115,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
 
     }
 
-    private static void calculateWeigth(IdentityPerson searchPersonData, List<IdentityPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators) {
+    private static void calculateWeigth(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators) {
         for (IdentityPerson personData : personDataList) {
             double weigth = weigthComporators.calc(searchPersonData, personData);
             personData.setWeigth(weigth);
