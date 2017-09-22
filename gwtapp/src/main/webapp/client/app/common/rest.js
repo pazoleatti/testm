@@ -75,7 +75,7 @@
          * @description Справочники
          */
         .factory('RefBookValuesResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/refBookValues/:refBookId', {}, {
+            return $resource('controller/rest/refBookValues/:refBookId', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
@@ -104,7 +104,7 @@
          * @description
          */
         .factory('DeclarationTypeForCreateResource', ['$resource', function ($resource) {
-            return $resource('/controller//rest/refBook/207/declarationTypesForCreate?declarationKind=:declarationKind&departmentId=:departmentId&periodId=:periodId', {}, {
+            return $resource('controller/rest/refBook/207/declarationTypesForCreate?declarationKind=:declarationKind&departmentId=:departmentId&periodId=:periodId', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])
