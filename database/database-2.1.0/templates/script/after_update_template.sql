@@ -25,6 +25,8 @@ ALTER TABLE declaration_report ENABLE CONSTRAINT decl_report_fk_blob_data;
 ALTER TABLE declaration_data_file ENABLE CONSTRAINT decl_data_file_pk;
 ALTER TABLE declaration_template_file ENABLE CONSTRAINT fk_decl_templ_file_blob;
 
+ALTER TABLE decl_template_event_script ENABLE CONSTRAINT FK_DEC_TEMP_EVENT_SCR_DEC_TEMP;
+
 COMMIT;
 EXIT;
 
