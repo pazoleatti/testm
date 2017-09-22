@@ -3102,7 +3102,7 @@ class NdflPersonFL {
                     if (personRecord.get(RF_BIRTH_DATE).value != null && !ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Дата рождения не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
-                                String.format(LOG_TYPE_PERSON_MSG, "Дата рождения", ndflPerson.birthDay ?(ndflPerson.birthDay?.format("dd.MM.yyyy")): "", R_PERSON))
+                                String.format(LOG_TYPE_PERSON_MSG, "Дата рождения", ndflPerson.birthDay ? formatDate(ndflPerson.birthDay): "", R_PERSON))
                     }
 
                     // Спр14 Гражданство (Обязательное поле)
@@ -3305,8 +3305,8 @@ class NdflPersonFL {
                         }
                         def incomeCodeRef = incomeCodeRefList.find {
                             it?.CODE?.stringValue == ndflPersonIncome.incomeCode &&
-                                    ndflPersonIncome.incomeAccruedDate >= it.record_version_from?.dateValue &&
-                                    ndflPersonIncome.incomeAccruedDate <= it.record_version_to?.dateValue
+                                    ndflPersonIncome.incomeAccruedDate >= new LocalDateTime(it.record_version_from?.dateValue) &&
+                                    ndflPersonIncome.incomeAccruedDate <= new LocalDateTime(it.record_version_to?.dateValue)
                         }
                         if (!incomeCodeRef) {
                             String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\"",
@@ -3769,7 +3769,7 @@ def checkDataCommon(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndfl
                     new Column21NotFill(),
                     String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: ""),
                     String.format("Гр. \"%s\" (\"%s\") не должна быть заполнена, так как не заполнены гр. \"%s\", гр. \"%s\", и не заполнены гр. \"%s\", гр. \"%s\", гр. \"%s\"",
-                            C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ndflPersonIncome.taxTransferDate.format(DATE_FORMAT): "",
+                            C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? formatDate(ndflPersonIncome.taxTransferDate): "",
                             C_INCOME_PAYOUT_DATE,
                             C_INCOME_PAYOUT_SUMM,
                             C_PAYMENT_DATE,
@@ -4539,7 +4539,7 @@ class ColumnFillConditionData {
                     List<NdflPersonIncome> S1List = ndflPersonIncomeCurrentList.findAll {
                         it.incomeAccruedDate <= ndflPersonIncome.incomeAccruedDate &&
                         it.incomeAccruedSumm != null && it.incomeAccruedSumm != 0 &&
-                                ndflPersonIncome.incomeAccruedDate >= getReportPeriodStartDate() && ndflPersonIncome.incomeAccruedDate <= getReportPeriodEndDate() &&
+                                ndflPersonIncome.incomeAccruedDate >= new LocalDateTime(getReportPeriodStartDate()) && ndflPersonIncome.incomeAccruedDate <= new LocalDateTime(getReportPeriodEndDate()) &&
                                 it.taxRate == 13 && it.incomeCode != "1010"
                     } ?: []
                     BigDecimal S1 = S1List.sum { it.taxBase ?: 0 } ?: 0
@@ -4554,7 +4554,7 @@ class ColumnFillConditionData {
                          */
                     List<NdflPersonIncome> S2List = ndflPersonIncomeCurrentList.findAll {
                         it.incomeAccruedDate < ndflPersonIncome.incomeAccruedDate &&
-                        ndflPersonIncome.incomeAccruedDate >= getReportPeriodStartDate() && ndflPersonIncome.incomeAccruedDate <= getReportPeriodEndDate() &&
+                        ndflPersonIncome.incomeAccruedDate >= new LocalDateTime(getReportPeriodStartDate()) && ndflPersonIncome.incomeAccruedDate <= new LocalDateTime(getReportPeriodEndDate()) &&
                                 it.taxRate == 13 && it.incomeCode != "1010"
                     } ?: []
                     BigDecimal S2 = S2List.sum { it.calculatedTax ?: 0 } ?: 0
