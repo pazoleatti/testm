@@ -4,7 +4,7 @@
      * Модуль с утилитными методами для работы с правами доступа
      */
     angular.module('app.permissionUtils', [])
-        .factory('PermissionChecker', ['$webStorage', function ($webStorage) {
+        .factory('PermissionChecker', [function () {
 
             var service = {
                 maxInt32: Math.pow(2, 32),

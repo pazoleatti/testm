@@ -31,6 +31,7 @@ public class RefBookAsnuDaoImpl implements RefBookAsnuDao {
      */
     @Override
     public List<RefBookAsnu> fetchAll() {
+        //Выбирются записи с положительным значением id, т.к. есть фиктивные записи с id=-1
         return sqlQueryFactory
                 .select(refBookAsnuBean)
                 .from(refBookAsnu)
@@ -39,13 +40,14 @@ public class RefBookAsnuDaoImpl implements RefBookAsnuDao {
     }
 
     /**
-     * Получение всех значений справочника по идентификаторам
+     * Получение значений справочника по идентификаторам
      *
      * @param ids Идентификаторы
      * @return Список значений справочника
      */
     @Override
     public List<RefBookAsnu> fetchByIds(List<Long> ids) {
+        //Выбирются записи с положительным значением id, т.к. есть фиктивные записи с id=-1
         return sqlQueryFactory
                 .select(refBookAsnuBean)
                 .from(refBookAsnu)

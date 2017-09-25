@@ -61,8 +61,8 @@ public class DeclarationDataController {
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService, DeclarationDataService declarationDataService,
-                                     LogEntryService LogEntryService) {
+                                     TAUserService taUserService, DeclarationDataService declarationDataService,
+                                     LogEntryService LogEntryService, AsyncTaskManagerService asyncTaskManagerService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;

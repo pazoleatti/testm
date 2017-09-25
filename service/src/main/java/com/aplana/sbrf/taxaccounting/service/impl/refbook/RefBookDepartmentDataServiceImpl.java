@@ -30,7 +30,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     //TODO https://jira.aplana.com/browse/SBRFNDFL-2008
 
     /**
-     * Получение всех доступных значений справочника
+     * Получение доступных (согласно правам доступа пользователя)  значений справочника
      *
      * @param user Пользователь
      * @return Список значений справочника
@@ -48,12 +48,12 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     }
 
     /**
-     * Получение доступных значений справочника с фильтрацией по наименованию подразделения и пейджингом
+     * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user         Пользователь
      * @param name         Наименование подразделения
      * @param pagingParams Параметры пейджинга
-     * @return Список значений справочника
+     * @return Страница списка значений справочника
      */
     @Override
     @Transactional(readOnly = true)
@@ -68,13 +68,13 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     }
 
     /**
-     * Получение доступных значений справочника, для которых открыт заданный период, с фильтрацией по наименованию подразделения и пейджингом
+     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период, с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user           Пользователь
      * @param name           Наименование подразделения
      * @param reportPeriodId ID отчетного периода, который должен быть открыт
      * @param pagingParams   Параметры пейджинга
-     * @return Список значений справочника
+     * @return Страница списка значений справочника
      */
     @Override
     @Transactional(readOnly = true)

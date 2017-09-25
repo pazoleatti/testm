@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -244,6 +241,11 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         getJdbcTemplate().update("UPDATE lock_data SET queue = ?, state_date = ? WHERE key = ? AND date_lock = ?",
                 new Object[] {queue.getId(), new Date(), key, lockDate},
                 new int[] {Types.INTEGER, Types.TIMESTAMP, Types.VARCHAR, Types.TIMESTAMP});
+    }
+
+    @Override
+    public SecuredEntity getSecuredEntity(long id) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     private static final class LockDataMapper implements RowMapper<LockData> {

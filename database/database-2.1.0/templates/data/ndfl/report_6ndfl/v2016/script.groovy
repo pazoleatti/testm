@@ -232,34 +232,31 @@ class report_6ndfl extends AbstractScriptClass {
         // Код периода
         def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
-        // Коды представления налоговой декларации по месту нахождения (учёта)
-        def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
-
-        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-        Department department = departmentService.get(departmentReportPeriod.departmentId)
-        String strCorrPeriod = ""
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
-        }
-        def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
-                FORM_NAME_NDFL6,
-                "${departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()} ${departmentReportPeriod.getReportPeriod().getName()}${strCorrPeriod}",
-                department.getName(),
-                declarationData.kpp,
-                declarationData.oktmo)
-        if (poMestuParam == null) {
-            logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\".")
-            calculateParams.put("notReplaceXml", true)
-            calculateParams.put("createForm", false)
-            return
-        }
-        def taxPlaceTypeCode = poMestuParam?.CODE?.value
-        if (taxPlaceTypeCode == null) {
-            logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
-            calculateParams.put("notReplaceXml", true)
-            calculateParams.put("createForm", false)
-            return
-        }
+    // Коды представления налоговой декларации по месту нахождения (учёта)
+    def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+    Department department = departmentService.get(departmentReportPeriod.departmentId)
+    String strCorrPeriod = ""
+    if (departmentReportPeriod.getCorrectionDate() != null) {
+        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+    }
+    def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
+            FORM_NAME_NDFL6,
+            "${departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()} ${departmentReportPeriod.getReportPeriod().getName()}${strCorrPeriod}",
+            department.getName(),
+            declarationData.kpp,
+            declarationData.oktmo)    if (poMestuParam == null) {
+        logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\"." )
+        calculateParams.put("notReplaceXml", true)
+        calculateParams.put("createForm", false)
+        return
+    }
+    def taxPlaceTypeCode = poMestuParam?.CODE?.valueif(taxPlaceTypeCode == null){
+        logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
+        calculateParams.put("notReplaceXml", true)
+        calculateParams.put("createForm", false)
+        return
+    }
 
         // Признак лица, подписавшего документ
         def signatoryId = getRefBookValue(REF_BOOK_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
@@ -462,41 +459,39 @@ class report_6ndfl extends AbstractScriptClass {
                     }
                     if (pairOperationIdMap.size() != 0) {
 
-                        ДохНал() {
-                            Set groups = []
-                            def payoutSumByGroup = [:]
-                            def withholdingTaxSumByGroup = [:]
-                            pairOperationIdMap.values().each { listIncomes ->
-                                ScriptUtils.checkInterrupted()
-                                def incomeAccruedDate
-                                def taxDate
-                                def transferDate
-                                def incomePayoutSumm = new BigDecimal(0)
-                                def withholdingTax = 0
-                                listIncomes.each {
-                                    if (it.incomeAccruedDate != null && it.incomeAccruedSumm != null && !it.incomeAccruedSumm.equals(new BigDecimal(0))) {
-                                        incomeAccruedDate = it.incomeAccruedDate
+                    ДохНал() {
+                        Set groups = []
+                        def payoutSumByGroup = [:]
+                        def withholdingTaxSumByGroup = [:]pairOperationIdMap.values().each { listIncomes ->
+                            ScriptUtils.checkInterrupted()
+                            def incomeAccruedDate
+                            def taxDate
+                            def transferDate
+                            def incomePayoutSumm = new BigDecimal(0)
+                            def withholdingTax = 0
+                            listIncomes.each {
+                                if (it.incomeAccruedDate != null && it.incomeAccruedSumm != null && !it.incomeAccruedSumm.equals(new BigDecimal(0))) {
+                                    incomeAccruedDate = it.incomeAccruedDate
+                                }
+                                if (it.taxDate != null) {
+                                    boolean notEmpty = false
+                                    if (it.withholdingTax != null && it.withholdingTax != 0) {
+                                        notEmpty = true
+                                    } else if (it.incomeAccruedSumm.equals(it.incomeAccruedSumm) && it.taxBase.equals(new BigDecimal(0)) && it.calculatedTax == 0) {
+                                        notEmpty = true
                                     }
-                                    if (it.taxDate != null) {
-                                        boolean notEmpty = false
-                                        if (it.withholdingTax != null && it.withholdingTax != 0) {
-                                            notEmpty = true
-                                        } else if (it.incomeAccruedSumm.equals(it.incomeAccruedSumm) && it.taxBase.equals(new BigDecimal(0)) && it.calculatedTax == 0) {
-                                            notEmpty = true
-                                        }
-                                        if (notEmpty) {
-                                            taxDate = it.taxDate
-                                        }
+                                    if (notEmpty) {
+                                        taxDate = it.taxDate
                                     }
-                                    if (it.taxTransferDate != null && it.taxSumm != null && it.taxSumm != 0) {
-                                        transferDate = it.taxTransferDate
-                                    }
-                                    if (it.incomePayoutSumm != null) {
-                                        incomePayoutSumm = incomePayoutSumm.add(it.incomePayoutSumm)
-                                    }
-                                    if (it.withholdingTax != null) {
-                                        withholdingTax += it.withholdingTax
-                                    }
+                                }
+                                if (it.taxTransferDate != null && it.taxSumm != null && it.taxSumm != 0) {
+                                    transferDate = it.taxTransferDate
+                                }
+                                if (it.incomePayoutSumm != null) {
+                                    incomePayoutSumm = incomePayoutSumm.add(it.incomePayoutSumm)
+                                }
+                                if (it.withholdingTax != null) {
+                                    withholdingTax += it.withholdingTax}
                                 }
                                 def grouping = [
                                         'incomeAccruedDate': incomeAccruedDate,
@@ -1058,7 +1053,7 @@ class report_6ndfl extends AbstractScriptClass {
  * Разыменование записи справочника
  */
     Map<String, RefBookValue> getRefBookValue(Long refBookId, Long recordId) {
-        return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+        return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
     }
 
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/

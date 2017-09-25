@@ -19,6 +19,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -41,9 +43,11 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -90,9 +94,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация).";
     private static final String CALCULATION_NOT_TOPICAL_SUFFIX = " Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
-    private static final int DEFAULT_TF_FILE_TYPE_CODE = 1;
 
-    final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(DeclarationDataReportType.ACCEPT_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.XML_DEC, DeclarationDataReportType.IMPORT_TF_DEC, DeclarationDataReportType.DELETE_DEC));
+    private final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(DeclarationDataReportType.ACCEPT_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.XML_DEC, DeclarationDataReportType.IMPORT_TF_DEC, DeclarationDataReportType.DELETE_DEC));
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -152,6 +155,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTypeService declarationTypeService;
     @Autowired
     private NdflPersonDao ndflPersonDao;
+    @Autowired
+    private DeclarationDataPermissionSetter declarationDataPermissionSetter;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -345,6 +350,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CALCULATE)")
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         boolean createForm = calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
         if (createForm) {
@@ -379,6 +385,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CHECK)")
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         LOG.info(String.format("Проверка данных налоговой формы %s", id));
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CHECK);
@@ -504,6 +511,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (userLogin != null && !userLogin.isEmpty()) {
             result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
+
+        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
+
+        result.setPermissions(declaration.getPermissions());
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
@@ -650,14 +662,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams) {
         TAUser currentUser = userInfo.getUser();
 
-        if (filter.getAsnuIds() == null || filter.getAsnuIds().isEmpty()) {
-            filter.setAsnuIds(new LinkedList<Long>());
+        if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
+            List<Long> asnuIds = new ArrayList<Long>();
             for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
-                filter.getAsnuIds().add((long) asnu.getId());
+                asnuIds.add(asnu.getId());
             }
+            filter.setAsnuIds(asnuIds);
         }
 
-        if (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()) {
+        if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
             Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
             for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
                 receiverDepartmentIds.add(department.getId());
@@ -665,7 +678,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             filter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         }
 
-        if (filter.getFormKindIds() == null || filter.getFormKindIds().isEmpty()) {
+        if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
             List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
             if (currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                 availableDeclarationFormKindIds.addAll(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
@@ -685,7 +698,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             filter.setControlNs(false);
         }
 
-        return declarationDataSearchService.findDeclarationDataJournalItems(filter, pagingParams);
+        List<DeclarationDataJournalItem> declarationDataList = declarationDataDao.findPage(filter, pagingParams);
+
+        int count = declarationDataDao.getCount(filter);
+
+        return new PagingResult<DeclarationDataJournalItem>(declarationDataList, count);
     }
 
     @Override
@@ -837,12 +854,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public void delete(long id, TAUserInfo userInfo) {
         delete(id, userInfo, true);
     }
 
     @Override
     @Transactional(readOnly = false)
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public void delete(long id, TAUserInfo userInfo, boolean createLock) {
         LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
         LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
@@ -896,6 +915,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).ACCEPTED)")
     public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED);
 
@@ -926,6 +946,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).RETURN_TO_CREATED)")
     public void cancel(Logger logger, long id, String note, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
         DeclarationData declarationData = declarationDataDao.get(id);
@@ -1304,7 +1325,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    // расчет декларации
     private boolean setDeclarationBlobs(Logger logger,
                                         DeclarationData declarationData, Date docDate, TAUserInfo userInfo, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         if (exchangeParams == null) {

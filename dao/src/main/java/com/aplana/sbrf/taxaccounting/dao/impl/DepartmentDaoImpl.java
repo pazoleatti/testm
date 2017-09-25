@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
@@ -143,6 +144,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Integer>(0);
         }
+    }
+
+    @Override
+    public SecuredEntity getSecuredEntity(long id) {
+        return getDepartment((int) id);
     }
 
     protected class DepartmentJdbcMapper implements RowMapper<Department> {

@@ -69,7 +69,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
      * @param ids          Список идентификаторов
      * @param name         Наименование подразделения
      * @param pagingParams Параметры пейджинга
-     * @return Список значений справочника
+     * @return Страница списка значений справочника
      */
     @Override
     public PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
@@ -79,8 +79,6 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
         if (!StringUtils.isBlank(name)) {
             where = where.and(department.name.containsIgnoreCase(name));
         }
-
-        int offset = pagingParams.getCount() * (pagingParams.getPage() - 1);
 
         long totalCount = sqlQueryFactory
                 .select(refBookDepartmentBean)
@@ -93,7 +91,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
                 .from(department)
                 .where(where)
                 .limit(pagingParams.getCount())
-                .offset(offset)
+                .offset(pagingParams.getStartIndex())
                 .fetch();
 
         return new PagingResult<RefBookDepartment>(departments, (int) totalCount);

@@ -102,7 +102,7 @@ class department extends AbstractScriptClass {
                 if (isChangeType && oldType in departmentTypes && !(type in departmentTypes)) {
                     MembersFilterData membersFilter = new MembersFilterData()
                     membersFilter.setDepartmentIds(new HashSet<Integer>(Arrays.asList(recordId)))
-                    PagingResult<TAUserView> users = refBookService.getUsersByFilter(membersFilter)
+                    PagingResult<TAUserView> users = formDataService.getUsersByFilter(membersFilter)
                     if (!users.isEmpty()) {
                         for (TAUserView user : users) {
                             logger.error("Пользователь %s назначен подразделению %s", user.getName(), record?.NAME?.stringValue)

@@ -4279,28 +4279,27 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                     }
                 }
 
-                // СведДох2 Сумма вычета (Графа 12)
-                if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0
-                        && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {
-                    BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-                    if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
-                                C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
-                                C_PERIOD_CURR_SUMM, sumNdflDeduction ?: 0)
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
-                    }
-                    if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
-                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\")",
-                                C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: 0,
-                                C_PERIOD_CURR_SUMM, sumNdflDeduction
-                        )
-                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
-                    }
+            // СведДох2 Сумма вычета (Графа 12)
+            if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0
+                && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
+                if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
+                            C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
+                            C_PERIOD_CURR_SUMM, sumNdflDeduction ?: 0)
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
                 }
+                if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\")",
+                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: 0,
+                            C_PERIOD_CURR_SUMM, sumNdflDeduction
+                    )
+                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                    logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
+                }
+            }
 
                 // СведДох4 НДФЛ.Процентная ставка (Графа 14)
                 if ((ndflPersonIncome.taxRate ?: 0) > 0) {

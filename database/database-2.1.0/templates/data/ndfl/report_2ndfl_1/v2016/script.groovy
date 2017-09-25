@@ -624,34 +624,32 @@ class report_2ndfl_1 extends AbstractScriptClass {
                             }
                         }
 
-                        if (isForSpecificReport && ndflPersonIncomesGroupedByTaxRate.keySet().isEmpty()) {
-                            СведДох() {
-                            }
+                    if (isForSpecificReport && ndflPersonIncomesGroupedByTaxRate.keySet().isEmpty()) {
+                        СведДох() {
                         }
                     }
-                    if (!refPersonIds.contains(np.personId)) {
-                        refPersonIds << np.personId
-                        ndflReferencess << createRefBookAttributesForNdflReference(np.id, np.personId, nomSpr, np.lastName, np.firstName, np.middleName, new Date(np.birthDay.getLocalMillis()))
-                    }
                 }
-            }
-            if (!presentNotHoldingTax && priznakF == "2") {
-                logger.info("\"Для подразделения: $depName, КПП: $kpp, ОКТМО: $oktmo за период $otchetGod $reportPeriod.name отсутствуют сведения о не удержанном налоге.\"")
-                if (calculateParams != null) {
-                    calculateParams.put("notReplaceXml", true)
-                    calculateParams.put("createForm", false)
+                if (!refPersonIds.contains(np.personId)) {
+                    refPersonIds << np.personId
+                    ndflReferencess << createRefBookAttributesForNdflReference(np.id, np.personId, nomSpr, np.lastName, np.firstName, np.middleName, new Date(np.birthDay.getLocalMillis()))
                 }
             }
         }
-        ScriptUtils.checkInterrupted();
-        if (!isForSpecificReport) {
-            if (!ndflReferencess.isEmpty()) {
-                saveNdflRefences()
-            }
-            ScriptUtils.checkInterrupted();
-            saveFileInfo(currDate, fileName)
+        if (!presentNotHoldingTax && priznakF == "2") {
+            logger.info("\"Для подразделения: $depName, КПП: $kpp, ОКТМО: $oktmo за период $otchetGod $reportPeriod.name отсутствуют сведения о не удержанном налоге.\"")
+            if(calculateParams != null) {calculateParams.put("notReplaceXml", true)
+            calculateParams.put("createForm", false)}
         }
     }
+    ScriptUtils.checkInterrupted();
+    if (!isForSpecificReport) {
+        if (!ndflReferencess.isEmpty()) {
+            saveNdflRefences()
+        }
+        ScriptUtils.checkInterrupted();
+        saveFileInfo(currDate, fileName)
+    }
+}
 
     @TypeChecked(TypeCheckingMode.SKIP)
     def createXmlNode(builder, name, attributes) {
@@ -2264,7 +2262,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
  * Разыменование записи справочника
  */
     Map<String, RefBookValue> getRefBookValue(Long refBookId, Long recordId) {
-        return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+        return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
     }
 /************************************* СПЕЦОТЧЕТ **********************************************************************/
 

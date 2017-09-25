@@ -209,7 +209,7 @@
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
-                            }).then(function () {
+                            }).success(function () {
                                 $state.go("ndflJournal", {});
                             });
                         });

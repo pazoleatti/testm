@@ -71,7 +71,7 @@
                 $translateProvider.useLocalStorage();
                 $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
             }
-        ]);
+        ])
 
     var UserDataResource = angular.injector(['app.rest']).get('UserDataResource');
     UserDataResource.query({
@@ -95,6 +95,8 @@
                         return roleAliasList.indexOf(role) >= 0;
                     }
                 };
+                $rootScope.permissionChecker = angular.injector(['app.permissionUtils']).get('PermissionChecker');
+                $rootScope.APP_CONSTANTS = angular.injector(['app.constants']).get('APP_CONSTANTS');
             });
         });
 

@@ -25,7 +25,7 @@ public interface RefBookDepartmentDataDao {
      * @param ids          Список идентификаторов
      * @param name         Наименование подразделения
      * @param pagingParams Параметры пейджинга
-     * @return Список значений справочника
+     * @return Страница списка значений справочника
      */
     PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
 }

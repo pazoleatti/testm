@@ -23,7 +23,12 @@
                 CREATE_DECLARATION_REPORT: 1 << 11,
                 CREATE_DECLARATION_PRIMARY: 1 << 12,
                 CREATE_DECLARATION_CONSOLIDATED: 1 << 13,
-                CREATE_UPLOAD_REPORT: 1 << 14
+                CREATE_UPLOAD_REPORT: 1 << 14,
+                HANDLING_FILE: 1 << 15,
+                UPLOAD_FILE: 1 << 16,
+                EDIT_GENERAL_PARAMS: 1 << 17,
+                VIEW_REF_BOOK: 1 << 18,
+                EDIT_REF_BOOK: 1 << 19
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",
@@ -45,16 +50,32 @@
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
-                CALCULATE: 1 << 1,
-                CHECK: 1 << 2,
-                ACCEPTED: 1 << 3,
-                DELETE: 1 << 4,
-                RETURN_TO_CREATED: 1 << 5
+                VIEW: 1 << 1,
+                CALCULATE: 1 << 2,
+                CHECK: 1 << 3,
+                ACCEPTED: 1 << 4,
+                DELETE: 1 << 5,
+                RETURN_TO_CREATED: 1 << 6,
+                EDIT_ASSIGNMENT: 1 << 7
             },
-            NDFL_STATE: {
-                CREATED: {id: 1, name: "Создана"},
-                PREPARED: {id: 2, name: "Подготовлена"},
-                ACCEPTED: {id: 3, name: "Принята"}
+            STATE: {
+                CREATED: "Создана",
+                PREPARED: "Подготовлена",
+                ACCEPTED: "Принята",
+                NOT_EXIST: "Не создана"
+            },
+            DECLARATION_FILE_PERMISSION: {
+                DELETE: 1 << 0
+            },
+            REPORT_PERIOD_PERMISSION: {
+                EDIT: 1 << 0
+            },
+            DEPARTMENT_PERMISSION: {
+                EDIT: 1 << 0
+            },
+            LOCK_DATA_PERMISSION: {
+                VIEW: 1 << 0,
+                DELETE: 1 << 1
             },
             NDFL_DECLARATION_KIND: {
                 ADDITIONAL: {id: 1, name: "Выходная"},

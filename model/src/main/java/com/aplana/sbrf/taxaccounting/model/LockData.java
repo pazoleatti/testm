@@ -9,7 +9,7 @@ import java.util.Date;
  * @since 17.07.14 13:51
  */
 
-public final class LockData {
+public final class LockData implements SecuredEntity {
 	/* Идентификатор блокировки */
 	private String key;
 	/* Код пользователя, установившего блокировку*/
@@ -28,6 +28,8 @@ public final class LockData {
     private int queuePosition;
     /* Наименование узла кластера, на котором выполняется связанная асинхронная задача */
     private String serverNode;
+    /* Права */
+    private long permissions;
 
     public enum LockObjects {
         REF_BOOK,
@@ -219,6 +221,16 @@ public final class LockData {
 
     public boolean isAsync() {
         return (getQueue() != null && !LockQueues.NONE.equals(getQueue()));
+    }
+
+    @Override
+    public long getPermissions() {
+        return permissions;
+    }
+
+    @Override
+    public void setPermissions(long permissions) {
+        this.permissions = permissions;
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.List;
  * @since 17.07.14 14:36
  */
 
-public interface LockDataDao {
+public interface LockDataDao extends PermissionDao {
 
     /**
      * Возвращает информацию о блокировке

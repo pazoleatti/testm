@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Информация о пользователе, его ролях и принадлежности к подразделению
  */
-public class TAUser implements AuthorisableEntity, Serializable {
+public class TAUser implements SecuredEntity, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/** Код учетной записи для пользователя "Система" */

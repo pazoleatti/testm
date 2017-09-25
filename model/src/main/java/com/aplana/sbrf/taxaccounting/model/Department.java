@@ -11,7 +11,7 @@ import java.io.Serializable;
  * 
  * @author dsultanbekov
  */
-public class Department implements Serializable {
+public class Department implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = 2144891300700432727L;
     public static final Long REF_BOOK_ID = 30L;
 
@@ -27,6 +27,7 @@ public class Department implements Serializable {
     /* Поле признак указывающее что подразделение используется в модуле гарантий */
     private boolean garantUse;
     private boolean sunrUse;
+    private long permissions;
 
     /**
      * Полное имя подразделения
@@ -229,5 +230,15 @@ public class Department implements Serializable {
 		result = 31 * result + (type != null ? type.hashCode() : 0);
 		result = 31 * result + (code != null ? code.hashCode() : 0);
 		return result;
+	}
+
+	@Override
+	public long getPermissions() {
+		return permissions;
+	}
+
+	@Override
+	public void setPermissions(long permissions) {
+		this.permissions = permissions;
 	}
 }
