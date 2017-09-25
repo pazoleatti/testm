@@ -18,9 +18,17 @@ prompt alter tables
 prompt drop tables
 @@drop_tables.sql;
 
+--create sequences
+prompt create sequences
+@@create_sequences.sql;
+
 -- compile source
 prompt compile DEP_REP_PER_BEFORE_DELETE
 @@DEP_REP_PER_BEFORE_DELETE.sql;
+
+-- compile source
+prompt compile DEP_REP_PER_BEFORE_INS_UPD
+@@DEP_REP_PER_BEFORE_INS_UPD.sql;
 
 -- compile source
 prompt compile person_pkg

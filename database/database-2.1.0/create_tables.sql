@@ -61,5 +61,18 @@ begin
 			EXECUTE IMMEDIATE 'comment on column async_task.balancing_variant is ''Тип очереди, в которую помещена задача. 1 - короткие, 2 - длинные''';
 			EXECUTE IMMEDIATE 'comment on column async_task.serialized_params is ''Сериализованные параметры, которые нужны для выполнения задачи''';
 	END IF;
+
+	select count(1) into v_count from user_tables where lower(table_name)='decl_template_event_script';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'create table decl_template_event_script(
+						id number(19) primary key not null,
+						declaration_template_id number(19)not null,
+						event_id number(19)not null,
+						script clob not null,
+						constraint fk_dec_temp_event_scr_dec_temp foreign key (declaration_template_id) references declaration_template(id),
+						constraint fk_dec_temp_event_id foreign key (event_id) references event(id),
+						constraint uc_dec_temp_even_dec_temp_even unique (declaration_template_id, event_id)
+						)';
+	END IF;
 end;
 /

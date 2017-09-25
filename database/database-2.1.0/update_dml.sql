@@ -7,5 +7,8 @@ prompt delete tax_type
 prompt async_task_type
 @@async_task_type.sql;
 
+prompt configuration_scheduler
+@@conf_scheduler.sql;
+
 commit;
 exit;

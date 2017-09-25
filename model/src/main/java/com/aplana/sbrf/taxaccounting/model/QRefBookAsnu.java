@@ -26,7 +26,7 @@ public class QRefBookAsnu extends com.querydsl.sql.RelationalPathBase<QRefBookAs
 
     public final StringPath code = createString("code");
 
-    public final NumberPath<Integer> id = createNumber("id", Integer.class);
+    public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath name = createString("name");
 
@@ -70,7 +70,7 @@ public class QRefBookAsnu extends com.querydsl.sql.RelationalPathBase<QRefBookAs
 
     public void addMetadata() {
         addMetadata(code, ColumnMetadata.named("CODE").withIndex(2).ofType(Types.VARCHAR).withSize(4).notNull());
-        addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(3).ofType(Types.VARCHAR).withSize(100).notNull());
         addMetadata(roleAlias, ColumnMetadata.named("ROLE_ALIAS").withIndex(5).ofType(Types.DECIMAL).withSize(9));
         addMetadata(roleName, ColumnMetadata.named("ROLE_NAME").withIndex(6).ofType(Types.DECIMAL).withSize(9));

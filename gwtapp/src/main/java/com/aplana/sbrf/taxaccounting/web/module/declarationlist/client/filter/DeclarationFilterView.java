@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;

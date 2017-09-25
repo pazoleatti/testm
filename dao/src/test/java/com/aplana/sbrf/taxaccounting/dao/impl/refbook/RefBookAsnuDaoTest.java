@@ -36,7 +36,7 @@ public class RefBookAsnuDaoTest {
     //Проверка получения значений справочника по id
     @Test
     public void testFetchByIds() {
-        List<RefBookAsnu> asnuList = refBookAsnuDao.fetchByIds(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
+        List<RefBookAsnu> asnuList = refBookAsnuDao.fetchByIds(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L));
         assertTrue(asnuList.size() == ASNU_BY_IDS_COUNT);
     }
 }

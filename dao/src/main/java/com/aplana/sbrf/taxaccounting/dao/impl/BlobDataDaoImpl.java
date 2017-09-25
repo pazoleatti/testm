@@ -99,18 +99,12 @@ public class BlobDataDaoImpl implements BlobDataDao {
                 SQLExpressions.select(QDeclarationTemplate.declarationTemplate.xsd)
                         .from(QDeclarationTemplate.declarationTemplate)
                         .where(QDeclarationTemplate.declarationTemplate.xsd.isNotNull()),
+                SQLExpressions.select(QDeclarationTemplate.declarationTemplate.jrxml)
+                        .from(QDeclarationTemplate.declarationTemplate)
+                        .where(QDeclarationTemplate.declarationTemplate.jrxml.isNotNull()),
                 SQLExpressions.select(QDeclarationReport.declarationReport.blobDataId)
                         .from(QDeclarationReport.declarationReport)
                         .where(QDeclarationReport.declarationReport.blobDataId.isNotNull()),
-                SQLExpressions.select(QFormDataReport.formDataReport.blobDataId)
-                        .from(QFormDataReport.formDataReport)
-                        .where(QFormDataReport.formDataReport.blobDataId.isNotNull()),
-                SQLExpressions.select(QIfrsData.ifrsData.blobDataId)
-                        .from(QIfrsData.ifrsData)
-                        .where(QIfrsData.ifrsData.blobDataId.isNotNull()),
-                SQLExpressions.select(QFormDataReport.formDataReport.blobDataId)
-                        .from(QFormDataReport.formDataReport)
-                        .where(QFormDataReport.formDataReport.blobDataId.isNotNull()),
                 SQLExpressions.select(QDeclarationDataFile.declarationDataFile.blobDataId)
                         .from(QDeclarationDataFile.declarationDataFile)
                         .where(QDeclarationDataFile.declarationDataFile.blobDataId.isNotNull()),

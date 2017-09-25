@@ -26,7 +26,7 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
 
     public final StringPath createScript = createString("createScript");
 
-    public final NumberPath<Integer> declarationTypeId = createNumber("declarationTypeId", Integer.class);
+    public final NumberPath<Long> declarationTypeId = createNumber("declarationTypeId", Long.class);
 
     public final NumberPath<Long> formKind = createNumber("formKind", Long.class);
 
@@ -64,6 +64,8 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
 
     public final com.querydsl.sql.ForeignKey<QTemplateChanges> _templateChangesFkDecT = createInvForeignKey(id, "DECLARATION_TEMPLATE_ID");
 
+    public final com.querydsl.sql.ForeignKey<QDeclTemplateEventScript> _decTempEventScrDecTempFk = createInvForeignKey(id, "DECLARATION_TEMPLATE_ID");
+
     public QDeclarationTemplate(String variable) {
         super(QDeclarationTemplate.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_TEMPLATE");
         addMetadata();
@@ -86,7 +88,7 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
 
     public void addMetadata() {
         addMetadata(createScript, ColumnMetadata.named("CREATE_SCRIPT").withIndex(5).ofType(Types.CLOB).withSize(4000));
-        addMetadata(declarationTypeId, ColumnMetadata.named("DECLARATION_TYPE_ID").withIndex(7).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(declarationTypeId, ColumnMetadata.named("DECLARATION_TYPE_ID").withIndex(7).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(formKind, ColumnMetadata.named("FORM_KIND").withIndex(9).ofType(Types.DECIMAL).withSize(18));
         addMetadata(formType, ColumnMetadata.named("FORM_TYPE").withIndex(10).ofType(Types.DECIMAL).withSize(18));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(9).notNull());

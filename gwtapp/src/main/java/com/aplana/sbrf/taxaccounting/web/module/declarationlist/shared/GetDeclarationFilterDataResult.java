@@ -2,6 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;

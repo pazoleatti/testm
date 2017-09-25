@@ -46,10 +46,6 @@ public class QFiasAddrobj extends com.querydsl.sql.RelationalPathBase<QFiasAddro
 
     public final com.querydsl.sql.PrimaryKey<QFiasAddrobj> fiasAddrobjPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QFiasAddrobj> fiasAddrobjParentidFk = createForeignKey(parentguid, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QFiasAddrobj> _fiasAddrobjParentidFk = createInvForeignKey(id, "PARENTGUID");
-
     public QFiasAddrobj(String variable) {
         super(QFiasAddrobj.class, forVariable(variable), "NDFL_UNSTABLE", "FIAS_ADDROBJ");
         addMetadata();

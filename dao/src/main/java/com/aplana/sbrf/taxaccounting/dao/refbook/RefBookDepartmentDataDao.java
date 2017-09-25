@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookDepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 
 import java.util.Collection;
@@ -21,12 +20,12 @@ public interface RefBookDepartmentDataDao {
     List<RefBookDepartment> fetchDepartments(Collection<Integer> ids);
 
     /**
-     * Получение значений справочника по идентификаторам с фильтрацией и пейджингом
+     * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param ids          Список идентификаторов
-     * @param filter       Фильтр
+     * @param name         Наименование подразделения
      * @param pagingParams Параметры пейджинга
      * @return Список значений справочника
      */
-    PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, RefBookDepartmentFilter filter, PagingParams pagingParams);
+    PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
 }

@@ -33,6 +33,7 @@
             'app.logPanel',
             'app.ndfl',
             'app.ndflJournal',
+            'app.ndflReportJournal',
             'app.filterUtils',
             'app.rest',
             'app.formatters',
@@ -84,7 +85,7 @@
                 $rootScope.user = {
                     name: data.taUserInfo.user.name,
                     login: data.taUserInfo.user.login,
-                    department: data.department,
+                    department: {id: data.taUserInfo.user.departmentId, name: data.department},
                     permissions: data.taUserInfo.user.permissions,
                     roles: data.taUserInfo.user.roles,
                     hasRole: function (role) {

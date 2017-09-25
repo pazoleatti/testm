@@ -25,8 +25,13 @@ public class ImportFiasDataServiceImpl implements ImportFiasDataService {
     }
 
     @Override
-    public void clearAll() {
-        fiasRefBookDao.clearAll();
+    public void beforeImport() {
+        fiasRefBookDao.beforeImport();
+    }
+
+    @Override
+    public void afterImport() {
+        fiasRefBookDao.afterImport();
     }
 
     @Override

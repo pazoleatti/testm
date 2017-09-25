@@ -2,13 +2,16 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
+import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -72,7 +75,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                 DeclarationData declarationData = declarationDataService.get(action.getDeclarationId(), userInfo);
                 if (!declarationData.getState().equals(State.ACCEPTED)) {
                     String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
+                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
                     if (restartStatus != null && restartStatus.getFirst()) {
                         result.setStatus(CreateAsyncTaskStatus.LOCKED);
                         result.setRestartMsg(restartStatus.getSecond());
@@ -97,17 +100,17 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
                             @Override
                             public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                                return declarationDataService.checkExistTask(action.getDeclarationId(), reportType, logger);
+                                return declarationDataService.checkExistAsyncTask(action.getDeclarationId(), reportType, logger);
                             }
 
                             @Override
                             public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                                declarationDataService.interruptTask(action.getDeclarationId(), userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
+                                declarationDataService.interruptAsyncTask(action.getDeclarationId(), userInfo, reportType, TaskInterruptCause.DECLARATION_ACCEPT);
                             }
 
                             @Override
                             public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                return declarationDataService.getTaskName(ddReportType, action.getTaxType());
+                                return declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
                             }
                         });
                     }
@@ -119,7 +122,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             }
         } else {
             final DeclarationDataReportType toCreatedReportType = DeclarationDataReportType.TO_CREATE_DEC;
-            final String toCreateTaskName = declarationDataService.getTaskName(toCreatedReportType, action.getTaxType());
+            final String toCreateTaskName = declarationDataService.getAsyncTaskName(toCreatedReportType, action.getTaxType());
             String declarationFullName = declarationDataService.getDeclarationFullName(action.getDeclarationId(), null);
             //logger.info("Постановка операции \"%s\" в очередь на исполнение для объекта: %s", toCreateTaskName, declarationDataService.getDeclarationFullName(action.getDeclarationId(), null));
             // Блокировка формы

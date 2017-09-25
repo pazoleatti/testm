@@ -278,6 +278,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public JasperPrint createJasperReport(InputStream jrxmlTemplate, Map<String, Object> parameters) {
+        return declarationDataService.createJasperReport(null, jrxmlTemplate, parameters);
+    }
+
+    @Override
     public ByteArrayInputStream generateXmlData(Closure xmlBuilder) {
         try {
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -304,8 +309,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note) {
-        return declarationDataService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note);
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
+        return declarationDataService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit);
     }
 
     @Override
@@ -475,7 +480,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getTaskName(DeclarationDataReportType ddReportType) {
-        return declarationDataService.getTaskName(ddReportType, TaxType.NDFL);
+        return declarationDataService.getAsyncTaskName(ddReportType, TaxType.NDFL);
     }
 
 

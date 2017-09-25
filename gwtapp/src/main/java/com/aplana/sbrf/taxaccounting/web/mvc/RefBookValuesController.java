@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookDepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,21 +60,36 @@ public class RefBookValuesController {
     @InitBinder
     public void init(WebDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
-        binder.registerCustomEditor(RefBookDepartmentFilter.class, new RequestParamEditor(RefBookDepartmentFilter.class));
     }
 
     /**
      * Получение всех значений справочника Подразделения
      *
-     * @param filter       Фильтр
+     * @param name         Наименование
      * @param pagingParams Параметры пейджинга
      * @return
      */
-    @GetMapping(value = "/rest/refBookValues/30")
-    public JqgridPagedList<RefBookDepartment> fetchDepartments(@RequestParam RefBookDepartmentFilter filter, @RequestParam PagingParams pagingParams) {
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=allDepartments")
+    public JqgridPagedList<RefBookDepartment> fetchAllDepartments(String name, @RequestParam PagingParams pagingParams) {
         LOG.info("Fetch records for refbook DEPARTMENT");
         TAUser user = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchAvailableDepartments(user, filter, pagingParams);
+        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchAvailableDepartments(user, name, pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение всех значений справочника Подразделения, у которых заданный период открыт
+     *
+     * @param name           Наименование
+     * @param reportPeriodId ID отчетного периода
+     * @param pagingParams   Параметры пейджинга
+     * @return
+     */
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriod")
+    public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriod(String name, Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
+        LOG.info("Fetch records for refbook DEPARTMENT");
+        TAUser user = securityService.currentUserInfo().getUser();
+        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchDepartmentsWithOpenPeriod(user, name, reportPeriodId, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
     }
 
@@ -116,11 +131,24 @@ public class RefBookValuesController {
      *
      * @return Список периодов
      */
-    @GetMapping(value = "/rest/refBookValues/reportPeriod")
-    public List<ReportPeriod> fetchReportPeriods() {
+    @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=allPeriods")
+    public List<ReportPeriod> fetchAllReportPeriods() {
         LOG.info("Fetch periods");
         TAUser user = securityService.currentUserInfo().getUser();
         List<ReportPeriod> periods = periodService.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, Arrays.asList(user.getDepartmentId()));
+        return periods;
+    }
+
+    /**
+     * Получение открытых Отчетных периодов
+     *
+     * @return Список периодов
+     */
+    @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=openPeriods")
+    public List<ReportPeriod> fetchOpenReportPeriods() {
+        LOG.info("Fetch periods");
+        TAUser user = securityService.currentUserInfo().getUser();
+        List<ReportPeriod> periods = new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
         return periods;
     }
 }

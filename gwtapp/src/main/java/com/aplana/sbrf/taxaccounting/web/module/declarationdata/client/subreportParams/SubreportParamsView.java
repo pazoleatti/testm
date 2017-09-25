@@ -3,6 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subrepor
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.mask.ui.TextMaskBox;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParam;
+import com.aplana.sbrf.taxaccounting.model.DeclarationSubreportParamType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RefBookParamInfo;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.WarnValueException;

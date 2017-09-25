@@ -160,6 +160,15 @@ public interface DeclarationService {
     JasperPrint createJasperReport(InputStream jrxml, Map<String, Object> parameters, InputStream xmlData);
 
     /**
+     * Формирование jasper-отчета
+     *
+     * @param jrxml      исходный jrxml-шаблон отчета
+     * @param parameters
+     * @return сформированный отчет
+     */
+    JasperPrint createJasperReport(InputStream jrxml, Map<String, Object> parameters);
+
+    /**
      * Метод записывает xml данные в буфер формирует поток на чтение
      *
      * @param xmlBuilder замыкание в котором описано формирование xml
@@ -207,7 +216,7 @@ public interface DeclarationService {
     DeclarationType getTemplateType(int declarationTypeId);
 
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note);
+                DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit);
 
     void delete(long declarationDataId, TAUserInfo userInfo);
 

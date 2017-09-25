@@ -68,13 +68,13 @@ public class FiasRefBookDaoImpl extends AbstractDao implements FiasRefBookDao {
     }
 
     @Override
-    public void dropIndexes() {
-        getJdbcTemplate().execute("drop index IDX_FIAS_ADDR_CURRST_AOLEV");
+    public void beforeImport() {
+        getJdbcTemplate().execute("call fias_pkg.BeforeImport()");
     }
 
     @Override
-    public void createIndexes() {
-        getJdbcTemplate().execute("CREATE INDEX IDX_FIAS_ADDR_CURRST_AOLEV ON FIAS_ADDROBJ (CURRSTATUS ASC, AOLEVEL ASC, REPLACE(LOWER(FORMALNAME), ' ', '') ASC)");
+    public void afterImport() {
+        getJdbcTemplate().execute("call fias_pkg.AfterImport()");
     }
 
     /**

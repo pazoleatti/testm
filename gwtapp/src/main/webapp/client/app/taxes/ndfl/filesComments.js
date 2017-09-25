@@ -98,7 +98,7 @@
                                     fileTypeName: "",
                                     note: "",
                                     userName: $scope.$parent.security.user.name,
-                                    userDepartmentName: $scope.$parent.security.user.department,
+                                    userDepartmentName: $scope.$parent.security.user.department.name,
                                     date: new Date().getTime()
                                 }];
                                 var grid = $scope.fileCommentGrid.ctrl.getGrid();

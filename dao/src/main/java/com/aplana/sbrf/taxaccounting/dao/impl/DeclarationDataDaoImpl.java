@@ -40,6 +40,7 @@ import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
 import static com.aplana.sbrf.taxaccounting.model.QDepartmentReportPeriod.departmentReportPeriod;
 import static com.aplana.sbrf.taxaccounting.model.QLogBusiness.logBusiness;
 import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
+import static com.aplana.sbrf.taxaccounting.model.QRefBookDocState.refBookDocState;
 import static com.aplana.sbrf.taxaccounting.model.QReportPeriod.reportPeriod;
 import static com.aplana.sbrf.taxaccounting.model.QSecUser.secUser;
 import static com.aplana.sbrf.taxaccounting.model.QState.state;
@@ -76,7 +77,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             state.name.as("state"),
             declarationData.fileName,
             logBusiness.logDate.as("creationDate"),
-            secUser.name.as("creationUserName"));
+            secUser.name.as("creationUserName"),
+            declarationData.kpp.as("kpp"),
+            declarationData.oktmo.as("oktmo"),
+            declarationData.taxOrganCode.as("taxOrganCode"),
+            refBookDocState.name.as("docState"),
+            declarationData.note.as("note"));
 
     public DeclarationDataDaoImpl(SQLQueryFactory sqlQueryFactory) {
         this.sqlQueryFactory = sqlQueryFactory;
@@ -282,7 +288,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         // id в REF_BOOK_ASNU - тип int, а AsnuId в фильтре - тип long
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
-            where.and(refBookAsnu.id.in(toIntegerList(filter.getAsnuIds())));
+            where.and(refBookAsnu.id.isNull().or(refBookAsnu.id.in(filter.getAsnuIds())));
         } else {
             where.and(refBookAsnu.id.in(Collections.EMPTY_LIST));
         }
@@ -302,7 +308,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         if (filter.getDeclarationTypeIds() != null && !filter.getDeclarationTypeIds().isEmpty()) {
-            where.and(declarationType.id.in(toIntegerList(filter.getDeclarationTypeIds())));
+            where.and(declarationType.id.in(filter.getDeclarationTypeIds()));
         }
 
         if (filter.getFormState() != null) {
@@ -343,7 +349,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 state.name.as("state"),
                 declarationData.fileName,
                 logBusiness.logDate.as("creationDate"),
-                secUser.name.as("creationUserName"))
+                secUser.name.as("creationUserName"),
+                declarationData.kpp.as("kpp"),
+                declarationData.oktmo.as("oktmo"),
+                declarationData.taxOrganCode.as("taxOrganCode"),
+                refBookDocState.name.as("docState"),
+                declarationData.note.as("note"))
                 .from(declarationData)
                 .leftJoin(declarationData.declarationDataFkAsnuId, refBookAsnu)
                 .leftJoin(declarationData._logBusinessFkDeclarationId, logBusiness).on(logBusiness.eventId.eq((short) 1))
@@ -356,6 +367,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .innerJoin(departmentReportPeriod.depRepPerFkDepartmentId, department)
                 .innerJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
+                .leftJoin(declarationData.declDataDocStateFk, refBookDocState)
                 .orderBy(ordering)
                 .where(where)
                 .offset(params.getStartIndex())

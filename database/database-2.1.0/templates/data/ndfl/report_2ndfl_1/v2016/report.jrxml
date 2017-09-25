@@ -157,7 +157,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NUM}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement uuid="0985cf55-18ce-4118-99e3-f8ebb261db09" stretchType="RelativeToTallestObject" mode="Transparent" x="45" y="0" width="128" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -172,7 +172,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SURNAME}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement uuid="62d6111c-801d-4a47-bce2-16905870813d" stretchType="RelativeToTallestObject" mode="Transparent" x="261" y="0" width="85" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -187,7 +187,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{LASTNAME}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="dd.MM.yyyy" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" pattern="dd.MM.yyyy" isBlankWhenNull="true">
 				<reportElement uuid="43cbecc3-8c84-43a7-a66a-0815dafc9454" stretchType="RelativeToTallestObject" mode="Transparent" x="346" y="0" width="55" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -217,7 +217,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement uuid="62471f7a-c754-4148-956c-c6c42052e65c" stretchType="RelativeToBandHeight" mode="Transparent" x="401" y="0" width="154" height="10" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
 				<box>
 					<pen lineWidth="0.5"/>

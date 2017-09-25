@@ -20,7 +20,7 @@
             'app.rnuNdflPersonFace'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
-                url: '/taxes/ndfl/{declarationDataId}',
+                url: '/taxes/ndfl/{declarationDataId}?uuid',
                 templateUrl: 'client/app/taxes/ndfl/ndfl.html',
                 controller: 'ndflCtrl'
             });
@@ -31,9 +31,13 @@
          */
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', 'appModals', '$rootScope',
-            'RefBookValuesResource', 'APP_CONSTANTS',
+            'RefBookValuesResource', 'APP_CONSTANTS', '$state',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appModals, $rootScope,
-                      RefBookValuesResource, APP_CONSTANTS) {
+                      RefBookValuesResource, APP_CONSTANTS, $state) {
+
+                if ($stateParams.uuid) {
+                    $logPanel.open('log-panel-container', $stateParams.uuid);
+                }
 
                 /**
                  * @description Инициализация первичных данных на странице
@@ -165,6 +169,7 @@
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {
                             $logPanel.open('log-panel-container', response.data.uuid);
+                            initPage();
                         } else {
                             if (response.data.status === "LOCKED" && !force) {
                                 appModals.confirm($filter('translate')('title.confirm'), response.data.restartMsg)
@@ -205,7 +210,7 @@
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).success(function () {
-                                $window.location.assign('/index.html#/taxes/ndflJournal');
+                                $state.go("ndflJournal", {});
                             });
                         });
                 };

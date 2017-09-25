@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.filter.refbook.RefBookDepartmentFilter;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
@@ -65,20 +64,20 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
     }
 
     /**
-     * Получение значений справочника по идентификаторам с фильтрацией и пейджингом
+     * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param ids          Список идентификаторов
-     * @param filter       Фильтр
+     * @param name         Наименование подразделения
      * @param pagingParams Параметры пейджинга
      * @return Список значений справочника
      */
     @Override
-    public PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, RefBookDepartmentFilter filter, PagingParams pagingParams) {
+    public PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
         BooleanBuilder where = new BooleanBuilder();
         where.and(department.isActive.eq((byte) 1).and(department.id.in(ids)));
 
-        if (!StringUtils.isBlank(filter.getName())) {
-            where = where.and(department.name.containsIgnoreCase(filter.getName()));
+        if (!StringUtils.isBlank(name)) {
+            where = where.and(department.name.containsIgnoreCase(name));
         }
 
         int offset = pagingParams.getCount() * (pagingParams.getPage() - 1);

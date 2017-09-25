@@ -11,10 +11,8 @@ public interface ErrorService {
      * Возвращает обёртку для сообщений об ошибке на клиент
      * Обрабатываются вложенные исключения. Учитываются настройки системы.
      *
-     * @param messageType тип сообщения
-     * @param messageCode текст сообщения
      * @param exception исключение
      * @return экземпляр класса-обёртки
      */
-    ExceptionMessage getExceptionMessage(MessageType messageType, String messageCode, Exception exception);
+    ExceptionMessage getExceptionMessage(Exception exception);
 }

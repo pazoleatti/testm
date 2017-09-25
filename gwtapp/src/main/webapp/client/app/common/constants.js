@@ -21,6 +21,8 @@
                 VIEW_MANUAL_DESIGNER: 1 << 9,
                 VIEW_JOURNAL: 1 << 10,
                 CREATE_DECLARATION_REPORT: 1 << 11,
+                CREATE_DECLARATION_PRIMARY: 1 << 12,
+                CREATE_DECLARATION_CONSOLIDATED: 1 << 13,
                 CREATE_DECLARATION_TAX: 1 << 12,
                 CREATE_UPLOAD_REPORT: 1 << 13,
                 HANDLING_FILE: 1 << 14,
@@ -57,6 +59,12 @@
                 RETURN_TO_CREATED: 1 << 6,
                 EDIT_ASSIGNMENT: 1 << 7
             },
+            NDFL_STATE: {
+                CREATED: "Создана",
+                PREPARED: "Подготовлена",
+                ACCEPTED: "Принята",
+                NOT_EXIST: "Не создана"
+            },
             DECLARATION_FILE_PERMISSION: {
                 DELETE: 1 << 0
             },
@@ -69,11 +77,6 @@
             LOCK_DATA_PERMISSION: {
                 VIEW: 1 << 0,
                 DELETE: 1 << 1
-            },
-            NDFL_STATE: {
-                CREATED: {id: 1, name: "Создана"},
-                PREPARED: {id: 2, name: "Подготовлена"},
-                ACCEPTED: {id: 3, name: "Принята"}
             },
             NDFL_DECLARATION_KIND: {
                 ADDITIONAL: {id: 1, name: "Выходная"},

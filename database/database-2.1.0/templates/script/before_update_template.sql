@@ -24,6 +24,8 @@ ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_blob_data;
 ALTER TABLE declaration_data_file DISABLE CONSTRAINT decl_data_file_pk;
 ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_blob;
 
+ALTER TABLE decl_template_event_script DISABLE CONSTRAINT FK_DEC_TEMP_EVENT_SCR_DEC_TEMP;
+
 COMMIT;
 EXIT;
 

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

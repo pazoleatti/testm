@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
+
 public class CreateReportResult extends DeclarationDataResult {
     private static final long serialVersionUID = 7832261980997033051L;
 

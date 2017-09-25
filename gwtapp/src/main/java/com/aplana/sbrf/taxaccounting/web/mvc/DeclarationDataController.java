@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -17,9 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.server.GetDeclarationFilterDataHandler;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
@@ -34,8 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -52,6 +49,10 @@ public class DeclarationDataController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
+        binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
+        binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
+        binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
 
     private DeclarationDataSearchService declarationDataSearchService;
@@ -62,10 +63,8 @@ public class DeclarationDataController {
     private DeclarationTemplateService declarationTemplateService;
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
-    private DepartmentService departmentService;
-    private DepartmentReportPeriodService departmentReportPeriodService;
-    private RefBookFactory rbFactory;
     private AsyncTaskManagerService asyncTaskManagerService;
+    private DeclarationDataService declarationDataService;
     private LogEntryService logEntryService;
     private LockDataService lockDataService;
     private SourceService sourceService;
@@ -73,7 +72,8 @@ public class DeclarationDataController {
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
+                                     TAUserService taUserService, DeclarationDataService declarationDataService,
+                                     LogEntryService LogEntryService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
                                      LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService,
                                      DeclarationDataSearchService declarationDataSearchService, DeclarationDataPermissionSetter declarationDataPermissionSetter) {
         this.declarationDataSearchService = declarationDataSearchService;
@@ -84,13 +84,9 @@ public class DeclarationDataController {
         this.declarationTemplateService = declarationTemplateService;
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
-        this.departmentService = departmentService;
-        this.departmentReportPeriodService = departmentReportPeriodService;
-        this.rbFactory = rbFactory;
         this.asyncTaskManagerService = asyncTaskManagerService;
-        this.logEntryService = logEntryService;
-        this.lockDataService = lockDataService;
-        this.sourceService = sourceService;
+        this.declarationDataService = declarationDataService;
+        this.logEntryService = LogEntryService;
         this.declarationDataPermissionSetter = declarationDataPermissionSetter;
     }
 
@@ -226,45 +222,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=declarationData")
     public DeclarationResult fetchDeclarationData(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-        if (!declarationService.existDeclarationData(declarationDataId)) {
-            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
-        }
-
-        DeclarationResult result = new DeclarationResult();
-
-        DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
-        result.setDepartment(departmentService.getParentsHierarchy(
-                declaration.getDepartmentId()));
-
-        result.setState(declaration.getState().getTitle());
-
-        String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
-        if (userLogin != null && !userLogin.isEmpty()) {
-            result.setCreationUserName(taUserService.getUser(userLogin).getName());
-        }
-
-        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
-
-        result.setPermissions(declaration.getPermissions());
-
-        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
-                declaration.getDepartmentReportPeriodId());
-        result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
-        result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
-
-        if (declaration.getAsnuId() != null) {
-            RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());
-            result.setAsnuName(asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue());
-        }
-
-        result.setCreationDate(sdf.format(logBusinessService.getFormCreationDate(declaration.getId())));
-        return result;
+        return declarationService.fetchDeclarationData(userInfo, declarationDataId);
     }
 
     /**
@@ -277,6 +235,29 @@ public class DeclarationDataController {
         if (declarationService.existDeclarationData(declarationDataId)) {
             declarationService.delete(declarationDataId, securityService.currentUserInfo());
         }
+    }
+
+
+    /**
+     * Создание налоговой формы
+     *
+     * @param declarationTypeId ID вида налоговой формы
+     * @param departmentId      ID подразделения
+     * @param periodId          ID периода
+     * @return Результат создания
+     */
+    @PostMapping(value = "/actions/declarationData/create")
+    public CreateDeclarationResult createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
+        Logger logger = new Logger();
+        CreateDeclarationResult result = new CreateDeclarationResult();
+
+        Long declarationId = declarationDataService.create(securityService.currentUserInfo(), logger, declarationTypeId, departmentId, periodId);
+        result.setDeclarationId(declarationId);
+        if (!logger.getEntries().isEmpty()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+
+        return result;
     }
 
     /**
@@ -296,80 +277,12 @@ public class DeclarationDataController {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
-     * @return модель {@link RecalculateDeclarationDataResult}, в которой содержаться данные о результате расчета декларации
+     * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/recalculate")
-    public RecalculateDeclarationDataResult recalculateDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
-        final RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
-        if (!declarationService.existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-            return result;
-        }
+    public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        final TaxType taxType = TaxType.NDFL;
-
-        Logger logger = new Logger();
-        try {
-            declarationService.preCalculationCheck(logger, declarationDataId, userInfo);
-        } catch (Exception e) {
-            String uuid;
-            if (e instanceof ServiceLoggerException) {
-                uuid = ((ServiceLoggerException) e).getUuid();
-            } else {
-                uuid = logEntryService.save(logger.getEntries());
-            }
-            throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(taxType) ? "Налоговая форма не может быть сформирована" : "Уведомление не может быть сформировано");
-        }
-
-        try {
-            String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
-            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
-            if (restartStatus != null && restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                result.setRestartMsg(restartStatus.getSecond());
-            } else if (restartStatus != null && !restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-            } else {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put("declarationDataId", declarationDataId);
-                params.put("docDate", new Date());
-                asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, cancelTask, userInfo, logger, new AsyncTaskHandler() {
-                    @Override
-                    public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                declarationService.getDeclarationFullName(declarationDataId, ddReportType),
-                                LockData.State.IN_QUEUE.getText());
-                    }
-
-                    @Override
-                    public void executePostCheck() {
-                        result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
-                    }
-
-                    @Override
-                    public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                        return declarationService.checkExistTask(declarationDataId, reportType, logger);
-                    }
-
-                    @Override
-                    public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                        declarationService.interruptTask(declarationDataId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
-                    }
-
-                    @Override
-                    public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                        return declarationService.getTaskName(ddReportType, taxType);
-                    }
-                });
-            }
-        } catch (Exception ignored) {
-        }
-
-        result.setUuid(logEntryService.save(logger.getEntries()));
-        return result;
+        return declarationDataService.recalculateDeclaration(userInfo, declarationDataId, force, cancelTask);
     }
 
     /**
@@ -380,80 +293,9 @@ public class DeclarationDataController {
      * @return модель {@link CheckDeclarationDataResult}, в которой содержаться данные о результате проверки декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/check")
-    public CheckDeclarationDataResult checkDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force) {
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
-        final CheckDeclarationDataResult result = new CheckDeclarationDataResult();
-
-        if (!declarationService.existDeclarationData(declarationDataId)) {
-            result.setExistDeclarationData(false);
-            result.setDeclarationDataId(declarationDataId);
-            return result;
-        }
+    public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        final TaxType taxType = TaxType.NDFL;
-        Logger logger = new Logger();
-        LockData lockDataAccept = lockDataService.getLock(declarationService.generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
-        if (lockDataAccept == null) {
-            String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
-            if (uuidXml != null) {
-                String keyTask = declarationService.generateAsyncTaskKey(declarationDataId, ddReportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationService.getTaskName(ddReportType, taxType), userInfo, force, logger);
-                if (restartStatus != null && restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                    result.setRestartMsg(restartStatus.getSecond());
-                } else if (restartStatus != null && !restartStatus.getFirst()) {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                } else {
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    Map<String, Object> params = new HashMap<String, Object>();
-                    params.put("declarationDataId", declarationDataId);
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
-                        @Override
-                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    declarationService.getDeclarationFullName(declarationDataId, ddReportType),
-                                    LockData.State.IN_QUEUE.getText());
-                        }
-
-                        @Override
-                        public void executePostCheck() {
-                        }
-
-                        @Override
-                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                            return false;
-                        }
-
-                        @Override
-                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                        }
-
-                        @Override
-                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationService.getTaskName(ddReportType, taxType);
-                        }
-                    });
-                }
-            } else {
-                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
-            }
-        } else {
-            try {
-                lockDataService.addUserWaitingForLock(lockDataAccept.getKey(), userInfo.getUser().getId());
-            } catch (Exception ignored) {
-            }
-            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-            logger.error(
-                    String.format(
-                            LockData.LOCK_CURRENT,
-                            sdf.format(lockDataAccept.getDateLock()),
-                            taUserService.getUser(lockDataAccept.getUserId()).getName(),
-                            declarationService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, taxType))
-            );
-            throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), taxType.getDeclarationShortName());
-        }
-        result.setUuid(logEntryService.save(logger.getEntries()));
-        return result;
+        return declarationDataService.checkDeclaration(userInfo, declarationDataId, force);
     }
 
     /**
@@ -478,16 +320,7 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=filesComments")
     public DeclarationDataFileComment fetchFilesComments(@PathVariable long declarationDataId) {
-        if (!declarationService.existDeclarationData(declarationDataId)) {
-            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
-        }
-
-        DeclarationDataFileComment result = new DeclarationDataFileComment();
-
-        result.setDeclarationDataId(declarationDataId);
-        result.setDeclarationDataFiles(declarationService.getFiles(declarationDataId));
-        result.setComment(declarationService.getNote(declarationDataId));
-        return result;
+        return declarationDataService.fetchFilesComments(declarationDataId);
     }
 
     /**
@@ -500,21 +333,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
     public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
-        long declarationDataId = dataFileComment.getDeclarationDataId();
-
-        DeclarationDataFileComment result = new DeclarationDataFileComment();
-        if (!declarationService.existDeclarationData(declarationDataId)) {
-            throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
-        }
-        //TODO: Добавить логирование и проверку на доступность изменений для текущего пользователя.
-
-        declarationService.saveFilesComments(declarationDataId, dataFileComment.getComment(), dataFileComment.getDeclarationDataFiles());
-
-        result.setDeclarationDataFiles(declarationService.getFiles(declarationDataId));
-        result.setComment(declarationService.getNote(declarationDataId));
-        result.setDeclarationDataId(declarationDataId);
-
-        return result;
+        return declarationDataService.saveDeclarationFilesComment(dataFileComment);
     }
 
     /**
@@ -548,59 +367,39 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=sources")
     public List<Relation> getDeclarationSourcesAndDestinations(@PathVariable long declarationDataId) {
-        if (declarationService.existDeclarationData(declarationDataId)) {
-            TAUserInfo userInfo = securityService.currentUserInfo();
-            Logger logger = new Logger();
-            DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
-
-            List<Relation> relationList = new ArrayList<Relation>();
-            relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
-            relationList.addAll(sourceService.getDeclarationDestinationsInfo(declaration, true, false, null, userInfo, logger));
-            return relationList;
-        } else {
-            return Collections.emptyList();
-        }
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationDataService.getDeclarationSourcesAndDestinations(userInfo, declarationDataId);
     }
 
     /**
      * Получение списка налоговых форм
      *
      * @param pagingParams параметры для пагинации
-     * @return список налоговых форм {@link DeclarationDataSearchResultItem}
+     * @return список налоговых форм {@link DeclarationDataJournalItem}
      */
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
-    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam PagingParams pagingParams) {
-
-        //TODO: переместить реализацию в сервис
-        TAUser currentUser = securityService.currentUserInfo().getUser();
-        Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
-
-        receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(currentUser, TaxType.NDFL, null, null));
-
-        List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
-        for (DeclarationFormKind declarationFormKind : GetDeclarationFilterDataHandler.getAvailableDeclarationFormKind(TaxType.NDFL, false, currentUser)) {
-            availableDeclarationFormKindIds.add(declarationFormKind.getId());
-        }
-
-        DeclarationDataFilter dataFilter = new DeclarationDataFilter();
-        dataFilter.setAsnuIds(currentUser.getAsnuIds());
-        dataFilter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
-        dataFilter.setFormKindIds(availableDeclarationFormKindIds);
-
-        if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
-            dataFilter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
-            dataFilter.setControlNs(true);
-        } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
-            dataFilter.setUserDepartmentId(currentUser.getDepartmentId());
-            dataFilter.setControlNs(false);
-        }
-
-        PagingResult<DeclarationDataJournalItem>   pagingResult =  declarationDataSearchService.findDeclarationDataJournalItems(dataFilter,pagingParams);
+    public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam DeclarationDataFilter filter, @RequestParam PagingParams pagingParams) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        PagingResult<DeclarationDataJournalItem> pagingResult = declarationDataService.fetchDeclarations(userInfo, filter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,
                 pagingResult.getTotalCount(),
                 pagingParams
         );
+    }
+
+    /**
+     * Формирование рну ндфл для отдельного физ лица`
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param personId          идентификатор физ лица
+     * @param ndflPersonFilter  заполненные поля при поиске
+     * @return источники и приемники декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
+    public CreateDeclarationReportResult creteReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long personId, @RequestParam NdflPersonFilter ndflPersonFilter) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationDataService.creteReportRnu(userInfo, declarationDataId, personId, ndflPersonFilter);
     }
 }

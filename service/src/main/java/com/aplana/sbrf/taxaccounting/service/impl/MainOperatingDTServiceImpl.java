@@ -110,7 +110,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(declarationTemplate.getId(), declarationTemplate.getVersion());
         for (long declarationId : ddIds) {
             // Отменяем задачи формирования спец отчетов/удаляем спец отчеты
-            declarationDataService.interruptTask(declarationId, userService.getSystemUserInfo(), ReportType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
+            declarationDataService.interruptAsyncTask(declarationId, userService.getSystemUserInfo(), ReportType.UPDATE_TEMPLATE_DEC, TaskInterruptCause.DECLARATION_TEMPLATE_UPDATE);
         }
 
         declarationTemplateService.save(declarationTemplate);

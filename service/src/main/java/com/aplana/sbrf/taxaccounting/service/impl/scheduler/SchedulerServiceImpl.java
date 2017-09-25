@@ -1,11 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl.scheduler;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.Executor;
-
 import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
@@ -34,6 +28,11 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
@@ -126,19 +125,15 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         for (final Method method : methods) {
             //Планируем задачи с расписанием из БД на момент старта приложения
             String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
-            String schedule = null;
-            try {
-                SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.valueOf(settingCode));
-                if (schedulerTask != null && schedulerTask.isActive()) {
-                    schedule = schedulerTask.getSchedule();
+            SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.valueOf(settingCode));
+            if (schedulerTask == null) {
+                LOG.error("Cannot find schedule for task with setting code = " + settingCode + ". Check database table 'CONFIGURATION_SCHEDULER'");
+            } else if (schedulerTask.isActive()){
+                try {
+                    scheduleTask(method, schedulerTask.getSchedule());
+                } catch (Exception e) {
+                    LOG.error("Cannot set schedule for task with setting code = " + settingCode + ", cron format is incorrect! Check database table 'CONFIGURATION_SCHEDULER'");
                 }
-            } catch (Exception e) {
-                LOG.error("Cannot find schedule for task with setting code = " + settingCode + ". Check database table 'CONFIGURATION'");
-            }
-            try {
-                scheduleTask(method, schedule);
-            } catch (Exception e) {
-                LOG.error("Cannot set schedule for task with setting code = " + settingCode + ", cron format is incorrect! Check database table 'CONFIGURATION'");
             }
         }
     }

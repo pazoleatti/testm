@@ -11,11 +11,10 @@ import java.util.Set;
  */
 public class ExceptionMessage {
 
-    public ExceptionMessage(MessageType messageType, String messageCode) {
-        this.messageType = messageType;
+    public ExceptionMessage(int messageCode) {
         this.messageCode = messageCode;
-        exceptionCause.add(new ExceptionCause());
     }
+
     /**
      * Тип сообщения
      */
@@ -23,7 +22,7 @@ public class ExceptionMessage {
     /**
      * Текст сообщения
      */
-    private String messageCode;
+    private int messageCode;
     /**
      * Набор класс-обёрток для отображения на клиенте одного исключения
      */
@@ -41,11 +40,11 @@ public class ExceptionMessage {
         this.messageType = messageType;
     }
 
-    public String getMessageCode() {
+    public int getMessageCode() {
         return messageCode;
     }
 
-    public void setMessageCode(String messageCode) {
+    public void setMessageCode(int messageCode) {
         this.messageCode = messageCode;
     }
 

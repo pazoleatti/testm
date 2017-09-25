@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -65,7 +66,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
         CheckDeclarationListResult result = new CheckDeclarationListResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        final String taskName = declarationDataService.getTaskName(ddReportType, action.getTaxType());
+        final String taskName = declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
         Logger logger = new Logger();
         for (Long id: action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
@@ -77,7 +78,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
                         String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
                         if (uuidXml != null) {
                             String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
-                            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
+                            Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
                             if (restartStatus != null && restartStatus.getFirst()) {
                                 logger.warn(prefix + "Данная операция уже запущена");
                             } else if (restartStatus != null && !restartStatus.getFirst()) {
@@ -108,7 +109,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
 
                                     @Override
                                     public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                        return declarationDataService.getTaskName(ddReportType, action.getTaxType());
+                                        return declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
                                     }
                                 });
                             }
@@ -125,7 +126,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
                                         LockData.LOCK_CURRENT,
                                         sdf.get().format(lockDataAccept.getDateLock()),
                                         userService.getUser(lockDataAccept.getUserId()).getName(),
-                                        declarationDataService.getTaskName(DeclarationDataReportType.ACCEPT_DEC, action.getTaxType()))
+                                        declarationDataService.getAsyncTaskName(DeclarationDataReportType.ACCEPT_DEC, action.getTaxType()))
                         );
                         logger.error(prefix + "Запущена операция, при которой выполнение данной операции невозможно");
                     }

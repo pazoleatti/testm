@@ -64,10 +64,6 @@ public class QDepartment extends com.querydsl.sql.RelationalPathBase<QDepartment
 
     public final com.querydsl.sql.ForeignKey<QNotification> _notificationFkReceiver = createInvForeignKey(id, "RECEIVER_DEPARTMENT_ID");
 
-    public final com.querydsl.sql.ForeignKey<QFormDataPerformer> _formdataPerformerFkDept = createInvForeignKey(id, "PRINT_DEPARTMENT_ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookFondDetail> _refBookFondDetDepartFk = createInvForeignKey(id, "DEPARTMENT_ID");
-
     public final com.querydsl.sql.ForeignKey<QDepartmentFormTypePerformer> _deptFormTypePerfFkPerf = createInvForeignKey(id, "PERFORMER_DEP_ID");
 
     public final com.querydsl.sql.ForeignKey<QSecUser> _secUserFkDepId = createInvForeignKey(id, "DEPARTMENT_ID");
@@ -79,8 +75,6 @@ public class QDepartment extends com.querydsl.sql.RelationalPathBase<QDepartment
     public final com.querydsl.sql.ForeignKey<QRefBookNdfl> _refBookNdflDepartFk = createInvForeignKey(id, "DEPARTMENT_ID");
 
     public final com.querydsl.sql.ForeignKey<QDepartment> _deptFkParentId = createInvForeignKey(id, "PARENT_ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookFond> _refBookFondDepartFk = createInvForeignKey(id, "DEPARTMENT_ID");
 
     public final com.querydsl.sql.ForeignKey<QNotification> _notificationFkSender = createInvForeignKey(id, "SENDER_DEPARTMENT_ID");
 

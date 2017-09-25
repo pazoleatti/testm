@@ -12,8 +12,6 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -44,20 +42,11 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         @Override
         public void processRow(ResultSet rs) throws SQLException {
             try {
-                Clob clobValue = rs.getClob("value");
-                String value = null;
-                if (clobValue != null) {
-                    char clobVal[] = new char[(int) clobValue.length()];
-                    clobValue.getCharacterStream().read(clobVal);
-                    value = new String(clobVal);
-                }
-                model.setFullStringValue(ConfigurationParam.valueOf(rs.getString("code")), rs.getInt("department_id"), value);
+                model.setFullStringValue(ConfigurationParam.valueOf(rs.getString("code")), rs.getInt("department_id"), rs.getString("value"));
             } catch (IllegalArgumentException e) {
                 // Если параметр не найден в ConfiguratioжnParam, то он просто пропускается (не виден на клиенте)
-            } catch (IOException e) {
-                throw new DaoException(GET_ALL_ERROR);
             } catch (SQLException e) {
-                throw new DaoException(GET_ALL_ERROR);
+                throw new DaoException(GET_ALL_ERROR, e);
             }
         }
     }
@@ -87,21 +76,12 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                 try {
                     ConfigurationParam configurationParam = ConfigurationParam.valueOf(rs.getString("code"));
                     if (configurationParam.getGroup().equals(group)) {
-                        Clob clobValue = rs.getClob("value");
-                        String value = null;
-                        if (clobValue != null) {
-                            char clobVal[] = new char[(int) clobValue.length()];
-                            clobValue.getCharacterStream().read(clobVal);
-                            value = new String(clobVal);
-                        }
-                        model.setFullStringValue(configurationParam, rs.getInt("department_id"), value);
+                        model.setFullStringValue(configurationParam, rs.getInt("department_id"), rs.getString("value"));
                     }
                 } catch (IllegalArgumentException e) {
                     // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
-                } catch (IOException e) {
-                    throw new DaoException(GET_ALL_ERROR);
                 } catch (SQLException e) {
-                    throw new DaoException(GET_ALL_ERROR);
+                    throw new DaoException(GET_ALL_ERROR, e);
                 }
             }
         });

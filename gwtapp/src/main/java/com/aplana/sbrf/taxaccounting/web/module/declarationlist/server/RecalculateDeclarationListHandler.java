@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
@@ -54,7 +55,7 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
         final RecalculateDeclarationListResult result = new RecalculateDeclarationListResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         final Logger logger = new Logger();
-        final String taskName = declarationDataService.getTaskName(ddReportType, action.getTaxType());
+        final String taskName = declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
         for (Long id: action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
@@ -66,7 +67,7 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
                         logger.error(prefix+"Налоговая форма не может быть рассчитана");
                     }
                     String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
+                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
                     if (restartStatus != null && restartStatus.getFirst()) {
                         logger.warn(prefix + "Данная операция уже запущена");
                     } else if (restartStatus != null && !restartStatus.getFirst()) {
@@ -90,17 +91,17 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
 
                             @Override
                             public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                                return declarationDataService.checkExistTask(declarationId, reportType, logger);
+                                return declarationDataService.checkExistAsyncTask(declarationId, reportType, logger);
                             }
 
                             @Override
                             public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                                declarationDataService.interruptTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
+                                declarationDataService.interruptAsyncTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
                             }
 
                             @Override
                             public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                return declarationDataService.getTaskName(ddReportType, action.getTaxType());
+                                return declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
                             }
                         });
                     }

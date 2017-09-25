@@ -1,17 +1,26 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.ErrorService;
 import com.aplana.sbrf.taxaccounting.model.error.ExceptionCause;
 import com.aplana.sbrf.taxaccounting.model.error.ExceptionMessage;
 import com.aplana.sbrf.taxaccounting.model.error.MessageType;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Service
 public class ErrorServiceImpl implements ErrorService {
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     /**
      * Перегоняет из StackTraceElement[] в Set<String> с учётом настройки по количеству строк стэка, отображаемого на клиенте
@@ -34,8 +43,14 @@ public class ErrorServiceImpl implements ErrorService {
     }
 
     @Override
-    public ExceptionMessage getExceptionMessage(MessageType messageType, String messageCode, Exception exception) {
-        ExceptionMessage result = new ExceptionMessage(messageType, messageCode);
+    public ExceptionMessage getExceptionMessage(Exception exception) {
+        ExceptionMessage result = new ExceptionMessage(500);
+        if (exception instanceof ServiceLoggerException) {
+            result.getAdditionInfo().put("uuid", ((ServiceLoggerException) exception).getUuid());
+            result.setMessageType(MessageType.MULTI_ERROR);
+        } else {
+            result.setMessageType(MessageType.ERROR);
+        }
         result.getAdditionInfo().put("serverDate", new Date());
 
         result.getExceptionCause().add(

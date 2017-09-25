@@ -3,11 +3,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
-import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -130,8 +130,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 		jt.update(
 				"insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_name, note)" +
-						" values (?, sysdate, ?, ?, ?, ?, ?, ?, ?)",
+						" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				id,
+				logBusiness.getLogDate(),
 				logBusiness.getEventId(),
 				logBusiness.getUserLogin(),
 				logBusiness.getRoles(),

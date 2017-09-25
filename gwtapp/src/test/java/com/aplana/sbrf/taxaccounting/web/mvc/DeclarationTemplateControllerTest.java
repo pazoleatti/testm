@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -25,6 +27,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
+import org.springframework.web.util.NestedServletException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,7 +83,7 @@ public class DeclarationTemplateControllerTest {
         ExceptionHandlerExceptionResolver exceptionResolver = new ExceptionHandlerExceptionResolver() {
             protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
                 Method method = new ExceptionHandlerMethodResolver(GlobalControllerExceptionHandler.class).resolveMethod(exception);
-                return new ServletInvocableHandlerMethod(new GlobalControllerExceptionHandler(logEntryService), method);
+                return new ServletInvocableHandlerMethod(new GlobalControllerExceptionHandler(), method);
             }
         };
         exceptionResolver.afterPropertiesSet();
@@ -127,7 +130,7 @@ public class DeclarationTemplateControllerTest {
 
     }
 
-    @Test
+    @Test(expected = NestedServletException.class)
     public void uploadDectFailTest() throws Exception {
         DeclarationTemplate dt = new DeclarationTemplate();
         when(declarationTemplateService.get(1)).thenReturn(dt);

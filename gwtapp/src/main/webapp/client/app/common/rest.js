@@ -13,9 +13,9 @@
      *  'delete': {method:'DELETE'} };
      */
     angular.module('app.rest', ['ngResource'])
-        /**
-         * @description Конфигурация
-         */
+    /**
+     * @description Конфигурация
+     */
         .factory('ConfigResource', ['$resource', function ($resource) {
             return $resource('controller/rest/config', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
@@ -75,7 +75,36 @@
          * @description Справочники
          */
         .factory('RefBookValuesResource', ['$resource', function ($resource) {
-            return $resource('/controller/rest/refBookValues/:refBookId', {}, {
+            return $resource('controller/rest/refBookValues/:refBookId', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
+
+        /**
+         * @description Поиск лиц для формирования персонального РНУ НДФЛ по физическому лицу
+         */
+        .factory('RnuPerson', ['$resource', function ($resource) {
+            return $resource('controller/rest/getListPerson/rnuPerson/:rnuPersons?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+
+        /**
+         * @description Формирование рну ндфл
+         */
+        .factory('RnuPersonDocument', ['$resource', function ($resource) {
+            return $resource('/actions/declarationData/declarationDataId}/rnuDoc?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false},
+                querySource: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
+
+        /**
+         * @description
+         */
+        .factory('DeclarationTypeForCreateResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBook/207/declarationTypesForCreate?declarationKind=:declarationKind&departmentId=:departmentId&periodId=:periodId', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])

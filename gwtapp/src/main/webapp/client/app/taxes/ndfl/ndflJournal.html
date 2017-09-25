@@ -1,6 +1,17 @@
 <div id="production-planning" class="container-grid" style="height: 100%">
-    <div class="page-top-content">
-        <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
+    <div class="row" style="min-width: 1400px;">
+        <div class="header-col" style="margin-left: 15px;">
+            <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
+        </div>
+        <div class="header-col w200" style="float: right; margin-top: 20px; margin-bottom: -14px;">
+            <button type="button" class="btn btn-danger" data-ng-click="showCreateDeclarationModal()" data-ng-show="declarationCreateAllowed">
+                <span data-translate-once="ndflJournal.button.create"></span>
+            </button>
+        </div>
+    </div>
+    <!-- Фильтр -->
+    <div class='container-grid-top'>
+        <span data-ng-include="'client/app/taxes/ndfl/ndflDeclarationFilter.html'"></span>
     </div>
     <!-- Фильтр -->
     <div class='container-grid-top'>
