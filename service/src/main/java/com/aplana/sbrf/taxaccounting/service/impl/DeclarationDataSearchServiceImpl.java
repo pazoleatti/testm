@@ -41,16 +41,6 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
     }
 
     @Override
-    public PagingResult<DeclarationDataJournalItem> findDeclarationDataJournalItems(DeclarationDataFilter declarationFilter, PagingParams pagingParams) {
-
-        List<DeclarationDataJournalItem> declarationDataList = declarationDao.findPage(declarationFilter, pagingParams);
-
-        int count = declarationDao.getCount(declarationFilter);
-
-        return new PagingResult<DeclarationDataJournalItem>(declarationDataList, count);
-    }
-
-    @Override
     public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType, boolean isReport) {
         DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
         if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER,

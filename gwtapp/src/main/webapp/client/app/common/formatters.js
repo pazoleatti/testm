@@ -61,7 +61,6 @@
 
                 var result = [];
                 angular.forEach(items, function (item) {
-                    console.log(item);
                     result.push(_.property(property)(item));
                 });
 
@@ -97,7 +96,28 @@
                         text = plural;
                 }
                 return text;
-            }
+            };
         }])
+
+
+        /**
+         * @description Форматтер для получения наименования сущности
+         * @param entity Сущность
+         */
+        .filter('nameFormatter', function () {
+            return function (entity) {
+                return entity ? entity.name : "";
+            };
+        })
+
+        /**
+         * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
+         * @param reportPeriod Отчетный период
+         */
+        .filter('periodFormatter', function () {
+            return function (reportPeriod) {
+                return reportPeriod ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name : "";
+            };
+        })
     ;
 }());

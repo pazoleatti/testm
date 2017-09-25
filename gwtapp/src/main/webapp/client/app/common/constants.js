@@ -23,13 +23,12 @@
                 CREATE_DECLARATION_REPORT: 1 << 11,
                 CREATE_DECLARATION_PRIMARY: 1 << 12,
                 CREATE_DECLARATION_CONSOLIDATED: 1 << 13,
-                CREATE_DECLARATION_TAX: 1 << 12,
-                CREATE_UPLOAD_REPORT: 1 << 13,
-                HANDLING_FILE: 1 << 14,
-                UPLOAD_FILE: 1 << 15,
-                EDIT_GENERAL_PARAMS: 1 << 16,
-                VIEW_REF_BOOK: 1 << 17,
-                EDIT_REF_BOOK: 1 << 18
+                CREATE_UPLOAD_REPORT: 1 << 14,
+                HANDLING_FILE: 1 << 15,
+                UPLOAD_FILE: 1 << 16,
+                EDIT_GENERAL_PARAMS: 1 << 17,
+                VIEW_REF_BOOK: 1 << 18,
+                EDIT_REF_BOOK: 1 << 19
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",
@@ -59,7 +58,7 @@
                 RETURN_TO_CREATED: 1 << 6,
                 EDIT_ASSIGNMENT: 1 << 7
             },
-            NDFL_STATE: {
+            STATE: {
                 CREATED: "Создана",
                 PREPARED: "Подготовлена",
                 ACCEPTED: "Принята",
