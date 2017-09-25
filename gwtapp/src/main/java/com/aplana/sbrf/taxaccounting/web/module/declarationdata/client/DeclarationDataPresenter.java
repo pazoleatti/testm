@@ -612,8 +612,7 @@ public class DeclarationDataPresenter
 
     @Override
     public void downloadXml() {
-        Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xml/"
-                + declarationId, null, null);
+        Window.open(GWT.getHostPageBaseURL() + "controller/rest/declarationData/" + declarationId + "/xml/", null, null);
     }
 
     @Override
