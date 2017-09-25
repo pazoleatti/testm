@@ -44,6 +44,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -650,14 +651,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams) {
         TAUser currentUser = userInfo.getUser();
 
-        if (filter.getAsnuIds() == null || filter.getAsnuIds().isEmpty()) {
-            filter.setAsnuIds(new LinkedList<Long>());
+        if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
+            List<Long> asnuIds = new ArrayList<Long>();
             for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
-                filter.getAsnuIds().add((long) asnu.getId());
+                asnuIds.add(asnu.getId());
             }
+            filter.setAsnuIds(asnuIds);
         }
 
-        if (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()) {
+        if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
             Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
             for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
                 receiverDepartmentIds.add(department.getId());
@@ -665,7 +667,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             filter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         }
 
-        if (filter.getFormKindIds() == null || filter.getFormKindIds().isEmpty()) {
+        if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
             List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
             if (currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                 availableDeclarationFormKindIds.addAll(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
@@ -685,7 +687,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             filter.setControlNs(false);
         }
 
-        return declarationDataSearchService.findDeclarationDataJournalItems(filter, pagingParams);
+        List<DeclarationDataJournalItem> declarationDataList = declarationDataDao.findPage(filter, pagingParams);
+
+        int count = declarationDataDao.getCount(filter);
+
+        return new PagingResult<DeclarationDataJournalItem>(declarationDataList, count);
     }
 
     @Override

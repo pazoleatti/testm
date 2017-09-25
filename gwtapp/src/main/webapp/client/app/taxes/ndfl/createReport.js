@@ -4,7 +4,7 @@
     /**
      * @description Модуль для создания отчетности
      */
-    angular.module('app.createReport', ['app.constants', 'app.modals', 'app.rest'])
+    angular.module('app.createReport', ['app.constants', 'app.modals', 'app.rest', 'app.formatters'])
 
     /**
      * @description Контроллер окна "Создание отчетности"
@@ -89,16 +89,5 @@
                         && $scope.createReportFilter.department !== null
                         && $scope.createReportFilter.declarationType !== null
                 }
-        }])
-        .filter('nameFormatter', function () {
-            return function (entity) {
-                return entity ? entity.name : "";
-            };
-        })
-        .filter('periodFormatter', function () {
-            return function (entity) {
-                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
-            };
-        });
-
+        }]);
 }());

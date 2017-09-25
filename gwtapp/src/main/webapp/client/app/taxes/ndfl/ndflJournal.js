@@ -4,40 +4,12 @@
     /**
      * @description Модуль для работы со формами ндфл
      */
-    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.modals', 'app.rest', 'app.createDeclaration', 'app.logPanel'])
+    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.modals', 'app.rest', 'app.createDeclaration', 'app.logPanel', 'app.formatters', 'app.select.common'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflJournal', {
                 url: '/taxes/ndflJournal',
                 templateUrl: 'client/app/taxes/ndfl/ndflJournal.html',
-                controller: 'ndflJournalCtrl',
-                resolve: {
-                    periods: function (APP_CONSTANTS, RefBookValuesResource) {
-                        return RefBookValuesResource.query({
-                            refBookId: APP_CONSTANTS.REFBOOK.PERIOD,
-                            projection: "allPeriods"
-                        }, function (data) {
-                            return data;
-                        }).$promise;
-                    },
-                    openPeriods: function (APP_CONSTANTS, RefBookValuesResource) {
-                        return RefBookValuesResource.query({
-                            refBookId: APP_CONSTANTS.REFBOOK.PERIOD,
-                            projection: "openPeriods"
-                        }, function (data) {
-                            return data;
-                        }).$promise;
-                    },
-                    declarationTypes: function (APP_CONSTANTS, RefBookValuesResource) {
-                        return RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                            return data;
-                        }).$promise;
-                    },
-                    asnu: function (APP_CONSTANTS, RefBookValuesResource) {
-                        return RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
-                            return data;
-                        }).$promise;
-                    }
-                }
+                controller: 'ndflJournalCtrl'
             });
         }])
 
@@ -45,46 +17,9 @@
          * @description Контроллер списка форм
          */
         .controller('ndflJournalCtrl', [
-            '$scope', '$state', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', 'appModals', 'periods', 'openPeriods', 'declarationTypes',
-            'asnu', '$logPanel', 'PermissionChecker',
-            function ($scope, $state, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, appModals, periods, openPeriods, declarationTypes,
-                      asnu, $logPanel, PermissionChecker) {
-                $scope.security = {
-                    user: $rootScope.user
-                };
-
-                $scope.declarationCreateAllowed = PermissionChecker.check($scope.security.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
-
-                /**
-                 * @description форматтер для поля 'Вид налоговой формы' для перехода на конкретную НФ
-                 * @param cellValue значение ячейки
-                 * @param options данные таблицы
-                 */
-                function linkformatter(cellValue, options) {
-                    return "<a href='index.html#/taxes/ndfl/" + options.rowId + "'>" + cellValue + "</a>";
-                }
-
-                /**
-                 * @description форматтер для поля 'Файл ТФ' для получения файла ТФ
-                 * @param cellValue значение ячейки
-                 * @param options данные таблицы
-                 */
-                function linkFileFormatter(cellValue, options) {
-                    if (!cellValue) {
-                        cellValue = '';
-                    }
-                    return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
-                }
-
-                function getIds(list) {
-                    if (list) {
-                        return list.map(function (elem) {
-                            return elem.id;
-                        });
-                    } else {
-                        return [];
-                    }
-                }
+            '$scope', '$state', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', 'appModals', '$logPanel', 'PermissionChecker',
+            function ($scope, $state, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, appModals, $logPanel, PermissionChecker) {
+                $scope.declarationCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
 
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
                 /**
@@ -95,29 +30,7 @@
                     $scope.ctrlMyGrid.refreshGrid(page);
                 };
 
-                var correctionTags = [APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE, APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY, APP_CONSTANTS.CORRETION_TAG.ALL];
                 var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
-
-                function getCorrectionTag() {
-                    switch ($scope.searchFilter.params.correctionTag) {
-                        case APP_CONSTANTS.CORRETION_TAG.ALL:
-                            return undefined;
-                        case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
-                            return false;
-                        case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
-                            return true;
-                    }
-                    return undefined;
-                }
-
-                var declarationStates = [APP_CONSTANTS.NDFL_STATE.CREATED, APP_CONSTANTS.NDFL_STATE.PREPARED, APP_CONSTANTS.NDFL_STATE.ACCEPTED];
-
-                var declarationKinds = [];
-                if ($scope.security.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_NS) || $scope.security.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP)) {
-                    declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY, APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED];
-                } else if ($scope.security.user.hasRole(APP_CONSTANTS.USER_ROLE.N_ROLE_OPER)) {
-                    declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY];
-                }
 
                 $scope.searchFilter = {
                     params: {
@@ -125,16 +38,20 @@
                     },
                     ajaxFilter: [],
                     isClear: false,
-                    filterName: 'ndflDeclarationFilter'
+                    filterName: 'ndflJournalFilter'
                 };
 
                 // Флаг отображения кнопки "Сбросить"
                 $scope.searchFilter.isClearByFilterParams = function () {
                     var needToClear = false;
                     angular.forEach($scope.searchFilter.params, function (value, key) {
+                        //Если значение поля корретировки отличается от значения по умолчанию, то фильтр можно сбросить
                         if (key === 'correctionTag') {
                             needToClear = needToClear || value.id !== defaultCorrectionTag.id;
                         } else if (value != null) {
+                            //Если у поля значение отлично от null, то фильтр можно сбросить
+                            //Дополнительная проверка нужно только полей, значениями которых являются массивы и строки
+                            //Длина таких значений должна быть больше 0
                             if (Array.isArray(value) || typeof(value) === "string" || value instanceof String) {
                                 needToClear = needToClear || value.length > 0;
                             } else {
@@ -149,117 +66,13 @@
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
                 };
 
-                $scope.$watch('searchFilter.params.periods', function (periods) {
-                    if (periods.length > 0) {
-                        $scope.latestSelectedPeriod = periods[periods.length - 1];
+                $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
+                    if (selectedPeriods && selectedPeriods.length > 0) {
+                        $scope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
                     } else {
                         $scope.latestSelectedPeriod = null;
                     }
                 });
-
-                $scope.correctionTagSelect = {
-                    options: {
-                        data: {
-                            results: correctionTags,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter')
-                    }
-                };
-
-                $scope.periodSelect = {
-                    options: {
-                        data: {
-                            results: periods,
-                            text: $filter('periodFormatter')
-                        },
-                        formatSelection: $filter('periodFormatter'),
-                        formatResult: $filter('periodFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.departmentsSelect = {
-                    options: {
-                        ajax: {
-                            url: "controller/rest/refBookValues/30?projection=allDepartments",
-                            quietMillis: 200,
-                            data: function (term, page) {
-                                return {
-                                    name: term,
-                                    pagingParams: JSON.stringify({count: 50, page: page})
-                                };
-                            },
-                            results: function (data, page) {
-                                var more = (page * 50) < data.records;
-                                return {results: data.rows, more: more};
-                            }
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.declarationKindSelect = {
-                    options: {
-                        data: {
-                            results: declarationKinds,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.declarationTypeSelect = {
-                    options: {
-                        data: {
-                            results: declarationTypes,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.asnuSelect = {
-                    options: {
-                        data: {
-                            results: asnu,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.stateSelect = {
-                    options: {
-                        data: {
-                            results: declarationStates,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
 
                 $scope.ndflJournalGridOptions = {
                     datatype: "angularResource",
@@ -268,39 +81,44 @@
                         return {
                             projection: 'declarations',
                             filter: JSON.stringify({
-                                asnuIds: getIds($scope.searchFilter.params.asnuList),
-                                departmentIds: getIds($scope.searchFilter.params.departments),
-                                formKindIds: getIds($scope.searchFilter.params.declarationKinds),
+                                asnuIds: $filter('idExtractor')($scope.searchFilter.params.asnuList),
+                                departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
+                                formKindIds: $filter('idExtractor')($scope.searchFilter.params.declarationKinds),
                                 declarationDataId: $scope.searchFilter.params.declarationNumber,
-                                declarationTypeIds: getIds($scope.searchFilter.params.declarationTypes),
+                                declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
                                 formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
                                 fileName: $scope.searchFilter.params.file,
-                                correctionTag: getCorrectionTag(),
-                                reportPeriodIds: getIds($scope.searchFilter.params.periods)
+                                correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
+                                reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
                             })
                         };
                     },
                     value: [],
                     colNames: [
-                        'Номер формы',
-                        'Тип налоговой формы',
-                        'Вид налоговой формы',
-                        'Подразделение',
-                        'Наименование АСНУ',
-                        'Период',
-                        'Состояние',
-                        'Файл ТФ',
-                        'Дата и время создания формы',
-                        'Создал'],
+                        $filter('translate')('ndflJournal.grid.columnName.declarationNumber'),
+                        $filter('translate')('ndflJournal.grid.columnName.declarationKind'),
+                        $filter('translate')('ndflJournal.grid.columnName.declarationType'),
+                        $filter('translate')('ndflJournal.grid.columnName.department'),
+                        $filter('translate')('ndflJournal.grid.columnName.asnu'),
+                        $filter('translate')('ndflJournal.grid.columnName.period'),
+                        $filter('translate')('ndflJournal.grid.columnName.state'),
+                        $filter('translate')('ndflJournal.grid.columnName.tfFile'),
+                        $filter('translate')('ndflJournal.grid.columnName.creationDateTime'),
+                        $filter('translate')('ndflJournal.grid.columnName.creator')],
                     colModel: [
                         {name: 'declarationDataId', index: 'declarationDataId', width: 135, key: true},
                         {name: 'declarationKind', index: 'declarationKind', width: 175},
-                        {name: 'declarationType', index: 'declarationType', width: 175, formatter: linkformatter},
+                        {
+                            name: 'declarationType',
+                            index: 'declarationType',
+                            width: 175,
+                            formatter: $filter('linkformatter')
+                        },
                         {name: 'department', index: 'department', width: 150},
                         {name: 'asnuName', index: 'asnuName', width: 176},
                         {name: 'reportPeriod', index: 'reportPeriod', width: 110},
                         {name: 'state', index: 'state', width: 100},
-                        {name: 'fileName', index: 'fileName', width: 400, formatter: linkFileFormatter},
+                        {name: 'fileName', index: 'fileName', width: 400, formatter: $filter('linkFileFormatter')},
                         {
                             name: 'creationDate',
                             index: 'creationDate',
@@ -346,10 +164,8 @@
                  * Показ МО "Создание налоговой формы"
                  */
                 $scope.showCreateDeclarationModal = function () {
-                    var modal = appModals.create('client/app/taxes/ndfl/createDeclaration.html', 'createDeclarationFormCtrl', {
-                        periods: openPeriods,
-                        latestSelectedPeriod: $scope.latestSelectedPeriod
-                    }, {size: 'md'});
+                    var modal = appModals.create('client/app/taxes/ndfl/createDeclaration.html', 'createDeclarationFormCtrl',
+                        {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'});
                     modal.result.then(function (response) {
                         if (response.data && response.data.declarationId && response.data.declarationId !== null) {
                             $state.go('ndfl', {
@@ -365,15 +181,43 @@
                 };
             }])
 
-        .filter('nameFormatter', function () {
-            return function (entity) {
-                return entity ? entity.name : "";
+        /**
+         * @description Форматтер для поля 'Вид налоговой формы' для перехода на конкретную НФ
+         * @param cellValue Значение ячейки
+         * @param options Данные таблицы
+         */
+        .filter('linkformatter', function () {
+            return function (cellValue, options) {
+                return "<a href='index.html#/taxes/ndfl/" + options.rowId + "'>" + cellValue + "</a>";
             };
         })
 
-        .filter('periodFormatter', function () {
-            return function (entity) {
-                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
+        /**
+         * @description Форматтер для поля 'Файл ТФ' для получения файла ТФ
+         * @param cellValue Значение ячейки
+         * @param options Данные таблицы
+         */
+        .filter('linkFileFormatter', function () {
+            return function (cellValue, options) {
+                return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
             };
-        });
+        })
+
+        /**
+         * @description Форматтер для преобразования тега корректировки из enum в boolean
+         * @param correctionTag
+         */
+        .filter('correctionTagFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (correctionTag) {
+                switch (correctionTag) {
+                    case APP_CONSTANTS.CORRETION_TAG.ALL:
+                        return undefined;
+                    case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
+                        return false;
+                    case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
+                        return true;
+                }
+                return undefined;
+            };
+        }]);
 }());

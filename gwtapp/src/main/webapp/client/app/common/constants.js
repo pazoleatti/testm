@@ -51,7 +51,7 @@
                 DELETE: 1 << 4,
                 RETURN_TO_CREATED: 1 << 5
             },
-            NDFL_STATE: {
+            STATE: {
                 CREATED: {id: 1, name: "Создана"},
                 PREPARED: {id: 2, name: "Подготовлена"},
                 ACCEPTED: {id: 3, name: "Принята"}

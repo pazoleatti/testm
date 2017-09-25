@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
@@ -17,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -25,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,23 +33,28 @@ import java.util.List;
 public class RefBookValuesController {
     private static final Log LOG = LogFactory.getLog(RefBookValuesController.class);
 
-    @Autowired
-    private RefBookAttachFileTypeService refBookAttachFileTypeService;
+    final private RefBookAttachFileTypeService refBookAttachFileTypeService;
 
-    @Autowired
-    private RefBookAsnuService refBookAsnuService;
+    final private RefBookAsnuService refBookAsnuService;
 
-    @Autowired
-    private RefBookDeclarationTypeService refBookDeclarationTypeService;
+    final private RefBookDeclarationTypeService refBookDeclarationTypeService;
 
-    @Autowired
-    private RefBookDepartmentDataService refBookDepartmentDataService;
+    final private RefBookDepartmentDataService refBookDepartmentDataService;
 
-    @Autowired
-    private PeriodService periodService;
+    final private PeriodService periodService;
 
-    @Autowired
-    private SecurityService securityService;
+    final private SecurityService securityService;
+
+    public RefBookValuesController(RefBookAttachFileTypeService refBookAttachFileTypeService, RefBookAsnuService refBookAsnuService,
+                                   RefBookDeclarationTypeService refBookDeclarationTypeService, RefBookDepartmentDataService refBookDepartmentDataService,
+                                   PeriodService periodService, SecurityService securityService) {
+        this.refBookAttachFileTypeService = refBookAttachFileTypeService;
+        this.refBookAsnuService = refBookAsnuService;
+        this.refBookDeclarationTypeService = refBookDeclarationTypeService;
+        this.refBookDepartmentDataService = refBookDepartmentDataService;
+        this.periodService = periodService;
+        this.securityService = securityService;
+    }
 
     /**
      * Привязка данных из параметров запроса
@@ -68,7 +71,7 @@ public class RefBookValuesController {
      *
      * @param name         Наименование
      * @param pagingParams Параметры пейджинга
-     * @return
+     * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=allDepartments")
     public JqgridPagedList<RefBookDepartment> fetchAllDepartments(String name, @RequestParam PagingParams pagingParams) {
@@ -84,7 +87,7 @@ public class RefBookValuesController {
      * @param name           Наименование
      * @param reportPeriodId ID отчетного периода
      * @param pagingParams   Параметры пейджинга
-     * @return
+     * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriod")
     public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriod(String name, Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
@@ -136,8 +139,7 @@ public class RefBookValuesController {
     public List<ReportPeriod> fetchAllReportPeriods() {
         LOG.info("Fetch periods");
         TAUser user = securityService.currentUserInfo().getUser();
-        List<ReportPeriod> periods = periodService.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, Arrays.asList(user.getDepartmentId()));
-        return periods;
+        return periodService.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, Collections.singletonList(user.getDepartmentId()));
     }
 
     /**
@@ -149,7 +151,6 @@ public class RefBookValuesController {
     public List<ReportPeriod> fetchOpenReportPeriods() {
         LOG.info("Fetch periods");
         TAUser user = securityService.currentUserInfo().getUser();
-        List<ReportPeriod> periods = new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
-        return periods;
+        return new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
     }
 }

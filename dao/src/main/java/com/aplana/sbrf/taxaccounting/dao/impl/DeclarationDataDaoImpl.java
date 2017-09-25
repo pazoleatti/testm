@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -66,7 +67,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     final private SQLQueryFactory sqlQueryFactory;
 
-
+    //Период формируется как "год: наименование периода", как и в списке периодов. Также это нужно, чтобы в таблице отображался период с годом
     final private QBean<DeclarationDataJournalItem> dataJournalItemQBean = bean(DeclarationDataJournalItem.class,
             declarationData.id.as("declarationDataId"),
             declarationKind.name.as("declarationKind"),
@@ -267,28 +268,28 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         BooleanBuilder where = new BooleanBuilder();
 
-        // id в REF_BOOK_ASNU - тип int, а AsnuId в фильтре - тип long
-        if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
+        if (!CollectionUtils.isEmpty(filter.getAsnuIds())) {
             where.and(refBookAsnu.id.isNull().or(refBookAsnu.id.in(filter.getAsnuIds())));
         } else {
             where.and(refBookAsnu.id.in(Collections.EMPTY_LIST));
         }
 
-        if (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()) {
+        if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
             filter.setDepartmentIds(Collections.EMPTY_LIST);
         }
         where.and(department.id.in(filter.getDepartmentIds()));
 
-        if (filter.getFormKindIds() == null || filter.getFormKindIds().isEmpty()) {
+        if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
             filter.setFormKindIds(Collections.EMPTY_LIST);
         }
         where.and(declarationKind.id.in(filter.getFormKindIds()));
 
         if (filter.getDeclarationDataId() != null) {
+            //Значение введенное в фильтре по длине может быть меньше, чем значение поля, и может содержаться в любой его части
             where.and(declarationData.id.stringValue().contains(filter.getDeclarationDataId().toString()));
         }
 
-        if (filter.getDeclarationTypeIds() != null && !filter.getDeclarationTypeIds().isEmpty()) {
+        if (!CollectionUtils.isEmpty(filter.getDeclarationTypeIds())) {
             where.and(declarationType.id.in(filter.getDeclarationTypeIds()));
         }
 
@@ -296,16 +297,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             where.and(declarationData.state.eq(filter.getFormState().getId().byteValue()));
         }
 
-        if(filter.getFileName() != null && StringUtils.isNotBlank(filter.getFileName())) {
+        if (StringUtils.isNotBlank(filter.getFileName())) {
+            //Значение введенное в фильтре по длине может быть меньше, чем значение поля, и может содержаться в любой его части
             where.and(declarationData.fileName.containsIgnoreCase(StringUtils.trim(filter.getFileName())));
         }
 
-        if(filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
+        if (!CollectionUtils.isEmpty(filter.getReportPeriodIds())) {
             where.and(reportPeriod.id.in(filter.getReportPeriodIds()));
         }
 
-        if(filter.getCorrectionTag() != null) {
-            if(filter.getCorrectionTag()) {
+        if (filter.getCorrectionTag() != null) {
+            if (filter.getCorrectionTag()) {
                 where.and(departmentReportPeriod.correctionDate.isNotNull());
             } else {
                 where.and(departmentReportPeriod.correctionDate.isNull());
@@ -551,7 +553,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
             sql.append(" AND ")
-                .append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));
+                    .append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));
         }
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             sql.append(" AND ")

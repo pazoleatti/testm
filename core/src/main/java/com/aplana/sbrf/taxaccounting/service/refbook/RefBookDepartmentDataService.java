@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface RefBookDepartmentDataService {
     /**
-     * Получение всех доступных значений справочника
+     * Получение доступных (согласно правам доступа пользователя)  значений справочника
      *
      * @param user Пользователь
      * @return Список значений справочника
@@ -20,23 +20,24 @@ public interface RefBookDepartmentDataService {
     List<RefBookDepartment> fetchAllAvailableDepartments(TAUser user);
 
     /**
-     * Получение доступных значений справочника с фильтрацией по наименованию подразделения и пейджингом
+     * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user         Пользователь
      * @param name         Наименование подразделения
      * @param pagingParams Параметры пейджинга
-     * @return Список значений справочника
+     * @return Страница списка значений справочника
      */
     PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams);
 
     /**
-     * Получение доступных значений справочника, для которых открыт заданный период, с фильтрацией по наименованию подразделения и пейджингом
+     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user           Пользователь
      * @param name           Наименование подразделения
      * @param reportPeriodId ID отчетного периода, который должен быть открыт
      * @param pagingParams   Параметры пейджинга
-     * @return Список значений справочника
+     * @return Страница списка значений справочника
      */
     PagingResult<RefBookDepartment> fetchDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams);
 }

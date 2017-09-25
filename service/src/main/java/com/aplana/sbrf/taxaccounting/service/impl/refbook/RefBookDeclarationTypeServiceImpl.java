@@ -37,9 +37,9 @@ public class RefBookDeclarationTypeServiceImpl implements RefBookDeclarationType
     /**
      * Получение значений справочника для создания налоговой формы
      *
-     * @param declarationKind     Вид налоговой формы
-     * @param departmentId Подразделение
-     * @param periodId ID отчетного периода
+     * @param declarationKind Вид налоговой формы
+     * @param departmentId    Подразделение
+     * @param periodId        ID отчетного периода
      * @return Список значений справочника
      */
     @Override
