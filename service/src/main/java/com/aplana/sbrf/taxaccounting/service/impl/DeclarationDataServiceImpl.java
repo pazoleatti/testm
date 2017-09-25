@@ -19,6 +19,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -152,6 +154,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTypeService declarationTypeService;
     @Autowired
     private NdflPersonDao ndflPersonDao;
+    @Autowired
+    private DeclarationDataPermissionSetter declarationDataPermissionSetter;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -506,6 +510,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (userLogin != null && !userLogin.isEmpty()) {
             result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
+
+        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
+
+        result.setPermissions(declaration.getPermissions());
 
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());

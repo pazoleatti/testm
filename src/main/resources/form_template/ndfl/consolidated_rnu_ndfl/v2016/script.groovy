@@ -286,9 +286,9 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
 
         }
 
-    logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
-logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") +" (всего " + declarationDataIdList.size() + " форм)")
-}
+        logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
+        logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") + " (всего " + declarationDataIdList.size() + " форм)")
+    }
 
     String getVal(Map<String, RefBookValue> refBookPersonRecord, String attrName) {
         RefBookValue refBookValue = refBookPersonRecord.get(attrName);
@@ -2959,21 +2959,20 @@ logger.info("Номера первичных НФ, включенных в ко�
                 }
             }
 
-        // Общ10 Соответствие КПП и ОКТМО Тербанку
-        if (ndflPersonIncome.oktmo != null) {
-            List<String> kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
-            if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-
-
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") , \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_KPP, ndflPersonIncome.kpp ?: "",C_OKTMO, ndflPersonIncome.oktmo ?: "",
-                        C_OKTMO, ndflPersonIncome.oktmo ?: "",    R_DETAIL,
+            // Общ10 Соответствие КПП и ОКТМО Тербанку
+            if (ndflPersonIncome.oktmo != null) {
+                List<String> kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
+                if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                            C_KPP, ndflPersonIncome.kpp ?: "",
+                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                            R_DETAIL,
                             department ? department.name : ""
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
                             errMsg)
-
+                }
             }
         }
 
@@ -3173,27 +3172,28 @@ logger.info("Номера первичных НФ, включенных в ко�
                     }
                 }
 
-            // СведДох2 Сумма вычета (Графа 12)
-            if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0
-                && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-                if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
-                            C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
-                            C_PERIOD_CURR_SUMM, sumNdflDeduction ?: 0)
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
+                // СведДох2 Сумма вычета (Графа 12)
+                if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0
+                        && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {
+                    BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
+                    if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
+                                C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
+                                C_PERIOD_CURR_SUMM, sumNdflDeduction ?: 0)
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
+                    }
+                    if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+                        // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
+                        String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\")",
+                                C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: 0,
+                                C_PERIOD_CURR_SUMM, sumNdflDeduction
+                        )
+                        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
+                        logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
+                    }
                 }
-                if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
-                    // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\")",
-                            C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: 0,
-                            C_PERIOD_CURR_SUMM, sumNdflDeduction
-                    )
-                    String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                    logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInp, pathError, errMsg)
-                }
-            }
 
                 // СведДох4 НДФЛ.Процентная ставка (Графа 14)
                 if ((ndflPersonIncome.taxRate ?: 0) > 0) {

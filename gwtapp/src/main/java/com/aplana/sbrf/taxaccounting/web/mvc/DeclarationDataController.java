@@ -1,16 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
@@ -55,7 +48,6 @@ public class DeclarationDataController {
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
 
-    private DeclarationDataSearchService declarationDataSearchService;
     private DeclarationDataService declarationService;
     private SecurityService securityService;
     private ReportService reportService;
@@ -66,17 +58,11 @@ public class DeclarationDataController {
     private AsyncTaskManagerService asyncTaskManagerService;
     private DeclarationDataService declarationDataService;
     private LogEntryService logEntryService;
-    private LockDataService lockDataService;
-    private SourceService sourceService;
-    private DeclarationDataPermissionSetter declarationDataPermissionSetter;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
                                      TAUserService taUserService, DeclarationDataService declarationDataService,
-                                     LogEntryService LogEntryService, DepartmentService departmentService, DepartmentReportPeriodService departmentReportPeriodService, RefBookFactory rbFactory, AsyncTaskManagerService asyncTaskManagerService,
-                                     LogEntryService logEntryService, LockDataService lockDataService, SourceService sourceService,
-                                     DeclarationDataSearchService declarationDataSearchService, DeclarationDataPermissionSetter declarationDataPermissionSetter) {
-        this.declarationDataSearchService = declarationDataSearchService;
+                                     LogEntryService LogEntryService, AsyncTaskManagerService asyncTaskManagerService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -87,7 +73,6 @@ public class DeclarationDataController {
         this.asyncTaskManagerService = asyncTaskManagerService;
         this.declarationDataService = declarationDataService;
         this.logEntryService = LogEntryService;
-        this.declarationDataPermissionSetter = declarationDataPermissionSetter;
     }
 
     /**

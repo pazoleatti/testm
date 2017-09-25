@@ -39,6 +39,7 @@
         }])
         /**
          * @description Данные НДФЛ по физлицу
+         * @description Данные НДФЛ по физлицу
          */
         .factory('NdflPersonResource', ['$resource', function ($resource) {
             return $resource('controller/rest/ndflPerson?projection=:projection', {}, {
