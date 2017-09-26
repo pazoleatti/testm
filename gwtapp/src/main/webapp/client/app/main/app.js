@@ -34,6 +34,7 @@
             'app.ndfl',
             'app.ndflJournal',
             'app.ndflReportJournal',
+            'app.taskList',
             'app.filterUtils',
             'app.rest',
             'app.formatters',
