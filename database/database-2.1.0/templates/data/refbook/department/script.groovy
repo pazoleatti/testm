@@ -11,6 +11,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
+import com.aplana.sbrf.taxaccounting.service.script.RefBookService
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import groovy.transform.TypeChecked
@@ -27,17 +30,42 @@ import groovy.transform.TypeCheckingMode
  *      проверки при редактировании записи шаги 3, 5, 6 - http://conf.aplana.com/pages/viewpage.action?pageId=11378355
  */
 
-(new department(this)).run();
+(new Department(this)).run();
 
 @TypeChecked
-class department extends AbstractScriptClass {
+class Department extends AbstractScriptClass {
 
-    department() {
+    Long uniqueRecordId;
+    Boolean isNewRecords;
+    RefBookFactory refBookFactory
+    List<Map<String, RefBookValue>> saveRecords
+    RefBookService refBookService
+    DepartmentService departmentService
+
+    Department() {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    public department(scriptClass) {
+    public Department(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("saveRecords")) {
+            this.saveRecords = (List<Map<String, RefBookValue>>) scriptClass.getBinding().getProperty("saveRecords");
+        }
+        if (scriptClass.getBinding().hasVariable("uniqueRecordId")) {
+            this.uniqueRecordId = (Long) scriptClass.getBinding().getProperty("uniqueRecordId");
+        }
+        if (scriptClass.getBinding().hasVariable("isNewRecords")) {
+            this.isNewRecords = (Boolean) scriptClass.getBinding().getProperty("isNewRecords");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookService")) {
+            this.refBookService = (RefBookService) scriptClass.getBinding().getProperty("refBookService");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+        }
     }
 
     @Override
@@ -53,13 +81,13 @@ class department extends AbstractScriptClass {
 
     Long REF_BOOK_ID = 30
 
-    Map<Integer, Department> departmantMap = [:]
+    Map<Integer, com.aplana.sbrf.taxaccounting.model.Department> departmantMap = [:]
 
     Map<Integer, Integer> parentTBIdMap = [:]
 
     void save() {
         // главный банк
-        Department rootBank = getDepartment(ROOT_BANK_ID)
+        com.aplana.sbrf.taxaccounting.model.Department rootBank = getDepartment(ROOT_BANK_ID)
         RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID)
         RefBook refBook = refBookFactory.get(REF_BOOK_ID)
         List<RefBookAttribute> attributes = refBook.getAttributes()
@@ -102,7 +130,7 @@ class department extends AbstractScriptClass {
                 if (isChangeType && oldType in departmentTypes && !(type in departmentTypes)) {
                     MembersFilterData membersFilter = new MembersFilterData()
                     membersFilter.setDepartmentIds(new HashSet<Integer>(Arrays.asList(recordId)))
-                    PagingResult<TAUserView> users = formDataService.getUsersByFilter(membersFilter)
+                    PagingResult<TAUserView> users = refBookService.getUsersByFilter(membersFilter)
                     if (!users.isEmpty()) {
                         for (TAUserView user : users) {
                             logger.error("Пользователь %s назначен подразделению %s", user.getName(), record?.NAME?.stringValue)
@@ -156,11 +184,11 @@ class department extends AbstractScriptClass {
             // 7 - проверка корректности
             // Новое подразделение не имеет смысла проверять
             if (recordId) {
-                Department currDepartment = getDepartment(recordId)
+                com.aplana.sbrf.taxaccounting.model.Department currDepartment = getDepartment(recordId)
                 boolean isChangeActive = saveRecord.IS_ACTIVE?.value != (currDepartment.isActive() ? 1 : 0)
                 if (isChangeActive && saveRecord.IS_ACTIVE?.value == 0) {
-                    List<Department> childIds = departmentService.getAllChildren(recordId)
-                    for (Department child : childIds) {
+                    List<com.aplana.sbrf.taxaccounting.model.Department> childIds = departmentService.getAllChildren(recordId)
+                    for (com.aplana.sbrf.taxaccounting.model.Department child : childIds) {
                         if (recordId != child.getId() && child.isActive()) {
                             logger.error('Подразделение не может быть отредактировано, так как нельзя установить для него признак "Недействующее", если в его составе находится действующее подразделение!')
                             break
@@ -225,7 +253,7 @@ class department extends AbstractScriptClass {
         return errors
     }
 
-    Department getDepartment(Integer id) {
+    com.aplana.sbrf.taxaccounting.model.Department getDepartment(Integer id) {
         if (departmantMap.get(id) == null) {
             departmantMap.put(id, departmentService.get(id))
         }

@@ -4,32 +4,45 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
-import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.identification.*
-import com.aplana.sbrf.taxaccounting.dao.identification.*
+import com.aplana.sbrf.taxaccounting.model.identification.Address
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEvent
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEventType
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeListener
+import com.aplana.sbrf.taxaccounting.model.identification.Country
+import com.aplana.sbrf.taxaccounting.model.identification.DocType
+import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
+import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument
+import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookObject
+import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
+import com.aplana.sbrf.taxaccounting.service.script.CalendarService
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
+import com.aplana.sbrf.taxaccounting.service.script.FiasRefBookService
+import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.RefBookPersonService
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.service.script.*
-import groovy.transform.CompileStatic
-import groovy.transform.Field
 import groovy.transform.Memoized
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.NodeChild
-import groovy.xml.MarkupBuilder
-import org.springframework.jdbc.core.RowMapper
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
@@ -40,26 +53,105 @@ import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.*
-import javax.xml.ws.LogicalMessage
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.SQLSyntaxErrorException
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import org.joda.time.LocalDateTime
+import org.joda.time.format.DateTimeFormat
 
-(new primary_rnu_ndfl_v2016(this)).run();
+new PrimaryRnuNdfl(this).run();
 
 @TypeChecked
-class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
+class PrimaryRnuNdfl extends AbstractScriptClass {
 
-    private primary_rnu_ndfl_v2016() {}
+    DeclarationService declarationService
+    DeclarationData declarationData
+    TAUserInfo userInfo
+    FiasRefBookService fiasRefBookService
+    NdflPersonService ndflPersonService
+    Map<String, Object> calculateParams
+    RefBookPersonService refBookPersonService
+    RefBookFactory refBookFactory
+    ReportPeriodService reportPeriodService
+    DepartmentService departmentService
+    Boolean needSources
+    Boolean light
+    FormSources sources
+    ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
+    DepartmentReportPeriodService departmentReportPeriodService
+    CalendarService calendarService
+    String UploadFileName
+    InputStream ImportInputStream
+    File dataFile
+
+    private PrimaryRnuNdfl() {}
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    public primary_rnu_ndfl_v2016(scriptClass) {
+    public PrimaryRnuNdfl(scriptClass) {
         super(scriptClass)
-        // инициализация параметров
+        if (scriptClass.getBinding().hasVariable("declarationData")) {
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("calendarService")) {
+            this.calendarService = (CalendarService) scriptClass.getProperty("calendarService");
+        }
+        if (scriptClass.getBinding().hasVariable("userInfo")) {
+            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
+        }
+        if (scriptClass.getBinding().hasVariable("fiasRefBookService")) {
+            this.fiasRefBookService = (FiasRefBookService) scriptClass.getProperty("fiasRefBookService");
+        }
+        if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+        }
+        if (scriptClass.getBinding().hasVariable("calculateParams")) {
+            this.calculateParams = (Map<String, Object>) scriptClass.getProperty("calculateParams");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookPersonService")) {
+            this.refBookPersonService = (RefBookPersonService) scriptClass.getProperty("refBookPersonService");
+        }
+        if (scriptClass.getBinding().hasVariable("scriptSpecificReportHolder")) {
+            this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) scriptClass.getProperty("scriptSpecificReportHolder");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("needSources")) {
+            this.needSources = (Boolean) scriptClass.getProperty("needSources");
+        }
+        if (scriptClass.getBinding().hasVariable("light")) {
+            this.light = (Boolean) scriptClass.getProperty("light");
+        }
+        if (scriptClass.getBinding().hasVariable("sources")) {
+            this.sources = (FormSources) scriptClass.getProperty("sources");
+        }
+        if (scriptClass.getBinding().hasVariable("dataFile")) {
+            this.dataFile = (File) scriptClass.getProperty("dataFile");
+        }
+        if (scriptClass.getBinding().hasVariable("UploadFileName")) {
+            this.UploadFileName = (String) scriptClass.getProperty("UploadFileName");
+        }
+        if (scriptClass.getBinding().hasVariable("ImportInputStream")) {
+            this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream");
+        }
     }
 
     @Override
@@ -340,12 +432,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
 
     int[] updatePrimaryToRefBookPersonReferences(List<NaturalPerson> primaryDataRecords) {
         ScriptUtils.checkInterrupted();
-
-        if (FORM_TYPE == 100){
-            ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
-        } else {
-            raschsvPersSvStrahLicService.updateRefBookPersonReferences(primaryDataRecords)
-        }
+        ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
     }
 
     def calculate() {
@@ -1919,9 +2006,9 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                                                def incomeCodeMap) {
         def operationNode = node.parent();
 
-        Date incomeAccruedDate = toDate(node.'@ДатаДохНач')
-        Date incomePayoutDate = toDate(node.'@ДатаДохВыпл')
-        Date taxDate = toDate(node.'@ДатаНалог')
+        LocalDateTime incomeAccruedDate = toDate(node.'@ДатаДохНач')
+        LocalDateTime incomePayoutDate = toDate(node.'@ДатаДохВыпл')
+        LocalDateTime taxDate = toDate(node.'@ДатаНалог')
 
         NdflPersonIncome personIncome = new NdflPersonIncome()
         personIncome.rowNum = toBigDecimal(node.'@НомСтр')
@@ -1975,7 +2062,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
     }
 
     // Проверка на принадлежность операций периоду при загрузке ТФ
-    boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
+    boolean operationNotRelateToCurrentPeriod(LocalDateTime incomeAccruedDate, LocalDateTime incomePayoutDate, LocalDateTime taxDate,
                                               String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         // Доход.Дата.Начисление
         boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(C_INCOME_ACCRUED_DATE, incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
@@ -1989,9 +2076,9 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
         return true
     }
 
-    boolean dateRelateToCurrentPeriod(String paramName, Date date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+    boolean dateRelateToCurrentPeriod(String paramName, LocalDateTime date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-        if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
+        if (date == null || (date.toDate() >= getReportPeriodStartDate() && date.toDate() <= getReportPeriodEndDate())) {
             return true
         }
         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, (ndflPersonIncome.rowNum ? ndflPersonIncome.rowNum.longValue() : ""))
@@ -2096,10 +2183,9 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
     @TypeChecked(TypeCheckingMode.SKIP)
     LocalDateTime toDate(xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
-            SimpleDateFormat format = new java.text.SimpleDateFormat(DATE_FORMAT)
             if (xmlNode.text() != null && !xmlNode.text().isEmpty()) {
-                Date date = format.parse(xmlNode.text())
-                if (format.format(date) != xmlNode.text()) {
+                LocalDateTime date = LocalDateTime.parse(xmlNode.text(), DateTimeFormat.forPattern(DATE_FORMAT));
+                if (date.toString(DATE_FORMAT) != xmlNode.text()) {
                     throw new ServiceException("Значения атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не существует.")
                 }
                 return date
@@ -3272,8 +3358,8 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
             // Спр5 Код вида дохода (Необязательное поле)
             if (ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
                 value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
-                        ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
-                        ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
+                        ndflPersonIncome.incomeAccruedDate.toDate() >= value.record_version_from?.dateValue &&
+                        ndflPersonIncome.incomeAccruedDate.toDate() <= value.record_version_to?.dateValue
             }) {
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                         C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
@@ -4286,8 +4372,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
 
                 // СведДох2 Сумма вычета (Графа 12)
                 if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0
-                        && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {
-                    BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
+                        && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
                     if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
@@ -4909,7 +4994,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
         BigDecimal sumNdflDeduction = new BigDecimal(0)
         for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
             if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                    && ndflPersonIncome.incomeAccruedDate?.format(DATE_FORMAT) == ndflPersonDeduction.incomeAccrued?.format(DATE_FORMAT)
+                    && ndflPersonIncome.incomeAccruedDate?.toLocalDate().equals(ndflPersonDeduction.incomeAccrued?.toLocalDate())
                     && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
                 sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
             }
@@ -4994,8 +5079,8 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
     class Column6EqualsColumn7 implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
-            String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
-            String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate?.toString("dd.MM.yyyy")
+            String payout = ndflPersonIncome.incomePayoutDate?.toString("dd.MM.yyyy")
             return accrued == payout
         }
     }
@@ -5015,7 +5100,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
             if (ndflPersonIncome.incomeAccruedDate == null) {
                 return false
             }
-            String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate.toString("dd.MM.yyyy")
             Pattern pattern = Pattern.compile(maskRegex)
             Matcher matcher = pattern.matcher(accrued)
             if (matcher.matches()) {
@@ -5035,7 +5120,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return true
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
             int currentMonth = calendar.get(Calendar.MONTH)
             calendar.add(calendar.DATE, 1)
             int comparedMonth = calendar.get(Calendar.MONTH)
@@ -5053,7 +5138,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -5074,7 +5159,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -5095,14 +5180,14 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
             // находим последний день месяца
             calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
             Date workDay = calendar.getTime()
             // если последний день месяца приходится на выходной, то следующий первый рабочий день
             int offset = 0
             workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
+            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.toDate().getTime()
         }
     }
 
@@ -5116,11 +5201,11 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate);
+            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
             // "Графа 7" + "1 рабочий день"
             int offset = 1
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -5138,11 +5223,11 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate);
+            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
             int offset = 30
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -5160,10 +5245,10 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate);
+            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
 
             Calendar calendar7 = Calendar.getInstance();
-            calendar7.setTime(ndflPersonIncome.incomePayoutDate);
+            calendar7.setTime(ndflPersonIncome.incomePayoutDate.toDate());
 
             // находим последний день месяца
             calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))

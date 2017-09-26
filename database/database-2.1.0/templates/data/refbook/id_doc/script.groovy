@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 
@@ -14,17 +15,34 @@ import groovy.transform.TypeCheckingMode
  * Cкрипт справочника "Документы, удостоверяющие личность" (id = 902).
  */
 
-(new id_doc(this)).run();
+(new IdDoc(this)).run();
 
 @TypeChecked
-class id_doc extends AbstractScriptClass {
+class IdDoc extends AbstractScriptClass {
 
-    private id_doc() {
+    RefBookFactory refBookFactory
+    List<Map<String, RefBookValue>> saveRecords
+    Long uniqueRecordId;
+    Date validDateFrom
+
+    private IdDoc() {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    public id_doc(scriptClass) {
+    public IdDoc(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("validDateFrom")) {
+            this.validDateFrom = (Date) scriptClass.getBinding().getProperty("validDateFrom");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("saveRecords")) {
+            this.saveRecords = (List<Map<String, RefBookValue>>) scriptClass.getBinding().getProperty("saveRecords");
+        }
+        if (scriptClass.getBinding().hasVariable("uniqueRecordId")) {
+            this.uniqueRecordId = (Long) scriptClass.getBinding().getProperty("uniqueRecordId");
+        }
     }
 
     @Override

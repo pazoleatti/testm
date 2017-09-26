@@ -16,17 +16,22 @@ import java.util.regex.Pattern
  * @author Bulat Kinzyabulatov
  */
 
-(new classificator_country(this)).run();
+(new ClassificatorCountry(this)).run();
 
 @TypeChecked
-class classificator_country extends AbstractScriptClass {
+class ClassificatorCountry extends AbstractScriptClass {
 
-    private classificator_country() {
+    List<Map<String, RefBookValue>> saveRecords;
+
+    private ClassificatorCountry() {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    classificator_country(scriptClass) {
+    ClassificatorCountry(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("saveRecords")) {
+            this.saveRecords = (List<Map<String, RefBookValue>>) scriptClass.getBinding().getProperty("saveRecords");
+        }
     }
 
     @Override

@@ -14,17 +14,22 @@ import java.util.regex.Pattern
  * @author Bulat Kinzyabulatov
  */
 
-(new classificator_okved(this)).run();
+new ClassificatorOkved(this).run();
 
 @TypeChecked
-class classificator_okved extends AbstractScriptClass {
+class ClassificatorOkved extends AbstractScriptClass {
 
-    private classificator_okved() {
+    List<Map<String, RefBookValue>> saveRecords;
+
+    private ClassificatorOkved() {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    classificator_okved(scriptClass) {
+    ClassificatorOkved(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("saveRecords")) {
+            this.saveRecords = (List<Map<String, RefBookValue>>) scriptClass.getBinding().getProperty("saveRecords");
+        }
     }
 
     @Override
