@@ -1,4 +1,4 @@
-<div id="ndflReportJournal" style="height: 90%;">
+<div id="ndflReportJournal" class="container-grid" style="height: 100%">
     <div class="row" style="min-width: 1400px;">
         <div class="header-col" style="margin-left: 15px;">
             <h1>{{::'header.ndflReportJournal.forms' | translate}}</h1>
@@ -18,7 +18,10 @@
     </div>
 
     <hr/>
-
+    <!-- Фильтр -->
+    <div class='container-grid-top'>
+        <span data-ng-include="'client/app/taxes/ndfl/ndflReportJournalFilter.html'"></span>
+    </div>
     <div class="container-grid" style="margin-left: -5px;">
         <div class='container-grid-top'>
             <!--Панель кнопок -->
@@ -61,6 +64,7 @@
              data-grid-fill-space-container-selector-top=".container-grid-top"
              data-grid-options="ndflReportJournalGrid.options"
              data-grid-ctrl="ndflReportJournalGrid.ctrl"
+             data-init-grid="initOurGrid(ctrl)"
              data-ng-model="ndflReportJournalGrid.value"
              id="ndflReportJournalTable"
              style="float: left; width: 100%; margin-top: 5px;"></div>

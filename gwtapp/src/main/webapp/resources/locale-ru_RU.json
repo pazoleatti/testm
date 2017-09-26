@@ -126,6 +126,11 @@
   "ndflReportJournal.button.createReport": "Создать отчетность",
   "ndflReportJournal.button.downloadReport": "Выгрузить отчетность",
   "ndflReportJournal.message.emptyFilterFields": "Заполнены не все поля отчетности",
+  "ndflReportJournal.filter.documentState": "Состояние ЭД",
+  "ndflReportJournal.filter.note": "Примечание",
+  "ndflReportJournal.filter.kpp": "КПП",
+  "ndflReportJournal.filter.oktmo": "ОКТМО",
+  "ndflReportJournal.filter.codeNO": "Код НО",
 
   "field.ndfl.requiredField": "Обязательно поле",
   "field.ndfl.isNumber": "В поле должны вводиться только цифры",
