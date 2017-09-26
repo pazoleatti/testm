@@ -88,8 +88,6 @@
   "menu.taxes.commonParameters": "Общие параметры",
   "menu.nsi.refbooks": "Справочники",
   "menu.administration.blockList": "Список блокировок",
-  "menu.administration.auditLog": "Журнал аудита",
-  "menu.administration.usersList": "Список пользователей",
   "menu.administration.configParams": "Конфигурационные параметры",
   "menu.administration.taskList": "Планировщик задач",
   "menu.administration.settings": "Настройки",

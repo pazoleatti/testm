@@ -107,20 +107,10 @@
                         }];
 
                         $scope.treeAdministration = [];
-                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK_AND_AUDIT)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.blockList'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!lockList"
-                            }, {
-                                name: $filter('translate')('menu.administration.auditLog'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!audit"
-                            });
-                        }
-
-                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_USERS)) {
-                            $scope.treeAdministration.push({
-                                name: $filter('translate')('menu.administration.usersList'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!members"
                             });
                         }
 
