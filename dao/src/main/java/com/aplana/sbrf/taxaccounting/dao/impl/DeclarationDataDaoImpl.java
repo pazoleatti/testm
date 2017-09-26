@@ -333,7 +333,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
         }
 
-        //Оперделяем способ сортировки
+        //Определяем способ сортировки
         String orderingProperty = params.getProperty();
         Order ascDescOrder = Order.valueOf(params.getDirection().toUpperCase());
 
