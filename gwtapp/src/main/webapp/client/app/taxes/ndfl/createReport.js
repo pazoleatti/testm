@@ -10,27 +10,27 @@
      * @description Контроллер окна "Создание отчетности"
      */
         .controller('createReportCtrl', [
-            '$scope', '$filter', 'appModals', '$uibModalInstance', 'RefBookValuesResource', 'APP_CONSTANTS',
-            function ($scope, $filter, appModals, $uibModalInstance, RefBookValuesResource, APP_CONSTANTS) {
-            $scope.save = function () {
-                if (checkFields()) {
-                    $uibModalInstance.close({
-                        period: $scope.createReportFilter.period,
-                        department: $scope.createReportFilter.department,
-                        declarationType: $scope.createReportFilter.declarationType
-                    })
-                } else {
-                    appModals.message($filter('translate')('DIALOGS_NOTIFICATION'), $filter('translate')('ndflReportJournal.message.emptyFilterFields'))
-                }
-            };
-            $scope.cancel = function () {
-                $uibModalInstance.dismiss('Canceled')
-            };
+            '$http', '$scope', '$rootScope', '$filter', 'appModals', '$uibModalInstance', 'RefBookValuesResource', 'APP_CONSTANTS', 'data',
+            function ($http, $scope, $rootScope, $filter, appModals, $uibModalInstance, RefBookValuesResource, APP_CONSTANTS, data) {
+
+                $scope.periods = data.periods;
+                // Определяем самый поздний период и подразделение для формирования отчённости
+                $scope.defaultPeriod = $scope.periods[0];
+                angular.forEach($scope.periods, function (period) {
+                    if (Date.parse($scope.defaultPeriod.endDate) < Date.parse(period.endDate)) {
+                        $scope.defaultPeriod = period;
+                    }
+                });
+
+                $scope.reportData = {
+                    department: $rootScope.user.department,
+                    period: $scope.defaultPeriod
+                };
 
                 $scope.periodSelect = {
                     options: {
                         data: {
-                            results: [],
+                            results: $scope.periods,
                             text: $filter('periodFormatter')
                         },
                         formatSelection: $filter('periodFormatter'),
@@ -40,18 +40,16 @@
                         placeholder: $filter('translate')('filter.placeholder.select')
                     }
                 };
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.PERIOD}, function (data) {
-                    $scope.periodSelect.options.data.results = data;
-                });
 
                 $scope.departmentsSelect = {
                     options: {
                         ajax: {
-                            url: "controller/rest/refBookValues/30",
+                            url: "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriod",
                             quietMillis: 200,
                             data: function (term, page) {
                                 return {
                                     filter: JSON.stringify({name: term}),
+                                    reportPeriodId: $scope.reportData.period.id,
                                     pagingParams: JSON.stringify({count: 50, page: page})
                                 };
                             },
@@ -85,11 +83,35 @@
                 });
 
                 function checkFields() {
-                    return $scope.createReportFilter.period !== null
-                        && $scope.createReportFilter.department !== null
-                        && $scope.createReportFilter.declarationType !== null
+                    return $scope.reportData.period !== null
+                        && $scope.reportData.department !== null
+                        && $scope.reportData.declarationType !== null
                 }
-        }])
+
+                $scope.save = function () {
+                    if (checkFields()) {
+                        $http({
+                            method: "POST",
+                            url: "controller/actions/declarationDate/createReports",
+                            params: {
+                                declarationTypeId: $scope.reportData.declarationType.id,
+                                departmentId: $scope.reportData.department.id,
+                                periodId: $scope.reportData.period.id
+                            }
+                        }).then(function (response) {
+                            $uibModalInstance.close(response);
+                        });
+                    } else {
+                        appModals.error($filter('translate')('DIALOGS_ERROR'), $filter('translate')('ndflReportJournal.message.emptyFilterFields'))
+                    }
+                };
+                $scope.cancel = function () {
+                    appModals.confirm($filter('translate')('createDeclaration.cancel.header'), $filter('translate')('createDeclaration.cancel.text'))
+                        .result.then(function () {
+                        $uibModalInstance.dismiss('Canceled');
+                    });
+                };
+            }])
         .filter('nameFormatter', function () {
             return function (entity) {
                 return entity ? entity.name : "";

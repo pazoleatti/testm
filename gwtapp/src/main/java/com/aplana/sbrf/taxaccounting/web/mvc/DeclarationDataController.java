@@ -222,6 +222,23 @@ public class DeclarationDataController {
         }
     }
 
+    /**
+     * Создание отчётности
+     *
+     * @param declarationTypeId идентификатор типа отчётности
+     * @param departmentId      идентификатор подразделения
+     * @param periodId          идентификатор периода
+     * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
+     */
+    @PostMapping(value = "/actions/declarationDate/createReports")
+    public CreateDeclarationReportResult createReports(Integer declarationTypeId, Integer departmentId, Integer periodId) {
+        Logger logger = new Logger();
+        CreateDeclarationReportResult result = declarationDataService.createReports(securityService.currentUserInfo(), logger, declarationTypeId, departmentId, periodId);
+        if (!logger.getEntries().isEmpty()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+        return result;
+    }
 
     /**
      * Создание налоговой формы

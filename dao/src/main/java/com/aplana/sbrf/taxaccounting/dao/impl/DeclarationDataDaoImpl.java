@@ -296,20 +296,36 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             where.and(declarationData.state.eq(filter.getFormState().getId().byteValue()));
         }
 
-        if(filter.getFileName() != null && StringUtils.isNotBlank(filter.getFileName())) {
+        if (filter.getFileName() != null && StringUtils.isNotBlank(filter.getFileName())) {
             where.and(declarationData.fileName.containsIgnoreCase(StringUtils.trim(filter.getFileName())));
         }
 
-        if(filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
+        if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
             where.and(reportPeriod.id.in(filter.getReportPeriodIds()));
         }
 
-        if(filter.getCorrectionTag() != null) {
-            if(filter.getCorrectionTag()) {
+        if (filter.getCorrectionTag() != null) {
+            if (filter.getCorrectionTag()) {
                 where.and(departmentReportPeriod.correctionDate.isNotNull());
             } else {
                 where.and(departmentReportPeriod.correctionDate.isNull());
             }
+        }
+        // Для Отчётов
+        if (StringUtils.isNotEmpty(filter.getTaxOrganKpp())) {
+            where.and(declarationData.kpp.eq(filter.getTaxOrganKpp()));
+        }
+
+        if (StringUtils.isNotEmpty(filter.getOktmo())) {
+            where.and(declarationData.oktmo.eq(filter.getOktmo()));
+        }
+
+        if (StringUtils.isNotEmpty(filter.getNote())) {
+            where.and(declarationData.note.containsIgnoreCase(filter.getNote()));
+        }
+
+        if (StringUtils.isNotEmpty(filter.getTaxOrganCode())) {
+            where.and(declarationData.taxOrganCode.eq(filter.getTaxOrganCode()));
         }
 
         //Оперделяем способ сортировки
@@ -551,7 +567,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         if (filter.getAsnuIds() != null && !filter.getAsnuIds().isEmpty()) {
             sql.append(" AND ")
-                .append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));
+                    .append(SqlUtils.transformToSqlInStatement("dec.asnu_id", filter.getAsnuIds()));
         }
         if (filter.getFormKindIds() != null && !filter.getFormKindIds().isEmpty()) {
             sql.append(" AND ")

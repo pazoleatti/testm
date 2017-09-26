@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
@@ -104,6 +103,13 @@ public class RefBookValuesController {
         LOG.info("Fetch records for refbook DECLARATION_TYPE");
         return refBookDeclarationTypeService.fetchAllDeclarationTypes();
     }
+
+    @GetMapping(value = "/rest/refBookValues/207", params = "projection=declarationTypeForCreate")
+    public List<RefBookDeclarationType> fetchAllDeclarationTypesfor(Long declarationKindId, Integer departmentId, Integer periodId) {
+        LOG.info("Fetch records for refbook DECLARATION_TYPE");
+        return refBookDeclarationTypeService.fetchDeclarationTypesForCreate(declarationKindId, departmentId, periodId);
+    }
+
 
     /**
      * Получение всех значений справочника АСНУ
