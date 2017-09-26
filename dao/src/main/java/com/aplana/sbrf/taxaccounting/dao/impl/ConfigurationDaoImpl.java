@@ -59,15 +59,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public ConfigurationParamModel get(String code) {
-        final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value, department_id from configuration where code = ?",
-                new Object[]{code},
-                new ConfigurationRowCallbackHandler(model));
-        return model;
-    }
-
-    @Override
     public ConfigurationParamModel getConfigByGroup(final ConfigurationParamGroup group) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
         getJdbcTemplate().query("select code, value, department_id from configuration", new RowCallbackHandler() {

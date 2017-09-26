@@ -13,18 +13,21 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskModel;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -60,9 +63,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Autowired
     private AuditService auditService;
     @Autowired
-    private LogEntryService logEntryService;
-    @Autowired
     private SchedulerTaskDao schedulerTaskDao;
+    @Autowired
+    private SchedulerService schedulerService;
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
@@ -128,11 +131,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
         return configurationDao.getByDepartment(departmentId);
-    }
-
-    @Override
-    public ConfigurationParamModel get(String code) {
-        return configurationDao.get(code);
     }
 
     @Override
@@ -536,6 +534,28 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    public PagingResult<TaskSearchResultItem> getAllSchedulerTaskWithPaging(PagingParams pagingParams) {
+        List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
+
+        PagingResult<SchedulerTaskModel> tasks = schedulerTaskDao.getAllWithPaging(pagingParams);
+        for (SchedulerTaskModel task : tasks) {
+            TaskSearchResultItem item = new TaskSearchResultItem();
+            item.setId((long)task.getId());
+            item.setName(task.getTaskName());
+            item.setSchedule(task.getSchedule());
+            item.setState(task.getSchedule() != null ? (task.getActive() == 1 ? "Активна" : "Остановлена") : "Не задано расписание");
+            item.setModificationDate(task.getModificationDate().toString("dd-MM-yyyy, HH:mm:ss"));
+            item.setLastFireTime(task.getLastFireDate() != null ? task.getLastFireDate().toString("dd-MM-yyyy, HH:mm:ss") : "");
+            Date nextFireTime = schedulerService.nextExecutionTime(task.getTaskName());
+            item.setNextFireTime(nextFireTime != null ? new SimpleDateFormat("dd-MM-yyyy, HH:mm:ss").format(nextFireTime):"");
+            records.add(item);
+        }
+
+        return new PagingResult<TaskSearchResultItem>(records, tasks.getTotalCount());
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void setActiveSchedulerTask(boolean active, List<Long> ids) {
         schedulerTaskDao.setActiveSchedulerTask(active, ids);
     }
@@ -546,6 +566,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void updateTask(SchedulerTaskData taskData) {
         schedulerTaskDao.updateTask(taskData);
     }

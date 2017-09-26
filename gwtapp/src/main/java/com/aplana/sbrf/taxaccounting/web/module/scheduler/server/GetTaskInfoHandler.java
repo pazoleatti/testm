@@ -35,8 +35,8 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
         result.setTaskName(taskData.getTaskName());
         result.setTaskState(taskData.isActive()?0:1);
         result.setSchedule(taskData.getSchedule());
-        result.setTimeCreated(taskData.getModificationDate());
-        result.setNextFireTime(taskData.getLast_fire_date());
+        result.setTimeCreated(taskData.getModificationDate().toDate());
+        result.setNextFireTime(taskData.getLast_fire_date().toDate());
         result.setContextId(taskData.getTask().getSchedulerTaskId());
         result.setParams(taskData.getParams());
         return result;

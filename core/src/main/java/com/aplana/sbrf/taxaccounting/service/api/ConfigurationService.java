@@ -40,13 +40,6 @@ public interface ConfigurationService {
     ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo);
 
     /**
-     * Получение конф.параметров по коду
-     * @param code
-     * @return модель
-     */
-    ConfigurationParamModel get(String code);
-
-    /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
      */
 	void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger);
@@ -88,7 +81,12 @@ public interface ConfigurationService {
      */
     List<SchedulerTaskData> getAllSchedulerTask();
 
-
+    /**
+     * Получение параметров всех задач планировщика
+     * @param pagingParams параметры пагиинации
+     * @return Список задач {@link SchedulerTaskData}
+     */
+    PagingResult<TaskSearchResultItem> getAllSchedulerTaskWithPaging(PagingParams pagingParams);
 
     /**
      * Изменение признака активности задач

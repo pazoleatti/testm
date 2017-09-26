@@ -24,7 +24,6 @@ import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.model.QNotification.notification;
 import static com.querydsl.core.types.Projections.bean;
-import static com.querydsl.sql.oracle.OracleGrammar.sysdate;
 
 @Repository
 public class NotificationDaoImpl extends AbstractDao implements NotificationDao {

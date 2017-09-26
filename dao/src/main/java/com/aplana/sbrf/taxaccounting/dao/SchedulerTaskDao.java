@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
+import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskModel;
 
 import java.util.List;
 
@@ -22,6 +24,13 @@ public interface SchedulerTaskDao {
      * @return
      */
     List<SchedulerTaskData> getAll();
+
+    /**
+     * Получение параметров всех задач планировщика
+     * @param pagingParams параметры пагиинации
+     * @return Список задач {@link SchedulerTaskModel}
+     */
+    PagingResult<SchedulerTaskModel> getAllWithPaging(PagingParams pagingParams);
 
     /**
      * Обновление параметров задачи планировщика

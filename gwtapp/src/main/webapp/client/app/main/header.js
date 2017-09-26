@@ -78,10 +78,14 @@
                         }
 
                         //Задаем ссылки для главного меню
-                        $scope.treeTaxes = [{
-                            name: $filter('translate')('menu.taxes.ndfl'),
-                            subtree: subtree
-                        }, {
+                        $scope.treeTaxes = [];
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)){
+                            $scope.treeTaxes.push({
+                                name: $filter('translate')('menu.taxes.ndfl'),
+                                subtree: subtree
+                            });
+                        }
+                        $scope.treeTaxes.push({
                             name: $filter('translate')('menu.taxes.service'),
                             subtree: [{
                                 name: $filter('translate')('menu.taxes.service.loadFiles'),
@@ -89,7 +93,7 @@
                                     $state.go('uploadTransportData');
                                 }
                             }]
-                        }];
+                        });
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
                             $scope.treeTaxes.push({
                                 name: $filter('translate')('menu.taxes.commonParameters'),
@@ -103,20 +107,10 @@
                         }];
 
                         $scope.treeAdministration = [];
-                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK_AND_AUDIT)) {
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.blockList'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!lockList"
-                            }, {
-                                name: $filter('translate')('menu.administration.auditLog'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!audit"
-                            });
-                        }
-
-                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_USERS)) {
-                            $scope.treeAdministration.push({
-                                name: $filter('translate')('menu.administration.usersList'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!members"
                             });
                         }
 
@@ -125,8 +119,10 @@
                                 name: $filter('translate')('menu.administration.configParams'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!configuration"
                             }, {
-                                name: $filter('translate')('menu.administration.taskManager'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!taskList"
+                                name: $filter('translate')('menu.administration.taskList'),
+                                onClick: function () {
+                                    $state.go('taskList');
+                                }
                             });
                         }
 

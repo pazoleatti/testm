@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.shared;
 
-import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.gwtplatform.dispatch.shared.Result;
 

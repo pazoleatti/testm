@@ -119,7 +119,6 @@
             });
         }])
 
-
         /**
          * @description Формирование рну ндфл
          */
@@ -130,6 +129,13 @@
             });
         }])
 
-
+        /**
+         * @description Планировщик задач - Список задач
+         */
+        .factory('taskList', ['$resource', function ($resource) {
+            return $resource('controller/rest/taskList', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

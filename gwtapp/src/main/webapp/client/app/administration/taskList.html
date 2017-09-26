@@ -1,0 +1,39 @@
+<div id="ndfl" style="height: 90%;">
+    <!--Заголовок-->
+    <div class="row" style="min-width: 1400px;">
+        <div class="header-col" style="margin-left: 15px;">
+            <h1>{{::'taskList.title.taskManager' | translate}} - {{::'taskList.title.listTasks' | translate}}:</h1>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="form100" style="height:66%;">
+        <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
+            <!--Запустить выполнение по расписанию-->
+            <button type="button" class="btn btn-danger"
+                    data-ng-click="runTasks()" data-ng-disabled="taskListGrid.value.length == 0">
+                <span data-translate-once="taskList.button.runTasks"></span>
+            </button>
+            <!--Остановить выполнение по расписанию-->
+            <button type="button" class="btn btn-danger"
+                    data-ng-click="stopTasks()" data-ng-disabled="taskListGrid.value.length == 0">
+                <span data-translate-once="taskList.button.stopTasks"></span>
+            </button>
+            <!--Обновить-->
+            <button type="button" class="btn btn-danger"
+                    data-ng-click="refreshGrid(1)">
+                <span data-translate-once="taskList.button.update"></span>
+            </button>
+        </div>
+        <div data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector=".form100"
+             data-grid-fill-space-container-selector-top=".container-grid-top"
+             data-grid-options="taskListGrid.options"
+             data-grid-ctrl="taskListGrid.ctrl"
+             data-ng-model="taskListGrid.value"
+             id="taskListTable"
+             style="float: left; width: 100%; margin-top: 5px;"></div>
+    </div>
+</div>
