@@ -58,11 +58,11 @@
                 RETURN_TO_CREATED: 1 << 6,
                 EDIT_ASSIGNMENT: 1 << 7
             },
-            STATE: {
-                CREATED: "Создана",
-                PREPARED: "Подготовлена",
-                ACCEPTED: "Принята",
-                NOT_EXIST: "Не создана"
+            NDFL_STATE: {
+                CREATED: {id: 1, name: "Создана"},
+                PREPARED: {id: 2, name: "Подготовлена"},
+                ACCEPTED: {id: 3, name: "Принята"},
+                NOT_EXIST: {id: 4, name: "Не создана"}
             },
             DECLARATION_FILE_PERMISSION: {
                 DELETE: 1 << 0
