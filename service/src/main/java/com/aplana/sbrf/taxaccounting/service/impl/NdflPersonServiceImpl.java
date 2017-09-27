@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
@@ -46,6 +47,17 @@ public class NdflPersonServiceImpl implements NdflPersonService{
     @Override
     public PagingResult<NdflPerson> findPersonByFilter(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
         return ndflPersonDao.findNdflPersonByParameters(declarationDataId, parameters, pagingParams);
+    }
+
+    /**
+     * Найти все данные НДФЛ ФЛ привязанные к декларации
+     *
+     * @param ndflPersonFilter значения фильтра
+     * @return список NdflPerson заполненый данными из таблицы NDFL_PERSON
+     */
+    @Override
+    public PagingResult<NdflPerson> findPersonByFilter(NdflPersonFilter ndflPersonFilter, PagingParams pagingParams) {
+        return ndflPersonDao.findNdflPersonByParameters(ndflPersonFilter, pagingParams);
     }
 
     /**

@@ -47,7 +47,7 @@ public class NdflPersonFilter {
     /**
      * Дата рождения с
      */
-    private  Date dateFrom;
+    private Date dateFrom;
     /**
      * Дата рождения по
      */

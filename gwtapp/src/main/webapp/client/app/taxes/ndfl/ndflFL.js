@@ -56,14 +56,14 @@
                                     projection: "ndflPersons",
                                     ndflPersonFilter: JSON.stringify({
                                         declarationDataId: $stateParams.declarationDataId,
-                                        inp: $scope.searchFilter.params.inp,
-                                        innNp: $scope.searchFilter.params.innNp,
-                                        innForeign: $scope.searchFilter.params.innForeign,
-                                        snils: $scope.searchFilter.params.snils,
-                                        idDocNumber: $scope.searchFilter.params.idDocNumber,
-                                        lastName: $scope.searchFilter.params.lastName,
-                                        firstName: $scope.searchFilter.params.firstName,
-                                        middleName: $scope.searchFilter.params.middleName,
+                                        inp: $scope.searchFilter.params.inp && $scope.searchFilter.params.inp !== "" ? $scope.searchFilter.params.inp : undefined,
+                                        innNp: $scope.searchFilter.params.innNp && $scope.searchFilter.params.innNp !== "" ? $scope.searchFilter.params.innNp : undefined,
+                                        innForeign: $scope.searchFilter.params.innForeign && $scope.searchFilter.params.innForeign !== "" ? $scope.searchFilter.params.innForeign : undefined,
+                                        snils: $scope.searchFilter.params.snils && $scope.searchFilter.params.snils !== "" ? $scope.searchFilter.params.snils : undefined,
+                                        idDocNumber: $scope.searchFilter.params.idDocNumber && $scope.searchFilter.params.idDocNumber !== "" ? $scope.searchFilter.params.idDocNumber : undefined,
+                                        lastName: $scope.searchFilter.params.lastName && $scope.searchFilter.params.lastName !== "" ? $scope.searchFilter.params.lastName : undefined,
+                                        firstName: $scope.searchFilter.params.firstName && $scope.searchFilter.params.firstName !== "" ? $scope.searchFilter.params.firstName : undefined,
+                                        middleName: $scope.searchFilter.params.middleName && $scope.searchFilter.params.middleName !== "" ? $scope.searchFilter.params.middleName : undefined,
                                         dateFrom: $scope.searchFilter.params.dateFrom,
                                         dateTo: $scope.searchFilter.params.dateTo
                                     })

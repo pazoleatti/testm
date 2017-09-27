@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
@@ -18,8 +19,6 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLQueryFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -59,8 +58,6 @@ import static com.querydsl.core.types.Projections.bean;
 public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Autowired
     SQLQueryFactory sqlQueryFactory;
-
-    private static final Log LOG = LogFactory.getLog(NdflPersonDaoImpl.class);
 
     private static final String DUPLICATE_ERORR_MSG = "Попытка перезаписать уже сохранённые данные!";
 
@@ -129,7 +126,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .fetchCount();
     }
 
-    final QBean<NdflPersonIncome> ndflPersonIncomeBean = bean(NdflPersonIncome.class, ndflPerson.inp, ndflPersonIncome.incomeCode,
+    private final QBean<NdflPersonIncome> ndflPersonIncomeBean = bean(NdflPersonIncome.class, ndflPerson.inp, ndflPersonIncome.incomeCode,
             ndflPersonIncome.incomeType, ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.kpp, ndflPersonIncome.oktmo,
             ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.incomePayoutSumm, ndflPersonIncome.totalDeductionsSumm, ndflPersonIncome.taxBase,
             ndflPersonIncome.taxRate, ndflPersonIncome.taxDate, ndflPersonIncome.calculatedTax, ndflPersonIncome.withholdingTax, ndflPersonIncome.notHoldingTax,
@@ -143,28 +140,28 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (ndflPersonIncomeFilter != null) {
             if (ndflPersonIncomeFilter.getInp() != null) {
-                where.and(ndflPerson.inp.toLowerCase().like(ndflPersonIncomeFilter.getInp().toLowerCase()));
+                where.and(ndflPerson.inp.toLowerCase().contains(ndflPersonIncomeFilter.getInp().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getOperationId() != null) {
-                where.and(ndflPersonIncome.operationId.toLowerCase().like(ndflPersonIncomeFilter.getOperationId().toLowerCase()));
+                where.and(ndflPersonIncome.operationId.toLowerCase().contains(ndflPersonIncomeFilter.getOperationId().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getKpp() != null) {
-                where.and(ndflPersonIncome.kpp.toLowerCase().like(ndflPersonIncomeFilter.getKpp().toLowerCase()));
+                where.and(ndflPersonIncome.kpp.toLowerCase().contains(ndflPersonIncomeFilter.getKpp().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getOktmo() != null) {
-                where.and(ndflPersonIncome.oktmo.toLowerCase().like(ndflPersonIncomeFilter.getOktmo().toLowerCase()));
+                where.and(ndflPersonIncome.oktmo.toLowerCase().contains(ndflPersonIncomeFilter.getOktmo().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getIncomeCode() != null) {
-                where.and(ndflPersonIncome.incomeCode.toLowerCase().like(ndflPersonIncomeFilter.getIncomeCode().toLowerCase()));
+                where.and(ndflPersonIncome.incomeCode.toLowerCase().contains(ndflPersonIncomeFilter.getIncomeCode().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getIncomeAttr() != null) {
-                where.and(ndflPersonIncome.incomeType.toLowerCase().like(ndflPersonIncomeFilter.getIncomeAttr().toLowerCase()));
+                where.and(ndflPersonIncome.incomeType.toLowerCase().contains(ndflPersonIncomeFilter.getIncomeAttr().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getTaxRate() != null) {
-                where.and(ndflPersonIncome.taxRate.like(ndflPersonIncomeFilter.getTaxRate()));
+                where.and(ndflPersonIncome.taxRate.stringValue().contains(ndflPersonIncomeFilter.getTaxRate()));
             }
             if (ndflPersonIncomeFilter.getNumberPaymentOrder() != null) {
-                where.and(ndflPersonIncome.paymentNumber.toLowerCase().like(ndflPersonIncomeFilter.getNumberPaymentOrder().toLowerCase()));
+                where.and(ndflPersonIncome.paymentNumber.toLowerCase().contains(ndflPersonIncomeFilter.getNumberPaymentOrder().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getTransferDateFrom() != null) {
                 where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.goe(ndflPersonIncomeFilter.getTransferDateFrom())));
@@ -239,16 +236,16 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (ndflPersonDeductionFilter != null) {
             if (ndflPersonDeductionFilter.getInp() != null) {
-                where.and(ndflPerson.inp.toLowerCase().like(ndflPersonDeductionFilter.getInp().toLowerCase()));
+                where.and(ndflPerson.inp.toLowerCase().contains(ndflPersonDeductionFilter.getInp().toLowerCase()));
             }
             if (ndflPersonDeductionFilter.getOperationId() != null) {
-                where.and(ndflPersonDeduction.operationId.toLowerCase().like(ndflPersonDeductionFilter.getOperationId().toLowerCase()));
+                where.and(ndflPersonDeduction.operationId.toLowerCase().contains(ndflPersonDeductionFilter.getOperationId().toLowerCase()));
             }
             if (ndflPersonDeductionFilter.getDeductionCode() != null) {
-                where.and(ndflPersonDeduction.typeCode.toLowerCase().like(ndflPersonDeductionFilter.getDeductionCode().toLowerCase()));
+                where.and(ndflPersonDeduction.typeCode.toLowerCase().contains(ndflPersonDeductionFilter.getDeductionCode().toLowerCase()));
             }
             if (ndflPersonDeductionFilter.getIncomeCode() != null) {
-                where.and(ndflPersonDeduction.incomeCode.toLowerCase().like(ndflPersonDeductionFilter.getIncomeCode().toLowerCase()));
+                where.and(ndflPersonDeduction.incomeCode.toLowerCase().contains(ndflPersonDeductionFilter.getIncomeCode().toLowerCase()));
             }
             if (ndflPersonDeductionFilter.getCalculationDateFrom() != null) {
                 where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.goe(ndflPersonDeductionFilter.getCalculationDateFrom())));
@@ -314,16 +311,16 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (ndflPersonPrepaymentFilter != null) {
             if (ndflPersonPrepaymentFilter.getInp() != null) {
-                where.and(ndflPerson.inp.toLowerCase().like(ndflPersonPrepaymentFilter.getInp().toLowerCase()));
+                where.and(ndflPerson.inp.toLowerCase().contains(ndflPersonPrepaymentFilter.getInp().toLowerCase()));
             }
             if (ndflPersonPrepaymentFilter.getOperationId() != null) {
-                where.and(ndflPersonPrepayment.operationId.toLowerCase().like(ndflPersonPrepaymentFilter.getOperationId().toLowerCase()));
+                where.and(ndflPersonPrepayment.operationId.toLowerCase().contains(ndflPersonPrepaymentFilter.getOperationId().toLowerCase()));
             }
             if (ndflPersonPrepaymentFilter.getNotifNum() != null) {
-                where.and(ndflPersonPrepayment.notifNum.toLowerCase().like(ndflPersonPrepaymentFilter.getNotifNum().toLowerCase()));
+                where.and(ndflPersonPrepayment.notifNum.toLowerCase().contains(ndflPersonPrepaymentFilter.getNotifNum().toLowerCase()));
             }
             if (ndflPersonPrepaymentFilter.getNotifSource() != null) {
-                where.and(ndflPersonPrepayment.notifSource.toLowerCase().like(ndflPersonPrepaymentFilter.getNotifSource().toLowerCase()));
+                where.and(ndflPersonPrepayment.notifSource.toLowerCase().contains(ndflPersonPrepaymentFilter.getNotifSource().toLowerCase()));
             }
             if (ndflPersonPrepaymentFilter.getNotifDateFrom() != null) {
                 where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.goe(ndflPersonPrepaymentFilter.getNotifDateFrom())));
@@ -597,6 +594,67 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         List<NdflPerson> result = getNamedParameterJdbcTemplate().query(totalQuery, parameters, new NdflPersonDaoImpl.NdflPersonRowMapper());
         return new PagingResult<NdflPerson>(result, getCount(totalQuery, parameters));
     }
+
+    private final QBean<NdflPerson> ndflPersonBean = bean(NdflPerson.class, ndflPerson.all());
+    @Override
+    public PagingResult<NdflPerson> findNdflPersonByParameters(NdflPersonFilter ndflPersonFilter, PagingParams pagingParams) {
+        BooleanBuilder where = new BooleanBuilder();
+        where.and(ndflPerson.declarationDataId.eq(ndflPersonFilter.getDeclarationDataId()));
+
+        if (ndflPersonFilter != null) {
+            if (ndflPersonFilter.getInp() != null) {
+                where.and(ndflPerson.inp.toLowerCase().contains(ndflPersonFilter.getInp().toLowerCase()));
+            }
+            if (ndflPersonFilter.getInnNp() != null) {
+                where.and(ndflPerson.innNp.toLowerCase().contains(ndflPersonFilter.getInnNp().toLowerCase()));
+            }
+            if (ndflPersonFilter.getInnForeign() != null) {
+                where.and(ndflPerson.innForeign.toLowerCase().contains(ndflPersonFilter.getInnForeign().toLowerCase()));
+            }
+            if (ndflPersonFilter.getSnils() != null) {
+                where.and(ndflPerson.snils.toLowerCase().contains(ndflPersonFilter.getSnils().toLowerCase()));
+            }
+            if (ndflPersonFilter.getIdDocNumber() != null) {
+                where.and(ndflPerson.idDocNumber.toLowerCase().contains(ndflPersonFilter.getIdDocNumber().toLowerCase()));
+            }
+            if (ndflPersonFilter.getLastName() != null) {
+                where.and(ndflPerson.lastName.toLowerCase().contains(ndflPersonFilter.getLastName().toLowerCase()));
+            }
+            if (ndflPersonFilter.getFirstName() != null) {
+                where.and(ndflPerson.firstName.toLowerCase().contains(ndflPersonFilter.getFirstName().toLowerCase()));
+            }
+            if (ndflPersonFilter.getMiddleName() != null) {
+                where.and(ndflPerson.middleName.toLowerCase().contains(ndflPersonFilter.getMiddleName().toLowerCase()));
+            }
+            if (ndflPersonFilter.getDateFrom() != null) {
+                where.and(ndflPerson.birthDay.isNull().or(ndflPerson.birthDay.goe(new LocalDateTime(ndflPersonFilter.getDateFrom()))));
+            }
+            if (ndflPersonFilter.getDateTo() != null) {
+                where.and(ndflPerson.birthDay.isNull().or(ndflPerson.birthDay.loe(new LocalDateTime(ndflPersonFilter.getDateTo()))));
+            }
+        }
+
+        //Оперделяем способ сортировки
+        String orderingProperty = pagingParams.getProperty();
+        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+
+        OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
+                ndflPersonBean, orderingProperty, ascDescOrder, ndflPerson.rowNum.asc());
+
+        List<NdflPerson> ndflPersonList = sqlQueryFactory.from(ndflPerson)
+                .leftJoin(ndflPerson.ndflPersonFkPersonId, refBookPerson)
+                .where(where)
+                .orderBy(order)
+                .offset(pagingParams.getStartIndex())
+                .limit(pagingParams.getCount())
+                .transform(GroupBy.groupBy(ndflPerson.id).list(ndflPersonBean));
+
+        int totalCount = findPersonCount(ndflPersonFilter.getDeclarationDataId());
+
+        return new PagingResult<NdflPerson>(ndflPersonList, totalCount);
+    }
+
+
 
     @Override
     public int findNdflPersonCountByParameters(long declarationDataId, Map<String, Object> parameters) {
@@ -1176,7 +1234,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
             person.setId(SqlUtils.getLong(rs, "id"));
             person.setDeclarationDataId(SqlUtils.getLong(rs, "declaration_data_id"));
-            person.setRowNum(SqlUtils.getInteger(rs, "row_num"));
+            person.setRowNum(SqlUtils.getLong(rs, "row_num"));
             person.setPersonId(SqlUtils.getLong(rs, "person_id"));
 
             // Идентификатор ФЛ REF_BOOK_PERSON.RECORD_ID

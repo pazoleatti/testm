@@ -767,7 +767,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
 
         public static class Builder {
             private Long id;
-            private Integer rowNum;
+            private Long rowNum;
             private Long personId;
             private String inp;
             private String lastName;
@@ -781,7 +781,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder rowNum(Integer rowNum) {
+            public Builder rowNum(Long rowNum) {
                 this.rowNum = rowNum;
                 return this;
             }

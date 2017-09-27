@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.ndfl;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
@@ -264,6 +265,15 @@ public interface NdflPersonDao {
      * @return результат запроса
      */
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams);
+
+    /**
+     * Найти все NdflPerson по заданным параметрам
+     *
+     * @param ndflPersonFilter  значения фильтра
+     * @param pagingParams      параметры вывода результата
+     * @return результат запроса
+     */
+    public PagingResult<NdflPerson> findNdflPersonByParameters(NdflPersonFilter ndflPersonFilter, PagingParams pagingParams);
 
     /**
      * Найти количество NdflPerson по заданным параметрам
