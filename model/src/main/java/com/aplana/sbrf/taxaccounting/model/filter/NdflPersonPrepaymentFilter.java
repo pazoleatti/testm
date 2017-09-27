@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
-import org.joda.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Модель для параметров Фильтра вкладки "Сведения о доходах в виде авансовых платежей" страницу РНУ НДФЛ
@@ -29,11 +29,11 @@ public class NdflPersonPrepaymentFilter {
     /**
      * Дата выдачи уведомления с
      */
-    private LocalDateTime notifDateFrom;
+    private Date notifDateFrom;
     /**
      * Дата выдачи уведомления по
      */
-    private LocalDateTime notifDateTo;
+    private Date notifDateTo;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -75,19 +75,19 @@ public class NdflPersonPrepaymentFilter {
         this.notifSource = notifSource;
     }
 
-    public LocalDateTime getNotifDateFrom() {
+    public Date getNotifDateFrom() {
         return notifDateFrom;
     }
 
-    public void setNotifDateFrom(LocalDateTime notifDateFrom) {
+    public void setNotifDateFrom(Date notifDateFrom) {
         this.notifDateFrom = notifDateFrom;
     }
 
-    public LocalDateTime getNotifDateTo() {
+    public Date getNotifDateTo() {
         return notifDateTo;
     }
 
-    public void setNotifDateTo(LocalDateTime notifDateTo) {
+    public void setNotifDateTo(Date notifDateTo) {
         this.notifDateTo = notifDateTo;
     }
 }

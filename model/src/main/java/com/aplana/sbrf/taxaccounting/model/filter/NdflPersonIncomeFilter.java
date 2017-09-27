@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
-import org.joda.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Модель для параметров Фильтра вкладки "Сведения о доходах и НДФЛ" страницу РНУ НДФЛ
@@ -45,27 +45,27 @@ public class NdflPersonIncomeFilter {
     /**
      * Срок перечисления в бюджет с
      */
-    private LocalDateTime transferDateFrom;
+    private Date transferDateFrom;
     /**
      * Срок перечисления в бюджет по
      */
-    private LocalDateTime transferDateTo;
+    private Date transferDateTo;
     /**
      * Дата расчета НДФЛ с
      */
-    private LocalDateTime calculationDateFrom;
+    private Date calculationDateFrom;
     /**
      * Дата расчета НДФЛ по
      */
-    private LocalDateTime calculationDateTo;
+    private Date calculationDateTo;
     /**
      * Дата платежного поручения с
      */
-    private LocalDateTime paymentDateFrom;
+    private Date paymentDateFrom;
     /**
      * Дата платежного поручения по
      */
-    private LocalDateTime paymentDateTo;
+    private Date paymentDateTo;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -139,51 +139,51 @@ public class NdflPersonIncomeFilter {
         this.numberPaymentOrder = numberPaymentOrder;
     }
 
-    public LocalDateTime getTransferDateFrom() {
+    public Date getTransferDateFrom() {
         return transferDateFrom;
     }
 
-    public void setTransferDateFrom(LocalDateTime transferDateFrom) {
+    public void setTransferDateFrom(Date transferDateFrom) {
         this.transferDateFrom = transferDateFrom;
     }
 
-    public LocalDateTime getTransferDateTo() {
+    public Date getTransferDateTo() {
         return transferDateTo;
     }
 
-    public void setTransferDateTo(LocalDateTime transferDateTo) {
+    public void setTransferDateTo(Date transferDateTo) {
         this.transferDateTo = transferDateTo;
     }
 
-    public LocalDateTime getCalculationDateFrom() {
+    public Date getCalculationDateFrom() {
         return calculationDateFrom;
     }
 
-    public void setCalculationDateFrom(LocalDateTime calculationDateFrom) {
+    public void setCalculationDateFrom(Date calculationDateFrom) {
         this.calculationDateFrom = calculationDateFrom;
     }
 
-    public LocalDateTime getCalculationDateTo() {
+    public Date getCalculationDateTo() {
         return calculationDateTo;
     }
 
-    public void setCalculationDateTo(LocalDateTime calculationDateTo) {
+    public void setCalculationDateTo(Date calculationDateTo) {
         this.calculationDateTo = calculationDateTo;
     }
 
-    public LocalDateTime getPaymentDateFrom() {
+    public Date getPaymentDateFrom() {
         return paymentDateFrom;
     }
 
-    public void setPaymentDateFrom(LocalDateTime paymentDateFrom) {
+    public void setPaymentDateFrom(Date paymentDateFrom) {
         this.paymentDateFrom = paymentDateFrom;
     }
 
-    public LocalDateTime getPaymentDateTo() {
+    public Date getPaymentDateTo() {
         return paymentDateTo;
     }
 
-    public void setPaymentDateTo(LocalDateTime paymentDateTo) {
+    public void setPaymentDateTo(Date paymentDateTo) {
         this.paymentDateTo = paymentDateTo;
     }
 }

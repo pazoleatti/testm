@@ -164,25 +164,25 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonIncome.paymentNumber.toLowerCase().contains(ndflPersonIncomeFilter.getNumberPaymentOrder().toLowerCase()));
             }
             if (ndflPersonIncomeFilter.getTransferDateFrom() != null) {
-                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.goe(ndflPersonIncomeFilter.getTransferDateFrom())));
+                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.goe(new LocalDateTime(ndflPersonIncomeFilter.getTransferDateFrom()))));
             }
 
             if (ndflPersonIncomeFilter.getTransferDateTo() != null) {
-                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.loe(ndflPersonIncomeFilter.getTransferDateTo())));
+                where.and(ndflPersonIncome.taxTransferDate.isNull().or(ndflPersonIncome.taxTransferDate.loe(new LocalDateTime(ndflPersonIncomeFilter.getTransferDateTo()))));
             }
             if (ndflPersonIncomeFilter.getCalculationDateFrom() != null) {
-                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.goe(ndflPersonIncomeFilter.getCalculationDateFrom())));
+                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.goe(new LocalDateTime(ndflPersonIncomeFilter.getCalculationDateFrom()))));
             }
 
             if (ndflPersonIncomeFilter.getCalculationDateTo() != null) {
-                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.loe(ndflPersonIncomeFilter.getCalculationDateTo())));
+                where.and(ndflPersonIncome.taxDate.isNull().or(ndflPersonIncome.taxDate.loe(new LocalDateTime(ndflPersonIncomeFilter.getCalculationDateTo()))));
             }
             if (ndflPersonIncomeFilter.getPaymentDateFrom() != null) {
-                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.goe(ndflPersonIncomeFilter.getPaymentDateFrom())));
+                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.goe(new LocalDateTime(ndflPersonIncomeFilter.getPaymentDateFrom()))));
             }
 
             if (ndflPersonIncomeFilter.getPaymentDateTo() != null) {
-                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.loe(ndflPersonIncomeFilter.getPaymentDateTo())));
+                where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.loe(new LocalDateTime(ndflPersonIncomeFilter.getPaymentDateTo()))));
             }
         }
         //Оперделяем способ сортировки
@@ -248,17 +248,17 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonDeduction.incomeCode.toLowerCase().contains(ndflPersonDeductionFilter.getIncomeCode().toLowerCase()));
             }
             if (ndflPersonDeductionFilter.getCalculationDateFrom() != null) {
-                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.goe(ndflPersonDeductionFilter.getCalculationDateFrom())));
+                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.goe(new LocalDateTime(ndflPersonDeductionFilter.getCalculationDateFrom()))));
             }
             if (ndflPersonDeductionFilter.getCalculationDateTo() != null) {
-                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.loe(ndflPersonDeductionFilter.getCalculationDateTo())));
+                where.and(ndflPersonDeduction.incomeAccrued.isNull().or(ndflPersonDeduction.incomeAccrued.loe(new LocalDateTime(ndflPersonDeductionFilter.getCalculationDateTo()))));
             }
             if (ndflPersonDeductionFilter.getDeductionDateFrom() != null) {
-                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.goe(ndflPersonDeductionFilter.getDeductionDateFrom())));
+                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.goe(new LocalDateTime(ndflPersonDeductionFilter.getDeductionDateFrom()))));
             }
 
             if (ndflPersonDeductionFilter.getDeductionDateTo() != null) {
-                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.loe(ndflPersonDeductionFilter.getDeductionDateTo())));
+                where.and(ndflPersonDeduction.periodCurrDate.isNull().or(ndflPersonDeduction.periodCurrDate.loe(new LocalDateTime(ndflPersonDeductionFilter.getDeductionDateTo()))));
             }
         }
 
@@ -323,10 +323,10 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonPrepayment.notifSource.toLowerCase().contains(ndflPersonPrepaymentFilter.getNotifSource().toLowerCase()));
             }
             if (ndflPersonPrepaymentFilter.getNotifDateFrom() != null) {
-                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.goe(ndflPersonPrepaymentFilter.getNotifDateFrom())));
+                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.goe(new LocalDateTime(ndflPersonPrepaymentFilter.getNotifDateFrom()))));
             }
             if (ndflPersonPrepaymentFilter.getNotifDateTo() != null) {
-                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.loe(ndflPersonPrepaymentFilter.getNotifDateTo())));
+                where.and(ndflPersonPrepayment.notifDate.isNull().or(ndflPersonPrepayment.notifDate.loe(new LocalDateTime(ndflPersonPrepaymentFilter.getNotifDateTo()))));
             }
         }
 

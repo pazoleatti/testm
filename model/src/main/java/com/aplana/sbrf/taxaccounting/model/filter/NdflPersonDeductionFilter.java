@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.filter;
 
-import org.joda.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Модель для параметров Фильтра вкладки "Сведения о вычетах" страницу РНУ НДФЛ
@@ -29,19 +29,19 @@ public class NdflPersonDeductionFilter {
     /**
      * Дата начисления дохода с
      */
-    private LocalDateTime calculationDateFrom;
+    private Date calculationDateFrom;
     /**
      * Дата начисления дохода по
      */
-    private LocalDateTime calculationDateTo;
+    private Date calculationDateTo;
     /**
      * Дата текущего вычета с
      */
-    private LocalDateTime deductionDateFrom;
+    private Date deductionDateFrom;
     /**
      * Дата текущего вычета по
      */
-    private LocalDateTime deductionDateTo;
+    private Date deductionDateTo;
 
     public long getDeclarationDataId() {
         return declarationDataId;
@@ -83,35 +83,35 @@ public class NdflPersonDeductionFilter {
         this.incomeCode = incomeCode;
     }
 
-    public LocalDateTime getCalculationDateFrom() {
+    public Date getCalculationDateFrom() {
         return calculationDateFrom;
     }
 
-    public void setCalculationDateFrom(LocalDateTime calculationDateFrom) {
+    public void setCalculationDateFrom(Date calculationDateFrom) {
         this.calculationDateFrom = calculationDateFrom;
     }
 
-    public LocalDateTime getCalculationDateTo() {
+    public Date getCalculationDateTo() {
         return calculationDateTo;
     }
 
-    public void setCalculationDateTo(LocalDateTime calculationDateTo) {
+    public void setCalculationDateTo(Date calculationDateTo) {
         this.calculationDateTo = calculationDateTo;
     }
 
-    public LocalDateTime getDeductionDateFrom() {
+    public Date getDeductionDateFrom() {
         return deductionDateFrom;
     }
 
-    public void setDeductionDateFrom(LocalDateTime deductionDateFrom) {
+    public void setDeductionDateFrom(Date deductionDateFrom) {
         this.deductionDateFrom = deductionDateFrom;
     }
 
-    public LocalDateTime getDeductionDateTo() {
+    public Date getDeductionDateTo() {
         return deductionDateTo;
     }
 
-    public void setDeductionDateTo(LocalDateTime deductionDateTo) {
+    public void setDeductionDateTo(Date deductionDateTo) {
         this.deductionDateTo = deductionDateTo;
     }
 }
