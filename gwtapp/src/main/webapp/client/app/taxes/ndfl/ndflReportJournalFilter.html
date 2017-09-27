@@ -10,17 +10,23 @@
                             <div class="col-md-4">
                                 <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
                             </div>
-                            <div data-ui-select2="periodSelect.options"
+                            <div data-ng-controller="SelectPeriodCtrl"
+                                 data-ui-select2="periodSelect.options"
+                                 data-ng-init="initSelectWithAllPeriods()"
                                  data-ng-model="searchFilter.params.periods"
-                                 class="col-md-8"></div>
+                                 class="col-md-8">
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
                                 <label class="control-label">{{::'ndflJournal.filter.department' | translate}}:</label>
                             </div>
-                            <div data-ui-select2="departmentsSelect.options"
+                            <div data-ng-controller="SelectDepartmentCtrl"
+                                 data-ui-select2="departmentsSelect.options"
+                                 data-ng-init="initSelectWithAllDepartments()"
                                  data-ng-model="searchFilter.params.departments"
-                                 class="col-md-8"></div>
+                                 class="col-md-8">
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
@@ -35,9 +41,11 @@
                         </div>
                     </div>
                     <div class="filter-col w250">
-                        <div data-ui-select2="correctionTagSelect.options"
+                        <div data-ng-controller="SelectCorrectionTagCtrl"
+                             data-ui-select2="correctionTagSelect.options"
                              data-ng-model="searchFilter.params.correctionTag"
-                             class="col-md-12"></div>
+                             class="col-md-12">
+                        </div>
                     </div>
                     <div class="filter-col w500">
                         <div class="form-group">
@@ -45,26 +53,33 @@
                                 <label class="control-label">{{::'ndflJournal.filter.declarationType' |
                                     translate}}:</label>
                             </div>
-                            <div data-ui-select2="declarationTypeSelect.options"
+                            <div data-ng-controller="SelectDeclarationTypeCtrl"
+                                 data-ui-select2="declarationTypeSelect.options"
+                                 data-ng-init="initSelectWithAllDeclarationTypes()"
                                  data-ng-model="searchFilter.params.declarationTypes"
-                                 class="col-md-8"></div>
+                                 class="col-md-8">
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
                                 <label class="control-label">{{::'ndflJournal.filter.state' | translate}}:</label>
                             </div>
-                            <div data-ui-select2="stateSelect.options"
+                            <div data-ng-controller="SelectDeclarationStateCtrl"
+                                 data-ui-select2="stateSelect.options"
                                  data-ng-model="searchFilter.params.state"
-                                 class="col-md-8"></div>
+                                 class="col-md-8">
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
                                 <label class="control-label">{{::'ndflReportJournal.filter.documentState' |
                                     translate}}:</label>
                             </div>
-                            <div data-ui-select2="docStateSelect.options"
-                                 data-ng-model="searchFilter.params.docStates"
-                                 class="col-md-8"></div>
+                            <div data-ng-controller="SelectDocStateCtrl"
+                                 data-ui-select2="docStateSelect.options"
+                                 data-ng-model="searchFilter.params.docState"
+                                 class="col-md-8">
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">

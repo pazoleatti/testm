@@ -334,11 +334,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
         // Для Отчётов
         if (StringUtils.isNotEmpty(filter.getTaxOrganKpp())) {
-            where.and(declarationData.kpp.eq(filter.getTaxOrganKpp()));
+            where.and(declarationData.kpp.containsIgnoreCase(filter.getTaxOrganKpp()));
         }
 
         if (StringUtils.isNotEmpty(filter.getOktmo())) {
-            where.and(declarationData.oktmo.eq(filter.getOktmo()));
+            where.and(declarationData.oktmo.containsIgnoreCase(filter.getOktmo()));
         }
 
         if (StringUtils.isNotEmpty(filter.getNote())) {
@@ -346,7 +346,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         if (StringUtils.isNotEmpty(filter.getTaxOrganCode())) {
-            where.and(declarationData.taxOrganCode.eq(filter.getTaxOrganCode()));
+            where.and(declarationData.taxOrganCode.containsIgnoreCase(filter.getTaxOrganCode()));
         }
 
         //Определяем способ сортировки

@@ -9,37 +9,24 @@
             $stateProvider.state('ndflReportJournal', {
                 url: '/taxes/ndflReportJournal',
                 templateUrl: 'client/app/taxes/ndfl/ndflReportJournal.html',
-                controller: 'ndflReportJournalCtrl',
-                resolve: {
-                    periods: function (APP_CONSTANTS, RefBookValuesResource) {
-                        return RefBookValuesResource.query({
-                            refBookId: APP_CONSTANTS.REFBOOK.PERIOD,
-                            projection: "allPeriods"
-                        }, function (data) {
-                            return data;
-                        }).$promise;
-                    },
-                    openPeriods: function (APP_CONSTANTS, RefBookValuesResource) {
-                        return RefBookValuesResource.query({
-                            refBookId: APP_CONSTANTS.REFBOOK.PERIOD,
-                            projection: "openPeriods"
-                        }, function (data) {
-                            return data;
-                        }).$promise;
-                    },
-                    declarationTypes: function (APP_CONSTANTS, RefBookValuesResource) {
-                        return RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                            return data;
-                        }).$promise;
-                    }
-                }
+                controller: 'ndflReportJournalCtrl'
             });
         }])
 
-        .controller('ndflReportJournalCtrl', ['$scope', '$rootScope', 'ShowToDoDialog', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals', 'APP_CONSTANTS',
-            'periods', 'openPeriods', 'declarationTypes',
-            function ($scope, $rootScope, $showToDoDialog, $filter, DeclarationDataResource, $http, $logPanel, appModals, APP_CONSTANTS,
-                      periods, openPeriods, declarationTypes) {
+        .controller('ndflReportJournalCtrl', ['$scope', '$rootScope', 'ShowToDoDialog', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals', 'APP_CONSTANTS', 'PermissionChecker',
+            function ($scope, $rootScope, $showToDoDialog, $filter, DeclarationDataResource, $http, $logPanel, appModals, APP_CONSTANTS, PermissionChecker) {
+                $scope.reportCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
+                $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
+                var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
+
+                $scope.searchFilter = {
+                    params: {
+                        correctionTag: defaultCorrectionTag
+                    },
+                    ajaxFilter: [],
+                    isClear: false,
+                    filterName: 'ndflReportsFilter'
+                };
                 /**
                  * @description Обновление грида
                  * @param page
@@ -47,13 +34,9 @@
                 $scope.refreshGrid = function (page) {
                     $scope.ndflReportJournalGrid.ctrl.refreshGrid(page);
                 };
-
                 $scope.createReport = function () {
                     appModals.create('client/app/taxes/ndfl/createReport.html', 'createReportCtrl',
-                        {
-                            periods: openPeriods,
-                            latestSelectedPeriod: $scope.latestSelectedPeriod
-                        }, {size: 'md'});
+                        {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'});
                 };
                 $scope.downloadReport = function () {
                     $showToDoDialog();
@@ -134,29 +117,6 @@
                     });
                 };
 
-                function getIds(list) {
-                    if (list) {
-                        return list.map(function (elem) {
-                            return elem.id;
-                        });
-                    } else {
-                        return [];
-                    }
-                }
-
-                $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
-                /**
-                 * @description Обновление грида
-                 * @param page
-                 */
-                $scope.refreshGrid = function (page) {
-                    $scope.ctrlReportGrid.refreshGrid(page);
-                };
-
-                var correctionTags = [APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE, APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY, APP_CONSTANTS.CORRETION_TAG.ALL];
-                var docStates = [APP_CONSTANTS.DOC_STATE.ACCEPTED, APP_CONSTANTS.DOC_STATE.REFUSED, APP_CONSTANTS.DOC_STATE.REVISION, APP_CONSTANTS.DOC_STATE.SUCCESSFUL];
-                var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
-
                 function getCorrectionTag() {
                     switch ($scope.searchFilter.params.correctionTag) {
                         case APP_CONSTANTS.CORRETION_TAG.ALL:
@@ -168,17 +128,6 @@
                     }
                     return undefined;
                 }
-
-                var declarationStates = [APP_CONSTANTS.NDFL_STATE.CREATED, APP_CONSTANTS.NDFL_STATE.PREPARED, APP_CONSTANTS.NDFL_STATE.ACCEPTED];
-
-                $scope.searchFilter = {
-                    params: {
-                        correctionTag: defaultCorrectionTag
-                    },
-                    ajaxFilter: [],
-                    isClear: false,
-                    filterName: 'ndflReportsFilter'
-                };
 
                 // Флаг отображения кнопки "Сбросить"
                 $scope.searchFilter.isClearByFilterParams = function () {
@@ -196,7 +145,6 @@
                     });
                     $scope.searchFilter.isClear = needToClear;
                 };
-
                 $scope.searchFilter.resetFilterParams = function () {
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
                 };
@@ -209,97 +157,6 @@
                     }
                 });
 
-                $scope.correctionTagSelect = {
-                    options: {
-                        data: {
-                            results: correctionTags,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter')
-                    }
-                };
-
-                $scope.periodSelect = {
-                    options: {
-                        data: {
-                            results: periods,
-                            text: $filter('periodFormatter')
-                        },
-                        formatSelection: $filter('periodFormatter'),
-                        formatResult: $filter('periodFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.departmentsSelect = {
-                    options: {
-                        ajax: {
-                            url: "controller/rest/refBookValues/30?projection=allDepartments",
-                            quietMillis: 200,
-                            data: function (term, page) {
-                                return {
-                                    name: term,
-                                    pagingParams: JSON.stringify({count: 50, page: page})
-                                };
-                            },
-                            results: function (data, page) {
-                                var more = (page * 50) < data.records;
-                                return {results: data.rows, more: more};
-                            }
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-
-                $scope.declarationTypeSelect = {
-                    options: {
-                        data: {
-                            results: declarationTypes,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.docStateSelect = {
-                    options: {
-                        data: {
-                            results: docStates,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: true,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.stateSelect = {
-                    options: {
-                        data: {
-                            results: declarationStates,
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
                 $scope.ndflReportJournalGrid = {
                     ctrl: {},
                     value: [],
@@ -310,11 +167,11 @@
                             return {
                                 projection: 'declarations',
                                 filter: JSON.stringify({
-                                    docStateIds: getIds($scope.searchFilter.params.docStates),
-                                    departmentIds: getIds($scope.searchFilter.params.departments),
+                                    docStateIds: $filter('idExtractor')($scope.searchFilter.params.docState),
+                                    departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
                                     formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
                                     declarationDataId: $scope.searchFilter.params.declarationNumber,
-                                    declarationTypeIds: getIds($scope.searchFilter.params.declarationTypes),
+                                    declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
                                     formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
                                     fileName: $scope.searchFilter.params.file,
                                     note: $scope.searchFilter.params.note,
@@ -322,7 +179,7 @@
                                     taxOrganKpp: $scope.searchFilter.params.kpp,
                                     taxOrganCode: $scope.searchFilter.params.codeNo,
                                     correctionTag: getCorrectionTag(),
-                                    reportPeriodIds: getIds($scope.searchFilter.params.periods)
+                                    reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
                                 })
                             };
                         },
@@ -371,12 +228,20 @@
                     }
                 };
 
+                $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
+                    if (selectedPeriods && selectedPeriods.length > 0) {
+                        $scope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                    } else {
+                        $scope.latestSelectedPeriod = null;
+                    }
+                });
+
                 /**
                  * @description инициализирует грид
                  * @param ctrl контроллер грида
                  */
                 $scope.initOurGrid = function (ctrl) {
-                    $scope.ctrlReportGrid = ctrl;
+                    $scope.ndflReportJournalGrid.ctrl = ctrl;
                     var grid = ctrl.getGrid();
                     grid.setGridParam({
                         onSelectRow: function () {

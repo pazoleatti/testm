@@ -12,75 +12,21 @@
         .controller('createReportCtrl', [
             '$http', '$scope', '$rootScope', '$filter', 'appModals', '$uibModalInstance', 'RefBookValuesResource', 'APP_CONSTANTS', 'data',
             function ($http, $scope, $rootScope, $filter, appModals, $uibModalInstance, RefBookValuesResource, APP_CONSTANTS, data) {
+                $scope.reportFormKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS;
 
-                $scope.periods = data.periods;
-                // Определяем самый поздний период и подразделение для формирования отчённости
-                $scope.defaultPeriod = $scope.periods[0];
-                angular.forEach($scope.periods, function (period) {
-                    if (Date.parse($scope.defaultPeriod.endDate) < Date.parse(period.endDate)) {
-                        $scope.defaultPeriod = period;
-                    }
-                });
+                $scope.latestReportPeriod = {};
 
                 $scope.reportData = {
-                    department: $rootScope.user.department,
-                    period: $scope.defaultPeriod
+                    department: $rootScope.user.department
                 };
 
-                $scope.periodSelect = {
-                    options: {
-                        data: {
-                            results: $scope.periods,
-                            text: $filter('periodFormatter')
-                        },
-                        formatSelection: $filter('periodFormatter'),
-                        formatResult: $filter('periodFormatter'),
-                        multiple: false,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-
-                $scope.departmentsSelect = {
-                    options: {
-                        ajax: {
-                            url: "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriod",
-                            quietMillis: 200,
-                            data: function (term, page) {
-                                return {
-                                    filter: JSON.stringify({name: term}),
-                                    reportPeriodId: $scope.reportData.period.id,
-                                    pagingParams: JSON.stringify({count: 50, page: page})
-                                };
-                            },
-                            results: function (data, page) {
-                                var more = (page * 50) < data.records;
-                                return {results: data.rows, more: more};
-                            }
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: false,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-                $scope.declarationTypeSelect = {
-                    options: {
-                        data: {
-                            results: [],
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: false,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                    $scope.declarationTypeSelect.options.data.results = data;
-                });
+                if (data.latestSelectedPeriod) {
+                    $scope.reportData.period = data.latestSelectedPeriod;
+                } else {
+                    $scope.$watch("latestReportPeriod.period", function (value) {
+                        $scope.reportData.period = value;
+                    });
+                }
 
                 function checkFields() {
                     return $scope.reportData.period !== null
