@@ -27,13 +27,7 @@
                 };
             };
 
-            /**
-             * Получить настройки выпадающего списка с постоянным набором элементов. Задано все, кроме data.results
-             * @param isMultiple Выбор множественный
-             * @param allowClear Возможна ли очистка
-             * @param formatter Фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
-             */
-            this.getBasicSelectOptions = function (isMultiple, allowClear, formatter) {
+            var buildBasicSelectOptions = function(isMultiple, allowClear, formatter) {
                 if (formatter === undefined) {
                     formatter = 'nameFormatter';
                 }
@@ -43,14 +37,49 @@
             };
 
             /**
-             * Получить настройки выпадающего списка с постоянным набором элементов
-             * @param isMultiple Выбор множественный
+             * Получить настройки выпадающего списка единичного выбора с постоянным набором элементов. Задано все, кроме data.results
+             * @param allowClear Возможна ли очистка
+             * @param allowSearch Доступен поиск, отображается поле ввода для поиска среди элементов списка. По умолчанию недоступен
+             * @param formatter Фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
+             */
+            this.getBasicSingleSelectOptions = function (allowClear, allowSearch, formatter) {
+                var select = buildBasicSelectOptions(false, allowClear, formatter);
+                if(!allowSearch) {
+                    select.options.minimumResultsForSearch = -1;
+                }
+                return select;
+            };
+
+            /**
+             * Получить настройки выпадающего списка множественного выбора с постоянным набором элементов. Задано все, кроме data.results
+             * @param allowClear Возможна ли очистка
+             * @param formatter Фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
+             */
+            this.getBasicMultipleSelectOptions = function (allowClear, formatter) {
+                return buildBasicSelectOptions(true, allowClear, formatter);
+            };
+
+            /**
+             * Получить настройки выпадающего списка единичного выбора с постоянным набором элементов
+             * @param allowClear Возможна ли очистка
+             * @param results Элементы списка
+             * @param allowSearch Доступен поиск, отображается поле ввода для поиска среди элементов списка. По умолчанию недоступен
+             * @param formatter Фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
+             */
+            this.getBasicSingleSelectOptionsWithResults = function (allowClear, results, allowSearch, formatter) {
+                var select = this.getBasicSingleSelectOptions(allowClear, allowSearch, formatter);
+                select.options.data.results = results;
+                return select;
+            };
+
+            /**
+             * Получить настройки выпадающего списка множественного выбора с постоянным набором элементов
              * @param allowClear Возможна ли очистка
              * @param results Элементы списка
              * @param formatter Фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
              */
-            this.getBasicSelectOptionsWithResults = function (isMultiple, allowClear, results, formatter) {
-                var select = this.getBasicSelectOptions(isMultiple, allowClear, formatter);
+            this.getBasicMultiSelectOptionsWithResults = function (allowClear, results, formatter) {
+                var select = this.getBasicMultipleSelectOptions(allowClear, formatter);
                 select.options.data.results = results;
                 return select;
             };
@@ -109,7 +138,7 @@
         .controller('SelectCorrectionTagCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, APP_CONSTANTS, GetSelectOption) {
                 var correctionTags = [APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE, APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY, APP_CONSTANTS.CORRETION_TAG.ALL];
-                $scope.correctionTagSelect = GetSelectOption.getBasicSelectOptionsWithResults(false, false, correctionTags);
+                $scope.correctionTagSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(false, correctionTags);
             }])
 
         /**
@@ -124,7 +153,7 @@
                     declarationKinds = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY];
                 }
 
-                $scope.declarationKindSelect = GetSelectOption.getBasicSelectOptionsWithResults(true, true, declarationKinds);
+                $scope.declarationKindSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, declarationKinds);
             }])
 
         /**
@@ -133,7 +162,7 @@
         .controller('SelectDeclarationStateCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, APP_CONSTANTS, GetSelectOption) {
                 var declarationStates = [APP_CONSTANTS.STATE.CREATED, APP_CONSTANTS.STATE.PREPARED, APP_CONSTANTS.STATE.ACCEPTED];
-                $scope.stateSelect = GetSelectOption.getBasicSelectOptionsWithResults(false, true, declarationStates);
+                $scope.stateSelect = GetSelectOption.getBasicSingleSelectOptionsWithResults(true, declarationStates);
             }])
 
         /**
@@ -141,7 +170,7 @@
          */
         .controller('SelectAsnuCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource',
             function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource) {
-                $scope.asnuSelect = GetSelectOption.getBasicSelectOptions(true, true);
+                $scope.asnuSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
                 RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
                     $scope.asnuSelect.options.data.results = data;
                 });
@@ -158,7 +187,7 @@
                  * Инициализировать список со всеми видами форм
                  */
                 $scope.initSelectWithAllDeclarationTypes = function () {
-                    $scope.declarationTypeSelect = GetSelectOption.getBasicSelectOptions(true, true);
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
                     RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
                         $scope.declarationTypeSelect.options.data.results = data;
                     });
@@ -171,7 +200,7 @@
                  * @param departmentObject Выражение из scope, по которому отслеживается изменение подразделения
                  */
                 $scope.initSelectWithDeclarationTypesForCreate = function (declarationKind, periodObject, departmentObject) {
-                    $scope.declarationTypeSelect = GetSelectOption.getBasicSelectOptions(false, true);
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
                     //Список обновляется при изменении отчетного периода и подразделения
                     $scope.$watchGroup([periodObject, departmentObject], function (newValues) {
                         var period = newValues[0];
@@ -222,7 +251,7 @@
                  * Добавить в список все отчетные периоды и определить последний
                  */
                 $scope.initSelectWithAllPeriods = function (latestPeriod) {
-                    $scope.periodSelect = GetSelectOption.getBasicSelectOptions(true, true, 'periodFormatter');
+                    $scope.periodSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'periodFormatter');
                     fillSelectListAndFindLatestPeriod("allPeriods", latestPeriod);
                 };
 
@@ -230,7 +259,7 @@
                  * Добавить в список открытые отчетные периоды и определить последний
                  */
                 $scope.initSelectWithOpenPeriods = function (latestPeriod) {
-                    $scope.periodSelect = GetSelectOption.getBasicSelectOptions(false, true, 'periodFormatter');
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, false, 'periodFormatter');
                     fillSelectListAndFindLatestPeriod("openPeriods", latestPeriod);
                 };
             }])
