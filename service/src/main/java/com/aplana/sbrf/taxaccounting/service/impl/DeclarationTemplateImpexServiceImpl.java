@@ -18,6 +18,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -26,10 +27,10 @@ import java.util.zip.ZipOutputStream;
 @Service
 @Transactional
 public class DeclarationTemplateImpexServiceImpl implements
-		DeclarationTemplateImpexService {
-	
-	@Autowired
-	DeclarationTemplateService declarationTemplateService;
+        DeclarationTemplateImpexService {
+
+    @Autowired
+    DeclarationTemplateService declarationTemplateService;
     @Autowired
     BlobDataService blobDataService;
 
@@ -38,18 +39,18 @@ public class DeclarationTemplateImpexServiceImpl implements
     public final static String REPORT_FILE = "report.jrxml";
     private static final String CONTENT_FILE = "content.xml";
 
-	private final static String ENCODING = "UTF-8";
+    private final static String ENCODING = "UTF-8";
 
-	@Override
-	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
-		try {
-			ZipOutputStream zos = new ZipOutputStream(os);
+    @Override
+    public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
+        try {
+            ZipOutputStream zos = new ZipOutputStream(os);
             DeclarationTemplate dt = declarationTemplateService.get(id);
             dt.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(id));
-			
-			// Version
-			ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
-			/*zos.putNextEntry(ze);
+
+            // Version
+            ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
+            /*zos.putNextEntry(ze);
 			zos.write("1.0".getBytes());
 			zos.closeEntry();*/
 
@@ -57,7 +58,7 @@ public class DeclarationTemplateImpexServiceImpl implements
             zos.putNextEntry(ze);
             DeclarationTemplateContent dtc = new DeclarationTemplateContent();
             dtc.fillDeclarationTemplateContent(dt);
-            for (DeclarationSubreportContent declarationSubreportContent: dtc.getSubreports()) {
+            for (DeclarationSubreportContent declarationSubreportContent : dtc.getSubreports()) {
                 if (declarationSubreportContent.getBlobDataId() != null) {
                     declarationSubreportContent.setFileName(blobDataService.get(declarationSubreportContent.getBlobDataId()).getName());
                 }
@@ -68,7 +69,7 @@ public class DeclarationTemplateImpexServiceImpl implements
             jaxbMarshaller.marshal(dtc, zos);
             zos.closeEntry();
 
-            for(DeclarationSubreport subreport: dt.getSubreports()) {
+            for (DeclarationSubreport subreport : dt.getSubreports()) {
                 if (subreport.getBlobDataId() != null) {
                     ze = new ZipEntry(subreport.getBlobDataId());
                     zos.putNextEntry(ze);
@@ -82,16 +83,23 @@ public class DeclarationTemplateImpexServiceImpl implements
                 }
             }
 
-			// Script
+            // Script
             String dtScript = dt.getCreateScript();
-            if (dtScript != null){
+            if (dtScript != null) {
                 ze = new ZipEntry(SCRIPT_FILE);
                 zos.putNextEntry(ze);
                 zos.write(dtScript.getBytes(ENCODING));
                 zos.closeEntry();
             }
-			
-			// JasperTemplate
+
+            for (DeclarationTemplateEventScript eventScript : dt.getEventScripts()) {
+                ze = new ZipEntry(eventScript.getEventId() + SCRIPT_FILE);
+                zos.putNextEntry(ze);
+                zos.write(eventScript.getScript().getBytes(ENCODING));
+                zos.closeEntry();
+            }
+
+            // JasperTemplate
             BlobData jrxml = blobDataService.get(dt.getJrxmlBlobId());
             if (jrxml != null) {
                 ze = new ZipEntry(REPORT_FILE);
@@ -102,49 +110,68 @@ public class DeclarationTemplateImpexServiceImpl implements
 
             //Xsd
             BlobData xsd = blobDataService.get(dt.getXsdId());
-            if (xsd!=null){
+            if (xsd != null) {
                 ze = new ZipEntry(xsd.getName());
                 zos.putNextEntry(ze);
                 IOUtils.copy(xsd.getInputStream(), zos);
                 zos.closeEntry();
             }
 
-			zos.finish();
-		} catch (Exception e) {
-			throw new ServiceException("Не удалось экспортировать шаблон", e);
-		}
-	}
+            zos.finish();
+        } catch (Exception e) {
+            throw new ServiceException("Не удалось экспортировать шаблон", e);
+        }
+    }
 
-	@Override
-	public DeclarationTemplate importDeclarationTemplate(TAUserInfo userInfo, Integer id,
-			InputStream is) {
-		try {
+    @Override
+    public DeclarationTemplate importDeclarationTemplate(TAUserInfo userInfo, Integer id,
+                                                         InputStream is) {
+        try {
             ZipInputStream zis = new ZipInputStream(is);
-			ZipEntry entry;
+            ZipEntry entry;
             DeclarationTemplate dt = SerializationUtils.clone(declarationTemplateService.get(id));
             dt.setXsdId(null);
             dt.setJrxmlBlobId(null);
             dt.setCreateScript("");
             dt.setSubreports(new ArrayList<DeclarationSubreport>());
+            dt.setEventScripts(new LinkedList<DeclarationTemplateEventScript>());
             Map<String, byte[]> files = new HashMap<String, byte[]>();
             DeclarationTemplateContent dtc = null;
-            while((entry = zis.getNextEntry())!=null){
+            while ((entry = zis.getNextEntry()) != null) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                if (entry.getSize() == 0){
+                if (entry.getSize() == 0) {
                     throw new ServiceException("Файл " + entry.getName() + " не должен быть пустой");
                 }
                 if (entry.getName().endsWith(".groovy")) {
-                    IOUtils.copy(zis, baos);
-                    dt.setCreateScript(new String(baos.toByteArray(), 0, baos.toByteArray().length, Charset.forName("UTF-8")));
-                } else if (entry.getName().endsWith(".jrxml")){
+                    if (entry.getName().equals(SCRIPT_FILE)) {
+                        IOUtils.copy(zis, baos);
+                        dt.setCreateScript(new String(baos.toByteArray(), 0, baos.toByteArray().length, Charset.forName("UTF-8")));
+                    } else {
+                        StringBuilder eventIdBuilder = new StringBuilder();
+                        char[] nameChars = entry.getName().toCharArray();
+                        for (char nameChar : nameChars) {
+                            if (!(nameChar == 's')) {
+                                eventIdBuilder.append(nameChar);
+                            } else {
+                                break;
+                            }
+                        }
+                        DeclarationTemplateEventScript dtes = new DeclarationTemplateEventScript();
+                        dtes.setDeclarationTemplateId(id);
+                        dtes.setEventId(Integer.valueOf(eventIdBuilder.toString()));
+                        IOUtils.copy(zis, baos);
+                        dtes.setScript(new String(baos.toByteArray(), 0, baos.toByteArray().length, Charset.forName("UTF-8")));
+                        dt.getEventScripts().add(dtes);
+                    }
+                } else if (entry.getName().endsWith(".jrxml")) {
                     IOUtils.copy(zis, baos);
                     String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
                     dt.setJrxmlBlobId(uuid);
-                } else if (entry.getName().endsWith(".xsd")){
+                } else if (entry.getName().endsWith(".xsd")) {
                     IOUtils.copy(zis, baos);
                     String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
                     dt.setXsdId(uuid);
-                } else if (entry.getName().equals(CONTENT_FILE)){
+                } else if (entry.getName().equals(CONTENT_FILE)) {
                     IOUtils.copy(zis, baos);
                     JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
                     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
@@ -186,7 +213,7 @@ public class DeclarationTemplateImpexServiceImpl implements
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }*/
-		} catch (Exception e) {
+        } catch (Exception e) {
             throw new ServiceException("Не удалось импортировать шаблон", e);
         }
     }

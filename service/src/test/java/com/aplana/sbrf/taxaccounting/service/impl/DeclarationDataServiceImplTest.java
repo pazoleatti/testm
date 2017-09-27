@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -373,8 +374,12 @@ public class DeclarationDataServiceImplTest {
         DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
         when(declarationTemplateDao.get(declarationTemplate.getId())).thenReturn(declarationTemplate);
         when(declarationTemplateDao.getDeclarationTemplateScript(declarationTemplate.getId())).thenReturn(declarationTemplate.getCreateScript());
-
         ReflectionTestUtils.setField(scriptingService, "declarationTemplateDao", declarationTemplateDao);
+
+        DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao = mock(DeclarationTemplateEventScriptDao.class);
+        when(declarationTemplateEventScriptDao.findScript(eq(declarationTemplate.getId()), any(Integer.class))).thenReturn(declarationTemplate.getCreateScript());
+        ReflectionTestUtils.setField(scriptingService, "declarationTemplateEventScriptDao", declarationTemplateEventScriptDao);
+
         Properties versionInfoProperties = new Properties();
         versionInfoProperties.put("productionMode", "true");
         versionInfoProperties.put("version", "test");

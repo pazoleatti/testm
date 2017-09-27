@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -82,6 +83,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Autowired
     @Qualifier("declarationTemplateMainOperatingService")
     MainOperatingService mainOperatingService;
+    @Autowired
+    private DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -527,5 +530,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 }
             }
         }
+    }
+
+    @Override
+    public boolean checkIfEventScriptPresent(int declarationTemplateId, int formDataEventId) {
+        return declarationTemplateEventScriptDao.checkIfEventScriptPresent(declarationTemplateId, formDataEventId);
     }
 }

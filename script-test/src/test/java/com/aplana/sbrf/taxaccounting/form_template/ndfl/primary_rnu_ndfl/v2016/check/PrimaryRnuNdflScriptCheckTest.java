@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016;
+package com.aplana.sbrf.taxaccounting.form_template.ndfl.primary_rnu_ndfl.v2016.check;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
@@ -822,7 +822,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             }
 
             public NdflPerson build() {
-                return new NdflPersonBuilder(this).ndflPerson;
+                return new PrimaryRnuNdflScriptCheckTest.NdflPersonBuilder(this).ndflPerson;
             }
         }
 
@@ -1001,7 +1001,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             }
 
             public NdflPersonIncome build() {
-                return new NdflPersonIncomeBuilder(this).ndflPersonIncome;
+                return new PrimaryRnuNdflScriptCheckTest.NdflPersonIncomeBuilder(this).ndflPersonIncome;
             }
         }
 
@@ -1138,7 +1138,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             }
 
             public NdflPersonDeduction build() {
-                return new NdflPersonDeductionBuilder(this).ndflPersonDeduction;
+                return new PrimaryRnuNdflScriptCheckTest.NdflPersonDeductionBuilder(this).ndflPersonDeduction;
             }
 
             public Builder rowNum(BigDecimal rowNum) {
@@ -1272,7 +1272,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             }
 
             public RefBookPersonTest build() {
-                return new RefBookPersonTestBuilder(this).refBookPersonTest;
+                return new PrimaryRnuNdflScriptCheckTest.RefBookPersonTestBuilder(this).refBookPersonTest;
             }
         }
 
@@ -1474,7 +1474,7 @@ public class PrimaryRnuNdflScriptCheckTest extends DeclarationScriptTestBase {
             }
 
             public RefBookAddressTest build() {
-                return new RefBookAddressTestBuilder(this).refBookAddressTest;
+                return new PrimaryRnuNdflScriptCheckTest.RefBookAddressTestBuilder(this).refBookAddressTest;
             }
         }
 

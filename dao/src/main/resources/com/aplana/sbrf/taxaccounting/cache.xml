@@ -31,6 +31,8 @@
     <jee:jndi-lookup id="permanentDataCacheStore" jndi-name="services/cache/aplana/taxaccounting/PermanentData"/>
 
     <jee:jndi-lookup id="dataBlobsCacheStore" jndi-name="services/cache/aplana/taxaccounting/DataBlobsCache"/>
+
+	<jee:jndi-lookup id="declarationTemplateEventScriptCacheStore" jndi-name="services/cache/aplana/taxaccounting/DeclarationTemplateEventScript" />
 				
 	<bean id="cacheManager" class="com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager">
 		<property name="caches">
@@ -67,7 +69,10 @@
                     <constructor-arg value="DataBlobsCache" />
                     <constructor-arg ref="dataBlobsCacheStore" />
                 </bean>
-
+				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
+					<constructor-arg value="DeclarationTemplateEventScript" />
+					<constructor-arg ref="declarationTemplateEventScriptCacheStore" />
+				</bean>
 			</set>
 		</property>
 	</bean>
