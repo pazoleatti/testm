@@ -18,7 +18,7 @@ import java.util.List;
 public class NdflPerson extends IdentityObject<Long> {
 
     // №пп
-    private Integer rowNum;
+    private Long rowNum;
 
     // Физическое лицо
     private Long personId;
@@ -143,11 +143,11 @@ public class NdflPerson extends IdentityObject<Long> {
         this.declarationDataId = declarationDataId;
     }
 
-    public Integer getRowNum() {
+    public Long getRowNum() {
         return rowNum;
     }
 
-    public void setRowNum(Integer rowNum) {
+    public void setRowNum(Long rowNum) {
         this.rowNum = rowNum;
     }
 

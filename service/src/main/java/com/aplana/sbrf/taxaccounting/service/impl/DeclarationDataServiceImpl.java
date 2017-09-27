@@ -2375,4 +2375,58 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return result;
     }
 
+    @Override
+    public CreateDeclarationReportResult createReports(TAUserInfo userInfo, Logger logger, Integer declarationTypeId, Integer departmentId, Integer periodId) {
+        // логика взята из CreateFormDeclarationHandler
+        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
+        final ReportType reportType = ReportType.CREATE_FORMS_DEC;
+
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService
+                .getLast(departmentId, periodId);
+        if (departmentReportPeriod == null) {
+            throw new ServiceException("Не удалось определить налоговый период.");
+        }
+        final Map<String, Object> params = new HashMap<String, Object>();
+        params.put("declarationTypeId", declarationTypeId);
+        params.put("departmentReportPeriodId", departmentReportPeriod.getId());
+
+        String keyTask = generateAsyncTaskKey(declarationTypeId, periodId, departmentId);
+        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, getAsyncTaskName(reportType, TaxType.NDFL, params), userInfo, false, logger);
+        if (restartStatus != null && restartStatus.getFirst()) {
+            // TODO: Реализовать логику случая, когда задача уже запущена.
+            result.setStatus(CreateAsyncTaskStatus.EXIST);
+            result.setRestartMsg(restartStatus.getSecond());
+        } else if (restartStatus != null && !restartStatus.getFirst()) {
+            result.setStatus(CreateAsyncTaskStatus.EXIST);
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.CREATE);
+            asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
+                @Override
+                public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                            getAsyncTaskName(reportType, TaxType.NDFL, params),
+                            LockData.State.IN_QUEUE.getText());
+                }
+
+                @Override
+                public void executePostCheck() {
+                }
+
+                @Override
+                public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                    return false;
+                }
+
+                @Override
+                public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                }
+
+                @Override
+                public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                    return getAsyncTaskName(reportType, TaxType.NDFL, params);
+                }
+            });
+        }
+        return result;
+    }
 }

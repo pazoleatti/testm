@@ -57,6 +57,12 @@
                 RETURN_TO_CREATED: 1 << 6,
                 EDIT_ASSIGNMENT: 1 << 7
             },
+            DOC_STATE: {
+                ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},
+                REFUSED: {id: 21123800, knd: 1166006, name: 'Отклонен'},
+                REVISION: {id: 21124000, knd: 1166009, name: 'Требует уточнения'},
+                SUCCESSFUL: {id: 21123900, knd: 1166007, name: 'Успешно отработан'}
+            },
             STATE: {
                 CREATED: {id: 1, name: "Создана"},
                 PREPARED: {id: 2, name: "Подготовлена"},
@@ -82,7 +88,8 @@
                 PRIMARY: {id: 3, name: "Первичная"},
                 SUMMARY: {id: 4, name: "Сводная"},
                 UNP: {id: 5, name: "Форма УНП"},
-                CALCULATED: {id: 6, name: "Расчетная"}
+                CALCULATED: {id: 6, name: "Расчетная"},
+                REPORTS: {id: 7, name: "Отчетная"}
             },
             CORRETION_TAG: {
                 ALL: {id: 0, name: "Все периоды"},

@@ -320,6 +320,22 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 where.and(departmentReportPeriod.correctionDate.isNull());
             }
         }
+        // Для Отчётов
+        if (StringUtils.isNotEmpty(filter.getTaxOrganKpp())) {
+            where.and(declarationData.kpp.containsIgnoreCase(filter.getTaxOrganKpp()));
+        }
+
+        if (StringUtils.isNotEmpty(filter.getOktmo())) {
+            where.and(declarationData.oktmo.containsIgnoreCase(filter.getOktmo()));
+        }
+
+        if (StringUtils.isNotEmpty(filter.getNote())) {
+            where.and(declarationData.note.containsIgnoreCase(filter.getNote()));
+        }
+
+        if (StringUtils.isNotEmpty(filter.getTaxOrganCode())) {
+            where.and(declarationData.taxOrganCode.containsIgnoreCase(filter.getTaxOrganCode()));
+        }
 
         //Определяем способ сортировки
         String orderingProperty = params.getProperty();

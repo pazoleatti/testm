@@ -1,24 +1,28 @@
-<div id="ndflReportJournal" style="height: 90%;">
+<div id="ndflReportJournal" class="container-grid" style="height: 100%">
     <div class="row" style="min-width: 1400px;">
         <div class="header-col" style="margin-left: 15px;">
             <h1>{{::'header.ndflReportJournal.forms' | translate}}</h1>
         </div>
         <div style="float: right; margin-right: 20px;">
-            <button type="button" class="btn btn-default" style="width: 150px;"
-                    data-ng-click="createReport()">
-                <img src="resources/img/add.png" style="margin-top: -5px;"/>
+            <button type="button" class="btn btn-default" style="width: 175px;"
+                    data-ng-click="createReport()"
+                    data-ng-show="reportCreateAllowed">
+                <span class="glyphicon glyphicon-file"></span>
                 <span data-translate-once="ndflReportJournal.button.createReport"></span>
             </button>
-            <button type="button" class="btn btn-default" style="width: 150px;"
+            <button type="button" class="btn btn-default" style="width: 175px;"
                     data-ng-click="downloadReport()">
-                <img src="resources/img/add.png" style="margin-top: -5px;"/>
+                <span class="glyphicon glyphicon-file"></span>
                 <span data-translate-once="ndflReportJournal.button.downloadReport"></span>
             </button>
         </div>
     </div>
 
     <hr/>
-
+    <!-- Фильтр -->
+    <div class='container-grid-top'>
+        <span data-ng-include="'client/app/taxes/ndfl/ndflReportJournalFilter.html'"></span>
+    </div>
     <div class="container-grid" style="margin-left: -5px;">
         <div class='container-grid-top'>
             <!--Панель кнопок -->
@@ -61,10 +65,9 @@
              data-grid-fill-space-container-selector-top=".container-grid-top"
              data-grid-options="ndflReportJournalGrid.options"
              data-grid-ctrl="ndflReportJournalGrid.ctrl"
+             data-init-grid="initOurGrid(ctrl)"
              data-ng-model="ndflReportJournalGrid.value"
              id="ndflReportJournalTable"
              style="float: left; width: 100%; margin-top: 5px;"></div>
     </div>
-</div>
-
 </div>

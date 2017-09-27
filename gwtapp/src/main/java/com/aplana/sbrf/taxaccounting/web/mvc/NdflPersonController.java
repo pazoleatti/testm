@@ -10,9 +10,10 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.web.mvc.CustomEditors.LocalDateTimeEditor;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,14 +35,11 @@ public class NdflPersonController {
 
     private NdflPersonService ndflPersonService;
 
-    private TAUserService taUserService;
-
     private RefBookFactory refBookFactory;
 
 
-    public NdflPersonController(NdflPersonService ndflPersonService, TAUserService taUserService, RefBookFactory refBookFactory) {
+    public NdflPersonController(NdflPersonService ndflPersonService, RefBookFactory refBookFactory) {
         this.ndflPersonService = ndflPersonService;
-        this.taUserService = taUserService;
         this.refBookFactory = refBookFactory;
 
     }
@@ -76,40 +74,7 @@ public class NdflPersonController {
     public JqgridPagedList<NdflPerson> fetchPersonData(@RequestParam NdflPersonFilter ndflPersonFilter,
                                                        @RequestParam PagingParams pagingParams) {
 
-        Map<String, Object> filterParams = new HashMap<String, Object>();
-
-        if (ndflPersonFilter.getInp() != null) {
-            filterParams.put("inp", ndflPersonFilter.getInp());
-        }
-        if (ndflPersonFilter.getInnNp() != null) {
-            filterParams.put("innNp", ndflPersonFilter.getInnNp());
-        }
-        if (ndflPersonFilter.getInnForeign() != null) {
-            filterParams.put("innForeign", ndflPersonFilter.getInnForeign());
-        }
-        if (ndflPersonFilter.getSnils() != null) {
-            filterParams.put("snils", ndflPersonFilter.getSnils());
-        }
-        if (ndflPersonFilter.getIdDocNumber() != null) {
-            filterParams.put("idDocNumber", ndflPersonFilter.getIdDocNumber());
-        }
-        if (ndflPersonFilter.getLastName() != null) {
-            filterParams.put("lastName", ndflPersonFilter.getLastName());
-        }
-        if (ndflPersonFilter.getFirstName() != null) {
-            filterParams.put("firstName", ndflPersonFilter.getFirstName());
-        }
-        if (ndflPersonFilter.getMiddleName() != null) {
-            filterParams.put("middleName", ndflPersonFilter.getMiddleName());
-        }
-        if (ndflPersonFilter.getDateFrom() != null) {
-            filterParams.put("fromBirthDay", ndflPersonFilter.getDateFrom());
-        }
-        if (ndflPersonFilter.getDateTo() != null) {
-            filterParams.put("toBirthDay", ndflPersonFilter.getDateTo());
-        }
-
-        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter.getDeclarationDataId(), filterParams, pagingParams);
+        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersons,
                 ndflPersonService.findPersonCount(ndflPersonFilter.getDeclarationDataId()),

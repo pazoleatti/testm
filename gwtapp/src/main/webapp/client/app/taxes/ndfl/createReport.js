@@ -10,84 +10,63 @@
      * @description Контроллер окна "Создание отчетности"
      */
         .controller('createReportCtrl', [
-            '$scope', '$filter', 'appModals', '$uibModalInstance', 'RefBookValuesResource', 'APP_CONSTANTS',
-            function ($scope, $filter, appModals, $uibModalInstance, RefBookValuesResource, APP_CONSTANTS) {
-            $scope.save = function () {
-                if (checkFields()) {
-                    $uibModalInstance.close({
-                        period: $scope.createReportFilter.period,
-                        department: $scope.createReportFilter.department,
-                        declarationType: $scope.createReportFilter.declarationType
-                    })
+            '$http', '$scope', '$rootScope', '$filter', 'appModals', '$uibModalInstance', 'RefBookValuesResource', 'APP_CONSTANTS', 'data',
+            function ($http, $scope, $rootScope, $filter, appModals, $uibModalInstance, RefBookValuesResource, APP_CONSTANTS, data) {
+                $scope.reportFormKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS;
+
+                $scope.latestReportPeriod = {};
+
+                $scope.reportData = {
+                    department: $rootScope.user.department
+                };
+
+                if (data.latestSelectedPeriod) {
+                    $scope.reportData.period = data.latestSelectedPeriod;
                 } else {
-                    appModals.message($filter('translate')('DIALOGS_NOTIFICATION'), $filter('translate')('ndflReportJournal.message.emptyFilterFields'))
+                    $scope.$watch("latestReportPeriod.period", function (value) {
+                        $scope.reportData.period = value;
+                    });
                 }
-            };
-            $scope.cancel = function () {
-                $uibModalInstance.dismiss('Canceled')
-            };
-
-                $scope.periodSelect = {
-                    options: {
-                        data: {
-                            results: [],
-                            text: $filter('periodFormatter')
-                        },
-                        formatSelection: $filter('periodFormatter'),
-                        formatResult: $filter('periodFormatter'),
-                        multiple: false,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.PERIOD}, function (data) {
-                    $scope.periodSelect.options.data.results = data;
-                });
-
-                $scope.departmentsSelect = {
-                    options: {
-                        ajax: {
-                            url: "controller/rest/refBookValues/30",
-                            quietMillis: 200,
-                            data: function (term, page) {
-                                return {
-                                    filter: JSON.stringify({name: term}),
-                                    pagingParams: JSON.stringify({count: 50, page: page})
-                                };
-                            },
-                            results: function (data, page) {
-                                var more = (page * 50) < data.records;
-                                return {results: data.rows, more: more};
-                            }
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: false,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-                $scope.declarationTypeSelect = {
-                    options: {
-                        data: {
-                            results: [],
-                            text: $filter('nameFormatter')
-                        },
-                        formatSelection: $filter('nameFormatter'),
-                        formatResult: $filter('nameFormatter'),
-                        multiple: false,
-                        allowClear: true,
-                        placeholder: $filter('translate')('filter.placeholder.select')
-                    }
-                };
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                    $scope.declarationTypeSelect.options.data.results = data;
-                });
 
                 function checkFields() {
-                    return $scope.createReportFilter.period !== null
-                        && $scope.createReportFilter.department !== null
-                        && $scope.createReportFilter.declarationType !== null
+                    return $scope.reportData.period !== null
+                        && $scope.reportData.department !== null
+                        && $scope.reportData.declarationType !== null
                 }
-        }]);
+
+                $scope.save = function () {
+                    if (checkFields()) {
+                        $http({
+                            method: "POST",
+                            url: "controller/actions/declarationDate/createReports",
+                            params: {
+                                declarationTypeId: $scope.reportData.declarationType.id,
+                                departmentId: $scope.reportData.department.id,
+                                periodId: $scope.reportData.period.id
+                            }
+                        }).then(function (response) {
+                            $uibModalInstance.close(response);
+                        });
+                    } else {
+                        appModals.error($filter('translate')('DIALOGS_ERROR'), $filter('translate')('ndflReportJournal.message.emptyFilterFields'))
+                    }
+                };
+                $scope.cancel = function () {
+                    appModals.confirm($filter('translate')('createDeclaration.cancel.header'), $filter('translate')('createDeclaration.cancel.text'))
+                        .result.then(function () {
+                        $uibModalInstance.dismiss('Canceled');
+                    });
+                };
+            }])
+        .filter('nameFormatter', function () {
+            return function (entity) {
+                return entity ? entity.name : "";
+            };
+        })
+        .filter('periodFormatter', function () {
+            return function (entity) {
+                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
+            };
+        });
+
 }());

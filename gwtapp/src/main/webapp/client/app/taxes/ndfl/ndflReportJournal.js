@@ -13,8 +13,20 @@
             });
         }])
 
-        .controller('ndflReportJournalCtrl', ['$scope', 'ShowToDoDialog', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals',
-            function ($scope, $showToDoDialog, $filter, DeclarationDataResource, $http, $logPanel, appModals) {
+        .controller('ndflReportJournalCtrl', ['$scope', '$rootScope', 'ShowToDoDialog', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals', 'APP_CONSTANTS', 'PermissionChecker',
+            function ($scope, $rootScope, $showToDoDialog, $filter, DeclarationDataResource, $http, $logPanel, appModals, APP_CONSTANTS, PermissionChecker) {
+                $scope.reportCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
+                $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
+                var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
+
+                $scope.searchFilter = {
+                    params: {
+                        correctionTag: defaultCorrectionTag
+                    },
+                    ajaxFilter: [],
+                    isClear: false,
+                    filterName: 'ndflReportsFilter'
+                };
                 /**
                  * @description Обновление грида
                  * @param page
@@ -22,9 +34,9 @@
                 $scope.refreshGrid = function (page) {
                     $scope.ndflReportJournalGrid.ctrl.refreshGrid(page);
                 };
-
                 $scope.createReport = function () {
-                    appModals.create('client/app/taxes/ndfl/createReport.html', 'createReportCtrl', null, {size: 'md'});
+                    appModals.create('client/app/taxes/ndfl/createReport.html', 'createReportCtrl',
+                        {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'});
                 };
                 $scope.downloadReport = function () {
                     $showToDoDialog();
@@ -105,6 +117,46 @@
                     });
                 };
 
+                function getCorrectionTag() {
+                    switch ($scope.searchFilter.params.correctionTag) {
+                        case APP_CONSTANTS.CORRETION_TAG.ALL:
+                            return undefined;
+                        case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
+                            return false;
+                        case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
+                            return true;
+                    }
+                    return undefined;
+                }
+
+                // Флаг отображения кнопки "Сбросить"
+                $scope.searchFilter.isClearByFilterParams = function () {
+                    var needToClear = false;
+                    angular.forEach($scope.searchFilter.params, function (value, key) {
+                        if (key === 'correctionTag') {
+                            needToClear = needToClear || value.id !== defaultCorrectionTag.id;
+                        } else if (value != null) {
+                            if (Array.isArray(value) || typeof(value) === "string" || value instanceof String) {
+                                needToClear = needToClear || value.length > 0;
+                            } else {
+                                needToClear = true;
+                            }
+                        }
+                    });
+                    $scope.searchFilter.isClear = needToClear;
+                };
+                $scope.searchFilter.resetFilterParams = function () {
+                    $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
+                };
+
+                $scope.$watch('searchFilter.params.periods', function (periods) {
+                    if (periods.length > 0) {
+                        $scope.latestSelectedPeriod = periods[periods.length - 1];
+                    } else {
+                        $scope.latestSelectedPeriod = null;
+                    }
+                });
+
                 $scope.ndflReportJournalGrid = {
                     ctrl: {},
                     value: [],
@@ -114,7 +166,21 @@
                         requestParameters: function () {
                             return {
                                 projection: 'declarations',
-                                isReport: true
+                                filter: JSON.stringify({
+                                    docStateIds: $filter('idExtractor')($scope.searchFilter.params.docState),
+                                    departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments),
+                                    formKindIds: [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id],
+                                    declarationDataId: $scope.searchFilter.params.declarationNumber,
+                                    declarationTypeIds: $filter('idExtractor')($scope.searchFilter.params.declarationTypes),
+                                    formState: $scope.searchFilter.params.state ? $scope.searchFilter.params.state.id : undefined,
+                                    fileName: $scope.searchFilter.params.file,
+                                    note: $scope.searchFilter.params.note,
+                                    oktmo: $scope.searchFilter.params.oktmo,
+                                    taxOrganKpp: $scope.searchFilter.params.kpp,
+                                    taxOrganCode: $scope.searchFilter.params.codeNo,
+                                    correctionTag: getCorrectionTag(),
+                                    reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
+                                })
                             };
                         },
                         height: 250,
@@ -160,6 +226,33 @@
                         hidegrid: false,
                         multiselect: true
                     }
+                };
+
+                $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
+                    if (selectedPeriods && selectedPeriods.length > 0) {
+                        $scope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                    } else {
+                        $scope.latestSelectedPeriod = null;
+                    }
+                });
+
+                /**
+                 * @description инициализирует грид
+                 * @param ctrl контроллер грида
+                 */
+                $scope.initOurGrid = function (ctrl) {
+                    $scope.ndflReportJournalGrid.ctrl = ctrl;
+                    var grid = ctrl.getGrid();
+                    grid.setGridParam({
+                        onSelectRow: function () {
+                            $scope.selectedItems = ctrl.getAllSelectedRows();
+                            $scope.$apply();
+                        },
+                        onSelectAll: function () {
+                            $scope.selectedItems = ctrl.getAllSelectedRows();
+                            $scope.$apply();
+                        }
+                    });
                 };
 
                 /**

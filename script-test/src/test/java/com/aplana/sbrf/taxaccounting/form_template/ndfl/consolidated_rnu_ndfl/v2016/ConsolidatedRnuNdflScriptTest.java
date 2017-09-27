@@ -205,7 +205,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         //person.setMiddleName("Иванович");
         person.setBirthDay(toDate("01.01.1980"));
         person.setCitizenship("643");
-        person.setRowNum(4);
+        person.setRowNum(4L);
         person.setInnNp("123456789123");
         person.setInnForeign("");
         person.setIdDocType("11");

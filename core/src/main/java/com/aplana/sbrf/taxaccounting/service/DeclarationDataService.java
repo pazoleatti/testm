@@ -21,30 +21,32 @@ import java.util.Map;
 
 /**
  * Сервис для работы с {@link DeclarationData налоговыми декларациями }
+ *
  * @author dsultanbekov
  */
 public interface DeclarationDataService {
-	/**
-	 * Создание декларации в заданном отчетном периоде подразделения
-     *
-	 * @param userInfo          Информация о текущем пользователе
-	 * @param logger            Логгер
-	 * @param declarationTypeId ID вида налоговой формы
-	 * @param departmentId      ID подразделения
-	 * @param periodId          ID отчетного периода
-	 * @return ID налоговой формы
-	 */
-	Long create(TAUserInfo userInfo, Logger logger, Long declarationTypeId, Integer departmentId, Integer periodId);
-
-	/**
+    /**
      * Создание декларации в заданном отчетном периоде подразделения
-     * @param logger - объект журнала
-     * @param declarationTemplateId идентификатор шаблона декларации
-     * @param userInfo информация о пользователе, выполняющего действие
+     *
+     * @param userInfo          Информация о текущем пользователе
+     * @param logger            Логгер
+     * @param declarationTypeId ID вида налоговой формы
+     * @param departmentId      ID подразделения
+     * @param periodId          ID отчетного периода
+     * @return ID налоговой формы
+     */
+    Long create(TAUserInfo userInfo, Logger logger, Long declarationTypeId, Integer departmentId, Integer periodId);
+
+    /**
+     * Создание декларации в заданном отчетном периоде подразделения
+     *
+     * @param logger                 - объект журнала
+     * @param declarationTemplateId  идентификатор шаблона декларации
+     * @param userInfo               информация о пользователе, выполняющего действие
      * @param departmentReportPeriod отчетный период подразделения
-     * @param taxOrganCode налоговый орган (для налога на имущество)
-     * @param taxOrganKpp КПП (для налога на имущество)
-	 * @param oktmo ОКТМО, для НДФЛ
+     * @param taxOrganCode           налоговый орган (для налога на имущество)
+     * @param taxOrganKpp            КПП (для налога на имущество)
+     * @param oktmo                  ОКТМО, для НДФЛ
      * @param fileName
      * @param note
      * @return идентификатор созданной декларации
@@ -53,42 +55,47 @@ public interface DeclarationDataService {
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo,
                 Long asunId, String fileName, String note, boolean writeAudit);
 
-	/**
-	 * Рассчитать декларацию
-     * @param logger - объект журнала
+    /**
+     * Рассчитать декларацию
+     *
+     * @param logger            - объект журнала
      * @param declarationDataId - идентификатор декларации
-     * @param userInfo - информация о пользователе, выполняющего операцию
-     * @param docDate - дата обновления декларации
-     * @param stateLogger - логгер для обновления статуса асинхронной задачи
+     * @param userInfo          - информация о пользователе, выполняющего операцию
+     * @param docDate           - дата обновления декларации
+     * @param stateLogger       - логгер для обновления статуса асинхронной задачи
      */
-	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
+    void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
     /**
      * Формирование Pdf отчета
+     *
      * @param logger
      * @param declarationData
      * @param userInfo
      */
     void setPdfDataBlobs(Logger logger,
                          DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
+
     /**
      * Формирование Xlsx отчета
+     *
      * @param logger
      * @param declarationData
      * @param userInfo
      */
     String setXlsxDataBlobs(Logger logger,
-                         DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
-	/**
-	 * Получить декларацию
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return объект декларации
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
+                            DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
+    /**
+     * Получить декларацию
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @return объект декларации
+     * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+     */
 
     /**
      * Формирование специфичного отчета декларации
+     *
      * @param logger
      * @param declarationData
      * @param ddReportType
@@ -100,6 +107,7 @@ public interface DeclarationDataService {
 
     /**
      * Подготовить данные для спец. отчета
+     *
      * @param logger
      * @param declarationData
      * @param ddReportType
@@ -108,197 +116,213 @@ public interface DeclarationDataService {
      */
     PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
 
-	DeclarationData get(long declarationDataId, TAUserInfo userInfo);
+    DeclarationData get(long declarationDataId, TAUserInfo userInfo);
 
-	/**
-	 * Удалить декларацию, при этом создается блокировка
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
-	 */
-	void delete(long declarationDataId, TAUserInfo userInfo);
-
-	/**
-	 * Удалить декларацию
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @param createLock если true, то создается блокировка, иначе блокировка не создается
-	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
-	 */
-	void delete(long declarationDataId, TAUserInfo userInfo, boolean createLock);
-
-	/**
-	 * метод запускает скрипты с событием проверить
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @param logger - объект журнала
-	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
-	 */
-	void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
-
-	/**
-	 * Рассчитать декларацию
-	 *
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @param declarationDataId идентификатор декларации
-	 * @param force             признак для перезапуска задачи
-	 * @param cancelTask        признак для отмены задачи
-	 * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
-	 */
-	RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
-
-	/**
-	 * Формирует DeclarationResult
-	 *
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @param declarationDataId идентификатор декларации
-	 * @return модель {@link DeclarationResult}, в которой содержаться данные о декларации
-	 */
-	DeclarationResult fetchDeclarationData(TAUserInfo userInfo, long declarationDataId);
-
-
-	/**
-	 * Проверить декларацию
-	 *
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @param declarationDataId идентификатор декларации
-	 * @param force             признак для перезапуска задачи
-	 * @return модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
-	 */
-	CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force);
-
-	/**
-	 * Получение дополнительной информации о файлах декларации с комментариями
-	 *
-	 * @param declarationDataId идентификатор декларации
-	 * @return объект модели {@link DeclarationDataFileComment}, в которой содержаться данные о файлах
-	 * и комментарий для текущей декларации.
-	 */
-	DeclarationDataFileComment fetchFilesComments(long declarationDataId);
-
-	/**
-	 * Сохранение дополнительной информации о файлах декларации с комментариями
-	 *
-	 * @param dataFileComment сохраняемый объект декларации, в котором содержаться
-	 *                        данные о файлах и комментарий для текущей декларации.
-	 * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
-	 * о файлах и комментарий для текущей декларации.
-	 */
-	DeclarationDataFileComment saveDeclarationFilesComment(DeclarationDataFileComment dataFileComment);
-
-
-	/**
-	 * Получение источников и приемников декларации
-	 *
-	 * @param declarationDataId идентификатор декларации
-	 * @return источники и приемники декларации {@link Relation}
-	 */
-	List<Relation> getDeclarationSourcesAndDestinations(TAUserInfo userInfo, long declarationDataId);
-
-	/**
-	 * Получение списка налоговых форм
-	 *
-	 * @param pagingParams параметры для пагинации
-	 * @return список налоговых форм {@link DeclarationDataSearchResultItem}
-	 */
-	PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams);
-
-	/**
-	 * Формирование рну ндфл для отдельного физ лица`
-	 *
-	 * @param declarationDataId идентификатор декларации
-	 * @param personId          идентификатор физ лица
-	 * @param ndflPersonFilter  заполненные поля при поиске
-	 * @return источники и приемники декларации
-	 */
-	CreateDeclarationReportResult creteReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
-
-	/**
-     * метод запускает скрипты с событием предрасчетные проверки
+    /**
+     * Удалить декларацию, при этом создается блокировка
+     *
      * @param declarationDataId идентификатор декларации
-     * @param userInfo информация о пользователе, выполняющего действие
-     * @param logger - объект журнала
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+     */
+    void delete(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Удалить декларацию
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param createLock        если true, то создается блокировка, иначе блокировка не создается
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+     */
+    void delete(long declarationDataId, TAUserInfo userInfo, boolean createLock);
+
+    /**
+     * метод запускает скрипты с событием проверить
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param logger            - объект журнала
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+     */
+    void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
+
+    /**
+     * Рассчитать декларацию
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @param cancelTask        признак для отмены задачи
+     * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
+     */
+    RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
+
+    /**
+     * Формирует DeclarationResult
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @return модель {@link DeclarationResult}, в которой содержаться данные о декларации
+     */
+    DeclarationResult fetchDeclarationData(TAUserInfo userInfo, long declarationDataId);
+
+
+    /**
+     * Проверить декларацию
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
+     */
+    CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force);
+
+    /**
+     * Получение дополнительной информации о файлах декларации с комментариями
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return объект модели {@link DeclarationDataFileComment}, в которой содержаться данные о файлах
+     * и комментарий для текущей декларации.
+     */
+    DeclarationDataFileComment fetchFilesComments(long declarationDataId);
+
+    /**
+     * Сохранение дополнительной информации о файлах декларации с комментариями
+     *
+     * @param dataFileComment сохраняемый объект декларации, в котором содержаться
+     *                        данные о файлах и комментарий для текущей декларации.
+     * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
+     * о файлах и комментарий для текущей декларации.
+     */
+    DeclarationDataFileComment saveDeclarationFilesComment(DeclarationDataFileComment dataFileComment);
+
+
+    /**
+     * Получение источников и приемников декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return источники и приемники декларации {@link Relation}
+     */
+    List<Relation> getDeclarationSourcesAndDestinations(TAUserInfo userInfo, long declarationDataId);
+
+    /**
+     * Получение списка налоговых форм
+     *
+     * @param pagingParams параметры для пагинации
+     * @return список налоговых форм {@link DeclarationDataSearchResultItem}
+     */
+    PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams);
+
+    /**
+     * Формирование рну ндфл для отдельного физ лица`
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param personId          идентификатор физ лица
+     * @param ndflPersonFilter  заполненные поля при поиске
+     * @return источники и приемники декларации
+     */
+    CreateDeclarationReportResult creteReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+
+    /**
+     * метод запускает скрипты с событием предрасчетные проверки
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param logger            - объект журнала
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
-	/**
-	 * Принятие декларации
-	 * @param logger - объект журнала
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
-	 */
+    /**
+     * Принятие декларации
+     *
+     * @param logger            - объект журнала
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
+     */
     void accept(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
     /**
      * Метод передающий управление на проверку декларации сторонней утилите
+     *
      * @param userInfo
      * @param declarationData
      * @param logger
-     * @param operation - не используется
+     * @param operation       - не используется
      * @param isErrorFatal
      * @param xmlFile
      * @param stateLogger
      */
     void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                    FormDataEvent operation, File xmlFile, String fileName, String xsdBlobDataId, LockStateLogger stateLogger);
+                             FormDataEvent operation, File xmlFile, String fileName, String xsdBlobDataId, LockStateLogger stateLogger);
 
     /**
      * Отмена принятия декларации
-     * @param logger - объект журнала
+     *
+     * @param logger            - объект журнала
      * @param declarationDataId идентификатор декларации
-	 * @param note - причина возврата
-     * @param userInfo информация о пользователе, выполняющего действие
+     * @param note              - причина возврата
+     * @param userInfo          информация о пользователе, выполняющего действие
      * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
      */
     void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo);
 
-	/**
-	 * Проверяет есть ли у формы приемники в состоянии Принята или Подготовлена
-	 * @param declarationDataId - идентификатор декларации
-	 * @param logger - объект журнала
-	 * @param userInfo - информация о пользователе, выполняющего действие
-	 * @return - список ИД приемников  в состоянии Принята или Подготовлена
-	 */
+    /**
+     * Проверяет есть ли у формы приемники в состоянии Принята или Подготовлена
+     *
+     * @param declarationDataId - идентификатор декларации
+     * @param logger            - объект журнала
+     * @param userInfo          - информация о пользователе, выполняющего действие
+     * @return - список ИД приемников  в состоянии Принята или Подготовлена
+     */
     public List<Long> getReceiversAcceptedPrepared(long declarationDataId, Logger logger, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
+     *
      * @param declarationDataId идентификатор декларации
-     * @param userInfo информация о пользователе, выполняющего действие
+     * @param userInfo          информация о пользователе, выполняющего действие
      * @return поток с данными
      * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
      */
     InputStream getXmlDataAsStream(long declarationDataId, TAUserInfo userInfo);
-	/**
-	 * Получить печатное представление данных декларации в PDF формате
-	 * @param declarationId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return файл Pdf в виде байтового массива
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
+
+    /**
+     * Получить печатное представление данных декларации в PDF формате
+     *
+     * @param declarationId идентификатор декларации
+     * @param userInfo      информация о пользователе, выполняющего действие
+     * @return файл Pdf в виде байтового массива
+     * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+     */
     InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo);
-	/**
-	 * Получить имя файла в формате законодателя
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return имя файла взятого из xml данных
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
-	String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo);
-	/**
-	 * Получить дату последнего изменения декларации
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return дату последнего изменения декларации из xml данных
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
-	LocalDateTime getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Получить имя файла в формате законодателя
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @return имя файла взятого из xml данных
+     * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+     */
+    String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Получить дату последнего изменения декларации
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @return дату последнего изменения декларации из xml данных
+     * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+     */
+    LocalDateTime getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Поиск декларации
-     * @param declarationTypeId Тип декларации
+     *
+     * @param declarationTypeId      Тип декларации
      * @param departmentReportPeriod Отчетный период подразделения
      * @return
      */
@@ -308,15 +332,17 @@ public interface DeclarationDataService {
 
     /**
      * Проверить наличие форм декларации
+     *
      * @param declarationTypeId идентификатор типа декларации
-     * @param departmentId подразделение
-     * @param logs записи лога
+     * @param departmentId      подразделение
+     * @param logs              записи лога
      * @return наличие форм декларации
      */
     boolean existDeclaration(int declarationTypeId, int departmentId, List<LogEntry> logs);
 
     /**
      * Генерация ключа блокировки для асинхронных задач по декларациям
+     *
      * @param declarationDataId
      * @param type
      * @return код блокировки
@@ -325,37 +351,42 @@ public interface DeclarationDataService {
 
     /**
      * Генерация ключа блокировки для асинхронных задач по декларациям
+     *
      * @return код блокировки
      */
     String generateAsyncTaskKey(int declarationTypeId, int reportPeriodId, int departmentId);
 
     /**
      * Заблокировать DeclarationData.
+     *
      * @param declarationDataId - идентификатор декларации
-     * @param userInfo информация о пользователе
+     * @param userInfo          информация о пользователе
      */
     LockData lock(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Снять блокировку с DeclarationData.
+     *
      * @param declarationDataId - идентификатор декларации
-     * @param userInfo информация о пользователе
-     * */
+     * @param userInfo          информация о пользователе
+     */
     void unlock(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Проверяет, не заблокирована ли декларация другим пользователем
+     *
      * @param declarationDataId - идентификатор декларации
-     * @param userInfo - информация о пользователе
+     * @param userInfo          - информация о пользователе
      */
     void checkLockedMe(Long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация пользователя
-	 * @param cause причина остановки задачи
-	 */
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация пользователя
+     * @param cause             причина остановки задачи
+     */
     void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
@@ -366,14 +397,16 @@ public interface DeclarationDataService {
 
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
+     *
      * @param declarationId идентификатор декларации
-     * @param ddReportType тип отчета. Может быть null
+     * @param ddReportType  тип отчета. Может быть null
      * @return название
      */
     String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
 
     /**
      * Проверяет существование операции, по которым требуется удалить блокировку
+     *
      * @param declarationDataId
      * @param reportType
      * @param logger
@@ -383,23 +416,26 @@ public interface DeclarationDataService {
 
     /**
      * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
-	 * @param declarationDataId
+     *
+     * @param declarationDataId
      * @param userInfo
-	 * @param reportType
-	 * @param cause причина остановки задачи
-	 */
+     * @param reportType
+     * @param cause             причина остановки задачи
+     */
     void interruptAsyncTask(long declarationDataId, TAUserInfo userInfo, ReportType reportType, TaskInterruptCause cause);
 
     /**
      * Метод для очитски blob-ов у деклараций.
      * Применяется в случае удаления jrxml макета декларации.
-     * @param ids идентификаторы деклараций
+     *
+     * @param ids         идентификаторы деклараций
      * @param reportTypes типы отчетов, которые надо удалить
      */
     void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes);
 
     /**
      * Формирует название операции
+     *
      * @param ddReportType
      * @param taxType
      * @return
@@ -408,6 +444,7 @@ public interface DeclarationDataService {
 
     /**
      * Формирует название операции
+     *
      * @param reportType
      * @param taxType
      * @return
@@ -416,8 +453,9 @@ public interface DeclarationDataService {
 
     /**
      * Формирование jasper-отчета
-     * @param xmlIn поток данных xml
-     * @param jrxml текст jrxml
+     *
+     * @param xmlIn      поток данных xml
+     * @param jrxml      текст jrxml
      * @param jrSwapFile
      * @param params
      * @return
@@ -425,30 +463,33 @@ public interface DeclarationDataService {
     JasperPrint createJasperReport(InputStream xmlIn, String jrxml, JRSwapFile jrSwapFile, Map<String, Object> params);
 
 
-	/**
-	 * Формирование jasper-отчета, данный метод не использует JRSwapFile для промежуточного хранения данных, вместо этого данные загружаются в буффер
-	 * @param xmlData xml поток входных данных
-	 * @param jrxmlTemplate шаблон отчета
-	 * @param params набор параметров отчета
+    /**
+     * Формирование jasper-отчета, данный метод не использует JRSwapFile для промежуточного хранения данных, вместо этого данные загружаются в буффер
+     *
+     * @param xmlData       xml поток входных данных
+     * @param jrxmlTemplate шаблон отчета
+     * @param params        набор параметров отчета
      * @return сформированный отчет
      */
-	JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> params);
+    JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> params);
 
 
-	/**
-	 * Формирование jasper-отчета, расширенный вариант метода
-	 * {@link DeclarationDataService#createJasperReport(InputStream, InputStream, Map)}
+    /**
+     * Формирование jasper-отчета, расширенный вариант метода
+     * {@link DeclarationDataService#createJasperReport(InputStream, InputStream, Map)}
      */
-	JasperPrint createJasperReport(InputStream xmlIn, InputStream jrxml, Map<String, Object> parameters, Connection connection);
+    JasperPrint createJasperReport(InputStream xmlIn, InputStream jrxml, Map<String, Object> parameters, Connection connection);
 
-	/**
-	 * Получить соединение для передачи в отчет
-	 * @return
+    /**
+     * Получить соединение для передачи в отчет
+     *
+     * @return
      */
-	Connection getReportConnection();
+    Connection getReportConnection();
 
     /**
      * Формирование PDF отчета
+     *
      * @param jasperPrint
      * @param data
      */
@@ -456,6 +497,7 @@ public interface DeclarationDataService {
 
     /**
      * Формирование XLSX отчета
+     *
      * @param jasperPrint
      * @param data
      */
@@ -463,6 +505,7 @@ public interface DeclarationDataService {
 
     /**
      * Получение возможности отображения формы предварительного просмотра
+     *
      * @param declarationData
      * @param userInfo
      * @return
@@ -473,8 +516,8 @@ public interface DeclarationDataService {
      * Импорт ТФ Декларации
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
-							   String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
-							   AttachFileType fileType, LocalDateTime createDateFile);
+                               String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
+                               AttachFileType fileType, LocalDateTime createDateFile);
 
     /**
      * Получение данных по файлам для формы "Файлы и комментарии"
@@ -493,20 +536,23 @@ public interface DeclarationDataService {
 
     /**
      * Создание экземпляров форм
+     *
      * @param departmentReportPeriod - отчетный период
-     * @param declarationTypeId идентификатор типа декларации
+     * @param declarationTypeId      идентификатор типа декларации
      */
     public void createForms(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
 
     /**
      * Создание отчетности для выгрузки
+     *
      * @param departmentReportPeriod - отчетный период
-     * @param declarationTypeId идентификатор типа декларации
+     * @param declarationTypeId      идентификатор типа декларации
      */
     public String createReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId, LockStateLogger stateLogger);
 
     /**
      * Изменение Состояния ЭД
+     *
      * @param logger
      * @param userInfo
      * @param declarationDataId
@@ -514,25 +560,40 @@ public interface DeclarationDataService {
      */
     void changeDocState(Logger logger, TAUserInfo userInfo, long declarationDataId, Long docStateId);
 
-	/**
-	 * Проверка существования формы
-	 * @param declarationDataId
-	 * @return
-	 */
-	boolean existDeclarationData(long declarationDataId);
+    /**
+     * Проверка существования формы
+     *
+     * @param declarationDataId
+     * @return
+     */
+    boolean existDeclarationData(long declarationDataId);
 
-	/**
-	 * Проверки перед созданием отчетности для выгрузки
-	 * @param departmentReportPeriod - отчетный период
-	 * @param declarationTypeId идентификатор типа декларации
-	 * @return возвращает сообщение об ошибке, иначе null
-	 */
-	String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
+    /**
+     * Проверки перед созданием отчетности для выгрузки
+     *
+     * @param departmentReportPeriod - отчетный период
+     * @param declarationTypeId      идентификатор типа декларации
+     * @return возвращает сообщение об ошибке, иначе null
+     */
+    String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
 
-	/**
-	 * Получает мапу созданных блокировок по основным операциям формы
-	 * @param declarationDataId
-	 * @return
-	 */
-	Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId);
+    /**
+     * Получает мапу созданных блокировок по основным операциям формы
+     *
+     * @param declarationDataId
+     * @return
+     */
+    Map<DeclarationDataReportType, LockData> getLockTaskType(long declarationDataId);
+
+    /**
+     * Создание отчётности
+     *
+     * @param userInfo          информация о пользователе
+     * @param logger            логгер
+     * @param declarationTypeId идентификатор типа отчётности
+     * @param departmentId      идентификатор подразделения
+     * @param periodId          идентификатор периода
+     * @return
+     */
+    CreateDeclarationReportResult createReports(TAUserInfo userInfo, Logger logger, Integer declarationTypeId, Integer departmentId, Integer periodId);
 }
