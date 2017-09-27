@@ -167,9 +167,9 @@
                     var modal = appModals.create('client/app/taxes/ndfl/createDeclaration.html', 'createDeclarationFormCtrl',
                         {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'});
                     modal.result.then(function (response) {
-                        if (response.data && response.data.declarationId && response.data.declarationId !== null) {
+                        if (response.data && response.data.entityId && response.data.entityId !== null) {
                             $state.go('ndfl', {
-                                declarationDataId: response.data.declarationId,
+                                declarationDataId: response.data.entityId,
                                 uuid: response.data.uuid
                             });
                         } else {

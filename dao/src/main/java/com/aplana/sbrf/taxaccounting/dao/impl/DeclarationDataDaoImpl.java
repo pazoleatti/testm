@@ -8,10 +8,12 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -268,22 +270,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         return new PagingResult<DeclarationDataSearchResultItem>(records, getCount(declarationFilter));
     }
 
-    /**
-     * Преобразует список long в список int
-     *
-     * @param longList
-     * @return
-     */
-    private List<Integer> toIntegerList(List<Long> longList) {
-        List<Integer> intList = new LinkedList<Integer>();
-        for (long elem : longList) {
-            intList.add((int) elem);
-        }
-        return intList;
-    }
-
     @Override
-    public List<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams params) {
+    public PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams params) {
 
         BooleanBuilder where = new BooleanBuilder();
 
@@ -340,8 +328,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         OrderSpecifier ordering = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
                 dataJournalItemQBean, orderingProperty, ascDescOrder, declarationData.id.desc());
 
-
-        List<DeclarationDataJournalItem> items = sqlQueryFactory.select(
+        SQLQuery<Tuple> queryBase = sqlQueryFactory.select(
                 declarationData.id.as("declarationDataId"),
                 declarationKind.name.as("declarationKind"),
                 declarationType.name.as("declarationType"),
@@ -371,12 +358,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
                 .leftJoin(declarationData.declDataDocStateFk, refBookDocState)
                 .orderBy(ordering)
-                .where(where)
+                .where(where);
+
+        List<DeclarationDataJournalItem> items = queryBase
                 .offset(params.getStartIndex())
                 .limit(params.getCount())
                 .transform(GroupBy.groupBy(declarationData.id).list(dataJournalItemQBean));
 
-        return items;
+        long count = queryBase.fetchCount();
+
+        return new PagingResult<DeclarationDataJournalItem>(items, (int) count);
     }
 
     @Override

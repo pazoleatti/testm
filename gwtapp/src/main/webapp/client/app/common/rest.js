@@ -102,10 +102,11 @@
         }])
 
         /**
-         * @description
+         * @description Поиск видов налоговых форм для создания формы. Ищутся назначенные подразделению виды форм
+         * с действующей на момент начала периода версией шаблона формы указанного типа.
          */
         .factory('DeclarationTypeForCreateResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBook/207/declarationTypesForCreate?declarationKind=:declarationKind&departmentId=:departmentId&periodId=:periodId', {}, {
+            return $resource('controller/rest/refBook/207/activeAndAssigned?declarationKind=:declarationKind&departmentId=:departmentId&periodId=:periodId', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])

@@ -152,12 +152,13 @@
          */
         .controller('SelectDeclarationTypeCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource', 'DeclarationTypeForCreateResource',
             function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, DeclarationTypeForCreateResource) {
-                $scope.declarationTypeSelect = GetSelectOption.getBasicSelectOptions(false, true);
+                $scope.declarationTypeSelect = {};
 
                 /**
                  * Инициализировать список со всеми видами форм
                  */
                 $scope.initSelectWithAllDeclarationTypes = function () {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSelectOptions(true, true);
                     RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
                         $scope.declarationTypeSelect.options.data.results = data;
                     });
@@ -170,6 +171,7 @@
                  * @param departmentObject Выражение из scope, по которому отслеживается изменение подразделения
                  */
                 $scope.initSelectWithDeclarationTypesForCreate = function (declarationKind, periodObject, departmentObject) {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSelectOptions(false, true);
                     //Список обновляется при изменении отчетного периода и подразделения
                     $scope.$watchGroup([periodObject, departmentObject], function (newValues) {
                         var period = newValues[0];

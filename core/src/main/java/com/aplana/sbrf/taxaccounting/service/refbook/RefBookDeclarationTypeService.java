@@ -16,12 +16,16 @@ public interface RefBookDeclarationTypeService {
     List<RefBookDeclarationType> fetchAllDeclarationTypes();
 
     /**
-     * Получение значений справочника для создания налоговой формы
+     * Получение значений справочника на основе типа формы, подразделения и начала отчетного периода. Выполняется поиск
+     * назначенных подразделению видов форм с действующей на момент начала периода версией шаблона формы указанного типа.
+     * Т.е. видов форм, назначенных заданному подразделению, имеющих статус версии "действующий" и для которых есть шаблон
+     * формы с заданным типом формы, "действующим" статусом версии и версией не более поздней, чем заданное начало
+     * отчетного периода
      *
-     * @param declarationKind     Вид налоговой формы
-     * @param departmentId Подразделение
-     * @param periodId ID отчетного периода
+     * @param declarationKind Тип налоговой формы
+     * @param departmentId    Подразделение
+     * @param periodId        ID отчетного периода
      * @return Список значений справочника
      */
-    List<RefBookDeclarationType> fetchDeclarationTypesForCreate(Long declarationKind, Integer departmentId, Integer periodId);
+    List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, Integer periodId);
 }
