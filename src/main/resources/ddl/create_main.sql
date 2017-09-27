@@ -1589,10 +1589,7 @@ create table decl_template_event_script(
 	id number(19) primary key not null,
 	declaration_template_id number(19) not null,
 	event_id number(19) not null,
-	script clob not null,
-	constraint fk_dec_temp_event_scr_dec_temp foreign key (declaration_template_id) references declaration_template(id),
-	constraint fk_dec_temp_event_id foreign key (event_id) references event(id),
-	constraint uc_dec_temp_even_dec_temp_even unique (declaration_template_id, event_id) 
+	script clob not null
 );
 
 create sequence seq_decl_template_event_script start with 1 increment by 1;
