@@ -29,7 +29,7 @@
                         "            </div>" +
                         "            <div id='log-panel-header-print' style='float: right; margin: -4px 5px 0 0;'>" +
                         "                <img src='resources/img/printer-black-16.png'>" +
-                        "                <a href='/controller/actions/logEntry/" + uuid + "'>{{'logPanel.header.print' | translate}}</a>" +
+                        "                <a href='controller/actions/logEntry/" + uuid + "'>{{'logPanel.header.print' | translate}}</a>" +
                         "            </div>" +
                         "        </div>" +
                         "        <div data-aplana-grid" +
