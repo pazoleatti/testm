@@ -131,11 +131,10 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getDepartmentReportPeriodService().get(eq(4))).thenReturn(createDepartmentReportPeriod(4, "10.01.2016"));
         when(testHelper.getDepartmentReportPeriodService().get(eq(5))).thenReturn(createDepartmentReportPeriod(5, "03.01.2016"));
 
-        testHelper.execute(FormDataEvent.GET_SOURCES);
 
+        testHelper.execute(FormDataEvent.GET_SOURCES);
         FormSources sources = testHelper.getSources();
-        // TODO: проинициализировать для нормальной работы теста
-        Assert.assertEquals(sources.getSourceList().size(), 5);
+        Assert.assertEquals(5, sources.getSourceList().size());
         Assert.assertTrue(sources.isSourcesProcessedByScript());
 
         checkLogger();

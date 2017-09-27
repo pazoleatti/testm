@@ -528,4 +528,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         }
         return result;
     }
+
+    @Override
+    public void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        declarationDataService.check(logger, declarationDataId, userInfo, lockStateLogger);
+    }
 }

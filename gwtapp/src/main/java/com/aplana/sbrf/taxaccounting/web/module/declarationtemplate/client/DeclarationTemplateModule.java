@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.editform.EditFormView;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event_script.EventScriptPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event_script.EventScriptView;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplatePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplateView;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.ui.UiModule;
@@ -24,6 +26,7 @@ public class DeclarationTemplateModule extends AbstractPresenterModule {
                 DeclarationTemplateMainView.class, DeclarationTemplateMainPresenter.MyProxy.class);
         bindPresenterWidget(FilterDeclarationTemplatePresenter.class, FilterDeclarationTemplatePresenter.MyView.class, FilterDeclarationTemplateView.class);
         bindSingletonPresenterWidget(EditFormPresenter.class, EditFormPresenter.MyView.class, EditFormView.class);
+        bindSingletonPresenterWidget(EventScriptPresenter.class, EventScriptPresenter.MyView.class, EventScriptView.class);
         install(new UiModule());
     }
 

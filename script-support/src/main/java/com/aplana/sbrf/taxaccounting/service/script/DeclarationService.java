@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -465,4 +467,13 @@ public interface DeclarationService {
      * @return если удаление прошло успешно, то возвращает пустой список, иначе список Pair<id-формы, типа блокировки>, по которым существует блокировка или произошла ошибка удаления
      */
     List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, Logger logger, TAUserInfo userInfo);
+
+    /**
+     * метод запускает скрипты с событием проверить
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @param logger - объект журнала
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+     */
+    void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 }

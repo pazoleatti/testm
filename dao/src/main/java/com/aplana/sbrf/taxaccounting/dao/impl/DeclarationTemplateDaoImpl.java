@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportParamDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
@@ -26,12 +27,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Реализация Dao для работы с шаблонами деклараций
@@ -51,6 +48,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     private DeclarationSubreportDao declarationSubreportDao;
     @Autowired
     private DeclarationSubreportParamDao declarationSubreportParamDao;
+    @Autowired
+    private DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao;
 
 	private final class DeclarationTemplateRowMapper implements RowMapper<DeclarationTemplate> {
 		@Override
@@ -64,6 +63,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             d.setJrxmlBlobId(rs.getString("JRXML"));
             d.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs, "status")));
             d.setSubreports(declarationSubreportDao.getDeclarationSubreports(d.getId()));
+            d.setEventScripts(declarationTemplateEventScriptDao.fetch(d.getId()));
             Long formKind = SqlUtils.getLong(rs, "form_kind");
             if (formKind != null) {
                 d.setDeclarationFormKind(DeclarationFormKind.fromId(formKind));
@@ -170,6 +170,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
             declarationSubreportDao.updateDeclarationSubreports(declarationTemplate);
             declarationSubreportParamDao.updateDeclarationSubreports(declarationTemplate);
+
+            declarationTemplateEventScriptDao.updateScriptList(declarationTemplate);
 
             return declarationTemplate.getId();
         } catch (DataAccessException e) {

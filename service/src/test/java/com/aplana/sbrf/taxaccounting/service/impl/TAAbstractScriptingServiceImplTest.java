@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -154,9 +153,9 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 
 	@Test
 	public void getScriptFilePath() {
-		assertTrue(getScriptFilePath("refbook.test.p1", TEST_SCRIPT_PATH_PREFIX, new Logger())
+		assertTrue(getScriptFilePath("refbook.test.p1", TEST_SCRIPT_PATH_PREFIX, new Logger(), FormDataEvent.CREATE)
 				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\p1\\script.groovy"));
-		assertTrue(getScriptFilePath("refbook.test.p2", TEST_SCRIPT_PATH_PREFIX, new Logger())
+		assertTrue(getScriptFilePath("refbook.test.p2", TEST_SCRIPT_PATH_PREFIX, new Logger(), FormDataEvent.CREATE)
 				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\p2\\script.groovy"));
 	}
 }

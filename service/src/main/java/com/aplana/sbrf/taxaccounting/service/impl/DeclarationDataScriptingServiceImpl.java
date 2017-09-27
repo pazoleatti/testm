@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -38,6 +39,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
+	@Autowired
+	private DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -85,7 +88,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
         String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
 		String scriptFilePath = null;
 		if (!applicationInfo.isProductionMode()) {
-			scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger);
+			scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger, event);
 			if (scriptFilePath != null) {
 				script = getScript(scriptFilePath);
 			}
@@ -95,7 +98,12 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
         }
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 		if (scriptFilePath == null) {
-			declarationTemplate.setCreateScript(script);
+			String eventScript = declarationTemplateEventScriptDao.findScript(declarationData.getDeclarationTemplateId(), event.getCode());
+			if (eventScript != null) {
+				declarationTemplate.setCreateScript(eventScript);
+			} else {
+				declarationTemplate.setCreateScript(script);
+			}
 		}
         return executeScript(userInfo, declarationTemplate, declarationData, scriptFilePath, event, logger, exchangeParams);
     }

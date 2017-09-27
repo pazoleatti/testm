@@ -35,6 +35,8 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
      */
     private List<DeclarationTemplateFile> declarationTemplateFiles = new ArrayList<DeclarationTemplateFile>();
 
+    private List<DeclarationTemplateEventScript> eventScripts = new ArrayList<DeclarationTemplateEventScript>();
+
     public String getName() {
         return name;
     }
@@ -184,5 +186,13 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
     public void setDeclarationTemplateFiles(List<DeclarationTemplateFile> declarationTemplateFiles) {
         this.declarationTemplateFiles = declarationTemplateFiles;
+    }
+
+    public List<DeclarationTemplateEventScript> getEventScripts() {
+        return eventScripts;
+    }
+
+    public void setEventScripts(List<DeclarationTemplateEventScript> eventScripts) {
+        this.eventScripts = eventScripts;
     }
 }
