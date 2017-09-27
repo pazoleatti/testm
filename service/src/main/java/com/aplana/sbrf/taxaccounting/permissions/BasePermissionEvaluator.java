@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
-import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.PermissionDaoFactory;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.logging.Log;
@@ -25,10 +27,14 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
     private static final Log LOG = LogFactory.getLog(BasePermissionEvaluator.class);
 
-    @Autowired
-    private TAUserDao taUserDao;
+    private final PermissionDaoFactory permissionDaoFactory;
 
     private Map<Class<?>, PermissionFactory<?>> permissionFactoryRegistry;
+
+    @Autowired
+    public BasePermissionEvaluator(PermissionDaoFactory permissionDaoFactory) {
+        this.permissionDaoFactory = permissionDaoFactory;
+    }
 
     /**
      * Устанавливает используемый регистр {@link PermissionFactory}.
@@ -122,9 +128,9 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
     private boolean hasPermissionSingleId(Authentication authentication, Serializable targetId,
                                           String targetType, Object permission) {
-        Class<?> targetClass;
+        Class<SecuredEntity> targetClass;
         try {
-            targetClass = ClassUtils.getClass(targetType);
+            targetClass = (Class<SecuredEntity>) ClassUtils.getClass(targetType);
         } catch (Exception e) {
             throw new IllegalArgumentException("Class represented by '" + targetType + "' cannot be instantiated", e);
         }
@@ -134,13 +140,12 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
             throw new IllegalStateException("No permission factory is registered for class '" + targetType + "'");
         }
 
-        //Object targetDomainObject = queryDslRepository.findOne(targetId, targetType);
-        Object targetDomainObject = taUserDao.getUser(((Integer)targetId).intValue());
+        PermissionDao permissionDao = permissionDaoFactory.getPermissionDao(targetClass);
+        SecuredEntity targetDomainObject = permissionDao.getSecuredEntity((Long) targetId);
+
         if (targetDomainObject == null) {
             throw new RuntimeException("Object of type '" + targetType +
                     "' with identity '" + targetId + "' not found");
-            /*throw new NotFoundException("Object of type '" + targetType +
-                    "' with identity '" + targetId + "' not found");*/
         }
         return checkPermission(authentication, targetDomainObject, permission);
     }

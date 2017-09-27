@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
@@ -34,8 +35,13 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
 	@Autowired
 	private TaxPeriodDao taxPeriodDao;
-	
-    private class ReportPeriodMapper implements RowMapper<ReportPeriod> {
+
+	@Override
+	public SecuredEntity getSecuredEntity(long id) {
+		return get((int) id);
+	}
+
+	private class ReportPeriodMapper implements RowMapper<ReportPeriod> {
         @Override
         public ReportPeriod mapRow(ResultSet rs, int index) throws SQLException {
             ReportPeriod reportPeriod = new ReportPeriod();

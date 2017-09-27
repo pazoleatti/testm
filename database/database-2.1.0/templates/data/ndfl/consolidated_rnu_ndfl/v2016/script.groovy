@@ -86,7 +86,9 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
         }
     }
 
-    final String DATE_FORMAT = "dd.MM.yyyy"
+    final FormDataService formDataService = getProperty("formDataService")
+@Field
+final String DATE_FORMAT = "dd.MM.yyyy"
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
     Boolean showTiming = false
 
@@ -2959,20 +2961,21 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 }
             }
 
-            // Общ10 Соответствие КПП и ОКТМО Тербанку
-            if (ndflPersonIncome.oktmo != null) {
-                List<String> kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
-                if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
-                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\"), \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
-                            C_KPP, ndflPersonIncome.kpp ?: "",
-                            C_OKTMO, ndflPersonIncome.oktmo ?: "",
-                            R_DETAIL,
+        // Общ10 Соответствие КПП и ОКТМО Тербанку
+        if (ndflPersonIncome.oktmo != null) {
+            List<String> kppList = mapRefBookNdflDetail.get(ndflPersonIncome.oktmo)
+            if (kppList == null || !kppList?.contains(ndflPersonIncome.kpp)) {
+
+
+                    String errMsg = String.format("Значение гр. \"%s\" (\"%s\") , \"%s\" (\"%s\") отсутствует в справочнике \"%s\" для \"%s\"",
+                            C_KPP, ndflPersonIncome.kpp ?: "",C_OKTMO, ndflPersonIncome.oktmo ?: "",
+                        C_OKTMO, ndflPersonIncome.oktmo ?: "",    R_DETAIL,
                             department ? department.name : ""
                     )
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                     logger.warnExp("%s. %s.", "\"КПП\" и \"ОКТМО\" не соответствуют Тербанку", fioAndInp, pathError,
                             errMsg)
-                }
+
             }
         }
 
@@ -3005,7 +3008,7 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
  * Разыменование записи справочника
  */
     Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId) {
-        return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
+        return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
     }
 
 /**
@@ -4124,7 +4127,7 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
         BigDecimal sumNdflDeduction = new BigDecimal(0)
         for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
             if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                    && ndflPersonIncome.incomeAccruedDate?.toLocalDate().equals(ndflPersonDeduction.incomeAccrued?.toLocalDate())
+                    && ndflPersonIncome.incomeAccruedDate?.format(DATE_FORMAT) == ndflPersonDeduction.incomeAccrued?.format(DATE_FORMAT)
                     && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
                 sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
             }
@@ -4209,8 +4212,8 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
     class Column6EqualsColumn7 implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
-            String accrued = ndflPersonIncome.incomeAccruedDate?.toString("dd.MM.yyyy")
-            String payout = ndflPersonIncome.incomePayoutDate?.toString("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
+            String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
             return accrued == payout
         }
     }
@@ -4230,7 +4233,7 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
             if (ndflPersonIncome.incomeAccruedDate == null) {
                 return false
             }
-            String accrued = ndflPersonIncome.incomeAccruedDate.toString("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
             Pattern pattern = Pattern.compile(maskRegex)
             Matcher matcher = pattern.matcher(accrued)
             if (matcher.matches()) {
@@ -4250,7 +4253,7 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 return true
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
             int currentMonth = calendar.get(Calendar.MONTH)
             calendar.add(calendar.DATE, 1)
             int comparedMonth = calendar.get(Calendar.MONTH)
@@ -4268,7 +4271,7 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -4289,7 +4292,7 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -4310,14 +4313,14 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 return false
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
             // находим последний день месяца
             calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
             Date workDay = calendar.getTime()
             // если последний день месяца приходится на выходной, то следующий первый рабочий день
             int offset = 0
             workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.toDate().getTime()
+            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
         }
     }
 
@@ -4331,11 +4334,11 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             // "Графа 7" + "1 рабочий день"
             int offset = 1
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -4353,11 +4356,11 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
             int offset = 30
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -4375,10 +4378,10 @@ class consolidated_rnu_ndfl extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             Calendar calendar7 = Calendar.getInstance();
-            calendar7.setTime(ndflPersonIncome.incomePayoutDate.toDate());
+            calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
             // находим последний день месяца
             calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))

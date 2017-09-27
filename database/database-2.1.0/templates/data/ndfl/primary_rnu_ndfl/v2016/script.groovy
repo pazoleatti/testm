@@ -44,11 +44,10 @@ import javax.xml.ws.LogicalMessage
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.SQLSyntaxErrorException
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import org.joda.time.LocalDateTime
-import org.joda.time.format.DateTimeFormat
 
 (new primary_rnu_ndfl_v2016(this)).run();
 
@@ -341,7 +340,12 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
 
     int[] updatePrimaryToRefBookPersonReferences(List<NaturalPerson> primaryDataRecords) {
         ScriptUtils.checkInterrupted();
-        ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
+
+        if (FORM_TYPE == 100){
+            ndflPersonService.updateRefBookPersonReferences(primaryDataRecords);
+        } else {
+            raschsvPersSvStrahLicService.updateRefBookPersonReferences(primaryDataRecords)
+        }
     }
 
     def calculate() {
@@ -1915,9 +1919,9 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                                                def incomeCodeMap) {
         def operationNode = node.parent();
 
-        LocalDateTime incomeAccruedDate = toDate(node.'@ДатаДохНач')
-        LocalDateTime incomePayoutDate = toDate(node.'@ДатаДохВыпл')
-        LocalDateTime taxDate = toDate(node.'@ДатаНалог')
+        Date incomeAccruedDate = toDate(node.'@ДатаДохНач')
+        Date incomePayoutDate = toDate(node.'@ДатаДохВыпл')
+        Date taxDate = toDate(node.'@ДатаНалог')
 
         NdflPersonIncome personIncome = new NdflPersonIncome()
         personIncome.rowNum = toBigDecimal(node.'@НомСтр')
@@ -1971,7 +1975,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
     }
 
     // Проверка на принадлежность операций периоду при загрузке ТФ
-    boolean operationNotRelateToCurrentPeriod(LocalDateTime incomeAccruedDate, LocalDateTime incomePayoutDate, LocalDateTime taxDate,
+    boolean operationNotRelateToCurrentPeriod(Date incomeAccruedDate, Date incomePayoutDate, Date taxDate,
                                               String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         // Доход.Дата.Начисление
         boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(C_INCOME_ACCRUED_DATE, incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
@@ -1985,9 +1989,9 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
         return true
     }
 
-    boolean dateRelateToCurrentPeriod(String paramName, LocalDateTime date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
+    boolean dateRelateToCurrentPeriod(String paramName, Date date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
         //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-        if (date == null || (date.toDate() >= getReportPeriodStartDate() && date.toDate() <= getReportPeriodEndDate())) {
+        if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
             return true
         }
         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, (ndflPersonIncome.rowNum ? ndflPersonIncome.rowNum.longValue() : ""))
@@ -2092,9 +2096,10 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
     @TypeChecked(TypeCheckingMode.SKIP)
     LocalDateTime toDate(xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
+            SimpleDateFormat format = new java.text.SimpleDateFormat(DATE_FORMAT)
             if (xmlNode.text() != null && !xmlNode.text().isEmpty()) {
-                LocalDateTime date = LocalDateTime.parse(xmlNode.text(), DateTimeFormat.forPattern(DATE_FORMAT));
-                if (date.toString(DATE_FORMAT) != xmlNode.text()) {
+                Date date = format.parse(xmlNode.text())
+                if (format.format(date) != xmlNode.text()) {
                     throw new ServiceException("Значения атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не существует.")
                 }
                 return date
@@ -3267,8 +3272,8 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
             // Спр5 Код вида дохода (Необязательное поле)
             if (ndflPersonIncome.incomeCode != null && ndflPersonIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
                 value.CODE?.stringValue == ndflPersonIncome.incomeCode &&
-                        ndflPersonIncome.incomeAccruedDate.toDate() >= value.record_version_from?.dateValue &&
-                        ndflPersonIncome.incomeAccruedDate.toDate() <= value.record_version_to?.dateValue
+                        ndflPersonIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                        ndflPersonIncome.incomeAccruedDate <= value.record_version_to?.dateValue
             }) {
                 String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                         C_INCOME_CODE, ndflPersonIncome.incomeCode ?: "",
@@ -4904,7 +4909,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
         BigDecimal sumNdflDeduction = new BigDecimal(0)
         for (NdflPersonDeduction ndflPersonDeduction in ndflPersonDeductionList) {
             if (ndflPersonIncome.operationId == ndflPersonDeduction.operationId
-                    && ndflPersonIncome.incomeAccruedDate?.toLocalDate().equals(ndflPersonDeduction.incomeAccrued?.toLocalDate())
+                    && ndflPersonIncome.incomeAccruedDate?.format(DATE_FORMAT) == ndflPersonDeduction.incomeAccrued?.format(DATE_FORMAT)
                     && ndflPersonIncome.ndflPersonId == ndflPersonDeduction.ndflPersonId) {
                 sumNdflDeduction += ndflPersonDeduction.periodCurrSumm ?: 0
             }
@@ -4989,8 +4994,8 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
     class Column6EqualsColumn7 implements DateConditionChecker {
         @Override
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
-            String accrued = ndflPersonIncome.incomeAccruedDate?.toString("dd.MM.yyyy")
-            String payout = ndflPersonIncome.incomePayoutDate?.toString("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
+            String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
             return accrued == payout
         }
     }
@@ -5010,7 +5015,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
             if (ndflPersonIncome.incomeAccruedDate == null) {
                 return false
             }
-            String accrued = ndflPersonIncome.incomeAccruedDate.toString("dd.MM.yyyy")
+            String accrued = ndflPersonIncome.incomeAccruedDate.format("dd.MM.yyyy")
             Pattern pattern = Pattern.compile(maskRegex)
             Matcher matcher = pattern.matcher(accrued)
             if (matcher.matches()) {
@@ -5030,7 +5035,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return true
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
             int currentMonth = calendar.get(Calendar.MONTH)
             calendar.add(calendar.DATE, 1)
             int comparedMonth = calendar.get(Calendar.MONTH)
@@ -5048,7 +5053,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -5069,7 +5074,7 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendarPayout = Calendar.getInstance()
-            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate.toDate())
+            calendarPayout.setTime(ndflPersonIncome.incomePayoutDate)
             int dayOfMonth = calendarPayout.get(Calendar.DAY_OF_MONTH)
             int month = calendarPayout.get(Calendar.MONTH)
             if (dayOfMonth != 31 || month != 11) {
@@ -5090,14 +5095,14 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar = Calendar.getInstance()
-            calendar.setTime(ndflPersonIncome.incomeAccruedDate.toDate())
+            calendar.setTime(ndflPersonIncome.incomeAccruedDate)
             // находим последний день месяца
             calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
             Date workDay = calendar.getTime()
             // если последний день месяца приходится на выходной, то следующий первый рабочий день
             int offset = 0
             workDay = dateConditionWorkDay.getWorkDay(workDay, offset)
-            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.toDate().getTime()
+            return workDay.getTime() == ndflPersonIncome.incomeAccruedDate.getTime()
         }
     }
 
@@ -5111,11 +5116,11 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             // "Графа 7" + "1 рабочий день"
             int offset = 1
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -5133,11 +5138,11 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             // "Следующий рабочий день" после "Графа 7" + "30 календарных дней"
             int offset = 30
-            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate.toDate(), offset)
+            Date workDay = dateConditionWorkDay.getWorkDay(ndflPersonIncome.incomePayoutDate, offset)
             Calendar calendar7 = Calendar.getInstance();
             calendar7.setTime(workDay);
 
@@ -5155,10 +5160,10 @@ class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
                 return false
             }
             Calendar calendar21 = Calendar.getInstance();
-            calendar21.setTime(ndflPersonIncome.taxTransferDate.toDate());
+            calendar21.setTime(ndflPersonIncome.taxTransferDate);
 
             Calendar calendar7 = Calendar.getInstance();
-            calendar7.setTime(ndflPersonIncome.incomePayoutDate.toDate());
+            calendar7.setTime(ndflPersonIncome.incomePayoutDate);
 
             // находим последний день месяца
             calendar7.set(Calendar.DAY_OF_MONTH, calendar7.getActualMaximum(Calendar.DAY_OF_MONTH))

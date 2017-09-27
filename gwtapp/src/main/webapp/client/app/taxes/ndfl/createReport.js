@@ -4,7 +4,7 @@
     /**
      * @description Модуль для создания отчетности
      */
-    angular.module('app.createReport', ['app.constants', 'app.modals', 'app.rest'])
+    angular.module('app.createReport', ['app.constants', 'app.modals', 'app.rest', 'app.formatters'])
 
     /**
      * @description Контроллер окна "Создание отчетности"

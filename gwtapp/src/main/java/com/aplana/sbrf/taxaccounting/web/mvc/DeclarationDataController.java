@@ -61,8 +61,8 @@ public class DeclarationDataController {
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService, DeclarationDataService declarationDataService,
-                                     LogEntryService LogEntryService) {
+                                     TAUserService taUserService, DeclarationDataService declarationDataService,
+                                     LogEntryService LogEntryService, AsyncTaskManagerService asyncTaskManagerService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -345,8 +345,8 @@ public class DeclarationDataController {
      * @param pagingParams      параметры пагинации
      * @return список изменений декларации {@link LogBusinessModel}
      */
-    @GetMapping(value = "/rest/declarationData", params = "projection=businessLogs")
-    public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@RequestParam long declarationDataId, @RequestParam PagingParams pagingParams) {
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=businessLogs")
+    public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@PathVariable long declarationDataId, @RequestParam PagingParams pagingParams) {
         ArrayList<LogBusinessModel> logBusinessModelArrayList = new ArrayList<LogBusinessModel>();
         for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, HistoryBusinessSearchOrdering.DATE, true)) {
             LogBusinessModel logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),

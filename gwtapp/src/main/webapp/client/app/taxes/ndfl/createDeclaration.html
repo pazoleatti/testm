@@ -15,7 +15,9 @@
                         <div class="col-md-4">
                             <label class="control-label">{{::'createDeclaration.period' | translate}}:</label>
                         </div>
-                        <div data-ui-select2="periodSelect.options"
+                        <div data-ng-controller="SelectPeriodCtrl"
+                             data-ui-select2="periodSelect.options"
+                             data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
                              data-ng-model="declarationData.period"
                              class="col-md-8"></div>
                     </div>
@@ -23,7 +25,9 @@
                         <div class="col-md-4">
                             <label class="control-label">{{::'createDeclaration.department' | translate}}:</label>
                         </div>
-                        <div data-ui-select2="departmentsSelect.options"
+                        <div data-ng-controller="SelectDepartmentCtrl"
+                             data-ui-select2="departmentsSelect.options"
+                             data-ng-init="initDepartmentSelectWithOpenPeriod('declarationData.period')"
                              data-ng-model="declarationData.department"
                              class="col-md-8"></div>
                     </div>
@@ -32,7 +36,9 @@
                             <label class="control-label">{{::'createDeclaration.declarationType' |
                                 translate}}:</label>
                         </div>
-                        <div data-ui-select2="declarationTypeSelect.options"
+                        <div data-ng-controller="SelectDeclarationTypeCtrl"
+                             data-ui-select2="declarationTypeSelect.options"
+                             data-ng-init="initSelectWithDeclarationTypesForCreate(declarationKind, 'declarationData.period', 'declarationData.department')"
                              data-ng-model="declarationData.declarationType"
                              class="col-md-8"></div>
                     </div>

@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,7 +23,7 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
     }
 
     /**
-     * Получение доступных значений справочника
+     * Получение доступных (согласно роли пользователя) значений справочника
      *
      * @param userInfo Информация о пользователей
      * @return Список доступных значений справочника

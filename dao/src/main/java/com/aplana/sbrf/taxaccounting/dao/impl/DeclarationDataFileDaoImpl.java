@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,7 +21,7 @@ import java.util.*;
 @Repository
 public class DeclarationDataFileDaoImpl extends AbstractDao implements DeclarationDataFileDao {
 
-	private final static class DeclarationDataFilesMapper implements RowMapper<DeclarationDataFile> {
+    private final static class DeclarationDataFilesMapper implements RowMapper<DeclarationDataFile> {
 		@Override
         public DeclarationDataFile mapRow(ResultSet rs, int index) throws SQLException {
 			final DeclarationDataFile result = new DeclarationDataFile();
@@ -36,6 +37,11 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
             return result;
 		}
 	}
+
+    @Override
+    public SecuredEntity getSecuredEntity(long id) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 
     private final static class DeclarationDataFileShortMapper implements RowMapper<DeclarationDataFile> {
         @Override

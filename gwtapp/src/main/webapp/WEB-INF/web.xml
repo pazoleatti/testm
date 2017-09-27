@@ -5,8 +5,9 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			/WEB-INF/applicationContext.xml
+			classpath:com/aplana/sbrf/taxaccounting/permissions.xml
 			/WEB-INF/security.xml
+			/WEB-INF/applicationContext.xml
             /WEB-INF/spring-ejb.xml
             /WEB-INF/mvc-dispatcher-servlet.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml

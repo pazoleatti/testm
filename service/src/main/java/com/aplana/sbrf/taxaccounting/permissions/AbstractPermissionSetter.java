@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
-import com.aplana.sbrf.taxaccounting.model.AuthorisableEntity;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -19,7 +19,7 @@ import java.util.Collection;
  *
  * @author <a href="mailto:ogalkin@aplana.com>Олег Галкин</a>
  */
-public abstract class AbstractPermissionSetter<T extends AuthorisableEntity> implements PermissionSetter<T> {
+public abstract class AbstractPermissionSetter<T extends SecuredEntity> implements PermissionSetter<T> {
     private PermissionFactory<T> permissionFactory;
     private PermissionEvaluator permissionEvaluator;
 

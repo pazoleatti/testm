@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * DAO интерфейс для работы с информацией о {@link com.aplana.sbrf.taxaccounting.model.DeclarationDataFile файлах НФ(declaration)}
  */
-public interface DeclarationDataFileDao {
+public interface DeclarationDataFileDao extends PermissionDao {
 
     /**
      * Получение данных по файлам НФ(declaration)

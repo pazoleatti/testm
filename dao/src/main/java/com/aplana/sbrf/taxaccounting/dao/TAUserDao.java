@@ -11,7 +11,7 @@ import java.util.List;
  * DAO-интерфейс для работы с пользователями системы
  * @author dsultanbekov
  */
-public interface TAUserDao {
+public interface TAUserDao extends PermissionDao {
 	/**
 	 * Получить информацию о пользователе по идентификатору
 	 * @param userId идентификатор пользователя

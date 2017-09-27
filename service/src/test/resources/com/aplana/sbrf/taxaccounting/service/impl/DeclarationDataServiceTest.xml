@@ -74,4 +74,26 @@
 
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl" />
 
+    <bean class="org.mockito.Mockito" factory-method="mock" id="permissionDaoFactory">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.impl.PermissionDaoFactory"/>
+    </bean>
+
+    <bean id="declarationDataPermissionFactory" class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission"/>
+    </bean>
+    <bean id="permissionEvaluator" class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator">
+        <constructor-arg ref="permissionDaoFactory"/>
+        <property name="permissionFactoryRegistry">
+            <map>
+                <entry key="com.aplana.sbrf.taxaccounting.model.DeclarationData" value-ref="declarationDataPermissionFactory"/>
+            </map>
+        </property>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter"/>
+        <property name="permissionFactory" ref="declarationDataPermissionFactory"/>
+        <property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </bean>
+
 </beans>
