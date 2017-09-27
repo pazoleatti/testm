@@ -340,3 +340,9 @@ alter table configuration_scheduler add constraint conf_scheduler_pk primary key
 alter table configuration_scheduler_param add constraint conf_scheduler_param_pk primary key (id);
 alter table configuration_scheduler_param add constraint conf_scheduler_param_fk_conf foreign key (task_id) references configuration_scheduler(id) on delete cascade;
 alter table configuration_scheduler_param add constraint conf_scheduler_param_chk_type check(type in (1, 2, 3));
+
+
+alter table decl_template_event_script add constraint pk_decl_template_event_script primary key(id);
+alter table decl_template_event_script add constraint fk_dec_temp_event_scr_dec_temp foreign key (declaration_template_id) references declaration_template(id);
+alter table decl_template_event_script add constraint fk_dec_temp_event_id foreign key (event_id) references event(id);
+alter table decl_template_event_script add constraint uc_dec_temp_even_dec_temp_even unique (declaration_template_id, event_id);
