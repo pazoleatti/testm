@@ -6,17 +6,14 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.model.StringColumn
-import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
-import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
-import groovy.transform.Field
 import groovy.transform.TypeChecked
 import groovy.xml.MarkupBuilder
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -50,23 +47,129 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.model.util.Pair
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
+import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.RefBookService
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import java.util.zip.ZipInputStream
 import org.joda.time.LocalDateTime
 
-(new report_2ndfl_1(this)).run();
+new Report2Ndfl(this).run();
 
 @TypeChecked
-class report_2ndfl_1 extends AbstractScriptClass {
+class Report2Ndfl extends AbstractScriptClass {
 
-    private report_2ndfl_1() {
+    DeclarationService declarationService
+    DeclarationData declarationData
+    TAUserInfo userInfo
+    NdflPersonService ndflPersonService
+    RefBookFactory refBookFactory
+    ReportPeriodService reportPeriodService
+    DepartmentService departmentService
+    Boolean needSources
+    Boolean light
+    FormSources sources
+    ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
+    DepartmentReportPeriodService departmentReportPeriodService
+    FileWriter xml
+    RefBookService refBookService
+    Map<String, Object> calculateParams
+    BlobDataService blobDataServiceDaoImpl
+    File xmlFile
+    List<Long> ndflPersonKnfId
+    Map<Long, Map<String, Object>> formMap
+    Map<String, Object> scriptParams
+    OutputStream outputStream
+    Boolean excludeIfNotExist
+    State stateRestriction
+
+
+    private Report2Ndfl() {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    report_2ndfl_1(scriptClass) {
+    Report2Ndfl(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("declarationData")) {
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("userInfo")) {
+            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
+        }
+        if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+        }
+        if (scriptClass.getBinding().hasVariable("scriptSpecificReportHolder")) {
+            this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) scriptClass.getProperty("scriptSpecificReportHolder");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("needSources")) {
+            this.needSources = (Boolean) scriptClass.getProperty("needSources");
+        }
+        if (scriptClass.getBinding().hasVariable("light")) {
+            this.light = (Boolean) scriptClass.getProperty("light");
+        }
+        if (scriptClass.getBinding().hasVariable("sources")) {
+            this.sources = (FormSources) scriptClass.getProperty("sources");
+        }
+        if (scriptClass.getBinding().hasVariable("xml")) {
+            this.xml = (FileWriter) scriptClass.getProperty("xml");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookService")) {
+            this.refBookService = (RefBookService) scriptClass.getBinding().getProperty("refBookService");
+        }
+        if (scriptClass.getBinding().hasVariable("calculateParams")) {
+            this.calculateParams = (Map<String, Object>) scriptClass.getProperty("calculateParams");
+        }
+        if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
+            this.blobDataServiceDaoImpl = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceDaoImpl");
+        }
+        if (scriptClass.getBinding().hasVariable("xmlFile")) {
+            this.xmlFile = (File) scriptClass.getBinding().getProperty("xmlFile");
+        }
+        if (scriptClass.getBinding().hasVariable("ndflPersonKnfId")) {
+            this.ndflPersonKnfId = (List<Long>) scriptClass.getBinding().getProperty("ndflPersonKnfId");
+        }
+        if (scriptClass.getBinding().hasVariable("formMap")) {
+            this.formMap = (Map<Long, Map<String, Object>>) scriptClass.getBinding().getProperty("formMap");
+        }
+        if (scriptClass.getBinding().hasVariable("scriptParams")) {
+            this.scriptParams = (Map<String, Object>) scriptClass.getBinding().getProperty("scriptParams");
+        }
+        if (scriptClass.getBinding().hasVariable("outputStream")) {
+            this.outputStream = (OutputStream) scriptClass.getBinding().getProperty("outputStream");
+        }
+        if (scriptClass.getBinding().hasVariable("excludeIfNotExist")) {
+            this.excludeIfNotExist = (Boolean) scriptClass.getBinding().getProperty("excludeIfNotExist");
+        }
+        if (scriptClass.getBinding().hasVariable("stateRestriction")) {
+            this.stateRestriction = (State) scriptClass.getBinding().getProperty("stateRestriction");
+        }
+        reportType = declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE ? "2-НДФЛ (1)" : "2-НДФЛ (2)"
     }
 
     @Override
@@ -224,7 +327,7 @@ class report_2ndfl_1 extends AbstractScriptClass {
     final Map<Long, Map<String, RefBookValue>> OKTMO_CACHE = [:]
 
     int pairKppOktmoSize = 0
-    String reportType = declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE ? "2-НДФЛ (1)" : "2-НДФЛ (2)"
+    String reportType
 
     PagingResult<Map<String, RefBookValue>> ndflReferencesWithError = []
 
@@ -3345,7 +3448,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
     /**
      * Абстрактная реализация интерфейса Checker
      */
-    abstract class AbstractChecker implements report_2ndfl_1.Checker {
+    abstract class AbstractChecker implements Report2Ndfl.Checker {
         final String LAST_NAME = "Фамилия"
         final String FIRST_NAME = "Имя"
         final String MIDDLE_NAME = "Отчество"

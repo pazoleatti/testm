@@ -40,50 +40,67 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      * "Администрирование->Список блокировок"
      * "Администрирование->Журнал аудита"
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_BLOCK_AND_AUDIT = new ViewAdministrationBlockAndAuditPermission(1 << 4);
-    /**
-     * Право доступа к пункту меню: "Администрирование->Список пользователей"
-     */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_USERS = new ViewAdministrationUsersPermission(1 << 5);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_BLOCK = new ViewAdministrationBlockAndAuditPermission(1 << 4);
     /**
      * Право доступа к пунктам меню:
      * "Администрирование->Конфигурационные параметр"
      * "Администрирование->Планировщик задач"
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_CONFIG = new ViewAdministrationConfigPermission(1 << 6);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_CONFIG = new ViewAdministrationConfigPermission(1 << 5);
     /**
      * Право доступа к пункту меню "Администрирование->Настройки" и всем подменю
      */
-    public static final Permission<TAUser> VIEW_ADMINISTRATION_SETTINGS = new ViewAdministrationSettingsPermission(1 << 7);
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_SETTINGS = new ViewAdministrationSettingsPermission(1 << 6);
     /**
      * Право доступа к пункту меню "Руководство пользователя"
      */
-    public static final Permission<TAUser> VIEW_MANUAL_USER = new ViewManualUserPermission(1 << 8);
+    public static final Permission<TAUser> VIEW_MANUAL_USER = new ViewManualUserPermission(1 << 7);
     /**
      * Право доступа к пункту меню "Руководство настройщика макетов"
      */
-    public static final Permission<TAUser> VIEW_MANUAL_DESIGNER = new ViewManualDesignerPermission(1 << 9);
+    public static final Permission<TAUser> VIEW_MANUAL_DESIGNER = new ViewManualDesignerPermission(1 << 8);
     /**
      * Право на просмотр журнала
      */
-    public static final Permission<TAUser> VIEW_JOURNAL = new ViewJournalPermission(1 << 10);
+    public static final Permission<TAUser> VIEW_JOURNAL = new ViewJournalPermission(1 << 9);
     /**
      * Право на создание декларации вручную (журнал = отчетность)
      */
-    public static final Permission<TAUser> CREATE_DECLARATION_REPORT = new CreateDeclarationReportPermission(1 << 11);
+    public static final Permission<TAUser> CREATE_DECLARATION_REPORT = new CreateDeclarationReportPermission(1 << 10);
     /**
      * Право на создание первичной формы вручную (журнал = налоговые формы)
      */
-    public static final Permission<TAUser> CREATE_DECLARATION_PRIMARY = new CreatePrimaryDeclarationPermission(1 << 12);
+    public static final Permission<TAUser> CREATE_DECLARATION_PRIMARY = new CreatePrimaryDeclarationPermission(1 << 11);
 
     /**
      * Право на создание консолидированный формы вручную (журнал = налоговые формы)
      */
-    public static final Permission<TAUser> CREATE_DECLARATION_CONSOLIDATED = new CreateConsolidatedDeclarationPermission(1 << 13);
+    public static final Permission<TAUser> CREATE_DECLARATION_CONSOLIDATED = new CreateConsolidatedDeclarationPermission(1 << 12);
     /**
      * Право на создание и выгрузку отчетности
      */
-    public static final Permission<TAUser> CREATE_UPLOAD_REPORT = new CreateAndUploadReportPermission(1 << 14);
+    public static final Permission<TAUser> CREATE_UPLOAD_REPORT = new CreateAndUploadReportPermission(1 << 13);
+
+    /**
+     * Право на обработку ТФ из каталога загрузки
+     */
+    public static final Permission<TAUser> HANDLING_FILE = new HandlingFilePermission(1 << 14);
+    /**
+     * Право на загрузку ТФ
+     */
+    public static final Permission<TAUser> UPLOAD_FILE = new UploadFilePermission(1 << 15);
+    /**
+     * Право на редактирование общих параметров
+     */
+    public static final Permission<TAUser> EDIT_GENERAL_PARAMS = new EditGeneralParamsPermission(1 << 16);
+    /**
+     * Право на просмотр справочников
+     */
+    public static final Permission<TAUser> VIEW_REF_BOOK = new ViewRefBookPermission(1 << 17);
+    /**
+     * Право на редактирование справочников
+     */
+    public static final Permission<TAUser> EDIT_REF_BOOK = new EditRefBookPermission(1 << 18);
 
 
     public UserPermission(long mask) {
@@ -201,29 +218,6 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
             for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
                 if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
-    /**
-     * Право доступа к пункту меню: "Администрирование->Список пользователей"
-     */
-    public static final class ViewAdministrationUsersPermission extends UserPermission {
-
-        public ViewAdministrationUsersPermission(long mask) {
-            super(mask);
-        }
-
-        @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
                         || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
                         || grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
                     return true;
@@ -431,6 +425,81 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
             }
 
             return false;
+        }
+    }
+
+    /**
+     * Право на обработку ТФ из каталога загрузки
+     */
+    public static final class HandlingFilePermission extends UserPermission {
+
+        public HandlingFilePermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN);
+        }
+    }
+
+    /**
+     * Право на загрузку ТФ
+     */
+    public static final class UploadFilePermission extends UserPermission {
+
+        public UploadFilePermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
+        }
+    }
+
+    /**
+     * Право на редактирование общих параметров
+     */
+    public static final class EditGeneralParamsPermission extends UserPermission {
+
+        public EditGeneralParamsPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+        }
+    }
+
+    /**
+     * Право на просмотр справочников
+     */
+    public static final class ViewRefBookPermission extends UserPermission {
+
+        public ViewRefBookPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN, TARole.N_ROLE_CONF);
+        }
+    }
+
+    /**
+     * Право на редактирование справочников
+     */
+    public static final class EditRefBookPermission extends UserPermission {
+
+        public EditRefBookPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 }

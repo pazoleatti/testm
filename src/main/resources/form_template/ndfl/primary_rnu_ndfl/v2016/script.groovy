@@ -4,32 +4,45 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils
-import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.identification.*
-import com.aplana.sbrf.taxaccounting.dao.identification.*
+import com.aplana.sbrf.taxaccounting.model.identification.Address
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEvent
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEventType
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener
+import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeListener
+import com.aplana.sbrf.taxaccounting.model.identification.Country
+import com.aplana.sbrf.taxaccounting.model.identification.DocType
+import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
+import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
+import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument
+import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier
+import com.aplana.sbrf.taxaccounting.model.identification.RefBookObject
+import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
-import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
+import com.aplana.sbrf.taxaccounting.service.script.CalendarService
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
+import com.aplana.sbrf.taxaccounting.service.script.FiasRefBookService
+import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.RefBookPersonService
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.service.script.*
-import groovy.transform.CompileStatic
-import groovy.transform.Field
 import groovy.transform.Memoized
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.NodeChild
-import groovy.xml.MarkupBuilder
-import org.springframework.jdbc.core.RowMapper
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
@@ -40,7 +53,6 @@ import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.*
-import javax.xml.ws.LogicalMessage
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.SQLSyntaxErrorException
@@ -50,17 +62,96 @@ import java.util.regex.Pattern
 import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormat
 
-(new primary_rnu_ndfl_v2016(this)).run();
+new PrimaryRnuNdfl(this).run();
 
 @TypeChecked
-class primary_rnu_ndfl_v2016 extends AbstractScriptClass {
+class PrimaryRnuNdfl extends AbstractScriptClass {
 
-    private primary_rnu_ndfl_v2016() {}
+    DeclarationService declarationService
+    DeclarationData declarationData
+    TAUserInfo userInfo
+    FiasRefBookService fiasRefBookService
+    NdflPersonService ndflPersonService
+    Map<String, Object> calculateParams
+    RefBookPersonService refBookPersonService
+    RefBookFactory refBookFactory
+    ReportPeriodService reportPeriodService
+    DepartmentService departmentService
+    Boolean needSources
+    Boolean light
+    FormSources sources
+    ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
+    DepartmentReportPeriodService departmentReportPeriodService
+    CalendarService calendarService
+    String UploadFileName
+    InputStream ImportInputStream
+    File dataFile
+
+    private PrimaryRnuNdfl() {}
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    public primary_rnu_ndfl_v2016(scriptClass) {
+    public PrimaryRnuNdfl(scriptClass) {
         super(scriptClass)
-        // инициализация параметров
+        if (scriptClass.getBinding().hasVariable("declarationData")) {
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("calendarService")) {
+            this.calendarService = (CalendarService) scriptClass.getProperty("calendarService");
+        }
+        if (scriptClass.getBinding().hasVariable("userInfo")) {
+            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
+        }
+        if (scriptClass.getBinding().hasVariable("fiasRefBookService")) {
+            this.fiasRefBookService = (FiasRefBookService) scriptClass.getProperty("fiasRefBookService");
+        }
+        if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+        }
+        if (scriptClass.getBinding().hasVariable("calculateParams")) {
+            this.calculateParams = (Map<String, Object>) scriptClass.getProperty("calculateParams");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookPersonService")) {
+            this.refBookPersonService = (RefBookPersonService) scriptClass.getProperty("refBookPersonService");
+        }
+        if (scriptClass.getBinding().hasVariable("scriptSpecificReportHolder")) {
+            this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) scriptClass.getProperty("scriptSpecificReportHolder");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("needSources")) {
+            this.needSources = (Boolean) scriptClass.getProperty("needSources");
+        }
+        if (scriptClass.getBinding().hasVariable("light")) {
+            this.light = (Boolean) scriptClass.getProperty("light");
+        }
+        if (scriptClass.getBinding().hasVariable("sources")) {
+            this.sources = (FormSources) scriptClass.getProperty("sources");
+        }
+        if (scriptClass.getBinding().hasVariable("dataFile")) {
+            this.dataFile = (File) scriptClass.getProperty("dataFile");
+        }
+        if (scriptClass.getBinding().hasVariable("UploadFileName")) {
+            this.UploadFileName = (String) scriptClass.getProperty("UploadFileName");
+        }
+        if (scriptClass.getBinding().hasVariable("ImportInputStream")) {
+            this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream");
+        }
     }
 
     @Override

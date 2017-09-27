@@ -5,24 +5,46 @@ import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 
 /**
  * Cкрипт справочника "Физические лица" (id = 904).
  * ref_book_id = 904
  */
 
-(new person(this)).run();
+(new Person(this)).run();
 
 
 @TypeChecked
-class person extends AbstractScriptClass {
+class Person extends AbstractScriptClass {
 
-    private person() {
+    Long sourceUniqueRecordId
+    Long uniqueRecordId;
+    Boolean isNewRecords
+    Date validDateFrom
+    RefBookFactory refBookFactory
+
+    private Person() {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    person(scriptClass) {
+    Person(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("sourceUniqueRecordId")) {
+            this.sourceUniqueRecordId = (Long) scriptClass.getBinding().getProperty("sourceUniqueRecordId");
+        }
+        if (scriptClass.getBinding().hasVariable("uniqueRecordId")) {
+            this.uniqueRecordId = (Long) scriptClass.getBinding().getProperty("uniqueRecordId");
+        }
+        if (scriptClass.getBinding().hasVariable("isNewRecords")) {
+            this.isNewRecords = (Boolean) scriptClass.getBinding().getProperty("isNewRecords");
+        }
+        if (scriptClass.getBinding().hasVariable("validDateFrom")) {
+            this.validDateFrom = (Date) scriptClass.getBinding().getProperty("validDateFrom");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
     }
 
     @Override

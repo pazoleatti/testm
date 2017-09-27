@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,54 +40,46 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
      */
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public List<RefBookDepartment> fetchAllAvailableDepartments(TAUser user) {
-        if (user.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-            List<Integer> taxFormDepartments = departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null);
-            Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(taxFormDepartments)).keySet();
-            return refBookDepartmentDataDao.fetchDepartments(departmentIds);
-        } else {
-            throw new AccessDeniedException("Недостаточно прав для поиска налоговых форм");
-        }
+        List<Integer> taxFormDepartments = departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null);
+        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(taxFormDepartments)).keySet();
+        return refBookDepartmentDataDao.fetchDepartments(departmentIds);
     }
 
     /**
      * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user         Пользователь
-     * @param name         Наименование подразделения
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
      * @param pagingParams Параметры пейджинга
      * @return Страница списка значений справочника
      */
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams) {
-        if (user.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-            List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null);
-            Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(declarationDepartments)).keySet();
-            return refBookDepartmentDataDao.fetchDepartments(departmentIds, name, pagingParams);
-        } else {
-            throw new AccessDeniedException("Недостаточно прав для поиска налоговых форм");
-        }
+        List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null);
+        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(declarationDepartments)).keySet();
+        return refBookDepartmentDataDao.fetchDepartments(departmentIds, name, pagingParams);
     }
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период, с фильтрацией по наименованию подразделения и пейджингом
+     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user           Пользователь
-     * @param name           Наименование подразделения
+     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
      * @param reportPeriodId ID отчетного периода, который должен быть открыт
      * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public PagingResult<RefBookDepartment> fetchDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams) {
-        if (user.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-            List<Integer> departmentsWithOpenPeriod = departmentService.getOpenPeriodDepartments(user, TaxType.NDFL, reportPeriodId);
-            Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(departmentsWithOpenPeriod)).keySet();
-            return refBookDepartmentDataDao.fetchDepartments(departmentIds, name, pagingParams);
-        } else {
-            throw new AccessDeniedException("Недостаточно прав для поиска налоговых форм");
-        }
+        List<Integer> departmentsWithOpenPeriod = departmentService.getOpenPeriodDepartments(user, TaxType.NDFL, reportPeriodId);
+        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(departmentsWithOpenPeriod)).keySet();
+        return refBookDepartmentDataDao.fetchDepartments(departmentIds, name, pagingParams);
     }
 }

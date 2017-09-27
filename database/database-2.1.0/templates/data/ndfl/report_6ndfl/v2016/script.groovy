@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
-import groovy.transform.Field
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.MarkupBuilder
@@ -29,9 +28,15 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.util.Pair
-import com.aplana.sbrf.taxaccounting.service.script.*
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
+import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.RefBookService
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
@@ -39,19 +44,117 @@ import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import org.joda.time.LocalDateTime
 
-import java.text.SimpleDateFormat
-
-(new report_6ndfl(this)).run();
+new Report6Ndfl(this).run();
 
 @TypeChecked
-class report_6ndfl extends AbstractScriptClass {
+class Report6Ndfl extends AbstractScriptClass {
 
-    private report_6ndfl() {
+    DeclarationService declarationService
+    DeclarationData declarationData
+    TAUserInfo userInfo
+    NdflPersonService ndflPersonService
+    RefBookFactory refBookFactory
+    ReportPeriodService reportPeriodService
+    DepartmentService departmentService
+    Boolean needSources
+    Boolean light
+    FormSources sources
+    ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
+    DepartmentReportPeriodService departmentReportPeriodService
+    FileWriter xml
+    RefBookService refBookService
+    Map<String, Object> calculateParams
+    BlobDataService blobDataServiceDaoImpl
+    File xmlFile
+    List<Long> ndflPersonKnfId
+    Map<Long, Map<String, Object>> formMap
+    Map<String, Object> scriptParams
+    OutputStream outputStream
+    Boolean excludeIfNotExist
+    State stateRestriction
+    String applicationVersion
+
+    private Report6Ndfl() {
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    report_6ndfl(scriptClass) {
+    Report6Ndfl(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("declarationData")) {
+            this.declarationData = (DeclarationData) scriptClass.getProperty("declarationData");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("userInfo")) {
+            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
+        }
+        if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
+            this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+        }
+        if (scriptClass.getBinding().hasVariable("scriptSpecificReportHolder")) {
+            this.scriptSpecificReportHolder = (ScriptSpecificDeclarationDataReportHolder) scriptClass.getProperty("scriptSpecificReportHolder");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("needSources")) {
+            this.needSources = (Boolean) scriptClass.getProperty("needSources");
+        }
+        if (scriptClass.getBinding().hasVariable("light")) {
+            this.light = (Boolean) scriptClass.getProperty("light");
+        }
+        if (scriptClass.getBinding().hasVariable("sources")) {
+            this.sources = (FormSources) scriptClass.getProperty("sources");
+        }
+        if (scriptClass.getBinding().hasVariable("xml")) {
+            this.xml = (FileWriter) scriptClass.getProperty("xml");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookService")) {
+            this.refBookService = (RefBookService) scriptClass.getBinding().getProperty("refBookService");
+        }
+        if (scriptClass.getBinding().hasVariable("calculateParams")) {
+            this.calculateParams = (Map<String, Object>) scriptClass.getProperty("calculateParams");
+        }
+        if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
+            this.blobDataServiceDaoImpl = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceDaoImpl");
+        }
+        if (scriptClass.getBinding().hasVariable("xmlFile")) {
+            this.xmlFile = (File) scriptClass.getBinding().getProperty("xmlFile");
+        }
+        if (scriptClass.getBinding().hasVariable("ndflPersonKnfId")) {
+            this.ndflPersonKnfId = (List<Long>) scriptClass.getBinding().getProperty("ndflPersonKnfId");
+        }
+        if (scriptClass.getBinding().hasVariable("formMap")) {
+            this.formMap = (Map<Long, Map<String, Object>>) scriptClass.getBinding().getProperty("formMap");
+        }
+        if (scriptClass.getBinding().hasVariable("scriptParams")) {
+            this.scriptParams = (Map<String, Object>) scriptClass.getBinding().getProperty("scriptParams");
+        }
+        if (scriptClass.getBinding().hasVariable("outputStream")) {
+            this.outputStream = (OutputStream) scriptClass.getBinding().getProperty("outputStream");
+        }
+        if (scriptClass.getBinding().hasVariable("excludeIfNotExist")) {
+            this.excludeIfNotExist = (Boolean) scriptClass.getBinding().getProperty("excludeIfNotExist");
+        }
+        if (scriptClass.getBinding().hasVariable("stateRestriction")) {
+            this.stateRestriction = (State) scriptClass.getBinding().getProperty("stateRestriction");
+        }
+        if (scriptClass.getBinding().hasVariable("applicationVersion")) {
+            this.applicationVersion = (String) scriptClass.getBinding().getProperty("applicationVersion");
+        }
     }
 
     @Override
@@ -232,31 +335,34 @@ class report_6ndfl extends AbstractScriptClass {
         // Код периода
         def periodCode = getRefBookValue(REF_BOOK_PERIOD_CODE_ID, reportPeriod?.dictTaxPeriodId)?.CODE?.stringValue
 
-    // Коды представления налоговой декларации по месту нахождения (учёта)
-    def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
-def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
-    Department department = departmentService.get(departmentReportPeriod.departmentId)
-    String strCorrPeriod = ""
-    if (departmentReportPeriod.getCorrectionDate() != null) {
-        strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
-    }
-    def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
-            FORM_NAME_NDFL6,
-            "${departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()} ${departmentReportPeriod.getReportPeriod().getName()}${strCorrPeriod}",
-            department.getName(),
-            declarationData.kpp,
-            declarationData.oktmo)    if (poMestuParam == null) {
-        logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\"." )
-        calculateParams.put("notReplaceXml", true)
-        calculateParams.put("createForm", false)
-        return
-    }
-    def taxPlaceTypeCode = poMestuParam?.CODE?.valueif(taxPlaceTypeCode == null){
-        logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
-        calculateParams.put("notReplaceXml", true)
-        calculateParams.put("createForm", false)
-        return
-    }
+        // Коды представления налоговой декларации по месту нахождения (учёта)
+        def poMestuParam = getRefPresentPlace().get(departmentParamIncomeRow?.PRESENT_PLACE?.referenceValue)
+
+        def departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+        Department department = departmentService.get(departmentReportPeriod.departmentId)
+        String strCorrPeriod = ""
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+        }
+        def errMsg = sprintf("Не удалось создать форму %s, за %s, подразделение: %s, КПП: %s, ОКТМО: %s.",
+                FORM_NAME_NDFL6,
+                "${departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()} ${departmentReportPeriod.getReportPeriod().getName()}${strCorrPeriod}",
+                department.getName(),
+                declarationData.kpp,
+                declarationData.oktmo)
+        if (poMestuParam == null) {
+            logger.warn(errMsg + " В \"Настройках подразделений\" не указан \"Код места, по которому представляется документ\".")
+            calculateParams.put("notReplaceXml", true)
+            calculateParams.put("createForm", false)
+            return
+        }
+        def taxPlaceTypeCode = poMestuParam?.CODE?.value
+        if (taxPlaceTypeCode == null) {
+            logger.warn(errMsg + " \"Код места, по которому представляется документ\", не соответствует справочнику \"Коды места представления расчета\" в \"Настройках подразделений\".")
+            calculateParams.put("notReplaceXml", true)
+            calculateParams.put("createForm", false)
+            return
+        }
 
         // Признак лица, подписавшего документ
         def signatoryId = getRefBookValue(REF_BOOK_MARK_SIGNATORY_CODE_ID, departmentParamIncomeRow?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
@@ -459,39 +565,41 @@ def departmentReportPeriod = departmentReportPeriodService.get(declarationData.d
                     }
                     if (pairOperationIdMap.size() != 0) {
 
-                    ДохНал() {
-                        Set groups = []
-                        def payoutSumByGroup = [:]
-                        def withholdingTaxSumByGroup = [:]pairOperationIdMap.values().each { listIncomes ->
-                            ScriptUtils.checkInterrupted()
-                            def incomeAccruedDate
-                            def taxDate
-                            def transferDate
-                            def incomePayoutSumm = new BigDecimal(0)
-                            def withholdingTax = 0
-                            listIncomes.each {
-                                if (it.incomeAccruedDate != null && it.incomeAccruedSumm != null && !it.incomeAccruedSumm.equals(new BigDecimal(0))) {
-                                    incomeAccruedDate = it.incomeAccruedDate
-                                }
-                                if (it.taxDate != null) {
-                                    boolean notEmpty = false
-                                    if (it.withholdingTax != null && it.withholdingTax != 0) {
-                                        notEmpty = true
-                                    } else if (it.incomeAccruedSumm.equals(it.incomeAccruedSumm) && it.taxBase.equals(new BigDecimal(0)) && it.calculatedTax == 0) {
-                                        notEmpty = true
+                        ДохНал() {
+                            Set groups = []
+                            def payoutSumByGroup = [:]
+                            def withholdingTaxSumByGroup = [:]
+                            pairOperationIdMap.values().each { listIncomes ->
+                                ScriptUtils.checkInterrupted()
+                                def incomeAccruedDate
+                                def taxDate
+                                def transferDate
+                                def incomePayoutSumm = new BigDecimal(0)
+                                def withholdingTax = 0
+                                listIncomes.each {
+                                    if (it.incomeAccruedDate != null && it.incomeAccruedSumm != null && !it.incomeAccruedSumm.equals(new BigDecimal(0))) {
+                                        incomeAccruedDate = it.incomeAccruedDate
                                     }
-                                    if (notEmpty) {
-                                        taxDate = it.taxDate
+                                    if (it.taxDate != null) {
+                                        boolean notEmpty = false
+                                        if (it.withholdingTax != null && it.withholdingTax != 0) {
+                                            notEmpty = true
+                                        } else if (it.incomeAccruedSumm.equals(it.incomeAccruedSumm) && it.taxBase.equals(new BigDecimal(0)) && it.calculatedTax == 0) {
+                                            notEmpty = true
+                                        }
+                                        if (notEmpty) {
+                                            taxDate = it.taxDate
+                                        }
                                     }
-                                }
-                                if (it.taxTransferDate != null && it.taxSumm != null && it.taxSumm != 0) {
-                                    transferDate = it.taxTransferDate
-                                }
-                                if (it.incomePayoutSumm != null) {
-                                    incomePayoutSumm = incomePayoutSumm.add(it.incomePayoutSumm)
-                                }
-                                if (it.withholdingTax != null) {
-                                    withholdingTax += it.withholdingTax}
+                                    if (it.taxTransferDate != null && it.taxSumm != null && it.taxSumm != 0) {
+                                        transferDate = it.taxTransferDate
+                                    }
+                                    if (it.incomePayoutSumm != null) {
+                                        incomePayoutSumm = incomePayoutSumm.add(it.incomePayoutSumm)
+                                    }
+                                    if (it.withholdingTax != null) {
+                                        withholdingTax += it.withholdingTax
+                                    }
                                 }
                                 def grouping = [
                                         'incomeAccruedDate': incomeAccruedDate,
@@ -1053,7 +1161,7 @@ def departmentReportPeriod = departmentReportPeriodService.get(declarationData.d
  * Разыменование записи справочника
  */
     Map<String, RefBookValue> getRefBookValue(Long refBookId, Long recordId) {
-        return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+        return refBookService.getRefBookValue(refBookId, recordId, refBookCache)
     }
 
 /************************************* СОЗДАНИЕ ФОРМЫ *****************************************************************/

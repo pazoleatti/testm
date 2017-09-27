@@ -3,19 +3,14 @@ package com.aplana.sbrf.taxaccounting.model.scheduler;
 import org.joda.time.LocalDateTime;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
- * Информация о задаче планировщика
- * @author lhaziev
+ * Информация о задаче планировщика (с признаком активности типа Byte)
  */
-public class SchedulerTaskData implements Serializable {
-    private static final long serialVersionUID = 5615161290731046644L;
-
+public class SchedulerTaskModel implements Serializable{
+    private static final long serialVersionUID = 8499843706617670293L;
     /** Идентификатор задачи */
-    private SchedulerTask task;
+    private int id;
 
     /** Название задачи */
     private String taskName;
@@ -30,21 +25,19 @@ public class SchedulerTaskData implements Serializable {
     private LocalDateTime modificationDate;
 
     /** Дата последнего запуска задачи */
-    private LocalDateTime last_fire_date;
+    private LocalDateTime lastFireDate;
 
     /**
      * Признак активности задачи
      */
-    private boolean active;
+    private Byte active;
 
-    private List<SchedulerTaskParam> params = new ArrayList<SchedulerTaskParam>();
-
-    public SchedulerTask getTask() {
-        return task;
+    public int getId() {
+        return id;
     }
 
-    public void setTask(SchedulerTask task) {
-        this.task = task;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getTaskName() {
@@ -63,46 +56,38 @@ public class SchedulerTaskData implements Serializable {
         this.schedule = schedule;
     }
 
-    public LocalDateTime getLast_fire_date() {
-        return last_fire_date;
-    }
-
-    public void setLast_fire_date(LocalDateTime last_fire_date) {
-        this.last_fire_date = last_fire_date;
+    public LocalDateTime getModificationDate() {
+        return modificationDate;
     }
 
     public void setModificationDate(LocalDateTime modificationDate) {
         this.modificationDate = modificationDate;
     }
 
-    public LocalDateTime getModificationDate() {
-        return modificationDate;
+    public LocalDateTime getLastFireDate() {
+        return lastFireDate;
     }
 
-    public boolean isActive() {
+    public void setLastFireDate(LocalDateTime lastFireDate) {
+        this.lastFireDate = lastFireDate;
+    }
+
+    public Byte getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Byte active) {
         this.active = active;
-    }
-
-    public List<SchedulerTaskParam> getParams() {
-        return params;
-    }
-
-    public void setParams(List<SchedulerTaskParam> params) {
-        this.params = params;
     }
 
     @Override
     public String toString() {
-        return "TaskData{" +
-                "task=" + task.name() +
+        return "TaskModel{" +
+                "id=" + id +
                 ", taskName='" + taskName + '\'' +
                 ", schedule='" + schedule + '\'' +
                 ", modificationDate=" + modificationDate +
-                ", last_fire_date=" + last_fire_date +
+                ", lastFireDate=" + lastFireDate +
                 ", active=" + active +
                 '}';
     }

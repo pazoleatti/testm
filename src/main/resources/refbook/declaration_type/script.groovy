@@ -13,24 +13,83 @@ import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 import org.joda.time.LocalDateTime
 import org.apache.commons.io.IOUtils
+import com.aplana.sbrf.taxaccounting.model.DeclarationType
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
 
 /**
  * Created by lhaziev on 09.02.2017.
  */
 
-(new declaration_type(this)).run();
+(new DeclarationType(this)).run();
 
 @TypeChecked
-class declaration_type extends AbstractScriptClass {
+class DeclarationType extends AbstractScriptClass {
 
-    private declaration_type() {
+    String UploadFileName
+    InputStream ImportInputStream
+    File dataFile
+    RefBookFactory refBookFactory
+    DeclarationService declarationService
+    TAUserInfo userInfo
+    DepartmentService departmentService
+    StringBuilder msgBuilder
+    BlobDataService blobDataServiceDaoImpl
+    DepartmentReportPeriodService departmentReportPeriodService
+    ReportPeriodService reportPeriodService
+
+    private DeclarationType() {
     }
 
     @TypeChecked(groovy.transform.TypeCheckingMode.SKIP)
-    declaration_type(scriptClass) {
+    DeclarationType(scriptClass) {
         super(scriptClass)
+        if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
+            this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("departmentService")) {
+            this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService");
+        }
+        if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
+            this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("userInfo")) {
+            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookFactory")) {
+            this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
+            this.blobDataServiceDaoImpl = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceDaoImpl");
+        }
+        if (scriptClass.getBinding().hasVariable("msgBuilder")) {
+            msgBuilder = (StringBuilder) scriptClass.getBinding().getProperty("msgBuilder")
+        }
+        if (scriptClass.getBinding().hasVariable("userInfo")) {
+            this.userInfo = (TAUserInfo) scriptClass.getProperty("userInfo");
+        }
+        if (scriptClass.getBinding().hasVariable("dataFile")) {
+            this.dataFile = (File) scriptClass.getProperty("dataFile");
+        }
+        if (scriptClass.getBinding().hasVariable("UploadFileName")) {
+            this.UploadFileName = (String) scriptClass.getProperty("UploadFileName");
+        }
+        if (scriptClass.getBinding().hasVariable("ImportInputStream")) {
+            this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream");
+        }
     }
 
     @Override
@@ -616,6 +675,7 @@ class declaration_type extends AbstractScriptClass {
         String formTypeCode = formType.CODE.stringValue
 
         // Выполнить проверку структуры файла ответа на соответствие XSD
+        InputStream inputStream
         if (NDFL6 == formTypeCode) {
             SAXHandler handl = new SAXHandler('Файл', 'Файл', true)
             try {
@@ -873,7 +933,7 @@ class declaration_type extends AbstractScriptClass {
             throw new IllegalArgumentException(String.format(ERROR_NAME_FORMAT, UploadFileName));
         }
 
-        DeclarationType declarationType = declarationService.getTemplateType(declarationTypeId);
+        com.aplana.sbrf.taxaccounting.model.DeclarationType declarationType = declarationService.getTemplateType(declarationTypeId);
 
         // Указан недопустимый код периода
         ReportPeriod reportPeriod = reportPeriodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodCode, year);
@@ -943,6 +1003,7 @@ class declaration_type extends AbstractScriptClass {
 
         //достать из XML файла атрибуты тега СлЧасть
         SAXHandler handler = new SAXHandler('СлЧасть', 'Файл', true)
+        InputStream inputStream
         try {
             inputStream = new FileInputStream(dataFile)
             SAXParserFactory factory = SAXParserFactory.newInstance()
@@ -1025,7 +1086,7 @@ class declaration_type extends AbstractScriptClass {
         // Создание экземпляра декларации
         declarationDataId = declarationService.create(logger, declarationTemplateId, userInfo, departmentReportPeriod, null, kpp, null, asnuId, UploadFileName, null, true);
 
-        InputStream inputStream = new FileInputStream(dataFile)
+        inputStream = new FileInputStream(dataFile)
         try {
             // Запуск события скрипта для разбора полученного файла
             declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, attachFileType, new LocalDateTime(createDateFile))

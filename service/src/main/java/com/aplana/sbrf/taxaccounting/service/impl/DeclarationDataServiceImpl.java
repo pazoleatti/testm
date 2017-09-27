@@ -698,11 +698,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             filter.setControlNs(false);
         }
 
-        List<DeclarationDataJournalItem> declarationDataList = declarationDataDao.findPage(filter, pagingParams);
-
-        int count = declarationDataDao.getCount(filter);
-
-        return new PagingResult<DeclarationDataJournalItem>(declarationDataList, count);
+        return declarationDataDao.findPage(filter, pagingParams);
     }
 
     @Override

@@ -1,21 +1,23 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SchedulerTaskDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParamType;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.RowMapper;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.scheduler.*;
+import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.QBean;
+import com.querydsl.core.types.dsl.DateExpression;
+import com.querydsl.sql.SQLQueryFactory;
+import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.aplana.sbrf.taxaccounting.model.QConfigurationScheduler.configurationScheduler;
+import static com.aplana.sbrf.taxaccounting.model.QConfigurationSchedulerParam.configurationSchedulerParam;
+import static com.querydsl.core.types.Projections.bean;
 
 /**
  * Дао для работы с типами асинхронных задач
@@ -23,138 +25,140 @@ import java.util.*;
 @Repository
 public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDao {
 
-    private static final class SchedulerTaskMapper implements RowMapper<SchedulerTaskData>{
+    private final SQLQueryFactory sqlQueryFactory;
 
-        @Override
-        public SchedulerTaskData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            SchedulerTaskData taskData = new SchedulerTaskData();
-            taskData.setTask(SchedulerTask.getByTaskId(rs.getLong("id")));
-            taskData.setTaskName(rs.getString("task_name"));
-            taskData.setSchedule(rs.getString("schedule"));
-            taskData.setModificationDate(new Date(rs.getTimestamp("modification_date").getTime()));
-            Timestamp last_fire_date = rs.getTimestamp("last_fire_date");
-            if (last_fire_date != null) {
-                taskData.setLast_fire_date(new Date(last_fire_date.getTime()));
-            }
-            taskData.setActive(rs.getBoolean("active"));
-            return taskData;
-        }
-    }
+    //TODO разобраться как Byte преобразовать в Boolean
+    private final QBean<SchedulerTaskModel> schedulerTaskModelBean = bean(SchedulerTaskModel.class, configurationScheduler.all());
+    private final QBean<SchedulerTaskParamModel> schedulerTaskParamModelBean = bean(SchedulerTaskParamModel.class, configurationSchedulerParam.id, configurationSchedulerParam.paramName,
+            configurationSchedulerParam.type, configurationSchedulerParam.value);
 
-    private static final class SchedulerTaskParamMapper implements RowMapper<SchedulerTaskParam>{
-
-        @Override
-        public SchedulerTaskParam mapRow(ResultSet rs, int rowNum) throws SQLException {
-            SchedulerTaskParam taskData = new SchedulerTaskParam();
-            taskData.setId(rs.getLong("id"));
-            taskData.setParamName(rs.getString("param_name"));
-            taskData.setParamType(SchedulerTaskParamType.getById(rs.getInt("type")));
-            taskData.setValue(rs.getString("value"));
-            return taskData;
-        }
+    @Autowired
+    public SchedulerTaskDaoImpl(SQLQueryFactory sqlQueryFactory) {
+        this.sqlQueryFactory = sqlQueryFactory;
     }
 
     @Override
     public SchedulerTaskData get(Long taskId) {
-        try{
-            Map<String, Object> valueMap = new HashMap<String, Object>();
-            valueMap.put("taskId", taskId);
-            SchedulerTaskData taskData = getNamedParameterJdbcTemplate().queryForObject(
-                    "SELECT id, task_name, schedule, active, modification_date, last_fire_date " +
-                            "FROM CONFIGURATION_SCHEDULER WHERE id = :taskId",
-                    valueMap,
-                    new SchedulerTaskMapper()
-            );
-            taskData.setParams(getTaskParam(taskId));
-            return taskData;
-        } catch (EmptyResultDataAccessException e){
-            return null;
+        List<SchedulerTaskModel> schedulerTaskModelList = sqlQueryFactory.from(configurationScheduler)
+                .where(configurationScheduler.id.eq(taskId.intValue()))
+                .transform(GroupBy.groupBy(configurationScheduler.id).list(schedulerTaskModelBean));
+
+        if (!schedulerTaskModelList.isEmpty()) {
+            SchedulerTaskModel schedulerTaskModel = schedulerTaskModelList.get(0);
+            SchedulerTaskData schedulerTaskData = new SchedulerTaskData();
+            schedulerTaskData.setTask(SchedulerTask.getByTaskId(schedulerTaskModel.getId()));
+            schedulerTaskData.setTaskName(schedulerTaskModel.getTaskName());
+            schedulerTaskData.setSchedule(schedulerTaskModel.getSchedule());
+            schedulerTaskData.setModificationDate(schedulerTaskModel.getModificationDate());
+            schedulerTaskData.setLast_fire_date(schedulerTaskModel.getLastFireDate());
+            schedulerTaskData.setActive(schedulerTaskModel.getActive() == 1);
+            schedulerTaskData.setParams(getTaskParam(taskId));
+            return schedulerTaskData;
         }
+
+        return null;
     }
 
     @Override
     public List<SchedulerTaskData> getAll() {
-        try{
-            return getJdbcTemplate().query(
-                    "SELECT id, task_name, schedule, active, modification_date, last_fire_date " +
-                            "FROM CONFIGURATION_SCHEDULER ORDER BY id",
-                    new SchedulerTaskMapper()
-            );
-        } catch (EmptyResultDataAccessException e){
-            return null;
+        List<SchedulerTaskModel> schedulerTaskModelList = sqlQueryFactory.from(configurationScheduler)
+                .transform(GroupBy.groupBy(configurationScheduler.id).list(schedulerTaskModelBean));
+
+        List<SchedulerTaskData> schedulerTaskDataList = new ArrayList<SchedulerTaskData>();
+
+        if (!schedulerTaskModelList.isEmpty()) {
+            for (SchedulerTaskModel task : schedulerTaskModelList) {
+                SchedulerTaskData schedulerTaskData = new SchedulerTaskData();
+                schedulerTaskData.setTask(SchedulerTask.getByTaskId(task.getId()));
+                schedulerTaskData.setTaskName(task.getTaskName());
+                schedulerTaskData.setSchedule(task.getSchedule());
+                schedulerTaskData.setModificationDate(task.getModificationDate());
+                schedulerTaskData.setLast_fire_date(task.getLastFireDate());
+                schedulerTaskData.setActive(task.getActive() == 1);
+                schedulerTaskDataList.add(schedulerTaskData);
+            }
+            return schedulerTaskDataList;
         }
+
+        return null;
+    }
+
+    @Override
+    public PagingResult<SchedulerTaskModel> getAllWithPaging(PagingParams pagingParams) {
+        List<SchedulerTaskModel> schedulerTaskModelList = sqlQueryFactory.from(configurationScheduler)
+                .offset(pagingParams.getStartIndex())
+                .limit(pagingParams.getCount())
+                .transform(GroupBy.groupBy(configurationScheduler.id).list(schedulerTaskModelBean));
+
+        int totalCount = (int) sqlQueryFactory.from(configurationScheduler)
+                .fetchCount();
+        return new PagingResult<SchedulerTaskModel>(schedulerTaskModelList, totalCount);
     }
 
     @Override
     public void updateTask(SchedulerTaskData taskData) {
-        Map<String, Object> valueMap = new HashMap<String, Object>();
-        valueMap.put("schedule", taskData.getSchedule());
-        valueMap.put("taskId", taskData.getTask().getSchedulerTaskId());
-        getNamedParameterJdbcTemplate().update(
-                "UPDATE CONFIGURATION_SCHEDULER SET schedule = :schedule, MODIFICATION_DATE = CURRENT_DATE WHERE id = :taskId",
-                valueMap
-        );
+        sqlQueryFactory.update(configurationScheduler)
+                .where(configurationScheduler.id.eq((int) taskData.getTask().getSchedulerTaskId()))
+                .set(configurationScheduler.schedule, taskData.getSchedule())
+                .set(configurationScheduler.modificationDate, DateExpression.currentDate(LocalDateTime.class))
+                .execute();
+
         updateTaskParam(taskData.getParams());
     }
 
     @Override
     public void updateTaskStartDate(long taskId) {
-        Map<String, Object> valueMap = new HashMap<String, Object>();
-        valueMap.put("taskId", taskId);
-        getNamedParameterJdbcTemplate().update(
-                "UPDATE CONFIGURATION_SCHEDULER SET last_fire_date = CURRENT_DATE WHERE id = :taskId",
-                valueMap
-        );
+        sqlQueryFactory.update(configurationScheduler)
+                .where(configurationScheduler.id.eq((int) taskId))
+                .set(configurationScheduler.lastFireDate, DateExpression.currentDate(LocalDateTime.class))
+                .execute();
     }
 
     @Override
     public void setActiveSchedulerTask(boolean active, List<Long> ids) {
         if (!ids.isEmpty()) {
-            Map<String, Object> valueMap = new HashMap<String, Object>();
-            valueMap.put("active", active);
-            getNamedParameterJdbcTemplate().update(
-                    String.format("UPDATE CONFIGURATION_SCHEDULER SET active = :active WHERE %s", SqlUtils.transformToSqlInStatement("id", ids)),
-                    valueMap
-            );
+            List<Integer> idsInt = new ArrayList<Integer>();
+            for (Long id : ids) {
+                idsInt.add(id.intValue());
+            }
+            sqlQueryFactory.update(configurationScheduler)
+                    .where(configurationScheduler.id.in(idsInt))
+                    .set(configurationScheduler.active, active ? (byte) 1 : (byte) 0)
+                    .execute();
         }
     }
 
     private List<SchedulerTaskParam> getTaskParam(long taskId) {
-        try{
-            Map<String, Object> valueMap = new HashMap<String, Object>();
-            valueMap.put("taskId", taskId);
-            return getNamedParameterJdbcTemplate().query(
-                    "SELECT id, param_name, type, value " +
-                            "FROM CONFIGURATION_SCHEDULER_PARAM " +
-                            "WHERE task_id = :taskId " +
-                            "ORDER BY ord",
-                    valueMap,
-                    new SchedulerTaskParamMapper()
-            );
-        } catch (EmptyResultDataAccessException e){
-            return new ArrayList<SchedulerTaskParam>();
+        List<SchedulerTaskParamModel> schedulerTaskParamModelList = sqlQueryFactory.from(configurationSchedulerParam)
+                .where(configurationSchedulerParam.taskId.eq((int) taskId))
+                .orderBy(configurationSchedulerParam.ord.asc())
+                .transform(GroupBy.groupBy(configurationSchedulerParam.id).list(schedulerTaskParamModelBean));
+
+        List<SchedulerTaskParam> schedulerTaskParamList = new ArrayList<SchedulerTaskParam>();
+
+        if (!schedulerTaskParamModelList.isEmpty()) {
+            for (SchedulerTaskParamModel taskParamModel : schedulerTaskParamModelList) {
+                SchedulerTaskParam taskData = new SchedulerTaskParam();
+                taskData.setId(taskParamModel.getId());
+                taskData.setParamName(taskParamModel.getParamName());
+                taskData.setParamType(SchedulerTaskParamType.getById(taskParamModel.getType()));
+                taskData.setValue(taskParamModel.getValue());
+                schedulerTaskParamList.add(taskData);
+            }
+
         }
+
+        return schedulerTaskParamList;
     }
 
     private void updateTaskParam(final List<SchedulerTaskParam> params) {
-        if (params != null && !params.isEmpty()) {
-            getJdbcTemplate().batchUpdate(
-                    "UPDATE CONFIGURATION_SCHEDULER_PARAM SET value = ? " +
-                            "WHERE id = ?",
-                    new BatchPreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-                            SchedulerTaskParam schedulerTaskParam = params.get(i);
-                            preparedStatement.setString(1, schedulerTaskParam.getValue());
-                            preparedStatement.setLong(2, schedulerTaskParam.getId());
-                        }
-
-                        @Override
-                        public int getBatchSize() {
-                            return params.size();
-                        }
-                    }
-            );
+        if (!params.isEmpty()) {
+            for (SchedulerTaskParam schedulerTaskParam : params) {
+                sqlQueryFactory.update(configurationSchedulerParam)
+                        .where(configurationSchedulerParam.id.eq((int) schedulerTaskParam.getId()))
+                        .set(configurationSchedulerParam.value, schedulerTaskParam.getValue())
+                        .execute();
+            }
         }
     }
 }

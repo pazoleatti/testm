@@ -88,10 +88,8 @@
   "menu.taxes.commonParameters": "Общие параметры",
   "menu.nsi.refbooks": "Справочники",
   "menu.administration.blockList": "Список блокировок",
-  "menu.administration.auditLog": "Журнал аудита",
-  "menu.administration.usersList": "Список пользователей",
   "menu.administration.configParams": "Конфигурационные параметры",
-  "menu.administration.taskManager": "Планировщик задач",
+  "menu.administration.taskList": "Планировщик задач",
   "menu.administration.settings": "Настройки",
   "menu.administration.settings.mockOfTaxForms": "Макеты налоговых форм",
   "menu.administration.settings.refbooks": "Справочники",
@@ -355,5 +353,18 @@
   "createDeclaration.periodMessage": "Налоговая форма будет создана в корректирующем периоде, дата сдачи корректировки: ",
   "createDeclaration.errorMessage": "Заполнены не все поля отчетности",
   "createDeclaration.cancel.header": "Отмена создания",
-  "createDeclaration.cancel.text": "Отменить создание?"
+  "createDeclaration.cancel.text": "Отменить создание?",
+
+  "taskList.title.taskManager": "Планировщик задач",
+  "taskList.title.listTasks": "Список задач",
+  "taskList.title.number": "№",
+  "taskList.title.name": "Название",
+  "taskList.title.status": "Статус",
+  "taskList.title.schedule": "Расписание",
+  "taskList.title.editDate": "Дата редактирования",
+  "taskList.title.lastStartDate": "Дата последнего запуска",
+  "taskList.title.nextStartDate": "Дата следующего запуска",
+  "taskList.button.runTasks": "Запустить выполнение по расписанию",
+  "taskList.button.stopTasks": "Остановить выполнение по расписанию",
+  "taskList.button.update": "Обновить"
 }

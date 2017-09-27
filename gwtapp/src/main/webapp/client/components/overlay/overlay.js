@@ -86,6 +86,8 @@
                             //jQuery возвращает число, а ангуляр - строку, !== не использовать
                             if (status === '413') {
                                 message = $filter('translate')("common.error.message.constraint.violation.exception");
+                            } else if (status === '403') {
+                                message = $filter('translate')(status);
                             } else if (status !== '500') {
                                 message = $filter('translate')(status);
                                 if (addMessage) {

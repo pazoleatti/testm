@@ -19,11 +19,6 @@ public interface ConfigurationDao {
      */
     ConfigurationParamModel getAll();
 
-    /**
-     * Читает из БД значения заданного параметра.
-     */
-    ConfigurationParamModel get(String code);
-
     ConfigurationParamModel getConfigByGroup(ConfigurationParamGroup group);
 
     ConfigurationParamModel getByDepartment(Integer departmentId);

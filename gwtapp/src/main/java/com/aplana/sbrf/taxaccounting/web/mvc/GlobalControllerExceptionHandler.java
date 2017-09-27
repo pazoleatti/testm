@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.error.ExceptionMessage;
-import com.aplana.sbrf.taxaccounting.model.error.MessageType;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.ErrorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,11 +34,16 @@ public class GlobalControllerExceptionHandler {
      * @param response ответ
      */
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     ExceptionMessage exceptionHandler(Exception e, final HttpServletResponse response) {
+        if (e.getClass().equals(org.springframework.security.access.AccessDeniedException.class)){
+            response.setStatus(403);
+        } else {
+            response.setStatus(500);
+        }
         LOG.error(e.getLocalizedMessage(), e);
         response.setCharacterEncoding(UTF_8);
         return errorService.getExceptionMessage(e);
     }
+
 }

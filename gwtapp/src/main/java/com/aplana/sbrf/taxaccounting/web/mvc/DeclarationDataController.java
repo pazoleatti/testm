@@ -4,12 +4,12 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.CreateDeclarationResult;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
@@ -62,7 +62,7 @@ public class DeclarationDataController {
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
                                      TAUserService taUserService, DeclarationDataService declarationDataService,
-                                     LogEntryService LogEntryService, AsyncTaskManagerService asyncTaskManagerService) {
+                                     LogEntryService logEntryService, AsyncTaskManagerService asyncTaskManagerService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -72,7 +72,7 @@ public class DeclarationDataController {
         this.taUserService = taUserService;
         this.asyncTaskManagerService = asyncTaskManagerService;
         this.declarationDataService = declarationDataService;
-        this.logEntryService = LogEntryService;
+        this.logEntryService = logEntryService;
     }
 
     /**
@@ -249,12 +249,12 @@ public class DeclarationDataController {
      * @return Результат создания
      */
     @PostMapping(value = "/actions/declarationData/create")
-    public CreateDeclarationResult createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
+    public CreateResult<Long> createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
         Logger logger = new Logger();
-        CreateDeclarationResult result = new CreateDeclarationResult();
+        CreateResult<Long> result = new CreateResult<Long>();
 
         Long declarationId = declarationDataService.create(securityService.currentUserInfo(), logger, declarationTypeId, departmentId, periodId);
-        result.setDeclarationId(declarationId);
+        result.setEntityId(declarationId);
         if (!logger.getEntries().isEmpty()) {
             result.setUuid(logEntryService.save(logger.getEntries()));
         }

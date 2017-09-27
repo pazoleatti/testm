@@ -14,8 +14,6 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataServic
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -31,8 +29,6 @@ import java.util.List;
  */
 @RestController
 public class RefBookValuesController {
-    private static final Log LOG = LogFactory.getLog(RefBookValuesController.class);
-
     final private RefBookAttachFileTypeService refBookAttachFileTypeService;
 
     final private RefBookAsnuService refBookAsnuService;
@@ -67,31 +63,30 @@ public class RefBookValuesController {
     }
 
     /**
-     * Получение всех значений справочника Подразделения
+     * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
      *
-     * @param name         Наименование
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
      * @param pagingParams Параметры пейджинга
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=allDepartments")
     public JqgridPagedList<RefBookDepartment> fetchAllDepartments(String name, @RequestParam PagingParams pagingParams) {
-        LOG.info("Fetch records for refbook DEPARTMENT");
         TAUser user = securityService.currentUserInfo().getUser();
         PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchAvailableDepartments(user, name, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
     }
 
     /**
-     * Получение всех значений справочника Подразделения, у которых заданный период открыт
+     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * с фильтрацией по наименованию подразделения и пейджингом
      *
-     * @param name           Наименование
+     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
      * @param reportPeriodId ID отчетного периода
      * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriod")
     public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriod(String name, Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
-        LOG.info("Fetch records for refbook DEPARTMENT");
         TAUser user = securityService.currentUserInfo().getUser();
         PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchDepartmentsWithOpenPeriod(user, name, reportPeriodId, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
@@ -104,7 +99,6 @@ public class RefBookValuesController {
      */
     @GetMapping(value = "/rest/refBookValues/207")
     public List<RefBookDeclarationType> fetchAllDeclarationTypes() {
-        LOG.info("Fetch records for refbook DECLARATION_TYPE");
         return refBookDeclarationTypeService.fetchAllDeclarationTypes();
     }
 
@@ -122,7 +116,6 @@ public class RefBookValuesController {
      */
     @GetMapping(value = "/rest/refBookValues/900")
     public List<RefBookAsnu> fetchAllAsnu() {
-        LOG.info("Fetch records for refbook ASNU");
         return refBookAsnuService.fetchAvailableAsnu(securityService.currentUserInfo());
     }
 
@@ -133,7 +126,6 @@ public class RefBookValuesController {
      */
     @GetMapping(value = "/rest/refBookValues/934")
     public List<RefBookAttachFileType> fetchAllAttachFileTypes() {
-        LOG.info("Fetch records for refbook ATTACH_FILE_TYPE");
         return refBookAttachFileTypeService.fetchAllAttachFileTypes();
     }
 
@@ -144,7 +136,6 @@ public class RefBookValuesController {
      */
     @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=allPeriods")
     public List<ReportPeriod> fetchAllReportPeriods() {
-        LOG.info("Fetch periods");
         TAUser user = securityService.currentUserInfo().getUser();
         return periodService.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, Collections.singletonList(user.getDepartmentId()));
     }
@@ -156,7 +147,6 @@ public class RefBookValuesController {
      */
     @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=openPeriods")
     public List<ReportPeriod> fetchOpenReportPeriods() {
-        LOG.info("Fetch periods");
         TAUser user = securityService.currentUserInfo().getUser();
         return new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
     }

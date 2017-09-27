@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.SchedulerTaskDao;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParamType;
+import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +63,8 @@ public class SchedulerTaskDaoTest {
 		assertEquals("0 15 22 * * ?", tasks.get(0).getSchedule());
 		assertEquals(true, tasks.get(0).isActive());
 		assertEquals(0, tasks.get(0).getParams().size());
-		assertEquals(new GregorianCalendar(2013, Calendar.MARCH, 31).getTime(), tasks.get(0).getModificationDate());
-		assertEquals(new GregorianCalendar(2015, Calendar.MARCH, 31).getTime(), tasks.get(0).getLast_fire_date());
+		assertEquals(new LocalDateTime(new GregorianCalendar(2013, Calendar.MARCH, 31).getTime()), tasks.get(0).getModificationDate());
+		assertEquals(new LocalDateTime(new GregorianCalendar(2015, Calendar.MARCH, 31).getTime()), tasks.get(0).getLast_fire_date());
 
 
 		assertEquals(SchedulerTask.CLEAR_LOCK_DATA, tasks.get(1).getTask());
