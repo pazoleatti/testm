@@ -102,13 +102,6 @@ public class RefBookValuesController {
         return refBookDeclarationTypeService.fetchAllDeclarationTypes();
     }
 
-    @GetMapping(value = "/rest/refBookValues/207", params = "projection=declarationTypeForCreate")
-    public List<RefBookDeclarationType> fetchAllDeclarationTypesfor(Long declarationKindId, Integer departmentId, Integer periodId) {
-        LOG.info("Fetch records for refbook DECLARATION_TYPE");
-        return refBookDeclarationTypeService.fetchDeclarationTypesForCreate(declarationKindId, departmentId, periodId);
-    }
-
-
     /**
      * Получение всех значений справочника АСНУ
      *
