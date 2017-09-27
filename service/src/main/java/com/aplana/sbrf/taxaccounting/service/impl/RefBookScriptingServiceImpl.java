@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -19,13 +18,11 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
-import groovy.lang.Binding;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +33,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Сервис, реализующий выполение скриптов справочников
@@ -91,7 +87,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         String script = writer.toString();
         String scriptFilePath = null;
         if (!applicationInfo.isProductionMode()) {
-            scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger);
+            scriptFilePath = getScriptFilePath(getPackageName(script), SCRIPT_PATH_PREFIX, logger, event);
             if (scriptFilePath != null) {
                 script = getScript(scriptFilePath);
             }

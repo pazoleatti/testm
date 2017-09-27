@@ -79,7 +79,6 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
             similarityPersonMap.put(refBookPersonId, naturalPerson);
         }
 
-
         //Добавляем документы физлица
         addPersonDocument(rs, naturalPerson);
 
@@ -127,20 +126,21 @@ public class NaturalPersonRefbookHandler extends NaturalPersonHandler {
         Long refBookPersonId = naturalPerson.getId();
         Long docId = SqlUtils.getLong(rs, "ref_book_id_doc_id");
         Map<Long, PersonDocument> pesonDocumentMap = documentsMap.get(refBookPersonId);
+        Integer docStatus = SqlUtils.getInteger(rs, "doc_status");
 
         if (pesonDocumentMap == null) {
             pesonDocumentMap = new HashMap<Long, PersonDocument>();
             documentsMap.put(refBookPersonId, pesonDocumentMap);
         }
 
-        if (docId != null && !pesonDocumentMap.containsKey(docId)) {
+        if (docId != null && !pesonDocumentMap.containsKey(docId) && docStatus == 0) {
             Long docTypeId = SqlUtils.getLong(rs, "doc_id");
             DocType docType = getDocTypeById(docTypeId);
             PersonDocument personDocument = new PersonDocument();
             personDocument.setId(docId);
 
             personDocument.setRecordId(SqlUtils.getLong(rs, "doc_record_id"));
-            personDocument.setStatus(SqlUtils.getInteger(rs, "doc_status"));
+            personDocument.setStatus(docStatus);
             personDocument.setVersion(rs.getDate("doc_version"));
 
             personDocument.setDocType(docType);

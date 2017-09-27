@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
@@ -10,9 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.script.range.Range;
-import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
@@ -22,7 +18,10 @@ import groovy.util.slurpersupport.GPathResult;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
@@ -31,6 +30,7 @@ import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.LocalDateTime;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -125,6 +125,7 @@ public final class ScriptUtils {
     public static final String SEPARATOR = "_";
     public static final String SNILS_REGEXP = "\\d{3}-\\d{3}-\\d{3}\\s\\d{2}";
     public static final String DUL_REGEXP = "[^№]+\\s[^N№]+";
+    public static String DATE_FORMAT = "dd.MM.yyyy";
 
     /**
      * Запрещаем создавать экземляры класса
@@ -2590,5 +2591,18 @@ public final class ScriptUtils {
             return "Значение гр. \"" + attrName + "\" (\"" + value + "\") не должно быть нулевым";
         }
         return null;
+    }
+
+    public static String calcTimeMillis(long time) {
+        long currTime = System.currentTimeMillis();
+        return (currTime - time) + " мс)";
+    }
+
+    public static String formatDate(Object date) {
+        if (date instanceof LocalDateTime) {
+            return ((LocalDateTime) date).toString(DATE_FORMAT);
+        } else {
+            return ScriptUtils.formatDate((Date) date, DATE_FORMAT);
+        }
     }
 }
