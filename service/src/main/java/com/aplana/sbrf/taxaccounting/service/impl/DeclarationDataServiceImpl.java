@@ -392,9 +392,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData dd = declarationDataDao.get(id);
         Logger scriptLogger = new Logger();
         try {
-            lockStateLogger.updateState("Проверка форм-источников");
+            if (lockStateLogger != null) {
+                lockStateLogger.updateState("Проверка форм-источников");
+            }
             checkSources(dd, logger, userInfo);
-            lockStateLogger.updateState("Проверка данных налоговой формы");
+            if (lockStateLogger != null) {
+                lockStateLogger.updateState("Проверка данных налоговой формы");
+            }
             declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, scriptLogger, null);
         } finally {
             logger.getEntries().addAll(scriptLogger.getEntries());
@@ -947,11 +951,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
         DeclarationData declarationData = declarationDataDao.get(id);
 
-        /*Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-        }*/
+        }
 
         declarationData.setState(State.CREATED);
         sourceService.updateDDConsolidation(declarationData.getId());

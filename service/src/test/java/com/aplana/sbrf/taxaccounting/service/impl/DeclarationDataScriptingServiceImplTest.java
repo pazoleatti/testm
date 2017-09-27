@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -29,6 +30,7 @@ import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDe
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -74,6 +76,11 @@ public class DeclarationDataScriptingServiceImplTest {
         when(declarationTemplateDao.getDeclarationTemplateScript(REPORT_TEMPLATE_ID1)).thenReturn(createScript1);
         when(declarationTemplateDao.getDeclarationTemplateScript(REPORT_TEMPLATE_ID2)).thenReturn(createScript2);
 		ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao, DeclarationTemplateDao.class);
+
+		DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao = mock(DeclarationTemplateEventScriptDao.class);
+		when(declarationTemplateEventScriptDao.findScript(eq(REPORT_TEMPLATE_ID1), any(Integer.class))).thenReturn(createScript1);
+        when(declarationTemplateEventScriptDao.findScript(eq(REPORT_TEMPLATE_ID2), any(Integer.class))).thenReturn(createScript2);
+		ReflectionTestUtils.setField(service, "declarationTemplateEventScriptDao", declarationTemplateEventScriptDao, DeclarationTemplateEventScriptDao.class);
 
 		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
 		List<DepartmentFormType> sourcesInfo = new ArrayList<DepartmentFormType>();
@@ -125,8 +132,7 @@ public class DeclarationDataScriptingServiceImplTest {
         for(LogEntry logEntry: logger.getEntries())
             System.out.println("log: "+logEntry.getMessage());
 		String xml = XML_HEADER.concat(writer.toString());
-
-		String correctXml = IOUtils.toString(getClass().getResourceAsStream("createDeclaration.xml"), "UTF-8");
+        String correctXml = IOUtils.toString(getClass().getResourceAsStream("createDeclaration.xml"), "UTF-8");
 		XMLUnit.setIgnoreWhitespace(true);
 		Diff xmlDiff = new Diff(xml, correctXml);
 		assertTrue(xmlDiff.similar());

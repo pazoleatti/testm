@@ -203,6 +203,19 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
             }
         }).when(mockDeclarationService).exportPDF(any(JasperPrint.class), any(OutputStream.class));
 
+        ConfigurationParamModel configurationParamModel = new ConfigurationParamModel();
+        Map<Integer, List<String>> confShowTimingMap = new LinkedHashMap<Integer, List<String>>();
+        List<String> timingList = new ArrayList<String>();
+        timingList.add("0");
+        confShowTimingMap.put(0, timingList);
+        Map<Integer, List<String>> confLimitIdentMap = new LinkedHashMap<Integer, List<String>>();
+        List<String> identList = new ArrayList<String>();
+        identList.add("0.65");
+        confLimitIdentMap.put(0, identList);
+        configurationParamModel.put(ConfigurationParam.SHOW_TIMING, confShowTimingMap);
+        configurationParamModel.put(ConfigurationParam.LIMIT_IDENT, confLimitIdentMap);
+        when(mockDeclarationService.getAllConfig(any(TAUserInfo.class))).thenReturn(configurationParamModel);
+
         return mockDeclarationService;
     }
 
