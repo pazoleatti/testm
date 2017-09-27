@@ -1586,7 +1586,7 @@ comment on column configuration_scheduler_param.type is 'Тип параметр
 comment on column configuration_scheduler_param.value is 'Значение';
 
 create table decl_template_event_script(
-	id number(19) primary key not null,
+	id number(19) not null,
 	declaration_template_id number(19) not null,
 	event_id number(19) not null,
 	script clob not null
