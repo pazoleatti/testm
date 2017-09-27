@@ -184,6 +184,16 @@ Begin
         execute immediate 'Alter sequence seq_department_report_period INCREMENT BY 1';
      END IF;
   end if;
+  
+  Select max(id) into v_id from decl_template_event_script;
+  if (v_id is not null) then 
+    Select seq_decl_template_event_script.NEXTVAL into v_seq from dual;
+     IF (v_id > v_seq) THEN         
+        execute immediate 'alter sequence seq_decl_template_event_script INCREMENT BY '||TO_CHAR(v_id-v_seq); 
+        Select seq_decl_template_event_script.NEXTVAL into v_seq from dual;
+        execute immediate 'Alter sequence seq_decl_template_event_script INCREMENT BY 1';
+     END IF;
+  end if;
 End;
 
 .
