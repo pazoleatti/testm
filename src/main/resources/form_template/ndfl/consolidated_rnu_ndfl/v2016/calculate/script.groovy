@@ -150,7 +150,7 @@ class Calculate extends AbstractScriptClass {
         time = System.currentTimeMillis();
 
         //разделы в которых идет сплошная нумерация
-        def ndflPersonNum = 1;
+        def ndflPersonNum = 1L;
         BigDecimal incomesRowNum = new BigDecimal(1);
         BigDecimal deductionRowNum = new BigDecimal(1);
         BigDecimal prepaymentRowNum = new BigDecimal(1);
