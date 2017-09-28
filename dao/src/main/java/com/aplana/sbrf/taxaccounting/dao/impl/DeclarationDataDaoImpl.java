@@ -337,6 +337,10 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             where.and(declarationData.taxOrganCode.containsIgnoreCase(filter.getTaxOrganCode()));
         }
 
+        if(!CollectionUtils.isEmpty(filter.getDocStateIds())){
+            where.and(declarationData.docStateId.in(filter.getDocStateIds()));
+        }
+
         //Определяем способ сортировки
         String orderingProperty = params.getProperty();
         Order ascDescOrder = Order.valueOf(params.getDirection().toUpperCase());
