@@ -21,13 +21,6 @@
 	<jee:jndi-lookup id="declarationTemplateCacheStore"
 		jndi-name="services/cache/aplana/taxaccounting/DeclarationTemplate"/>
 
-	<jee:jndi-lookup id="departmentCacheStore"
-		jndi-name="services/cache/aplana/taxaccounting/Department"/>
-
-	<jee:jndi-lookup id="userCacheStore"
-		jndi-name="services/cache/aplana/taxaccounting/User"/>
-				
-
     <jee:jndi-lookup id="permanentDataCacheStore" jndi-name="services/cache/aplana/taxaccounting/PermanentData"/>
 
     <jee:jndi-lookup id="dataBlobsCacheStore" jndi-name="services/cache/aplana/taxaccounting/DataBlobsCache"/>
@@ -52,14 +45,6 @@
 				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
 					<constructor-arg value="DeclarationTemplate" />
 					<constructor-arg ref="declarationTemplateCacheStore" />
-				</bean>
-				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
-					<constructor-arg value="Department" />
-					<constructor-arg ref="departmentCacheStore" />
-				</bean>
-				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
-					<constructor-arg value="User" />
-					<constructor-arg ref="userCacheStore" />
 				</bean>
                 <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
                     <constructor-arg value="PermanentData" />
