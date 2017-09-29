@@ -60,7 +60,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
             KBK.getId(), PERSON_CATEGORY.getId(), NDFL.getId(), NDFL_DETAIL.getId(), NDFL_REFERENCES.getId(),
 
             // справочник ОКТМО отдельным списком идет, так как является версионируемым, но только для чтения
-            OKTMO.getId()
+            // аналогично Справочник: "Признак кода вычета", реализован как нередактируемый
+            OKTMO.getId(), DEDUCTION_MARK.getId()
     });
 
     @Autowired
