@@ -40,7 +40,7 @@
                         $scope.gwtMode = data.gwtMode;
                         $scope.version = data.versionInfoProperties.version;
                         $scope.revision = data.versionInfoProperties.revision;
-                        $scope.serverName = data.versionInfoProperties.serverName;
+                        $scope.serverName = data.serverInfo.serverName;
                         $scope.browser = deviceDetector.browser + " " + deviceDetector.browser_version;
                         $scope.aboutHref = "Main.jsp" + $scope.gwtMode + "#!about";
 
@@ -79,7 +79,7 @@
 
                         //Задаем ссылки для главного меню
                         $scope.treeTaxes = [];
-                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)){
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
                             $scope.treeTaxes.push({
                                 name: $filter('translate')('menu.taxes.ndfl'),
                                 subtree: subtree

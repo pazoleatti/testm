@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.web.model.ConfigModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,11 @@ public class ConfigController {
 
     private Properties versionInfoProperties;
 
-    public ConfigController(Properties versionInfoProperties) {
+    private ServerInfo serverInfo;
+
+    public ConfigController(Properties versionInfoProperties, ServerInfo serverInfo) {
         this.versionInfoProperties = versionInfoProperties;
+        this.serverInfo = serverInfo;
     }
 
     /**
@@ -32,7 +36,7 @@ public class ConfigController {
     public ConfigModel fetchConfig() {
         String gwtMode = applicationInfo.isProductionMode() ? "" : "?gwt.codesvr=127.0.0.1:9997";
 
-        return new ConfigModel(gwtMode, versionInfoProperties);
+        return new ConfigModel(gwtMode, versionInfoProperties, serverInfo);
     }
 
 }
