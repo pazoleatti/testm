@@ -20,6 +20,6 @@ begin
 	EXECUTE IMMEDIATE 'alter table declaration_type modify id number(18,0)';
 	EXECUTE IMMEDIATE 'alter table department_declaration_type modify DECLARATION_TYPE_ID number(18,0)';
 	EXECUTE IMMEDIATE 'alter table declaration_template modify DECLARATION_TYPE_ID number(18,0)';
-	EXECUTE IMMEDIATE 'alter table ref_book_asnux modify id number(18,0)';
+	EXECUTE IMMEDIATE 'alter table ref_book_asnu modify id number(18,0)';
 end;
 /
