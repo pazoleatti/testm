@@ -119,7 +119,7 @@
   "link.ndfl.reporting.formExcel": "Сформировать \"Выгрузка в Excel\"",
   "link.ndfl.historyOfChange": "История изменений",
   "link.ndfl.filesAndComment": "Файлы и комментарии",
-  "link.ndfl.sources": "Источники",
+  "link.ndfl.sources": "Источники и приемники",
 
   "ndflReportJournal.button.createReport": "Создать отчетность",
   "ndflReportJournal.button.downloadReport": "Выгрузить отчетность",
