@@ -569,11 +569,4 @@ public class ConfigurationServiceTest {
         user.setRoles(asList(role));
         return userInfo;
     }
-
-    @Test
-    public void validateSchedule() {
-        Assert.assertTrue(service.validateSchedule("0 10 22 * * ?"));
-        Assert.assertTrue(service.validateSchedule("0 0/5 * * * ?"));
-        Assert.assertFalse(service.validateSchedule("0 22 * * ?"));
-    }
 }

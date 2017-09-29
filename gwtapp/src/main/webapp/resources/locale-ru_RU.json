@@ -89,7 +89,7 @@
   "menu.nsi.refbooks": "Справочники",
   "menu.administration.blockList": "Список блокировок",
   "menu.administration.configParams": "Конфигурационные параметры",
-  "menu.administration.taskList": "Планировщик задач",
+  "menu.administration.schedulerTaskList": "Планировщик задач",
   "menu.administration.settings": "Настройки",
   "menu.administration.settings.mockOfTaxForms": "Макеты налоговых форм",
   "menu.administration.settings.refbooks": "Справочники",

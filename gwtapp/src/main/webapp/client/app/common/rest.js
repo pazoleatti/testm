@@ -133,8 +133,8 @@
         /**
          * @description Планировщик задач - Список задач
          */
-        .factory('taskList', ['$resource', function ($resource) {
-            return $resource('controller/rest/taskList', {}, {
+        .factory('schedulerTaskResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/schedulerTask', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])

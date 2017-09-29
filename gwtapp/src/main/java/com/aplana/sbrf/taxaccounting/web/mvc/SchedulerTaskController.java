@@ -4,11 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,12 +22,11 @@ import java.util.List;
 @RestController
 public class SchedulerTaskController {
 
-    private ConfigurationService configurationService;
+    private SchedulerTaskService schedulerTaskService;
     private final SchedulerService schedulerService;
 
-    @Autowired
-    public SchedulerTaskController(ConfigurationService configurationService, SchedulerService schedulerService) {
-        this.configurationService = configurationService;
+    public SchedulerTaskController(SchedulerService schedulerService, SchedulerTaskService schedulerTaskService) {
+        this.schedulerTaskService = schedulerTaskService;
         this.schedulerService = schedulerService;
     }
 
@@ -40,13 +38,15 @@ public class SchedulerTaskController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
-
-
     }
 
-    @GetMapping(value = "/rest/taskList")
+    /**
+     * @param pagingParams параметры пагинации
+     * @return список {@link JqgridPagedList} задач {@link TaskSearchResultItem}
+     */
+    @GetMapping(value = "/rest/schedulerTask")
     public JqgridPagedList<TaskSearchResultItem> fetchSchedulerTasks(@RequestParam PagingParams pagingParams) {
-        PagingResult<TaskSearchResultItem> taskList = configurationService.getAllSchedulerTaskWithPaging(pagingParams);
+        PagingResult<TaskSearchResultItem> taskList = schedulerTaskService.fetchAllSchedulerTasks(pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 taskList,
                 taskList.getTotalCount(),
@@ -54,11 +54,29 @@ public class SchedulerTaskController {
         );
     }
 
-    @PostMapping(value = "/actions/taskList/changeState")
-    public void changeStateSchedulerTasks(@RequestParam Long[] ids, boolean isActive) {
+    /**
+     * Запуск выполнения задач по расписанию
+     *
+     * @param ids идентификаторы задач
+     */
+    @PostMapping(value = "/actions/schedulerTask/activate")
+    public void activateSchedulerTasks(@RequestParam Long[] ids) {
         List<Long> tasksIds = new ArrayList<Long>();
         Collections.addAll(tasksIds, ids);
-        configurationService.setActiveSchedulerTask(isActive, tasksIds);
+        schedulerTaskService.setActiveSchedulerTask(true, tasksIds);
+        schedulerService.updateAllTask();
+    }
+
+    /**
+     * Остановка выполнения задач по расписанию
+     *
+     * @param ids идентификаторы задач
+     */
+    @PostMapping(value = "/actions/schedulerTask/deactivate")
+    public void deactivateStateSchedulerTasks(@RequestParam Long[] ids) {
+        List<Long> tasksIds = new ArrayList<Long>();
+        Collections.addAll(tasksIds, ids);
+        schedulerTaskService.setActiveSchedulerTask(false, tasksIds);
         schedulerService.updateAllTask();
     }
 }

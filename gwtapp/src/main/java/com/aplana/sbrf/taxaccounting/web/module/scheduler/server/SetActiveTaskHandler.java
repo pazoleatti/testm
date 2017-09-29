@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.SetActiveTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.SetActiveTaskResult;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Обновление признака активности задачи планировщика
+ *
  * @author dkoshkarev
  */
 @Service
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class SetActiveTaskHandler extends AbstractActionHandler<SetActiveTaskAction, SetActiveTaskResult> {
 
     @Autowired
-    private ConfigurationService configurationService;
+    private SchedulerTaskService schedulerTaskService;
     @Autowired
     private SchedulerService schedulerService;
 
@@ -31,7 +32,7 @@ public class SetActiveTaskHandler extends AbstractActionHandler<SetActiveTaskAct
     @Override
     public SetActiveTaskResult execute(SetActiveTaskAction action, ExecutionContext executionContext) throws ActionException {
         SetActiveTaskResult result = new SetActiveTaskResult();
-        configurationService.setActiveSchedulerTask(action.isActive(), action.getTasksIds());
+        schedulerTaskService.setActiveSchedulerTask(action.isActive(), action.getTasksIds());
         schedulerService.updateAllTask();
         return result;
     }

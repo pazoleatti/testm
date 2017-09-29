@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListResult;
@@ -23,6 +23,7 @@ import java.util.List;
 
 /**
  * Получение списка задач планировщика
+ *
  * @author dloshkarev
  */
 @Service
@@ -34,7 +35,7 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private ConfigurationService configurationService;
+    private SchedulerTaskService schedulerTaskService;
     @Autowired
     private SchedulerService schedulerService;
 
@@ -49,17 +50,17 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
         List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
         Logger logger = new Logger();
 
-        List<SchedulerTaskData> tasks = configurationService.getAllSchedulerTask();
+        List<SchedulerTaskData> tasks = schedulerTaskService.getAllSchedulerTask();
         for (SchedulerTaskData task : tasks) {
             TaskSearchResultItem item = new TaskSearchResultItem();
             item.setId(task.getTask().getSchedulerTaskId());
             item.setName(task.getTaskName());
             item.setSchedule(task.getSchedule());
-            item.setState(task.getSchedule() != null?(task.isActive()?"Активна":"Остановлена"):"Не задано расписание");
+            item.setState(task.getSchedule() != null ? (task.isActive() ? "Активна" : "Остановлена") : "Не задано расписание");
             item.setModificationDate(df.format(task.getModificationDate().toDate()));
-            item.setLastFireTime(task.getLast_fire_date() != null ? df.format(task.getLast_fire_date().toDate()):"");
+            item.setLastFireTime(task.getLast_fire_date() != null ? df.format(task.getLast_fire_date().toDate()) : "");
             Date nextFireTime = schedulerService.nextExecutionTime(task.getTask().name());
-            item.setNextFireTime(nextFireTime != null?df.format(nextFireTime):"");
+            item.setNextFireTime(nextFireTime != null ? df.format(nextFireTime) : "");
             item.setContextId(task.getTask().getSchedulerTaskId());
             records.add(item);
         }

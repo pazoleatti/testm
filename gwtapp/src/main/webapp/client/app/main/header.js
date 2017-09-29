@@ -119,9 +119,9 @@
                                 name: $filter('translate')('menu.administration.configParams'),
                                 href: "Main.jsp" + $scope.gwtMode + "#!configuration"
                             }, {
-                                name: $filter('translate')('menu.administration.taskList'),
+                                name: $filter('translate')('menu.administration.schedulerTaskList'),
                                 onClick: function () {
-                                    $state.go('taskList');
+                                    $state.go('schedulerTaskList');
                                 }
                             });
                         }
