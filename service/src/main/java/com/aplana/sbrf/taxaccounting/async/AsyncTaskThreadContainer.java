@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
@@ -35,9 +37,10 @@ public class AsyncTaskThreadContainer {
      */
     public void processQueues() {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        executorService.submit(new AsyncTaskShortQueueProcessor());
-        executorService.submit(new AsyncTaskLongQueueProcessor());
-        executorService.shutdown();
+        DelegatingSecurityContextExecutorService executor = new DelegatingSecurityContextExecutorService(executorService, SecurityContextHolder.getContext());
+        executor.submit(new AsyncTaskShortQueueProcessor());
+        executor.submit(new AsyncTaskLongQueueProcessor());
+        executor.shutdown();
     }
 
     /**
