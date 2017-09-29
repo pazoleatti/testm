@@ -89,7 +89,8 @@ class Report2Ndfl extends AbstractScriptClass {
     OutputStream outputStream
     Boolean excludeIfNotExist
     State stateRestriction
-
+    Integer partNumber
+    String applicationVersion
 
     private Report2Ndfl() {
     }
@@ -168,6 +169,12 @@ class Report2Ndfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("stateRestriction")) {
             this.stateRestriction = (State) scriptClass.getBinding().getProperty("stateRestriction");
+        }
+        if (scriptClass.getBinding().hasVariable("partNumber")) {
+            this.partNumber = (Integer) scriptClass.getBinding().getProperty("partNumber");
+        }
+        if (scriptClass.getBinding().hasVariable("applicationVersion")) {
+            this.applicationVersion = (String) scriptClass.getBinding().getProperty("applicationVersion");
         }
         reportType = declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE ? "2-НДФЛ (1)" : "2-НДФЛ (2)"
     }
