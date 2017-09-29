@@ -27,7 +27,7 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
 
     private final SQLQueryFactory sqlQueryFactory;
 
-    //TODO разобраться как Byte преобразовать в Boolean
+    //TODO https://jira.aplana.com/browse/SBRFNDFL-2113 разобраться с преобразованием типов данных полей
     private final QBean<SchedulerTaskModel> schedulerTaskModelBean = bean(SchedulerTaskModel.class, configurationScheduler.all());
     private final QBean<SchedulerTaskParamModel> schedulerTaskParamModelBean = bean(SchedulerTaskParamModel.class, configurationSchedulerParam.id, configurationSchedulerParam.paramName,
             configurationSchedulerParam.type, configurationSchedulerParam.value);
@@ -38,7 +38,7 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
     }
 
     @Override
-    public SchedulerTaskData get(Long taskId) {
+    public SchedulerTaskData fetchOneSchedulerTask(Long taskId) {
         List<SchedulerTaskModel> schedulerTaskModelList = sqlQueryFactory.from(configurationScheduler)
                 .where(configurationScheduler.id.eq(taskId.intValue()))
                 .transform(GroupBy.groupBy(configurationScheduler.id).list(schedulerTaskModelBean));
@@ -60,7 +60,7 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
     }
 
     @Override
-    public List<SchedulerTaskData> getAll() {
+    public List<SchedulerTaskData> fetchAllSchedulerTasks() {
         List<SchedulerTaskModel> schedulerTaskModelList = sqlQueryFactory.from(configurationScheduler)
                 .transform(GroupBy.groupBy(configurationScheduler.id).list(schedulerTaskModelBean));
 
@@ -84,7 +84,7 @@ public class SchedulerTaskDaoImpl extends AbstractDao implements SchedulerTaskDa
     }
 
     @Override
-    public PagingResult<SchedulerTaskModel> getAllWithPaging(PagingParams pagingParams) {
+    public PagingResult<SchedulerTaskModel> fetchAllSchedulerTasks(PagingParams pagingParams) {
         List<SchedulerTaskModel> schedulerTaskModelList = sqlQueryFactory.from(configurationScheduler)
                 .offset(pagingParams.getStartIndex())
                 .limit(pagingParams.getCount())

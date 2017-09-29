@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.UpdateTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.UpdateTaskResult;
@@ -26,7 +27,7 @@ import java.util.List;
 public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, UpdateTaskResult> {
 
     @Autowired
-    private ConfigurationService configurationService;
+    private SchedulerTaskService schedulerTaskService;
     @Autowired
     private SchedulerService schedulerService;
 
@@ -37,7 +38,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
     @Override
     public UpdateTaskResult execute(UpdateTaskAction action, ExecutionContext executionContext) throws ActionException {
         UpdateTaskResult result = new UpdateTaskResult();
-        SchedulerTaskData taskData = configurationService.getSchedulerTask(SchedulerTask.getByTaskId(action.getTaskId()));
+        SchedulerTaskData taskData = schedulerTaskService.getSchedulerTask(SchedulerTask.getByTaskId(action.getTaskId()));
 
         // список ошибок
         List<String> errors = new ArrayList<String>(1);
@@ -45,7 +46,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
         /**
          * Проверка расписания
          */
-        if (!configurationService.validateSchedule(action.getSchedule())){
+        if (!schedulerTaskService.validateSchedule(action.getSchedule())){
             errors.add(" Значение атрибута «Расписание» не соответствует требованиям формата Cron!");
         }
 
@@ -58,7 +59,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
 
         taskData.setParams(action.getParams());
         taskData.setSchedule(action.getSchedule());
-        configurationService.updateTask(taskData);
+        schedulerTaskService.updateTask(taskData);
         schedulerService.updateAllTask();
         return result;
     }

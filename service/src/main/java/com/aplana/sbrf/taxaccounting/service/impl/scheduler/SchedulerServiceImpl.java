@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.FileUtils;
@@ -60,7 +60,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private ScheduledTaskRegistrar taskRegistrar;
 
     @Autowired
-    private ConfigurationService configurationService;
+    private SchedulerTaskService schedulerTaskService;
     @Autowired
     private BlobDataService blobDataService;
     @Autowired
@@ -73,7 +73,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Инициализация планировщика
      */
-    @Bean(destroyMethod="shutdown")
+    @Bean(destroyMethod = "shutdown")
     public Executor taskExecutor() {
         return Executors.newScheduledThreadPool(100);
     }
@@ -94,7 +94,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                for(ScheduledTask scheduledTask: tasks.values()) {
+                for (ScheduledTask scheduledTask : tasks.values()) {
                     scheduledTask.cancel();
                 }
             }
@@ -125,10 +125,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         for (final Method method : methods) {
             //Планируем задачи с расписанием из БД на момент старта приложения
             String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
-            SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.valueOf(settingCode));
+            SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.valueOf(settingCode));
             if (schedulerTask == null) {
                 LOG.error("Cannot find schedule for task with setting code = " + settingCode + ". Check database table 'CONFIGURATION_SCHEDULER'");
-            } else if (schedulerTask.isActive()){
+            } else if (schedulerTask.isActive()) {
                 try {
                     scheduleTask(method, schedulerTask.getSchedule());
                 } catch (Exception e) {
@@ -141,8 +141,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     /**
      * Добавляет задачу в планировщик
      *
-     * @param method        метод, который планировщик должен вызвать
-     * @param cron          расписание задачи
+     * @param method метод, который планировщик должен вызвать
+     * @param cron   расписание задачи
      */
     public void scheduleTask(final Method method, final String cron) {
         final SchedulerServiceImpl scheduler = this;
@@ -195,10 +195,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "CLEAR_TEMP_DIR")
     public void clearTempDirectory() {
-        SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.CLEAR_TEMP_DIR);
+        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.CLEAR_TEMP_DIR);
         if (schedulerTask.isActive()) {
             LOG.info("Temp directory cleaning started by scheduler");
-            configurationService.updateTaskStartDate(SchedulerTask.CLEAR_TEMP_DIR);
+            schedulerTaskService.updateTaskStartDate(SchedulerTask.CLEAR_TEMP_DIR);
             File tempPath = new File(System.getProperty("java.io.tmpdir"));
             File[] fileList = tempPath.listFiles();
             long currentDate = new Date().getTime();
@@ -225,10 +225,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     @AplanaScheduled(settingCode = "CLEAR_BLOB_DATA")
     @Transactional
     public void clearBlobData() {
-        SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA);
+        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA);
         if (schedulerTask.isActive()) {
             LOG.info("BLOB_DATA cleaning started by scheduler");
-            configurationService.updateTaskStartDate(SchedulerTask.CLEAR_BLOB_DATA);
+            schedulerTaskService.updateTaskStartDate(SchedulerTask.CLEAR_BLOB_DATA);
             blobDataService.clean();
             LOG.info("BLOB_DATA cleaning finished");
         }
@@ -239,10 +239,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "CLEAR_LOCK_DATA")
     public void clearLockData() {
-        SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.CLEAR_LOCK_DATA);
+        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.CLEAR_LOCK_DATA);
         if (schedulerTask.isActive()) {
             LOG.info("LOCK_DATA cleaning started by scheduler");
-            configurationService.updateTaskStartDate(SchedulerTask.CLEAR_LOCK_DATA);
+            schedulerTaskService.updateTaskStartDate(SchedulerTask.CLEAR_LOCK_DATA);
             String secCountParam = schedulerTask.getParams().get(0).getValue();
             Long seconds = Long.parseLong(secCountParam);
             lockDataService.unlockIfOlderThan(seconds);
@@ -256,9 +256,9 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
     public void asyncTasksMonitoring() {
         if (applicationInfo.isProductionMode()) {
-            SchedulerTaskData schedulerTask = configurationService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
+            SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
             if (schedulerTask.isActive()) {
-                configurationService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
+                schedulerTaskService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
                 asyncTaskThreadContainer.processQueues();
             }
         }

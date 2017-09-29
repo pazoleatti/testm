@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.SchedulerTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -11,23 +10,16 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskModel;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
-import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.support.CronSequenceGenerator;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -51,8 +43,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
     private static final String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
     private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
-    private static final String NO_CODE_ERROR="«%s» не найден в справочнике";
-    private static final String INN_JUR_ERROR="Введен некорректные номер ИНН «%s»";
+    private static final String NO_CODE_ERROR = "«%s» не найден в справочнике";
+    private static final String INN_JUR_ERROR = "Введен некорректные номер ИНН «%s»";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -62,10 +54,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private RefBookFactory refBookFactory;
     @Autowired
     private AuditService auditService;
-    @Autowired
-    private SchedulerTaskDao schedulerTaskDao;
-    @Autowired
-    private SchedulerService schedulerService;
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
@@ -88,7 +76,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public List<Map<String, String>> getEmailConfig() {
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.EMAIL_CONFIG.getId());
-		PagingParams pagingParams = null;
+        PagingParams pagingParams = null;
         PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), pagingParams, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
@@ -104,7 +92,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public List<Map<String, String>> getAsyncConfig() {
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ASYNC_CONFIG.getId());
-		PagingParams pagingParams = null;
+        PagingParams pagingParams = null;
         PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), pagingParams, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         for (Map<String, RefBookValue> value : values) {
@@ -390,10 +378,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         ConfigurationParamModel oldModel = configurationDao.getAll();
         Map<String, Map<String, String>> oldEmailConfigMap = new HashMap<String, Map<String, String>>();
         Map<String, Map<String, String>> oldAsyncConfigMap = new HashMap<String, Map<String, String>>();
-        for (Map<String, String> config: getEmailConfig()) {
+        for (Map<String, String> config : getEmailConfig()) {
             oldEmailConfigMap.put(config.get("NAME"), config);
         }
-        for (Map<String, String> config: getAsyncConfig()) {
+        for (Map<String, String> config : getAsyncConfig()) {
             oldAsyncConfigMap.put(config.get("ID"), config);
         }
         model.put(ConfigurationParam.NO_CODE, oldModel.get(ConfigurationParam.NO_CODE));
@@ -401,70 +389,70 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         model.put(ConfigurationParam.LIMIT_IDENT, oldModel.get(ConfigurationParam.LIMIT_IDENT));
         model.put(ConfigurationParam.SHOW_TIMING, oldModel.get(ConfigurationParam.SHOW_TIMING));
         configurationDao.save(model);
-        for (ConfigurationParam param: ConfigurationParam.values()) {
+        for (ConfigurationParam param : ConfigurationParam.values()) {
             if (ConfigurationParamGroup.COMMON.equals(param.getGroup())) {
                 if (model.keySet().contains(param) && oldModel.keySet().contains(param)) {
                     String keyFileUrlDiff = checkParams(oldModel, model, param, 0);
                     if (keyFileUrlDiff != null) {
                         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + param.getCaption() +"\":" + keyFileUrlDiff, null);
+                                userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + param.getCaption() + "\":" + keyFileUrlDiff, null);
                     }
                 } else if (model.keySet().contains(param)) {
                     String stringValue = "\"" + model.getFullStringValue(param, 0) + "\"";
                     auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() +"\":" + stringValue, null);
+                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\":" + stringValue, null);
                 } else if (oldModel.keySet().contains(param)) {
                     String stringValue = "\"" + oldModel.getFullStringValue(param, 0) + "\"";
                     auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption() +"\":" + stringValue, null);
+                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption() + "\":" + stringValue, null);
                 }
             } else if (ConfigurationParamGroup.FORM.equals(param.getGroup())) {
                 Map<Integer, List<String>> values = model.get(param);
                 Map<Integer, List<String>> oldValues = oldModel.get(param);
                 Set<Integer> allDepartmentIds = new HashSet<Integer>();
-                Set<Integer> departmentIds = values!= null?values.keySet():new HashSet<Integer>();
-                Set<Integer> oldDepartmentIds = oldValues!= null?oldValues.keySet():new HashSet<Integer>();
+                Set<Integer> departmentIds = values != null ? values.keySet() : new HashSet<Integer>();
+                Set<Integer> oldDepartmentIds = oldValues != null ? oldValues.keySet() : new HashSet<Integer>();
                 allDepartmentIds.addAll(departmentIds);
                 allDepartmentIds.addAll(oldDepartmentIds);
 
-                for(Integer departmentId: allDepartmentIds) {
+                for (Integer departmentId : allDepartmentIds) {
                     if (departmentIds.contains(departmentId) && oldDepartmentIds.contains(departmentId)) {
                         // Проверка на изменение
                         String keyFileUrlDiff = checkParams(oldModel, model, param, departmentId);
                         if (keyFileUrlDiff != null) {
                             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                    departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Изменён параметр \"" +param.getCaption() +"\":" + keyFileUrlDiff, null);
+                                    departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Изменён параметр \"" + param.getCaption() + "\":" + keyFileUrlDiff, null);
                         }
                     } else if (departmentIds.contains(departmentId)) {
                         // Добавление
                         String stringValue = "\"" + model.getFullStringValue(param, departmentId) + "\"";
                         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Добавлен параметр \"" +param.getCaption() +"\":" + stringValue, null);
+                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\":" + stringValue, null);
                     } else {
                         // Удаление
                         String stringValue = "\"" + oldModel.getFullStringValue(param, departmentId) + "\"";
                         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Удален параметр \"" +param.getCaption() +"\":" + stringValue, null);
+                                departmentId, null, null, null, null, ConfigurationParamGroup.FORM.getCaption() + ". Удален параметр \"" + param.getCaption() + "\":" + stringValue, null);
                     }
                 }
             }
         }
-        for (Map<String, String> config: emailConfigs) {
+        for (Map<String, String> config : emailConfigs) {
             Map<String, String> oldConfig = oldEmailConfigMap.get(config.get("NAME"));
             String check = checkConfig(config, oldConfig, "VALUE");
             if (check != null) {
                 auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                        userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" +config.get("NAME") +"\":" + check, null);
+                        userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.EMAIL.getCaption() + ". Изменён параметр \"" + config.get("NAME") + "\":" + check, null);
             }
         }
         RefBook refBookAsyncConfig = refBookFactory.get(RefBook.Id.ASYNC_CONFIG.getId());
-        for (Map<String, String> config: asyncConfigs) {
+        for (Map<String, String> config : asyncConfigs) {
             Map<String, String> oldConfig = oldAsyncConfigMap.get(config.get("ID"));
-            for (String key: Arrays.asList("SHORT_QUEUE_LIMIT", "TASK_LIMIT")) {
+            for (String key : Arrays.asList("SHORT_QUEUE_LIMIT", "TASK_LIMIT")) {
                 String check = checkConfig(config, oldConfig, key);
                 if (check != null) {
                     auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.ASYNC.getCaption() + ". Изменён параметр \"" + refBookAsyncConfig.getAttribute(key).getName() + "\" для задания \"" + config.get("NAME")+ "\":" + check, null);
+                            userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.ASYNC.getCaption() + ". Изменён параметр \"" + refBookAsyncConfig.getAttribute(key).getName() + "\" для задания \"" + config.get("NAME") + "\":" + check, null);
                 }
             }
         }
@@ -486,16 +474,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (!"0".equals(value) && !"1".equals(value)) {
             logger.error(SIGN_CHECK_ERROR, value);
         }
-    }
-
-    @Override
-    public boolean validateSchedule(String schedule) {
-        try{
-            new CronSequenceGenerator(schedule);
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -521,53 +499,5 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else {
             return "\"\" -> \"" + newModelFullStringValue + "\"";
         }
-    }
-
-    @Override
-    public SchedulerTaskData getSchedulerTask(SchedulerTask task) {
-        return schedulerTaskDao.get(task.getSchedulerTaskId());
-    }
-
-    @Override
-    public List<SchedulerTaskData> getAllSchedulerTask() {
-        return schedulerTaskDao.getAll();
-    }
-
-    @Override
-    public PagingResult<TaskSearchResultItem> getAllSchedulerTaskWithPaging(PagingParams pagingParams) {
-        List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
-
-        PagingResult<SchedulerTaskModel> tasks = schedulerTaskDao.getAllWithPaging(pagingParams);
-        for (SchedulerTaskModel task : tasks) {
-            TaskSearchResultItem item = new TaskSearchResultItem();
-            item.setId((long)task.getId());
-            item.setName(task.getTaskName());
-            item.setSchedule(task.getSchedule());
-            item.setState(task.getSchedule() != null ? (task.getActive() == 1 ? "Активна" : "Остановлена") : "Не задано расписание");
-            item.setModificationDate(task.getModificationDate().toString("dd-MM-yyyy, HH:mm:ss"));
-            item.setLastFireTime(task.getLastFireDate() != null ? task.getLastFireDate().toString("dd-MM-yyyy, HH:mm:ss") : "");
-            Date nextFireTime = schedulerService.nextExecutionTime(task.getTaskName());
-            item.setNextFireTime(nextFireTime != null ? new SimpleDateFormat("dd-MM-yyyy, HH:mm:ss").format(nextFireTime):"");
-            records.add(item);
-        }
-
-        return new PagingResult<TaskSearchResultItem>(records, tasks.getTotalCount());
-    }
-
-    @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public void setActiveSchedulerTask(boolean active, List<Long> ids) {
-        schedulerTaskDao.setActiveSchedulerTask(active, ids);
-    }
-
-    @Override
-    public void updateTaskStartDate(SchedulerTask task) {
-        schedulerTaskDao.updateTaskStartDate(task.getSchedulerTaskId());
-    }
-
-    @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public void updateTask(SchedulerTaskData taskData) {
-        schedulerTaskDao.updateTask(taskData);
     }
 }

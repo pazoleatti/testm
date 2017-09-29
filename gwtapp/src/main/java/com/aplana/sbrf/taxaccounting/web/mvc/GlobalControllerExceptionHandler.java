@@ -34,13 +34,24 @@ public class GlobalControllerExceptionHandler {
      * @param response ответ
      */
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     ExceptionMessage exceptionHandler(Exception e, final HttpServletResponse response) {
-        if (e.getClass().equals(org.springframework.security.access.AccessDeniedException.class)){
-            response.setStatus(403);
-        } else {
-            response.setStatus(500);
-        }
+        LOG.error(e.getLocalizedMessage(), e);
+        response.setCharacterEncoding(UTF_8);
+        return errorService.getExceptionMessage(e);
+    }
+
+    /**
+     * Обработка стандартных исключений
+     *
+     * @param e        исключение
+     * @param response ответ
+     */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    ExceptionMessage accessDeniedexceptionHandler(Exception e, final HttpServletResponse response) {
         LOG.error(e.getLocalizedMessage(), e);
         response.setCharacterEncoding(UTF_8);
         return errorService.getExceptionMessage(e);

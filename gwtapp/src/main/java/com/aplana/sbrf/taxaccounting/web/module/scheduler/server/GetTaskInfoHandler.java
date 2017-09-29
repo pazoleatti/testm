@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Остановка задачи планировщика
+ *
  * @author dloshkarev
  */
 @Service
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction, GetTaskInfoResult> {
 
     @Autowired
-    private ConfigurationService configurationService;
+    private SchedulerTaskService schedulerTaskService;
 
     public GetTaskInfoHandler() {
         super(GetTaskInfoAction.class);
@@ -30,10 +31,10 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
     @Override
     public GetTaskInfoResult execute(GetTaskInfoAction action, ExecutionContext executionContext) throws ActionException {
         GetTaskInfoResult result = new GetTaskInfoResult();
-        SchedulerTaskData taskData = configurationService.getSchedulerTask(SchedulerTask.getByTaskId(action.getTaskId()));
+        SchedulerTaskData taskData = schedulerTaskService.getSchedulerTask(SchedulerTask.getByTaskId(action.getTaskId()));
         result.setTaskId(taskData.getTask().getSchedulerTaskId());
         result.setTaskName(taskData.getTaskName());
-        result.setTaskState(taskData.isActive()?0:1);
+        result.setTaskState(taskData.isActive() ? 0 : 1);
         result.setSchedule(taskData.getSchedule());
         result.setTimeCreated(taskData.getModificationDate().toDate());
         result.setNextFireTime(taskData.getLast_fire_date().toDate());

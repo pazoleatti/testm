@@ -4,20 +4,20 @@
     /**
      * @description Модуль для страницы Планировщик задач
      */
-    angular.module('app.taskList', ['app.rest'])
+    angular.module('app.schedulerTaskList', ['app.rest'])
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('taskList', {
-                url: '/administration/taskList',
-                templateUrl: 'client/app/administration/taskList.html',
-                controller: 'taskListCtrl'
+            $stateProvider.state('schedulerTaskList', {
+                url: '/administration/schedulerTaskList',
+                templateUrl: 'client/app/administration/schedulerTaskList.html',
+                controller: 'schedulerTaskListCtrl'
             });
         }])
 
         /**
          * @description Контроллер страницы "Планировщик задач"
          */
-        .controller('taskListCtrl', ['$scope', '$filter', 'taskList', '$http',
-            function ($scope, $filter, taskList, $http) {
+        .controller('schedulerTaskListCtrl', ['$scope', '$filter', 'schedulerTaskResource', '$http',
+            function ($scope, $filter, schedulerTaskResource, $http) {
 
                 /**
                  * @description Обновление грида
@@ -32,7 +32,7 @@
                     value: [],
                     options: {
                         datatype: "angularResource",
-                        angularResource: taskList,
+                        angularResource: schedulerTaskResource,
                         height: 250,
                         colNames: [
                             $filter('translate')('taskList.title.number'),
@@ -79,37 +79,42 @@
                 /**
                  * @description Запуск выполнения по расписанию
                  */
-                $scope.runTasks = function () {
-                    changeStateTasks(true);
+                $scope.activate = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/schedulerTask/activate",
+                        params: {
+                            ids: getIds()
+                        }
+                    }).then(function () {
+                        $scope.refreshGrid(1);
+                    });
                 };
 
                 /**
                  * @description Остановка выполнения по расписанию
                  */
-                $scope.stopTasks = function () {
-                    changeStateTasks(false);
-                };
-
-                /**
-                 * @description Изменения активности задачи
-                 * @param isActive признак активности задачи
-                 */
-                function changeStateTasks(isActive) {
-                    var ids = [];
-                    for (var i = 0; i < $scope.taskListGrid.value.length; i++) {
-                        ids.push($scope.taskListGrid.value[i].id);
-                    }
-
+                $scope.deactivate = function () {
                     $http({
                         method: "POST",
-                        url: "controller/actions/taskList/changeState",
+                        url: "controller/actions/schedulerTask/deactivate",
                         params: {
-                            ids: ids,
-                            isActive: isActive
+                            ids: getIds()
                         }
                     }).then(function () {
                         $scope.refreshGrid(1);
                     });
+                };
+
+                /**
+                 * @description Изменения активности задачи
+                 */
+                function getIds() {
+                    var ids = [];
+                    for (var i = 0; i < $scope.taskListGrid.value.length; i++) {
+                        ids.push($scope.taskListGrid.value[i].id);
+                    }
+                    return ids;
                 }
             }])
 
