@@ -17,7 +17,8 @@
             'app.modals',
             'app.filesComments',
             'app.rest',
-            'app.rnuNdflPersonFace'])
+            'app.rnuNdflPersonFace',
+            'app.returnToCreatedDialog'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
@@ -188,12 +189,15 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnToCreatedDeclaration'))
+                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {header: $filter('translate')('title.indicateReasonForReturn'), msg: $filter('translate')('title.reasonForReturn')}, {size : 'md'})
                         .result.then(
-                        function () {
+                        function (reason) {
                             $http({
                                 method: "POST",
-                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/returnToCreated"
+                                url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/returnToCreated",
+                                params: {
+                                    reason: reason
+                                }
                             }).then(function () {
                                 initPage();
                             });

@@ -1,0 +1,16 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="no()">×</button>
+    <h4 class="modal-title">
+        <span class="glyphicon glyphicon-star-empty"></span>&nbsp;{{header}}
+    </h4>
+</div>
+<div class="modal-body">
+    <div>{{msg}}:</div>
+    <textarea data-ng-model="reason" style="width: 550px; height: 100px"></textarea>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" ng-click="yes()">
+        {{labelYes}}
+    </button>
+    <button type="button" class="btn btn-default" id="cancelButton" ng-click="no()">{{labelNo}}</button>
+</div>
