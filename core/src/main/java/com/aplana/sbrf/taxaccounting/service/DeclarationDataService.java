@@ -589,11 +589,10 @@ public interface DeclarationDataService {
      * Создание отчётности
      *
      * @param userInfo          информация о пользователе
-     * @param logger            логгер
      * @param declarationTypeId идентификатор типа отчётности
      * @param departmentId      идентификатор подразделения
      * @param periodId          идентификатор периода
      * @return
      */
-    CreateDeclarationReportResult createReports(TAUserInfo userInfo, Logger logger, Integer declarationTypeId, Integer departmentId, Integer periodId);
+    CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId);
 }

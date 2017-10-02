@@ -84,7 +84,7 @@
                         method: "POST",
                         url: "controller/actions/schedulerTask/activate",
                         params: {
-                            ids: getIds()
+                            ids: $filter('idExtractor')($scope.taskListGrid.value)
                         }
                     }).then(function () {
                         $scope.refreshGrid(1);
@@ -99,23 +99,12 @@
                         method: "POST",
                         url: "controller/actions/schedulerTask/deactivate",
                         params: {
-                            ids: getIds()
+                            ids: $filter('idExtractor')($scope.taskListGrid.value)
                         }
                     }).then(function () {
                         $scope.refreshGrid(1);
                     });
                 };
-
-                /**
-                 * @description Изменения активности задачи
-                 */
-                function getIds() {
-                    var ids = [];
-                    for (var i = 0; i < $scope.taskListGrid.value.length; i++) {
-                        ids.push($scope.taskListGrid.value[i].id);
-                    }
-                    return ids;
-                }
             }])
 
 }());

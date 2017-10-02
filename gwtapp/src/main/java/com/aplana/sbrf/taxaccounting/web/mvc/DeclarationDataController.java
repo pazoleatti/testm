@@ -232,12 +232,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationDate/createReports")
     public CreateDeclarationReportResult createReports(Integer declarationTypeId, Integer departmentId, Integer periodId) {
-        Logger logger = new Logger();
-        CreateDeclarationReportResult result = declarationDataService.createReports(securityService.currentUserInfo(), logger, declarationTypeId, departmentId, periodId);
-        if (!logger.getEntries().isEmpty()) {
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
-        return result;
+        return declarationDataService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
     }
 
     /**
