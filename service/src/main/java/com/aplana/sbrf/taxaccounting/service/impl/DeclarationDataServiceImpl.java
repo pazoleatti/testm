@@ -2376,8 +2376,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReports(TAUserInfo userInfo, Logger logger, Integer declarationTypeId, Integer departmentId, Integer periodId) {
-        // логика взята из CreateFormDeclarationHandler
+    public CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId) {
+        // логика взята из CreateFormsDeclarationHandler
+        Logger logger = new Logger();
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         final ReportType reportType = ReportType.CREATE_FORMS_DEC;
 
@@ -2427,6 +2428,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             });
         }
+        result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 }
