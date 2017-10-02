@@ -4,13 +4,23 @@ import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,16 +41,17 @@ public class AsyncTaskThreadContainer {
     private AsyncTaskDao asyncTaskDao;
     @Autowired
     private ServerInfo serverInfo;
+    @Autowired
+    private TAUserService taUserService;
 
     /**
      * Метод запускает потоки обработки асинхронных задач для каждой очереди
      */
     public void processQueues() {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        DelegatingSecurityContextExecutorService executor = new DelegatingSecurityContextExecutorService(executorService, SecurityContextHolder.getContext());
-        executor.submit(new AsyncTaskShortQueueProcessor());
-        executor.submit(new AsyncTaskLongQueueProcessor());
-        executor.shutdown();
+        executorService.submit(new AsyncTaskShortQueueProcessor());
+        executorService.submit(new AsyncTaskLongQueueProcessor());
+        executorService.shutdown();
     }
 
     /**
@@ -82,7 +93,21 @@ public class AsyncTaskThreadContainer {
                             @Override
                             public void run() {
                                 Thread.currentThread().setName("AsyncTask-" + taskData.getId());
+
                                 try {
+                                    int userId = (Integer) taskData.getParams().get("USER_ID");
+                                    TAUser user = taUserService.getUser(userId);
+                                    List<String> roles = new ArrayList<String>();
+                                    for (TARole role : user.getRoles()) {
+                                        roles.add(role.getAlias());
+                                    }
+                                    Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[roles.size()]));
+                                    Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                            new User(user.getLogin(), "user", authorities),
+                                            user.getLogin(),
+                                            authorities
+                                    );
+                                    SecurityContextHolder.getContext().setAuthentication(authentication);
                                     task.execute(taskData.getParams());
                                 } catch (Exception e) {
                                     LOG.error("Unexpected error during async task execution", e);
