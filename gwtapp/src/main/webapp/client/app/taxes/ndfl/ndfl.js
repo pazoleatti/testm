@@ -232,5 +232,12 @@
                 $scope.selectTab = function(tab) {
                     $rootScope.$broadcast('tabSelected', tab);
                 };
+
+                $scope.uploadXml = function () {
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml/"
+                    });
+                }
             }]);
 }());

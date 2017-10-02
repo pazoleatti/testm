@@ -46,15 +46,15 @@
                                 index: 'link',
                                 width: 175,
                                 sortable: false,
-                                formatter: linkFileFormatter,
+                                formatter: linkFileFormatter
                             },
                             {
                                 name: 'reportId',
                                 index: 'reportId',
                                 hidden: true,
                                 width: 175,
-                                sortable: false,
-                            },
+                                sortable: false
+                            }
 
                         ],
                         rowNum: 10,
@@ -75,7 +75,7 @@
                  * * @param options данные таблицы
                  */
                 function linkFileFormatter(cellValue, options, row) {
-                    if (row.reportId != null) {
+                    if (row.reportId !== null) {
                         return "<a target='_blank' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
 
                     } else {
