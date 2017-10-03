@@ -199,6 +199,9 @@
          */
         .filter('linkFileFormatter', function () {
             return function (cellValue, options) {
+                if (!cellValue) {
+                    cellValue = '';
+                }
                 return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
             };
         })

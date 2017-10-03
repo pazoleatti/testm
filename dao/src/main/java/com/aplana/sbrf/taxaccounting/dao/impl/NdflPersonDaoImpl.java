@@ -185,7 +185,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 where.and(ndflPersonIncome.paymentDate.isNull().or(ndflPersonIncome.paymentDate.loe(new LocalDateTime(ndflPersonIncomeFilter.getPaymentDateTo()))));
             }
         }
-        //Оперделяем способ сортировки
+        //Определяем способ сортировки
         String orderingProperty = pagingParams.getProperty();
         Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
 
@@ -262,7 +262,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
 
-        //Оперделяем способ сортировки
+        //Определяем способ сортировки
         String orderingProperty = pagingParams.getProperty();
         Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
 
@@ -330,7 +330,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
 
-        //Оперделяем способ сортировки
+        //Определяем способ сортировки
         String orderingProperty = pagingParams.getProperty();
         Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
 
@@ -634,7 +634,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             }
         }
 
-        //Оперделяем способ сортировки
+        //Определяем способ сортировки
         String orderingProperty = pagingParams.getProperty();
         Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
 

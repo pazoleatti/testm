@@ -535,4 +535,946 @@
 			<column name="value" value="172800"/>
         </insert>
 	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-59" author="rnurgaleev">
+		<delete
+            tableName="blob_data">
+			<where>id NOT IN
+       (
+       SELECT DISTINCT id
+       FROM (
+            SELECT script_id id FROM ref_book
+            UNION
+            SELECT xsd FROM declaration_template
+            UNION
+            SELECT jrxml FROM declaration_template
+            UNION
+            SELECT blob_data_id FROM declaration_report
+            UNION
+            SELECT blob_data_id FROM declaration_data_file
+            UNION
+            SELECT blob_data_id FROM declaration_template_file
+            UNION
+            SELECT blob_data_id FROM declaration_subreport
+            )
+       WHERE id IS NOT NULL
+       )
+       AND (sysdate - creation_date) > 1</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-60" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template DISABLE CONSTRAINT declaration_template_fk_dtype;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-61" author="rnurgaleev">
+        <sql>
+            ALTER TABLE department_declaration_type DISABLE CONSTRAINT dept_decl_type_fk_decl_type;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-62" author="rnurgaleev">
+        <sql>
+            ALTER TABLE template_changes DISABLE CONSTRAINT template_changes_fk_dec_t;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-63" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_data DISABLE CONSTRAINT declaration_data_fk_decl_t_id;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-64" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_decl_template;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-65" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_template;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-66" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_decl_subreport;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-67" author="rnurgaleev">
+        <sql>
+            ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_script_id;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-68" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template DISABLE CONSTRAINT declaration_tem_fk_blob_data;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-69" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template DISABLE CONSTRAINT dec_tem_fk_blob_data_jrxml;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-70" author="rnurgaleev">
+        <sql>
+            ALTER TABLE notification DISABLE CONSTRAINT notification_fk_report_id;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-71" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_blob_data;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-72" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_blob_data;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-73" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_data_file DISABLE CONSTRAINT decl_data_file_pk;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-74" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_blob;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-75" author="rnurgaleev">
+        <sql>
+            ALTER TABLE decl_template_event_script DISABLE CONSTRAINT FK_DEC_TEMP_EVENT_SCR_DEC_TEMP;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-76" author="rnurgaleev">
+		<delete
+            tableName="blob_data">
+			<where>id IN (
+					'ce397da5-cf59-457f-9e91-2a31a478b510',
+					'3ec53b66-624d-45cd-aa17-f046e3a1f1fc',
+					'99034f20-18c3-11e5-b60b-1697f925ec7b',
+					'352adf59-372b-4020-98fe-8960dd5bc972',
+					'4e387483-0330-4e05-ad46-e9b03a3b025d',
+					'39327388-9684-4fd5-a522-c40a21680156',
+					'375ba56a-2509-11e7-93ae-92361f002671',
+					'884b9f2e-1678-4d69-9652-b036bba2f728')
+			</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-77" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="ce397da5-cf59-457f-9e91-2a31a478b510"/>
+            <column name="name" value="refbook_classificator_country.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/classificator_country/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-78" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="3ec53b66-624d-45cd-aa17-f046e3a1f1fc"/>
+            <column name="name" value="refbook_classificator_oktmo.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/classificator_oktmo/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-79" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="99034f20-18c3-11e5-b60b-1697f925ec7b"/>
+            <column name="name" value="refbook_classificator_okved.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/classificator_okved/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-80" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="352adf59-372b-4020-98fe-8960dd5bc972"/>
+            <column name="name" value="refbook_declaration_type.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/declaration_type/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-81" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="4e387483-0330-4e05-ad46-e9b03a3b025d"/>
+            <column name="name" value="refbook_department.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/department/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-82" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="39327388-9684-4fd5-a522-c40a21680156"/>
+            <column name="name" value="refbook_fias.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/fias/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-83" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="375ba56a-2509-11e7-93ae-92361f002671"/>
+            <column name="name" value="refbook_department.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/id_doc/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-84" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="884b9f2e-1678-4d69-9652-b036bba2f728"/>
+            <column name="name" value="refbook_department.groovy"/>
+            <column name="data" valueBlobFile="templates/refbook/person/script.groovy"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-85" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="ce397da5-cf59-457f-9e91-2a31a478b510"/>
+			<where>id = 10</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-86" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="3ec53b66-624d-45cd-aa17-f046e3a1f1fc"/>
+			<where>id = 96</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-87" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="99034f20-18c3-11e5-b60b-1697f925ec7b"/>
+			<where>id = 925</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-88" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="352adf59-372b-4020-98fe-8960dd5bc972"/>
+			<where>id = 207</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-89" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="4e387483-0330-4e05-ad46-e9b03a3b025d"/>
+			<where>id = 30</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-90" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="39327388-9684-4fd5-a522-c40a21680156"/>
+			<where>id = 1030</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-91" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="375ba56a-2509-11e7-93ae-92361f002671"/>
+			<where>id = 902</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-92" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="script_id" value="884b9f2e-1678-4d69-9652-b036bba2f728"/>
+			<where>id = 904</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-93" author="rnurgaleev">
+		<delete
+            tableName="blob_data">
+			<where>id IN (
+						SELECT blob_data_id FROM declaration_subreport WHERE declaration_template_id IN (100, 101, 102, 103, 104) UNION
+						SELECT blob_data_id FROM declaration_template_file WHERE declaration_template_id IN (100, 101, 102, 103, 104) UNION
+						SELECT jrxml FROM declaration_template WHERE id IN (100, 101, 102, 103, 104) UNION
+						SELECT xsd   FROM declaration_template WHERE id IN (100, 101, 102, 103, 104)
+						)
+			</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-94" author="rnurgaleev">
+		<delete
+            tableName="declaration_template_file">
+			<where>declaration_template_id IN (100, 101, 102, 103, 104)</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-95" author="rnurgaleev">
+		<delete
+            tableName="declaration_subreport">
+			<where>declaration_template_id IN (100, 101, 102, 103, 104)</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-96" author="rnurgaleev">
+		<delete
+            tableName="declaration_template">
+			<where>id IN (100, 101, 102, 103, 104)</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-97" author="rnurgaleev">
+		<delete
+            tableName="decl_template_event_script">
+			<where>declaration_template_id IN (100, 101, 102, 103, 104)</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-98" author="rnurgaleev">
+        <sql>
+            MERGE INTO declaration_type t USING (
+			SELECT 100 ID, 'РНУ_НДФЛ (первичная)' NAME, 0 STATUS, 0 IS_IFRS, 'NULL' IFRS_NAME FROM DUAL UNION ALL
+			SELECT 101 ID, 'РНУ_НДФЛ (консолидированная)' NAME, 0 STATUS, 0 IS_IFRS, 'NULL' IFRS_NAME FROM DUAL UNION ALL
+			SELECT 102 ID, '2-НДФЛ (1)' NAME, 0 STATUS, 0 IS_IFRS, 'NULL' IFRS_NAME FROM DUAL UNION ALL
+			SELECT 103 ID, '6-НДФЛ' NAME, 0 STATUS, 0 IS_IFRS, 'NULL' IFRS_NAME FROM DUAL UNION ALL
+			SELECT 104 ID, '2-НДФЛ (2)' NAME, 0 STATUS, 0 IS_IFRS, 'NULL' IFRS_NAME FROM DUAL ) s ON
+			(t.id = s.id)
+			WHEN NOT MATCHED THEN INSERT
+				(t.id, t.name, t.status, t.is_ifrs, t.ifrs_name)
+			VALUES
+				(s.id, s.name, s.status, s.is_ifrs, s.ifrs_name)
+			WHEN MATCHED THEN UPDATE SET 
+				t.name = s.name, t.status = s.status, t.is_ifrs = s.is_ifrs, t.ifrs_name = s.ifrs_name;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-99" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="bf172465-20b7-4ce2-ac43-5482ad310c08"/>
+            <column name="name" value="report_ndfl_primary.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/report.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-100" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="58adc3c2-66a0-4f11-98a2-defe682a092f"/>
+            <column name="name" value="rnu_ndfl_light.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-101" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="b8406636-beb1-41d8-8f8a-cf4971309962"/>
+            <column name="name" value="report_ndfl_consolidated.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/report.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-102" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71"/>
+            <column name="name" value="report_2ndfl_1.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/report.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-103" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="790782e0-2282-41f4-8735-7b50904703ac"/>
+            <column name="name" value="NO_NDFL2_1_399_00_05_04_02.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_04_02.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-104" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="41303bf7-9765-463f-a34b-f0a280bfa7bf"/>
+            <column name="name" value="report_6ndfl.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-105" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="13765b29-f1b7-4ec0-a8a9-88196a6e45a1"/>
+            <column name="name" value="NO_NDFL6_1_152_00_05_01_02.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_6ndfl/v2016/NO_NDFL6_1_152_00_05_01_02.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-106" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="d372df40-e448-48f5-9879-994753822122"/>
+            <column name="name" value="report_2ndfl_2.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/report.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-107" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="77d802bf-e3b1-485b-ae52-41a21aac1034"/>
+            <column name="name" value="NO_NDFL2_1_399_00_05_04_02.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/NO_NDFL2_1_399_00_05_04_02.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-108" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="03f6d78d-bfd7-45bb-a16b-6c89131b76d1"/>
+            <column name="name" value="report_person_primary.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/report_person_db.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-109" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="042c50fc-a590-46b5-bb50-d04cc3a9424a"/>
+            <column name="name" value="report_person_consolidated.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/report_person_db.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-110" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="f847146a-07ec-11e7-93ae-92361f002671"/>
+            <column name="name" value="report_person_all_primary.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/report_person_all_db.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-111" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="005699a0-07ed-11e7-93ae-92361f002671"/>
+            <column name="name" value="report_person_all_consolidated.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/report_person_all_db.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-112" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="047f207c-113e-488d-8390-9afc248a3bc8"/>
+            <column name="name" value="report_ndfl_ref_1.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-113" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="04d9b114-1782-4d09-ad88-729e5605c6ff"/>
+            <column name="name" value="report_ndfl_ref_2.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-114" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="d11ebeb4-07f2-11e7-93ae-92361f002671"/>
+            <column name="name" value="report_kpp_oktmo.jrxml"/>
+            <column name="data" valueBlobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/report_kpp_oktmo.jrxml"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-115" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb91"/>
+            <column name="name" value="UU_OTCH_1_087_00_05_07_01.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_6ndfl/v2016/UU_OTCH_1_087_00_05_07_01.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-116" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb92"/>
+            <column name="name" value="IV_OTCH_1_098_00_05_04_01.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_6ndfl/v2016/IV_OTCH_1_098_00_05_04_01.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-117" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb93"/>
+            <column name="name" value="UO_OTCH_1_097_00_05_05_01.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_6ndfl/v2016/UO_OTCH_1_097_00_05_05_01.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-118" author="rnurgaleev">
+        <insert tableName="BLOB_DATA">
+            <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb94"/>
+            <column name="name" value="KV_OTCH_1_095_00_05_04_01.xsd"/>
+            <column name="data" valueBlobFile="templates/ndfl/report_6ndfl/v2016/KV_OTCH_1_095_00_05_04_01.xsd"/>
+			<column name="creation_date" valueDate="2016-01-01"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-119" author="rnurgaleev">
+        <insert tableName="DECLARATION_TEMPLATE">
+            <column name="id" value="100"/>
+			<column name="declaration_type_id" value="100"/>	
+			<column name="version" valueDate="2016-01-01"/>
+			<column name="status" value="0"/>
+			<column name="form_kind" value="3"/>
+			<column name="form_type" value="2"/>
+			<column name="jrxml" value="bf172465-20b7-4ce2-ac43-5482ad310c08"/>
+			<column name="xsd" value="58adc3c2-66a0-4f11-98a2-defe682a092f"/>
+			<column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/script.groovy"/>
+            <column name="name" value="РНУ_НДФЛ (первичная)"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-120" author="rnurgaleev">
+        <insert tableName="DECLARATION_TEMPLATE">
+            <column name="id" value="101"/>
+			<column name="declaration_type_id" value="101"/>	
+			<column name="version" valueDate="2016-01-01"/>
+			<column name="status" value="0"/>
+			<column name="form_kind" value="2"/>
+			<column name="form_type" value="2"/>
+			<column name="jrxml" value="b8406636-beb1-41d8-8f8a-cf4971309962"/>
+			<column name="create_script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/script.groovy"/>
+            <column name="name" value="РНУ_НДФЛ (консолидированная)"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-121" author="rnurgaleev">
+        <insert tableName="DECLARATION_TEMPLATE">
+            <column name="id" value="102"/>
+			<column name="declaration_type_id" value="102"/>	
+			<column name="version" valueDate="2016-01-01"/>
+			<column name="status" value="0"/>
+			<column name="form_kind" value="7"/>
+			<column name="form_type" value="3"/>
+			<column name="jrxml" value="f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71"/>
+			<column name="xsd" value="790782e0-2282-41f4-8735-7b50904703ac"/>
+			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/script.groovy"/>
+            <column name="name" value="2-НДФЛ (1)"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-122" author="rnurgaleev">
+        <insert tableName="DECLARATION_TEMPLATE">
+            <column name="id" value="103"/>
+			<column name="declaration_type_id" value="103"/>	
+			<column name="version" valueDate="2016-01-01"/>
+			<column name="status" value="0"/>
+			<column name="form_kind" value="7"/>
+			<column name="form_type" value="5"/>
+			<column name="jrxml" value="41303bf7-9765-463f-a34b-f0a280bfa7bf"/>
+			<column name="xsd" value="13765b29-f1b7-4ec0-a8a9-88196a6e45a1"/>
+			<column name="create_script" valueClobFile="templates/ndfl/report_6ndfl/v2016/script.groovy"/>
+            <column name="name" value="6-НДФЛ"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-123" author="rnurgaleev">
+        <insert tableName="DECLARATION_TEMPLATE">
+            <column name="id" value="104"/>
+			<column name="declaration_type_id" value="104"/>	
+			<column name="version" valueDate="2016-01-01"/>
+			<column name="status" value="0"/>
+			<column name="form_kind" value="7"/>
+			<column name="form_type" value="4"/>
+			<column name="jrxml" value="d372df40-e448-48f5-9879-994753822122"/>
+			<column name="xsd" value="77d802bf-e3b1-485b-ae52-41a21aac1034"/>
+			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/script.groovy"/>
+            <column name="name" value="2-НДФЛ (2)"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-124" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="1"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="3"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/calculate/script.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-125" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="2"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/check/script.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-126" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="3"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="105"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/move_accepted_to_created/script.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-127" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="4"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/move_created_to_accepted/script.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-128" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="5"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="event_id" value="3"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/calculate/script.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-129" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="6"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/check/script.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-130" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="7"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/move_created_to_accepted/script.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-131" author="rnurgaleev">
+        <insert tableName="declaration_template_file">
+            <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb91"/>
+			<column name="declaration_template_id" value="103"/>	
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-132" author="rnurgaleev">
+        <insert tableName="declaration_template_file">
+            <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb92"/>
+			<column name="declaration_template_id" value="103"/>	
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-133" author="rnurgaleev">
+        <insert tableName="declaration_template_file">
+            <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb93"/>
+			<column name="declaration_template_id" value="103"/>	
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-134" author="rnurgaleev">
+        <insert tableName="declaration_template_file">
+            <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb94"/>
+			<column name="declaration_template_id" value="103"/>	
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-135" author="rnurgaleev">
+        <insert tableName="declaration_subreport">
+            <column name="id" value="1001"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="name" value="РНУ НДФЛ по физическому лицу"/>	
+			<column name="ord" value="1"/>	
+			<column name="alias" value="rnu_ndfl_person_db"/>	
+			<column name="blob_data_id" value="03f6d78d-bfd7-45bb-a16b-6c89131b76d1"/>
+			<column name="select_record" value="1"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-136" author="rnurgaleev">
+        <insert tableName="declaration_subreport">
+            <column name="id" value="1002"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="name" value="РНУ НДФЛ по всем ФЛ"/>	
+			<column name="ord" value="2"/>	
+			<column name="alias" value="rnu_ndfl_person_all_db"/>	
+			<column name="blob_data_id" value="f847146a-07ec-11e7-93ae-92361f002671"/>
+			<column name="select_record" value="0"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-137" author="rnurgaleev">
+        <insert tableName="declaration_subreport">
+            <column name="id" value="1011"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="name" value="РНУ НДФЛ по физическому лицу"/>	
+			<column name="ord" value="1"/>	
+			<column name="alias" value="rnu_ndfl_person_db"/>	
+			<column name="blob_data_id" value="042c50fc-a590-46b5-bb50-d04cc3a9424a"/>
+			<column name="select_record" value="1"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-138" author="rnurgaleev">
+        <insert tableName="declaration_subreport">
+            <column name="id" value="1012"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="name" value="РНУ НДФЛ по всем ФЛ"/>	
+			<column name="ord" value="2"/>	
+			<column name="alias" value="rnu_ndfl_person_all_db"/>	
+			<column name="blob_data_id" value="005699a0-07ed-11e7-93ae-92361f002671"/>
+			<column name="select_record" value="0"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-139" author="rnurgaleev">
+        <insert tableName="declaration_subreport">
+            <column name="id" value="1013"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="name" value="Реестр сформированной отчетности"/>	
+			<column name="ord" value="3"/>	
+			<column name="alias" value="report_kpp_oktmo"/>	
+			<column name="blob_data_id" value="d11ebeb4-07f2-11e7-93ae-92361f002671"/>
+			<column name="select_record" value="0"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-140" author="rnurgaleev">
+        <insert tableName="declaration_subreport">
+            <column name="id" value="1021"/>
+			<column name="declaration_template_id" value="102"/>	
+			<column name="name" value="2-НДФЛ (1) по физическому лицу"/>	
+			<column name="ord" value="1"/>	
+			<column name="alias" value="report_2ndfl"/>	
+			<column name="blob_data_id" value="047f207c-113e-488d-8390-9afc248a3bc8"/>
+			<column name="select_record" value="1"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-141" author="rnurgaleev">
+        <insert tableName="declaration_subreport">
+            <column name="id" value="1041"/>
+			<column name="declaration_template_id" value="104"/>	
+			<column name="name" value="2-НДФЛ (2) по физическому лицу"/>	
+			<column name="ord" value="1"/>	
+			<column name="alias" value="report_2ndfl"/>	
+			<column name="blob_data_id" value="04d9b114-1782-4d09-ad88-729e5605c6ff"/>
+			<column name="select_record" value="1"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-142" author="rnurgaleev">
+        <sql>
+            INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10001,1001,'№ ДУЛ','idDocNumber',9,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10002,1001,'Дата рождения по','toBirthDay',8,'D',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10003,1001,'Дата рождения с','fromBirthDay',7,'D',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10004,1001,'Имя','firstName',2,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10005,1001,'ИНН','inn',5,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10006,1001,'ИНП','inp',6,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10007,1001,'Отчество','middleName',3,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10008,1001,'СНИЛС','snils',4,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10009,1001,'Фамилия','lastName',1,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10011,1011,'№ ДУЛ','idDocNumber',9,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10012,1011,'Дата рождения по','toBirthDay',8,'D',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10013,1011,'Дата рождения с','fromBirthDay',7,'D',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10014,1011,'Имя','firstName',2,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10015,1011,'ИНН','inn',5,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10016,1011,'ИНП','inp',6,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10017,1011,'Отчество','middleName',3,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10018,1011,'СНИЛС','snils',4,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10019,1011,'Фамилия','lastName',1,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10201,1021,'Номер справки','pNumSpravka',0,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10202,1021,'Фамилия','lastName',1,'S',null,null,0);  
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10203,1021,'Имя','firstName',2,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10204,1021,'Отчество','middleName',3,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10206,1021,'№ ДУЛ','idDocNumber',7,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10207,1021,'ИНН','inn',4,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10208,1021,'Дата рождения с','fromBirthDay',5,'D',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10209,1021,'Дата рождения по','toBirthDay',6,'D',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10401,1041,'Номер справки','pNumSpravka',0,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10402,1041,'Фамилия','lastName',1,'S',null,null,0);  
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10403,1041,'Имя','firstName',2,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10404,1041,'Отчество','middleName',3,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10406,1041,'№ ДУЛ','idDocNumber',7,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10407,1041,'ИНН','inn',4,'S',null,null,0);
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10408,1041,'Дата рождения с','fromBirthDay',5,'D',null,null,0); 
+			INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
+			(10409,1041,'Дата рождения по','toBirthDay',6,'D',null,null,0);
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-143" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template enable CONSTRAINT declaration_template_fk_dtype;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-144" author="rnurgaleev">
+        <sql>
+            ALTER TABLE department_declaration_type enable CONSTRAINT dept_decl_type_fk_decl_type;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-145" author="rnurgaleev">
+        <sql>
+            ALTER TABLE template_changes enable CONSTRAINT template_changes_fk_dec_t;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-146" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_data enable CONSTRAINT declaration_data_fk_decl_t_id;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-147" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_subreport enable CONSTRAINT decl_subrep_fk_decl_template;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-148" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template_file enable CONSTRAINT fk_decl_templ_file_template;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-149" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_report enable CONSTRAINT decl_report_fk_decl_subreport;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-150" author="rnurgaleev">
+        <sql>
+            ALTER TABLE ref_book enable CONSTRAINT ref_book_fk_script_id;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-151" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template enable CONSTRAINT declaration_tem_fk_blob_data;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-152" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template enable CONSTRAINT dec_tem_fk_blob_data_jrxml;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-153" author="rnurgaleev">
+        <sql>
+            ALTER TABLE notification enable CONSTRAINT notification_fk_report_id;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-154" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_subreport enable CONSTRAINT decl_subrep_fk_blob_data;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-155" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_report enable CONSTRAINT decl_report_fk_blob_data;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-156" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_data_file enable CONSTRAINT decl_data_file_pk;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-157" author="rnurgaleev">
+        <sql>
+            ALTER TABLE declaration_template_file enable CONSTRAINT fk_decl_templ_file_blob;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-158" author="rnurgaleev">
+        <sql>
+            ALTER TABLE decl_template_event_script enable CONSTRAINT FK_DEC_TEMP_EVENT_SCR_DEC_TEMP;
+        </sql>
+    </changeSet>
+	
+	<!--SBRFNDFL-2142-->
+	<changeSet id="ndfl-2.1-rnurgaleev-159" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="is_versioned" value="0"/>
+			<where>table_name='REPORT_PERIOD_TYPE'</where>
+		</update>
+	</changeSet>
+	
 </databaseChangeLog>

@@ -225,7 +225,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             whereOut.and(rn.between(filter.getStartIndex().toString(), String.valueOf(filter.getStartIndex() + filter.getCountOfRecords())));
         }
 
-        //Оперделяем способ сортировки
+        //Определяем способ сортировки
         String orderingProperty = pagingParams.getProperty();
         Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
 
