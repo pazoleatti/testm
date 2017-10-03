@@ -92,18 +92,18 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			if (scriptFilePath != null) {
 				script = getScript(scriptFilePath);
 			}
+		} else {
+			String eventScript = declarationTemplateEventScriptDao.findScript(declarationData.getDeclarationTemplateId(), event.getCode());
+			if (eventScript != null) {
+				script = eventScript;
+			}
 		}
 		if (!canExecuteScript(script, event)) {
             return false;
         }
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 		if (scriptFilePath == null) {
-			String eventScript = declarationTemplateEventScriptDao.findScript(declarationData.getDeclarationTemplateId(), event.getCode());
-			if (eventScript != null) {
-				declarationTemplate.setCreateScript(eventScript);
-			} else {
-				declarationTemplate.setCreateScript(script);
-			}
+			declarationTemplate.setCreateScript(script);
 		}
         return executeScript(userInfo, declarationTemplate, declarationData, scriptFilePath, event, logger, exchangeParams);
     }

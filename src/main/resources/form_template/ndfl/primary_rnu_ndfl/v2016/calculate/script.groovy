@@ -889,7 +889,7 @@ class Calculate extends AbstractScriptClass {
 
         //подготовка записей
         if (identityObjectList != null && !identityObjectList.isEmpty()) {
-            String refBookName = RefBook.Id.name()
+            String refBookName = RefBook.Id.getById(refBookId).name()
             logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
 
             identityObjectList.collate(1000).each { identityObjectSubList ->
