@@ -39,7 +39,8 @@
                                 name: 'text',
                                 index: 'text',
                                 width: 520,
-                                formatter: $filter('notificationTextFormatter')
+                                formatter: $filter('notificationTextFormatter'),
+                                classes: 'grid-cell-white-space'
                             },
                             {
                                 name: 'link',
