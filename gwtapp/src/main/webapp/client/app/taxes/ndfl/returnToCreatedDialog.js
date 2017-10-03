@@ -2,13 +2,13 @@
     'use strict';
 
     /**
-     * @description Модуль для создания налоговых форм
+     * @description Модуль МО возврата декларации в статус "Создана"
      */
 
     angular.module('app.returnToCreatedDialog', [])
 
     /**
-     * @description Контроллер МО Создания налоговой формы
+     * @description Контроллер МО возврата декларации в статус "Создана"
      */
         .controller('returnToCreatedCtrl', ['$scope', '$translate', '$uibModalInstance', 'data', function ($scope, $translate, $uibModalInstance, data) {
             $scope.header = (angular.isDefined(data.header)) ? data.header : $translate.instant('DIALOGS_CONFIRMATION');
