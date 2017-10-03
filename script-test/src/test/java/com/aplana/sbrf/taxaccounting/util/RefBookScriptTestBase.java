@@ -35,10 +35,11 @@ public abstract class RefBookScriptTestBase {
         // Хэлпер хранится статично для оптимизации, чтобы он был один для всех тестов отдельного скрипта
         if (testHelper == null) {
             String path = getFolderPath();
+            String name = getFileName();
             if (path == null) {
                 throw new ServiceException("Test folder path is null!");
             }
-            testHelper = new RefBookTestScriptHelper(path, getMockHelper());
+            testHelper = new RefBookTestScriptHelper(path, name, getMockHelper());
         }
         testHelper.reset();
     }
@@ -58,6 +59,11 @@ public abstract class RefBookScriptTestBase {
         // Путь вычисляется из пути к классу теста
         String classPath = this.getClass().getResource(".").toString();
         return classPath.substring(classPath.indexOf("/refbook/"));
+    }
+
+    protected String getFileName() {
+        String className = this.getClass().getName();
+        return className.substring(className.lastIndexOf('.') + 1, className.indexOf("ScriptTest"));
     }
 
     /**

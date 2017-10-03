@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.DeclarationSubreport;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.mock.DefaultScriptTestMockHelper;
@@ -18,6 +15,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Базовый класс для тестов скриптов.
@@ -28,7 +26,8 @@ public abstract class DeclarationScriptTestBase {
     // Хэлпер для работы со скриптами декларации в тестовом режиме
     // Один набор тестов для скрипта — один хелпер
     protected static DeclarationTestScriptHelper testHelper;
-
+    // Мапа, где ключ - имя фай
+    protected Map<String, String> substituteMap = new HashMap<String, String>();
 
     @BeforeClass
     public static void initClass() {
@@ -44,10 +43,11 @@ public abstract class DeclarationScriptTestBase {
         // Хэлпер хранится статично для оптимизации, чтобы он был один для всех тестов отдельного скрипта
         if (testHelper == null) {
             String path = getFolderPath();
+            String name = getFileName();
             if (path == null) {
                 throw new ServiceException("Test folder path is null!");
             }
-            testHelper = new DeclarationTestScriptHelper(path, getDeclarationData(), getMockHelper());
+            testHelper = new DeclarationTestScriptHelper(path, name, getDeclarationData(), getMockHelper());
             testHelper.setImportFileInputStream(getInputStream());
 
         }
@@ -120,6 +120,11 @@ public abstract class DeclarationScriptTestBase {
         // Путь вычисляется из пути к классу теста
         String classPath = this.getClass().getResource(".").toString();
         return classPath.substring(classPath.indexOf("/form_template/"));
+    }
+
+    protected String getFileName() {
+        String className = this.getClass().getName();
+        return className.substring(className.lastIndexOf('.') + 1, className.indexOf("ScriptTest"));
     }
 
     /**

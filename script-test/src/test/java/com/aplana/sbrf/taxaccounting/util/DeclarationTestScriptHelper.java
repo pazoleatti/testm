@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -40,8 +38,6 @@ public class DeclarationTestScriptHelper {
     private final static String XML_ENCODING = "UTF-8";
     // Префикс пути скрипта
     public final static String SCRIPT_PATH_PREFIX = "../src/main/resources";
-    // Имя файла скрипта
-    private final String SCRIPT_PATH_FILE_NAME = "script.groovy";
     // Сервис работы со скриптами
     private static ScriptingService scriptingService = new ScriptingService();
     // Mock-сервисы
@@ -141,7 +137,7 @@ public class DeclarationTestScriptHelper {
      * @param declarationData Экземпляр декларации
      * @param mockHelper      Хэлпер с заглушками других сервисов, можно переопределить
      */
-    public DeclarationTestScriptHelper(String path, DeclarationData declarationData, ScriptTestMockHelper mockHelper) {
+    public DeclarationTestScriptHelper(String path, String scriptName, DeclarationData declarationData, ScriptTestMockHelper mockHelper) {
         super();
         this.declarationData = declarationData;
         this.mockHelper = mockHelper;
@@ -149,8 +145,8 @@ public class DeclarationTestScriptHelper {
         userDepartment.setId(declarationData.getDepartmentId());
         //userDepartment.setRegionId(DEPARTMENT_REGION_ID);
         userDepartment.setName(DEPARTMENT_NAME);
-        this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
-
+        String underlineName = TestUtils.convertToUnderlineStyle(scriptName);
+        this.path = SCRIPT_PATH_PREFIX + path + underlineName + ".groovy";
         try {
             script = readFile(this.path, charsetName);
         } catch (IOException e) {
@@ -159,7 +155,6 @@ public class DeclarationTestScriptHelper {
         // Моск сервисов
         initMock();
     }
-
 
     /**
      * Моск сервисов

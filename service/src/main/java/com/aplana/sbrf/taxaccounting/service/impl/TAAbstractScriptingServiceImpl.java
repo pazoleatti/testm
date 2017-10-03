@@ -159,7 +159,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 
             String eventScript = findEventScript(folder, packageName, event);
             if (eventScript == null) {
-                return findLocalScriptPath(folder, packageName, event);
+                return findLocalScriptPath(folder, packageName);
             } else {
                 return eventScript;
             }
@@ -170,18 +170,19 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
         return scriptFilePath;
     }
 
-    public static String findLocalScriptPath(File folder, String packageName, FormDataEvent event) throws IOException {
+    public static String findLocalScriptPath(File folder, String packageName) throws IOException {
         for (File file : folder.listFiles()) {
             if (file.isDirectory()) {
                 //Если папка - достаем из нее файлы groovy
-                String script = findLocalScriptPath(file, packageName, event);
+                String script = findLocalScriptPath(file, packageName);
                 if (script != null) {
                     return script;
                 }
-            } else if (file.getName().equals("script.groovy")) {
+            } else {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 try {
-                    if (reader.readLine().equals("package " + packageName)) {
+                    String line = reader.readLine();
+                    if (line != null && line.equals("package " + packageName) && line.contains(file.getName().substring(0, file.getName().indexOf(".groovy")))) {
                         return file.getAbsolutePath();
                     }
                 } finally {
@@ -200,11 +201,11 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
                 if (script != null) {
                     return script;
                 }
-            } else if (file.getName().equals("script.groovy")) {
+            } else if (file.getName().contains(event.name().toLowerCase())) {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 try {
                     String line = reader.readLine();
-                    if (line.contains("package " + packageName) && line.contains("." + event.name().toLowerCase())) {
+                    if (line.equals("package " + packageName)) {
                         return file.getAbsolutePath();
                     }
                 } finally {

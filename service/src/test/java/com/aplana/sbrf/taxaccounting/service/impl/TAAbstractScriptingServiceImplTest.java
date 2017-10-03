@@ -42,7 +42,7 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 			"        break";
 
 	private static String SCRIPT2 =
-			"package refbook.test.p2\n" +
+			"package refbook.test.script2\n" +
 					"switch (formDataEvent) {\n" +
 					"   case FormDataEvent.IMPORT:\n" +
 					"   break\n" +
@@ -148,14 +148,14 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 
 	@Test
 	public void getPackageName() {
-		assertEquals("refbook.test.p2", getPackageName(SCRIPT2));
+		assertEquals("refbook.test.script2", getPackageName(SCRIPT2));
 	}
 
 	@Test
 	public void getScriptFilePath() {
-		assertTrue(getScriptFilePath("refbook.test.p1", TEST_SCRIPT_PATH_PREFIX, new Logger(), FormDataEvent.CREATE)
-				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\p1\\script.groovy"));
-		assertTrue(getScriptFilePath("refbook.test.p2", TEST_SCRIPT_PATH_PREFIX, new Logger(), FormDataEvent.CREATE)
-				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\p2\\script.groovy"));
+		assertTrue(getScriptFilePath("refbook.test.script1", TEST_SCRIPT_PATH_PREFIX, new Logger(), FormDataEvent.CREATE)
+				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\script1\\script.groovy"));
+		assertTrue(getScriptFilePath("refbook.test.script2", TEST_SCRIPT_PATH_PREFIX, new Logger(), FormDataEvent.CREATE)
+				.contains("\\service\\src\\test\\resources\\com\\aplana\\sbrf\\taxaccounting\\service\\impl\\groovy\\script2\\script.groovy"));
 	}
 }

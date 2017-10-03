@@ -37,5 +37,22 @@ public class TestUtils {
         }
     }
 
+    public static String convertToUnderlineStyle(String camelCaseString) {
+        StringBuilder underlineBuilder = new StringBuilder();
+        char[] asArray = camelCaseString.toCharArray();
+        underlineBuilder.append(String.valueOf(asArray[0]).toLowerCase());
+        for (int i = 1; i < asArray.length; i++) {
+            if (Character.isUpperCase(asArray[i])) {
+                underlineBuilder.append('_');
+                underlineBuilder.append(String.valueOf(asArray[i]).toLowerCase());
+            } else if (Character.isDigit(asArray[i])) {
+                underlineBuilder.append('_');
+                underlineBuilder.append(asArray[i]);
+            } else {
+                underlineBuilder.append(asArray[i]);
+            }
+        }
+        return underlineBuilder.toString();
+    }
 
 }

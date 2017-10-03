@@ -44,8 +44,6 @@ public class RefBookTestScriptHelper {
     private final String charsetName = "UTF-8";
     // Префикс пути скрипта
     private final static String SCRIPT_PATH_PREFIX = "../src/main/resources";
-    // Имя файла скрипта
-    private final String SCRIPT_PATH_FILE_NAME = "script.groovy";
     // Сервис работы со скриптами
     private static ScriptingService scriptingService = new ScriptingService();
     // Mock-сервисы
@@ -87,11 +85,12 @@ public class RefBookTestScriptHelper {
      * @param path       Относительный путь к каталогу со скриптом
      * @param mockHelper Хэлпер с заглушками других сервисов, можно переопределить
      */
-    public RefBookTestScriptHelper(String path, ScriptTestMockHelper mockHelper) {
+    public RefBookTestScriptHelper(String path, String name, ScriptTestMockHelper mockHelper) {
         super();
         this.mockHelper = mockHelper;
 
-        this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
+        String underlineName = TestUtils.convertToUnderlineStyle(name);
+        this.path = SCRIPT_PATH_PREFIX + path + underlineName + ".groovy";
         try {
             script = readFile(this.path, charsetName);
         } catch (IOException e) {
