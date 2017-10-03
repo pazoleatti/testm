@@ -20,5 +20,5 @@ when matched then
     update set a.param_name=b.param_name, a.task_id=b.task_id, a.ord=b.ord, a.type=b.type, a.value=b.value
 when not matched then
 	insert (id, param_name, task_id, ord, type, value)
-    values (b.id, b.param_name, b.task_id, b.ord, b.type, b.value)
+    values (b.id, b.param_name, b.task_id, b.ord, b.type, b.value);
       
