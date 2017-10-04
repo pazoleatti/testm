@@ -63,7 +63,7 @@
                                        title="Выбор типа налоговой формы"/>
             </g:HorizontalPanel>
             <g:HorizontalPanel verticalAlignment="middle" height="26px">
-                <g:Label width="250px" text="Вип налоговой формы:"/>
+                <g:Label width="250px" text="Вид налоговой формы:"/>
                 <r:RefBookPickerWidget ui:field="formTypePicker" width="100%" versionEnabled="false" manualUpdate="false"
                                        attributeIdInt="9312" isHierarchical="false" multiSelect="false"
                                        title="Выбор вида налоговой формы"/>
