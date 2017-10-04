@@ -12,15 +12,10 @@ import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-
-import javax.script.ScriptException
-
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-
-import groovy.xml.MarkupBuilder
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
 
 import java.text.SimpleDateFormat
 

@@ -320,48 +320,57 @@
     </changeSet>		
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-33" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+				 endDelimiter=""
+                 path="/scripts/person_pkg_body.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-34" author="rnurgaleev">
 		<delete
             tableName="ref_book_attribute">
 			<where>ref_book_id in (select id from ref_book where table_name in ('REF_BOOK_FOND','REF_BOOK_FOND_DETAIL'))</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-34" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-35" author="rnurgaleev">
 		<delete
             tableName="ref_book">
 			<where>table_name in ('REF_BOOK_FOND','REF_BOOK_FOND_DETAIL')</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-35" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-36" author="rnurgaleev">
 		<delete
             tableName="report_period">
 			<where>tax_period_id in (select id from tax_period where tax_type='F')</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-36" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-37" author="rnurgaleev">
 		<delete
             tableName="tax_period">
 			<where>tax_type='F'</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-37" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-38" author="rnurgaleev">
 		<delete
             tableName="tax_type">
 			<where>id='F'</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-38" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-39" author="rnurgaleev">
 		<delete
             tableName="async_task_type">
 			<where>id in (103, 104, 105, 106, 107, 110, 111, 112, 113, 114, 115, 123, 124, 125, 126, 127, 128, 129)</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-39" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-40" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="XlsxGeneratorAsyncTask"/>
@@ -369,7 +378,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-40" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-41" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="XmlGeneratorAsyncTask"/>
@@ -377,7 +386,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-41" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-42" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="PdfGeneratorAsyncTask"/>
@@ -385,7 +394,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-42" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-43" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="CsvAuditArchiveGeneratorAsyncTask"/>
@@ -393,7 +402,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-43" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-44" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="CsvAuditGeneratorAsyncTask"/>
@@ -401,7 +410,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-44" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-45" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="LoadAllTransportDataAsyncTask"/>
@@ -409,7 +418,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-45" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-46" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="CheckDeclarationAsyncTask"/>
@@ -417,7 +426,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-46" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-47" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="AcceptDeclarationAsyncTask"/>
@@ -425,7 +434,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-47" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-48" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="ExcelReportRefBookAsyncTask"/>
@@ -433,7 +442,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-48" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-49" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="CsvReportRefBookAsyncTask"/>
@@ -441,7 +450,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-49" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-50" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="SpecificReportRefBookAsyncTask"/>
@@ -449,7 +458,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-50" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-51" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="SpecificReportDeclarationDataAsyncTask"/>
@@ -457,7 +466,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-51" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-52" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="UploadRefBookAsyncTask"/>
@@ -465,7 +474,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-52" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-53" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="CreateFormsAsyncTask"/>
@@ -473,7 +482,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-53" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-54" author="rnurgaleev">
 		<update
             tableName="async_task_type">
 			<column name="handler_bean" value="CreateReportsAsyncTask"/>
@@ -481,7 +490,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-54" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-55" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="1"/>
             <column name="task_name" value="CLEAR_BLOB_DATA"/>
@@ -492,7 +501,7 @@
         </insert>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-55" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-56" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="2"/>
             <column name="task_name" value="CLEAR_LOCK_DATA"/>
@@ -503,7 +512,7 @@
         </insert>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-56" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-57" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="3"/>
             <column name="task_name" value="CLEAR_TEMP_DIR"/>
@@ -514,7 +523,7 @@
         </insert>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-57" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-58" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="4"/>
             <column name="task_name" value="ASYNC_TASK_MONITORING"/>
@@ -525,7 +534,7 @@
         </insert>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-58" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-59" author="rnurgaleev">
 		<insert tableName="configuration_scheduler_param">
             <column name="id" value="20"/>
             <column name="param_name" value="Время жизни блокировки (секунд)"/>
@@ -536,7 +545,7 @@
         </insert>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-59" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-60" author="rnurgaleev">
 		<delete
             tableName="blob_data">
 			<where>id NOT IN
@@ -563,103 +572,103 @@
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-60" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-61" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template DISABLE CONSTRAINT declaration_template_fk_dtype;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-61" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-62" author="rnurgaleev">
         <sql>
             ALTER TABLE department_declaration_type DISABLE CONSTRAINT dept_decl_type_fk_decl_type;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-62" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-63" author="rnurgaleev">
         <sql>
             ALTER TABLE template_changes DISABLE CONSTRAINT template_changes_fk_dec_t;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-63" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-64" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_data DISABLE CONSTRAINT declaration_data_fk_decl_t_id;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-64" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-65" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_decl_template;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-65" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-66" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_template;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-66" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-67" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_decl_subreport;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-67" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-68" author="rnurgaleev">
         <sql>
             ALTER TABLE ref_book DISABLE CONSTRAINT ref_book_fk_script_id;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-68" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-69" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template DISABLE CONSTRAINT declaration_tem_fk_blob_data;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-69" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-70" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template DISABLE CONSTRAINT dec_tem_fk_blob_data_jrxml;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-70" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-71" author="rnurgaleev">
         <sql>
             ALTER TABLE notification DISABLE CONSTRAINT notification_fk_report_id;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-71" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-72" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_subreport DISABLE CONSTRAINT decl_subrep_fk_blob_data;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-72" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-73" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_report DISABLE CONSTRAINT decl_report_fk_blob_data;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-73" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-74" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_data_file DISABLE CONSTRAINT decl_data_file_pk;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-74" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-75" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template_file DISABLE CONSTRAINT fk_decl_templ_file_blob;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-75" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-76" author="rnurgaleev">
         <sql>
             ALTER TABLE decl_template_event_script DISABLE CONSTRAINT FK_DEC_TEMP_EVENT_SCR_DEC_TEMP;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-76" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-77" author="rnurgaleev">
 		<delete
             tableName="blob_data">
 			<where>id IN (
@@ -675,7 +684,7 @@
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-77" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-78" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="ce397da5-cf59-457f-9e91-2a31a478b510"/>
             <column name="name" value="refbook_classificator_country.groovy"/>
@@ -684,7 +693,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-78" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-79" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="3ec53b66-624d-45cd-aa17-f046e3a1f1fc"/>
             <column name="name" value="refbook_classificator_oktmo.groovy"/>
@@ -693,7 +702,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-79" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-80" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="99034f20-18c3-11e5-b60b-1697f925ec7b"/>
             <column name="name" value="refbook_classificator_okved.groovy"/>
@@ -702,7 +711,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-80" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-81" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="352adf59-372b-4020-98fe-8960dd5bc972"/>
             <column name="name" value="refbook_declaration_type.groovy"/>
@@ -711,7 +720,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-81" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-82" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="4e387483-0330-4e05-ad46-e9b03a3b025d"/>
             <column name="name" value="refbook_department.groovy"/>
@@ -720,7 +729,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-82" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-83" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="39327388-9684-4fd5-a522-c40a21680156"/>
             <column name="name" value="refbook_fias.groovy"/>
@@ -729,7 +738,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-83" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-84" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="375ba56a-2509-11e7-93ae-92361f002671"/>
             <column name="name" value="refbook_department.groovy"/>
@@ -738,7 +747,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-84" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-85" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="884b9f2e-1678-4d69-9652-b036bba2f728"/>
             <column name="name" value="refbook_department.groovy"/>
@@ -747,7 +756,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-85" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-86" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="ce397da5-cf59-457f-9e91-2a31a478b510"/>
@@ -755,7 +764,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-86" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-87" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="3ec53b66-624d-45cd-aa17-f046e3a1f1fc"/>
@@ -763,7 +772,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-87" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-88" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="99034f20-18c3-11e5-b60b-1697f925ec7b"/>
@@ -771,7 +780,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-88" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-89" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="352adf59-372b-4020-98fe-8960dd5bc972"/>
@@ -779,7 +788,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-89" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-90" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="4e387483-0330-4e05-ad46-e9b03a3b025d"/>
@@ -787,7 +796,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-90" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-91" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="39327388-9684-4fd5-a522-c40a21680156"/>
@@ -795,7 +804,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-91" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-92" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="375ba56a-2509-11e7-93ae-92361f002671"/>
@@ -803,7 +812,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-92" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-93" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="script_id" value="884b9f2e-1678-4d69-9652-b036bba2f728"/>
@@ -811,7 +820,7 @@
 		</update>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-93" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-94" author="rnurgaleev">
 		<delete
             tableName="blob_data">
 			<where>id IN (
@@ -824,35 +833,35 @@
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-94" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-95" author="rnurgaleev">
 		<delete
             tableName="declaration_template_file">
 			<where>declaration_template_id IN (100, 101, 102, 103, 104)</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-95" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-96" author="rnurgaleev">
 		<delete
             tableName="declaration_subreport">
 			<where>declaration_template_id IN (100, 101, 102, 103, 104)</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-96" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-97" author="rnurgaleev">
 		<delete
             tableName="declaration_template">
 			<where>id IN (100, 101, 102, 103, 104)</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-97" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-98" author="rnurgaleev">
 		<delete
             tableName="decl_template_event_script">
 			<where>declaration_template_id IN (100, 101, 102, 103, 104)</where>
 		</delete>
 	</changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-98" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-99" author="rnurgaleev">
         <sql>
             MERGE INTO declaration_type t USING (
 			SELECT 100 ID, 'РНУ_НДФЛ (первичная)' NAME, 0 STATUS, 0 IS_IFRS, 'NULL' IFRS_NAME FROM DUAL UNION ALL
@@ -870,7 +879,7 @@
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-99" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-100" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="bf172465-20b7-4ce2-ac43-5482ad310c08"/>
             <column name="name" value="report_ndfl_primary.jrxml"/>
@@ -879,7 +888,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-100" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-101" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="58adc3c2-66a0-4f11-98a2-defe682a092f"/>
             <column name="name" value="rnu_ndfl_light.xsd"/>
@@ -888,7 +897,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-101" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-102" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="b8406636-beb1-41d8-8f8a-cf4971309962"/>
             <column name="name" value="report_ndfl_consolidated.jrxml"/>
@@ -897,7 +906,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-102" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-103" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71"/>
             <column name="name" value="report_2ndfl_1.jrxml"/>
@@ -906,7 +915,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-103" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-104" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="790782e0-2282-41f4-8735-7b50904703ac"/>
             <column name="name" value="NO_NDFL2_1_399_00_05_04_02.xsd"/>
@@ -915,7 +924,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-104" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-105" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="41303bf7-9765-463f-a34b-f0a280bfa7bf"/>
             <column name="name" value="report_6ndfl.jrxml"/>
@@ -924,7 +933,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-105" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-106" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="13765b29-f1b7-4ec0-a8a9-88196a6e45a1"/>
             <column name="name" value="NO_NDFL6_1_152_00_05_01_02.xsd"/>
@@ -933,7 +942,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-106" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-107" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="d372df40-e448-48f5-9879-994753822122"/>
             <column name="name" value="report_2ndfl_2.jrxml"/>
@@ -942,7 +951,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-107" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-108" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="77d802bf-e3b1-485b-ae52-41a21aac1034"/>
             <column name="name" value="NO_NDFL2_1_399_00_05_04_02.xsd"/>
@@ -951,7 +960,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-108" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-109" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="03f6d78d-bfd7-45bb-a16b-6c89131b76d1"/>
             <column name="name" value="report_person_primary.jrxml"/>
@@ -960,7 +969,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-109" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-110" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="042c50fc-a590-46b5-bb50-d04cc3a9424a"/>
             <column name="name" value="report_person_consolidated.jrxml"/>
@@ -969,7 +978,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-110" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-111" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="f847146a-07ec-11e7-93ae-92361f002671"/>
             <column name="name" value="report_person_all_primary.jrxml"/>
@@ -978,7 +987,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-111" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-112" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="005699a0-07ed-11e7-93ae-92361f002671"/>
             <column name="name" value="report_person_all_consolidated.jrxml"/>
@@ -987,7 +996,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-112" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-113" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="047f207c-113e-488d-8390-9afc248a3bc8"/>
             <column name="name" value="report_ndfl_ref_1.jrxml"/>
@@ -996,7 +1005,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-113" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-114" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="04d9b114-1782-4d09-ad88-729e5605c6ff"/>
             <column name="name" value="report_ndfl_ref_2.jrxml"/>
@@ -1005,7 +1014,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-114" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-115" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="d11ebeb4-07f2-11e7-93ae-92361f002671"/>
             <column name="name" value="report_kpp_oktmo.jrxml"/>
@@ -1014,7 +1023,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-115" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-116" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb91"/>
             <column name="name" value="UU_OTCH_1_087_00_05_07_01.xsd"/>
@@ -1023,7 +1032,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-116" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-117" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb92"/>
             <column name="name" value="IV_OTCH_1_098_00_05_04_01.xsd"/>
@@ -1032,7 +1041,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-117" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-118" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb93"/>
             <column name="name" value="UO_OTCH_1_097_00_05_05_01.xsd"/>
@@ -1041,7 +1050,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-118" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-119" author="rnurgaleev">
         <insert tableName="BLOB_DATA">
             <column name="id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb94"/>
             <column name="name" value="KV_OTCH_1_095_00_05_04_01.xsd"/>
@@ -1050,7 +1059,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-119" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-120" author="rnurgaleev">
         <insert tableName="DECLARATION_TEMPLATE">
             <column name="id" value="100"/>
 			<column name="declaration_type_id" value="100"/>	
@@ -1060,12 +1069,12 @@
 			<column name="form_type" value="2"/>
 			<column name="jrxml" value="bf172465-20b7-4ce2-ac43-5482ad310c08"/>
 			<column name="xsd" value="58adc3c2-66a0-4f11-98a2-defe682a092f"/>
-			<column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/script.groovy"/>
+			<column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
             <column name="name" value="РНУ_НДФЛ (первичная)"/>
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-120" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-121" author="rnurgaleev">
         <insert tableName="DECLARATION_TEMPLATE">
             <column name="id" value="101"/>
 			<column name="declaration_type_id" value="101"/>	
@@ -1074,12 +1083,12 @@
 			<column name="form_kind" value="2"/>
 			<column name="form_type" value="2"/>
 			<column name="jrxml" value="b8406636-beb1-41d8-8f8a-cf4971309962"/>
-			<column name="create_script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/script.groovy"/>
+			<column name="create_script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
             <column name="name" value="РНУ_НДФЛ (консолидированная)"/>
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-121" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-122" author="rnurgaleev">
         <insert tableName="DECLARATION_TEMPLATE">
             <column name="id" value="102"/>
 			<column name="declaration_type_id" value="102"/>	
@@ -1089,12 +1098,12 @@
 			<column name="form_type" value="3"/>
 			<column name="jrxml" value="f6b8a069-97d5-4c3f-80fc-1fbb2e44fd71"/>
 			<column name="xsd" value="790782e0-2282-41f4-8735-7b50904703ac"/>
-			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/script.groovy"/>
+			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
             <column name="name" value="2-НДФЛ (1)"/>
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-122" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-123" author="rnurgaleev">
         <insert tableName="DECLARATION_TEMPLATE">
             <column name="id" value="103"/>
 			<column name="declaration_type_id" value="103"/>	
@@ -1104,12 +1113,12 @@
 			<column name="form_type" value="5"/>
 			<column name="jrxml" value="41303bf7-9765-463f-a34b-f0a280bfa7bf"/>
 			<column name="xsd" value="13765b29-f1b7-4ec0-a8a9-88196a6e45a1"/>
-			<column name="create_script" valueClobFile="templates/ndfl/report_6ndfl/v2016/script.groovy"/>
+			<column name="create_script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
             <column name="name" value="6-НДФЛ"/>
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-123" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-124" author="rnurgaleev">
         <insert tableName="DECLARATION_TEMPLATE">
             <column name="id" value="104"/>
 			<column name="declaration_type_id" value="104"/>	
@@ -1119,103 +1128,157 @@
 			<column name="form_type" value="4"/>
 			<column name="jrxml" value="d372df40-e448-48f5-9879-994753822122"/>
 			<column name="xsd" value="77d802bf-e3b1-485b-ae52-41a21aac1034"/>
-			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/script.groovy"/>
+			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
             <column name="name" value="2-НДФЛ (2)"/>
-        </insert>
-    </changeSet>
-	
-	<changeSet id="ndfl-2.1-rnurgaleev-124" author="rnurgaleev">
-        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="1"/>
-			<column name="declaration_template_id" value="100"/>	
-			<column name="event_id" value="3"/>
-			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/calculate/script.groovy"/>
         </insert>
     </changeSet>
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-125" author="rnurgaleev">
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="2"/>
+            <column name="id" value="1"/>
 			<column name="declaration_template_id" value="100"/>	
-			<column name="event_id" value="5"/>
-			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/check/script.groovy"/>
+			<column name="event_id" value="3"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
         </insert>
     </changeSet>
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-126" author="rnurgaleev">
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="3"/>
+            <column name="id" value="2"/>
 			<column name="declaration_template_id" value="100"/>	
-			<column name="event_id" value="105"/>
-			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/move_accepted_to_created/script.groovy"/>
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
         </insert>
     </changeSet>
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-127" author="rnurgaleev">
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="4"/>
+            <column name="id" value="3"/>
 			<column name="declaration_template_id" value="100"/>	
-			<column name="event_id" value="106"/>
-			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/move_created_to_accepted/script.groovy"/>
+			<column name="event_id" value="105"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_accepted_to_created.groovy"/>
         </insert>
     </changeSet>
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-128" author="rnurgaleev">
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="5"/>
-			<column name="declaration_template_id" value="101"/>	
-			<column name="event_id" value="3"/>
-			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/calculate/script.groovy"/>
+            <column name="id" value="4"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_created_to_accepted.groovy"/>
         </insert>
     </changeSet>
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-129" author="rnurgaleev">
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="6"/>
+            <column name="id" value="5"/>
 			<column name="declaration_template_id" value="101"/>	
-			<column name="event_id" value="5"/>
-			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/check/script.groovy"/>
+			<column name="event_id" value="3"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
         </insert>
     </changeSet>
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-130" author="rnurgaleev">
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="7"/>
+            <column name="id" value="6"/>
 			<column name="declaration_template_id" value="101"/>	
-			<column name="event_id" value="106"/>
-			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/move_created_to_accepted/script.groovy"/>
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
         </insert>
     </changeSet>
 	
 	<changeSet id="ndfl-2.1-rnurgaleev-131" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="7"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-132" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="8"/>
+			<column name="declaration_template_id" value="102"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-133" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="9"/>
+			<column name="declaration_template_id" value="102"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-134" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="10"/>
+			<column name="declaration_template_id" value="103"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-135" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="11"/>
+			<column name="declaration_template_id" value="103"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-136" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="12"/>
+			<column name="declaration_template_id" value="104"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-137" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="13"/>
+			<column name="declaration_template_id" value="104"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="ndfl-2.1-rnurgaleev-138" author="rnurgaleev">
         <insert tableName="declaration_template_file">
             <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb91"/>
 			<column name="declaration_template_id" value="103"/>	
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-132" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-139" author="rnurgaleev">
         <insert tableName="declaration_template_file">
             <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb92"/>
 			<column name="declaration_template_id" value="103"/>	
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-133" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-140" author="rnurgaleev">
         <insert tableName="declaration_template_file">
             <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb93"/>
 			<column name="declaration_template_id" value="103"/>	
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-134" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-141" author="rnurgaleev">
         <insert tableName="declaration_template_file">
             <column name="blob_data_id" value="b92395ea-62b1-4ce1-b06e-c9ee0270fb94"/>
 			<column name="declaration_template_id" value="103"/>	
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-135" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-142" author="rnurgaleev">
         <insert tableName="declaration_subreport">
             <column name="id" value="1001"/>
 			<column name="declaration_template_id" value="100"/>	
@@ -1227,7 +1290,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-136" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-143" author="rnurgaleev">
         <insert tableName="declaration_subreport">
             <column name="id" value="1002"/>
 			<column name="declaration_template_id" value="100"/>	
@@ -1239,7 +1302,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-137" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-144" author="rnurgaleev">
         <insert tableName="declaration_subreport">
             <column name="id" value="1011"/>
 			<column name="declaration_template_id" value="101"/>	
@@ -1251,7 +1314,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-138" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-145" author="rnurgaleev">
         <insert tableName="declaration_subreport">
             <column name="id" value="1012"/>
 			<column name="declaration_template_id" value="101"/>	
@@ -1263,7 +1326,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-139" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-146" author="rnurgaleev">
         <insert tableName="declaration_subreport">
             <column name="id" value="1013"/>
 			<column name="declaration_template_id" value="101"/>	
@@ -1275,7 +1338,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-140" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-147" author="rnurgaleev">
         <insert tableName="declaration_subreport">
             <column name="id" value="1021"/>
 			<column name="declaration_template_id" value="102"/>	
@@ -1287,7 +1350,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-141" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-148" author="rnurgaleev">
         <insert tableName="declaration_subreport">
             <column name="id" value="1041"/>
 			<column name="declaration_template_id" value="104"/>	
@@ -1299,7 +1362,7 @@
         </insert>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-142" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-149" author="rnurgaleev">
         <sql>
             INSERT INTO declaration_subreport_params (id,declaration_subreport_id,name,alias,ord,type,filter,attribute_id,required) VALUES
 			(10001,1001,'№ ДУЛ','idDocNumber',9,'S',null,null,0);
@@ -1372,104 +1435,104 @@
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-143" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-150" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template enable CONSTRAINT declaration_template_fk_dtype;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-144" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-151" author="rnurgaleev">
         <sql>
             ALTER TABLE department_declaration_type enable CONSTRAINT dept_decl_type_fk_decl_type;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-145" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-152" author="rnurgaleev">
         <sql>
             ALTER TABLE template_changes enable CONSTRAINT template_changes_fk_dec_t;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-146" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-153" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_data enable CONSTRAINT declaration_data_fk_decl_t_id;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-147" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-154" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_subreport enable CONSTRAINT decl_subrep_fk_decl_template;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-148" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-155" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template_file enable CONSTRAINT fk_decl_templ_file_template;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-149" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-156" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_report enable CONSTRAINT decl_report_fk_decl_subreport;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-150" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-157" author="rnurgaleev">
         <sql>
             ALTER TABLE ref_book enable CONSTRAINT ref_book_fk_script_id;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-151" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-158" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template enable CONSTRAINT declaration_tem_fk_blob_data;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-152" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-159" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template enable CONSTRAINT dec_tem_fk_blob_data_jrxml;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-153" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-160" author="rnurgaleev">
         <sql>
             ALTER TABLE notification enable CONSTRAINT notification_fk_report_id;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-154" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-161" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_subreport enable CONSTRAINT decl_subrep_fk_blob_data;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-155" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-162" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_report enable CONSTRAINT decl_report_fk_blob_data;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-156" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-163" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_data_file enable CONSTRAINT decl_data_file_pk;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-157" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-164" author="rnurgaleev">
         <sql>
             ALTER TABLE declaration_template_file enable CONSTRAINT fk_decl_templ_file_blob;
         </sql>
     </changeSet>
 	
-	<changeSet id="ndfl-2.1-rnurgaleev-158" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-165" author="rnurgaleev">
         <sql>
             ALTER TABLE decl_template_event_script enable CONSTRAINT FK_DEC_TEMP_EVENT_SCR_DEC_TEMP;
         </sql>
     </changeSet>
 	
 	<!--SBRFNDFL-2142-->
-	<changeSet id="ndfl-2.1-rnurgaleev-159" author="rnurgaleev">
+	<changeSet id="ndfl-2.1-rnurgaleev-166" author="rnurgaleev">
 		<update
             tableName="ref_book">
 			<column name="is_versioned" value="0"/>

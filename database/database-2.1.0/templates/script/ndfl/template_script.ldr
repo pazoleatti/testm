@@ -13,10 +13,16 @@ L_0 FILLER char,
 SCRIPT LOBFILE( L_0) TERMINATED BY EOF NULLIF L_0 = 'null'
 )
 begindata
- 1|100|3|primary_rnu_ndfl/v2016/calculate/script.groovy|
- 2|100|5|primary_rnu_ndfl/v2016/check/script.groovy|
- 3|100|105|primary_rnu_ndfl/v2016/move_accepted_to_created/script.groovy|
- 4|100|106|primary_rnu_ndfl/v2016/move_created_to_accepted/script.groovy|
- 5|101|3|consolidated_rnu_ndfl/v2016/calculate/script.groovy|
- 6|101|5|consolidated_rnu_ndfl/v2016/check/script.groovy|
- 7|101|106|consolidated_rnu_ndfl/v2016/move_created_to_accepted/script.groovy|
+ 1|100|3|primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy|
+ 2|100|5|primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy|
+ 3|100|105|primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_accepted_to_created.groovy|
+ 4|100|106|primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_created_to_accepted.groovy|
+ 5|101|3|consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy|
+ 6|101|5|consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy|
+ 7|101|106|consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_move_created_to_accepted.groovy|
+ 8|102|5|report_2ndfl_1/v2016/report_2ndfll_check.groovy|
+ 9|102|106|report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy|
+ 10|103|5|report_6ndfl/v2016/report_6ndfl_check.groovy|
+ 11|103|106|report_6ndfl/v2016/report_6ndfl_move_created_to_accepted.groovy|
+ 12|104|5|report_2ndfl_1/v2016/report_2ndfll_check.groovy|
+ 13|104|106|report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy|

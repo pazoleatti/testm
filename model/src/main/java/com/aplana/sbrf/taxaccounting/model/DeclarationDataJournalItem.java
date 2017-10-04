@@ -75,6 +75,10 @@ public class DeclarationDataJournalItem implements Serializable {
      * Примечание
      */
     private String note;
+    /**
+     * Права
+     */
+    private long permissions;
 
     public Long getDeclarationDataId() {
         return declarationDataId;
@@ -194,5 +198,13 @@ public class DeclarationDataJournalItem implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public long getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(long permissions) {
+        this.permissions = permissions;
     }
 }
