@@ -7,8 +7,8 @@ insert into department (id, name, parent_id, type, code) values (2, 'Б - деп
 insert into tax_type (id, name) values ('T', 'Транспортный');
 insert into tax_type (id, name) values ('I', 'Прибыль');
 
-insert into declaration_type (id, name, tax_type, status) values (1, 'Вид налоговой формы 1', 'N', 1);
-insert into declaration_type (id, name, tax_type, status) values (2, 'Вид налоговой формы 2', 'N', 0);
+insert into declaration_type (id, name, status) values (1, 'Вид налоговой формы 1', 1);
+insert into declaration_type (id, name, status) values (2, 'Вид налоговой формы 2', 0);
 
 insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
   values (1, 'Налоговая форма 1', date '2013-01-01', null, 1, 0, 3, 2);

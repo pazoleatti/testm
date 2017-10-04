@@ -91,11 +91,11 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         try {
 
             int typeId = generateId("seq_declaration_type", Integer.class);
-            getJdbcTemplate().update("insert into declaration_type (id, name, tax_type, status) values (?,?,?,?)",
+            getJdbcTemplate().update("insert into declaration_type (id, name, status) values (?,?,?)",
                     new Object[]{typeId,
-                            type.getName(),'N',
+                            type.getName(),
                             type.getStatus().getId()},
-                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.CHAR, Types.NUMERIC});
+                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.NUMERIC});
             return typeId;
         } catch (DataAccessException e){
 			LOG.error("Ошибка при создании макета", e);

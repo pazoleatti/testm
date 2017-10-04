@@ -4,23 +4,67 @@
             <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
         </div>
         <div class="header-col w200" style="float: right; margin-top: 20px; margin-bottom: -14px;">
-            <button type="button" class="btn btn-danger" data-ng-click="showCreateDeclarationModal()" data-ng-show="declarationCreateAllowed">
+            <button type="button" class="btn btn-danger" data-ng-click="showCreateDeclarationModal()"
+                    data-ng-show="declarationCreateAllowed">
                 <span data-translate-once="ndflJournal.button.create"></span>
             </button>
         </div>
     </div>
+
     <!-- Фильтр -->
     <div class='container-grid-top'>
         <span data-ng-include="'client/app/taxes/ndfl/ndflJournalFilter.html'"></span>
     </div>
+
+    <!--Панель кнопок -->
+    <div class="button_panel">
+        <div class="btn-toolbar" role="toolbar">
+            <!--Рассчитать -->
+            <span>
+                <button type="button" class="btn btn-danger" data-ng-click="calculate()"
+                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CALCULATE)">
+                    <span data-translate-once="button.calculate"></span>
+                </button>
+            </span>
+            <!--Принять -->
+            <span>
+                <button type="button" class="btn btn-danger" data-ng-click="accept()"
+                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
+                    <span data-translate-once="button.accept"></span>
+                </button>
+            </span>
+            <!--Проверить -->
+            <span>
+                <button type="button" class="btn btn-danger" data-ng-click="check()"
+                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
+                    <span data-translate-once="button.check"></span>
+                </button>
+            </span>
+            <!--Вернуть в Создана -->
+            <span>
+                <button type="button" class="btn btn-danger" data-ng-click="returnToCreated()"
+                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)">
+                    <span data-translate-once="button.return"></span>
+                </button>
+            </span>
+            <!--Удалить-->
+            <span>
+                <button type="button" class="btn btn-danger" data-ng-click="delete()"
+                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
+                    <span data-translate-once="button.delete"></span>
+                </button>
+            </span>
+        </div>
+    </div>
+
     <!-- Таблица -->
     <div data-aplana-grid
          data-grid-fill-space="true"
          data-grid-fill-space-container-selector=".cbr-page-layout__view"
          data-grid-fill-space-container-selector-top=".page-top-content"
-         data-grid-options="ndflJournalGridOptions"
-         data-grid-ctrl="ourGrid2"
-         data-init-grid="initOurGrid(ctrl)"
+         data-grid-options="ndflJournalGrid.options"
+         data-grid-ctrl="ndflJournalGrid.ctrl"
+         data-init-grid="ndflJournalGrid.init(ctrl)"
          id="ndflJournalTable"
          style="float: left; width: 100%;"></div>
 </div>
