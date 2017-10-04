@@ -1,4 +1,4 @@
-package form_template.ndfl.primary_rnu_ndfl.v2016.calculate
+package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
@@ -23,8 +23,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
+import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -889,7 +889,7 @@ class Calculate extends AbstractScriptClass {
 
         //подготовка записей
         if (identityObjectList != null && !identityObjectList.isEmpty()) {
-            String refBookName = RefBook.Id.name()
+            String refBookName = RefBook.Id.getById(refBookId).name()
             logForDebug("Добавление записей: cправочник «${refBookName}», количество ${identityObjectList.size()}")
 
             identityObjectList.collate(1000).each { identityObjectSubList ->

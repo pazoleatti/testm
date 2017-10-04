@@ -1,4 +1,4 @@
-package form_template.ndfl.consolidated_rnu_ndfl.v2016.check
+package form_template.ndfl.consolidated_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException

@@ -1,4 +1,4 @@
-package form_template.ndfl.primary_rnu_ndfl.v2016.move_created_to_accepted
+package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
