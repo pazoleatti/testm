@@ -868,24 +868,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param page Страница списка налоговых форм
      */
     private void setPageItemsPermissions(PagingResult<DeclarationDataJournalItem> page) {
-        //Получение id всех форм
-        List<Long> declarationIds = new ArrayList<Long>();
-        for (DeclarationDataJournalItem item : page) {
-            declarationIds.add(item.getDeclarationDataId());
-        }
+        if(!page.isEmpty()) {
+            //Получение id всех форм
+            List<Long> declarationIds = new ArrayList<Long>();
+            for (DeclarationDataJournalItem item : page) {
+                declarationIds.add(item.getDeclarationDataId());
+            }
 
-        //Сохранение в мапе для получения формы по id
-        Map<Long, DeclarationData> declarationDataMap = new HashMap<Long, DeclarationData>();
-        for (DeclarationData declarationData : declarationDataDao.get(declarationIds)) {
-            declarationDataMap.put(declarationData.getId(), declarationData);
-        }
+            //Сохранение в мапе для получения формы по id
+            Map<Long, DeclarationData> declarationDataMap = new HashMap<Long, DeclarationData>();
+            for (DeclarationData declarationData : declarationDataDao.get(declarationIds)) {
+                declarationDataMap.put(declarationData.getId(), declarationData);
+            }
 
-        //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
-        for (DeclarationDataJournalItem item : page) {
-            DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
-            declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                    DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
-            item.setPermissions(declaration.getPermissions());
+            //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
+            for (DeclarationDataJournalItem item : page) {
+                DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
+                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
+                item.setPermissions(declaration.getPermissions());
+            }
         }
     }
 
