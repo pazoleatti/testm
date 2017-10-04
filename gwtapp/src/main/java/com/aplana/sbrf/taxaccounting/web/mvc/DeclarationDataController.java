@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -25,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -211,15 +213,26 @@ public class DeclarationDataController {
     }
 
     /**
-     * Удаление декларации
+     * Удаление налоговой формы
      *
-     * @param declarationDataId идентификатор декларации
+     * @param declarationDataId Идентификатор налоговой формы
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/delete")
     public void deleteDeclaration(@PathVariable int declarationDataId) {
-        if (declarationService.existDeclarationData(declarationDataId)) {
-            declarationService.delete(declarationDataId, securityService.currentUserInfo());
-        }
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        declarationService.deleteIfExists(declarationDataId, userInfo);
+    }
+
+    /**
+     * Удаление налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/delete")
+    public ActionResult deleteDeclarations(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationDataService.deleteDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -245,16 +258,8 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/create")
     public CreateResult<Long> createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
-        Logger logger = new Logger();
-        CreateResult<Long> result = new CreateResult<Long>();
-
-        Long declarationId = declarationDataService.create(securityService.currentUserInfo(), logger, declarationTypeId, departmentId, periodId);
-        result.setEntityId(declarationId);
-        if (!logger.getEntries().isEmpty()) {
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
-
-        return result;
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationDataService.create(userInfo, declarationTypeId, departmentId, periodId);
     }
 
     /**
@@ -266,6 +271,18 @@ public class DeclarationDataController {
     public void returnToCreatedDeclaration(@PathVariable int declarationDataId, @RequestParam String reason) {
         Logger logger = new Logger();
         declarationService.cancel(logger, declarationDataId, reason, securityService.currentUserInfo());
+    }
+
+    /**
+     * Вернуть в создана список налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/returnToCreated")
+    public ActionResult returnToCreatedDeclaration(@RequestParam Long[] declarationDataIds, @RequestParam String reason) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.cancelDeclarationList(Arrays.asList(declarationDataIds), reason, userInfo);
     }
 
     /**
@@ -283,6 +300,18 @@ public class DeclarationDataController {
     }
 
     /**
+     * Рассчитать налоговые формы
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/recalculate")
+    public ActionResult recalculateDeclarationList(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationDataService.recalculateDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+    }
+
+    /**
      * Проверить декларацию
      *
      * @param declarationDataId идентификатор декларации
@@ -296,6 +325,18 @@ public class DeclarationDataController {
     }
 
     /**
+     * Проверить налоговые формы
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/check")
+    public ActionResult checkDeclaration(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationDataService.checkDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+    }
+
+    /**
      * Принять декларацию
      *
      * @param declarationDataId идентификатор декларации
@@ -306,6 +347,18 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/accept")
     public AcceptDeclarationResult acceptDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
         return asyncTaskManagerService.createAcceptDeclarationTask(securityService.currentUserInfo(), declarationDataId, force, cancelTask);
+    }
+
+    /**
+     * Принять список налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/accept")
+    public ActionResult acceptDeclarationList(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationDataService.acceptDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
