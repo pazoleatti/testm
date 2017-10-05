@@ -58,4 +58,9 @@ public class EventDaoImpl extends AbstractDao implements EventDao {
             throw new DaoException("", e);
         }
     }
+
+    @Override
+    public Collection<Integer> fetch() {
+        return getJdbcTemplate().queryForList("select id from event", Integer.class);
+    }
 }
