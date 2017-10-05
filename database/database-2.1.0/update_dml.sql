@@ -10,5 +10,8 @@ prompt async_task_type
 prompt configuration_scheduler
 @@conf_scheduler.sql;
 
+prompt delete event
+@@event.sql;
+
 commit;
 exit;
