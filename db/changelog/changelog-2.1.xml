@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet id="2.1-rnurgaleev-1" author="rnurgaleev">
+        <modifyDataType
+			tableName="notification"
+            columnName="id"
+            newDataType="number(18)"
+            />
+    </changeSet>
+		
+	<changeSet id="2.1-rnurgaleev-2" author="rnurgaleev">
+		<createTable 
+            remarks="Настройки задач планировщика"
+            tableName="configuration_scheduler">
+			<column name="id" type="number(9)" remarks="Идентификатор задачи">
+				<constraints nullable="false"/>
+			</column>
+			<column name="task_name" type="varchar2(200 char)" remarks="Название">
+				<constraints nullable="false"/>
+			</column>
+			<column name="schedule" type="varchar2(100 char)" remarks="Расписание">
+			</column>
+			<column name="active" type="number(1)" remarks="Признак активности">
+				<constraints nullable="false"/>
+			</column>
+			<column name="modification_date" type="date" remarks="Дата редактирования">
+				<constraints nullable="false"/>
+			</column>
+			<column name="last_fire_date" type="date" remarks="Дата последнего запуска">
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-3" author="rnurgaleev">
+		<createTable 
+            remarks="Параметры задач планировщика"
+            tableName="configuration_scheduler_param">
+			<column name="id" type="number(9)" remarks="Идентификатор параметра">
+				<constraints nullable="false"/>
+			</column>
+			<column name="param_name" type="varchar2(200 char)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="task_id" type="number(9)" remarks="Ссылка на задачу планировщика">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ord" type="number(9)" remarks="Порядок следования">
+				<constraints nullable="false"/>
+			</column>
+			<column name="type" type="number(1)" remarks="Тип параметра(1 - Строка, 2 - Целое число, 3 - Число с плавающей запятой)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="value" type="varchar2(200 char)" remarks="Значение">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-4" author="rnurgaleev">
+		<createTable 
+            remarks="Асинхронные задачи"
+            tableName="async_task">
+			<column name="id" type="number(18)" remarks="Идентификатор задачи">
+				<constraints nullable="false"/>
+			</column>
+			<column name="type_id" type="number(18)" remarks="Ссылка на тип задачи">
+				<constraints nullable="false"/>
+			</column>
+			<column name="create_date" type="timestamp" remarks="Дата создания задачи" defaultValueComputed="CURRENT_TIMESTAMP">
+			</column>
+			<column name="start_process_date" type="timestamp" remarks="Дата начала выполнения задачи">
+			</column>
+			<column name="node" type="varchar2(500)" remarks="Название узла, на котором выполняется задача">
+			</column>
+			<column name="balancing_variant" type="number(1)" remarks="Тип очереди, в которую помещена задача. 1 - короткие, 2 - длинные">
+				<constraints nullable="false"/>
+			</column>
+			<column name="serialized_params" type="blob" remarks="Сериализованные параметры, которые нужны для выполнения задачи">
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-5" author="rnurgaleev">
+		<createTable 
+            tableName="decl_template_event_script">
+			<column name="id" type="number(19)">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_decl_template_event_script"/>
+			</column>
+			<column name="declaration_template_id" type="number(19)">
+				<constraints nullable="false" foreignKeyName="fk_dec_temp_event_scr_dec_temp" references="declaration_template(id)"/>
+			</column>
+			<column name="event_id" type="number(19)">
+				<constraints nullable="false" foreignKeyName="fk_dec_temp_event_id" references="event(id)"/>
+			</column>
+			<column name="script" type="clob">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-6" author="rnurgaleev">
+		<addUniqueConstraint tableName="decl_template_event_script"
+                             columnNames="declaration_template_id, event_id"
+                             constraintName="uc_dec_temp_even_dec_temp_even"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-7" author="rnurgaleev">
+		<addPrimaryKey 
+            columnNames="id"
+            constraintName="CONF_SCHEDULER_PK"
+            tableName="configuration_scheduler"/>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-8" author="rnurgaleev">
+		<addPrimaryKey 
+            columnNames="id"
+            constraintName="CONF_SCHEDULER_PARAM_PK"
+            tableName="configuration_scheduler_param"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-9" author="rnurgaleev">
+		<addPrimaryKey 
+            columnNames="id"
+            constraintName="ASYNC_TASK_PK"
+            tableName="async_task"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-10" author="rnurgaleev">
+		<addForeignKeyConstraint baseColumnNames="task_id"
+            baseTableName="configuration_scheduler_param"
+            constraintName="conf_scheduler_param_fk_conf"
+            onDelete="CASCADE"
+            referencedColumnNames="id"
+            referencedTableName="configuration_scheduler"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-11" author="rnurgaleev">
+		<addForeignKeyConstraint baseColumnNames="type_id"
+            baseTableName="async_task"
+            constraintName="async_task_fk_type"
+            referencedColumnNames="id"
+            referencedTableName="async_task_type"/>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-12" author="rnurgaleev">
+        <sql>
+            alter table configuration_scheduler add constraint conf_scheduler_chk_active check(active in (0, 1));
+        </sql>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-13" author="rnurgaleev">
+        <sql>
+            alter table configuration_scheduler_param add constraint conf_scheduler_param_chk_type check(type in (1, 2, 3));
+        </sql>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-14" author="rnurgaleev">
+		<dropColumn
+            columnName="dev_mode"
+            tableName="async_task_type"/>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-15" author="rnurgaleev">
+		<renameColumn
+            newColumnName="handler_bean"
+            oldColumnName="handler_jndi"
+            remarks="Имя spring бина-обработчика задачи"
+            tableName="async_task_type"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-16" author="rnurgaleev">
+		<addColumn
+            tableName="configuration">
+			<column name="value2" type="varchar2(2048 char)"/>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-17" author="rnurgaleev">
+		<sql>
+            update configuration set value2=value;
+        </sql>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-18" author="rnurgaleev">
+		<dropColumn
+            columnName="value"
+            tableName="configuration"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-19" author="rnurgaleev">
+		<renameColumn
+            newColumnName="value"
+            oldColumnName="value2"
+            tableName="configuration"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-20" author="rnurgaleev">
+        <modifyDataType
+			tableName="declaration_type"
+            columnName="id"
+            newDataType="number(18)"
+            />
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-21" author="rnurgaleev">
+        <modifyDataType
+			tableName="department_declaration_type"
+            columnName="DECLARATION_TYPE_ID"
+            newDataType="number(18)"
+            />
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-22" author="rnurgaleev">
+        <modifyDataType
+			tableName="declaration_template"
+            columnName="DECLARATION_TYPE_ID"
+            newDataType="number(18)"
+            />
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-23" author="rnurgaleev">
+        <modifyDataType
+			tableName="ref_book_asnu"
+            columnName="id"
+            newDataType="number(18)"
+            />
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-24" author="rnurgaleev">
+		<sql splitStatements="false">
+			begin
+				for rec in (select table_name from user_tables where table_name like 'RASCHSV_%')
+				loop
+					for rec2 in (select constraint_name from user_constraints WHERE table_name=rec.table_name and constraint_type='R')
+					loop
+						execute immediate 'ALTER TABLE '||rec.table_name||' DROP CONSTRAINT '||rec2.constraint_name;
+					end loop;
+				end loop;
+				
+				for rec in (select table_name from user_tables where table_name like 'RASCHSV_%')
+				loop
+					execute immediate 'DROP TABLE '||rec.table_name;
+				end loop;
+			end;
+        </sql>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-25" author="rnurgaleev">
+		<sql splitStatements="false">
+			begin
+				for rec in (select constraint_name from user_constraints where constraint_type='P' and table_name like 'FORM_%')
+				loop
+					for rec2 in (select constraint_name, table_name from user_constraints WHERE r_constraint_name=rec.constraint_name and constraint_type='R')
+					loop
+						execute immediate 'ALTER TABLE '||rec2.table_name||' DROP CONSTRAINT '||rec2.constraint_name;
+					end loop;
+				end loop;
+
+				for rec in (select table_name from user_tables where table_name like 'FORM_%')
+				loop
+					execute immediate 'DROP TABLE '||rec.table_name;
+				end loop;
+			end;
+        </sql>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-26" author="rnurgaleev">
+		<dropTable cascadeConstraints="true"
+            tableName="IFRS_DATA"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-27" author="rnurgaleev">
+		<dropTable cascadeConstraints="true"
+            tableName="DEPARTMENT_CHANGE"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-28" author="rnurgaleev">
+		<createSequence
+            incrementBy="100"
+            sequenceName="seq_async_task"
+            startValue="100000"/>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-29" author="rnurgaleev">
+		<createSequence
+            incrementBy="1"
+            sequenceName="seq_decl_template_event_script"
+            startValue="1"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-30" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+				 endDelimiter=""
+                 path="/scripts/DEP_REP_PER_BEFORE_DELETE.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-31" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+				 endDelimiter=""
+                 path="/scripts/DEP_REP_PER_BEFORE_INS_UPD.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-32" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+				 endDelimiter=""
+                 path="/scripts/person_pkg.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>		
+	
+	<changeSet id="2.1-rnurgaleev-33" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+				 endDelimiter=""
+                 path="/scripts/person_pkg_body.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-34" author="rnurgaleev">
+		<delete
+            tableName="ref_book_attribute">
+			<where>ref_book_id in (select id from ref_book where table_name in ('REF_BOOK_FOND','REF_BOOK_FOND_DETAIL'))</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-35" author="rnurgaleev">
+		<delete
+            tableName="ref_book">
+			<where>table_name in ('REF_BOOK_FOND','REF_BOOK_FOND_DETAIL')</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-36" author="rnurgaleev">
+		<delete
+            tableName="report_period">
+			<where>tax_period_id in (select id from tax_period where tax_type='F')</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-37" author="rnurgaleev">
+		<delete
+            tableName="tax_period">
+			<where>tax_type='F'</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-38" author="rnurgaleev">
+		<delete
+            tableName="tax_type">
+			<where>id='F'</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-39" author="rnurgaleev">
+		<delete
+            tableName="async_task_type">
+			<where>id in (103, 104, 105, 106, 107, 110, 111, 112, 113, 114, 115, 123, 124, 125, 126, 127, 128, 129)</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-40" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="XlsxGeneratorAsyncTask"/>
+			<where>id = 5</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-41" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="XmlGeneratorAsyncTask"/>
+			<where>id = 6</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-42" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="PdfGeneratorAsyncTask"/>
+			<where>id = 7</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-43" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="CsvAuditArchiveGeneratorAsyncTask"/>
+			<where>id = 10</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-44" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="CsvAuditGeneratorAsyncTask"/>
+			<where>id = 11</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-45" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="LoadAllTransportDataAsyncTask"/>
+			<where>id = 13</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-46" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="CheckDeclarationAsyncTask"/>
+			<where>id = 14</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-47" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="AcceptDeclarationAsyncTask"/>
+			<where>id = 15</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-48" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="ExcelReportRefBookAsyncTask"/>
+			<where>id = 23</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-49" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="CsvReportRefBookAsyncTask"/>
+			<where>id = 24</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-50" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="SpecificReportRefBookAsyncTask"/>
+			<where>id = 25</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-51" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="SpecificReportDeclarationDataAsyncTask"/>
+			<where>id = 26</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-52" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="UploadRefBookAsyncTask"/>
+			<where>id = 27</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-53" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="CreateFormsAsyncTask"/>
+			<where>id = 28</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-54" author="rnurgaleev">
+		<update
+            tableName="async_task_type">
+			<column name="handler_bean" value="CreateReportsAsyncTask"/>
+			<where>id = 29</where>
+		</update>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-55" author="rnurgaleev">
+		<insert tableName="CONFIGURATION_SCHEDULER">
+            <column name="id" value="1"/>
+            <column name="task_name" value="CLEAR_BLOB_DATA"/>
+			<column name="schedule" value="0 15 22 * * ?"/>
+			<column name="active" value="1"/>
+			<column name="modification_date" valueDate="sysdate"/>
+			<column name="last_fire_date" valueDate="sysdate"/>
+        </insert>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-56" author="rnurgaleev">
+		<insert tableName="CONFIGURATION_SCHEDULER">
+            <column name="id" value="2"/>
+            <column name="task_name" value="CLEAR_LOCK_DATA"/>
+			<column name="schedule" value="0 10 22 * * ?"/>
+			<column name="active" value="1"/>
+			<column name="modification_date" valueDate="sysdate"/>
+			<column name="last_fire_date" valueDate="sysdate"/>
+        </insert>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-57" author="rnurgaleev">
+		<insert tableName="CONFIGURATION_SCHEDULER">
+            <column name="id" value="3"/>
+            <column name="task_name" value="CLEAR_TEMP_DIR"/>
+			<column name="schedule" value="0 5 22 * * ?"/>
+			<column name="active" value="1"/>
+			<column name="modification_date" valueDate="sysdate"/>
+			<column name="last_fire_date" valueDate="sysdate"/>
+        </insert>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-58" author="rnurgaleev">
+		<insert tableName="CONFIGURATION_SCHEDULER">
+            <column name="id" value="4"/>
+            <column name="task_name" value="ASYNC_TASK_MONITORING"/>
+			<column name="schedule" value="0/5 * * * * ?"/>
+			<column name="active" value="1"/>
+			<column name="modification_date" valueDate="sysdate"/>
+			<column name="last_fire_date" valueDate="sysdate"/>
+        </insert>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-59" author="rnurgaleev">
+		<insert tableName="configuration_scheduler_param">
+            <column name="id" value="20"/>
+            <column name="param_name" value="Время жизни блокировки (секунд)"/>
+			<column name="task_id" value="2"/>
+			<column name="ord" value="1"/>
+			<column name="type" value="2"/>
+			<column name="value" value="172800"/>
+        </insert>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-60" author="rnurgaleev">
+        <update tableName="DECLARATION_TEMPLATE">
+			<column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+			<where>id=100</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-61" author="rnurgaleev">
+        <update tableName="DECLARATION_TEMPLATE">
+			<column name="create_script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+			<where>id=101</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-62" author="rnurgaleev">
+        <update tableName="DECLARATION_TEMPLATE">
+			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=102</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-63" author="rnurgaleev">
+        <update tableName="DECLARATION_TEMPLATE">
+			<column name="create_script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>id=103</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-64" author="rnurgaleev">
+        <update tableName="DECLARATION_TEMPLATE">
+			<column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=104</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-65" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="1"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="3"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-66" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="2"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-67" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="3"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="105"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_accepted_to_created.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-68" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="4"/>
+			<column name="declaration_template_id" value="100"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-69" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="5"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="event_id" value="3"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-70" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="6"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-71" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="7"/>
+			<column name="declaration_template_id" value="101"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-72" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="8"/>
+			<column name="declaration_template_id" value="102"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-73" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="9"/>
+			<column name="declaration_template_id" value="102"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-74" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="10"/>
+			<column name="declaration_template_id" value="103"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-75" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="11"/>
+			<column name="declaration_template_id" value="103"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-76" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="12"/>
+			<column name="declaration_template_id" value="104"/>	
+			<column name="event_id" value="5"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
+        </insert>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-77" author="rnurgaleev">
+        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="id" value="13"/>
+			<column name="declaration_template_id" value="104"/>	
+			<column name="event_id" value="106"/>
+			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy"/>
+        </insert>
+    </changeSet>
+	
+		<changeSet id="2.1-rnurgaleev-78" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/classificator_country.groovy"/>
+			<where>id='ce397da5-cf59-457f-9e91-2a31a478b510'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-79" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/classificator_oktmo.groovy"/>
+			<where>id='3ec53b66-624d-45cd-aa17-f046e3a1f1fc'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-80" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/classificator_okved.groovy"/>
+			<where>id='99034f20-18c3-11e5-b60b-1697f925ec7b'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-81" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+			<where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-82" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/department.groovy"/>
+			<where>id='4e387483-0330-4e05-ad46-e9b03a3b025d'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-83" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/fias.groovy"/>
+			<where>id='39327388-9684-4fd5-a522-c40a21680156'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-84" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/id_doc.groovy"/>
+			<where>id='375ba56a-2509-11e7-93ae-92361f002671'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-85" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/person.groovy"/>
+			<where>id='884b9f2e-1678-4d69-9652-b036bba2f728'</where>
+        </update>
+    </changeSet>
+	
+	<!--SBRFNDFL-2142-->
+	<changeSet id="2.1-rnurgaleev-86" author="rnurgaleev">
+		<update
+            tableName="ref_book">
+			<column name="is_versioned" value="0"/>
+			<where>table_name='REPORT_PERIOD_TYPE'</where>
+		</update>
+	</changeSet>
+	
+</databaseChangeLog>
