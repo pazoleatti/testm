@@ -17,8 +17,7 @@
                 //Чекбоксы
                 $scope.gridFilter = {
                     showSources: true,
-                    showDestinations: true,
-                    showUncreated: false
+                    showDestinations: true
                 };
 
                 //Получение списка приемников и источников
@@ -120,10 +119,9 @@
                 $scope.updateGridData = function () {
                     var sources = $scope.gridFilter.showSources;
                     var destinations = $scope.gridFilter.showDestinations;
-                    var uncreated = $scope.gridFilter.showUncreated;
                     var data = [];
                     angular.forEach($scope.sourcesGridData, function (source) {
-                        if ((sources && source.source || destinations && !source.source) && (uncreated || source.created)) {
+                        if (sources && source.source || destinations && !source.source) {
                             data.push(source);
                         }
                     });
