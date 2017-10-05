@@ -74,10 +74,11 @@
 
                 /**
                  * @description форматтер для поля 'Ссылка' для получения файла
+                 * @param value значение столбца
                  * @param row строка таблицы
                  */
-                function linkFileFormatter(row) {
-                    if (row.reportId !== null) {
+                function linkFileFormatter(value, row) {
+                    if (row.reportId && row.reportId !== undefined) {
                         return "<a target='_blank' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
 
                     } else {
