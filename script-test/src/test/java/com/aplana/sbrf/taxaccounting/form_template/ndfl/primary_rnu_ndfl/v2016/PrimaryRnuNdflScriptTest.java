@@ -284,7 +284,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     //@Test
     public void createSpecificReportTest() throws Exception {
         ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
-        reportHolder.getSubreportParamValues().put("lastName", "Иванов");
+        reportHolder.getSubreportParamValues().put(SubreportAliasConstants.LAST_NAME, "Иванов");
         testHelper.setScriptSpecificReportHolder(reportHolder);
         testHelper.execute(FormDataEvent.CREATE_SPECIFIC_REPORT);
     }
@@ -299,7 +299,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     public void createSpecificReportTestFull() throws Exception {
 
         ScriptSpecificDeclarationDataReportHolder reportHolder = createReportHolder();
-        reportHolder.getSubreportParamValues().put("lastName", "Иванов");
+        reportHolder.getSubreportParamValues().put(SubreportAliasConstants.LAST_NAME, "Иванов");
         testHelper.setScriptSpecificReportHolder(reportHolder);
 
         List<NdflPerson> result = new ArrayList<NdflPerson>();
