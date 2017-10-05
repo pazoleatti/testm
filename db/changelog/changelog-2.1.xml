@@ -762,4 +762,18 @@
 		</update>
 	</changeSet>
 	
+	<!--SBRFNDFL-2059-->
+	<changeSet id="2.1-rnurgaleev-87" author="rnurgaleev">
+		<delete
+            tableName="role_event">
+			<where>event_id in (4, 10, 11, 101, 102, 103, 104, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 303, 302, 601)</where>
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-88" author="rnurgaleev">
+		<delete
+            tableName="event">
+			<where>id in (4, 10, 11, 101, 102, 103, 104, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 303, 302, 601)</where>
+		</delete>
+	</changeSet>
 </databaseChangeLog>
