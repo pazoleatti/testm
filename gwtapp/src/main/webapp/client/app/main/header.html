@@ -7,8 +7,8 @@
         </a>
     </div>
 
-    <ul class="nav navbar-nav">
-        <li class="dropdown" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)">
+    <ul class="nav navbar-nav" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)">
+        <li class="dropdown">
             <a data-toggle="dropdown">{{::'menu.taxes' | translate}}<b class='caret'></b></a>
             <tree tree='treeTaxes'></tree>
         </li>
