@@ -518,18 +518,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * Спец. отчет "РНУ НДФЛ по физическому лицу". Данные макет извлекает непосредственно из бд
      */
     def createSpecificReportPersonDb() {
-        DataRow<Cell> row = scriptSpecificReportHolder.getSelectedRecord()
-        NdflPerson ndflPerson = ndflPersonService.get(Long.valueOf(row.id))
-
-        Map<String, String> subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
-        subReportViewParams.put('Фамилия', (String) row.lastName)
-        subReportViewParams.put('Имя', (String) row.firstName)
-        subReportViewParams.put('Отчество', (String) row.middleName)
-        subReportViewParams.put('Дата рождения', row.birthDay ? ((Date) row.birthDay)?.format(DATE_FORMAT) : "")
-        subReportViewParams.put('№ ДУЛ', (String) row.idDocNumber)
+        NdflPerson ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
         if (ndflPerson != null) {
-            Map<String, Object> params = [NDFL_PERSON_ID: (Object) ndflPerson.id];
-
+            def params = [NDFL_PERSON_ID: (Object) ndflPerson.id];
             JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params);
             exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
             scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")

@@ -8,7 +8,8 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson', 'RnuPersonDocument', 'DeclarationDataResource', function ($scope, $uibModalInstance, $filter, $http, RnuPerson, RnuPersonDocument, DeclarationDataResource) {
+        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson',
+            function ($scope, $uibModalInstance, $filter, $http, RnuPerson) {
 
             //Доступгость грида
             $scope.enabledGrid = false;
@@ -36,8 +37,8 @@
                             dateFrom: $scope.searchFilter.params.dateFrom,
                             dateTo: $scope.searchFilter.params.dateTo
                         }),
-                        personId: $scope.notificationsGrid.value[0].personId,
-                    },
+                        personId: $scope.notificationsGrid.value[0].personId
+                    }
 
 
                 }).then(function (response) {
@@ -91,7 +92,7 @@
                             $filter('translate')('title.inp'),
                             $filter('translate')('title.dateOfBirth'),
                             $filter('translate')('title.idDocNumber'),
-                            $filter('translate')('title.status.taxpayer'),
+                            $filter('translate')('title.status.taxpayer')
 
                         ],
                         colModel: [
@@ -110,7 +111,7 @@
                             },
 
                             {name: 'idDocNumber', index: 'id_doc_number', width: 95},
-                            {name: 'status', index: 'status', width: 160},
+                            {name: 'status', index: 'status', width: 160}
 
                         ],
                         rowNum: 10,
@@ -127,7 +128,7 @@
              * @description Отвечает за доступность недоступность кнопки 'сформировать'
              */
             $scope.chekRow = function () {
-                if ($scope.notificationsGrid.value.length != null) {
+                if ($scope.notificationsGrid.value.length !== null) {
                     $scope.enabledCreateReport = true;
                 }
             };

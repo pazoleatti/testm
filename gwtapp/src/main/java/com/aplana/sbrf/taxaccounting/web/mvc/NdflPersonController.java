@@ -31,9 +31,9 @@ import java.util.Map;
 @RestController
 public class NdflPersonController {
 
-    private NdflPersonService ndflPersonService;
+    private final NdflPersonService ndflPersonService;
 
-    private RefBookFactory refBookFactory;
+    private final RefBookFactory refBookFactory;
 
 
     public NdflPersonController(NdflPersonService ndflPersonService, RefBookFactory refBookFactory) {
@@ -187,9 +187,14 @@ public class NdflPersonController {
                 new PagingParams()
         );
         for (NdflPerson ndflPerson : resultPerson.getRows()) {
-            ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
-                    get("NAME").getValue().toString());
+            if (refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0) != null) {
+                ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                        getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
+                        get("NAME").getStringValue());
+            } else {
+                ndflPerson.setStatus("");
+            }
         }
         return resultPerson;
     }

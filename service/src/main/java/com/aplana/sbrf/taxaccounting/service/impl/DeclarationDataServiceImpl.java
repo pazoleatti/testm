@@ -138,8 +138,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private RefBookDepartmentDataService refBookDepartmentDataService;
     @Autowired
-    private DeclarationDataSearchService declarationDataSearchService;
-    @Autowired
     private NdflPersonService ndflPersonService;
     @Autowired
     private AsyncTaskDao asyncTaskTypeDao;
@@ -891,53 +889,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+
+    //Формирование рну ндфл для физ лица
     @Override
     public CreateDeclarationReportResult creteReportRnu(TAUserInfo userInfo, final long declarationDataId, long personId, final NdflPersonFilter ndflPersonFilter) {
-
-        Map<String, Object> filterParams = new HashMap<String, Object>();
-
-        if ((ndflPersonFilter.getInp() != null) && (ndflPersonFilter.getInp() != "")) {
-            filterParams.put("inp", ndflPersonFilter.getInp());
-        }
-        if ((ndflPersonFilter.getInnNp() != null) && (ndflPersonFilter.getInnNp() != "")) {
-            filterParams.put("innNp", ndflPersonFilter.getInnNp());
-        }
-
-        if ((ndflPersonFilter.getSnils() != null) && (ndflPersonFilter.getSnils() != "")) {
-            filterParams.put("snils", ndflPersonFilter.getSnils());
-        }
-        if ((ndflPersonFilter.getIdDocNumber() != null) && (ndflPersonFilter.getIdDocNumber() != "")) {
-            filterParams.put("idDocNumber", ndflPersonFilter.getIdDocNumber());
-        }
-        if ((ndflPersonFilter.getLastName() != null) && (ndflPersonFilter.getLastName() != "")) {
-            filterParams.put("lastName", ndflPersonFilter.getLastName());
-        }
-        if ((ndflPersonFilter.getFirstName() != null) && (ndflPersonFilter.getFirstName() != "")) {
-            filterParams.put("firstName", ndflPersonFilter.getFirstName());
-        }
-        if ((ndflPersonFilter.getMiddleName() != null) && ndflPersonFilter.getMiddleName() != "") {
-            filterParams.put("middleName", ndflPersonFilter.getMiddleName());
-        }
-        if (ndflPersonFilter.getDateFrom() != null) {
-            filterParams.put("fromBirthDay", ndflPersonFilter.getDateFrom());
-        }
-
-        if (ndflPersonFilter.getDateTo() != null) {
-            filterParams.put("toBirthDay", ndflPersonFilter.getDateTo());
-        }
-
-        NdflPerson ndflPerson = null;
-        for (NdflPerson itemNdflPerson : ndflPersonService.findPersonByFilter(declarationDataId, filterParams, new PagingParams())) {
-            if (itemNdflPerson.getPersonId().equals(personId)) {
-                ndflPerson = itemNdflPerson;
-            }
-        }
-        filterParams.put("PERSON_ID", ndflPerson.getId());
-        ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
-                get("NAME").getValue().toString());
-
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName("NDFL");
+        final DeclarationDataReportType ddReportType = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, null);
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
             result.setExistDeclarationData(false);
@@ -950,11 +906,35 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && !isVisiblePDF(get(declarationDataId, userInfo), userInfo)) {
             throw new ServiceException("Данное действие недоступно");
         }
+
+        Map<String, Object> filterParams = new HashMap<String, Object>();
+        NdflPerson ndflPerson = null;
+
+        //поиск лица для которого формируется рну
+        for (NdflPerson itemNdflPerson : ndflPersonService.findPersonByFilter(declarationDataId, filterParams, new PagingParams())) {
+            if (itemNdflPerson.getPersonId().equals(personId)) {
+                ndflPerson = itemNdflPerson;
+            }
+        }
+
+        filterParams.put("PERSON_ID", ndflPerson.getId());
+
+        //Узнаем статус налогоплательщика
+        if (refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0) != null) {
+            ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
+                    get("NAME").getStringValue());
+        } else {
+            ndflPerson.setStatus("");
+        }
+
+
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
             final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
-            if (uuid != null && !true) {
+            if (uuid != null) {
                 result.setStatus(CreateAsyncTaskStatus.EXIST);
                 return result;
             } else {
@@ -967,7 +947,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                 } else {
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    Map<String, Object> params = new HashMap<String, Object>();
+                    Map<String, Object> params = new HashMap<String, Object>(10);
                     params.put("declarationDataId", declarationDataId);
                     if (ddReportType.isSubreport()) {
                         params.put("alias", ddReportType.getReportAlias());
@@ -976,13 +956,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             params.put("subreportParamValues", filterParams);
 
                             if (ndflPerson != null) {
-                                params.put("PERSON_ID", new Long("128055"));
+                                params.put("PERSON_ID", ndflPerson.getId());
                             }
                         }
                     }
                     asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
 
-                        /*asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, , userInfo, logger, new AsyncTaskHandler() {*/
                         @Override
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
