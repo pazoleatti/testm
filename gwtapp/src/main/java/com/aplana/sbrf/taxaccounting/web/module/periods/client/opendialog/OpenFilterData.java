@@ -4,7 +4,6 @@ import java.util.Date;
 
 public class OpenFilterData {
 	Integer year;
-	boolean balancePeriod;
 	Integer departmentId;
 	Long dictionaryTaxPeriodId;
 	Date endDate;
@@ -16,14 +15,6 @@ public class OpenFilterData {
 
 	public void setYear(Integer year) {
 		this.year = year;
-	}
-
-	public boolean isBalancePeriod() {
-		return balancePeriod;
-	}
-
-	public void setBalancePeriod(boolean balancePeriod) {
-		this.balancePeriod = balancePeriod;
 	}
 
 	public Integer getDepartmentId() {

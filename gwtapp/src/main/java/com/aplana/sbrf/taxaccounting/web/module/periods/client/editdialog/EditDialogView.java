@@ -39,9 +39,6 @@ public class EditDialogView extends PopupViewWithUiHandlers<EditDialogUiHandlers
 	Spinner yearBox;
 
 	@UiField
-	CheckBox balancePeriod;
-
-	@UiField
     RefBookPickerWidget period;
 
     @UiField
@@ -83,7 +80,6 @@ public class EditDialogView extends PopupViewWithUiHandlers<EditDialogUiHandlers
 	@UiHandler("continueButton")
 	public void onContinue(ClickEvent event) {
         EditDialogData data = new EditDialogData();
-        data.setBalance(balancePeriod.getValue());
         data.setYear(yearBox.getValue());
         data.setReportPeriodId(period.getSingleValue() == null ? null : period.getSingleValue().intValue());
         data.setDepartmentId(departmentPicker.getValue().isEmpty() ? null : departmentPicker.getValue().get(0));
@@ -113,10 +109,5 @@ public class EditDialogView extends PopupViewWithUiHandlers<EditDialogUiHandlers
         period.setDereferenceValue(periodName);
         period.setSingleValue(reportPeriodId);
 
-    }
-
-    @Override
-    public void setBalancePeriod(boolean isBalance) {
-        balancePeriod.setValue(isBalance);
     }
 }

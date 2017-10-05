@@ -45,7 +45,6 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertEquals(1, departmentReportPeriod.getDepartmentId().intValue());
         Assert.assertEquals(20, departmentReportPeriod.getReportPeriod().getId().intValue());
         Assert.assertTrue(departmentReportPeriod.isActive());
-        Assert.assertFalse(departmentReportPeriod.isBalance());
         Assert.assertEquals(SIMPLE_DATE_FORMAT.parse("02.01.2014"), departmentReportPeriod.getCorrectionDate());
         // 3
         departmentReportPeriod = departmentReportPeriodDao.get(101);
@@ -53,7 +52,6 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertEquals(1, departmentReportPeriod.getDepartmentId().intValue());
         Assert.assertEquals(1, departmentReportPeriod.getReportPeriod().getId().intValue());
         Assert.assertTrue(departmentReportPeriod.isActive());
-        Assert.assertFalse(departmentReportPeriod.isBalance());
         Assert.assertNull(departmentReportPeriod.getCorrectionDate());
     }
 
@@ -93,13 +91,6 @@ public class DepartmentReportPeriodDaoTest {
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
             Assert.assertFalse(departmentReportPeriod.isActive());
         }
-        // Фильтр по периоду ввода остатков
-        departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-        departmentReportPeriodFilter.setIsBalance(true);
-        departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
-        for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            Assert.assertTrue(departmentReportPeriod.isBalance());
-        }
         // Фильтр по корректирующему периоду
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         departmentReportPeriodFilter.setIsCorrection(true);
@@ -124,7 +115,6 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(1, 2));
         departmentReportPeriodFilter.setIsActive(true);
-        departmentReportPeriodFilter.setIsBalance(false);
         departmentReportPeriodFilter.setIsCorrection(true);
         departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
         Assert.assertEquals(2, departmentReportPeriodList.size());
@@ -146,7 +136,6 @@ public class DepartmentReportPeriodDaoTest {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         Date date = new Date();
         departmentReportPeriod.setActive(true);
-        departmentReportPeriod.setBalance(true);
         departmentReportPeriod.setCorrectionDate(date);
         departmentReportPeriod.setDepartmentId(1);
         departmentReportPeriod.setReportPeriod(reportPeriodDao.get(1));
@@ -155,7 +144,6 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), savedDepartmentReportPeriod.getCorrectionDate());
         Assert.assertEquals(id, savedDepartmentReportPeriod.getId().intValue());
         Assert.assertTrue(savedDepartmentReportPeriod.isActive());
-        Assert.assertTrue(savedDepartmentReportPeriod.isBalance());
         Assert.assertEquals(1, savedDepartmentReportPeriod.getDepartmentId().intValue());
         Assert.assertEquals(1, savedDepartmentReportPeriod.getReportPeriod().getId().intValue());
     }
@@ -165,7 +153,6 @@ public class DepartmentReportPeriodDaoTest {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = reportPeriodDao.get(11);
         departmentReportPeriod.setActive(true);
-        departmentReportPeriod.setBalance(true);
         departmentReportPeriod.setReportPeriod(reportPeriod);
         List<Integer> depIds = new ArrayList<Integer>();
         depIds.add(2);
@@ -175,7 +162,6 @@ public class DepartmentReportPeriodDaoTest {
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setIsActive(true);
-        filter.setIsBalance(true);
         filter.setReportPeriodIdList(Collections.singletonList(reportPeriod.getId()));
         filter.setDepartmentIdList(depIds);
         List<DepartmentReportPeriod> savedDepartmentReportPeriods = departmentReportPeriodDao.getListByFilter(filter);
@@ -187,11 +173,9 @@ public class DepartmentReportPeriodDaoTest {
     public void updateActiveTest() {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(101);
         Assert.assertTrue(departmentReportPeriod.isActive());
-        Assert.assertFalse(departmentReportPeriod.isBalance());
-        departmentReportPeriodDao.updateActive(101, false, true);
+        departmentReportPeriodDao.updateActive(101, false);
         departmentReportPeriod = departmentReportPeriodDao.get(101);
         Assert.assertFalse(departmentReportPeriod.isActive());
-        Assert.assertTrue(departmentReportPeriod.isBalance());
     }
 
     @Test
@@ -202,24 +186,8 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void batchUpdateActiveTest2() {
-        departmentReportPeriodDao.updateActive(Arrays.asList(101, 201, 401), 1, true, true);
+        departmentReportPeriodDao.updateActive(Arrays.asList(101, 201, 401), 1, true);
         Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
-        Assert.assertTrue(departmentReportPeriodDao.get(101).isBalance());
-    }
-
-    @Test
-    public void updateBalanceTest() {
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(101);
-        Assert.assertFalse(departmentReportPeriod.isBalance());
-        departmentReportPeriodDao.updateBalance(101, true);
-        departmentReportPeriod = departmentReportPeriodDao.get(101);
-        Assert.assertTrue(departmentReportPeriod.isBalance());
-    }
-
-    @Test
-    public void batchUpdateBalanceTest() {
-        departmentReportPeriodDao.updateBalance(Arrays.asList(101, 102, 103), true);
-        Assert.assertTrue(departmentReportPeriodDao.get(101).isBalance());
     }
 
     @Test

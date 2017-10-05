@@ -6,7 +6,6 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class CheckPeriodStatusAction  extends UnsecuredActionImpl<CheckPeriodStatusResult> {
 	TaxType taxType;
 	int year;
-	boolean balancePeriod;
 	int departmentId;
 	long dictionaryTaxPeriodId;
 
@@ -24,14 +23,6 @@ public class CheckPeriodStatusAction  extends UnsecuredActionImpl<CheckPeriodSta
 
 	public void setYear(int year) {
 		this.year = year;
-	}
-
-	public void setBalancePeriod(boolean balancePeriod) {
-		this.balancePeriod = balancePeriod;
-	}
-
-	public boolean isBalancePeriod() {
-		return balancePeriod;
 	}
 
 	public int getDepartmentId() {

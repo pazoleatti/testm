@@ -115,10 +115,6 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
 
             TaxType taxType = TaxType.NDFL;
-            // Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
-            if (departmentReportPeriod.isBalance()) {
-                return false;
-            }
 
             // Выборка для доступа к экземплярам деклараций
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670

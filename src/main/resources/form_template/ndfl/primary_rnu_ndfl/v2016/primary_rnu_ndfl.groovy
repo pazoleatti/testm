@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -730,7 +731,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def imya = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
         def otchestvo = ndflPerson.middleName != null ? ndflPerson.middleName : ""
         def fio = familia + imya + otchestvo
-        Object test = infoPart.'СведОпер'
         Iterator ndflPersonOperations = infoPart.'СведОпер'.iterator()
 
         // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>

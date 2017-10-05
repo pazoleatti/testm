@@ -12,7 +12,6 @@ public class TableRow implements Serializable {
 	private String periodName;
 	private Boolean periodCondition;
 	private boolean isSubHeader;
-    private Boolean balance;
 	int year; //TODO Возможно не  нужно хранить дату в каждом экземпляре
     private long dictTaxPeriodId;
     private int ord; // Порядок следования в налоговом периоде
@@ -92,14 +91,6 @@ public class TableRow implements Serializable {
 	public void setSubHeader(boolean subHeader) {
 		isSubHeader = subHeader;
 	}
-
-    public Boolean isBalance() {
-        return balance;
-    }
-
-    public void setBalance(Boolean balance) {
-        this.balance = balance;
-    }
 
     public Date getDeadline() {
         return deadline;

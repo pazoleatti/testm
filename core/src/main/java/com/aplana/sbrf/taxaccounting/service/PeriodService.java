@@ -32,7 +32,7 @@ public interface PeriodService {
 	 */
     //TODO Слишком много параметров
 	void open(int year, long dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
-	          int departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate);
+	          int departmentId, List<LogEntry> logs, Date correctionDate);
 
     /**
      * Создание нового отчетного периода подразделения или открытие существующего по комбинации параметров
@@ -206,12 +206,11 @@ public interface PeriodService {
 	 * Проверяет статус периода ОТКРЫТ, ЗАКРЫТ ИЛИ НЕСУЩЕСТВУЕТ
 	 * @param taxType
 	 * @param year
-	 * @param balancePeriod
 	 * @param departmentId
 	 * @param dictionaryTaxPeriodId
 	 * @return
 	 */
-	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, int departmentId, long dictionaryTaxPeriodId);
+	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, int departmentId, long dictionaryTaxPeriodId);
 
     /**
      * Получает список месяцев, в зависимости от выбранного периода
@@ -233,12 +232,11 @@ public interface PeriodService {
      * Список открытых периодов
      * @param taxType тип налога
      * @param departmentList подразделения
-     * @param withoutBalance true - без периодов ввода остатков, false - с периодами ввода остатков
      * @param withoutCorrect true - без корректирующих периодов false - с корректирующими периодами
      * @return список отчетных периодов
      */
     List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
-                                                             boolean withoutBalance, boolean withoutCorrect);
+                                                             boolean withoutCorrect);
 
     /**
      * Возвращает предыдущий отчетный период, не привязываясь к налоговому периоду,
@@ -296,11 +294,10 @@ public interface PeriodService {
      * @param taxType тип налога
      * @param user пользователь, который выполняет действие
      * @param departmentId идентификатор подразделения
-     * @param isBalance признак ввода остатков
      * @param logs логер, при необходимости
      */
     void edit(int reportPeriodId, int oldDepartmentId, long newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
-                     int departmentId, boolean isBalance,  List<LogEntry> logs);
+                     int departmentId, List<LogEntry> logs);
 
     /**
      * Редактировать корректирующий период

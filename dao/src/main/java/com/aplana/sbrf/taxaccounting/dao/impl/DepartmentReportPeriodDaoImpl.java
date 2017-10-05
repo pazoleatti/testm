@@ -50,16 +50,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             reportPeriod.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
             reportPeriod.setReportPeriod(reportPeriodDao.get(SqlUtils.getInteger(rs, "report_period_id")));
             reportPeriod.setActive(!SqlUtils.getInteger(rs, "is_active").equals(0));
-            reportPeriod.setBalance(!SqlUtils.getInteger(rs, "is_balance_period").equals(0));
             reportPeriod.setCorrectionDate(rs.getDate("correction_date"));
             return reportPeriod;
         }
     };
 
     private static final String QUERY_TEMPLATE_SIMPLE = "select id, department_id, report_period_id, is_active, " +
-            "is_balance_period, correction_date from department_report_period";
+            "correction_date from department_report_period";
 
-    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.is_balance_period, drp.correction_date \n" +
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date \n" +
             "          from \n" +
             "          department_report_period drp \n" +
             "          join report_period rp on drp.report_period_id = rp.id \n" +
@@ -76,10 +75,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
         if (filter.isCorrection() != null) {
             causeList.add("drp.correction_date is " + (filter.isCorrection() ? " not " : "") + " null");
-        }
-
-        if (filter.isBalance() != null) {
-            causeList.add("drp.is_balance_period " + (filter.isBalance() ? "<>" : "=") + " 0");
         }
 
         if (filter.isActive() != null) {
@@ -171,12 +166,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
         getJdbcTemplate()
                 .update("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, " +
-                        "IS_BALANCE_PERIOD, CORRECTION_DATE) values (?, ?, ?, ?, ?, ?)",
+                        "CORRECTION_DATE) values (?, ?, ?, ?, ?)",
                         id,
                         departmentReportPeriod.getDepartmentId(),
                         departmentReportPeriod.getReportPeriod().getId(),
                         departmentReportPeriod.isActive(),
-                        departmentReportPeriod.isBalance(),
                         departmentReportPeriod.getCorrectionDate());
         return id;
     }
@@ -186,15 +180,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public void save(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
         getJdbcTemplate()
                 .batchUpdate("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, " +
-                                "IS_BALANCE_PERIOD, CORRECTION_DATE) select seq_department_report_period.nextval, ?, ?, ?, ?, ? from dual",
+                                "CORRECTION_DATE) select seq_department_report_period.nextval, ?, ?, ?, ? from dual",
                         new BatchPreparedStatementSetter() {
                             @Override
                             public void setValues(PreparedStatement ps, int i) throws SQLException {
                                 ps.setInt(1, departmentIds.get(i));
                                 ps.setInt(2, departmentReportPeriod.getReportPeriod().getId());
                                 ps.setInt(3, departmentReportPeriod.isActive() ? 1 : 0);
-                                ps.setInt(4, departmentReportPeriod.isBalance() ? 1 : 0);
-                                ps.setDate(5, departmentReportPeriod.getCorrectionDate() == null ? null : new java.sql.Date(departmentReportPeriod.getCorrectionDate().getTime()));
+                                ps.setDate(4, departmentReportPeriod.getCorrectionDate() == null ? null : new java.sql.Date(departmentReportPeriod.getCorrectionDate().getTime()));
                             }
 
                             @Override
@@ -206,35 +199,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public void updateActive(int id, boolean active, boolean isBalance) {
+    public void updateActive(int id, boolean active) {
         getJdbcTemplate().update(
-                "update department_report_period set is_active = ?, is_balance_period = ? where id = ?",
-                new Object[]{active ? 1 : 0, isBalance ? 1 : 0, id},
-                new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
+                "update department_report_period set is_active = ? where id = ?",
+                new Object[]{active ? 1 : 0, id},
+                new int[]{Types.NUMERIC, Types.NUMERIC}
         );
-    }
-
-    @Override
-    public void updateActive(final List<Integer> ids, final Integer report_period_id, final boolean active, final boolean isBalance) {
-        try {
-            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ?, is_balance_period = ? where report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setInt(1, active ? 1 : 0);
-                    ps.setInt(2, isBalance ? 1 : 0);
-                    ps.setInt(3, report_period_id);
-                    ps.setInt(4, ids.get(i));
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return ids.size();
-                }
-            });
-        } catch (DataAccessException e) {
-            LOG.error("", e);
-            throw new DaoException("", e);
-        }
     }
 
     @Override
@@ -266,42 +236,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 new Object[]{correctionDate, id},
                 new int[]{Types.DATE, Types.NUMERIC}
         );
-    }
-
-    @Override
-    public void updateBalance(int id, boolean isBalance) {
-        try {
-            getJdbcTemplate().update(
-                    "update department_report_period set is_balance_period = ? where id = ?",
-                    new Object[]{isBalance ? 1: 0, id},
-                    new int[]{Types.NUMERIC, Types.NUMERIC}
-            );
-        } catch (DataAccessException e){
-			LOG.error("", e);
-            throw new DaoException("", e);
-        }
-    }
-
-    @Override
-    public void updateBalance(final List<Integer> ids, final boolean isBalance) {
-        try {
-            getJdbcTemplate().batchUpdate("update department_report_period set is_balance_period = ? where id = ?",
-                    new BatchPreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setInt(1, isBalance ? 1: 0);
-                            ps.setInt(2, ids.get(i));
-                        }
-
-                        @Override
-                        public int getBatchSize() {
-                            return ids.size();
-                        }
-                    });
-        } catch (DataAccessException e){
-			LOG.error("", e);
-            throw new DaoException("", e);
-        }
     }
 
     @Override
@@ -353,7 +287,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public DepartmentReportPeriod getLast(int departmentId, int reportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
-                    "drp.is_active, drp.is_balance_period, drp.correction_date " +
+                    "drp.is_active, drp.correction_date " +
                     "from " +
                     "department_report_period drp, " +
                     "(select max(correction_date) as correction_date, department_id, report_period_id " +
@@ -377,7 +311,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             params.addValue("departmentId", departmentId).
                     addValue("reportPeriodId", reportPeriodId);
             return getNamedParameterJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
-                            "drp.is_active, drp.is_balance_period, drp.correction_date from department_report_period drp " +
+                            "drp.is_active, drp.correction_date from department_report_period drp " +
                             "where drp.REPORT_PERIOD_ID = :reportPeriodId and drp.DEPARTMENT_ID = :departmentId and " +
                             "drp.CORRECTION_DATE in (select max(CORRECTION_DATE) from department_report_period where " +
                             "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId and CORRECTION_DATE " +
@@ -393,7 +327,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId) {
         try {
             return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
-                            "drp.is_active, drp.is_balance_period, drp.correction_date " +
+                            "drp.is_active, drp.correction_date " +
                             "from " +
                             "department_report_period drp " +
                             "where drp.department_id = ? " +
@@ -476,7 +410,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public List<DepartmentReportPeriod> getClosedForFormTemplate(final int formTemplateId) {
         try {
             return getNamedParameterJdbcTemplate().query("select drp.id, drp.department_id, drp.report_period_id, " +
-                    "drp.is_active, drp.is_balance_period, drp.correction_date " +
+                    "drp.is_active, drp.correction_date " +
                     "from department_report_period drp, form_data fd " +
                     "where drp.id = fd.department_report_period_id " +
                     "and drp.is_active = 0 and fd.form_template_id = :formTemplateId",

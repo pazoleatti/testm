@@ -8,7 +8,6 @@ import java.util.Date;
 public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 	TaxType taxType;
 	int year;
-	boolean balancePeriod;
 	int departmentId;
 	long dictionaryTaxPeriodId;
 	Date endDate;
@@ -28,14 +27,6 @@ public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 
 	public void setYear(int year) {
 		this.year = year;
-	}
-
-	public boolean isBalancePeriod() {
-		return balancePeriod;
-	}
-
-	public void setBalancePeriod(boolean balancePeriod) {
-		this.balancePeriod = balancePeriod;
 	}
 
 	public int getDepartmentId() {
