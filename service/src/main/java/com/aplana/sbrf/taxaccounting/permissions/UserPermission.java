@@ -101,6 +101,10 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      * Право на редактирование справочников
      */
     public static final Permission<TAUser> EDIT_REF_BOOK = new EditRefBookPermission(1 << 18);
+    /**
+     * Право доступа к пункту меню "НСИ"
+     */
+    public static final Permission<TAUser> VIEW_NSI = new ViewNsiPermission(1 << 19);
 
 
     public UserPermission(long mask) {
@@ -500,6 +504,21 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+        }
+    }
+
+    /**
+     * Право доступа к пункту меню "НСИ"
+     */
+    public static final class ViewNsiPermission extends UserPermission {
+
+        public ViewNsiPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return VIEW_TAXES_NDFL.isGranted(currentUser, entity);
         }
     }
 }
