@@ -16,61 +16,39 @@ public enum FormDataEvent implements Serializable {
 	CREATE(1, "Создать"),
 	DELETE(2, "Удалить"),
 	CALCULATE(3, "Рассчитать"),
-	COMPOSE(4, "Обобщить"),
 	CHECK(5, "Проверить"),
 	SAVE(6, "Сохранить"),
 	IMPORT(7, "Импорт данных"),
 	GET_LEVEL0(8, "Получение данных"),
 	GET_LEVEL1(9, "Получение защищенных данных"),
     AFTER_CREATE(12, "После создания"),
-    SORT_ROWS (13, "Сортировка строк"),
     GET_SOURCES (14, "Получение источников-приемников"),
-    PRE_CALCULATION_CHECK(16, "Расчетные проверки"),
-    GET_HEADERS(17, "Получение заголовка таблицы"),
-    REFRESH(18, "Обновить"),
-    CREATE_SPECIFIC_REPORT(19, "Сформировать специфичный отчет"),
 	PREPARE_SPECIFIC_REPORT(15, "Подготовить данные для спец. отчета"),
+	PRE_CALCULATION_CHECK(16, "Расчетные проверки"),
+	PRE_CREATE_REPORTS(18, "Проверки перед формировнием отчетности"), // Вызывается не для экземпляра формы
+	CREATE_SPECIFIC_REPORT(19, "Сформировать специфичный отчет"),
     GET_SPECIFIC_REPORT_TYPES(20, "Получить список специфичных отчетов"),
     CALCULATE_TASK_COMPLEXITY(21, "Рассчитать сложность задачи формирования специфичных отчетов"),
     CHECK_VISIBILITY_PDF(22, "Проверка видимости формы предварительного просмотра для налоговой формы"),
-    AFTER_CALCULATE(25, "После рассчитать"),
+
 
     CREATE_FORMS(23, "Создание экземпляров форм"), // Вызывается не для экземпляра формы
-	PRE_CREATE_REPORTS(24, "Проверки перед формировнием отчетности"), // Вызывается не для экземпляра формы
+
     CREATE_REPORTS(24, "Сформировать отчетность"), // Вызывается не для экземпляра формы
+	AFTER_CALCULATE(25, "После рассчитать"),
 
     CHANGE_STATUS_ED(26, "Изменить состояние ЭД"),
 
     CREATE_EXCEL_REPORT(27, "Сформировать Excel отчет"),
 	CREATE_PDF_REPORT(28, "Сформировать PDF отчет"),
 
-    MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
-	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),
-	MOVE_APPROVED_TO_ACCEPTED(103, "Принять из \"Утверждена\""),
-	MOVE_ACCEPTED_TO_APPROVED(104, "Вернуть из \"Принята\" в \"Утверждена\""),
 	MOVE_CREATED_TO_ACCEPTED(105, "Принять из \"Создана\""),
 	MOVE_ACCEPTED_TO_CREATED(106, "Возврат в \"Создана\""),
 	MOVE_CREATED_TO_PREPARED(107, "Подготовить из \"Создана\""),
 	MOVE_PREPARED_TO_CREATED(108,  "Вернуть из \"Подготовлена\" в \"Создана\""),
 	MOVE_PREPARED_TO_ACCEPTED(109,  "Принять из \"Подготовлена\""),
-	MOVE_ACCEPTED_TO_PREPARED(110,  "Вернуть из \"Принята\" в \"Подготовлена\""),
-	MOVE_PREPARED_TO_APPROVED(111,  "Утвердить из \"Подготовлена\""),
-	MOVE_APPROVED_TO_PREPARED(112,  "Вернуть из \"Утверждена\" в \"Подготовлена\""),
-
-	AFTER_MOVE_APPROVED_TO_ACCEPTED(203, "После принять из \"Утверждена\""),
-	AFTER_MOVE_ACCEPTED_TO_APPROVED(204, "После вернуть из \"Принята\" в \"Утверждена\""),
-	AFTER_MOVE_CREATED_TO_ACCEPTED(205, "После принять из \"Создана\""),
-	AFTER_MOVE_ACCEPTED_TO_CREATED(206, "После вернуть из \"Принята\" в \"Создана\""),
-	AFTER_MOVE_PREPARED_TO_ACCEPTED(207, "После принять из \"Подготовлена\""),
-    AFTER_MOVE_ACCEPTED_TO_PREPARED(208, "После вернуть из \"Принята\" в \"Подготовлена\""),
-	AFTER_MOVE_PREPARED_TO_APPROVED(209, "После утвердить из \"Подготовлена\""),
-	AFTER_MOVE_APPROVED_TO_PREPARED(210, "После вернуть \"Подготовлена\" из \"Утверждена\""),
 
 	ADD_ROW(301, "Добавить строку"),
-	DELETE_ROW(303, "Удалить строку"),
-    AFTER_LOAD(302, "Загрузка"),	/* Вызывается после того как форма была получена из БД.
-									Если изменяются данные формы в справочных ячейках,
-									то нужно вызвать scriptFormDataHolder.setDataChanged(true) */
 
 	IMPORT_TRANSPORT_FILE(401, "Импорт из транспортных файлов"),
     UPLOAD_TRANSPORT_FILE(402, "Загрузка транспортных файлов в каталог загрузки"),
@@ -78,7 +56,6 @@ public enum FormDataEvent implements Serializable {
     LOGIN(501, "Вход пользователя в Систему"),
     LOGOUT(502, "Выход пользователя из Системы"),
     EXTERNAL_INTERACTION(503, "Взаимодействие с внешней АС"),
-	SUNR_USER_ACTION(504, "Действия пользователя в ФП СУНР"),
 
     SEND_EMAIL(650, "Отправка email"),
 

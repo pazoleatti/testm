@@ -199,8 +199,6 @@ class Report2Ndfl extends AbstractScriptClass {
                 } finally {
                     break
                 }
-            case FormDataEvent.COMPOSE: // Консолидирование
-                break
             case FormDataEvent.GET_SOURCES: //формирование списка источников
                 getSources()
                 break
