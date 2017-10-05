@@ -85,10 +85,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			return getJdbcTemplate().queryForObject(
 					"select max(log_date) from log_business where form_data_id = ? and" +
 					" (event_id = ? or event_id = ? or event_id = ? or event_id = ?)",
-					new Object[]{formId, FormDataEvent.MOVE_APPROVED_TO_ACCEPTED.getCode(),
-							FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getCode(),
-							FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getCode(),
-                            FormDataEvent.MOVE_PREPARED_TO_APPROVED.getCode()}, Timestamp.class
+					new Object[]{formId, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getCode()
+							}, Timestamp.class
 			);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
