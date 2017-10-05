@@ -52,8 +52,8 @@
         /**
          * @description Конфигурирование роутера и локализации сообщений для приложения
          */
-        .config(['$stateProvider', '$urlRouterProvider', '$translateProvider', '$httpProvider',
-            function ($stateProvider, $urlRouterProvider, $translateProvider, $httpProvider) {
+        .config(['$stateProvider', '$urlRouterProvider', '$translateProvider',
+            function ($stateProvider, $urlRouterProvider, $translateProvider) {
                 // Указание страницы по умолчанию
                 $urlRouterProvider.otherwise('/');
                 // Настройка обработчика главной страницы
@@ -67,14 +67,6 @@
                 $translateProvider.translations('ru', translateDictionary);
                 $translateProvider.preferredLanguage('ru');
                 $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
-
-                //отключение кеша при ajax-запросах в IE
-                if (!$httpProvider.defaults.headers.get) {
-                    $httpProvider.defaults.headers.get = {};
-                }
-                $httpProvider.defaults.headers.get['If-Modified-Since'] = 'Mon, 26 Jul 1997 05:00:00 GMT';
-                $httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
-                $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
             }
         ]);
 

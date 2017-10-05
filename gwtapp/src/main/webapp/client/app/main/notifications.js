@@ -10,7 +10,10 @@
         .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope',
             function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope) {
                 // Пометим все оповещения как прочтённые
-                $http.post("controller/actions/notification/markAsRead").success(function () {
+                $http({
+                    method: "POST",
+                    url: "controller/actions/notification/markAsRead"
+                }).success(function () {
                     $rootScope.$broadcast('UPDATE_NOTIFICATION_COUNT');
                 });
 
@@ -71,10 +74,11 @@
 
                 /**
                  * @description форматтер для поля 'Ссылка' для получения файла
+                 * @param value значение столбца
                  * @param row строка таблицы
                  */
-                function linkFileFormatter(row) {
-                    if (row.reportId !== null) {
+                function linkFileFormatter(value, row) {
+                    if (row.reportId && row.reportId !== undefined) {
                         return "<a target='_blank' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
 
                     } else {
