@@ -10,7 +10,10 @@
         .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope',
             function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope) {
                 // Пометим все оповещения как прочтённые
-                $http.post("controller/actions/notification/markAsRead").success(function () {
+                $http({
+                    method: "POST",
+                    url: "controller/actions/notification/markAsRead"
+                }).success(function () {
                     $rootScope.$broadcast('UPDATE_NOTIFICATION_COUNT');
                 });
 
