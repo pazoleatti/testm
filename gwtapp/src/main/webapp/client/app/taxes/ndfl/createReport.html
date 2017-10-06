@@ -5,41 +5,66 @@
     </h4>
 </div>
 <div class="modal-body">
-    <div class="row">
-        <div class="form-group" style="height: 15px;">
-            <div class="col-md-4">
-                <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
-            </div>
-            <div data-ng-controller="SelectPeriodCtrl"
-                 data-ui-select2="periodSelect.options"
-                 data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
-                 data-ng-model="reportData.period"
-                 class="col-md-8">
-            </div>
-        </div>
-        <div class="form-group" style="height: 15px;">
-            <div class="col-md-4">
-                <label class="control-label">{{::'ndflJournal.filter.department' | translate}}:</label>
-            </div>
-            <div data-ng-controller="SelectDepartmentCtrl"
-                 data-ui-select2="departmentsSelect.options"
-                 data-ng-init="initDepartmentSelectWithOpenPeriod('reportData.period')"
-                 data-ng-model="reportData.department"
-                 class="col-md-8">
-            </div>
-        </div>
-        <div class="form-group" style="height: 15px;">
-            <div class="col-md-4">
-                <label class="control-label">{{::'ndflJournal.filter.declarationType' |
-                    translate}}:</label>
-            </div>
-            <div data-ng-controller="SelectDeclarationTypeCtrl"
-                 data-ui-select2="declarationTypeSelect.options"
-                 data-ng-model="reportData.declarationType"
-                 data-ng-init="initSelectWithDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
-                 class="col-md-8">
-            </div>
-        </div>
+    <div class="form-horizontal" data-ng-form="general">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
+            <tbody>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
+                </td>
+                <td>
+                    <div  data-aplana-field>
+                        <div style="width: 355px;"   data-ng-controller="SelectPeriodCtrl"
+                             data-ui-select2="periodSelect.options"
+                             data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
+                             data-ng-model="reportData.period"
+                             data-ng-required="true">
+                        </div>
+                        <div data-aplana-validator data-key='required'>!!!!!
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label class="control-label">{{::'ndflJournal.filter.department' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
+                             data-ui-select2="departmentsSelect.options"
+                             data-ng-init="initDepartmentSelectWithOpenPeriod('reportData.period')"
+                             data-ng-model="reportData.department"
+                             data-ng-required="true">
+                        </div>
+                        <div data-aplana-validator data-key='required'>!!!!!
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label class="control-label">{{::'ndflJournal.filter.declarationType' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
+                             data-ui-select2="declarationTypeSelect.options"
+                             data-ng-model="reportData.declarationType"
+                             data-ng-init="initSelectWithDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
+                             data-ng-required="true">
+                        </div>
+                        <div data-aplana-validator data-key='required'>!!!!!
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
     </div>
 </div>
 <div class="modal-footer">

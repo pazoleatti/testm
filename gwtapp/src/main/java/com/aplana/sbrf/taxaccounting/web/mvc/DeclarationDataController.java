@@ -243,7 +243,7 @@ public class DeclarationDataController {
      * @param periodId          идентификатор периода
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
-    @PostMapping(value = "/actions/declarationDate/createReports")
+    @PostMapping(value = "/actions/declarationData/createReport")
     public CreateDeclarationReportResult createReports(Integer declarationTypeId, Integer departmentId, Integer periodId) {
         return declarationDataService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
     }
