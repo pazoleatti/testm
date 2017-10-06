@@ -38,7 +38,6 @@ public class DeclarationTemplateEventScriptDaoImpl extends AbstractDao implement
     }
 
     @Override
-    @Cacheable(CacheConstants.DECLARATION_TEMPLATE_EVENT_SCRIPT)
     public List<DeclarationTemplateEventScript> fetch(int declarationTemplateId) {
         String query = "SELECT ID, DECLARATION_TEMPLATE_ID, EVENT_ID, SCRIPT FROM decl_template_event_script where declaration_template_id = ?";
         List<DeclarationTemplateEventScript> toReturn = getJdbcTemplate().query(query,

@@ -46,8 +46,6 @@ public class DeclarationTemplateScriptPresenter
 
         void addEventScript(DeclarationTemplateEventScript eventScript);
 
-        void removeEventScript(int index);
-
         void removeButtonEnable(boolean enable);
 
         String getSelectedTitle();
@@ -167,7 +165,6 @@ public class DeclarationTemplateScriptPresenter
         }
         declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getEventScripts().remove(eventScriptForRemove);
         getView().setEventScriptList(declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getEventScripts());
-        /*getView().removeEventScript(index);*/
         getView().removeButtonEnable(false);
         onSelectScript("Основной скрипт");
     }

@@ -15,4 +15,6 @@ public interface EventDao {
      * @return список кодов
      */
     Collection<Integer> getEventCodes(String roleAlias, Collection<Integer> notInList, String... mask);
+
+    Collection<Integer> fetch();
 }

@@ -9,15 +9,20 @@
             $stateProvider.state('ndflReportJournal', {
                 url: '/taxes/ndflReportJournal',
                 templateUrl: 'client/app/taxes/ndfl/ndflReportJournal.html',
-                controller: 'ndflReportJournalCtrl'
+                controller: 'ndflReportJournalCtrl',
+                params: {uuid: null}
             });
         }])
 
-        .controller('ndflReportJournalCtrl', ['$scope', '$rootScope', 'ShowToDoDialog', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals', 'APP_CONSTANTS', 'PermissionChecker',
-            function ($scope, $rootScope, $showToDoDialog, $filter, DeclarationDataResource, $http, $logPanel, appModals, APP_CONSTANTS, PermissionChecker) {
+        .controller('ndflReportJournalCtrl', ['$scope', '$state', '$stateParams', '$rootScope', 'ShowToDoDialog', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals', 'APP_CONSTANTS', 'PermissionChecker',
+            function ($scope, $state, $stateParams, $rootScope, $showToDoDialog, $filter, DeclarationDataResource, $http, $logPanel, appModals, APP_CONSTANTS, PermissionChecker) {
                 $scope.reportCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
                 var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
+
+                if ($stateParams.uuid) {
+                    $logPanel.open('log-panel-container', $stateParams.uuid);
+                }
 
                 $scope.searchFilter = {
                     params: {
@@ -34,100 +39,44 @@
                 $scope.refreshGrid = function (page) {
                     $scope.ndflReportJournalGrid.ctrl.refreshGrid(page);
                 };
+
+                /**
+                 * Показ МО "Создание отчётности"
+                 */
                 $scope.createReport = function () {
                     appModals.create('client/app/taxes/ndfl/createReport.html', 'createReportCtrl',
-                        {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'});
+                        {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'})
+                        .result.then(function (response) {
+                        if (response.data && response.data.entityId && response.data.entityId !== null) {
+                            $state.go('ndfl', {
+                                declarationDataId: response.data.entityId,
+                                uuid: response.data.uuid
+                            });
+                        } else {
+                            if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
+                        }
+                    });
                 };
                 $scope.downloadReport = function () {
                     $showToDoDialog();
                 };
-                $scope.check = function () {
-                    var ids = [];
-                    _.each($scope.ndflReportJournalGrid.value, function (element) {
-                        ids.push(element.declarationDataId);
-                    });
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/checkDeclarationDataList",
-                        params: {
-                            declarationDataIds: ids
-                        }
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                    });
-                };
-                $scope.delete = function () {
-                    var ids = [];
-                    _.each($scope.ndflReportJournalGrid.value, function (element) {
-                        ids.push(element.declarationDataId);
-                    });
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/deleteDeclarationDataList",
-                        params: {
-                            declarationDataIds: ids
-                        }
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                        $scope.refreshGrid(1);
-                    });
-                };
-                $scope.accept = function () {
-                    var ids = [];
-                    _.each($scope.ndflReportJournalGrid.value, function (element) {
-                        ids.push(element.declarationDataId);
-                    });
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/acceptDeclarationDataList",
-                        params: {
-                            declarationDataIds: ids
-                        }
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                        $scope.refreshGrid(1);
-                    });
-                };
-                $scope.returnToCreated = function () {
-                    appModals.inputMessage($filter('translate')('title.indicateReasonForReturn'), $filter('translate')('title.reasonForReturn'))
-                        .result.then(function (text) {
-                        var ids = [];
-                        _.each($scope.ndflReportJournalGrid.value, function (element) {
-                            ids.push(element.declarationDataId);
-                        });
-                        $http({
-                            method: "POST",
-                            url: "controller/actions/declarationData/returnToCreatedDeclarationDataList",
-                            params: {
-                                declarationDataIds: ids,
-                                reasonForReturn: text
-                            }
-                        }).then(function (response) {
-                            if (response.data && response.data.uuid && response.data.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
-                            }
-                            $scope.refreshGrid(1);
-                        });
-                    });
-                };
 
-                function getCorrectionTag() {
-                    switch ($scope.searchFilter.params.correctionTag) {
-                        case APP_CONSTANTS.CORRETION_TAG.ALL:
-                            return undefined;
-                        case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
-                            return false;
-                        case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
-                            return true;
+
+                /**
+                 * Проверка, может ли текущий пользоватеть выполнить операцию над выделенными налоговыми формами
+                 * @param permission
+                 */
+                $scope.checkPermissionForSelectedItems = function (permission) {
+                    if ($scope.selectedItems && $scope.selectedItems.length > 0) {
+                        return $scope.selectedItems.every(function (item) {
+                            return PermissionChecker.check(item, permission);
+                        });
+                    } else {
+                        return false;
                     }
-                    return undefined;
-                }
+                };
 
                 // Флаг отображения кнопки "Сбросить"
                 $scope.searchFilter.isClearByFilterParams = function () {
@@ -149,17 +98,27 @@
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
                 };
 
-                $scope.$watch('searchFilter.params.periods', function (periods) {
-                    if (periods.length > 0) {
-                        $scope.latestSelectedPeriod = periods[periods.length - 1];
-                    } else {
-                        $scope.latestSelectedPeriod = null;
-                    }
-                });
+                /**
+                 * @description Инициализация грида
+                 * @param ctrl Контроллер грида
+                 */
+                var init = function (ctrl) {
+                    //Установить обработчик выбора строки
+                    ctrl.onSelectRow = function () {
+                        $scope.selectedItems = ctrl.getAllSelectedRows();
+                        $scope.$apply();
+                    };
+
+                    //Установить обрабочик выбора всех строк
+                    ctrl.onSelectAll = function () {
+                        $scope.selectedItems = ctrl.getAllSelectedRows();
+                        $scope.$apply();
+                    };
+                };
 
                 $scope.ndflReportJournalGrid = {
                     ctrl: {},
-                    value: [],
+                    init: init,
                     options: {
                         datatype: "angularResource",
                         angularResource: DeclarationDataResource,
@@ -178,7 +137,7 @@
                                     oktmo: $scope.searchFilter.params.oktmo,
                                     taxOrganKpp: $scope.searchFilter.params.kpp,
                                     taxOrganCode: $scope.searchFilter.params.codeNo,
-                                    correctionTag: getCorrectionTag(),
+                                    correctionTag: $filter('correctionTagFormatter')($scope.searchFilter.params.correctionTag),
                                     reportPeriodIds: $filter('idExtractor')($scope.searchFilter.params.periods)
                                 })
                             };
@@ -200,7 +159,12 @@
                             $filter('translate')('title.note')],
                         colModel: [
                             {name: 'declarationDataId', index: 'declarationDataId', width: 110, key: true},
-                            {name: 'declarationType', index: 'declarationType', width: 170, formatter: linkformatter},
+                            {
+                                name: 'declarationType',
+                                index: 'declarationType',
+                                width: 170,
+                                formatter: $filter('linkformatter')
+                            },
                             {name: 'department', index: 'department', width: 200},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 175},
                             {name: 'state', index: 'state', width: 175},
@@ -215,7 +179,7 @@
                                 formatter: $filter('dateTimeFormatter')
                             },
                             {name: 'creationUserName', index: 'creationUserName', width: 130},
-                            {name: 'fileName', index: 'fileName', width: 200, formatter: linkFileFormatter},
+                            {name: 'fileName', index: 'fileName', width: 200, formatter: $filter('linkFileFormatter')},
                             {name: 'note', index: 'note', width: 200}
                         ],
                         rowNum: 20,
@@ -224,10 +188,15 @@
                         viewrecords: true,
                         sortorder: "desc",
                         hidegrid: false,
-                        multiselect: true
+                        multiselect: true,
+                        ondblClickRow: function (rowId) {
+                            $state.go("ndfl", {
+                                declarationId: rowId
+                            });
+                        }
                     }
                 };
-
+                // Запоминаем самый поздний период для создания отчётности
                 $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
                     if (selectedPeriods && selectedPeriods.length > 0) {
                         $scope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
@@ -237,43 +206,136 @@
                 });
 
                 /**
-                 * @description инициализирует грид
-                 * @param ctrl контроллер грида
+                 * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
-                $scope.initOurGrid = function (ctrl) {
-                    $scope.ndflReportJournalGrid.ctrl = ctrl;
-                    var grid = ctrl.getGrid();
-                    grid.setGridParam({
-                        onSelectRow: function () {
-                            $scope.selectedItems = ctrl.getAllSelectedRows();
-                            $scope.$apply();
-                        },
-                        onSelectAll: function () {
-                            $scope.selectedItems = ctrl.getAllSelectedRows();
-                            $scope.$apply();
+                $scope.accept = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/accept",
+                        params: {
+                            declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
                         }
+                    }).then(function (response) {
+                        //Обновить страницу и, если есть сообщения, показать их
+                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                        $state.go($state.current, params, {reload: true});
                     });
                 };
 
                 /**
-                 * @description форматтер для поля 'Вид налоговой формы' для перехода на конкретную НФ
-                 * @param cellValue значение ячейки
-                 * @param options данные таблицы
+                 * @description Событие, которое возникает по нажатию на кнопку "Проверить"
                  */
-                function linkformatter(cellValue, options) {
-                    return "<a href='index.html#/taxes/ndfl/" + options.rowId + "'>" + cellValue + "</a>";
-                }
+                $scope.check = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/check",
+                        params: {
+                            declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
+                        }
+                    }).then(function (response) {
+                        //Обновить страницу и, если есть сообщения, показать их
+                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                        $state.go($state.current, params, {reload: true});
+                    });
+                };
 
                 /**
-                 * @description форматтер для поля 'Файл ТФ' для получения файла ТФ
-                 * @param cellValue значение ячейки
-                 * @param options данные таблицы
+                 * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
-                function linkFileFormatter(cellValue, options) {
-                    if (!cellValue) {
-                        cellValue = '';
-                    }
-                    return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
-                }
+                $scope.returnToCreated = function () {
+                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {
+                        header: $filter('translate')('title.indicateReasonForReturn'),
+                        msg: $filter('translate')('title.reasonForReturn')
+                    }, {size: 'md'})
+                        .result.then(
+                        function (reason) {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/returnToCreated",
+                                params: {
+                                    declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId'),
+                                    reason: reason
+                                }
+                            }).then(function (response) {
+                                //Обновить страницу и, если есть сообщения, показать их
+                                var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                $state.go($state.current, params, {reload: true});
+                            });
+                        });
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Удалить"
+                 */
+                $scope.delete = function () {
+                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.deleteDeclarations'))
+                        .result.then(
+                        function () {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/declarationData/delete",
+                                params: {
+                                    declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
+                                }
+                            }).then(function (response) {
+                                //Обновить страницу и, если есть сообщения, показать их
+                                var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                $state.go($state.current, params, {reload: true});
+                            });
+                        });
+                };
+
             }])
+        /**
+         * @description Форматтер для поля 'Вид налоговой формы' для перехода на конкретную НФ
+         * @param cellValue Значение ячейки
+         * @param options Данные таблицы
+         */
+        .filter('linkformatter', function () {
+            return function (cellValue, options) {
+                return "<a href='index.html#/taxes/ndfl/" + options.rowId + "'>" + cellValue + "</a>";
+            };
+        })
+        /**
+         * @description Форматтер для поля 'Файл ТФ' для получения файла ТФ
+         * @param cellValue Значение ячейки
+         * @param options Данные таблицы
+         */
+        .filter('linkFileFormatter', function () {
+            return function (cellValue, options) {
+                if (!cellValue) {
+                    cellValue = '';
+                }
+                return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
+            };
+        })
+
+        .filter('nameFormatter', function () {
+            return function (entity) {
+                return entity ? entity.name : "";
+            };
+        })
+
+        .filter('periodFormatter', function () {
+            return function (entity) {
+                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
+            };
+        })
+        /**
+         * @description Форматтер для преобразования тега корректировки из enum в boolean
+         * @param correctionTag
+         */
+        .filter('correctionTagFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (correctionTag) {
+                switch (correctionTag) {
+                    case APP_CONSTANTS.CORRETION_TAG.ALL:
+                        return undefined;
+                    case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
+                        return false;
+                    case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
+                        return true;
+                }
+                return undefined;
+            };
+        }]);
 }());
