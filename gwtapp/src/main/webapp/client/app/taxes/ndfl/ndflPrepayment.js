@@ -60,10 +60,10 @@
                                     projection: "personsPrepayment",
                                     ndflPersonPrepaymentFilter: JSON.stringify({
                                         declarationDataId: $stateParams.declarationDataId,
-                                        inp: $scope.searchFilter.params.inp && $scope.searchFilter.params.inp !== "" ? $scope.searchFilter.params.inp : undefined,
-                                        operationId: $scope.searchFilter.params.operationId && $scope.searchFilter.params.operationId !== "" ? $scope.searchFilter.params.operationId : undefined,
-                                        notifNum: $scope.searchFilter.params.notifNum && $scope.searchFilter.params.notifNum !== "" ? $scope.searchFilter.params.notifNum : undefined,
-                                        notifSource: $scope.searchFilter.params.notifSource && $scope.searchFilter.params.notifSource !== "" ? $scope.searchFilter.params.notifSource : undefined,
+                                        inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
+                                        operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
+                                        notifNum: $filter('requestParamsFormatter')($scope.searchFilter.params.notifNum),
+                                        notifSource: $filter('requestParamsFormatter')($scope.searchFilter.params.notifSource),
                                         notifDateFrom: $scope.searchFilter.params.notifDateFrom,
                                         notifDateTo: $scope.searchFilter.params.notifDateTo
                                     })

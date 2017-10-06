@@ -59,6 +59,23 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Autowired
     SQLQueryFactory sqlQueryFactory;
 
+    private final QBean<NdflPerson> ndflPersonBean = bean(NdflPerson.class, ndflPerson.all());
+
+    private final QBean<NdflPersonIncome> ndflPersonIncomeBean = bean(NdflPersonIncome.class, ndflPerson.inp, ndflPersonIncome.incomeCode,
+            ndflPersonIncome.incomeType, ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.kpp, ndflPersonIncome.oktmo,
+            ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.incomePayoutSumm, ndflPersonIncome.totalDeductionsSumm, ndflPersonIncome.taxBase,
+            ndflPersonIncome.taxRate, ndflPersonIncome.taxDate, ndflPersonIncome.calculatedTax, ndflPersonIncome.withholdingTax, ndflPersonIncome.notHoldingTax,
+            ndflPersonIncome.overholdingTax, ndflPersonIncome.refoundTax, ndflPersonIncome.taxTransferDate, ndflPersonIncome.paymentDate, ndflPersonIncome.paymentNumber,
+            ndflPersonIncome.taxSumm, ndflPersonIncome.operationId, ndflPersonIncome.sourceId, ndflPersonIncome.rowNum);
+
+    private final QBean<NdflPersonDeduction> ndflPersonDeductionBean = bean(NdflPersonDeduction.class, ndflPerson.inp, ndflPersonDeduction.operationId, ndflPersonDeduction.sourceId,
+            ndflPersonDeduction.rowNum, ndflPersonDeduction.typeCode, ndflPersonDeduction.notifType, ndflPersonDeduction.notifDate, ndflPersonDeduction.notifNum, ndflPersonDeduction.notifSource,
+            ndflPersonDeduction.notifSumm, ndflPersonDeduction.incomeAccrued, ndflPersonDeduction.incomeCode, ndflPersonDeduction.incomeSumm, ndflPersonDeduction.periodCurrDate,
+            ndflPersonDeduction.periodCurrSumm, ndflPersonDeduction.periodPrevDate, ndflPersonDeduction.periodPrevSumm);
+
+    private final QBean<NdflPersonPrepayment> ndflPersonPrepaymentBean = bean(NdflPersonPrepayment.class, ndflPerson.inp, ndflPersonPrepayment.operationId, ndflPersonPrepayment.sourceId,
+            ndflPersonPrepayment.rowNum, ndflPersonPrepayment.summ, ndflPersonPrepayment.notifNum, ndflPersonPrepayment.notifDate, ndflPersonPrepayment.notifSource);
+
     private static final String DUPLICATE_ERORR_MSG = "Попытка перезаписать уже сохранённые данные!";
 
     @Override
@@ -125,13 +142,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .where(ndflPerson.declarationDataId.eq(declarationDataId))
                 .fetchCount();
     }
-
-    private final QBean<NdflPersonIncome> ndflPersonIncomeBean = bean(NdflPersonIncome.class, ndflPerson.inp, ndflPersonIncome.incomeCode,
-            ndflPersonIncome.incomeType, ndflPersonIncome.incomeAccruedDate, ndflPersonIncome.incomePayoutDate, ndflPersonIncome.kpp, ndflPersonIncome.oktmo,
-            ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.incomePayoutSumm, ndflPersonIncome.totalDeductionsSumm, ndflPersonIncome.taxBase,
-            ndflPersonIncome.taxRate, ndflPersonIncome.taxDate, ndflPersonIncome.calculatedTax, ndflPersonIncome.withholdingTax, ndflPersonIncome.notHoldingTax,
-            ndflPersonIncome.overholdingTax, ndflPersonIncome.refoundTax, ndflPersonIncome.taxTransferDate, ndflPersonIncome.paymentDate, ndflPersonIncome.paymentNumber,
-            ndflPersonIncome.taxSumm, ndflPersonIncome.operationId, ndflPersonIncome.sourceId, ndflPersonIncome.rowNum);
 
     @Override
     public PagingResult<NdflPersonIncome> findPersonIncomeByParameters(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams) {
@@ -224,11 +234,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .fetchCount();
     }
 
-    final QBean<NdflPersonDeduction> ndflPersonDeductionBean = bean(NdflPersonDeduction.class, ndflPerson.inp, ndflPersonDeduction.operationId, ndflPersonDeduction.sourceId,
-            ndflPersonDeduction.rowNum, ndflPersonDeduction.typeCode, ndflPersonDeduction.notifType, ndflPersonDeduction.notifDate, ndflPersonDeduction.notifNum, ndflPersonDeduction.notifSource,
-            ndflPersonDeduction.notifSumm, ndflPersonDeduction.incomeAccrued, ndflPersonDeduction.incomeCode, ndflPersonDeduction.incomeSumm, ndflPersonDeduction.periodCurrDate,
-            ndflPersonDeduction.periodCurrSumm, ndflPersonDeduction.periodPrevDate, ndflPersonDeduction.periodPrevSumm);
-
     @Override
     public PagingResult<NdflPersonDeduction> findPersonDeductionByParameters(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams) {
         BooleanBuilder where = new BooleanBuilder();
@@ -300,9 +305,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .where(ndflPerson.declarationDataId.eq(declarationDataId))
                 .fetchCount();
     }
-
-    final QBean<NdflPersonPrepayment> ndflPersonPrepaymentBean = bean(NdflPersonPrepayment.class, ndflPerson.inp, ndflPersonPrepayment.operationId, ndflPersonPrepayment.sourceId,
-            ndflPersonPrepayment.rowNum, ndflPersonPrepayment.summ, ndflPersonPrepayment.notifNum, ndflPersonPrepayment.notifDate, ndflPersonPrepayment.notifSource);
 
     @Override
     public PagingResult<NdflPersonPrepayment> findPersonPrepaymentByParameters(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams) {
@@ -595,7 +597,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         return new PagingResult<NdflPerson>(result, getCount(totalQuery, parameters));
     }
 
-    private final QBean<NdflPerson> ndflPersonBean = bean(NdflPerson.class, ndflPerson.all());
     @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(NdflPersonFilter ndflPersonFilter, PagingParams pagingParams) {
         BooleanBuilder where = new BooleanBuilder();

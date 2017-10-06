@@ -119,5 +119,15 @@
                 return reportPeriod ? reportPeriod.taxPeriod.year + ": " + reportPeriod.name : "";
             };
         })
+
+        /**
+         * @description Форматтер для параметров запроса
+         * @param param параметр запроса
+         */
+        .filter('requestParamsFormatter', function () {
+            return function (param) {
+                return !param ? undefined : param;
+            };
+        })
     ;
 }());

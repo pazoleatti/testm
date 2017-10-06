@@ -110,7 +110,7 @@
     "tab.ndfl.requisites": "Реквизиты",
     "tab.ndfl.informationOnIncomesAndNdfl": "Сведения о доходах и НДФЛ",
     "tab.ndfl.informationOnDeductions": "Сведения о вычетах",
-    "tab.ndfl.informationOnAdvancePayments": "Сведения о доходах и НДФЛ",
+    "tab.ndfl.informationOnAdvancePayments": "Сведения о доходах в виде авансовых платежей",
 
     "link.ndfl.reporting": "Формирование отчетов",
     "link.ndfl.reporting.uploadXml": "Выгрузить в XML",
