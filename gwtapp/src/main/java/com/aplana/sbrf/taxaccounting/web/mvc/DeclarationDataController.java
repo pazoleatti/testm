@@ -244,7 +244,7 @@ public class DeclarationDataController {
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
     @PostMapping(value = "/actions/declarationData/createReport")
-    public CreateDeclarationReportResult createReports(Integer declarationTypeId, Integer departmentId, Integer periodId) {
+    public CreateDeclarationReportResult createReport(Integer declarationTypeId, Integer departmentId, Integer periodId) {
         return declarationDataService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
     }
 
