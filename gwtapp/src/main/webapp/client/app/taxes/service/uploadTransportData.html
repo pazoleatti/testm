@@ -7,7 +7,7 @@
     </div>
 
     <div style="padding-bottom: 15px;">
-        <button type="file" class="btn btn-danger w250" ngf-select="uploadButtonClick($file)" data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.HANDLING_FILE)">
+        <button type="file" class="btn btn-danger w250" ngf-select="uploadButtonClick($file)" data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.UPLOAD_FILE)">
             <span data-translate-once="uploadTransportData.button.upload"></span>
         </button>
         <label class="font-normal">{{::'uploadTransportData.description.upload' | translate}}</label>
@@ -15,7 +15,7 @@
     </div>
 
     <div>
-        <button type="button" class="btn btn-danger w250" data-ng-click="loadAllButtonClick()" data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.UPLOAD_FILE)">
+        <button type="button" class="btn btn-danger w250" data-ng-click="loadAllButtonClick()" data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.HANDLING_FILE)">
             <span data-translate-once="uploadTransportData.button.loadAll"></span>
         </button>
         <label class="font-normal">{{::'uploadTransportData.description.loadAll' | translate}}</label>
