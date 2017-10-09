@@ -6,6 +6,10 @@ alter table notification modify id number(18);
 prompt create tables
 @@create_tables.sql;
 
+--create views
+prompt create views
+@@create_views.sql;
+
 --create constraints
 prompt create constraints
 @@create_constraints.sql;

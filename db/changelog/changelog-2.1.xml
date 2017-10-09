@@ -776,4 +776,17 @@
 			<where>id in (4, 10, 11, 101, 102, 103, 104, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 303, 302, 601)</where>
 		</delete>
 	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-89" author="rnurgaleev">
+		<createView
+			replaceIfExists="true"
+            viewName="DEPARTMENT_CHILD_VIEW">select cast(connect_by_root id as number(9,0)) id, parent_id, (connect_by_root id)||'|'||parent_id view_rowid from department connect by prior parent_id = id order by parent_id, id</createView>
+	</changeSet>
+	
+	<!--SBRFNDFL-2077-->
+	<changeSet id="2.1-rnurgaleev-90" author="rnurgaleev">
+		<dropColumn	columnName="is_balance_period"
+					tableName="department_report_period"/>
+	</changeSet>
+
 </databaseChangeLog>
