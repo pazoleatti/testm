@@ -23,8 +23,8 @@ INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, '1 - период', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (2, '2 - период', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (2, 2, 2, 1, 0);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (1, 1, 1, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (2, 2, 2, 1);
 
 insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (1, 1, 1, 1);
 insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (2, 1, 2, 1);
