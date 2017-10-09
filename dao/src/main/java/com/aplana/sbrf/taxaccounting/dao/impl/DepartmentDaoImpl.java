@@ -1,17 +1,16 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-//import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.querydsl.core.types.SubQueryExpression;
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-//import org.springframework.cache.annotation.CacheEvict;
-//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -21,34 +20,45 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
+import static com.aplana.sbrf.taxaccounting.model.QDepartmentChildView.departmentChildView;
+import static com.aplana.sbrf.taxaccounting.model.QDepartmentDeclTypePerformer.departmentDeclTypePerformer;
+import static com.aplana.sbrf.taxaccounting.model.QDepartmentDeclarationType.departmentDeclarationType;
+
+//import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+//import org.springframework.cache.annotation.CacheEvict;
+//import org.springframework.cache.annotation.Cacheable;
 
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
-	private static final Log LOG = LogFactory.getLog(DepartmentDaoImpl.class);
+    private static final Log LOG = LogFactory.getLog(DepartmentDaoImpl.class);
 
-	@Override
-	//@Cacheable(CacheConstants.DEPARTMENT)
-	public Department getDepartment(int id) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Fetching department with id = " + id  + " from database");
-		}
+    final private SQLQueryFactory sqlQueryFactory;
+
+    public DepartmentDaoImpl(SQLQueryFactory sqlQueryFactory) {
+        this.sqlQueryFactory = sqlQueryFactory;
+    }
+
+    @Override
+    //@Cacheable(CacheConstants.DEPARTMENT)
+    public Department getDepartment(int id) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Fetching department with id = " + id + " from database");
+        }
         try {
             return getJdbcTemplate().queryForObject(
                     "select * from department where id = ?",
-                    new Object[] { id },
+                    new Object[]{id},
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не удалось найти подразделение банка с id = " + id);
         }
-	}
+    }
 
     @Override
     public boolean existDepartment(int id) {
@@ -56,17 +66,17 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-	public List<Department> getChildren(int parentDepartmentId){
+    public List<Department> getChildren(int parentDepartmentId) {
         try {
             return getJdbcTemplate().query(
                     "select * from department where parent_id = ?",
-                    new Object[] { parentDepartmentId },
+                    new Object[]{parentDepartmentId},
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
         }
-	}
+    }
 
     @Override
     public String getParentsHierarchy(Integer departmentId) {
@@ -85,9 +95,9 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
-	@Override
-	public String getParentsHierarchyShortNames(Integer departmentId) {
-		try {
+    @Override
+    public String getParentsHierarchyShortNames(Integer departmentId) {
+        try {
             return getJdbcTemplate().queryForObject(sqlParentHierarchy("shortname"),
                     new RowMapper<String>() {
                         @Override
@@ -97,13 +107,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     },
                     departmentId
             );
-		} catch (EmptyResultDataAccessException e) {
-			return getDepartment(departmentId).getShortName();
-		}
-	}
+        } catch (EmptyResultDataAccessException e) {
+            return getDepartment(departmentId).getShortName();
+        }
+    }
 
-    private String sqlParentHierarchy(String columnName){
-        return "SELECT LTRIM(SYS_CONNECT_BY_PATH(CASE WHEN " + columnName +" is not null THEN " + columnName + " ELSE name END, '/'), '/') as path \n" +
+    private String sqlParentHierarchy(String columnName) {
+        return "SELECT LTRIM(SYS_CONNECT_BY_PATH(CASE WHEN " + columnName + " is not null THEN " + columnName + " ELSE name END, '/'), '/') as path \n" +
                 "FROM department\n" +
                 "WHERE id = ? \n" +
                 "START WITH parent_id in (select id from department where parent_id is null)  \n" +
@@ -115,15 +125,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         try {
             return getJdbcTemplate().queryForObject("SELECT id FROM department WHERE parent_id = 0 and type = 2 " +
                     "START WITH id = ? CONNECT BY id = prior parent_id", new Object[]{departmentId}, Integer.class);
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return null;
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DaoException("", e);
         }
     }
 
     @Override
-    public List<Department> listDepartments(){
+    public List<Department> listDepartments() {
         try {
             return getJdbcTemplate().query(
                     "select * from department",
@@ -135,25 +145,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> listDepartmentIds() {
-        try {
-            return getJdbcTemplate().queryForList(
-                    "select id from department",
-                    Integer.class
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>(0);
-        }
-    }
-
-    @Override
     public SecuredEntity getSecuredEntity(long id) {
         return getDepartment((int) id);
     }
 
     protected class DepartmentJdbcMapper implements RowMapper<Department> {
-		@Override
-		public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
+        @Override
+        public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
             try {
                 Department department = new Department();
                 department.setId(SqlUtils.getInteger(rs, "id"));
@@ -177,7 +175,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
-	@Override
+    @Override
     public Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly) {
         try {
             return getJdbcTemplate().queryForObject(
@@ -190,21 +188,21 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
     }
 
-	@Override
-	public Department getDepartmentByName(String name) {
-		return getJdbcTemplate().queryForObject(
-				"SELECT * FROM department dp WHERE dp.name = ?",
-				new Object[]{name},
-				new DepartmentJdbcMapper()
-		);
-	}
+    @Override
+    public Department getDepartmentByName(String name) {
+        return getJdbcTemplate().queryForObject(
+                "SELECT * FROM department dp WHERE dp.name = ?",
+                new Object[]{name},
+                new DepartmentJdbcMapper()
+        );
+    }
 
     @Override
     public List<Department> getDepartmentsByType(int type) {
         try {
             return getJdbcTemplate().query(
                     "SELECT * FROM department dp WHERE dp.type = ?",
-                    new Object[] { type },
+                    new Object[]{type},
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
@@ -269,10 +267,10 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         try {
             String recursive = isWithRecursive() ? "recursive" : "";
             return getJdbcTemplate().queryForObject("with " + recursive + " tree (id, parent_id, type) as " +
-                    "(select id, parent_id, type from department where id = ? " +
-                    "union all select d.id, d.parent_id, d.type from department d " +
-                    "inner join tree t on d.id = t.parent_id) " +
-                    "select d.* from department d, tree where d.id = tree.id and tree.type = ?",
+                            "(select id, parent_id, type from department where id = ? " +
+                            "union all select d.id, d.parent_id, d.type from department d " +
+                            "inner join tree t on d.id = t.parent_id) " +
+                            "select d.* from department d, tree where d.id = tree.id and tree.type = ?",
                     new Object[]{departmentId, typeId},
                     new DepartmentJdbcMapper()
             );
@@ -313,10 +311,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     /**
      * Формирование запроса для методов
-     * @see DepartmentDaoImpl#getParentDepartmentChildIdByType(int, int)
-     * @see DepartmentDaoImpl#getParentDepartmentChildByType(int, int)
+     *
      * @param idOnly true - выборка только идентификаторов, false - выборка полной модели
      * @return строку запроса
+     * @see DepartmentDaoImpl#getParentDepartmentChildIdByType(int, int)
+     * @see DepartmentDaoImpl#getParentDepartmentChildByType(int, int)
      */
     private String createQueryParentDepartmentChildByType(boolean idOnly) {
         String recursive = isWithRecursive() ? "recursive" : "";
@@ -340,24 +339,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         try {
             return getJdbcTemplate().query(
                     "select * from department CONNECT BY prior id = parent_id start with id = ?",
-                    new Object[] { parentDepartmentId },
+                    new Object[]{parentDepartmentId},
                     new DepartmentJdbcMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
-        }
-    }
-
-    @Override
-    public List<Integer> getAllChildrenIds(int parentDepartmentId) {
-        try {
-            return getJdbcTemplate().queryForList(
-                    "select id from department CONNECT BY prior id = parent_id start with id = ?",
-                    new Object[] { parentDepartmentId },
-                    Integer.class
-            );
-        } catch (DataAccessException e) {
-            throw new DaoException("Ошибка получения дочерних подразделений", e);
         }
     }
 
@@ -382,17 +368,17 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         parameterMap.put("formtype", formType);
 
-        return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
+        return getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
     }
 
     /**
      * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений
      *
      * @param userDepartmentId Подразделение пользователя
-     * @param taxTypes Типы налога
-     * @param periodStart  начало периода, в котором действуют назначения
-     * @param periodEnd    окончание периода, в котором действуют назначения
-     * @param isNs true - для роли "Контролер НС", false для роли "Контролер"  @return Список id подразделений
+     * @param taxTypes         Типы налога
+     * @param periodStart      начало периода, в котором действуют назначения
+     * @param periodEnd        окончание периода, в котором действуют назначения
+     * @param isNs             true - для роли "Контролер НС", false для роли "Контролер"  @return Список id подразделений
      */
     private List<Integer> getDepartmentsBySource(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd, boolean isNs) {
         String recursive = isWithRecursive() ? "recursive" : "";
@@ -471,7 +457,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Department> getDepartmentsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd){
+    public List<Department> getDepartmentsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
@@ -486,7 +472,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 "       from DEPARTMENT_FORM_TYPE src_dft " +
                 "       where %s)" +
                 "   )", SqlUtils.transformToSqlInStatement("department_id", departments));
-        try{
+        try {
             return getNamedParameterJdbcTemplate().query(sql, params, new DepartmentJdbcMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
@@ -517,7 +503,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     //@CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
     public void setUsedByGarant(int depId, boolean used) {
         if (LOG.isDebugEnabled()) {
-			LOG.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);
+            LOG.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);
         }
         try {
             int usedInt = used ? 1 : 0;
@@ -653,5 +639,67 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return result.get(0);
         }
         return "";
+    }
+
+    @Override
+    public List<Integer> listDepartmentIds() {
+        return sqlQueryFactory
+                .select(department.id)
+                .from(department)
+                .fetch();
+    }
+
+    @Override
+    public List<Integer> getAllChildrenIds(int parentDepartmentId) {
+        //В department_child_view, в отличие от начального запроса select id from department CONNECT BY prior id = parent_id start with id = ?
+        //подразделение не является родителем (потомком) самого себя, поэтому его тоже нужно добавить в список. Но нужно убедиться, что
+        //подразделение существует в БД
+
+        SubQueryExpression<Integer> childrenQuery = sqlQueryFactory
+                .select(departmentChildView.id)
+                .from(departmentChildView)
+                .where(departmentChildView.parentId.eq(parentDepartmentId));
+
+        SubQueryExpression<Integer> departmentQuery = sqlQueryFactory
+                .select(department.id)
+                .from(department)
+                .where(department.id.eq(parentDepartmentId));
+
+        return sqlQueryFactory
+                .query()
+                .union(childrenQuery, departmentQuery)
+                .fetch();
+    }
+
+    @Override
+    public List<Integer> getAllChildrenIds(List<Integer> parentDepartmentIds) {
+        //В department_child_view, в отличие от начального запроса select id from department CONNECT BY prior id = parent_id start with id = ?
+        //подразделение не является родителем (потомком) самого себя, поэтому его тоже нужно добавить в список. Но нужно убедиться, что
+        //подразделение существует в БД
+
+        SubQueryExpression<Integer> childrenQuery = sqlQueryFactory
+                .select(departmentChildView.id)
+                .from(departmentChildView)
+                .where(departmentChildView.parentId.in(parentDepartmentIds));
+
+        SubQueryExpression<Integer> departmentQuery = sqlQueryFactory
+                .select(department.id)
+                .from(department)
+                .where(department.id.in(parentDepartmentIds));
+
+        return sqlQueryFactory
+                .query()
+                .union(childrenQuery, departmentQuery)
+                .fetch();
+    }
+
+    @Override
+    public List<Integer> getDepartmentsByDeclarationsPerformers(List<Integer> performersIds) {
+        return sqlQueryFactory
+                .select(departmentDeclarationType.departmentId)
+                .distinct()
+                .from(departmentDeclarationType).innerJoin(departmentDeclTypePerformer).on(departmentDeclarationType.id.eq(departmentDeclTypePerformer.departmentDeclTypeId))
+                .where(departmentDeclTypePerformer.performerDepId.in(performersIds))
+                .fetch();
     }
 }

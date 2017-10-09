@@ -421,7 +421,7 @@ public class DepartmentServiceImplTest {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
-        List<Integer> result = departmentService.getTaxFormDepartments(taUser, TaxType.NDFL, null, null);
+        List<Integer> result = departmentService.getNDFLDeclarationDepartments(taUser);
         Assert.assertEquals(5, result.size());
         Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
                 && result.contains(departmentTB3.getId()) && result.contains(departmentGOSB31.getId())
