@@ -218,7 +218,6 @@ alter table declaration_template add constraint dec_template_check_status check 
 alter table declaration_template add constraint chk_declaration_template_fkind check ((status in (0,1) and form_kind is not null) or status not in (0,1));
 alter table declaration_template add constraint chk_declaration_template_ftype check ((status in (0,1) and form_type is not null) or status not in (0,1));
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
-alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
 alter table form_data add constraint form_data_chk_return_sign check(return_sign in (0,1));
 alter table form_data add constraint form_data_chk_period_order check(period_order in (1,2,3,4,5,6,7,8,9,10,11,12));

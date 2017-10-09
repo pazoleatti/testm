@@ -43,9 +43,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	Spinner yearBox;
 
 	@UiField
-	CheckBox balancePeriod;
-
-	@UiField
     DateMaskBoxPicker term;
 
 	@UiField
@@ -97,7 +94,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	public void onContinue(ClickEvent event) {
 		OpenFilterData openFilterData = new OpenFilterData();
 		openFilterData.setYear(yearBox.getValue());
-		openFilterData.setBalancePeriod(balancePeriod.getValue());
 		openFilterData.setDepartmentId(departmentPicker.getValue().isEmpty() ? null : departmentPicker.getValue().get(0));
 	    openFilterData.setDictionaryTaxPeriodId(period.getSingleValue());
         if (correctPeriod.getValue()) {
@@ -146,7 +142,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
         period.setDereferenceValue(null);
 	    Date current = new Date();
 	    period.setPeriodDates(current, current);
-        balancePeriod.setValue(false);
         correctPeriod.setValue(false, true);
         onCorrectPeriodButton();
         term.setValue(null);

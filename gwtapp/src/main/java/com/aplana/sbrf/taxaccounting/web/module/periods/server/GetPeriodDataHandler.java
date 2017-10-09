@@ -66,7 +66,6 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
             row.setDictTaxPeriodId(drp.getReportPeriod().getDictTaxPeriodId());
             row.setDepartmentId(drp.getDepartmentId());
             row.setPeriodCondition(drp.isActive());
-            row.setBalance(drp.isBalance());
             row.setYear(year);
             row.setOrd(drp.getReportPeriod().getOrder());
             row.setCorrectPeriod(drp.getCorrectionDate());

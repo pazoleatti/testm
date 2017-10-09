@@ -203,7 +203,6 @@ public class PeriodServiceImplTest {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         departmentReportPeriod.setId(1);
         departmentReportPeriod.setActive(true);
-        departmentReportPeriod.setBalance(false);
         departmentReportPeriod.setCorrectionDate(null);
         departmentReportPeriod.setDepartmentId(1);
         departmentReportPeriod.setReportPeriod(reportPeriod11);
@@ -308,7 +307,7 @@ public class PeriodServiceImplTest {
 
     @Test
     public void open() {
-        periodService.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), false, new Date());
+        periodService.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), new Date());
 
         ArgumentCaptor<ReportPeriod> argument = ArgumentCaptor.forClass(ReportPeriod.class);
         verify(reportPeriodDao, times(1)).save(argument.capture());

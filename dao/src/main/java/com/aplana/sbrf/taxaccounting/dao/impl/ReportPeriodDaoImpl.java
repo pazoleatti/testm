@@ -165,14 +165,13 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
-                                                                    boolean withoutBalance, boolean withoutCorrect) {
+	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutCorrect) {
 		return getJdbcTemplate().query(
 				"select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
 						"(select distinct report_period_id from department_report_period " +
 						"where "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+" and is_active=1 " +
-						(withoutBalance ? " and is_balance_period=0 " : "") + (withoutCorrect ? "and correction_date is null" : "") + " ) " +
+						(withoutCorrect ? "and correction_date is null" : "") + " ) " +
 						"and rp.tax_period_id = tp.id " +
 						"and tp.tax_type = \'" + taxType.getCode() +"\' " +
 						"order by tp.year desc, rp.calendar_start_date",
@@ -187,7 +186,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                             "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
                             "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
                             "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
-                            "and drp.IS_BALANCE_PERIOD=0 and drp.IS_ACTIVE=0 and CORRECTION_DATE is null " +
+                            "and drp.IS_ACTIVE=0 and CORRECTION_DATE is null " +
                             "order by year",
                     new Object[]{String.valueOf(taxType.getCode()), departmentId},
                     new int[] { Types.VARCHAR, Types.NUMERIC},

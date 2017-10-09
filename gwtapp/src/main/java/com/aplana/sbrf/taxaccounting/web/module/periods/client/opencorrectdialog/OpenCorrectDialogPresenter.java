@@ -44,7 +44,6 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
 	private DispatchAsync dispatcher;
 	private TaxType taxType;
-    private Boolean balance;
 
 	@Inject
 	public OpenCorrectDialogPresenter(final EventBus eventBus, final MyView view,
@@ -98,10 +97,6 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
 	@Override
 	public void onContinue() {
-        if(balance != null && balance){
-            Dialog.errorMessage("Ошибка", "Корректирующий период не может быть открыт для периода ввода остатков!");
-            return;
-        }
         StringBuilder missedFields = new StringBuilder();
         if (getView().getSelectedDepartments().isEmpty()) {
             missedFields.append(" \"Подразделение\"");
@@ -146,9 +141,6 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                             @Override
                             public void onSuccess(CheckCorrectionPeriodStatusResult result) {
                                 switch (result.getStatus()) {
-                                    case CLOSE_AND_BALANCE:
-                                        Dialog.errorMessage("Корректирование периода", "Корректирующий период не может быть открыт для периода ввода остатков!");
-                                        break;
                                     case NOT_EXIST:
                                         openCorrectionPeriod();
                                         break;
@@ -227,7 +219,6 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
     public void init(TableRow data){
         setSelectedDepartment(data.getDepartmentId());
-        balance = data.isBalance();
         getView().setTerm(new Date());
     }
 

@@ -72,10 +72,6 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         Department declDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
 
         TaxType taxType = TaxType.NDFL;
-        // Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
-        if (departmentReportPeriod.isBalance()) {
-            error("Налоговая форма не может быть создана в периоде ввода остатков!", logger);
-        }
 
         // Выборка для доступа к экземплярам деклараций
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380670

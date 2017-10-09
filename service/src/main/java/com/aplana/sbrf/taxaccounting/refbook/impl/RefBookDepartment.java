@@ -665,7 +665,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                         drpCopy.setDepartmentId(depId);
                         drpCopy.setActive(drp.isActive());
                         drpCopy.setCorrectionDate(drp.getCorrectionDate());
-                        drpCopy.setBalance(drp.isBalance());
                         periodService.saveOrOpen(drpCopy, null);
                     }
                     return;
@@ -687,7 +686,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                 drpCopy.setDepartmentId(depId);
                 drpCopy.setActive(drp.isActive());
                 drpCopy.setCorrectionDate(drp.getCorrectionDate());
-                drpCopy.setBalance(drp.isBalance());
                 periodService.saveOrOpen(drpCopy, null);
             }
         }

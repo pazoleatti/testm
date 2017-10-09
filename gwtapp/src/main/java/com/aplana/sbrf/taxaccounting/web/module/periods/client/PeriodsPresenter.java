@@ -319,7 +319,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         ITD.add(TaxType.INCOME);
         ITD.add(TaxType.TRANSPORT);
         ITD.add(TaxType.DEAL);
-        if (canEdit && !selectedRow.isSubHeader() && !selectedRow.isOpen() && !selectedRow.isBalance()) {
+        if (canEdit && !selectedRow.isSubHeader() && !selectedRow.isOpen()) {
             getView().setCanOpenCorrectPeriod(true);
         } else {
             getView().setCanOpenCorrectPeriod(false);
@@ -337,7 +337,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
     public void editPeriod() {
         final EditDialogData initData = new EditDialogData();
         initData.setYear(getView().getSelectedRow().getYear());
-        initData.setBalance(getView().getSelectedRow().isBalance());
         initData.setDepartmentId(getView().getDepartmentId().getDepartmentId());
         initData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
         initData.setDictTaxPeriodId(getView().getSelectedRow().getDictTaxPeriodId());

@@ -1,15 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import static com.querydsl.core.types.PathMetadataFactory.*;
-
-import com.querydsl.core.types.dsl.*;
-
-import com.querydsl.core.types.PathMetadata;
-import javax.annotation.Generated;
 import com.querydsl.core.types.Path;
-
+import com.querydsl.core.types.PathMetadata;
+import com.querydsl.core.types.dsl.DateTimePath;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.ColumnMetadata;
+
+import javax.annotation.Generated;
 import java.sql.Types;
+
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 
 
 
@@ -31,8 +31,6 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final NumberPath<Byte> isActive = createNumber("isActive", Byte.class);
-
-    public final NumberPath<Byte> isBalancePeriod = createNumber("isBalancePeriod", Byte.class);
 
     public final NumberPath<Integer> reportPeriodId = createNumber("reportPeriodId", Integer.class);
 
@@ -65,11 +63,10 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
     }
 
     public void addMetadata() {
-        addMetadata(correctionDate, ColumnMetadata.named("CORRECTION_DATE").withIndex(6).ofType(Types.TIMESTAMP).withSize(7));
+        addMetadata(correctionDate, ColumnMetadata.named("CORRECTION_DATE").withIndex(5).ofType(Types.TIMESTAMP).withSize(7));
         addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(isActive, ColumnMetadata.named("IS_ACTIVE").withIndex(4).ofType(Types.DECIMAL).withSize(1).notNull());
-        addMetadata(isBalancePeriod, ColumnMetadata.named("IS_BALANCE_PERIOD").withIndex(5).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(reportPeriodId, ColumnMetadata.named("REPORT_PERIOD_ID").withIndex(3).ofType(Types.DECIMAL).withSize(9).notNull());
     }
 

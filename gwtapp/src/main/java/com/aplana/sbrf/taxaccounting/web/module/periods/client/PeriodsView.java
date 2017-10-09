@@ -35,7 +35,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
             "Период",
             "Состояние",
             "Срок сдачи отчетности",
-            "Признак ввода остатков",
             "Период сдачи корректировки"
     };
 
@@ -112,20 +111,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 			}
 		};
         periodConditionColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        TextColumn<TableRow> periodBalanceColumn = new TextColumn<TableRow>() {
-            @Override
-            public String getValue(TableRow object) {
-                if (object.isBalance() == null) {
-                    return "";
-                }
-                if (object.isBalance()) {
-                    return "Да";
-                } else {
-                    return "Нет";
-                }
-            }
-        };
-        periodBalanceColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<TableRow> deadlineColumn = new TextColumn<TableRow>() {
             @Override
@@ -144,8 +129,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		periodsTable.addResizableColumn(periodNameColumn, COLUMN_NAMES[0]);
 		periodsTable.addResizableColumn(periodConditionColumn, COLUMN_NAMES[1]);
         periodsTable.addResizableColumn(deadlineColumn, COLUMN_NAMES[2]);
-        periodsTable.addResizableColumn(periodBalanceColumn, COLUMN_NAMES[3]);
-        periodsTable.addResizableColumn(correctDateColumn, COLUMN_NAMES[4]);
+        periodsTable.addResizableColumn(correctDateColumn, COLUMN_NAMES[3]);
 
 		periodsTable.setSelectionModel(selectionModel);
 

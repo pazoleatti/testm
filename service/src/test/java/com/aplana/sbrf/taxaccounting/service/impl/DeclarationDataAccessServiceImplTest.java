@@ -27,7 +27,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.*;
 
 public class DeclarationDataAccessServiceImplTest {
@@ -174,9 +173,9 @@ public class DeclarationDataAccessServiceImplTest {
         when(reportPeriod.getTaxPeriod()).thenReturn(taxPeriod);
 
         final Map<Integer, DepartmentReportPeriod> periods = new HashMap<Integer, DepartmentReportPeriod>();
-        periods.put(BANK_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(BANK_REPORT_PERIOD_ID, ROOT_BANK_ID, reportPeriod, true, false, null));
-        periods.put(TB1_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB1_REPORT_PERIOD_ID, DEPARTMENT_TB1_ID, reportPeriod, true, false, null));
-        periods.put(TB2_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB2_REPORT_PERIOD_ID, DEPARTMENT_TB2_ID, reportPeriod, true, false, null));
+        periods.put(BANK_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(BANK_REPORT_PERIOD_ID, ROOT_BANK_ID, reportPeriod, true, null));
+        periods.put(TB1_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB1_REPORT_PERIOD_ID, DEPARTMENT_TB1_ID, reportPeriod, true, null));
+        periods.put(TB2_REPORT_PERIOD_ID, mockDepartmentReportPeriodData(TB2_REPORT_PERIOD_ID, DEPARTMENT_TB2_ID, reportPeriod, true, null));
 
         DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, State.CREATED, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));
         DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, State.ACCEPTED, DECLARATION_TEMPLATE_1_ID, periods.get(BANK_REPORT_PERIOD_ID));

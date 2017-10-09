@@ -96,11 +96,10 @@ public interface ReportPeriodDao extends PermissionDao {
 	 * Список открытых периодов
 	 * @param taxType тип налога
 	 * @param departmentList подразделения
-	 * @param withoutBalance true - без периодов ввода остатков, false - с периодами ввода остатков
 	 * @return список отчетных периодов
 	 */
 	List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
-                                                             boolean withoutBalance, boolean withoutCorrect);
+                                                             boolean withoutCorrect);
 
     /**
      * Получить корректирующие периоды

@@ -80,28 +80,15 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	}
 
     @Override
-    public void updateActive(int id, boolean active, boolean isBalance) {
+    public void updateActive(int id, boolean active) {
 		try {
-			departmentReportPeriodDao.updateActive(id, active, isBalance);
+			departmentReportPeriodDao.updateActive(id, active);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
-
-	@Override
-	public void updateActive(List<Integer> ids, Integer report_period_id, boolean active, boolean isBalance) {
-		if (ids == null || ids.isEmpty())
-			throw new ServiceException(ERROR_BATCH_MESSAGE);
-		try {
-			departmentReportPeriodDao.updateActive(ids, report_period_id, active, isBalance);
-		} catch (ServiceException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
-		}
-	}
 
     @Override
     public void updateActive(List<Integer> ids, Integer report_period_id, boolean active) {
@@ -120,30 +107,6 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     public void updateCorrectionDate(int id, Date correctionDate) {
 		try {
 			departmentReportPeriodDao.updateCorrectionDate(id, correctionDate);
-		} catch (ServiceException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
-		}
-    }
-
-    @Override
-    public void updateBalance(int id, boolean isBalance) {
-		try {
-			departmentReportPeriodDao.updateBalance(id, isBalance);
-		} catch (ServiceException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
-		}
-    }
-
-    @Override
-    public void updateBalance(List<Integer> ids, boolean isBalance) {
-        if (ids == null || ids.isEmpty())
-            throw new ServiceException(ERROR_BATCH_MESSAGE);
-		try {
-			departmentReportPeriodDao.updateBalance(ids, isBalance);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
