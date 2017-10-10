@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
@@ -67,14 +68,14 @@ public class NdflPersonDaoTest {
 
         Map<String, Object> parameters = new HashMap<String, Object>();
 
-        parameters.put("lastName", "Иванов");
-        parameters.put("firstName", "Федор");
+        parameters.put(SubreportAliasConstants.LAST_NAME, "Иванов");
+        parameters.put(SubreportAliasConstants.FIRST_NAME, "Федор");
         //parameters.put("middleName", "Иванович");
         //parameters.put("snils", "foo");
         //parameters.put("inn", "foo");
         //parameters.put("inp", "foo");
         //parameters.put("fromBirthDay", "foo");
-        parameters.put("toBirthDay", new Date());
+        parameters.put(SubreportAliasConstants.TO_BIRTHDAY, new Date());
         //parameters.put("idDocNumber", "foo");
 
         PagingResult<NdflPerson> result = ndflPersonDao.findNdflPersonByParameters(1L, parameters, new PagingParams());

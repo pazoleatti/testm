@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
@@ -692,23 +693,23 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (parameters != null && !parameters.isEmpty()) {
 
-            if (contains(parameters, "lastName")) {
+            if (contains(parameters, SubreportAliasConstants.LAST_NAME)) {
                 sb.append("AND lower(np.last_name) like lower(:lastName) \n");
             }
 
-            if (contains(parameters, "firstName")) {
+            if (contains(parameters, SubreportAliasConstants.FIRST_NAME)) {
                 sb.append("AND lower(np.first_name) like lower(:firstName) \n");
             }
 
-            if (contains(parameters, "middleName")) {
+            if (contains(parameters, SubreportAliasConstants.MIDDLE_NAME)) {
                 sb.append("AND lower(np.middle_name) like lower(:middleName) \n");
             }
 
-            if (contains(parameters, "snils")) {
+            if (contains(parameters, SubreportAliasConstants.SNILS)) {
                 sb.append("AND (translate(lower(np.snils), '0-, ', '0') like translate(lower(:snils), '0-, ', '0')) \n");
             }
 
-            if (contains(parameters, "inn")) {
+            if (contains(parameters, SubreportAliasConstants.INN)) {
                 sb.append("AND (translate(lower(np.inn_np), '0-, ', '0') like translate(lower(:inn), '0-, ', '0') OR " +
                         "translate(lower(np.inn_foreign), '0-, ', '0') like translate(lower(:inn), '0-, ', '0')) \n");
             }
@@ -721,19 +722,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 sb.append("AND (translate(lower(np.inn_foreign), '0-, ', '0') like translate(lower(:innForeign), '0-, ', '0')) \n");
             }
 
-            if (contains(parameters, "inp")) {
+            if (contains(parameters, SubreportAliasConstants.INP)) {
                 sb.append("AND lower(np.inp) like lower(:inp) \n");
             }
 
-            if (contains(parameters, "fromBirthDay")) {
+            if (contains(parameters, SubreportAliasConstants.FROM_BIRTHDAY)) {
                 sb.append("AND (np.birth_day is null OR np.birth_day >= :fromBirthDay) \n");
             }
 
-            if (contains(parameters, "toBirthDay")) {
+            if (contains(parameters, SubreportAliasConstants.TO_BIRTHDAY)) {
                 sb.append("AND (np.birth_day is null OR np.birth_day <= :toBirthDay) \n");
             }
 
-            if (contains(parameters, "idDocNumber")) {
+            if (contains(parameters, SubreportAliasConstants.ID_DOC_NUMBER)) {
                 sb.append("AND (translate(lower(np.id_doc_number), '0-, ', '0') like translate(lower(:idDocNumber), '0-, ', '0')) \n");
             }
         }
