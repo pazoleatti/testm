@@ -87,8 +87,6 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
     private HandlerRegistration nativePreviewHandler;
 
-    final String SNILS_ALIAS = "snils";
-
     @Inject
     public SubreportParamsView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
@@ -175,7 +173,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
                     widget = new com.aplana.gwt.client.NumberBox(NUMBER_VALUE_PRECISION);
                     break;
                 case STRING:
-                    if (subreportParam.getAlias().equals(SNILS_ALIAS)) {
+                    if (subreportParam.getAlias().equals(SubreportAliasConstants.SNILS)) {
                         widget = new TextMaskBox("XXX-XXX-XXX XX");
                     } else {
                         widget = new com.aplana.gwt.client.TextBox();
@@ -338,13 +336,6 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
 
     @Override
     public Map<String, Object> getPersonFieldsValues() throws BadValueException, WarnValueException {
-        final String LAST_NAME_ALIAS = "lastName";
-        final String FIRST_NAME_ALIAS = "firstName";
-        final String MIDDLE_NAME_ALIAS = "middleName";
-        final String INN_ALIAS = "inn";
-        final String INP_ALIAS = "inp";
-        final String ID_DOC_NUMBER_ALIAS = "idDocNumber";
-        final String REF_NUMBER_ALIAS = "pNumSpravka";
 
         final int LAST_NAME_LENGTH = 36;
         final int FIRST_NAME_LENGTH = 36;
@@ -362,7 +353,7 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
             Object value = null;
             if (field.getKey().getType().equals(DeclarationSubreportParamType.STRING)) {
                 String string = "";
-                if (field.getKey().getAlias().equals(SNILS_ALIAS)) {
+                if (field.getKey().getAlias().equals(SubreportAliasConstants.SNILS)) {
                     TextMaskBox textMaskBox = (TextMaskBox) field.getValue();
                     string = (textMaskBox.getText() == null || textMaskBox.getText().trim().isEmpty()) ?
                             null : textMaskBox.getText();
@@ -372,21 +363,21 @@ public class SubreportParamsView extends PopupViewWithUiHandlers<SubreportParams
                 }
 
                 value = string;
-                if (field.getKey().getAlias().equals(LAST_NAME_ALIAS)) {
+                if (field.getKey().getAlias().equals(SubreportAliasConstants.LAST_NAME)) {
                     checkPersonStringFields(string, LAST_NAME_LENGTH, warnMap, field);
-                } else if (field.getKey().getAlias().equals(FIRST_NAME_ALIAS)) {
+                } else if (field.getKey().getAlias().equals(SubreportAliasConstants.FIRST_NAME)) {
                     checkPersonStringFields(string, FIRST_NAME_LENGTH, warnMap, field);
-                } else if (field.getKey().getAlias().equals(MIDDLE_NAME_ALIAS)) {
+                } else if (field.getKey().getAlias().equals(SubreportAliasConstants.MIDDLE_NAME)) {
                     checkPersonStringFields(string, MIDDLE_NAME_LENGTH, warnMap, field);
-                } else if (field.getKey().getAlias().equals(SNILS_ALIAS)) {
+                } else if (field.getKey().getAlias().equals(SubreportAliasConstants.SNILS)) {
                     checkSnils(string, SNILS_LENGTH, warnMap, field);
-                } else if (field.getKey().getAlias().equals(INN_ALIAS)) {
+                } else if (field.getKey().getAlias().equals(SubreportAliasConstants.INN)) {
                     checkPersonStringFields(string, INN_LENGTH, warnMap, field);
-                } else if (field.getKey().getAlias().equals(INP_ALIAS)) {
+                } else if (field.getKey().getAlias().equals(SubreportAliasConstants.INP)) {
                     checkPersonStringFields(string, INP_LENGTH, warnMap, field);
-                } else if (field.getKey().getAlias().equals(ID_DOC_NUMBER_ALIAS)) {
+                } else if (field.getKey().getAlias().equals(SubreportAliasConstants.ID_DOC_NUMBER)) {
                     checkPersonStringFields(string, ID_DOC_NUMBER_LENGTH, warnMap, field);
-                } else if (field.getKey().getAlias().equals(REF_NUMBER_ALIAS)) {
+                } else if (field.getKey().getAlias().equals(SubreportAliasConstants.P_NUM_SPRAVKA)) {
                     checkPersonStringFields(string, REF_NUMBER_LENGTH, warnMap, field);
                 }
             } else if (field.getKey().getType().equals(DeclarationSubreportParamType.NUMBER)) {

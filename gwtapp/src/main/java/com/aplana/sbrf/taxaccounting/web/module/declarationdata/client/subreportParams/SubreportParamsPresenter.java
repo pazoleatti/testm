@@ -44,10 +44,6 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     private boolean selectRecord = false;
     private Map<String, Object> subreportParamValues;
 
-    private final String RNU_NDFL_ALIAS = "rnu_ndfl_person_db";
-
-    private final String REPORT_NDFL_ALIAS = "report_2ndfl";
-
     public interface MyView extends PopupView, HasUiHandlers<SubreportParamsUiHandlers> {
         void setSubreport(DeclarationSubreport declarationSubreport, Map<Long, RefBookParamInfo> refBookParamInfoMap, Date startDate, Date endDate);
 
@@ -112,7 +108,7 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
             action.setDeclarationDataId(declarationDataPresenter.getDeclarationId());
             action.setTaxType(declarationDataPresenter.getTaxType());
             action.setType(declarationSubreport.getAlias());
-            if (declarationSubreport.getAlias().equals(RNU_NDFL_ALIAS) || declarationSubreport.getAlias().equals(REPORT_NDFL_ALIAS)) {
+            if (declarationSubreport.getAlias().equals(SubreportAliasConstants.RNU_NDFL_PERSON_DB) || declarationSubreport.getAlias().equals(SubreportAliasConstants.REPORT_2NDFL)) {
                 subreportParamValues = getView().getPersonFieldsValues();
             } else {
                 subreportParamValues = getView().getFieldsValues();
