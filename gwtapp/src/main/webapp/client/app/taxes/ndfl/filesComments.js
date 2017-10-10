@@ -18,7 +18,8 @@
             'DeclarationDataResource',
             'Upload',
             'data',
-            function ($scope, $http, $uibModalInstance, $filter, $logPanel, appModals, DeclarationDataResource, Upload, data) {
+            'APP_CONSTANTS',
+            function ($scope, $http, $uibModalInstance, $filter, $logPanel, appModals, DeclarationDataResource, Upload, data, APP_CONSTANTS) {
 
                 var attachFileType = data.attachFileTypes;
 
@@ -51,6 +52,8 @@
                             {name: 'userName', index: 'userName', width: 135},
                             {name: 'userDepartmentName', index: 'userDepartmentName', width: 250, sortable: false}
                         ],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         cellEdit: true,
                         cellsubmit: 'clientArray',
                         viewrecords: true,
