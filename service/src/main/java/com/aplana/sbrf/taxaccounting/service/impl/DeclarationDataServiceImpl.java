@@ -902,7 +902,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         if (ddReportType.isSubreport()) {
             DeclarationData declaration = get(declarationDataId, userInfo);
-            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), "rnu_ndfl_person_db"));
+            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), SubreportAliasConstants.RNU_NDFL_PERSON_DB));
         } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && !isVisiblePDF(get(declarationDataId, userInfo), userInfo)) {
             throw new ServiceException("Данное действие недоступно");
         }

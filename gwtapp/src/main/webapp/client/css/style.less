@@ -3,17 +3,24 @@
 @import "bootstrap.css";
 @import "less/bootstrap";
 @import "overlay";
+@import "font";
 
-@mts_red: #1a9f29;
 // Высота шапки модального окна
 @mts_modal_header_height: 44px;
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
 html{
   overflow: auto;
 }
 body {
   color: #333;
-  background-color: #fff;
+  background-color: @white;
   min-width: 1200px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: @basic-font-size;
 }
 
 .clear {
@@ -61,12 +68,6 @@ a{
   width: 100%;
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
 .stack-trace {
   overflow: scroll;
   position: relative;
@@ -84,7 +85,7 @@ body {
 }
 
 #edit-object .modal-header h4 {
-  color: #1a9f29;
+  color: @greenDark;
 }
 /*===========================bootstrap-custom==================================*/
 /* bootstrap-custom.css */
@@ -100,7 +101,7 @@ body {
 }
 
 .navbar .dropdown:hover {
-  background-color: #e8e8e8;
+  background-color: @grayLighter;
 }
 
 .navbar-right {
@@ -117,7 +118,7 @@ body {
   text-decoration: none;
 }
 .navbar-header a span {
-  color: #777;
+  color: @grayDark;
   display: inline-block;
   vertical-align: middle;
   text-transform: uppercase;
@@ -130,16 +131,13 @@ a.collapse-link {
 }
 
 //TODO для bootstrap найти исходники less, управлять переменными, а не переопределять стили
-body {
-  font-size: 12px;
-}
 h1,
 .h1 {
-  font-size: 24px;
+  font-size: @h1-size;
 }
 h2,
 .h2 {
-  font-size: 21px;
+  font-size: @h2-size;
 }
 h3,
 .h3 {
@@ -162,7 +160,7 @@ h6,
 }
 /* Цвет выделения строки в таблице. Желтый */
 .ui-grid-row.ui-grid-row-selected > [ui-grid-row] > .ui-grid-cell {
-  background-color: #F6E8B6;
+  background-color: @yellow;
 }
 /* Настройка для кнопки удаления в выпадающих списках ui-select*/
 .ui-select-toggle .btn {
@@ -184,10 +182,10 @@ input::-ms-clear {
 /* Звездочка для обязательных полей*/
 .form-group.required .control-label:after {
   content: "*";
-  color: red;
+  color: @red;
 }
 input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match >span{
-  box-shadow: inset 0 0 3px red;
+  box-shadow: inset 0 0 3px @red;
 }
 .form-group .text-danger p, .form-group .text-danger span {
   position: relative;
@@ -264,7 +262,7 @@ input[type="number"]{
   font-size: inherit;
 }
 .dropdown-menu > li > a, .btn-default, .form-control , .ui-select-bootstrap .ui-select-choices-row > span {
-  color: #777777;
+  color: @grayDark;
 }
 .ui-grid-cell-contents{
   padding: 3px;
@@ -275,14 +273,14 @@ input[type="number"]{
 }
 /***************************************** Стили для модальных окон ***************************************************/
 .modal-header {
-  background-color: #ffffff;
+  background-color: @white;
   height: @mts_modal_header_height;
   padding: 10px 20px;
   border-radius: 6px;
 }
 
 .modal-header h4, .modal-header .glyphicon, .modal-header .close, .empty-consolidated-remain, .positive-undisposed-amount, .restricted-remain {
-  color: @mts_red;
+  color: @greenDark;
 }
 
 .modal-header h4, .empty-consolidated-remain, .restricted-remain {
@@ -304,9 +302,9 @@ input[type="number"]{
 }
 
 .modal-dialog .btn-primary {
-  color: #ffffff;
-  background-color: #1a9f29;
-  border-color: #1a9f29;
+  color: @white;
+  background-color: @greenDark;
+  border-color: @greenDark;
 }
 .modal-dialog {
   margin: 15% auto;
@@ -332,9 +330,9 @@ input[type="number"]{
 
 /* Красная рамка при наведении курсора на кнопки кроме отключенных кнопок */
 button.btn.btn-default:hover:not([disabled]) {
-  border: 1px solid #D50712 !important;
+  border: 1px solid @red !important;
   border-radius: 4px;
-  background-color: #FFFFFF;
+  background-color: @white;
   color: inherit;
 }
 
@@ -344,7 +342,7 @@ button.btn.btn-default:hover:not([disabled]) {
 
 button.btn-back-to-list {
   padding: 0 15px 0 0;
-  border-color: #FFFFFF;
+  border-color: @white;
   border-radius: 4px;
   margin-right: 4px;
   float: right;
@@ -354,9 +352,9 @@ button.btn-back-to-list.btn-default:hover:not([disabled]),
 .btn-default:active,
 .btn-default:active:focus,
 .btn-default:focus{
-  border-color: #FFFFFF !important;
+  border-color: @white !important;
   border-radius: 4px;
-  background-color: #FFFFFF;
+  background-color: @white;
   color: inherit;
 }
 
@@ -401,11 +399,11 @@ input[type="checkbox"] {
 }
 
 .form-row-separator {
-  border-bottom: 1px solid #e4dfdf;
+  border-bottom: 1px solid @grayLighter;
 }
 
 .form-bordered-column {
-  border: 1px solid #e4dfdf;
+  border: 1px solid @grayLighter;
 }
 
 .form-bordered-column > div {
@@ -450,11 +448,11 @@ input[type="checkbox"] {
 }
 
 .operation-table .even-row {
-  background-color: #fdfdfd;
+  background-color: @grayMoreLighter;
 }
 
 .operation-table .odd-row {
-  background-color: #eeeeee;
+  background-color: @grayMoreLighter;
 }
 
 /* Панель для отображения информации о версии приложения и его сборке */
@@ -467,7 +465,7 @@ input[type="checkbox"] {
 /* Признак обязательности поля */
 label.required:after {
   content: "*";
-  color: red;
+  color: @red;
 }
 
 .header-details {
@@ -519,7 +517,7 @@ hr {
 
 .form-fieldset {
   padding: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid @grayLight;
 }
 
 .form-fieldset > legend {
@@ -545,9 +543,9 @@ hr {
 
 /*-------new-style----------*/
 .navbar-default {
-  background: #1a9f29;
+  background: @greenDark;
   .navbar-nav > li {
-    border-left: 1px solid #fff;
+    border-left: 1px solid @white;
     height: 40px;
     margin-top: 0;
     div {
@@ -559,7 +557,7 @@ hr {
     }
   }
   .navbar-nav > li > a {
-    color: #fff;
+    color: @white;
     padding: 11px 14px !important;
     border-radius: 1px;
     outline: none;
@@ -568,7 +566,7 @@ hr {
     border: none;
     font-size: 14px;
     &:hover {
-      background: #fff;
+      background: @white;
     }
   }
 }
@@ -577,7 +575,7 @@ hr {
   width: 132px;
   height: 54px;
   margin: -4px 9px -30px 0;
-  background: #fff;
+  background: @white;
   padding: 15px 11px;
   border-radius: 0 0 16px 0;
 }
@@ -585,12 +583,12 @@ hr {
   width: 110px;
 }
 .navbar-right {
-  color: #fff;
+  color: @white;
   margin-right: 0;
 }
 
 button.btn.btn-default:hover:not([disabled]) {
-  border: 1px solid #1a9f29 !important;
+  border: 1px solid @greenDark !important;
 }
 
 .button_panel button.btn {
@@ -610,7 +608,7 @@ button.btn.btn-default.ng-binding {
 
 .form-control {
   &:focus {
-    border-color: #1a9f29;
+    border-color: @greenDark;
   }
 }
 
@@ -623,23 +621,23 @@ button.btn.btn-default.ng-binding {
 }
 
 .btn-danger {
-  color: #ffffff;
-  background-color: #1a9f29;
-  border-color: #1a9f29;
+  color: @white;
+  background-color: @greenDark;
+  border-color: @greenDark;
   &:focus, &.focus {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
-    border-color: #1a9f29;
+    border-color: @greenDark;
   }
   &:hover {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
-    border-color: #1a9f29;
+    border-color: @greenDark;
   }
   &:active, &.active {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
-    border-color: #1a9f29;
+    border-color: @greenDark;
   }
 }
 
@@ -654,7 +652,7 @@ button.btn.btn-default.ng-binding {
 .open > .dropdown-toggle.btn-danger.focus {
   background: #59bf57;
   color: hsla(0, 0%, 100%, .85);
-  border-color: #1a9f29;
+  border-color: @greenDark;
 }
 
 .btn-danger:active:hover,
@@ -668,10 +666,10 @@ button.btn.btn-default.ng-binding {
 .open > .dropdown-toggle.btn-danger.focus {
   background: #59bf57;
   color: hsla(0, 0%, 100%, .85);
-  border-color: #1a9f29;
+  border-color: @greenDark;
 }
 .logout_link:hover {
-  border: 1px solid #fff;
+  border: 1px solid @white;
 }
 
 .ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell {
@@ -679,7 +677,7 @@ button.btn.btn-default.ng-binding {
 }
 
 #overlay-parent > div {
-  border-top: 6px solid #1a9f29;
+  border-top: 6px solid @greenDark;
 }
 
 .btn-sm {
@@ -724,7 +722,7 @@ button.btn.btn-default.ng-binding {
 }
 
 .dropdown-submenu:hover > a:after {
-  border-left-color: #fff;
+  border-left-color: @white;
 }
 
 .dropdown-submenu.pull-left {
@@ -745,7 +743,7 @@ button.btn.btn-default.ng-binding {
 }
 
 .logout_link:hover {
-  border: 1px solid #fff;
+  border: 1px solid @white;
 }
 
 .ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell {
@@ -753,7 +751,7 @@ button.btn.btn-default.ng-binding {
 }
 
 #overlay-parent > div {
-  border-top: 6px solid #1a9f29;
+  border-top: 6px solid @greenDark;
 }
 
 .btn-sm {
@@ -788,7 +786,7 @@ button.btn.btn-default.ng-binding {
 
 .btn-default{
   &:hover, &:active:hover{
-    background-color: #FFF;
+    background-color: @white;
   }
 }
 .border-none{
@@ -835,7 +833,7 @@ div [ui-view] {
   box-sizing: border-box;
   height: 100%;
   width: 370px;
-  background-color: #fff;
+  background-color: @white;
 }
 .cbr-side-content {
   box-sizing: border-box;

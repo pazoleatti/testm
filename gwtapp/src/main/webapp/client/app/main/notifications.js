@@ -71,15 +71,17 @@
                     }
                 };
 
-
                 /**
                  * @description форматтер для поля 'Ссылка' для получения файла
-                 * @param value значение столбца
                  * @param row строка таблицы
+                 * @param cellValue значение ячейки
+                 * @param options данные таблицы
+                 * без cellValue и options ссылка формируется некорректно
                  */
-                function linkFileFormatter(value, row) {
-                    if (row.reportId && row.reportId !== undefined) {
-                        return "<a target='_blank' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
+                function linkFileFormatter(cellValue, options, row) {
+
+                    if (row.reportId != null) {
+                        return "<a target='_self' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
 
                     } else {
                         return "";
