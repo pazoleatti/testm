@@ -305,7 +305,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         if (pagingResult.isEmpty()) {
             Closure subreportParamsToString = {
-                it.collect { Map<String, Object> param ->
+                it.collect { Map.Entry<String, Object> param ->
                     (param.value != null ? (((param.value instanceof Date) ? ((Date) param.value).format('dd.MM.yyyy') : (String) param.value) + ";") : "")
                 } join " "
             }
