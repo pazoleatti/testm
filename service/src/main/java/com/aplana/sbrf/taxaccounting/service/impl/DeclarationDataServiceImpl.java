@@ -1153,7 +1153,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         DeclarationData declaration = get(declarationDataId, userInfo);
         List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
-        for(DeclarationSubreport subreport: subreports) {
+        for (DeclarationSubreport subreport : subreports) {
             if ("rnu_ndfl_person_all_db".equals(subreport.getAlias())) {
                 reportAvailableResult.setDownloadSpecificAvailable((reportService.getDec(userInfo, declarationDataId, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport))) != null);
             }

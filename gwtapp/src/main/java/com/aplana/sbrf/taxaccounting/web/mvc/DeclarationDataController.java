@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
@@ -12,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.server.GetDeclarationDataHandler;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerSubreportResult;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
@@ -27,7 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -59,11 +59,10 @@ public class DeclarationDataController {
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
     private AsyncTaskManagerService asyncTaskManagerService;
-    private LockDataService lockDataService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService, LockDataService lockDataService) {
+                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -72,7 +71,6 @@ public class DeclarationDataController {
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
         this.asyncTaskManagerService = asyncTaskManagerService;
-        this.lockDataService = lockDataService;
     }
 
     /**
@@ -482,7 +480,7 @@ public class DeclarationDataController {
      * @return данные о наличии отчетов
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=availableReports")
-    public ReportAvailableResult checkAvailabilityReports(@PathVariable long declarationDataId){
+    public ReportAvailableResult checkAvailabilityReports(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.checkAvailabilityReports(userInfo, declarationDataId);
     }
