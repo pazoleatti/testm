@@ -87,6 +87,11 @@
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
+        <!-- Используется джаспером, поскольку он обрабатывает выражения через Groovy-->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
