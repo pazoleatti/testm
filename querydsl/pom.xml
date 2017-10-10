@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>querydsl</artifactId>
-    <description>АС "Учёт налогов" - Модуль для генерации Q-классов QueryDSL</description>
+    <description>Модуль генерации Q-классов QueryDSL</description>
 
     <dependencies>
         <dependency>
@@ -75,12 +75,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>taxaccounting-thirdparty</id>
-            <name>Сторонние библиотеки, используемые в проекте</name>
-            <url>http://172.19.214.42:8081/nexus/content/repositories/thirdparty/</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>
