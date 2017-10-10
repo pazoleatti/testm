@@ -146,8 +146,8 @@
                             },
                             {name: 'creationUserName', index: 'creationUserName', width: 175}
                         ],
-                        rowNum: 100,
-                        rowList: [10, 50, 100, 200],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         sortname: 'declarationDataId',
                         viewrecords: true,
                         sortorder: "desc",

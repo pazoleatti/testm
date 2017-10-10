@@ -7,8 +7,8 @@
     /**
      * @description Контроллер модального окна оповещений
      */
-        .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope',
-            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope) {
+        .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope, APP_CONSTANTS) {
                 // Пометим все оповещения как прочтённые
                 $http({
                     method: "POST",
@@ -61,8 +61,8 @@
                             }
 
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
                         sortname: 'createDate',
                         sortorder: "desc",

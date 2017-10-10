@@ -4,8 +4,8 @@
      * @description Модуль панели уведомлений
      */
     angular.module('app.logPanel', ['aplana.splitter', 'ui.router'])
-        .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource',
-            function ($compile, $rootScope, $filter, LogEntryResource) {
+        .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource', 'APP_CONSTANTS',
+            function ($compile, $rootScope, $filter, LogEntryResource, APP_CONSTANTS) {
                 var logPanel = {};
 
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
@@ -95,8 +95,8 @@
                                         formatter: $filter('textColorFormatter')
                                     }
                                 ],
-                                rowNum: 10,
-                                rowList: [10, 20, 30],
+                                rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                                rowList: APP_CONSTANTS.COMMON.PAGINATION,
                                 viewrecords: true,
                                 sortname: 'date',
                                 sortorder: "asc",
