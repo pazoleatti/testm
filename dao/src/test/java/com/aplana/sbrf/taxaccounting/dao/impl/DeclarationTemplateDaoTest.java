@@ -60,12 +60,10 @@ public class DeclarationTemplateDaoTest {
     public void testGet() {
         DeclarationTemplate d1 = declarationTemplateDao.get(1);
         assertEquals(1, d1.getId().longValue());
-        /*assertFalse(d1.isActive());*/
         assertEquals("Налоговая форма 1", d1.getName());
 
         DeclarationTemplate d2 = declarationTemplateDao.get(2);
         assertEquals(2, d2.getId().longValue());
-        /*assertTrue(d2.isActive());*/
     }
 
     @Test(expected = DaoException.class)
