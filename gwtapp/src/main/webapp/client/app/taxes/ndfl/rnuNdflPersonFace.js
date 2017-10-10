@@ -8,8 +8,8 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson',
-            function ($scope, $uibModalInstance, $filter, $http, RnuPerson) {
+        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson', 'APP_CONSTANTS',
+            function ($scope, $uibModalInstance, $filter, $http, RnuPerson, APP_CONSTANTS) {
 
             //Доступгость грида
             $scope.enabledGrid = false;
@@ -37,7 +37,7 @@
                             dateFrom: $scope.searchFilter.params.dateFrom,
                             dateTo: $scope.searchFilter.params.dateTo
                         }),
-                        personId: $scope.notificationsGrid.value[0].personId
+                        personId: $scope.rnuNdflGrid.value[0].personId
                     }
 
 
@@ -57,7 +57,7 @@
             /**
              * Grid для отображения найденных физ лиц в документе
              */
-            $scope.notificationsGrid =
+            $scope.rnuNdflGrid =
                 {
                     ctrl: {},
                     value: [],
@@ -114,8 +114,8 @@
                             {name: 'status', index: 'status', width: 160}
 
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
                         sortname: 'createDate',
                         sortorder: "desc",
@@ -128,7 +128,7 @@
              * @description Отвечает за доступность недоступность кнопки 'сформировать'
              */
             $scope.chekRow = function () {
-                if ($scope.notificationsGrid.value.length !== null) {
+                if ($scope.rnuNdflGrid.value.length !== null) {
                     $scope.enabledCreateReport = true;
                 }
             };
@@ -138,8 +138,8 @@
              */
             $scope.searchPerson = function () {
                 $scope.enabledGrid = true;
-                $scope.notificationsGrid.ctrl.refreshGrid();
-                $scope.enabledCreateReport = $scope.notificationsGrid;
+                $scope.rnuNdflGrid.ctrl.refreshGrid();
+                $scope.enabledCreateReport = $scope.rnuNdflGrid;
                 $scope.enabledCreateReport = false;
 
             };

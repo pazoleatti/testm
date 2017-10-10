@@ -10,8 +10,8 @@
     /**
      * @description Контроллер модального окна, в котором выводятся источники и приемники формы
      */
-        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'DeclarationDataResource',
-            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, DeclarationDataResource) {
+        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'DeclarationDataResource', 'APP_CONSTANTS',
+            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, DeclarationDataResource, APP_CONSTANTS) {
                 $scope.sourcesGridData = [];
 
                 //Чекбоксы
@@ -106,7 +106,8 @@
                             }
 
                         ],
-                        rowNum: 10,
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
                         sortname: 'index',
                         sortorder: "asc"

@@ -8,6 +8,9 @@
         .module('app.constants', [])
 
         .constant('APP_CONSTANTS', {
+            COMMON: {
+                PAGINATION: [100, 500, 1000]
+            },
             USER_PERMISSION: {
                 VIEW_TAXES_NDFL: 1 << 0,
                 VIEW_TAXES_NDFL_SETTINGS: 1 << 1,

@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Реквизиты"
      */
         .controller('ndflFLCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog', '$rootScope',
-            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog, $rootScope) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog, $rootScope, APP_CONSTANTS) {
 
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
@@ -122,8 +122,8 @@
                                 {name: 'building', index: 'building', width: 170},
                                 {name: 'flat', index: 'flat', width: 205}
                             ],
-                            rowNum: 10,
-                            rowList: [10, 20, 30],
+                            rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                            rowList: APP_CONSTANTS.COMMON.PAGINATION,
                             sortname: 'rowNum',
                             viewrecords: true,
                             sortorder: "asc",

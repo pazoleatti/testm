@@ -46,6 +46,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
         binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
         binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
+        binder.registerCustomEditor(DeclarationSubreport.class, new RequestParamEditor(DeclarationSubreport.class));
         binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
@@ -58,13 +59,10 @@ public class DeclarationDataController {
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
     private AsyncTaskManagerService asyncTaskManagerService;
-    private DeclarationDataService declarationDataService;
-    private LogEntryService logEntryService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, DeclarationDataService declarationDataService,
-                                     LogEntryService logEntryService, AsyncTaskManagerService asyncTaskManagerService) {
+                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -73,8 +71,6 @@ public class DeclarationDataController {
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
         this.asyncTaskManagerService = asyncTaskManagerService;
-        this.declarationDataService = declarationDataService;
-        this.logEntryService = logEntryService;
     }
 
     /**
@@ -232,7 +228,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/delete")
     public ActionResult deleteDeclarations(@RequestParam Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.deleteDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.deleteDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -245,7 +241,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/createReport")
     public CreateDeclarationReportResult createReport(Integer declarationTypeId, Integer departmentId, Integer periodId) {
-        return declarationDataService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
+        return declarationService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
     }
 
     /**
@@ -259,7 +255,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/create")
     public CreateResult<Long> createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.create(userInfo, declarationTypeId, departmentId, periodId);
+        return declarationService.create(userInfo, declarationTypeId, departmentId, periodId);
     }
 
     /**
@@ -296,7 +292,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/recalculate")
     public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.recalculateDeclaration(userInfo, declarationDataId, force, cancelTask);
+        return declarationService.recalculateDeclaration(userInfo, declarationDataId, force, cancelTask);
     }
 
     /**
@@ -308,7 +304,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/recalculate")
     public ActionResult recalculateDeclarationList(@RequestParam Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.recalculateDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.recalculateDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -321,7 +317,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/check")
     public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.checkDeclaration(userInfo, declarationDataId, force);
+        return declarationService.checkDeclaration(userInfo, declarationDataId, force);
     }
 
     /**
@@ -333,7 +329,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/check")
     public ActionResult checkDeclaration(@RequestParam Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.checkDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.checkDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -358,7 +354,7 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/accept")
     public ActionResult acceptDeclarationList(@RequestParam Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.acceptDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.acceptDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -370,7 +366,7 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=filesComments")
     public DeclarationDataFileComment fetchFilesComments(@PathVariable long declarationDataId) {
-        return declarationDataService.fetchFilesComments(declarationDataId);
+        return declarationService.fetchFilesComments(declarationDataId);
     }
 
     /**
@@ -383,7 +379,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
     public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
-        return declarationDataService.saveDeclarationFilesComment(dataFileComment);
+        return declarationService.saveDeclarationFilesComment(dataFileComment);
     }
 
     /**
@@ -418,7 +414,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=sources")
     public List<Relation> getDeclarationSourcesAndDestinations(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.getDeclarationSourcesAndDestinations(userInfo, declarationDataId);
+        return declarationService.getDeclarationSourcesAndDestinations(userInfo, declarationDataId);
     }
 
     /**
@@ -430,7 +426,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
     public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam DeclarationDataFilter filter, @RequestParam PagingParams pagingParams) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        PagingResult<DeclarationDataJournalItem> pagingResult = declarationDataService.fetchDeclarations(userInfo, filter, pagingParams);
+        PagingResult<DeclarationDataJournalItem> pagingResult = declarationService.fetchDeclarations(userInfo, filter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,
@@ -448,8 +444,45 @@ public class DeclarationDataController {
      * @return источники и приемники декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
-    public CreateDeclarationReportResult creteReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long personId, @RequestParam NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long personId, @RequestParam NdflPersonFilter ndflPersonFilter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.creteReportRnu(userInfo, declarationDataId, personId, ndflPersonFilter);
+        return declarationService.createReportRnu(userInfo, declarationDataId, personId, ndflPersonFilter);
     }
+
+    /**
+     * Формирование рну ндфл для всех физ лиц
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/allRnuReport")
+    public CreateDeclarationReportResult createReportAllRnus(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createReportAllRnu(userInfo, declarationDataId, force);
+    }
+
+    /**
+     * Формирование отчета в xlsx
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return информация о создании отчета
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportXsls")
+    public CreateDeclarationReportResult CreateDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createReportXlsx(userInfo, declarationDataId, force);
+    }
+
+    /**
+     * Возвращает данные о наличии отчетов
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return данные о наличии отчетов
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=availableReports")
+    public ReportAvailableResult checkAvailabilityReports(@PathVariable long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.checkAvailabilityReports(userInfo, declarationDataId);
+    }
+
 }

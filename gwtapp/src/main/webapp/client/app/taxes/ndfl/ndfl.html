@@ -8,19 +8,33 @@
         <div class="header-col w200" style="float: right; margin-top: 20px; margin-bottom: -14px;">
             <div class="btn-group" data-uib-dropdown style="float: right;" >
                 <button id="single-button" type="button" class="btn btn-danger" data-uib-dropdown-toggle
-                        data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.VIEW)">
+                        data-ng-disabled="!availableReports">
                     <span data-translate-once="link.ndfl.reporting"></span>
                 </button>
                 <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button"
                     style="margin-left: -180px;">
-                    <li role="menuitem"><a ng-click="uploadXml()">{{::'link.ndfl.reporting.uploadXml' |
-                        translate}}</a></li>
-                    <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formXLSX' |
-                        translate}}</a></li>
-                    <li role="menuitem"><a ng-click="createReport()">{{::'link.ndfl.reporting.formForFL' |
-                        translate}}</a></li>
-                    <li role="menuitem"><a ng-click="showToDoDialog()">{{::'link.ndfl.reporting.formForFLs' |
-                        translate}}</a></li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createReportXlsx()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a>
+                            <a ng-click="downloadXlsx()" ng-show="availableXlsxReport">{{::'link.ndfl.reporting.download' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createReport()">{{::'link.ndfl.reporting.formForFL' | translate}}</a>
+                        </div>
+                    </li>
+                    <li role="menuitem">
+                        <div class="row menuitem">
+                            <a ng-click="createReportAllRnu()">{{::'link.ndfl.reporting.formForFLs' | translate}}</a>
+                            <a ng-click="downloadSpecific()" ng-show="availableSpecificReport">{{::'link.ndfl.reporting.download' | translate}}</a>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

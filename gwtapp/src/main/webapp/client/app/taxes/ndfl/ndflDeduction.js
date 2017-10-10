@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Сведения о вычетах"
      */
         .controller('deductionCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', '$rootScope',
-            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $rootScope) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $rootScope, APP_CONSTANTS) {
 
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
@@ -127,8 +127,8 @@
                                 },
                                 {name: 'periodCurrSumm', index: 'periodCurrSumm', width: 170}
                             ],
-                            rowNum: 10,
-                            rowList: [10, 20, 30],
+                            rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                            rowList: APP_CONSTANTS.COMMON.PAGINATION,
                             sortname: 'rowNum',
                             viewrecords: true,
                             sortorder: "asc",

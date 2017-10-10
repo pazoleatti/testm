@@ -57,6 +57,35 @@
                     );
                 }
 
+                initPage();
+
+                function updateAvailableReports () {
+                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableSpecificReport)) {
+                        DeclarationDataResource.query({
+                                declarationDataId: $stateParams.declarationDataId,
+                                projection: "availableReports"
+                            },
+                            function (data) {
+                                if (data) {
+                                    $scope.availableReports = data.downloadXmlAvailable;
+                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                    $scope.availableSpecificReport = data.downloadSpecificAvailable;
+                                    if (!$scope.intervalId){
+                                        $scope.intervalId = setInterval(function () {
+                                            updateAvailableReports();
+                                        }, 60000);
+                                    }
+                                }
+                            }
+                        );
+                    } else {
+                        clearInterval($scope.intervalId);
+                    }
+                }
+
+                updateAvailableReports();
+
+
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();
                 };
@@ -227,17 +256,70 @@
                     appModals.create('client/app/taxes/ndfl/formSources.html', 'sourcesFormCtrl');
                 };
 
-                initPage();
-
                 $scope.selectTab = function(tab) {
                     $rootScope.$broadcast('tabSelected', tab);
                 };
 
-                $scope.uploadXml = function () {
-                    $http({
-                        method: "GET",
-                        url: "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml/"
-                    });
+                $scope.downloadXml = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml";
+                };
+                $scope.downloadXlsx = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
                 }
+                $scope.downloadSpecific = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
+                };
+
+                $scope.createReportXlsx = function (force) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
+                        params: {
+                            force: force ? force : false
+                        }
+                    }).success(function (response) {
+                        if (response.uuid && response.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.uuid);
+                        } else {
+                            if (response.status === "LOCKED" && !force) {
+                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
+                                    .result.then(
+                                    function () {
+                                        $scope.createReportXlsx(true);
+                                    });
+                            } else if (response.status === "NOT_EXIST_XML") {
+                                $window.alert($filter('translate')('title.noCalculationPerformed'));
+                            } else if (response.status === "EXIST") {
+                                $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
+                            }
+                        }
+                    });
+                };
+
+                $scope.createReportAllRnu = function (force) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/allRnuReport",
+                        params: {
+                            force: force ? force : false
+                        }
+                    }).success(function (response) {
+                        if (response.uuid && response.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.uuid);
+                        } else {
+                            if (response.status === "LOCKED" && !force) {
+                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
+                                    .result.then(
+                                    function () {
+                                        $scope.createReportXlsx(true);
+                                    });
+                            } else if (response.status === "NOT_EXIST_XML") {
+                                $window.alert($filter('translate')('title.noCalculationPerformed'));
+                            } else if (response.status === "EXIST") {
+                                $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
+                            }
+                        }
+                    });
+                };
             }]);
 }());

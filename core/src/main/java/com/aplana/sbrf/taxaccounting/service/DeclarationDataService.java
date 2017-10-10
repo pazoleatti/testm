@@ -259,7 +259,36 @@ public interface DeclarationDataService {
      * @param ndflPersonFilter  заполненные поля при поиске
      * @return источники и приемники декларации
      */
-    CreateDeclarationReportResult creteReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+    CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+
+    /**
+     * Формирование рну ндфл по всем физ лицам`
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return результат о формировании отчета
+     */
+    CreateDeclarationReportResult createReportAllRnu(TAUserInfo userInfo, final long declarationDataId, boolean force);
+
+    /**
+     * Формирование отчета в xlsx
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return результат о формировании отчета
+     */
+    CreateDeclarationReportResult createReportXlsx(TAUserInfo userInfo, long declarationDataId, boolean force);
+
+    /**
+     * Возвращает информацию о доступности скачивания отчетов
+     *
+     * @param userInfo          текущий пользователь
+     * @param declarationDataId идентификатор декларации
+     * @return информация о доступности скачивания отчетов
+     */
+    ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * метод запускает скрипты с событием предрасчетные проверки

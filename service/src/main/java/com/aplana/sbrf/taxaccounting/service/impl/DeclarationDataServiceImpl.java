@@ -866,7 +866,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param page Страница списка налоговых форм
      */
     private void setPageItemsPermissions(PagingResult<DeclarationDataJournalItem> page) {
-        if(!page.isEmpty()) {
+        if (!page.isEmpty()) {
             //Получение id всех форм
             List<Long> declarationIds = new ArrayList<Long>();
             for (DeclarationDataJournalItem item : page) {
@@ -892,7 +892,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     //Формирование рну ндфл для физ лица
     @Override
-    public CreateDeclarationReportResult creteReportRnu(TAUserInfo userInfo, final long declarationDataId, long personId, final NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId, long personId, final NdflPersonFilter ndflPersonFilter) {
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, null);
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
@@ -997,6 +997,169 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
+    }
+
+    @Override
+    public CreateDeclarationReportResult createReportAllRnu(TAUserInfo userInfo, final long declarationDataId, boolean force) {
+        DeclarationData declaration = get(declarationDataId, userInfo);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+
+        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
+
+        if (!existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+
+        Logger logger = new Logger();
+        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        if (uuidXml != null) {
+            for (DeclarationSubreport subreport : declarationTemplate.getSubreports()) {
+                final DeclarationDataReportType ddReportType = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport);
+
+                ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), "rnu_ndfl_person_all_db"));
+                final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+                if (uuid != null) {
+                    result.setStatus(CreateAsyncTaskStatus.EXIST);
+                    return result;
+                } else {
+                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, getAsyncTaskName(ddReportType, TaxType.NDFL), userInfo, force, logger);
+                    if (restartStatus != null && restartStatus.getFirst()) {
+                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                        result.setRestartMsg(restartStatus.getSecond());
+                    } else if (restartStatus != null && !restartStatus.getFirst()) {
+                        result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    } else {
+                        result.setStatus(CreateAsyncTaskStatus.CREATE);
+                        Map<String, Object> params = new HashMap<String, Object>();
+                        params.put("declarationDataId", declarationDataId);
+                        params.put("alias", ddReportType.getReportAlias());
+                        params.put("viewParamValues", new LinkedHashMap<String, String>());
+
+                        asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+                            @Override
+                            public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                                return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                        getDeclarationFullName(declarationDataId, ddReportType),
+                                        LockData.State.IN_QUEUE.getText());
+                            }
+
+                            @Override
+                            public void executePostCheck() {
+                            }
+
+                            @Override
+                            public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                                return false;
+                            }
+
+                            @Override
+                            public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                                if (uuid != null) {
+                                    reportService.deleteDec(uuid);
+                                }
+                            }
+
+                            @Override
+                            public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                                return getAsyncTaskName(ddReportType, TaxType.NDFL);
+                            }
+                        });
+                    }
+                }
+            }
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    @Override
+    public CreateDeclarationReportResult createReportXlsx(TAUserInfo userInfo, final long declarationDataId, boolean force) {
+        final DeclarationDataReportType ddReportType = new DeclarationDataReportType(ReportType.EXCEL_DEC, null);
+        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
+        if (!existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+
+        Logger logger = new Logger();
+        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        if (uuidXml != null) {
+            final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            if (uuid != null) {
+                result.setStatus(CreateAsyncTaskStatus.EXIST);
+                return result;
+            } else {
+                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, getAsyncTaskName(ddReportType, TaxType.NDFL), userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
+
+                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+                        @Override
+                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    getDeclarationFullName(declarationDataId, ddReportType),
+                                    LockData.State.IN_QUEUE.getText());
+                        }
+
+                        @Override
+                        public void executePostCheck() {
+                        }
+
+                        @Override
+                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                            return false;
+                        }
+
+                        @Override
+                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                            if (uuid != null) {
+                                reportService.deleteDec(uuid);
+                            }
+                        }
+
+                        @Override
+                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                            return getAsyncTaskName(ddReportType, TaxType.NDFL);
+                        }
+                    });
+                }
+            }
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    @Override
+    public ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId) {
+        ReportAvailableResult reportAvailableResult = new ReportAvailableResult();
+        reportAvailableResult.setDownloadXlsxAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
+        reportAvailableResult.setDownloadXmlAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) != null);
+
+        DeclarationData declaration = get(declarationDataId, userInfo);
+        List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
+        for (DeclarationSubreport subreport : subreports) {
+            if ("rnu_ndfl_person_all_db".equals(subreport.getAlias())) {
+                reportAvailableResult.setDownloadSpecificAvailable((reportService.getDec(userInfo, declarationDataId, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport))) != null);
+            }
+        }
+
+        return reportAvailableResult;
     }
 
     @Override
