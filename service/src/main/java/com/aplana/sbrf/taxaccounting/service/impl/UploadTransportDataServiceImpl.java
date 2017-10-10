@@ -1,16 +1,23 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -24,23 +31,30 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Dmitriy Levykin
  */
 @Service
-@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)//Поменял scope бина, из-за переменных formTypeId, formTypeName
+@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
+//Поменял scope бина, из-за переменных formTypeId, formTypeName
 public class UploadTransportDataServiceImpl implements UploadTransportDataService {
 
-	private static final Log LOG = LogFactory.getLog(UploadTransportDataServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(UploadTransportDataServiceImpl.class);
 
     //Добавил исключительно для записи в лог
     private String declarationTypeName = null;
     public static final String TAG_DOCUMENT = "Документ";
     public static final String ATTR_PERIOD = "Период";
     public static final String ATTR_YEAR = "ОтчетГод";
+
+    @Autowired
+    private ApplicationInfo applicationInfo;
+
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -66,6 +80,16 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
     private SourceService sourceService;
+    @Autowired
+    private BlobDataService blobDataService;
+    @Autowired
+    private LockDataService lockDataService;
+    @Autowired
+    private AsyncManager asyncManager;
+    @Autowired
+    private LogEntryService logEntryService;
+
+    private static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
 
     private static final long REF_BOOK_DEPARTMENT = RefBook.Id.DEPARTMENT.getId(); // Подразделения
     private static final long REF_BOOK_PERIOD_DICT = RefBook.Id.PERIOD_CODE.getId(); // Коды отчетных периодов
@@ -154,6 +178,113 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         return uploadResult;
     }
 
+
+    @Override
+    public ActionResult upload(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
+
+        if (fileName.contains("\\")) {
+            // IE Выдает полный путь
+            fileName = fileName.substring(fileName.lastIndexOf('\\') + 1);
+        }
+
+        try {
+            String uuid = blobDataService.create(inputStream, fileName);
+
+            int userId = userInfo.getUser().getId();
+            String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+            BalancingVariants balancingVariant = BalancingVariants.SHORT;
+            LockData lockData = lockDataService.lock(key, userId,
+                    String.format(LockData.DescriptionTemplate.IMPORT_TRANSPORT_DATA.getText(), fileName),
+                    LockData.State.IN_QUEUE.getText());
+            if (lockData == null) {
+                try {
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
+                    params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                    params.put("blobDataId", uuid);
+
+                    lockData = lockDataService.getLock(key);
+                    params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                    try {
+                        lockDataService.addUserWaitingForLock(key, userId);
+                        asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
+                                params, balancingVariant);
+                        LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                        lockDataService.updateQueue(key, lockData.getDateLock(), queue);
+                        logger.info(String.format(CREATE_TASK, "Загрузка файла"));
+                    } catch (AsyncTaskException e) {
+                        lockDataService.unlock(key, userId);
+                        logger.error("Ошибка при постановке в очередь задачи загрузки ТФ.");
+                    }
+                } catch (Exception e) {
+                    logger.error(e);
+                    try {
+                        lockDataService.unlock(key, userId);
+                    } catch (ServiceException e2) {
+                        logger.error(e2);
+                    }
+                }
+            }
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+
+        ActionResult result = new ActionResult();
+        if (!logger.getEntries().isEmpty()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+        return result;
+    }
+
+
+    @Override
+    public ActionResult uploadAll(TAUserInfo userInfo, Logger logger) {
+        int userId = userInfo.getUser().getId();
+        String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+        BalancingVariants balancingVariant = BalancingVariants.SHORT;
+        LockData lockData = lockDataService.lock(key, userId, LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
+                LockData.State.IN_QUEUE.getText());
+        if (lockData == null) {
+            try {
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
+                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                try {
+                    lockDataService.addUserWaitingForLock(key, userId);
+                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
+                            params, balancingVariant);
+                    LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                    lockDataService.updateQueue(key, lockData.getDateLock(), queue);
+                    logger.info("Задача загрузки ТФ запущена");
+                } catch (AsyncTaskException e) {
+                    lockDataService.unlock(key, userId);
+                    logger.error("Ошибка при постановке в очередь задачи загрузки ТФ.");
+                }
+            } catch (Exception e) {
+                try {
+                    lockDataService.unlock(key, userId);
+                } catch (ServiceException e2) {
+                    if (applicationInfo.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
+                        throw e2;
+                    }
+                }
+                if (e instanceof ServiceLoggerException) {
+                    throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                } else {
+                    throw new ServiceException(e.getMessage(), e);
+                }
+            }
+        }
+
+        ActionResult result = new ActionResult();
+        if (!logger.getEntries().isEmpty()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+        return result;
+    }
+
     private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream,
                                                List<String> formDataFileNameList, List<Integer> formDataDepartmentList,
                                                Logger logger) {
@@ -200,11 +331,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     // Ошибка копирования из архива
                     log(userInfo, LogData.L33, logger, fileName, e.getMessage());
                     fail++;
-					LOG.error(e.getMessage(), e);
+                    LOG.error(e.getMessage(), e);
                 } catch (ServiceException se) {
                     log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                     fail++;
-					LOG.error(se.getMessage(), se);
+                    LOG.error(se.getMessage(), se);
                 } finally {
                     IOUtils.closeQuietly(zais);
                 }
@@ -315,11 +446,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             FileWrapper file = ResourceUtils.getSharedResource(checkResult.getPath() + "/" + fileName, false);
             boolean exist = file.exists();
             OutputStream outputStream = file.getOutputStream();
-			try {
-            	IOUtils.copy(inputStream, outputStream);
-			} finally {
-            	IOUtils.closeQuietly(outputStream);
-			}
+            try {
+                IOUtils.copy(inputStream, outputStream);
+            } finally {
+                IOUtils.closeQuietly(outputStream);
+            }
             log(userInfo, LogData.L32, logger, fileName, checkResult.getPath());
             if (exist) {
                 logger.info(U1, fileName);

@@ -1,52 +1,52 @@
 <nav id="app-header" class="navbar navbar-default" style="min-width: 1300px;">
     <div class="navbar-header">
         <a href="#">
-            <div class="logo">
-                <img src="resources/img/content.png" styalt="" />
-            </div>
+            <div class="logo"></div>
         </a>
     </div>
-
+    <div class="navbar-header">
+        <span class="sub-logo">АС «Учет налогов»</span>
+    </div>
     <ul class="nav navbar-nav" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)">
         <li class="dropdown">
-            <a data-toggle="dropdown">{{::'menu.taxes' | translate}}<b class='caret'></b></a>
+            <a data-toggle="dropdown">{{::'menu.taxes' | translate}}</a>
             <tree tree='treeTaxes'></tree>
         </li>
     </ul>
     <ul class="nav navbar-nav" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_NSI)">
         <li class="dropdown">
-            <a data-toggle="dropdown">{{::'main.menu.nsi' | translate}}<b class='caret'></b></a>
+            <a data-toggle="dropdown">{{::'main.menu.nsi' | translate}}</a>
             <tree tree='treeNsi'></tree>
         </li>
     </ul>
     <ul class="nav navbar-nav">
         <li class="dropdown">
-            <a data-toggle="dropdown">{{::'main.menu.administration' | translate}}<b class='caret'></b></a>
+            <a data-toggle="dropdown">{{::'main.menu.administration' | translate}}</a>
             <tree tree='treeAdministration'></tree>
         </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-        <li type="button" id="btnNotif" class="btn btn-link" data-toggle="button"
+        <li type="button" id="btnNotif" class="btn btn-link width66" data-toggle="button"
             data-ng-click="openNotifications()" style="color: white; font-size: 11pt;">
             <img data-ng-show="showImage" src="resources/img/attention_on_20.png" style="float: left; margin-top: 5px;"/>
-            <span style="line-height: 33px;">{{notificationsCount}}</span>
+            <span class="new-message">2</span>
+            <!--<span style="line-height: 33px;">{{notificationsCount}}</span>-->
         </li>
-        <li>
-            <a href="{{aboutHref}}"><i class="glyphicon glyphicon-info-sign"></i></a>
-        <li class="border-none">
+        <li class="width66">
+            <a href="{{aboutHref}}"><span class="info-icon"></span></a>
+        <li class="border-none width66">
             <ul class="nav navbar-nav">
                 <li class="dropdown">
-                    <a data-toggle="dropdown"><b
-                            class='glyphicon glyphicon-question-sign'></b></a>
+                    <a data-toggle="dropdown"><span class="question-icon"></span></a>
                     <tree tree='treeManual'></tree>
                 </li>
             </ul>
         </li>
         <li class="app-header-user-info" style="padding-top: 4px;">
             <div>{{security.user.department.name}}</div>
-            <div style="text-align: center;">{{security.user.name}}</div>
+            <div>{{security.user.name}}</div>
         </li>
-        <li><a class="logout_link" data-ng-click="logout()">{{::'main.menu.exit' | translate}}</a></li>
+        <li><a class="logout_link" data-ng-click="logout()"></a></li>
     </ul>
 
     <div class="build_info">
