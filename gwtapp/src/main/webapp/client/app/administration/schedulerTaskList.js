@@ -16,8 +16,8 @@
         /**
          * @description Контроллер страницы "Планировщик задач"
          */
-        .controller('schedulerTaskListCtrl', ['$scope', '$filter', 'schedulerTaskResource', '$http',
-            function ($scope, $filter, schedulerTaskResource, $http) {
+        .controller('schedulerTaskListCtrl', ['$scope', '$filter', 'schedulerTaskResource', '$http', 'APP_CONSTANTS',
+            function ($scope, $filter, schedulerTaskResource, $http, APP_CONSTANTS) {
 
                 /**
                  * @description Обновление грида
@@ -66,8 +66,8 @@
                                 formatter: $filter('dateFormatter')
                             }
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         sortname: 'id',
                         viewrecords: true,
                         sortorder: "asc",

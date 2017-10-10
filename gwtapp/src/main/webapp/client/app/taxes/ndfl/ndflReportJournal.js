@@ -182,8 +182,8 @@
                             {name: 'fileName', index: 'fileName', width: 200, formatter: $filter('linkFileFormatter')},
                             {name: 'note', index: 'note', width: 200}
                         ],
-                        rowNum: 20,
-                        rowList: [10, 20, 30, 50, 100],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         sortname: 'declarationDataId',
                         viewrecords: true,
                         sortorder: "desc",
