@@ -236,6 +236,68 @@ public class DepartmentDaoTest {
         Assert.assertEquals(0, departmentDao.getDepartmentIdsByDestinationSource(departments, dateStart, dateEnd).size());
         departments.add(1);
         Assert.assertEquals(1, departmentDao.getDepartmentIdsByDestinationSource(departments, null, null).size());
-        Assert.assertEquals(2, (int)departmentDao.getDepartmentIdsByDestinationSource(departments, dateStart, null).get(0));
+        Assert.assertEquals(2, (int) departmentDao.getDepartmentIdsByDestinationSource(departments, dateStart, null).get(0));
+    }
+
+    @Test
+    public void getAlLChildrenIdsTest() {
+        List<Integer> result = departmentDao.getAllChildrenIds(1);
+        Assert.assertEquals(7, result.size());
+        Assert.assertTrue(result.containsAll(asList(1, 2, 3, 4, 5, 6, 7)));
+
+        result = departmentDao.getAllChildrenIds(2);
+        Assert.assertEquals(2, result.size());
+        Assert.assertTrue(result.containsAll(asList(2, 6)));
+
+        result = departmentDao.getAllChildrenIds(3);
+        Assert.assertEquals(3, result.size());
+        Assert.assertTrue(result.containsAll(asList(3, 4, 5)));
+
+        result = departmentDao.getAllChildrenIds(4);
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(result.containsAll(asList(4)));
+
+        result = departmentDao.getAllChildrenIds(5);
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(result.containsAll(asList(5)));
+
+        result = departmentDao.getAllChildrenIds(6);
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(result.containsAll(asList(6)));
+
+        result = departmentDao.getAllChildrenIds(7);
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(result.containsAll(asList(7)));
+
+        result = departmentDao.getAllChildrenIds(asList(2, 3));
+        Assert.assertEquals(5, result.size());
+        Assert.assertTrue(result.containsAll(asList(2, 3, 4, 5, 6)));
+
+        result = departmentDao.getAllChildrenIds(asList(2, 7));
+        Assert.assertEquals(3, result.size());
+        Assert.assertTrue(result.containsAll(asList(2, 6, 7)));
+
+        result = departmentDao.getAllChildrenIds(asList(3, 7));
+        Assert.assertEquals(4, result.size());
+        Assert.assertTrue(result.containsAll(asList(3, 4, 5, 7)));
+    }
+
+    @Test
+    public void getDepartmentsByDeclarationsPerformersTest() {
+        List<Integer> result = departmentDao.getDepartmentsByDeclarationsPerformers(asList(5));
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(result.containsAll(asList(2)));
+
+        result = departmentDao.getDepartmentsByDeclarationsPerformers(asList(3));
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(result.containsAll(asList(2)));
+
+        result = departmentDao.getDepartmentsByDeclarationsPerformers(asList(3, 4, 5));
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(result.containsAll(asList(2)));
+
+        result = departmentDao.getDepartmentsByDeclarationsPerformers(asList(7));
+        Assert.assertEquals(2, result.size());
+        Assert.assertTrue(result.containsAll(asList(2, 3)));
     }
 }

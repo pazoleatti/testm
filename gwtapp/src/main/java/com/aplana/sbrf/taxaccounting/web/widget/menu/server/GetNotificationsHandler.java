@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static java.util.Arrays.asList;
-
 @Component
 @PreAuthorize("isAuthenticated()")
 public class GetNotificationsHandler extends AbstractActionHandler<GetNotificationsAction, GetNotificationsResult> {
@@ -43,7 +41,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         NotificationsFilterData filter = action.getFilter();
         filter.setUserId(user.getId());
 		Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
-		receiverDepartmentIds.addAll(departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null));
+		receiverDepartmentIds.addAll(departmentService.getNDFLDeclarationDepartments(user));
         filter.setReceiverDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         filter.setUserRoleIds(userRoles);
 

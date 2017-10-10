@@ -442,8 +442,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
 
             // 40 - Выборка для доступа к экземплярам НФ/деклараций
-            List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    TaxType.NDFL, null, null);
+            List<Integer> departmentList = departmentService.getNDFLDeclarationDepartments(userInfo.getUser());
             if (!departmentList.contains(formDepartment.getId())) {
                 logger.warn(U3 + U3_1, fileName, formDepartment.getName());
                 return null;
