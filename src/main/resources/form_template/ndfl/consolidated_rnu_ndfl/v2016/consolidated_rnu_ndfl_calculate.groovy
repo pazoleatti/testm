@@ -260,7 +260,8 @@ class Calculate extends AbstractScriptClass {
                 result.add(relation.declarationDataId)
             }
         }
-        return result
+
+        return result.sort()
     }
 
     /**
