@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
@@ -89,7 +90,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     };
 
     @Override
-    @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
+    @Cacheable(value = CacheConstants.PERMANENT_DATA, key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
@@ -127,7 +128,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @Cacheable(value = "PermanentData", key = "'RefBook_attribute_'+#attributeId.toString()")
+    @Cacheable(value = CacheConstants.PERMANENT_DATA, key = "'RefBook_attribute_'+#attributeId.toString()")
     public RefBook getByAttribute(Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForObject(
@@ -1455,7 +1456,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @CacheEvict(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
+    @CacheEvict(value = CacheConstants.PERMANENT_DATA, key = "'RefBook_'+#refBookId.toString()")
     public void setScriptId(Long refBookId, String scriptId) {
         getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
     }

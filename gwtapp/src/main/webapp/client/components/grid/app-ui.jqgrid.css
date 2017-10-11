@@ -212,7 +212,7 @@ background-position: -40px 0;*/
 }
 
 .ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
-    background: #ffdc82;
+    background: #fff9cf;
 }
 
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-hover,
@@ -228,14 +228,14 @@ background-position: -40px 0;*/
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-highlight.warning,
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-highlight.message,
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-highlight.error {
-    background: #ffdc82;
+    background: #fff9cf;
 }
 
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-highlight td.success,
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-highlight td.notification,
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-highlight td.warning,
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-highlight td.error {
-    background: #ffdc82;
+    background: #fff9cf;
 }
 
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-hover.ui-state-highlight.success,
