@@ -243,7 +243,9 @@
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).success(function () {
-                                $state.go("ndflJournal", {});
+                                $state.go("ndflJournal", {}).then(function () {
+                                    clearInterval($scope.intervalId);
+                                });
                             });
                         });
                 };
@@ -265,7 +267,7 @@
                 };
                 $scope.downloadXlsx = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
-                }
+                };
                 $scope.downloadSpecific = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
                 };
