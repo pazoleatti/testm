@@ -88,6 +88,7 @@
   "menu.taxes.commonParameters": "Общие параметры",
   "menu.nsi.refbooks": "Справочники",
   "menu.administration.blockList": "Список блокировок",
+  "menu.administration.asyncTaskList": "Асинхронные задачи",
   "menu.administration.configParams": "Конфигурационные параметры",
   "menu.administration.schedulerTaskList": "Планировщик задач",
   "menu.administration.settings": "Настройки",
@@ -373,5 +374,17 @@
   "locks.title.description": "Описание",
   "locks.title.user": "Пользователь",
   "locks.button.delete": "Удалить блокировку",
-  "locks.button.search": "Найти"
+  "locks.button.search": "Найти",
+
+  "async.title": "Асинхронные задачи",
+  "async.button.interrupt": "Остановить задачу",
+  "async.button.search": "Найти",
+  "async.title.number": "№",
+  "async.title.createDate": "Дата создания",
+  "async.title.node": "Сервер",
+  "async.title.description": "Описание",
+  "async.title.user": "Пользователь",
+  "async.title.queue": "Тип очереди",
+  "async.title.state": "Состояние",
+  "async.title.stateDate": "Дата изменения состояния"
 }

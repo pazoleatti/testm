@@ -266,8 +266,11 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void interruptTask(String lockKey, TAUserInfo user, TaskInterruptCause cause) {
-        throw new UnsupportedOperationException("a");
-        //TODO
+        LockData lockData = lockDataService.getLock(lockKey);
+        if (lockData != null) {
+            final AsyncTaskData taskData = asyncTaskDao.getTaskData(lockData.getTaskId());
+            interruptTask(taskData, user, cause);
+        }
     }
 
     @Override
@@ -336,6 +339,11 @@ public class AsyncManagerImpl implements AsyncManager {
     @Override
     public List<Integer> getUsersWaitingForTask(long taskId) {
         return asyncTaskDao.getUsersWaitingForTask(taskId);
+    }
+
+    @Override
+    public PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams) {
+        return asyncTaskDao.getTasks(filter, pagingParams);
     }
 
     /**

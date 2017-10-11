@@ -125,4 +125,13 @@ public interface AsyncManager {
      * @return список идентификаторов пользователей
      */
     List<Integer> getUsersWaitingForTask(long taskId);
+
+    /**
+     * Получает список асинхронных задач + пейджинг. Используется на форме списка асинхронных задач.
+     *
+     * @param filter       ограничение по имени пользователя или ключу. Необязательный параметр. Может быть null
+     * @param pagingParams параметры пэйджинга. Обязательный параметр
+     * @return все блокировки
+     */
+    PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams);
 }

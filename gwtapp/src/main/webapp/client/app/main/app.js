@@ -36,6 +36,7 @@
             'app.ndflReportJournal',
             'app.schedulerTaskList',
             'app.lockDataList',
+            'app.asyncTaskList',
             'app.filterUtils',
             'app.rest',
             'app.formatters',

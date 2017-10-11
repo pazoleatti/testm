@@ -9,7 +9,7 @@ import static com.aplana.sbrf.taxaccounting.model.TaskInterruptCause.EventType.T
 
 public enum TaskInterruptCause {
 
-    LOCK_DELETE("Удалена блокировка задачи (форма \"Список блокировок\")", EventType.LOCK_DELETE),
+    CANCELLED("Задача отменена", EventType.TASK_CANCEL),
     SCHEDULER_OLD_LOCK_DELETE("Удаление истекших блокировок", SCHEDULER),
     RESTART_TASK("Выполнен перезапуск задачи", TASK_CANCEL),
     FORM_DATA_CHANGE_CANCEL("Отмена изменений", TASK_CANCEL),
@@ -41,8 +41,6 @@ public enum TaskInterruptCause {
     private Object[] args;
 
     enum EventType {
-        // Удаление блокировки при выполнении событие "Нажатие на кнопку "Удалить блокировку"" формы "Список блокировок"
-        LOCK_DELETE("С формы \"Список блокировок\" удалена блокировка, установленная %s пользователем %s. %s"),
         // Удаление блокировки при подтверждении отмены операции
         TASK_CANCEL("При отмене операции удалена блокировка, установленная %s пользователем %s. %s"),
         // Удаление блокировки в рамках задачи планировщика «Удаление истекших блокировок»

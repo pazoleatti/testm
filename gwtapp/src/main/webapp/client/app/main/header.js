@@ -113,6 +113,11 @@
                                 onClick: function () {
                                     $state.go('lockDataList');
                                 }
+                            }, {
+                                name: $filter('translate')('menu.administration.asyncTaskList'),
+                                onClick: function () {
+                                    $state.go('asyncTaskList');
+                                }
                             });
                         }
 

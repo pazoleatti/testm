@@ -21,6 +21,7 @@ import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -51,11 +52,11 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         }
     }
 
-    private static final class AsyncTaskMapper implements RowMapper<AsyncTaskData> {
+    private static final class AsyncTaskDataMapper implements RowMapper<AsyncTaskData> {
         /* Признак того, что надо заполнить все поля включая сериализованные параметры */
         private boolean full;
 
-        public AsyncTaskMapper(boolean full) {
+        public AsyncTaskDataMapper(boolean full) {
             this.full = full;
         }
 
@@ -65,12 +66,9 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
             result.setId(rs.getLong("id"));
             result.setType(AsyncTaskType.getByAsyncTaskTypeId(rs.getInt("type_id")));
             result.setUserId(rs.getInt("user_id"));
-            result.setCreateDate(rs.getDate("create_date"));
-            result.setNode(rs.getString("node"));
-            result.setQueue(AsyncQueue.getById(rs.getInt("queue")));
             result.setState(AsyncTaskState.getById(rs.getInt("state")));
-            result.setStateDate(rs.getDate("state_date"));
             result.setDescription(rs.getString("description"));
+            result.setCreateDate(rs.getTimestamp("create_date"));
             if (full) {
                 ObjectInputStream ois = null;
                 try {
@@ -90,6 +88,24 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
                     }
                 }
             }
+            return result;
+        }
+    }
+
+    private static final class AsyncTaskDTOMapper implements RowMapper<AsyncTaskDTO> {
+
+        @Override
+        public AsyncTaskDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            AsyncTaskDTO result = new AsyncTaskDTO();
+            result.setId(rs.getLong("id"));
+            result.setUser(rs.getString("user_name") + " (" + rs.getString("user_login") + ")");
+            result.setCreateDate(rs.getTimestamp("create_date"));
+            result.setNode(rs.getString("node"));
+            result.setState(AsyncTaskState.getById(rs.getInt("state")).getText());
+            result.setStateDate(rs.getTimestamp("state_date"));
+            result.setDescription(rs.getString("description"));
+            result.setQueue(AsyncQueue.getById(rs.getInt("queue")).getName());
+            result.setQueuePosition(rs.getInt("queue_position"));
             return result;
         }
     }
@@ -149,7 +165,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         try {
             return getNamedParameterJdbcTemplate().queryForObject("select * from (" +
                     "select * from async_task where node = :node and queue = :queue order by start_process_date desc" +
-                    ") where rownum = 1", params, new AsyncTaskMapper(true));
+                    ") where rownum = 1", params, new AsyncTaskDataMapper(true));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -160,7 +176,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("taskId", taskId);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject("select * from async_task where id = :taskId", params, new AsyncTaskMapper(true));
+            return getNamedParameterJdbcTemplate().queryForObject("select * from async_task where id = :taskId", params, new AsyncTaskDataMapper(true));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -171,7 +187,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("taskId", taskId);
         try {
-            return getNamedParameterJdbcTemplate().queryForObject("select * from async_task where id = :taskId", params, new AsyncTaskMapper(false));
+            return getNamedParameterJdbcTemplate().queryForObject("select * from async_task where id = :taskId", params, new AsyncTaskDataMapper(false));
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -223,6 +239,40 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         params.addValue("taskId", taskId);
         params.addValue("userId", userId);
         getNamedParameterJdbcTemplate().update("insert into async_task_subscribers (async_task_id, user_id) values (:taskId, :userId)", params);
+    }
+
+    @Override
+    public PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("start", pagingParams.getStartIndex() + 1);
+            params.addValue("count", pagingParams.getStartIndex() + pagingParams.getCount());
+            String filterParam = filter == null ? "" : filter;
+            params.addValue("filter", "%" + filterParam.toLowerCase() + "%");
+            String sql = " (SELECT t.id, t.create_date, t.state, t.state_date, t.description, t.queue, t.node, u.name as user_name, u.login as user_login, \n" +
+                    (isSupportOver() ? "ROW_NUMBER() OVER (partition BY queue ORDER BY create_date)" : "ROWNUM") +
+                    " AS queue_position, " +
+                    (isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY queue, create_date)" : "ROWNUM") +
+                    " AS rn \n" +
+                    "FROM async_task t \n"
+                    + "join sec_user u on u.id = t.user_id \n" +
+                    (!filterParam.isEmpty() ?
+                            "WHERE (LOWER(t.id) LIKE :filter OR LOWER(t.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter OR LOWER(t.node) LIKE :filter) "
+                            : "")
+                    + ") \n";
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(params);
+                LOG.trace(sql.toString());
+            }
+            String fullSql = "SELECT * FROM" + sql + "WHERE rn BETWEEN :start AND :count";
+            String countSql = "SELECT COUNT(*) FROM" + sql;
+            List<AsyncTaskDTO> records = getNamedParameterJdbcTemplate().query(fullSql, params, new AsyncTaskDTOMapper());
+            int count = getNamedParameterJdbcTemplate().queryForObject(countSql, params, Integer.class);
+            return new PagingResult<AsyncTaskDTO>(records, count);
+        } catch (EmptyResultDataAccessException e) {
+            // недостижимое место из-за особенности запроса
+            return new PagingResult<AsyncTaskDTO>(new ArrayList<AsyncTaskDTO>(), 0);
+        }
     }
 
 }

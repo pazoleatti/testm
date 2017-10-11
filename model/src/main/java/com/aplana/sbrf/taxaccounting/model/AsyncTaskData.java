@@ -17,18 +17,10 @@ public class AsyncTaskData {
     private int userId;
     /* Дата создания/помещения в очередь задачи */
     private Date createDate;
-    /* Узел кластера (название машины), на котором выполняется задача */
-    private String node;
     /* Описание задачи */
     private String description;
     /* Состояние задачи */
     private AsyncTaskState state;
-    /* Дата последнего изменения состояния задачи */
-    private Date stateDate;
-    /* Очередь, в которой находится связанная асинхронная задача */
-    private AsyncQueue queue;
-    /* Положение задачи в очереди */
-    private int queuePosition;
     /**
      * Параметры для выполнения конкретной задачи
      */
@@ -58,22 +50,6 @@ public class AsyncTaskData {
         this.userId = userId;
     }
 
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public String getNode() {
-        return node;
-    }
-
-    public void setNode(String node) {
-        this.node = node;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -90,32 +66,16 @@ public class AsyncTaskData {
         this.state = state;
     }
 
-    public Date getStateDate() {
-        return stateDate;
-    }
-
-    public void setStateDate(Date stateDate) {
-        this.stateDate = stateDate;
-    }
-
-    public int getQueuePosition() {
-        return queuePosition;
-    }
-
-    public void setQueuePosition(int queuePosition) {
-        this.queuePosition = queuePosition;
-    }
-
-    public AsyncQueue getQueue() {
-        return queue;
-    }
-
-    public void setQueue(AsyncQueue queue) {
-        this.queue = queue;
-    }
-
     public Map<String, Object> getParams() {
         return params;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
     public void setParams(Map<String, Object> params) {
@@ -128,13 +88,9 @@ public class AsyncTaskData {
                 "id=" + id +
                 ", type=" + type +
                 ", userId=" + userId +
-                ", createDate=" + createDate +
-                ", node='" + node + '\'' +
                 ", description='" + description + '\'' +
                 ", state=" + state +
-                ", stateDate=" + stateDate +
-                ", queue=" + queue +
-                ", queuePosition=" + queuePosition +
+                ", createDate=" + createDate +
                 ", params=" + params +
                 '}';
     }
