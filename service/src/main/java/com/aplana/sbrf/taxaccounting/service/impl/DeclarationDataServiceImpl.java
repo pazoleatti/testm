@@ -819,9 +819,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         TAUser currentUser = userInfo.getUser();
 
         if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
+            //Контролерам доступны все АСНУ, поэтому фильтрации по АСНУ нет, поэтому список для них пустой
+            //Операторам доступны только некоторые АСНУ. Если такие есть, добавить их в список. Если доступных АСНУ нет, то
+            //список будет состоять из 1 элемента (-1), который не может быть id существующего АСНУ, чтобы не нашлась ни одна форма
             List<Long> asnuIds = new ArrayList<Long>();
-            for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
-                asnuIds.add(asnu.getId());
+            if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
+                List<RefBookAsnu> avaliableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
+                if(!avaliableAsnuList.isEmpty()) {
+                    for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
+                        asnuIds.add(asnu.getId());
+                    }
+                } else {
+                    asnuIds.add(-1L);
+                }
             }
             filter.setAsnuIds(asnuIds);
         }
