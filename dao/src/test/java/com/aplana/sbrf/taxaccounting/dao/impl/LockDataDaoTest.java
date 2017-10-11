@@ -106,8 +106,8 @@ public class LockDataDaoTest extends Assert {
 
 	@Test
 	public void unlockAll() {
-		List<String> keys = Arrays.asList(new String[] {"a", "q"});
-		dao.unlockAll(keys);
+		List<Long> ids = Arrays.asList(1L, 5L);
+		dao.unlockAll(ids);
 		// проверяем, что блокировки были удалены
 		PagingParams paging = new PagingParams(0, 100);
 		PagingResult<LockData> data = dao.getLocks("", paging);
@@ -116,8 +116,8 @@ public class LockDataDaoTest extends Assert {
 
 	private int unlockIfOlderThan(long seconds) {
 		List<String> keyList = dao.getLockIfOlderThan(seconds);
-		if (keyList.size() > 0) {
-			dao.unlockAll(keyList);
+		for (String key : keyList) {
+			dao.unlock(key);
 		}
 		return keyList.size();
 	}

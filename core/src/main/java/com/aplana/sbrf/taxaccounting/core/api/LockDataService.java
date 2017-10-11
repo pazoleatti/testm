@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -123,19 +120,19 @@ public interface LockDataService {
      */
     boolean isLockExists(String key, Date lockDate);
 
-    /**
-     * Получает список всех блокировок
-     * @return все блокировки
-     * @param filter ограничение по имени пользователя или ключу
-     * @param pagingParams параметры пэйджинга
-     */
-    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
+	/**
+	 * Получает список всех блокировок в виде объектов предназначенных для отображения в GUI
+	 * @return все блокировки
+	 * @param filter ограничение по имени пользователя или ключу
+	 * @param pagingParams параметры пэйджинга
+	 */
+	PagingResult<LockDataItem> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки
-     * @param keys список ключей блокировок
+     * @param ids идентификаторы блокировок
      */
-    void unlockAll(List<String> keys);
+    void unlockAll(List<Long> ids);
 
 	/**
 	 * Удаляет блокировки, созданные ранее "seconds" секунд назад. Предполагается, что данный метод

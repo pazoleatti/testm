@@ -36,7 +36,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public LockData get(String key, boolean like) {
         try {
-            String sql = "SELECT key, user_id, date_lock, description FROM lock_data WHERE key " + (like ? "LIKE ?" : "= ?");
+            String sql = "SELECT id, key, user_id, date_lock, description FROM lock_data WHERE key " + (like ? "LIKE ?" : "= ?");
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {like ? "%" + key + "%" : key},
                     new int[] {Types.VARCHAR},
@@ -54,7 +54,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_lock, description FROM lock_data WHERE key = ? and date_lock = ?",
+                    "SELECT id, key, user_id, date_lock, description FROM lock_data WHERE key = ? and date_lock = ?",
                     new Object[] {key, lockDate},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
@@ -70,7 +70,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public List<LockData> getStartsWith(String key) {
         try {
-            String sql = "SELECT key, user_id, date_lock, description FROM lock_data WHERE key LIKE ?";
+            String sql = "SELECT id, key, user_id, date_lock, description FROM lock_data WHERE key LIKE ?";
             return getJdbcTemplate().query(sql,
                     new Object[] {key+"%"},
                     new int[] {Types.VARCHAR},
@@ -88,7 +88,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public void lock(String key, int userId, String description) {
         try {
             Date lockDate = new Date();
-            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_lock, description) VALUES (?, ?, ?, ?)",
+            getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock, description) VALUES (seq_lock_data.nextval, ?, ?, ?, ?)",
                     new Object[] {key,
                             userId,
                             lockDate,
@@ -104,7 +104,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public void lock(String key, int userId) {
         try {
             Date lockDate = new Date();
-            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_lock) VALUES (?, ?, ?)",
+            getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock) VALUES (seq_lock_data.nextval, ?, ?, ?)",
                     new Object[] {key,
                             userId,
                             lockDate
@@ -155,15 +155,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
 			String filterParam = filter == null ? "" : filter;
             params.put("filter", "%" + filterParam.toLowerCase() + "%");
-            String sql = " (SELECT ld.key, ld.user_id, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, ld.server_node, u.login, \n" +
-					(isSupportOver() ? "ROW_NUMBER() OVER (partition BY queue ORDER BY date_lock)" : "ROWNUM") +
-                    " AS queue_position, " +
-					(isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY queue, date_lock)" : "ROWNUM") +
+            String sql = " (SELECT ld.id, ld.key, ld.user_id, ld.date_lock, ld.description, u.login, \n" +
+					(isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY date_lock)" : "ROWNUM") +
 					" AS rn \n" +
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
                     (!filterParam.isEmpty() ?
-                    "WHERE (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(ld.state) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter OR LOWER(ld.server_node) LIKE :filter) "
+                    "WHERE (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter) "
                     : "")
                     + ") \n";
 			if (LOG.isTraceEnabled()) {
@@ -182,8 +180,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void unlockAll(List<String> keys) {
-        getJdbcTemplate().update("DELETE FROM lock_data ld WHERE " + SqlUtils.transformToSqlInStatementForString("key", keys));
+    public void unlockAll(List<Long> ids) {
+        getJdbcTemplate().update("DELETE FROM lock_data ld WHERE " + SqlUtils.transformToSqlInStatement("id", ids));
     }
 
     @Override
@@ -195,6 +193,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         @Override
         public LockData mapRow(ResultSet rs, int index) throws SQLException {
             LockData result = new LockData();
+            result.setId(rs.getLong("id"));
             result.setKey(rs.getString("key"));
             result.setUserId(rs.getInt("user_id"));
             result.setDateLock(rs.getTimestamp("date_lock"));

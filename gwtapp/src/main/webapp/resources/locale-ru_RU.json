@@ -365,5 +365,13 @@
   "taskList.title.nextStartDate": "Дата следующего запуска",
   "taskList.button.runTasks": "Запустить выполнение по расписанию",
   "taskList.button.stopTasks": "Остановить выполнение по расписанию",
-  "taskList.button.update": "Обновить"
+  "taskList.button.update": "Обновить",
+
+  "locks.title": "Список блокировок",
+  "locks.title.dateLock": "Дата установки блокировки",
+  "locks.title.key": "Ключ блокировки",
+  "locks.title.description": "Описание",
+  "locks.title.user": "Пользователь",
+  "locks.button.delete": "Удалить блокировку",
+  "locks.button.search": "Найти"
 }

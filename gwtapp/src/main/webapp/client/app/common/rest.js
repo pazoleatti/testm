@@ -138,5 +138,14 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        /**
+         * @description Список блокировок
+         */
+        .factory('lockDataResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/locks', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

@@ -79,7 +79,7 @@ public interface LockDataDao extends PermissionDao {
      * Удаляет все указанные блокировки
      * @param keys список ключей блокировок
      */
-    void unlockAll(List<String> keys);
+    void unlockAll(List<Long> keys);
 
     /**
      * Возвращяет список истекших блокировок

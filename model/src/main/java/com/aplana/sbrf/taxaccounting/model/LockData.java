@@ -14,6 +14,8 @@ public final class LockData implements SecuredEntity {
     public static final String STANDARD_LOCK_MSG = "Объект заблокирован другой операцией. Попробуйте выполнить операцию позже";
 
     /* Идентификатор блокировки */
+    private long id;
+    /* Идентификатор блокировки */
     private String key;
     /* Код пользователя, установившего блокировку*/
     private int userId;
@@ -43,6 +45,14 @@ public final class LockData implements SecuredEntity {
     public LockData(String key, int userId) {
         this.key = key;
         this.userId = userId;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getKey() {

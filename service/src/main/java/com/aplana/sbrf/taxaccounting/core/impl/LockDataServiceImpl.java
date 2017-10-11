@@ -164,13 +164,25 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
-        return dao.getLocks(filter, pagingParams);
+    public PagingResult<LockDataItem> getLocks(String filter, PagingParams pagingParams) {
+        PagingResult<LockData> lockDataList = dao.getLocks(filter, pagingParams);
+        PagingResult<LockDataItem> result = new PagingResult<LockDataItem>();
+        for (LockData lockData : lockDataList) {
+            LockDataItem item = new LockDataItem();
+            item.setDateLock(lockData.getDateLock());
+            item.setDescription(lockData.getDescription());
+            item.setKey(lockData.getKey());
+            item.setId(lockData.getId());
+            TAUser user = userDao.getUser(lockData.getUserId());
+            item.setUser(TAUser.SYSTEM_USER_ID != user.getId() ? user.getName() + " (" + user.getLogin() + ")" : user.getName());
+            result.add(item);
+        }
+        return result;
     }
 
     @Override
-    public void unlockAll(List<String> keys) {
-        dao.unlockAll(keys);
+    public void unlockAll(List<Long> ids) {
+        dao.unlockAll(ids);
     }
 
     private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, TaskInterruptCause cause) {
