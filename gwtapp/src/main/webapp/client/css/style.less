@@ -19,10 +19,10 @@ html {
 
 body {
   color: #333;
-  background-color: @white;
   min-width: 1200px;
   font-family: 'Open Sans', sans-serif;
   font-size: @basic-font-size;
+  background-color: @grayMoreLighter;
 }
 
 .clear {
@@ -506,10 +506,13 @@ input[type="checkbox"] {
 
 /* Панель для отображения информации о версии приложения и его сборке */
 .build_info {
-  font-size: 100%;
   position: fixed; /* Фиксированное положение */
-  left: 0;
-  bottom: 0; /* Левый нижний угол */
+  left: 16px;
+  bottom: 5px;/* Левый нижний угол */
+  font-size: 12px;
+  line-height: 1.33;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /* Признак обязательности поля */
@@ -922,9 +925,13 @@ hr {
   }
   .container-grid {
     overflow: hidden;
-    height: 100%;
+    height: 92%;
     position: relative;
     padding: 6px;
+    background: @white;
+    margin: 16px 11px 0;
+    box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.1);
+    border: solid 1px rgba(0, 0, 0, 0.1);
   }
   div [ui-view] {
     height: 100%;
