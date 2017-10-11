@@ -351,7 +351,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName, String xsdBlobDataId) {
         declarationDataService.validateDeclaration(userInfo, declarationData, logger, true, FormDataEvent.IMPORT_TRANSPORT_FILE, dataFile, fileName, xsdBlobDataId, new LockStateLogger() {
             @Override
-            public void updateState(String state) {
+            public void updateState(AsyncTaskState state) {
                 // ничего не делаем
             }
         });
@@ -422,7 +422,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         deleteReport(declarationData.getId(), Arrays.asList(DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
         declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
             @Override
-            public void updateState(String state) {
+            public void updateState(AsyncTaskState state) {
                 // ничего не делаем
             }
         });
@@ -477,12 +477,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         }
         return lockDataService.getLock(deleteLockKey);
     }
-
-    @Override
-    public String getTaskName(DeclarationDataReportType ddReportType) {
-        return declarationDataService.getAsyncTaskName(ddReportType, TaxType.NDFL);
-    }
-
 
     @Override
     public List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, Logger logger, TAUserInfo userInfo) {

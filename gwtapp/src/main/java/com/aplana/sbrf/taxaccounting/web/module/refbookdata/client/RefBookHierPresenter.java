@@ -20,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteI
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.OnTimerEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.upload.UploadDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.event.BackEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -59,7 +58,6 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     AbstractEditPresenter commonEditPresenter;
     RefBookVersionPresenter versionPresenter;
     RefBookHierDataPresenter refBookHierDataPresenter;
-    UploadDialogPresenter uploadDialogPresenter;
 
     public static final Object TYPE_editFormPresenter = new Object();
     public static final Object TYPE_mainFormPresenter = new Object();
@@ -83,8 +81,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     public RefBookHierPresenter(EventBus eventBus, MyView view, MyProxy proxy,
                                 DispatchAsync dispatcher, PlaceManager placeManager,
                                 HierEditPresenter editFormPresenter, RefBookHierDataPresenter refBookHierDataPresenter,
-                                RefBookVersionPresenter versionPresenter, DepartmentEditPresenter departmentEditPresenter,
-                                UploadDialogPresenter uploadDialogPresenter) {
+                                RefBookVersionPresenter versionPresenter, DepartmentEditPresenter departmentEditPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
@@ -92,7 +89,6 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         this.refBookHierDataPresenter = refBookHierDataPresenter;
         this.versionPresenter = versionPresenter;
         this.departmentEditPresenter = departmentEditPresenter;
-        this.uploadDialogPresenter = uploadDialogPresenter;
         getView().setUiHandlers(this);
         this.timer = new Timer() {
             @Override
@@ -444,34 +440,6 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                     Dialog.errorMessage("Ошибка", result.getErrorMsg());
                             }
                         }, RefBookHierPresenter.this));
-    }
-
-    @Override
-    public void showUploadDialogClicked() {
-        if (eventScriptStatus.get(FormDataEvent.IMPORT)) {
-            if (!commonEditPresenter.isFormModified()) {
-                uploadDialogPresenter.open(refBookId, isVersioned);
-            } else {
-                commonEditPresenter.checkModified(new CheckModifiedHandler() {
-                    @Override
-                    public void openLoadDialog() {
-                        uploadDialogPresenter.open(refBookId, isVersioned);
-                    }
-
-                    @Override
-                    public String getTitle() {
-                        return "Подтверждение изменений";
-                    }
-
-                    @Override
-                    public String getText() {
-                        return "Выбранная запись была изменена. Сохранить изменения и загрузить файл? \"Да\" - загрузить с сохранением. \"Нет\" - загрузить без сохранения.";
-                    }
-                });
-            }
-        } else {
-            Dialog.infoMessage(NOT_EXIST_EVENT_MSG + "\"" + refBookName + "\"");
-        }
     }
 
     @Override

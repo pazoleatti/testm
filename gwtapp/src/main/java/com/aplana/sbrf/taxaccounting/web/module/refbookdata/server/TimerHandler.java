@@ -2,9 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.TimerAction;
@@ -46,18 +44,11 @@ public class TimerHandler extends AbstractActionHandler<TimerAction, TimerResult
         TimerResult result = new TimerResult();
         RefBook refBook = refBookFactory.get(action.getRefBookId());
 
-        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
-        if (lockType != null) {
-            if (lockType.getFirst().equals(ReportType.IMPORT_REF_BOOK)) {
-                result.setLock(true);
-            } else if (true) {
-                result.setLock(true);
-            }
-            result.setText(String.format("Пользователем \"%s\" запущена операция \"%s\" (с %s)",
-                    taUserService.getUser(lockType.getSecond().getUserId()).getName(),
-                    refBookFactory.getTaskName(lockType.getFirst(), refBook.getId(), null),
-                    SIMPLE_DATE_FORMAT.get().format(lockType.getSecond().getDateLock())));
-            result.setLockId(lockType.getSecond().getKey() + "_" + lockType.getSecond().getDateLock().getTime());
+        LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
+        if (lockData != null) {
+            result.setLock(true);
+            result.setText(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
+            result.setLockId(lockData.getKey() + "_" + lockData.getDateLock().getTime());
         } else {
             result.setLock(false);
         }

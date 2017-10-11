@@ -23,7 +23,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import com.aplana.sbrf.taxaccounting.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,7 +59,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     @Autowired
     private RefBookSimpleQueryBuilderComponent queryBuilder;
     @Autowired
-    private BDUtils dbUtils;
+    private DBUtils dbUtils;
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -701,7 +701,7 @@ public class RefBookSimpleDaoImpl extends AbstractDao implements RefBookSimpleDa
     public List<Long> createRecordVersion(final RefBook refBook, final Date version, final VersionedObjectStatus status,
                                           final List<RefBookRecord> records) {
 
-        final List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds((long) records.size());
+        final List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds(records.size());
         MapSqlParameterSource[] allParameters = makeParametersForCreateRecordVersion(refBook, version, status, records, refBookRecordIds);
 
         PreparedStatementData ps = queryBuilder.psCreateRecordVersion(refBook);

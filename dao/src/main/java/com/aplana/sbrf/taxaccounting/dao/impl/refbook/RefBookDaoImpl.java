@@ -17,7 +17,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import com.aplana.sbrf.taxaccounting.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,7 +79,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private BDUtils dbUtils;
+    private DBUtils dbUtils;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -1075,7 +1075,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         RefBook refBook = get(refBookId);
 
-        final List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds((long) records.size());
+        final List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds(records.size());
         BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -2230,7 +2230,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (records.isEmpty()) {
             return;
         }
-        final List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds(Long.valueOf(records.size()));
+        final List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds(records.size());
 
         BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
             @Override
@@ -2363,7 +2363,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
 
             // генерация нужного количества id'шников
-            List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds(Long.valueOf(needIdsCnt));
+            List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds(needIdsCnt);
             Iterator<Long> idsIterator = refBookRecordIds.iterator();
             for (int i = 0; i < recordAddIds.size(); i++) {
                 if (recordAddIds.get(i)[0] == null) {

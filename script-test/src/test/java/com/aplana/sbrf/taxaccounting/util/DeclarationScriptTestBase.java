@@ -90,7 +90,7 @@ public abstract class DeclarationScriptTestBase {
         try {
             FileInputStream jrxmlTemplate = new FileInputStream(getSpecificReportPath(subreport.getName()));
             ScriptSpecificDeclarationDataReportHolder reportHolder = new ScriptSpecificDeclarationDataReportHolder();
-            DeclarationDataReportType reportType = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport);
+            DeclarationDataReportType reportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
             reportHolder.setFileOutputStream(new ByteArrayOutputStream());
             reportHolder.setFileInputStream(jrxmlTemplate);
             reportHolder.setDeclarationSubreport(reportType.getSubreport());

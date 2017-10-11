@@ -22,9 +22,9 @@ public interface LoadDeclarationDataService {
      * @param userInfo
      * @param fileName
      * @param inputStream
-     * @param lock
+     * @param taskId идентификатор асинхронной задачи, которая занимается обработкой файла (необходим для логирования)
      */
-    String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock);
+    String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, long taskId);
 
     /**
      * @param logger

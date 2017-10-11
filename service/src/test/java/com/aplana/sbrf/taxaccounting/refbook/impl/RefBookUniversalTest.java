@@ -15,7 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import com.aplana.sbrf.taxaccounting.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class RefBookUniversalTest {
     private LockDataService lockService;
     private Logger logger;
     private RefBook refBook;
-    private BDUtils dbUtils;
+    private DBUtils dbUtils;
     private RefBookRecord refBookRecord;
     private List<RefBookAttribute> attributes;
 
@@ -63,8 +63,8 @@ public class RefBookUniversalTest {
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(provider, "logEntryService", logEntryService);
 
-        dbUtils = mock(BDUtils.class);
-        when(dbUtils.getNextIds(any(BDUtils.Sequence.class), eq(1L))).thenReturn(Arrays.asList(1L));
+        dbUtils = mock(DBUtils.class);
+        when(dbUtils.getNextIds(any(DBUtils.Sequence.class), eq(1))).thenReturn(Arrays.asList(1L));
         ReflectionTestUtils.setField(provider, "dbUtils", dbUtils);
 
         lockService = mock(LockDataService.class);
@@ -95,7 +95,7 @@ public class RefBookUniversalTest {
         attributes.add(attributeName);
         when(refBook.getAttributes()).thenReturn(attributes);
 
-        when(lockService.lock(any(String.class), any(Integer.class), any(String.class), any(String.class))).thenReturn(new LockData());
+        when(lockService.lock(any(String.class), any(Integer.class), any(String.class))).thenReturn(new LockData());
     }
 
     /**************** Создание версии **************************/

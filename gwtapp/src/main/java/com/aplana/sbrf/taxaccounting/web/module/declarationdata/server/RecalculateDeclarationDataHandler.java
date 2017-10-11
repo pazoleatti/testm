@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -39,7 +40,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     private LockDataService lockDataService;
 
     @Autowired
-    private AsyncTaskManagerService asyncTaskManagerService;
+    private AsyncManager asyncManager;
 
     public RecalculateDeclarationDataHandler() {
         super(RecalculateDeclarationDataAction.class);
@@ -68,7 +69,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
             throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(action.getTaxType()) ? "Налоговая форма не может быть сформирована" : "Уведомление не может быть сформировано");
         }
         String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
-        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
+        Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, action.isForce(), logger);
         if (restartStatus != null && restartStatus.getFirst()) {
             result.setStatus(CreateAsyncTaskStatus.LOCKED);
             result.setRestartMsg(restartStatus.getSecond());
@@ -79,32 +80,26 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("declarationDataId", action.getDeclarationId());
             params.put("docDate", action.getDocDate());
-            asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, action.isCancelTask(), userInfo, logger, new AsyncTaskHandler() {
+            asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, action.isCancelTask(), new AbstractStartupAsyncTaskHandler() {
                 @Override
-                public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            declarationDataService.getDeclarationFullName(action.getDeclarationId(), ddReportType),
-                            LockData.State.IN_QUEUE.getText());
+                            declarationDataService.getDeclarationFullName(action.getDeclarationId(), ddReportType));
                 }
 
                 @Override
-                public void executePostCheck() {
+                public void postCheckProcessing() {
                     result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
                 }
 
                 @Override
-                public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                public boolean checkExistTasks(AsyncTaskType reportType, TAUserInfo userInfo, Logger logger) {
                     return declarationDataService.checkExistAsyncTask(action.getDeclarationId(), reportType, logger);
                 }
 
                 @Override
-                public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
                     declarationDataService.interruptAsyncTask(action.getDeclarationId(), userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
-                }
-
-                @Override
-                public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                    return declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
                 }
             });
         }

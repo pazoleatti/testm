@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.Collection;

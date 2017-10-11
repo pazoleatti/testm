@@ -4,7 +4,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * Варианты, определяющие, в какую очередь будет направлена задача
  * @author dloshkarev
  */
-public enum BalancingVariants {
+public enum AsyncQueue {
 	/** 1 - Кратковременные задачи */
 	SHORT(1, "Очередь кратковременных задач"),
 	/** 2 - Длительные задачи */
@@ -13,7 +13,7 @@ public enum BalancingVariants {
     private int id;
     private String name;
 
-    BalancingVariants(int id, String name) {
+    AsyncQueue(int id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -26,8 +26,8 @@ public enum BalancingVariants {
         return id;
     }
 
-    BalancingVariants getById(int id) {
-        for (BalancingVariants item : values()) {
+    public static AsyncQueue getById(int id) {
+        for (AsyncQueue item : values()) {
             if (item.getId() == id) {
                 return item;
             }

@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.async;
 
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -37,8 +36,6 @@ public class AsyncTaskThreadContainer {
 
     @Autowired
     private AsyncManager asyncManager;
-    @Autowired
-    private AsyncTaskDao asyncTaskDao;
     @Autowired
     private ServerInfo serverInfo;
     @Autowired
@@ -88,15 +85,15 @@ public class AsyncTaskThreadContainer {
                     if (taskData != null) {
                         //Запускаем выполнение бина-обработчика задачи в новом потоке
                         LOG.info("Task started: " + taskData);
-                        final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getTypeId());
+                        final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
                         executorService.submit(new Thread() {
                             @Override
                             public void run() {
                                 Thread.currentThread().setName("AsyncTask-" + taskData.getId());
 
                                 try {
-                                    int userId = (Integer) taskData.getParams().get("USER_ID");
-                                    TAUser user = taUserService.getUser(userId);
+                                    //Запускаем задачу под нужным пользователем
+                                    TAUser user = taUserService.getUser(taskData.getUserId());
                                     List<String> roles = new ArrayList<String>();
                                     for (TARole role : user.getRoles()) {
                                         roles.add(role.getAlias());
@@ -108,11 +105,11 @@ public class AsyncTaskThreadContainer {
                                             authorities
                                     );
                                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                                    task.execute(taskData.getParams());
+                                    task.execute(taskData);
                                 } catch (Exception e) {
                                     LOG.error("Unexpected error during async task execution", e);
                                 } finally {
-                                    asyncTaskDao.finishTask(taskData);
+                                    asyncManager.finishTask(taskData.getId());
                                 }
                             }
                         });
@@ -120,7 +117,9 @@ public class AsyncTaskThreadContainer {
                     Thread.sleep(500);
                 } catch (Exception e) {
                     LOG.info("Unexpected error during startup async task execution", e);
-                    asyncTaskDao.finishTask(taskData);
+                    if (taskData != null) {
+                        asyncManager.finishTask(taskData.getId());
+                    }
                 }
             }
         }
@@ -132,7 +131,7 @@ public class AsyncTaskThreadContainer {
     private final class AsyncTaskShortQueueProcessor extends AbstractQueueProcessor {
         @Override
         protected AsyncTaskData getNextTask(int taskTimeout) {
-            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, BalancingVariants.SHORT, getThreadCount());
+            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, AsyncQueue.SHORT, getThreadCount());
         }
 
         @Override
@@ -147,7 +146,7 @@ public class AsyncTaskThreadContainer {
     private final class AsyncTaskLongQueueProcessor extends AbstractQueueProcessor {
         @Override
         protected AsyncTaskData getNextTask(int taskTimeout) {
-            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, BalancingVariants.LONG, getThreadCount());
+            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, AsyncQueue.LONG, getThreadCount());
         }
 
         @Override

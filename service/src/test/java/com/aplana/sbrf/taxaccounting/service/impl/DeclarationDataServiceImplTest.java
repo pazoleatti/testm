@@ -290,7 +290,7 @@ public class DeclarationDataServiceImplTest {
             when(sourceService.isDDConsolidationTopical(1L)).thenReturn(false);
             declarationDataService.check(logger, 1L, userInfo, new LockStateLogger() {
                 @Override
-                public void updateState(String state) {
+                public void updateState(AsyncTaskState state) {
                 }
             });
         } catch (ServiceException e){
@@ -305,7 +305,7 @@ public class DeclarationDataServiceImplTest {
             when(sourceService.isDDConsolidationTopical(1L)).thenReturn(true);
             declarationDataService.check(logger, 1L, userInfo, new LockStateLogger() {
                 @Override
-                public void updateState(String state) {
+                public void updateState(AsyncTaskState state) {
                 }
             });
         } catch (ServiceLoggerException e){
@@ -320,20 +320,6 @@ public class DeclarationDataServiceImplTest {
                 "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Консолидированная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" - экземпляр формы не создан",
                 logger.getEntries().get(1).getMessage()
         );
-    }
-
-    @Test
-    public void getTaskName() {
-        DeclarationSubreport declarationSubreport = new DeclarationSubreport();
-        declarationSubreport.setName("report name");
-        DeclarationDataReportType specificReport = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, declarationSubreport);
-
-        assertEquals(declarationDataService.getAsyncTaskName(DeclarationDataReportType.CHECK_DEC, TaxType.INCOME), "Проверка налоговой формы");
-        assertEquals(declarationDataService.getAsyncTaskName(DeclarationDataReportType.ACCEPT_DEC, TaxType.INCOME), "Принятие налоговой формы");
-        assertEquals(declarationDataService.getAsyncTaskName(DeclarationDataReportType.EXCEL_DEC, TaxType.INCOME), "Формирование отчета налоговой формы в XLSX-формате");
-        assertEquals(declarationDataService.getAsyncTaskName(DeclarationDataReportType.XML_DEC, TaxType.INCOME), "Расчет налоговой формы");
-        assertEquals(declarationDataService.getAsyncTaskName(DeclarationDataReportType.PDF_DEC, TaxType.INCOME), "Создание формы предварительного просмотра");
-        assertEquals(declarationDataService.getAsyncTaskName(specificReport, TaxType.INCOME), "Формирование отчета \"report name\" налоговой формы");
     }
 
     @Test
@@ -361,7 +347,7 @@ public class DeclarationDataServiceImplTest {
         DeclarationSubreport declarationSubreport = new DeclarationSubreport();
         declarationSubreport.setName("report name");
         declarationSubreport.setAlias("specific1");
-        DeclarationDataReportType specificReport = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, declarationSubreport);
+        DeclarationDataReportType specificReport = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, declarationSubreport);
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -428,7 +414,7 @@ public class DeclarationDataServiceImplTest {
 
         declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null,null, userInfo, new LockStateLogger() {
             @Override
-            public void updateState(String state) {
+            public void updateState(AsyncTaskState state) {
                 //Nothing
             }
         });
@@ -472,6 +458,6 @@ public class DeclarationDataServiceImplTest {
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.ACCEPT_DEC));
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.CHECK_DEC));
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC));
-        assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, new DeclarationSubreport(){{setAlias("alias1");}})));
+        assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, new DeclarationSubreport(){{setAlias("alias1");}})));
     }
 }

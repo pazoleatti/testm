@@ -70,13 +70,13 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
      */
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, String lock) {
-        ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream, logger, lock);
+    public String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, long taskId) {
+        ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream, logger, taskId);
         logger.info(LogData.L35.getText(), importCounter.getSuccessCounter(), importCounter.getFailCounter());
         return StringUtils.join(importCounter.getMsgList().toArray(), ", ", null);
     }
 
-    private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger, String lock) {
+    private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger, long taskId) {
         if (!userInfo.getUser().hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP,
                 TARole.F_ROLE_OPER, TARole.F_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_UNP)) {
             logger.error(ACCESS_DENIED_ERROR);
@@ -106,7 +106,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                     dataFileOutputStream = new FileOutputStream(dataFile);
                     IOUtils.copy(inputStream, dataFileOutputStream);
                 } catch (IOException e) {
-                    log(userInfo, LogData.L33, logger, lock, fileName, e.getMessage());
+                    log(userInfo, LogData.L33, logger, taskId, fileName, e.getMessage());
                     fail++;
                     LOG.error(e.getMessage(), e);
                 } finally {
@@ -121,7 +121,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                             InputStream is = zf.getInputStream(entry);
                             Logger localLogger = new Logger();
                             try {
-                                if (loadFile(is, entry.getName(), userInfo, localLogger, lock, msgList)) {
+                                if (loadFile(is, entry.getName(), userInfo, localLogger, taskId, msgList)) {
                                     success++;
                                 } else {
                                     fail++;
@@ -130,41 +130,41 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
                                 logger.getEntries().addAll(localLogger.getEntries());
                             }
                         } catch (ServiceException se) {
-                            log(userInfo, LogData.L33, logger, lock, entry.getName(), se.getMessage());
+                            log(userInfo, LogData.L33, logger, taskId, entry.getName(), se.getMessage());
                             fail++;
                             LOG.error(se.getMessage(), se);
                         }
                     }
                 } catch (IOException e) {
                     // Ошибка копирования из архива
-                    log(userInfo, LogData.L33, logger, lock, fileName, e.getMessage());
+                    log(userInfo, LogData.L33, logger, taskId, fileName, e.getMessage());
                     fail++;
                     LOG.error(e.getMessage(), e);
                 } catch (ServiceException se) {
-                    log(userInfo, LogData.L33, logger, lock, fileName, se.getMessage());
+                    log(userInfo, LogData.L33, logger, taskId, fileName, se.getMessage());
                     fail++;
                     LOG.error(se.getMessage(), se);
                 }
             } else {
                 try {
-                    if (loadFile(inputStream, fileName, userInfo, logger, lock, msgList)) {
+                    if (loadFile(inputStream, fileName, userInfo, logger, taskId, msgList)) {
                         success++;
                     } else {
                         fail++;
                     }
                 } catch (IOException e) {
                     // Ошибка копирования файла
-                    log(userInfo, LogData.L33, logger, lock, fileName, e.getMessage());
+                    log(userInfo, LogData.L33, logger, taskId, fileName, e.getMessage());
                     fail++;
                     LOG.error(e.getMessage(), e);
                 } catch (ServiceException se) {
-                    log(userInfo, LogData.L33, logger, lock, fileName, se.getMessage());
+                    log(userInfo, LogData.L33, logger, taskId, fileName, se.getMessage());
                     fail++;
                     LOG.error(se.getMessage(), se);
                 }
             }
         } catch (IOException e) {
-            log(userInfo, LogData.L33, logger, lock, fileName, e.getMessage());
+            log(userInfo, LogData.L33, logger, taskId, fileName, e.getMessage());
             fail++;
             LOG.error(e.getMessage(), e);
         } finally {
@@ -173,11 +173,11 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
         return new ImportCounter(success, fail, msgList);
     }
 
-    private boolean loadFile(InputStream inputStream, String fileName, TAUserInfo userInfo, Logger logger, String lock, List<String> msgList) throws IOException {
+    private boolean loadFile(InputStream inputStream, String fileName, TAUserInfo userInfo, Logger logger, long taskId, List<String> msgList) throws IOException {
         File dataFile = null;
         LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                 userInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.FILE.getText(), fileName));
+                String.format(DescriptionTemplate.FILE.getText(), fileName));
         if (fileLock != null) {
             logger.error("Файл %s пропущен, т.к. он уже обрабатывается системой", fileName);
             return false;

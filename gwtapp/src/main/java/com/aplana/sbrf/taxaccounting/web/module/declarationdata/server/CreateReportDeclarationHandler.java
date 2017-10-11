@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -18,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author lhaziev
@@ -44,7 +48,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     private LogEntryService logEntryService;
 
     @Autowired
-    private AsyncTaskManagerService asyncTaskManagerService;
+    private AsyncManager asyncManager;
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -78,7 +82,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                 return result;
             } else {
                 String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), ddReportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, action.isForce(), logger);
                 if (restartStatus != null && restartStatus.getFirst()) {
                     result.setStatus(CreateAsyncTaskStatus.LOCKED);
                     result.setRestartMsg(restartStatus.getSecond());
@@ -98,33 +102,18 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                             }
                         }
                     }
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                         @Override
-                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), ddReportType),
-                                    LockData.State.IN_QUEUE.getText());
+                                    declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), ddReportType));
                         }
 
                         @Override
-                        public void executePostCheck() {
-                        }
-
-                        @Override
-                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                            return false;
-                        }
-
-                        @Override
-                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                        public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
                             if (uuid != null) {
                                 reportService.deleteDec(uuid);
                             }
-                        }
-
-                        @Override
-                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
                         }
                     });
                 }

@@ -452,13 +452,6 @@ public interface DeclarationService {
     LockData createDeleteLock(long declarationDataId, TAUserInfo userInfo);
 
     /**
-     * Формирует название операции
-     * @param ddReportType
-     * @return
-     */
-    String getTaskName(DeclarationDataReportType ddReportType);
-
-    /**
      * Удаляет все формы заданного вида в заданном отчетном периоде
      * @param declarationTypeId вид НФ
      * @param departmentReportPeriodId отчетный период

@@ -10,13 +10,11 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
-import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scriptsimport.client.ScriptsImportTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
-import com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client.UploadTransportDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
@@ -133,8 +131,8 @@ public class GetMainMenuActionHandler extends
             MenuItem adminMenuItem = new MenuItem("Администрирование");
             if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                     TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
-                adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", NUMBER_SIGN
-                        + LockTokens.lockList));
+                //adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", NUMBER_SIGN
+                //        + LockTokens.lockList));
             }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {

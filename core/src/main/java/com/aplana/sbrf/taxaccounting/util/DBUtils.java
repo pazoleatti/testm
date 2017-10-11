@@ -9,9 +9,10 @@ import java.util.List;
  * бд на продакшене(oracle)
  * @author auldanov
  */
-public interface BDUtils {
+public interface DBUtils {
 
     enum Sequence {
+		ASYNC_TASK("seq_async_task"),
 		FORM_DATA_NNN("seq_form_data_nnn"),
         FORM_COLUMN("seq_form_column"),
         REF_BOOK_RECORD("seq_ref_book_record"),
@@ -33,12 +34,12 @@ public interface BDUtils {
     /**
      * Метод возвращает список зарезервированных id для таблицы seq_form_data_nnn
      */
-    List<Long> getNextDataRowIds(Long count);
+    List<Long> getNextDataRowIds(int count);
 
     /**
      * Метод возвращает список зарезервированных id для таблицы ref_book_record
      */
-    List<Long> getNextRefBookRecordIds(Long count);
+    List<Long> getNextRefBookRecordIds(int count);
 
     /**
      * Метод возвращает список зарезервированных id
@@ -51,7 +52,7 @@ public interface BDUtils {
      * @param count Необходимое количество
      * @return Идентификаторы из последовательности
      */
-    List<Long> getNextIds(Sequence sequence, Long count);
+    List<Long> getNextIds(Sequence sequence, int count);
 
     /**
      * Получение текущего соединения

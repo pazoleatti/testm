@@ -68,8 +68,8 @@ public class RefBookAsyncConfigDaoTest {
 
     @Test
     public void get() {
-        AsyncTaskTypeData asyncTaskTypeData1 = asyncTaskTypeDao.getTaskData(1L);
-        AsyncTaskTypeData asyncTaskTypeData2 = asyncTaskTypeDao.getTaskData(2L);
+        AsyncTaskTypeData asyncTaskTypeData1 = asyncTaskTypeDao.getTaskTypeData(1L);
+        AsyncTaskTypeData asyncTaskTypeData2 = asyncTaskTypeDao.getTaskTypeData(2L);
 
         assertEquals(1, asyncTaskTypeData1.getId());
         assertEquals("task1", asyncTaskTypeData1.getName());

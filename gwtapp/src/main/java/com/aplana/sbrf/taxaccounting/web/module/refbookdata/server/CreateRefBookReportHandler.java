@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -39,16 +39,13 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
     private SecurityService securityService;
 
     @Autowired
-    private AsyncTaskManagerService asyncTaskManagerService;
+    private AsyncManager asyncManager;
 
     @Autowired
     private LockDataService lockDataService;
 
     @Autowired
     private LogEntryService logEntryService;
-
-    @Autowired
-    private DepartmentService departmentService;
 
     @Autowired
     private TAUserService userService;
@@ -73,34 +70,27 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
 
     @Override
     public CreateReportResult execute(final CreateReportAction action, ExecutionContext context) throws ActionException {
-        final ReportType reportType;
+        final AsyncTaskType reportType;
         final String reportName = action.getReportName();
-        if (ReportType.CSV_REF_BOOK.getName().equals(reportName)) {
-            reportType = ReportType.CSV_REF_BOOK;
-        } else if (ReportType.EXCEL_REF_BOOK.getName().equals(reportName)) {
-            reportType = ReportType.EXCEL_REF_BOOK;
+        if (AsyncTaskType.CSV_REF_BOOK.getName().equals(reportName)) {
+            reportType = AsyncTaskType.CSV_REF_BOOK;
+        } else if (AsyncTaskType.EXCEL_REF_BOOK.getName().equals(reportName)) {
+            reportType = AsyncTaskType.EXCEL_REF_BOOK;
         } else {
-            reportType = ReportType.SPECIFIC_REPORT_REF_BOOK;
+            reportType = AsyncTaskType.SPECIFIC_REPORT_REF_BOOK;
         }
         CreateReportResult result = new CreateReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
 
         RefBook refBook = refBookFactory.get(action.getRefBookId());
-        TAUser currentUser = securityService.currentUserInfo().getUser();
 
-        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
-        LockData lockData = null;
-        if (lockType == null &&
-                (lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId(), ReportType.EDIT_REF_BOOK))) == null) {
+        LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
+        if (lockData == null) {
             String filter = null;
             String searchPattern = action.getSearchPattern();
             if (searchPattern != null && !searchPattern.isEmpty()) {
-                if (filter != null && !filter.isEmpty()) {
-                    filter += " and (" + refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch()) + ")";
-                } else {
-                    filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
-                }
+                filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
             }
 
             Map<String, Object> params = new HashMap<String, Object>();
@@ -129,48 +119,20 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
                 params.put("sortAttribute", sortAttribute.getId());
             }
             params.put("isSortAscending", action.isAscSorting());
-            if (reportType.equals(ReportType.SPECIFIC_REPORT_REF_BOOK))
+            if (reportType.equals(AsyncTaskType.SPECIFIC_REPORT_REF_BOOK))
                 params.put("specificReportType", reportName);
 
             String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
                     LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.get().format(action.getVersion()), action.getSearchPattern(),
                     (sortAttribute != null ? sortAttribute.getAlias() : null), action.isAscSorting(), UUID.randomUUID());
-            asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
+            asyncManager.executeTask(keyTask, reportType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                 @Override
-                public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            refBookFactory.getTaskFullName(reportType, action.getRefBookId(), action.getVersion(), action.getSearchPattern(), reportName),
-                            LockData.State.IN_QUEUE.getText());
-                }
-
-                @Override
-                public void executePostCheck() {
-                }
-
-                @Override
-                public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                    return false;
-                }
-
-                @Override
-                public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                }
-
-                @Override
-                public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                    return refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getReportName());
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
                 }
             });
         } else {
-            ReportType rType = ReportType.EDIT_REF_BOOK;
-            if (lockData == null) {
-                lockData = lockType.getSecond();
-                rType = lockType.getFirst();
-            }
-            logger.info(LockData.LOCK_CURRENT,
-                    sdf.get().format(lockData.getDateLock()),
-                    userService.getUser(lockData.getUserId()).getName(),
-                    refBookFactory.getTaskName(rType, action.getRefBookId(), null));
+            logger.info(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
             result.setErrorMsg("Для текущего справочника запущена операция, при которой формирование отчета невозможно");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

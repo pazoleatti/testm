@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.model.NotificationType;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -20,13 +17,12 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.async.AsyncTask.RequiredParams.*;;
 
 /**
  * @author lhaziev
  */
 @Component("SpecificReportRefBookAsyncTask")
-public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask  {
+public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
@@ -38,79 +34,81 @@ public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask  {
     private PrintingService printingService;
 
     @Autowired
-    private LockDataService lockService;
+    private AsyncManager asyncManager;
 
     @Override
-    protected ReportType getReportType() {
-        return ReportType.SPECIFIC_REPORT_REF_BOOK;
+    protected AsyncTaskType getAsyncTaskType() {
+        return AsyncTaskType.SPECIFIC_REPORT_REF_BOOK;
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
-        long refBookId = (Long)params.get("refBookId");
-        String filter = (String)params.get("filter");
-        Date version = (Date)params.get("version");
-        String specificReportType = (String)params.get("specificReportType");
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) throws AsyncTaskException {
+        long refBookId = (Long) params.get("refBookId");
+        String filter = (String) params.get("filter");
+        Date version = (Date) params.get("version");
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
         if (filter.isEmpty())
             filter = null;
         Long value = Long.valueOf(refBookDataProvider.getRecordsCount(version, filter)) * refBookFactory.get(refBookId).getAttributes().size();
         String msg = String.format("количество выгружаемых ячеек(%s) превышает максимально допустимое(%s)!", value, "%s");
-        return checkTask(getReportType(), value, refBookFactory.getTaskName(getReportType(), refBookId, specificReportType), msg);
+        return checkTask(value, taskDescription, msg);
     }
 
     @Override
-    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        int userId = (Integer)params.get(USER_ID.name());
-        long refBookId = (Long)params.get("refBookId");
-        String filter = (String)params.get("filter");
-        String searchPattern = (String)params.get("searchPattern");
-        Date version = (Date)params.get("version");
-        String specificReportType = (String)params.get("specificReportType");
+    protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
+        Map<String, Object> params = taskData.getParams();
+        long refBookId = (Long) params.get("refBookId");
+        String filter = (String) params.get("filter");
+        String searchPattern = (String) params.get("searchPattern");
+        Date version = (Date) params.get("version");
+        String specificReportType = (String) params.get("specificReportType");
         RefBookAttribute sortAttribute = null;
         if (params.containsKey("sortAttribute"))
-            sortAttribute = refBookFactory.get(refBookId).getAttribute((Long)params.get("sortAttribute"));
+            sortAttribute = refBookFactory.get(refBookId).getAttribute((Long) params.get("sortAttribute"));
         if (filter.isEmpty())
             filter = null;
-        Boolean isSortAscending = (Boolean)params.get("isSortAscending");
+        Boolean isSortAscending = (Boolean) params.get("isSortAscending");
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-        final String lock = (String) params.get(LOCKED_OBJECT.name());
-        final Date lockDate = (Date) params.get(LOCK_DATE.name());
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         String uuid = printingService.generateRefBookSpecificReport(refBookId, specificReportType, version, filter, searchPattern, sortAttribute, isSortAscending, userInfo, new LockStateLogger() {
             @Override
-            public void updateState(String state) {
-                lockService.updateState(lock, lockDate, state);
+            public void updateState(AsyncTaskState state) {
+                asyncManager.updateState(taskData.getId(), state);
             }
         });
-        return new TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
+        return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
     }
 
     @Override
-    protected String getAsyncTaskName() {
-        return "Формирование специфичного отчета формы";
-    }
-
-    @Override
-    protected String getNotificationMsg(Map<String, Object> params) {
-        long refBookId = (Long)params.get("refBookId");
-        String searchPattern = (String)params.get("searchPattern");
-        Date version = (Date)params.get("version");
-        String specificReportType = (String)params.get("specificReportType");
+    protected String getNotificationMsg(AsyncTaskData taskData) {
+        long refBookId = (Long) taskData.getParams().get("refBookId");
+        String searchPattern = (String) taskData.getParams().get("searchPattern");
+        Date version = (Date) taskData.getParams().get("version");
+        String specificReportType = (String) taskData.getParams().get("specificReportType");
         RefBook refBook = refBookFactory.get(refBookId);
 
         return String.format("Сформирован отчет \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        long refBookId = (Long)params.get("refBookId");
-        String searchPattern = (String)params.get("searchPattern");
-        Date version = (Date)params.get("version");
-        String specificReportType = (String)params.get("specificReportType");
+    protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
+        long refBookId = (Long) taskData.getParams().get("refBookId");
+        String searchPattern = (String) taskData.getParams().get("searchPattern");
+        Date version = (Date) taskData.getParams().get("version");
+        String specificReportType = (String) taskData.getParams().get("specificReportType");
         RefBook refBook = refBookFactory.get(refBookId);
 
-        return String.format("Произошла %sошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", unexpected?"непредвиденная ":"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
+        return String.format("Произошла %sошибка при формировании отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", unexpected ? "непредвиденная " : "", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.get().format(version), searchPattern);
+    }
+
+    @Override
+    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+        long refBookId = (Long) params.get("refBookId");
+        String specificReportType = (String) params.get("specificReportType");
+        String filter = (String) params.get("filter");
+        Date version = (Date) params.get("version");
+        RefBook refBook = refBookFactory.get(refBookId);
+        return String.format(getAsyncTaskType().getDescription(), specificReportType, refBook.getName(), version, filter);
     }
 }

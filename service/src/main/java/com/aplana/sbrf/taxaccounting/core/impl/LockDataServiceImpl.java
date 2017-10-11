@@ -6,21 +6,17 @@ import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +56,7 @@ public class LockDataServiceImpl implements LockDataService {
 						if (lock != null) {
 							return lock;
 						}
-						internalLock(key, userId, description, null, serverInfo.getServerName());
+						internalLock(key, userId, description);
 					}
 					return null;
 				} catch (Exception e) {
@@ -71,7 +67,7 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
     @Override
-    public LockData lock(final String key, final int userId, final String description, final String state) {
+    public LockData lockAsync(final String key, final int userId) {
         return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData execute() {
@@ -81,7 +77,7 @@ public class LockDataServiceImpl implements LockDataService {
                         if (lock != null) {
                             return lock;
                         }
-                        internalLock(key, userId, description, state, serverInfo.getServerName());
+                        dao.lock(key, userId);
                     }
                     return null;
                 } catch (Exception e) {
@@ -168,86 +164,13 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void addUserWaitingForLock(final String key, final int userId) {
-        tx.executeInNewTransaction(new TransactionLogic() {
-            @Override
-            public Object execute() {
-                try {
-                    synchronized(LockDataServiceImpl.class) {
-                        LockData lock = dao.get(key, false);
-                        if (lock != null) {
-                            dao.addUserWaitingForLock(key, userId);
-                        } else {
-                            throw new ServiceException(String.format("Нельзя ожидать несуществующий объект блокировки. key = \"%s\"", key));
-                        }
-                    }
-                } catch (ServiceException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new ServiceException("Не удалось добавить пользователя в список ожидающих объект блокировки", e);
-                }
-				return null;
-            }
-        });
-    }
-
-    @Override
-    public List<Integer> getUsersWaitingForLock(String key) {
-        synchronized(LockDataServiceImpl.class) {
-            try {
-                return dao.getUsersWaitingForLock(key);
-            } catch (Exception e) {
-                throw new ServiceException("Не удалось получить список пользователей ожидающих объект блокировки", e);
-            }
-        }
-    }
-
-    @Override
-    public PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams) {
-        return dao.getLocks(filter, queues, pagingParams);
+    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
+        return dao.getLocks(filter, pagingParams);
     }
 
     @Override
     public void unlockAll(List<String> keys) {
         dao.unlockAll(keys);
-    }
-
-    @Override
-    public void updateState(final String key, final Date lockDate, final String state) {
-        tx.executeInNewTransaction(new TransactionLogic() {
-            @Override
-            public Object execute() {
-                try {
-                    synchronized (LockDataServiceImpl.class) {
-                        dao.updateState(key, lockDate, state, serverInfo.getServerName());
-                    }
-                } catch (ServiceException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new ServiceException("Не удалось обновить статус блокировки объекта", e);
-                }
-				return null;
-            }
-        });
-    }
-
-    @Override
-    public void updateQueue(final String key, final Date lockDate, final LockData.LockQueues queue) {
-        tx.executeInNewTransaction(new TransactionLogic() {
-            @Override
-            public Object execute() {
-                try {
-                    synchronized (LockDataServiceImpl.class) {
-                        dao.updateQueue(key, lockDate, queue);
-                    }
-                } catch (ServiceException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new ServiceException("Не удалось обновить статус блокировки объекта", e);
-                }
-				return null;
-            }
-        });
     }
 
     private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, TaskInterruptCause cause) {
@@ -277,72 +200,28 @@ public class LockDataServiceImpl implements LockDataService {
         return keyList.size();
 	}
 
-	/**
+    @Override
+    public void unlockAllByTask(long taskId) {
+        dao.unlockAllByTask(taskId);
+    }
+
+    @Override
+    public void bindTask(final String lockKey, final long taskId) {
+        tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
+            @Override
+            public Boolean execute() {
+                synchronized (LockDataServiceImpl.class) {
+                    dao.bindTask(lockKey, taskId);
+                }
+                return null;
+            }
+        });
+    }
+
+    /**
 	 * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
 	 */
-	private void internalLock(String key, int userId, String description, String state, String serverNode) {
-		dao.lock(key, userId, description, state, serverNode);
+	private void internalLock(String key, int userId, String description) {
+		dao.lock(key, userId, description);
 	}
-
-    @Override
-    public void interruptTask(final LockData lockData, final TAUserInfo userInfo, final boolean force, final TaskInterruptCause cause) {
-        if (lockData != null) {
-            LOG.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
-            tx.executeInNewTransaction(new TransactionLogic() {
-				   @Override
-				   public Object execute() {
-					   try {
-						   TAUser user = userInfo.getUser();
-						   List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
-                           if (!waitingUsers.contains(user.getId()))
-                               waitingUsers.add(user.getId());
-						   unlock(lockData.getKey(), user.getId(), force);
-						   //asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
-						   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription(), cause.toString());
-						   List<Notification> notifications = new ArrayList<Notification>();
-						   //Создаем оповещение для каждого пользователя из списка
-						   if (!waitingUsers.isEmpty()) {
-							   for (Integer waitingUser : waitingUsers) {
-								   Notification notification = new Notification();
-								   notification.setUserId(waitingUser);
-								   notification.setCreateDate(new LocalDateTime());
-								   notification.setText(msg);
-								   notifications.add(notification);
-							   }
-							   notificationService.saveList(notifications);
-						   }
-					   } catch (Exception e) {
-						   throw new ServiceException("Не удалось прервать задачу", e);
-					   }
-                       auditLockDeletion(userInfo, lockData, cause);
-					   return null;
-				   }
-			   }
-            );
-        }
-    }
-
-    @Override
-    public void interruptAllTasks(List<String> lockKeys, TAUserInfo userInfo, TaskInterruptCause cause) {
-        for (String key : lockKeys) {
-            interruptTask(getLock(key), userInfo, true, cause);
-        }
-    }
-
-    public void lockInfo(LockData lockData, Logger logger) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
-        if (LockData.State.IN_QUEUE.getText().equals(lockData.getState())) {
-            logger.info("\"%s\" пользователем \"%s\" запущена операция \"%s\"(статус \"%s\")",
-                    formatter.format(lockData.getDateLock()),
-                    userDao.getUser(lockData.getUserId()).getName(),
-                    lockData.getDescription(),
-                    lockData.getState());
-        } else {
-            logger.info("\"%s\" пользователем \"%s\" запущена операция \"%s\". Данная операция уже выполняется Системой(статус \"%s\")",
-                    formatter.format(lockData.getDateLock()),
-                    userDao.getUser(lockData.getUserId()).getName(),
-                    lockData.getDescription(),
-                    lockData.getState());
-        }
-    }
 }

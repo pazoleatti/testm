@@ -75,9 +75,9 @@ public class LockDataServiceImplTest {
 
 	@Test
 	public void lockTest() {
-		Assert.assertNotNull(service.lock("a", 0, "", "")); // есть активная блокировка
-		Assert.assertNotNull(service.lock("a", 1, "", "")); // есть активная блокировка
-		Assert.assertNull(service.lock("z", 0, "", "")); // можно заблокировать
+		Assert.assertNotNull(service.lock("a", 0, "")); // есть активная блокировка
+		Assert.assertNotNull(service.lock("a", 1, "")); // есть активная блокировка
+		Assert.assertNull(service.lock("z", 0, "")); // можно заблокировать
 	}
 
 	@Test (expected = ServiceException.class)

@@ -617,7 +617,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 @Override
                 public void onClick(ClickEvent event) {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().viewReport(false, true, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport));
+                        getUiHandlers().viewReport(false, true, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport));
                     }
                 }
             });
@@ -633,7 +633,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 @Override
                 public void onClick(ClickEvent event) {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().viewReport(false, false, new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport));
+                        getUiHandlers().viewReport(false, false, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport));
                     }
                 }
             });

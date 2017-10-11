@@ -41,7 +41,8 @@ public class PreLoadCheckRefBookHandler extends AbstractActionHandler<PreLoadChe
     public PreLoadCheckRefBookResult execute(PreLoadCheckRefBookAction action, ExecutionContext context) throws ActionException {
         PreLoadCheckRefBookResult result = new PreLoadCheckRefBookResult();
         Logger logger = new Logger();
-        loadRefBookDataService.preLoadCheck(action.getRefBookId(), action.getFileName(), action.getDateFrom(), action.getDateTo(), securityService.currentUserInfo(), logger);
+        //TODO: Убрал, т.к импорт в этом проекте не используется
+        //loadRefBookDataService.preLoadCheck(action.getRefBookId(), action.getFileName(), action.getDateFrom(), action.getDateTo(), securityService.currentUserInfo(), logger);
         if (refBookFactory.get(action.getRefBookId()).isVersioned()) {
             if (action.getDateFrom() == null) {
                 logger.error("Дата начала действия новых версий должна быть заполнена!");

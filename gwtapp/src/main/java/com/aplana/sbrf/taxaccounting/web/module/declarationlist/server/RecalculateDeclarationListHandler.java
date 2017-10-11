@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -43,7 +43,7 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
     private LockDataService lockDataService;
 
     @Autowired
-    private AsyncTaskManagerService asyncTaskManagerService;
+    private AsyncManager asyncManager;
 
     public RecalculateDeclarationListHandler() {
         super(RecalculateDeclarationListAction.class);
@@ -55,19 +55,18 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
         final RecalculateDeclarationListResult result = new RecalculateDeclarationListResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         final Logger logger = new Logger();
-        final String taskName = declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
-        for (Long id: action.getDeclarationIds()) {
+        for (Long id : action.getDeclarationIds()) {
             if (declarationDataService.existDeclarationData(id)) {
                 final Long declarationId = id;
-                final String prefix = String.format("Постановка операции \"%s\" для формы № %d в очередь на исполнение: ", taskName, declarationId);
+                final String prefix = String.format("Постановка операции \"Расчет налоговой формы\" для формы № %d в очередь на исполнение: ", declarationId);
                 try {
                     try {
                         declarationDataService.preCalculationCheck(logger, declarationId, userInfo);
                     } catch (Exception e) {
-                        logger.error(prefix+"Налоговая форма не может быть рассчитана");
+                        logger.error(prefix + "Налоговая форма не может быть рассчитана");
                     }
                     String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType()), userInfo, false, logger);
+                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
                     if (restartStatus != null && restartStatus.getFirst()) {
                         logger.warn(prefix + "Данная операция уже запущена");
                     } else if (restartStatus != null && !restartStatus.getFirst()) {
@@ -76,32 +75,26 @@ public class RecalculateDeclarationListHandler extends AbstractActionHandler<Rec
                         Map<String, Object> params = new HashMap<String, Object>();
                         params.put("declarationDataId", declarationId);
                         params.put("docDate", action.getDocDate());
-                        asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                             @Override
-                            public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
                                 return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                        declarationDataService.getDeclarationFullName(declarationId, ddReportType),
-                                        LockData.State.IN_QUEUE.getText());
+                                        declarationDataService.getDeclarationFullName(declarationId, ddReportType));
                             }
 
                             @Override
-                            public void executePostCheck() {
+                            public void postCheckProcessing() {
                                 logger.error(prefix + "Найдены запущенные задачи, которые блокирует выполнение операции.");
                             }
 
                             @Override
-                            public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                            public boolean checkExistTasks(AsyncTaskType reportType, TAUserInfo userInfo, Logger logger) {
                                 return declarationDataService.checkExistAsyncTask(declarationId, reportType, logger);
                             }
 
                             @Override
-                            public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                            public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
                                 declarationDataService.interruptAsyncTask(declarationId, userInfo, reportType, TaskInterruptCause.DECLARATION_RECALCULATION);
-                            }
-
-                            @Override
-                            public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                return declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
                             }
                         });
                     }

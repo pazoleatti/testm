@@ -35,30 +35,28 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     private RefBookFactory refBookFactory;
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
-        TAUserInfo userInfo = getUserInfo(params);
-        DeclarationData declarationData = getDeclaration(params);
-        DeclarationDataReportType ddReportType = getDeclarationDataReportType(params);
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
+        DeclarationData declarationData = getDeclaration(userInfo, params);
+        DeclarationDataReportType ddReportType = getDeclarationDataReportType();
 
         Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), ddReportType);
         if (value == null) {
             throw new AsyncTaskException(new ServiceLoggerException("Налоговая форма не сформирована", null));
         }
 
-        String taskName = declarationDataService.getAsyncTaskName(ddReportType, TaxType.NDFL);
-        return checkTask(getReportType(), value, taskName, getTaskLimitMsg(value, params));
+        return checkTask(value, taskDescription, getTaskLimitMsg(value, params));
     }
 
     protected String getTaskLimitMsg(Long value, Map<String, Object> params) {
-        return String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!", TaxType.NDFL.getDeclarationShortName(), value);
+        return String.format("xml файл налоговой формы имеет слишком большой размер(%s Кбайт)!", value);
     }
 
-    protected DeclarationDataReportType getDeclarationDataReportType(Map<String, Object> params) {
-        return DeclarationDataReportType.getDDReportTypeByReportType(getReportType());
+    protected DeclarationDataReportType getDeclarationDataReportType() {
+        return DeclarationDataReportType.getDDReportTypeByReportType(getAsyncTaskType());
     }
 
-    protected final String getDeclarationDescription(Map<String, Object> params) {
-        DeclarationData declaration = getDeclaration(params);
+    protected final String getDeclarationDescription(int userId, Map<String, Object> params) {
+        DeclarationData declaration = getDeclaration(userId, params);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
@@ -73,9 +71,15 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
                 getAdditionalString(declaration, params));
     }
 
-    protected final DeclarationData getDeclaration(Map<String, Object> params) {
+    protected final DeclarationData getDeclaration(int userId, Map<String, Object> params) {
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+        return getDeclaration(userInfo, params);
+    }
+
+    protected final DeclarationData getDeclaration(TAUserInfo userInfo, Map<String, Object> params) {
         long declarationDataId = (Long) params.get("declarationDataId");
-        return declarationDataService.get(declarationDataId, getUserInfo(params));
+        return declarationDataService.get(declarationDataId, userInfo);
     }
 
     private String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
@@ -109,6 +113,6 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
         }
 
         String str = StringUtils.join(messages.toArray(), ", ", null);
-        return str.isEmpty()?"":(", " + str);
+        return str.isEmpty() ? "" : (", " + str);
     }
 }

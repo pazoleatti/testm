@@ -1,23 +1,22 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +40,12 @@ import static com.aplana.sbrf.taxaccounting.model.refbook.RefBook.RECORD_PARENT_
 @Service("refBookFactory")
 @Transactional
 public class RefBookFactoryImpl implements RefBookFactory {
+
+    @Autowired
+    private AsyncManager asyncManager;
+
+    @Autowired
+    private TAUserService userService;
 
     private static final Log LOG = LogFactory.getLog(RefBookFactoryImpl.class);
 
@@ -408,34 +413,13 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
-    public String getTaskName(ReportType reportType, Long refBookId, String specificReportType) {
+    public String getRefBookDescription(DescriptionTemplate descriptionTemplate, Long refBookId) {
         RefBook refBook = get(refBookId);
-        switch (reportType) {
-            case EXCEL_REF_BOOK:
-            case CSV_REF_BOOK:
-            case IMPORT_REF_BOOK:
-            case EDIT_REF_BOOK:
-                return String.format(reportType.getDescription(), refBook.getName());
-            case SPECIFIC_REPORT_REF_BOOK:
-                return String.format(reportType.getDescription(), specificReportType, refBook.getName());
+        switch (descriptionTemplate) {
+            case REF_BOOK_EDIT:
+                return String.format(descriptionTemplate.getText(), refBook.getName());
             default:
-                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
-        }
-    }
-
-    @Override
-    public String getTaskFullName(ReportType reportType, Long refBookId, Date version, String filter, String specificReportType) {
-        RefBook refBook = get(refBookId);
-        switch (reportType) {
-            case EXCEL_REF_BOOK:
-            case CSV_REF_BOOK:
-                return String.format("Формирование отчета справочника \"%s\" в %s-формате : Версия: %s, Фильтр: \"%s\"", refBook.getName(), reportType.getName(), sdf.get().format(version), filter);
-            case SPECIFIC_REPORT_REF_BOOK:
-                return String.format("Формирование специфического отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), sdf.get().format(version), filter);
-            case IMPORT_REF_BOOK:
-                return String.format("Загрузка данных из файла в справочник \"%s\"", refBook.getName());
-            default:
-                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+                throw new ServiceException("Неверный тип шаблона(%s)", descriptionTemplate);
         }
     }
 
@@ -451,8 +435,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
         Iterator<String> iterator = specificReportTypes.iterator();
         while (iterator.hasNext()) {
             String specificReportType = iterator.next();
-            if (ReportType.EXCEL_REF_BOOK.getName().equals(specificReportType) ||
-                    ReportType.CSV_REF_BOOK.getName().equals(specificReportType)) {
+            if (AsyncTaskType.EXCEL_REF_BOOK.getName().equals(specificReportType) ||
+                    AsyncTaskType.CSV_REF_BOOK.getName().equals(specificReportType)) {
                 iterator.remove();
                 LOG.error(String.format("Нельзя переопределить стандартный отчет: %s.", specificReportType));
             }
@@ -461,19 +445,26 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
-    public Pair<ReportType, LockData> getLockTaskType(long refBookId) {
-        ReportType[] reportTypes = {ReportType.IMPORT_REF_BOOK, ReportType.EDIT_REF_BOOK};
-        for (ReportType reportType : reportTypes) {
-            LockData lockData = lockDataService.getLock(generateTaskKey(refBookId, reportType));
-            if (lockData != null)
-                return new Pair<ReportType, LockData>(reportType, lockData);
-        }
-        return null;
+    public String generateTaskKey(long refBookId) {
+        return LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
     }
 
     @Override
-    public String generateTaskKey(long refBookId, ReportType reportType) {
-        return LockData.LockObjects.REF_BOOK.name() + "_" + refBookId + "_" + reportType.getName();
+    public String getRefBookLockDescription(LockData lockData, long refBookId) {
+        if (lockData.getTaskId() != null) {
+            //Заблокировано асинхроннной задачей
+            AsyncTaskData lockTaskData = asyncManager.getLightTaskData(lockData.getTaskId());
+            return String.format(AsyncTask.LOCK_CURRENT,
+                    sdf.get().format(lockData.getDateLock()),
+                    userService.getUser(lockData.getUserId()).getName(),
+                    lockTaskData.getDescription());
+        } else {
+            //Заблокировано редактированием
+            return String.format(AsyncTask.LOCK_CURRENT,
+                    sdf.get().format(lockData.getDateLock()),
+                    userService.getUser(lockData.getUserId()).getName(),
+                    getRefBookDescription(DescriptionTemplate.REF_BOOK_EDIT, refBookId));
+        }
     }
 
     @Override

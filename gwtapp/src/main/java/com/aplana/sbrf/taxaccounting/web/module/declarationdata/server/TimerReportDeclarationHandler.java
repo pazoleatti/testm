@@ -64,8 +64,8 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
         TAUserInfo userInfo = securityService.currentUserInfo();
         TimerReportResult.Status status = getStatus(userInfo, action.getDeclarationDataId(), ddReportType);
         result.setExistReport(status);
-        if (TimerReportResult.StatusReport.EXIST.equals(status.getStatusReport()) && ReportType.PDF_DEC.equals(ddReportType.getReportType())) {
-        } else if (!TimerReportResult.StatusReport.LOCKED.equals(status.getStatusReport()) && ReportType.PDF_DEC.equals(ddReportType.getReportType())) {
+        if (TimerReportResult.StatusReport.EXIST.equals(status.getStatusReport()) && AsyncTaskType.PDF_DEC.equals(ddReportType.getReportType())) {
+        } else if (!TimerReportResult.StatusReport.LOCKED.equals(status.getStatusReport()) && AsyncTaskType.PDF_DEC.equals(ddReportType.getReportType())) {
             TimerReportResult.Status statusXML = getStatus(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
             if (TimerReportResult.StatusReport.LOCKED.equals(statusXML.getStatusReport()) ||
                     TimerReportResult.StatusReport.NOT_EXIST.equals(statusXML.getStatusReport())) {

@@ -14,7 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import com.aplana.sbrf.taxaccounting.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -46,7 +46,7 @@ public abstract class RefBookOktmoDaoImpl extends AbstractDao implements RefBook
     private RefBookDao refBookDao;
 
     @Autowired
-    private BDUtils dbUtils;
+    private DBUtils dbUtils;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -684,7 +684,7 @@ public abstract class RefBookOktmoDaoImpl extends AbstractDao implements RefBook
             }
         }
 
-        final List<Long> refBookRecordIds  = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_OKTMO, (long) records.size());
+        final List<Long> refBookRecordIds  = dbUtils.getNextIds(DBUtils.Sequence.REF_BOOK_OKTMO, records.size());
         BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {

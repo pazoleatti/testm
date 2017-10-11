@@ -2,10 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -57,13 +55,10 @@ public class EditRefBookHandler extends AbstractActionHandler<EditRefBookAction,
         RefBook refBook = refBookFactory.get(action.getRefBookId());
         Logger logger = new Logger();
 
-        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
-        if (lockType != null) {
+        LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
+        if (lockData != null) {
             result.setLock(true);
-            logger.info(LockData.LOCK_CURRENT,
-                    sdf.get().format(lockType.getSecond().getDateLock()),
-                    userService.getUser(lockType.getSecond().getUserId()).getName(),
-                    refBookFactory.getTaskName(lockType.getFirst(), action.getRefBookId(), null));
+            logger.info(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
             result.setLockMsg("Для текущего справочника запущена операция, при которой редактирование невозможно");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

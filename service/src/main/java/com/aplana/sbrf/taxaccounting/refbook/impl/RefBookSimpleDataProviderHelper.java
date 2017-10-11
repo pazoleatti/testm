@@ -22,7 +22,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import com.aplana.sbrf.taxaccounting.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,7 +57,7 @@ public class RefBookSimpleDataProviderHelper {
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private BDUtils dbUtils;
+    private DBUtils dbUtils;
     @Autowired
     private RefBookDao refBookDao;
     @Autowired
@@ -403,9 +403,9 @@ public class RefBookSimpleDataProviderHelper {
         }*/
     }
 
-    List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
+    List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, int countIds, List<Long> excludedVersionEndRecords, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
-        List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
+        List<Long> generatedIds = dbUtils.getNextIds(DBUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
         if (refBook.isVersioned()) {
             int counter = 0;
             for (RefBookRecord record : records) {
