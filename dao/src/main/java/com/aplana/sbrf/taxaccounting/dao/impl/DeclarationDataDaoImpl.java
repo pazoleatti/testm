@@ -276,9 +276,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         BooleanBuilder where = new BooleanBuilder();
 
         if (!CollectionUtils.isEmpty(filter.getAsnuIds())) {
-            where.and(refBookAsnu.id.isNull().or(refBookAsnu.id.in(filter.getAsnuIds())));
-        } else {
-            where.and(refBookAsnu.id.in(Collections.EMPTY_LIST));
+            where.and(refBookAsnu.id.in(filter.getAsnuIds()));
         }
 
         if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {

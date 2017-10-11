@@ -232,10 +232,15 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
             retList.addAll(departments);
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            // 1
-            retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
-            // 2
-            retList.addAll(departmentDao.getAllPerformers(tAUser.getDepartmentId(), Arrays.asList(taxType)));
+            //Дочерние подразделения для подразделения пользователя
+            List<Integer> userDepartmentChildrenIds = departmentDao.getAllChildrenIds(tAUser.getDepartmentId());
+            //Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
+            List<Integer> declarationDepartmentsIds = departmentDao.getDepartmentsByDeclarationsPerformers(userDepartmentChildrenIds);
+            List<Integer> declarationDepartmentsChildrenIds = departmentDao.getAllChildrenIds(declarationDepartmentsIds);
+            //В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
+            //назначены исполнителями, их дочерние подразделения
+            retList.addAll(userDepartmentChildrenIds);
+            retList.addAll(declarationDepartmentsChildrenIds);
         }
 
         // Результат выборки должен содержать только уникальные подразделения

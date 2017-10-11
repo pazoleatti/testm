@@ -30,8 +30,6 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
         this.departmentService = departmentService;
     }
 
-    //TODO https://jira.aplana.com/browse/SBRFNDFL-2008
-
     /**
      * Получение доступных (согласно правам доступа пользователя)  значений справочника
      *
