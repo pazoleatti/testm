@@ -232,7 +232,7 @@ public interface DeclarationDataService {
      * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
      * о файлах и комментарий для текущей декларации.
      */
-    DeclarationDataFileComment saveDeclarationFilesComment(DeclarationDataFileComment dataFileComment);
+    DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment dataFileComment);
 
 
     /**
