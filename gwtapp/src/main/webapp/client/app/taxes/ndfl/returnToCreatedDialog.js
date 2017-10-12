@@ -15,7 +15,7 @@
             $scope.msg = (angular.isDefined(data.msg)) ? data.msg : $translate.instant('DIALOGS_CONFIRMATION_MSG');
             $scope.reason = "";
             $scope.labelYes = $translate.instant('DIALOGS_CONTINUE');
-            $scope.labelNo = $translate.instant('DIALOGS_CANCEL');
+            $scope.labelNo = $translate.instant('DIALOGS_CANCELLATION');
             //-- Methods -----//
 
             $scope.no = function(){
