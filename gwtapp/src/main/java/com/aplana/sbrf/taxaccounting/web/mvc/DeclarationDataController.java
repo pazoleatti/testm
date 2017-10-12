@@ -379,7 +379,8 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
     public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
-        return declarationService.saveDeclarationFilesComment(dataFileComment);
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.saveDeclarationFilesComment(userInfo, dataFileComment);
     }
 
     /**

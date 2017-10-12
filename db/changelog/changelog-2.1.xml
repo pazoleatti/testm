@@ -493,7 +493,7 @@
 	<changeSet id="2.1-rnurgaleev-55" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="1"/>
-            <column name="task_name" value="CLEAR_BLOB_DATA"/>
+            <column name="task_name" value="Очистка файлового хранилища"/>
 			<column name="schedule" value="0 15 22 * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
@@ -504,7 +504,7 @@
 	<changeSet id="2.1-rnurgaleev-56" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="2"/>
-            <column name="task_name" value="CLEAR_LOCK_DATA"/>
+            <column name="task_name" value="Удаление истекших блокировок"/>
 			<column name="schedule" value="0 10 22 * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
@@ -515,7 +515,7 @@
 	<changeSet id="2.1-rnurgaleev-57" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="3"/>
-            <column name="task_name" value="CLEAR_TEMP_DIR"/>
+            <column name="task_name" value="Очистка хранилища временных файлов"/>
 			<column name="schedule" value="0 5 22 * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
@@ -526,7 +526,7 @@
 	<changeSet id="2.1-rnurgaleev-58" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="4"/>
-            <column name="task_name" value="ASYNC_TASK_MONITORING"/>
+            <column name="task_name" value="Мониторинг асинхронных задач"/>
 			<column name="schedule" value="0/5 * * * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
@@ -602,7 +602,7 @@
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="id" value="3"/>
 			<column name="declaration_template_id" value="100"/>	
-			<column name="event_id" value="105"/>
+			<column name="event_id" value="106"/>
 			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_accepted_to_created.groovy"/>
         </insert>
     </changeSet>
@@ -611,7 +611,7 @@
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="id" value="4"/>
 			<column name="declaration_template_id" value="100"/>	
-			<column name="event_id" value="106"/>
+			<column name="event_id" value="105"/>
 			<column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_move_created_to_accepted.groovy"/>
         </insert>
     </changeSet>
@@ -638,7 +638,7 @@
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="id" value="7"/>
 			<column name="declaration_template_id" value="101"/>	
-			<column name="event_id" value="106"/>
+			<column name="event_id" value="105"/>
 			<column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_move_created_to_accepted.groovy"/>
         </insert>
     </changeSet>
@@ -656,7 +656,7 @@
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="id" value="9"/>
 			<column name="declaration_template_id" value="102"/>	
-			<column name="event_id" value="106"/>
+			<column name="event_id" value="105"/>
 			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy"/>
         </insert>
     </changeSet>
@@ -674,7 +674,7 @@
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="id" value="11"/>
 			<column name="declaration_template_id" value="103"/>	
-			<column name="event_id" value="106"/>
+			<column name="event_id" value="105"/>
 			<column name="script" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl_move_created_to_accepted.groovy"/>
         </insert>
     </changeSet>
@@ -692,7 +692,7 @@
         <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="id" value="13"/>
 			<column name="declaration_template_id" value="104"/>	
-			<column name="event_id" value="106"/>
+			<column name="event_id" value="105"/>
 			<column name="script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl_move_created_to_accepted.groovy"/>
         </insert>
     </changeSet>
@@ -780,7 +780,26 @@
 	<changeSet id="2.1-rnurgaleev-89" author="rnurgaleev">
 		<createView
 			replaceIfExists="true"
-            viewName="DEPARTMENT_CHILD_VIEW">select cast(connect_by_root id as number(9,0)) id, parent_id, (connect_by_root id)||'|'||parent_id view_rowid from department connect by prior parent_id = id order by parent_id, id</createView>
+            viewName="DEPARTMENT_CHILD_VIEW">WITH dep_with (id, parent_id, shortname) AS 
+  (
+    SELECT 
+      dp.id, 
+      dp.parent_id, 
+      dp.shortname
+    FROM department dp 
+    WHERE dp.parent_id IS NULL
+    UNION ALL 
+    SELECT 
+      dp.id, 
+      dp.parent_id, 
+      dep_with.shortname ||'/'|| dp.shortname
+    FROM dep_with dep_with
+    INNER JOIN department dp ON dp.parent_id = dep_with.id
+  )
+select a.id, a.parent_id, a.view_rowid, d. shortname from (   
+select cast(connect_by_root id as number(9,0)) id, parent_id, (connect_by_root id)||'|'||parent_id view_rowid from department connect by prior parent_id = id
+) a left join dep_with d on a.id=d.id
+order by parent_id, id</createView>
 	</changeSet>
 	
 	<!--SBRFNDFL-2077-->
