@@ -1540,6 +1540,14 @@ code {
   background-color: #f9f2f4;
   border-radius: 4px;
 }
+
+.personRnuParagraphForDate {
+    margin: 0 0 0 -43px;
+}
+
+.standartParagraphForDate {
+    margin: 0 0 0 -31px;
+}
 kbd {
   padding: 2px 4px;
   font-size: 90%;
