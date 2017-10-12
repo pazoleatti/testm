@@ -28,9 +28,7 @@
     <ul class="nav navbar-nav navbar-right">
         <li type="button" id="btnNotif" class="btn btn-link width66" data-toggle="button"
             data-ng-click="openNotifications()" style="color: white; font-size: 11pt;">
-            <img data-ng-show="showImage" src="resources/img/attention_on_20.png" style="float: left; margin-top: 5px;"/>
-            <span class="new-message">2</span>
-            <!--<span style="line-height: 33px;">{{notificationsCount}}</span>-->
+            <span ng-class="notificationsCountClass">{{notificationsCount}}</span>
         </li>
         <li class="width66">
             <a href="{{aboutHref}}"><span class="info-icon"></span></a>

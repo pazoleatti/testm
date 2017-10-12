@@ -198,12 +198,16 @@
                         projection: 'count'
                     }, function (data) {
                         if (parseInt(data.notifications_count) !== 0) {
-                            $scope.showImage = true;
-                            $scope.notificationsCount = data.notifications_count + " "
-                                + amountCasesFormatterFilter(parseInt(data.notifications_count), $filter('translate')('notifications.nominative'), $filter('translate')('notifications.singular'), $filter('translate')('notifications.plural'));
+                            $scope.notificationsCount = parseInt(data.notifications_count);
                         } else {
-                            $scope.showImage = false;
-                            $scope.notificationsCount = "Нет оповещений";
+                            $scope.notificationsCount = 0;
+                        }
+
+                        if ($scope.notificationsCount > 0) {
+                            $scope.notificationsCountClass = "new-message";
+                        }
+                        else {
+                            $scope.notificationsCountClass = "new-message empty-message";
                         }
                     });
                 };
