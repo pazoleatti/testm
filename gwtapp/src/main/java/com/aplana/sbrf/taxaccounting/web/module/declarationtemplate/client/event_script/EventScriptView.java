@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class EventScriptView extends PopupViewWithUiHandlers<EventScriptUiHandlers> implements EventScriptPresenter.MyView {
@@ -38,7 +37,6 @@ public class EventScriptView extends PopupViewWithUiHandlers<EventScriptUiHandle
         widget.setAnimationEnabled(true);
         dataProvider.addDataDisplay(eventTable);
         initTable();
-        updateTableData();
     }
 
     @Override
@@ -66,9 +64,9 @@ public class EventScriptView extends PopupViewWithUiHandlers<EventScriptUiHandle
         eventTable.setColumnWidth(nameColumn, 55, Style.Unit.PX);
     }
 
-    private void updateTableData() {
-        List<FormDataEvent> events = Arrays.asList(FormDataEvent.values());
-        eventTable.setRowData(0, events);
+    @Override
+    public void updateTableData(List<FormDataEvent> eventList) {
+        eventTable.setRowData(0, eventList);
     }
 
     @UiHandler("create")

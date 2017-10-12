@@ -35,12 +35,7 @@ public interface DepartmentReportPeriodDao {
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
-    void updateActive(int id, boolean active, boolean isBalance);
-
-    /**
-     * Открытие/закрытие отчетного периода подразделения (batch)
-     */
-    void updateActive(final List<Integer> ids, final Integer report_period_id, final boolean active, final boolean isBalance);
+    void updateActive(int id, boolean active);
 
     /**
      * Открытие/закрытие отчетного периода подразделения (batch)
@@ -51,17 +46,6 @@ public interface DepartmentReportPeriodDao {
      * Изменить дату корректировки
      */
     void updateCorrectionDate(int id, Date correctionDate);
-
-    /**
-     * Изменить признак периода ввода остатков
-     */
-    void updateBalance(int id, boolean isBalance);
-
-    /**
-     * Изменить признак периода ввода остатков(батчем)
-     * @param ids список периодов
-     */
-    void updateBalance(List<Integer> ids, boolean isBalance);
 
     /**
      * Удаление отчетного периода подразделения

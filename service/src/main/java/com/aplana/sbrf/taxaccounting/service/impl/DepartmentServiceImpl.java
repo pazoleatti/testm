@@ -107,7 +107,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentTBChildren(tAUser.getDepartmentId()));
         } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER) ||
-                tAUser.hasRole(taxType, TARole.F_ROLE_OPER)){
+                tAUser.hasRole(taxType, TARole.F_ROLE_OPER)) {
             retList.addAll(departmentDao.getAllChildren(tAUser.getDepartmentId()));
         }
 
@@ -123,7 +123,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departmentDao.listDepartmentIds());
         } else if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
-        } else if (tAUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)){
+        } else if (tAUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
             retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
         }
 
@@ -135,7 +135,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Department> retList = new ArrayList<Department>();
 
         if (tAUser.hasRole(TARole.ROLE_ADMIN)
-         || tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
+                || tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделение с типом 2
@@ -227,15 +227,20 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             Set<Integer> departments = new LinkedHashSet<Integer>();
             departments.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
-            for(int tbId : getTBDepartmentIdsByDeclarationPerformer(departmentDao.getParentTBId(tAUser.getDepartmentId()))) {
+            for (int tbId : getTBDepartmentIdsByDeclarationPerformer(departmentDao.getParentTBId(tAUser.getDepartmentId()))) {
                 departments.addAll(departmentDao.getDepartmentTBChildrenId(tbId));
             }
             retList.addAll(departments);
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            // 1
-            retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
-            // 2
-            retList.addAll(departmentDao.getAllPerformers(tAUser.getDepartmentId(), Arrays.asList(taxType)));
+            //Дочерние подразделения для подразделения пользователя
+            List<Integer> userDepartmentChildrenIds = departmentDao.getAllChildrenIds(tAUser.getDepartmentId());
+            //Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
+            List<Integer> declarationDepartmentsIds = departmentDao.getDepartmentsByDeclarationsPerformers(userDepartmentChildrenIds);
+            List<Integer> declarationDepartmentsChildrenIds = departmentDao.getAllChildrenIds(declarationDepartmentsIds);
+            //В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
+            //назначены исполнителями, их дочерние подразделения
+            retList.addAll(userDepartmentChildrenIds);
+            retList.addAll(declarationDepartmentsChildrenIds);
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -243,6 +248,32 @@ public class DepartmentServiceImpl implements DepartmentService {
         retList.clear();
         retList.addAll(setItems);
         return retList;
+    }
+
+    @Override
+    public List<Integer> getNDFLDeclarationDepartments(TAUser user) {
+        int userDepartmentId = user.getDepartmentId();
+        Set<Integer> departments = new LinkedHashSet<Integer>();
+        if (user.hasRoles(TARole.N_ROLE_CONTROL_UNP)) {
+            // Все подразделения из справочника подразделений
+            departments.addAll(departmentDao.listDepartmentIds());
+        } else if (user.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
+            departments.addAll(departmentDao.getDepartmentTBChildrenId(userDepartmentId));
+            for (int tbId : getTBDepartmentIdsByDeclarationPerformer(departmentDao.getParentTBId(userDepartmentId))) {
+                departments.addAll(departmentDao.getDepartmentTBChildrenId(tbId));
+            }
+        } else if (user.hasRoles(TARole.N_ROLE_OPER)) {
+            //Дочерние подразделения для подразделения пользователя
+            List<Integer> userDepartmentChildrenIds = departmentDao.getAllChildrenIds(userDepartmentId);
+            //Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
+            List<Integer> declarationDepartmentsIds = departmentDao.getDepartmentsByDeclarationsPerformers(userDepartmentChildrenIds);
+            List<Integer> declarationDepartmentsChildrenIds = departmentDao.getAllChildrenIds(declarationDepartmentsIds);
+            //В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
+            //назначены исполнителями, их дочерние подразделения
+            departments.addAll(userDepartmentChildrenIds);
+            departments.addAll(declarationDepartmentsChildrenIds);
+        }
+        return new ArrayList<Integer>(departments);
     }
 
     @Override
@@ -337,7 +368,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         departmentReportPeriodFilter.setDepartmentIdList(list);
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
-        for(DepartmentReportPeriod departmentReportPeriod: departmentReportPeriodList) {
+        for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
             retList.add(departmentReportPeriod.getDepartmentId());
         }
 
@@ -348,15 +379,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-	@Override
-	public Map<Integer, Department> getDepartments(List<Integer> departmentId) {
-		Map<Integer, Department> result = new HashMap<Integer, Department>();
-		for (Integer depId : departmentId) {
-			Department department = departmentDao.getDepartment(depId);
-			result.put(department.getId(), department);
-		}
-		return result;
-	}
+    @Override
+    public Map<Integer, Department> getDepartments(List<Integer> departmentId) {
+        Map<Integer, Department> result = new HashMap<Integer, Department>();
+        for (Integer depId : departmentId) {
+            Department department = departmentDao.getDepartment(depId);
+            result.put(department.getId(), department);
+        }
+        return result;
+    }
 
     @Override
     public List<Department> getDepartmentForSudir() {
@@ -371,10 +402,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentDao.getParentsHierarchy(departmentId);
     }
 
-	@Override
-	public String getParentsHierarchyShortNames(Integer departmentId) {
-		return departmentDao.getParentsHierarchyShortNames(departmentId);
-	}
+    @Override
+    public String getParentsHierarchyShortNames(Integer departmentId) {
+        return departmentDao.getParentsHierarchyShortNames(departmentId);
+    }
 
     @Override
     public Department getParentTB(int departmentId) {
@@ -383,7 +414,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             if (tbId == null)
                 return null;
             return getDepartment(tbId);
-        } catch (ServiceException e){
+        } catch (ServiceException e) {
             throw new ServiceException("", e);
         }
     }

@@ -8,6 +8,9 @@
         .module('app.constants', [])
 
         .constant('APP_CONSTANTS', {
+            COMMON: {
+                PAGINATION: [100, 500, 1000]
+            },
             USER_PERMISSION: {
                 VIEW_TAXES_NDFL: 1 << 0,
                 VIEW_TAXES_NDFL_SETTINGS: 1 << 1,
@@ -27,7 +30,8 @@
                 UPLOAD_FILE: 1 << 15,
                 EDIT_GENERAL_PARAMS: 1 << 16,
                 VIEW_REF_BOOK: 1 << 17,
-                EDIT_REF_BOOK: 1 << 18
+                EDIT_REF_BOOK: 1 << 18,
+                VIEW_NSI: 1 << 19
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

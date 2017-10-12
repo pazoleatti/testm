@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
 import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
@@ -419,7 +420,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
     def prepareSpecificReport() {
         def reportAlias = scriptSpecificReportHolder?.declarationSubreport?.alias;
-        if ('rnu_ndfl_person_db' != reportAlias) {
+        if (SubreportAliasConstants.RNU_NDFL_PERSON_DB != reportAlias) {
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
         }
         PrepareSpecificReportResult result = new PrepareSpecificReportResult();
@@ -654,17 +655,17 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
 
     def createSpecificReport() {
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
-            case 'rnu_ndfl_person_db':
+            case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 createSpecificReportPersonDb();
                 break;
-            case 'report_kpp_oktmo':
+            case SubreportAliasConstants.REPORT_KPP_OKTMO:
                 createSpecificReportDb();
                 ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
                 def reportPeriodName = reportPeriod.getTaxPeriod().year + '_' + reportPeriod.name
                 Department department = departmentService.get(declarationData.departmentId)
                 scriptSpecificReportHolder.setFileName("Реестр_сформированной_отчетности_${declarationData.id}_${reportPeriodName}_${department.shortName}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break;
-            case 'rnu_ndfl_person_all_db':
+            case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 createSpecificReportDb();
                 scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break;

@@ -31,6 +31,7 @@
                     <!--Проверить -->
                     <span>
                         <button type="button" class="btn btn-danger"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)"
                                 data-ng-click="check()">
                             <span data-translate-once="button.check"></span>
                         </button>
@@ -38,6 +39,7 @@
                     <!--Удалить-->
                     <span>
                         <button type="button" class="btn btn-danger"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)"
                                 data-ng-click="delete()">
                             <span data-translate-once="button.delete"></span>
                         </button>
@@ -45,6 +47,7 @@
                     <!--Принять -->
                     <span>
                         <button type="button" class="btn btn-danger"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)"
                                 data-ng-click="accept()">
                             <span data-translate-once="button.accept"></span>
                         </button>
@@ -52,6 +55,7 @@
                     <!--Вернуть в Создана -->
                     <span>
                         <button type="button" class="btn btn-danger"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)"
                                 data-ng-click="returnToCreated()">
                             <span data-translate-once="button.return"></span>
                         </button>
@@ -65,8 +69,7 @@
              data-grid-fill-space-container-selector-top=".container-grid-top"
              data-grid-options="ndflReportJournalGrid.options"
              data-grid-ctrl="ndflReportJournalGrid.ctrl"
-             data-init-grid="initOurGrid(ctrl)"
-             data-ng-model="ndflReportJournalGrid.value"
+             data-init-grid="ndflReportJournalGrid.init(ctrl)"
              id="ndflReportJournalTable"
              style="float: left; width: 100%; margin-top: 5px;"></div>
     </div>

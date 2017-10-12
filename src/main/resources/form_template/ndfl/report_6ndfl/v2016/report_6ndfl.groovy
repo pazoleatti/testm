@@ -185,9 +185,6 @@ class Report6Ndfl extends AbstractScriptClass {
                 } finally {
                     break
                 }
-            case FormDataEvent.COMPOSE: // Консолидирование
-                println "!COMPOSE!"
-                break
             case FormDataEvent.GET_SOURCES: //формирование списка источников
                 println "!GET_SOURCES!"
                 getSources()

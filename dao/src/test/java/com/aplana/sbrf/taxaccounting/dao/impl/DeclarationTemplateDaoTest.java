@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,6 @@ import static org.junit.Assert.assertNull;
 @ContextConfiguration({"DeclarationTemplateDaoTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Ignore // Временно отключил пока не добавлена decl_template_event_script в create_main.sql
 public class DeclarationTemplateDaoTest {
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
@@ -62,12 +60,10 @@ public class DeclarationTemplateDaoTest {
     public void testGet() {
         DeclarationTemplate d1 = declarationTemplateDao.get(1);
         assertEquals(1, d1.getId().longValue());
-        /*assertFalse(d1.isActive());*/
         assertEquals("Налоговая форма 1", d1.getName());
 
         DeclarationTemplate d2 = declarationTemplateDao.get(2);
         assertEquals(2, d2.getId().longValue());
-        /*assertTrue(d2.isActive());*/
     }
 
     @Test(expected = DaoException.class)
@@ -292,7 +288,7 @@ public class DeclarationTemplateDaoTest {
 
     @Test
     public void testDeleteList() {
-        declarationTemplateDao.delete(Arrays.asList(1, 2));
+        declarationTemplateDao.delete(Arrays.asList(4, 5));
     }
 
     @Test

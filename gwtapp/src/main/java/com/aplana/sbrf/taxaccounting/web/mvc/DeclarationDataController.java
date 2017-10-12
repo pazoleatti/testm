@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -25,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
@@ -44,6 +46,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
         binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
         binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
+        binder.registerCustomEditor(DeclarationSubreport.class, new RequestParamEditor(DeclarationSubreport.class));
         binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
@@ -209,15 +212,26 @@ public class DeclarationDataController {
     }
 
     /**
-     * Удаление декларации
+     * Удаление налоговой формы
      *
-     * @param declarationDataId идентификатор декларации
+     * @param declarationDataId Идентификатор налоговой формы
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/delete")
     public void deleteDeclaration(@PathVariable int declarationDataId) {
-        if (declarationService.existDeclarationData(declarationDataId)) {
-            declarationService.delete(declarationDataId, securityService.currentUserInfo());
-        }
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        declarationService.deleteIfExists(declarationDataId, userInfo);
+    }
+
+    /**
+     * Удаление налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/delete")
+    public ActionResult deleteDeclarations(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.deleteDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -228,9 +242,9 @@ public class DeclarationDataController {
      * @param periodId          идентификатор периода
      * @return модель {@link CreateDeclarationReportResult}, в которой содержаться данные результате операции создания
      */
-    @PostMapping(value = "/actions/declarationDate/createReports")
-    public CreateDeclarationReportResult createReports(Integer declarationTypeId, Integer departmentId, Integer periodId) {
-        return declarationDataService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
+    @PostMapping(value = "/actions/declarationData/createReport")
+    public CreateDeclarationReportResult createReport(Integer declarationTypeId, Integer departmentId, Integer periodId) {
+        return declarationService.createReports(securityService.currentUserInfo(), declarationTypeId, departmentId, periodId);
     }
 
     /**
@@ -243,16 +257,8 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/create")
     public CreateResult<Long> createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
-        Logger logger = new Logger();
-        CreateResult<Long> result = new CreateResult<Long>();
-
-        Long declarationId = declarationDataService.create(securityService.currentUserInfo(), logger, declarationTypeId, departmentId, periodId);
-        result.setEntityId(declarationId);
-        if (!logger.getEntries().isEmpty()) {
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
-
-        return result;
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.create(userInfo, declarationTypeId, departmentId, periodId);
     }
 
     /**
@@ -267,6 +273,18 @@ public class DeclarationDataController {
     }
 
     /**
+     * Вернуть в создана список налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/returnToCreated")
+    public ActionResult returnToCreatedDeclaration(@RequestParam Long[] declarationDataIds, @RequestParam String reason) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.cancelDeclarationList(Arrays.asList(declarationDataIds), reason, userInfo);
+    }
+
+    /**
      * Рассчитать декларацию
      *
      * @param declarationDataId идентификатор декларации
@@ -277,7 +295,19 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/recalculate")
     public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.recalculateDeclaration(userInfo, declarationDataId, force, cancelTask);
+        return declarationService.recalculateDeclaration(userInfo, declarationDataId, force, cancelTask);
+    }
+
+    /**
+     * Рассчитать налоговые формы
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/recalculate")
+    public ActionResult recalculateDeclarationList(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.recalculateDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -290,7 +320,19 @@ public class DeclarationDataController {
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/check")
     public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.checkDeclaration(userInfo, declarationDataId, force);
+        return declarationService.checkDeclaration(userInfo, declarationDataId, force);
+    }
+
+    /**
+     * Проверить налоговые формы
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/check")
+    public ActionResult checkDeclaration(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.checkDeclarationList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -307,6 +349,18 @@ public class DeclarationDataController {
     }
 
     /**
+     * Принять список налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/accept")
+    public ActionResult acceptDeclarationList(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.acceptDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+    }
+
+    /**
      * Получение дополнительной информации о файлах декларации с комментариями
      *
      * @param declarationDataId идентификатор декларации
@@ -315,7 +369,7 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=filesComments")
     public DeclarationDataFileComment fetchFilesComments(@PathVariable long declarationDataId) {
-        return declarationDataService.fetchFilesComments(declarationDataId);
+        return declarationService.fetchFilesComments(declarationDataId);
     }
 
     /**
@@ -328,7 +382,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
     public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
-        return declarationDataService.saveDeclarationFilesComment(dataFileComment);
+        return declarationService.saveDeclarationFilesComment(dataFileComment);
     }
 
     /**
@@ -363,7 +417,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=sources")
     public List<Relation> getDeclarationSourcesAndDestinations(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.getDeclarationSourcesAndDestinations(userInfo, declarationDataId);
+        return declarationService.getDeclarationSourcesAndDestinations(userInfo, declarationDataId);
     }
 
     /**
@@ -375,7 +429,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData", params = "projection=declarations")
     public JqgridPagedList<DeclarationDataJournalItem> fetchDeclarations(@RequestParam DeclarationDataFilter filter, @RequestParam PagingParams pagingParams) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        PagingResult<DeclarationDataJournalItem> pagingResult = declarationDataService.fetchDeclarations(userInfo, filter, pagingParams);
+        PagingResult<DeclarationDataJournalItem> pagingResult = declarationService.fetchDeclarations(userInfo, filter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,
@@ -393,8 +447,45 @@ public class DeclarationDataController {
      * @return источники и приемники декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
-    public CreateDeclarationReportResult creteReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long personId, @RequestParam NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long personId, @RequestParam NdflPersonFilter ndflPersonFilter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationDataService.creteReportRnu(userInfo, declarationDataId, personId, ndflPersonFilter);
+        return declarationService.createReportRnu(userInfo, declarationDataId, personId, ndflPersonFilter);
     }
+
+    /**
+     * Формирование рну ндфл для всех физ лиц
+     *
+     * @param declarationDataId идентификатор декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/allRnuReport")
+    public CreateDeclarationReportResult createReportAllRnus(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createReportAllRnu(userInfo, declarationDataId, force);
+    }
+
+    /**
+     * Формирование отчета в xlsx
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return информация о создании отчета
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/reportXsls")
+    public CreateDeclarationReportResult CreateDeclarationReportXlsx(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createReportXlsx(userInfo, declarationDataId, force);
+    }
+
+    /**
+     * Возвращает данные о наличии отчетов
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return данные о наличии отчетов
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=availableReports")
+    public ReportAvailableResult checkAvailabilityReports(@PathVariable long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.checkAvailabilityReports(userInfo, declarationDataId);
+    }
+
 }

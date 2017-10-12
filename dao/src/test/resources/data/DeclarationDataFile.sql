@@ -7,8 +7,8 @@ insert into department (id, name, parent_id, type, code) values (2, 'Б - деп
 insert into tax_type (id, name) values ('T', 'Транспортный');
 insert into tax_type (id, name) values ('I', 'Прибыль');
 
-insert into declaration_type (id, name, tax_type, status) values (1, 'Вид налоговой формы 1', 'N', 1);
-insert into declaration_type (id, name, tax_type, status) values (2, 'Вид налоговой формы 2', 'N', 0);
+insert into declaration_type (id, name, status) values (1, 'Вид налоговой формы 1', 1);
+insert into declaration_type (id, name, status) values (2, 'Вид налоговой формы 2', 0);
 
 insert into declaration_template(id, name, version, jrxml, declaration_type_id, status, form_kind, form_type)
   values (1, 'Налоговая форма 1', date '2013-01-01', null, 1, 0, 3, 2);
@@ -23,8 +23,8 @@ INSERT INTO report_period_type (id,code,name,start_date,end_date,calendar_start_
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, '1 - период', 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) values (2, '2 - период', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (2, 2, 2, 1, 0);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (1, 1, 1, 1);
+insert into department_report_period(id, department_id, report_period_id, is_active) values (2, 2, 2, 1);
 
 insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (1, 1, 1, 1);
 insert into declaration_data(id, declaration_template_id, department_report_period_id, state) values (2, 1, 2, 1);

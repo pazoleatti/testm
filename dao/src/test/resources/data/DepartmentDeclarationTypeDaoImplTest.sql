@@ -29,10 +29,10 @@ INSERT INTO tax_type (id, name) VALUES ('V', 'НДС');
 INSERT INTO tax_type (id, name) VALUES ('D', 'ТЦО');
 
 -- DECLARATION_TYPE
-insert into declaration_type (id, name, tax_type) values (1, 'testName1', 'N');
-insert into declaration_type (id, name, tax_type) values (2, 'testName2', 'N');
-insert into declaration_type (id, name, tax_type) values (3, 'testName3', 'N');
-insert into declaration_type (id, name, tax_type) values (4, 'testName4', 'N');
+insert into declaration_type (id, name) values (1, 'testName1');
+insert into declaration_type (id, name) values (2, 'testName2');
+insert into declaration_type (id, name) values (3, 'testName3');
+insert into declaration_type (id, name) values (4, 'testName4');
 
 -- DEPARTMENT_DECLARATION_TYPE
 insert into department_declaration_type (id, department_id, declaration_type_id) values (1, 1, 1);

@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.paging;
 
-import java.util.Collection;
-
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+
+import java.util.Collection;
 
 public class JqgridPagedResourceAssembler {
 
@@ -20,7 +20,8 @@ public class JqgridPagedResourceAssembler {
 
         pagedList.setPage(pagingParams.getPage());
         pagedList.setRecords(size);
-        pagedList.setTotal(new Double(Math.ceil((double) size / pagingParams.getCount())).intValue());
+        Integer total = new Double(Math.ceil((double) size / pagingParams.getCount())).intValue();
+        pagedList.setTotal(total == 0 ? 1 : total);
 
         return pagedList;
     }

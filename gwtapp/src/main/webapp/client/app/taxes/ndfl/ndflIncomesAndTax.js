@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Сведения о доходах и НДФЛ"
      */
         .controller('incomesAndTaxCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog', '$rootScope',
-            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog, $rootScope) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog, $rootScope, APP_CONSTANTS) {
 
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
@@ -62,14 +62,14 @@
                                     projection: "personsIncome",
                                     ndflPersonIncomeFilter: JSON.stringify({
                                         declarationDataId: $stateParams.declarationDataId,
-                                        inp: $scope.searchFilter.params.inp && $scope.searchFilter.params.inp !== "" ? $scope.searchFilter.params.inp : undefined,
-                                        operationId: $scope.searchFilter.params.operationId && $scope.searchFilter.params.operationId !== "" ? $scope.searchFilter.params.operationId : undefined,
-                                        kpp: $scope.searchFilter.params.kpp && $scope.searchFilter.params.kpp !== "" ? $scope.searchFilter.params.kpp : undefined,
-                                        oktmo: $scope.searchFilter.params.oktmo && $scope.searchFilter.params.oktmo !== "" ? $scope.searchFilter.params.oktmo : undefined,
-                                        incomeCode: $scope.searchFilter.params.incomeCode && $scope.searchFilter.params.incomeCode !== "" ? $scope.searchFilter.params.incomeCode : undefined,
-                                        incomeAttr: $scope.searchFilter.params.incomeAttr && $scope.searchFilter.params.incomeAttr !== "" ? $scope.searchFilter.params.incomeAttr : undefined,
-                                        taxRate: $scope.searchFilter.params.taxRate && $scope.searchFilter.params.taxRate !== "" ? $scope.searchFilter.params.taxRate : undefined,
-                                        numberPaymentOrder: $scope.searchFilter.params.numberPaymentOrder && $scope.searchFilter.params.numberPaymentOrder !== "" ? $scope.searchFilter.params.numberPaymentOrder : undefined,
+                                        inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
+                                        operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
+                                        kpp: $filter('requestParamsFormatter')($scope.searchFilter.params.kpp),
+                                        oktmo: $filter('requestParamsFormatter')($scope.searchFilter.params.oktmo),
+                                        incomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeCode),
+                                        incomeAttr: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeAttr),
+                                        taxRate: $filter('requestParamsFormatter')($scope.searchFilter.params.taxRate),
+                                        numberPaymentOrder: $filter('requestParamsFormatter')($scope.searchFilter.params.numberPaymentOrder),
                                         transferDateFrom: $scope.searchFilter.params.transferDateFrom,
                                         transferDateTo: $scope.searchFilter.params.transferDateTo,
                                         calculationDateFrom: $scope.searchFilter.params.calculationDateFrom,
@@ -151,8 +151,8 @@
                                 {name: 'paymentNumber', index: 'paymentNumber', width: 205},
                                 {name: 'taxSumm', index: 'taxSumm', width: 205}
                             ],
-                            rowNum: 10,
-                            rowList: [10, 20, 30],
+                            rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                            rowList: APP_CONSTANTS.COMMON.PAGINATION,
                             sortname: 'rowNum',
                             viewrecords: true,
                             sortorder: "asc",

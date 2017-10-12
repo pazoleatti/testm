@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
 import com.aplana.sbrf.taxaccounting.model.filter.*;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
@@ -31,9 +32,9 @@ import java.util.Map;
 @RestController
 public class NdflPersonController {
 
-    private NdflPersonService ndflPersonService;
+    private final NdflPersonService ndflPersonService;
 
-    private RefBookFactory refBookFactory;
+    private final RefBookFactory refBookFactory;
 
 
     public NdflPersonController(NdflPersonService ndflPersonService, RefBookFactory refBookFactory) {
@@ -151,33 +152,33 @@ public class NdflPersonController {
         Map<String, Object> filterParams = new HashMap<String, Object>();
 
         if (ndflPersonFilter.getInp() != null) {
-            filterParams.put("inp", ndflPersonFilter.getInp());
+            filterParams.put(SubreportAliasConstants.INP, ndflPersonFilter.getInp());
         }
         if (ndflPersonFilter.getInnNp() != null) {
             filterParams.put("innNp", ndflPersonFilter.getInnNp());
         }
 
         if (ndflPersonFilter.getSnils() != null) {
-            filterParams.put("snils", ndflPersonFilter.getSnils());
+            filterParams.put(SubreportAliasConstants.SNILS, ndflPersonFilter.getSnils());
         }
         if (ndflPersonFilter.getIdDocNumber() != null) {
-            filterParams.put("idDocNumber", ndflPersonFilter.getIdDocNumber());
+            filterParams.put(SubreportAliasConstants.ID_DOC_NUMBER, ndflPersonFilter.getIdDocNumber());
         }
         if (ndflPersonFilter.getLastName() != null) {
-            filterParams.put("lastName", ndflPersonFilter.getLastName());
+            filterParams.put(SubreportAliasConstants.LAST_NAME, ndflPersonFilter.getLastName());
         }
         if (ndflPersonFilter.getFirstName() != null) {
-            filterParams.put("firstName", ndflPersonFilter.getFirstName());
+            filterParams.put(SubreportAliasConstants.FIRST_NAME, ndflPersonFilter.getFirstName());
         }
         if (ndflPersonFilter.getMiddleName() != null) {
-            filterParams.put("middleName", ndflPersonFilter.getMiddleName());
+            filterParams.put(SubreportAliasConstants.MIDDLE_NAME, ndflPersonFilter.getMiddleName());
         }
         if (ndflPersonFilter.getDateFrom() != null) {
-            filterParams.put("fromBirthDay", ndflPersonFilter.getDateFrom());
+            filterParams.put(SubreportAliasConstants.FROM_BIRTHDAY, ndflPersonFilter.getDateFrom());
         }
 
         if (ndflPersonFilter.getDateTo() != null) {
-            filterParams.put("toBirthDay", ndflPersonFilter.getDateTo());
+            filterParams.put(SubreportAliasConstants.TO_BIRTHDAY, ndflPersonFilter.getDateTo());
         }
 
         PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter.getDeclarationDataId(), filterParams, new PagingParams());
@@ -187,9 +188,14 @@ public class NdflPersonController {
                 new PagingParams()
         );
         for (NdflPerson ndflPerson : resultPerson.getRows()) {
-            ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
-                    get("NAME").getValue().toString());
+            if (refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0) != null) {
+                ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                        getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
+                        get("NAME").getStringValue());
+            } else {
+                ndflPerson.setStatus("");
+            }
         }
         return resultPerson;
     }

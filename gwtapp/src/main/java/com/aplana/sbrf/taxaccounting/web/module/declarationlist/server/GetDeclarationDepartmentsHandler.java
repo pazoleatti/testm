@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static java.util.Arrays.asList;
-
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetDeclarationDepartmentsAction, GetDeclarationDepartmentsResult> {
@@ -53,7 +51,7 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
         if (action.isCreate()) {
             departments = departmentService.getOpenPeriodDepartments(userInfo.getUser(), action.getTaxType(), action.getReportPeriodId());
         } else {
-            departments = departmentService.getTaxFormDepartments(userInfo.getUser(), TaxType.NDFL, null, null);
+            departments = departmentService.getNDFLDeclarationDepartments(userInfo.getUser());
         }
         if (departments.isEmpty()){
             result.setDepartments(new ArrayList<Department>());

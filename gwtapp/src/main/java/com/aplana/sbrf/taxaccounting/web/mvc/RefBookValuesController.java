@@ -70,7 +70,7 @@ public class RefBookValuesController {
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=allDepartments")
-    public JqgridPagedList<RefBookDepartment> fetchAllDepartments(String name, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<RefBookDepartment> fetchAllDepartments(@RequestParam String name, @RequestParam PagingParams pagingParams) {
         TAUser user = securityService.currentUserInfo().getUser();
         PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchAvailableDepartments(user, name, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
@@ -86,7 +86,7 @@ public class RefBookValuesController {
      * @return Страница списка значений справочника
      */
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriod")
-    public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriod(String name, Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriod(@RequestParam String name, @RequestParam Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
         TAUser user = securityService.currentUserInfo().getUser();
         PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchDepartmentsWithOpenPeriod(user, name, reportPeriodId, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);

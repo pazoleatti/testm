@@ -10,15 +10,14 @@
     /**
      * @description Контроллер модального окна, в котором выводятся источники и приемники формы
      */
-        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'DeclarationDataResource',
-            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, DeclarationDataResource) {
+        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'DeclarationDataResource', 'APP_CONSTANTS',
+            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, DeclarationDataResource, APP_CONSTANTS) {
                 $scope.sourcesGridData = [];
 
                 //Чекбоксы
                 $scope.gridFilter = {
                     showSources: true,
-                    showDestinations: true,
-                    showUncreated: false
+                    showDestinations: true
                 };
 
                 //Получение списка приемников и источников
@@ -107,7 +106,8 @@
                             }
 
                         ],
-                        rowNum: 10,
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
                         sortname: 'index',
                         sortorder: "asc"
@@ -120,10 +120,9 @@
                 $scope.updateGridData = function () {
                     var sources = $scope.gridFilter.showSources;
                     var destinations = $scope.gridFilter.showDestinations;
-                    var uncreated = $scope.gridFilter.showUncreated;
                     var data = [];
                     angular.forEach($scope.sourcesGridData, function (source) {
-                        if ((sources && source.source || destinations && !source.source) && (uncreated || source.created)) {
+                        if (sources && source.source || destinations && !source.source) {
                             data.push(source);
                         }
                     });

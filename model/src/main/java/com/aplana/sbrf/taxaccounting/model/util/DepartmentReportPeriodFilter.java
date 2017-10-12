@@ -11,7 +11,6 @@ import java.util.List;
  */
 public class DepartmentReportPeriodFilter implements Serializable {
     private Boolean isActive;
-    private Boolean isBalance;
     private Boolean isCorrection;
     private Date correctionDate;
     private List<Integer> departmentIdList;
@@ -42,14 +41,6 @@ public class DepartmentReportPeriodFilter implements Serializable {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
-    }
-
-    public Boolean isBalance() {
-        return isBalance;
-    }
-
-    public void setIsBalance(Boolean isBalance) {
-        this.isBalance = isBalance;
     }
 
     public Boolean isCorrection() {

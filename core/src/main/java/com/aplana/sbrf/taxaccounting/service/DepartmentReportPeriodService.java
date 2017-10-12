@@ -30,9 +30,7 @@ public interface DepartmentReportPeriodService {
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
-    void updateActive(int id, boolean active, boolean isBalance);
-
-    void updateActive(List<Integer> ids, Integer report_period_id, boolean active, boolean isBalance);
+    void updateActive(int id, boolean active);
 
     /**
      * Открытие/закрытие отчетного периода подразделения
@@ -43,13 +41,6 @@ public interface DepartmentReportPeriodService {
      * Изменить дату корректировки
      */
     void updateCorrectionDate(int id, Date correctionDate);
-
-    /**
-     * Изменить признак периода ввода остатков
-     */
-    void updateBalance(int id, boolean isBalance);
-
-    void updateBalance(List<Integer> id, boolean isBalance);
 
     /**
      * Удаление отчетного периода подразделения

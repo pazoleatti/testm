@@ -15,7 +15,6 @@ public class EditPeriodAction extends UnsecuredActionImpl<EditPeriodResult> {
     int newDepartmentId;
     Date correctionDate;
     Date newCorrectionDate;
-    boolean isBalance;
 
     public int getYear() {
         return year;
@@ -63,14 +62,6 @@ public class EditPeriodAction extends UnsecuredActionImpl<EditPeriodResult> {
 
     public void setNewCorrectionDate(Date newCorrectionDate) {
         this.newCorrectionDate = newCorrectionDate;
-    }
-
-    public boolean isBalance() {
-        return isBalance;
-    }
-
-    public void setBalance(boolean isBalance) {
-        this.isBalance = isBalance;
     }
 
     public int getReportPeriodId() {

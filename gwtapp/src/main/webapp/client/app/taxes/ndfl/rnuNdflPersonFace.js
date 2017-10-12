@@ -8,7 +8,8 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson', 'RnuPersonDocument', 'DeclarationDataResource', function ($scope, $uibModalInstance, $filter, $http, RnuPerson, RnuPersonDocument, DeclarationDataResource) {
+        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson', 'APP_CONSTANTS',
+            function ($scope, $uibModalInstance, $filter, $http, RnuPerson, APP_CONSTANTS) {
 
             //Доступгость грида
             $scope.enabledGrid = false;
@@ -36,8 +37,8 @@
                             dateFrom: $scope.searchFilter.params.dateFrom,
                             dateTo: $scope.searchFilter.params.dateTo
                         }),
-                        personId: $scope.notificationsGrid.value[0].personId,
-                    },
+                        personId: $scope.rnuNdflGrid.value[0].personId
+                    }
 
 
                 }).then(function (response) {
@@ -56,7 +57,7 @@
             /**
              * Grid для отображения найденных физ лиц в документе
              */
-            $scope.notificationsGrid =
+            $scope.rnuNdflGrid =
                 {
                     ctrl: {},
                     value: [],
@@ -68,13 +69,14 @@
                                 projection: 'rnuPersons',
                                 ndflPersonFilter: JSON.stringify({
                                     declarationDataId: $scope.$resolve.data.declarationDataId,
-                                    lastName: $scope.searchFilter.params.lastName,
-                                    firstName: $scope.searchFilter.params.firstName,
-                                    middleName: $scope.searchFilter.params.middleName,
-                                    innNp: $scope.searchFilter.params.innNp,
-                                    innForeign: $scope.searchFilter.params.innForeign,
-                                    snils: $scope.searchFilter.params.snils,
-                                    idDocNumber: $scope.searchFilter.params.idDocNumber,
+                                    lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' :  $scope.searchFilter.params.lastName ,
+                                    firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
+                                    middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
+                                    inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
+                                    innNp: (typeof($scope.searchFilter.params.innNp) !== 'undefined') ? '%' + $scope.searchFilter.params.innNp + '%' : $scope.searchFilter.params.innNp,
+                                    innForeign: (typeof($scope.searchFilter.params.innForeign) !== 'undefined') ? '%' + $scope.searchFilter.params.innForeign + '%' : $scope.searchFilter.params.innForeign,
+                                    snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
+                                    idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
                                     dateFrom: $scope.searchFilter.params.dateFrom,
                                     dateTo: $scope.searchFilter.params.dateTo
                                 })
@@ -91,7 +93,7 @@
                             $filter('translate')('title.inp'),
                             $filter('translate')('title.dateOfBirth'),
                             $filter('translate')('title.idDocNumber'),
-                            $filter('translate')('title.status.taxpayer'),
+                            $filter('translate')('title.status.taxpayer')
 
                         ],
                         colModel: [
@@ -110,11 +112,11 @@
                             },
 
                             {name: 'idDocNumber', index: 'id_doc_number', width: 95},
-                            {name: 'status', index: 'status', width: 160},
+                            {name: 'status', index: 'status', width: 160}
 
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
                         sortname: 'createDate',
                         sortorder: "desc",
@@ -127,7 +129,7 @@
              * @description Отвечает за доступность недоступность кнопки 'сформировать'
              */
             $scope.chekRow = function () {
-                if ($scope.notificationsGrid.value.length != null) {
+                if ($scope.rnuNdflGrid.value.length !== null) {
                     $scope.enabledCreateReport = true;
                 }
             };
@@ -137,8 +139,8 @@
              */
             $scope.searchPerson = function () {
                 $scope.enabledGrid = true;
-                $scope.notificationsGrid.ctrl.refreshGrid();
-                $scope.enabledCreateReport = $scope.notificationsGrid;
+                $scope.rnuNdflGrid.ctrl.refreshGrid();
+                $scope.enabledCreateReport = $scope.rnuNdflGrid;
                 $scope.enabledCreateReport = false;
 
             };

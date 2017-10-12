@@ -12,8 +12,6 @@ public class DepartmentReportPeriod implements Serializable{
 	
 	private Integer departmentId;
 	
-	private boolean balance;
-	
 	private boolean active;
 
     private Date correctionDate;
@@ -32,14 +30,6 @@ public class DepartmentReportPeriod implements Serializable{
 
 	public void setDepartmentId(Integer departmentId) {
 		this.departmentId = departmentId;
-	}
-
-	public boolean isBalance() {
-		return balance;
-	}
-
-	public void setBalance(boolean balance) {
-		this.balance = balance;
 	}
 
 	public boolean isActive() {

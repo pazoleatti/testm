@@ -94,11 +94,8 @@ public class LogBusinessDaoTest {
 
 	@Test
 	public void testGetFormDates() {
-		logBusinessDao.add(createFormLogBusiness(FormDataEvent.MOVE_APPROVED_TO_ACCEPTED.getCode(), 4l));
 		logBusinessDao.add(createFormLogBusiness(FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getCode(), 5l));
 		logBusinessDao.add(createFormLogBusiness(FormDataEvent.CREATE.getCode(), 6l));
-		logBusinessDao.add(createFormLogBusiness(FormDataEvent.MOVE_PREPARED_TO_ACCEPTED.getCode(), 7l));
-
         /*Date acceptanceDate = logBusinessDao.getFormAcceptanceDate(1);
 		Date creationDate = logBusinessDao.getFormCreationDate(1);
 		assertEquals(new Date(14253454568000l).getTime(), acceptanceDate.getTime());

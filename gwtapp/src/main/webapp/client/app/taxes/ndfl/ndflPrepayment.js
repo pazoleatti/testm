@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Сведения о доходах в виде авансовых платежей"
      */
         .controller('prepaymentCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', '$rootScope',
-            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $rootScope) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $rootScope, APP_CONSTANTS) {
 
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
@@ -60,10 +60,10 @@
                                     projection: "personsPrepayment",
                                     ndflPersonPrepaymentFilter: JSON.stringify({
                                         declarationDataId: $stateParams.declarationDataId,
-                                        inp: $scope.searchFilter.params.inp && $scope.searchFilter.params.inp !== "" ? $scope.searchFilter.params.inp : undefined,
-                                        operationId: $scope.searchFilter.params.operationId && $scope.searchFilter.params.operationId !== "" ? $scope.searchFilter.params.operationId : undefined,
-                                        notifNum: $scope.searchFilter.params.notifNum && $scope.searchFilter.params.notifNum !== "" ? $scope.searchFilter.params.notifNum : undefined,
-                                        notifSource: $scope.searchFilter.params.notifSource && $scope.searchFilter.params.notifSource !== "" ? $scope.searchFilter.params.notifSource : undefined,
+                                        inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
+                                        operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
+                                        notifNum: $filter('requestParamsFormatter')($scope.searchFilter.params.notifNum),
+                                        notifSource: $filter('requestParamsFormatter')($scope.searchFilter.params.notifSource),
                                         notifDateFrom: $scope.searchFilter.params.notifDateFrom,
                                         notifDateTo: $scope.searchFilter.params.notifDateTo
                                     })
@@ -92,8 +92,8 @@
                                 },
                                 {name: 'notifSource', index: 'notifSource', width: 631}
                             ],
-                            rowNum: 10,
-                            rowList: [10, 20, 30],
+                            rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                            rowList: APP_CONSTANTS.COMMON.PAGINATION,
                             sortname: 'rowNum',
                             viewrecords: true,
                             sortorder: "asc",

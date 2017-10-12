@@ -106,11 +106,6 @@ public class DeclarationTemplateScriptView extends ViewWithUiHandlers<Declaratio
     }
 
     @Override
-    public void removeEventScript(int index) {
-        eventScriptListBox.removeItem(index);
-    }
-
-    @Override
     public void removeButtonEnable(boolean enable) {
         removeButton.setEnabled(enable);
     }

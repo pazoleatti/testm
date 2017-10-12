@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -41,7 +42,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 	}
 	
 	@Override
-	@Cacheable("DeclarationType")
+	@Cacheable(CacheConstants.DECLARATION_TYPE)
 	public DeclarationType get(int declarationTypeId) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -91,11 +92,11 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         try {
 
             int typeId = generateId("seq_declaration_type", Integer.class);
-            getJdbcTemplate().update("insert into declaration_type (id, name, tax_type, status) values (?,?,?,?)",
+            getJdbcTemplate().update("insert into declaration_type (id, name, status) values (?,?,?)",
                     new Object[]{typeId,
-                            type.getName(),'N',
+                            type.getName(),
                             type.getStatus().getId()},
-                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.CHAR, Types.NUMERIC});
+                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.NUMERIC});
             return typeId;
         } catch (DataAccessException e){
 			LOG.error("Ошибка при создании макета", e);
@@ -103,7 +104,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         }
     }
 
-    @CacheEvict(value = "DeclarationType", beforeInvocation = true ,key = "#type.id")
+    @CacheEvict(value = CacheConstants.DECLARATION_TYPE, beforeInvocation = true ,key = "#type.id")
     @Override
     public void updateDT(DeclarationType type) {
         try {
@@ -116,7 +117,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         }
     }
 
-    @CacheEvict("DeclarationType")
+    @CacheEvict(CacheConstants.DECLARATION_TYPE)
     @Override
     public void delete(int typeId) {
         try {

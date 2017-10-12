@@ -105,7 +105,7 @@ public class GetMainMenuActionHandler extends
             }
 
             MenuItem menuItem = new MenuItem("Сервис", "", "Сервис");
-            menuItem.getSubMenu().add(new MenuItem("Загрузить файлы", "/index.html#/taxes/service/uploadTransportData"));
+            menuItem.getSubMenu().add(new MenuItem("Загрузить файлы", "index.html#/taxes/service/uploadTransportData"));
             taxMenu.getSubMenu().add(menuItem);
 
             if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,

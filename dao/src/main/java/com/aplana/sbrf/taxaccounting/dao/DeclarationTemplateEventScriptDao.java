@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateEventScript;
 
 import java.util.List;
 
+/**
+ * dao для работы со скриптами событий {@link DeclarationTemplateEventScript}
+ */
 public interface DeclarationTemplateEventScriptDao {
 
     /**
@@ -12,13 +15,29 @@ public interface DeclarationTemplateEventScriptDao {
      * @param declarationTemplateId
      * @return
      */
-    public List<DeclarationTemplateEventScript> fetch(int declarationTemplateId);
+    List<DeclarationTemplateEventScript> fetch(int declarationTemplateId);
 
-    public String getScript(long declarationTemplateEventScriptId);
+    /**
+     * Получить скрипт по его id в БД
+     * @param declarationTemplateEventScriptId
+     * @return
+     */
+    String getScript(long declarationTemplateEventScriptId);
 
-    public String findScript(int declarationTemplateId, int eventId);
+    /**
+     * Найти скрипт привязанный к определенному макету и событию
+     * @param declarationTemplateId
+     * @param eventId
+     * @return
+     */
+    String findScript(int declarationTemplateId, int eventId);
 
-    public void updateScript(long declarationTemplateEventScriptId, String script);
+    /**
+     * Обновить содержимое скрипта
+     * @param declarationTemplateEventScriptId
+     * @param script
+     */
+    void updateScript(long declarationTemplateEventScriptId, String script);
 
     /**
      * Проверить существование скрипта
@@ -26,11 +45,25 @@ public interface DeclarationTemplateEventScriptDao {
      * @param formDataEventId
      * @return
      */
-    public boolean checkIfEventScriptPresent(int declarationTemplateId, int formDataEventId);
+    boolean checkIfEventScriptPresent(int declarationTemplateId, int formDataEventId);
 
+    /**
+     * Сохранить новый скрипт в БД
+     * @param declarationTemplateEventScript
+     * @return
+     */
     DeclarationTemplateEventScript create(DeclarationTemplateEventScript declarationTemplateEventScript);
 
+    /**
+     * Удалить скрипт
+     * @param declarationTemplateEventScriptId
+     */
     void delete(long declarationTemplateEventScriptId);
 
+    /**
+     * Сравнивает состояние списка скриптов для макета с состоянием в бд: в случае несоответствия, изменяет список объектов
+     * в БД - удаляет удаленные, сохраняет новые, обновляет существующие.
+     * @param declarationTemplate
+     */
     void updateScriptList(DeclarationTemplate declarationTemplate);
 }

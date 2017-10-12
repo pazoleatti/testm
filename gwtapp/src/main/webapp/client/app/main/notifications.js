@@ -7,10 +7,13 @@
     /**
      * @description Контроллер модального окна оповещений
      */
-        .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope',
-            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope) {
+        .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope, APP_CONSTANTS) {
                 // Пометим все оповещения как прочтённые
-                $http.post("controller/actions/notification/markAsRead").success(function () {
+                $http({
+                    method: "POST",
+                    url: "controller/actions/notification/markAsRead"
+                }).success(function () {
                     $rootScope.$broadcast('UPDATE_NOTIFICATION_COUNT');
                 });
 
@@ -58,8 +61,8 @@
                             }
 
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
                         sortname: 'createDate',
                         sortorder: "desc",
@@ -68,16 +71,17 @@
                     }
                 };
 
-
                 /**
                  * @description форматтер для поля 'Ссылка' для получения файла
                  * @param row строка таблицы
                  * @param cellValue значение ячейки
-                 * * @param options данные таблицы
+                 * @param options данные таблицы
+                 * без cellValue и options ссылка формируется некорректно
                  */
                 function linkFileFormatter(cellValue, options, row) {
-                    if (row.reportId !== null) {
-                        return "<a target='_blank' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
+
+                    if (row.reportId != null) {
+                        return "<a target='_self' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
 
                     } else {
                         return "";

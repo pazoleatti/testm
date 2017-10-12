@@ -10,8 +10,8 @@
      * @description Контроллер вкладки "Реквизиты"
      */
         .controller('ndflFLCtrl', [
-            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog', '$rootScope',
-            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog, $rootScope) {
+            '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog, $rootScope, APP_CONSTANTS) {
 
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
@@ -56,14 +56,14 @@
                                     projection: "ndflPersons",
                                     ndflPersonFilter: JSON.stringify({
                                         declarationDataId: $stateParams.declarationDataId,
-                                        inp: $scope.searchFilter.params.inp && $scope.searchFilter.params.inp !== "" ? $scope.searchFilter.params.inp : undefined,
-                                        innNp: $scope.searchFilter.params.innNp && $scope.searchFilter.params.innNp !== "" ? $scope.searchFilter.params.innNp : undefined,
-                                        innForeign: $scope.searchFilter.params.innForeign && $scope.searchFilter.params.innForeign !== "" ? $scope.searchFilter.params.innForeign : undefined,
-                                        snils: $scope.searchFilter.params.snils && $scope.searchFilter.params.snils !== "" ? $scope.searchFilter.params.snils : undefined,
-                                        idDocNumber: $scope.searchFilter.params.idDocNumber && $scope.searchFilter.params.idDocNumber !== "" ? $scope.searchFilter.params.idDocNumber : undefined,
-                                        lastName: $scope.searchFilter.params.lastName && $scope.searchFilter.params.lastName !== "" ? $scope.searchFilter.params.lastName : undefined,
-                                        firstName: $scope.searchFilter.params.firstName && $scope.searchFilter.params.firstName !== "" ? $scope.searchFilter.params.firstName : undefined,
-                                        middleName: $scope.searchFilter.params.middleName && $scope.searchFilter.params.middleName !== "" ? $scope.searchFilter.params.middleName : undefined,
+                                        inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
+                                        innNp: $filter('requestParamsFormatter')($scope.searchFilter.params.innNp),
+                                        innForeign: $filter('requestParamsFormatter')($scope.searchFilter.params.innForeign),
+                                        snils: $filter('requestParamsFormatter')($scope.searchFilter.params.snils),
+                                        idDocNumber: $filter('requestParamsFormatter')($scope.searchFilter.params.idDocNumber),
+                                        lastName: $filter('requestParamsFormatter')($scope.searchFilter.params.lastName),
+                                        firstName: $filter('requestParamsFormatter')($scope.searchFilter.params.firstName),
+                                        middleName: $filter('requestParamsFormatter')($scope.searchFilter.params.middleName),
                                         dateFrom: $scope.searchFilter.params.dateFrom,
                                         dateTo: $scope.searchFilter.params.dateTo
                                     })
@@ -122,8 +122,8 @@
                                 {name: 'building', index: 'building', width: 170},
                                 {name: 'flat', index: 'flat', width: 205}
                             ],
-                            rowNum: 10,
-                            rowList: [10, 20, 30],
+                            rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                            rowList: APP_CONSTANTS.COMMON.PAGINATION,
                             sortname: 'rowNum',
                             viewrecords: true,
                             sortorder: "asc",

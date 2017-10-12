@@ -25,7 +25,7 @@ public class CheckPeriodStatusHandler extends AbstractActionHandler<CheckPeriodS
 	public CheckPeriodStatusResult execute(CheckPeriodStatusAction action, ExecutionContext executionContext) throws ActionException {
 		CheckPeriodStatusResult result = new CheckPeriodStatusResult();
 		result.setStatus(periodService.checkPeriodStatusBeforeOpen(action.getTaxType(), action.getYear(),
-				action.isBalancePeriod(), action.getDepartmentId(), action.getDictionaryTaxPeriodId()));
+				action.getDepartmentId(), action.getDictionaryTaxPeriodId()));
 		return result;
 
 	}

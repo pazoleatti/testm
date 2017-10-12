@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateEventScript;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -17,12 +19,16 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
 public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationAction, GetDeclarationResult> {
     @Autowired
 	private DeclarationTemplateService declarationTemplateService;
+
+    @Autowired
+    private DeclarationTemplateEventScriptDao declarationTemplateEventScriptDao;
 
 	@Autowired
 	private SecurityService securityService;
@@ -41,6 +47,8 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
         GetDeclarationResult result = new GetDeclarationResult();
         fillLockData(action, userInfo, result);
 		DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getId());
+		List<DeclarationTemplateEventScript> eventScriptList = declarationTemplateEventScriptDao.fetch(action.getId());
+		declarationTemplate.setEventScripts(eventScriptList);
         declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(action.getId()));
 		result.setDeclarationTemplate(declarationTemplate);
         result.setEndDate(declarationTemplateService.getDTEndDate(declarationTemplate.getId()));

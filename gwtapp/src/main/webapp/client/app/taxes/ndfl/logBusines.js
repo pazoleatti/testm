@@ -8,7 +8,8 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('logBusinesFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'DeclarationDataResource', function ($scope, $uibModalInstance, $filter, $http, DeclarationDataResource) {
+        .controller('logBusinesFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'DeclarationDataResource', 'APP_CONSTANTS',
+            function ($scope, $uibModalInstance, $filter, $http, DeclarationDataResource, APP_CONSTANTS) {
             /**
              * @description Закрытие окна
              */
@@ -48,7 +49,10 @@
                         {name: 'roles', index: 'roles', width: 165},
                         {name: 'departmentName', index: 'departmentName', width: 220},
                         {name: 'note', index: 'note', width: 140}
-                    ]
+                    ],
+                    rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                    rowList: APP_CONSTANTS.COMMON.PAGINATION,
+                    viewrecords: true
                 }
             };
 

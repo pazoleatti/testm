@@ -12,13 +12,12 @@ public final class DepartmentReportPeriodMockUtils {
 
     private DepartmentReportPeriodMockUtils() {}
 
-	public static DepartmentReportPeriod mockDepartmentReportPeriodData(int id, int departmentId, ReportPeriod reportPeriod, boolean isActive, boolean isBalance, Date correctionDate) {
+	public static DepartmentReportPeriod mockDepartmentReportPeriodData(int id, int departmentId, ReportPeriod reportPeriod, boolean isActive, Date correctionDate) {
         DepartmentReportPeriod drp = mock(DepartmentReportPeriod.class);
 		when(drp.getId()).thenReturn(id);
 		when(drp.getDepartmentId()).thenReturn(departmentId);
 		when(drp.getReportPeriod()).thenReturn(reportPeriod);
         when(drp.isActive()).thenReturn(isActive);
-        when(drp.isBalance()).thenReturn(isBalance);
 		when(drp.getCorrectionDate()).thenReturn(correctionDate);
 		return drp;
 	}

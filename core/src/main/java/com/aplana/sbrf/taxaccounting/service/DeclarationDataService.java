@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
+import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import org.joda.time.LocalDateTime;
@@ -29,13 +31,12 @@ public interface DeclarationDataService {
      * Создание декларации в заданном отчетном периоде подразделения
      *
      * @param userInfo          Информация о текущем пользователе
-     * @param logger            Логгер
      * @param declarationTypeId ID вида налоговой формы
      * @param departmentId      ID подразделения
      * @param periodId          ID отчетного периода
-     * @return ID налоговой формы
+     * @return Модель {@link CreateResult}, в которой содержатся данные о результате операции
      */
-    Long create(TAUserInfo userInfo, Logger logger, Long declarationTypeId, Integer departmentId, Integer periodId);
+    CreateResult<Long> create(TAUserInfo userInfo, Long declarationTypeId, Integer departmentId, Integer periodId);
 
     /**
      * Создание декларации в заданном отчетном периоде подразделения
@@ -128,6 +129,15 @@ public interface DeclarationDataService {
     void delete(long declarationDataId, TAUserInfo userInfo);
 
     /**
+     * Удалить налоговую форму, если она существует, при этом создается блокировка
+     *
+     * @param declarationDataId Идентификатор налоговой формы
+     * @param userInfo          Информация о пользователе, выполняющем действие
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+     */
+    void deleteIfExists(long declarationDataId, TAUserInfo userInfo);
+
+    /**
      * Удалить декларацию
      *
      * @param declarationDataId идентификатор декларации
@@ -136,6 +146,15 @@ public interface DeclarationDataService {
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void delete(long declarationDataId, TAUserInfo userInfo, boolean createLock);
+
+    /**
+     * Удалить все налоговые формы из списка
+     *
+     * @param userInfo           Информация о пользователе, выполняющем действие
+     * @param declarationDataIds Список идентификаторов налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    ActionResult deleteDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * метод запускает скрипты с событием проверить
@@ -154,9 +173,18 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
-     * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
+     * @return Модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
      */
     RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
+
+    /**
+     * Рассчитать список налоговых форм
+     *
+     * @param userInfo           Информация о пользователе, выполняющем действие
+     * @param declarationDataIds Список идентификаторов налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    ActionResult recalculateDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Формирует DeclarationResult
@@ -177,6 +205,15 @@ public interface DeclarationDataService {
      * @return модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
      */
     CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force);
+
+    /**
+     * Проверить список деклараций
+     *
+     * @param userInfo           Информация о пользователе, выполняющем действие
+     * @param declarationDataIds Список идентификаторов налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    ActionResult checkDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Получение дополнительной информации о файлах декларации с комментариями
@@ -222,7 +259,36 @@ public interface DeclarationDataService {
      * @param ndflPersonFilter  заполненные поля при поиске
      * @return источники и приемники декларации
      */
-    CreateDeclarationReportResult creteReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+    CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+
+    /**
+     * Формирование рну ндфл по всем физ лицам`
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return результат о формировании отчета
+     */
+    CreateDeclarationReportResult createReportAllRnu(TAUserInfo userInfo, final long declarationDataId, boolean force);
+
+    /**
+     * Формирование отчета в xlsx
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return результат о формировании отчета
+     */
+    CreateDeclarationReportResult createReportXlsx(TAUserInfo userInfo, long declarationDataId, boolean force);
+
+    /**
+     * Возвращает информацию о доступности скачивания отчетов
+     *
+     * @param userInfo          текущий пользователь
+     * @param declarationDataId идентификатор декларации
+     * @return информация о доступности скачивания отчетов
+     */
+    ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * метод запускает скрипты с событием предрасчетные проверки
@@ -243,6 +309,16 @@ public interface DeclarationDataService {
      * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
      */
     void accept(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
+
+    /**
+     * Принятие списка налоговых форм
+     *
+     * @param userInfo           Информация о пользователе, выполняющем действие
+     * @param declarationDataIds Идентификатор налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
+     */
+    ActionResult acceptDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Метод передающий управление на проверку декларации сторонней утилите
@@ -268,6 +344,17 @@ public interface DeclarationDataService {
      * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
      */
     void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo);
+
+    /**
+     * Отмена принятия списка налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @param note               Причина
+     * @param userInfo           Информация о пользователе, выполняющем действие
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
+     */
+    ActionResult cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo);
 
     /**
      * Проверяет есть ли у формы приемники в состоянии Принята или Подготовлена

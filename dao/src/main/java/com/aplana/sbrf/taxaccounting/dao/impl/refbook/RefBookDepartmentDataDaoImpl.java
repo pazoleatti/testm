@@ -33,8 +33,6 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
 
     //TODO https://jira.aplana.com/browse/SBRFNDFL-1880
 
-    //TODO https://jira.aplana.com/browse/SBRFNDFL-2008
-
     final private Expression<DepartmentType> departmentTypeExpression = new CaseBuilder()
             .when(department.type.eq(1)).then(DepartmentType.ROOT_BANK)
             .when(department.type.eq(2)).then(DepartmentType.TERR_BANK)

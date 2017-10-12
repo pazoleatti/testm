@@ -30,8 +30,6 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
         this.departmentService = departmentService;
     }
 
-    //TODO https://jira.aplana.com/browse/SBRFNDFL-2008
-
     /**
      * Получение доступных (согласно правам доступа пользователя)  значений справочника
      *
@@ -42,8 +40,8 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public List<RefBookDepartment> fetchAllAvailableDepartments(TAUser user) {
-        List<Integer> taxFormDepartments = departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null);
-        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(taxFormDepartments)).keySet();
+        List<Integer> declarationDepartments = departmentService.getNDFLDeclarationDepartments(user);
+        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(declarationDepartments)).keySet();
         return refBookDepartmentDataDao.fetchDepartments(departmentIds);
     }
 
@@ -59,7 +57,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams) {
-        List<Integer> declarationDepartments = departmentService.getTaxFormDepartments(user, TaxType.NDFL, null, null);
+        List<Integer> declarationDepartments = departmentService.getNDFLDeclarationDepartments(user);
         Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(declarationDepartments)).keySet();
         return refBookDepartmentDataDao.fetchDepartments(departmentIds, name, pagingParams);
     }

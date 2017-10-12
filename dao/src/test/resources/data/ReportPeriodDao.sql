@@ -25,8 +25,8 @@ INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_da
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (2, 'Transport report period 2', 1, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (3, 'VAT report period 1'      , 21, 21, date '2013-01-01', date '2015-03-31', date '2015-01-01');
 
-INSERT INTO department_report_period(id, department_id, report_period_id, is_active, is_balance_period) VALUES (1, 1, 1, 1, 0);
-INSERT INTO department_report_period(id, department_id, report_period_id, is_active, is_balance_period) VALUES (2, 1, 2, 1, 0);
-INSERT INTO department_report_period(id, department_id, report_period_id, is_active, is_balance_period) VALUES (3, 1, 3, 1, 0);
-INSERT INTO department_report_period(id, department_id, report_period_id, is_active, is_balance_period) VALUES (5, 2, 1, 1, 0);
-INSERT INTO department_report_period(id, department_id, report_period_id, is_active, is_balance_period) VALUES (6, 2, 2, 1, 0);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (1, 1, 1, 1);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (2, 1, 2, 1);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (3, 1, 3, 1);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (5, 2, 1, 1);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active) VALUES (6, 2, 2, 1);

@@ -10,10 +10,11 @@
      * @description Контроллер окна "Создание отчетности"
      */
         .controller('createReportCtrl', [
-            '$http', '$scope', '$rootScope', '$filter', 'appModals', '$uibModalInstance', 'RefBookValuesResource', 'APP_CONSTANTS', 'data',
-            function ($http, $scope, $rootScope, $filter, appModals, $uibModalInstance, RefBookValuesResource, APP_CONSTANTS, data) {
+            '$http', '$scope', '$rootScope', '$filter', 'appModals', '$uibModalInstance', 'APP_CONSTANTS', 'data',
+            function ($http, $scope, $rootScope, $filter, appModals, $uibModalInstance, APP_CONSTANTS, data) {
                 $scope.reportFormKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS;
 
+                //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
                 $scope.latestReportPeriod = {};
 
                 $scope.reportData = {
@@ -27,18 +28,13 @@
                         $scope.reportData.period = value;
                     });
                 }
-
-                function checkFields() {
-                    return $scope.reportData.period !== null
-                        && $scope.reportData.department !== null
-                        && $scope.reportData.declarationType !== null
-                }
-
+                /**
+                 * Создание отчётности
+                 */
                 $scope.save = function () {
-                    if (checkFields()) {
                         $http({
                             method: "POST",
-                            url: "controller/actions/declarationDate/createReports",
+                            url: "controller/actions/declarationData/createReport",
                             params: {
                                 declarationTypeId: $scope.reportData.declarationType.id,
                                 departmentId: $scope.reportData.department.id,
@@ -47,10 +43,10 @@
                         }).then(function (response) {
                             $uibModalInstance.close(response);
                         });
-                    } else {
-                        appModals.error($filter('translate')('DIALOGS_ERROR'), $filter('translate')('ndflReportJournal.message.emptyFilterFields'))
-                    }
                 };
+                /**
+                 * Закрытие окна
+                 */
                 $scope.cancel = function () {
                     appModals.confirm($filter('translate')('createDeclaration.cancel.header'), $filter('translate')('createDeclaration.cancel.text'))
                         .result.then(function () {

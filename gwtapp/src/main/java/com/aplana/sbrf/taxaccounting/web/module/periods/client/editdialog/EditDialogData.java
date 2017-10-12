@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 public class EditDialogData {
-    private boolean isBalance;
     private Integer year;
     private Integer departmentId;
     private Long dictTaxPeriodId;
@@ -15,14 +14,6 @@ public class EditDialogData {
     private Date correctionDate;
     private String periodName;
     private Integer periodYear;
-
-    public boolean isBalance() {
-        return isBalance;
-    }
-
-    public void setBalance(boolean isBalance) {
-        this.isBalance = isBalance;
-    }
 
     public Integer getYear() {
         return year;
