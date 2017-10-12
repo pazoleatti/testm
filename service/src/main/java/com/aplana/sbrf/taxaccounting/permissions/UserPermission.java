@@ -105,6 +105,10 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      * Право доступа к пункту меню "НСИ"
      */
     public static final Permission<TAUser> VIEW_NSI = new ViewNsiPermission(1 << 19);
+    /**
+     * Право доступа к пункту меню "Налоги"
+     */
+    public static final Permission<TAUser> VIEW_TAXES = new ViewTaxesPermission(1 << 20);
 
 
     public UserPermission(long mask) {
@@ -122,16 +126,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            taUserService.getUser(currentUser.getUsername());
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 
@@ -149,15 +144,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 
@@ -172,14 +159,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 
@@ -194,15 +174,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 
@@ -219,16 +191,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.ROLE_ADMIN);
         }
     }
 
@@ -245,13 +208,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN);
         }
     }
 
@@ -266,13 +223,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONF)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONF);
         }
     }
 
@@ -287,16 +238,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)
-                        || grantedAuthority.getAuthority().equals(TARole.ROLE_ADMIN)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.ROLE_ADMIN);
         }
     }
 
@@ -311,13 +253,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONF)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONF);
         }
     }
 
@@ -332,15 +268,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
 
@@ -355,14 +283,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 
@@ -377,13 +298,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS) || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 
@@ -398,15 +313,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_OPER)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS);
         }
     }
 
@@ -421,14 +328,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            for (GrantedAuthority grantedAuthority : currentUser.getAuthorities()) {
-                if (grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_NS)
-                        || grantedAuthority.getAuthority().equals(TARole.N_ROLE_CONTROL_UNP)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 
@@ -519,6 +419,21 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
             return VIEW_TAXES_NDFL.isGranted(currentUser, entity);
+        }
+    }
+
+    /**
+     * Право доступа к пункту меню "НСИ"
+     */
+    public static final class ViewTaxesPermission extends UserPermission {
+
+        public ViewTaxesPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return VIEW_TAXES_NDFL.isGranted(currentUser, entity) || PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN);
         }
     }
 }
