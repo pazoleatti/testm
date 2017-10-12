@@ -4,6 +4,7 @@ import java.util.List;
 
 public class DeclarationDataFileComment {
 
+    private String uuid;
     private long declarationDataId;
     private List<DeclarationDataFile> declarationDataFiles;
     private String comment;
@@ -17,6 +18,14 @@ public class DeclarationDataFileComment {
 
     public void setDeclarationDataFiles(List<DeclarationDataFile> declarationDataFiles) {
         this.declarationDataFiles = declarationDataFiles;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getComment() {
