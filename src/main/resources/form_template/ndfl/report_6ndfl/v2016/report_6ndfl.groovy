@@ -424,6 +424,8 @@ class Report6Ndfl extends AbstractScriptClass {
                             incomesWithNullTaxRateMap.get(incomeWithNullTaxRate.operationId).add(incomeWithNullTaxRate)
                         }
 
+                        incomesGroupedByRate.remove(null)
+
                         // Объединенные доходы без ставки и доходы имеющие одинаковый номер операции, ключ ставка - значение список операций
                         incomesGroupedByRate.each { key, value ->
                             def pickedIncomes = []
