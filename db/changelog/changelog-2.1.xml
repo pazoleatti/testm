@@ -493,7 +493,7 @@
 	<changeSet id="2.1-rnurgaleev-55" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="1"/>
-            <column name="task_name" value="CLEAR_BLOB_DATA"/>
+            <column name="task_name" value="Очистка файлового хранилища"/>
 			<column name="schedule" value="0 15 22 * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
@@ -504,7 +504,7 @@
 	<changeSet id="2.1-rnurgaleev-56" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="2"/>
-            <column name="task_name" value="CLEAR_LOCK_DATA"/>
+            <column name="task_name" value="Удаление истекших блокировок"/>
 			<column name="schedule" value="0 10 22 * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
@@ -515,7 +515,7 @@
 	<changeSet id="2.1-rnurgaleev-57" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="3"/>
-            <column name="task_name" value="CLEAR_TEMP_DIR"/>
+            <column name="task_name" value="Очистка хранилища временных файлов"/>
 			<column name="schedule" value="0 5 22 * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
@@ -526,7 +526,7 @@
 	<changeSet id="2.1-rnurgaleev-58" author="rnurgaleev">
 		<insert tableName="CONFIGURATION_SCHEDULER">
             <column name="id" value="4"/>
-            <column name="task_name" value="ASYNC_TASK_MONITORING"/>
+            <column name="task_name" value="Мониторинг асинхронных задач"/>
 			<column name="schedule" value="0/5 * * * * ?"/>
 			<column name="active" value="1"/>
 			<column name="modification_date" valueDate="sysdate"/>
