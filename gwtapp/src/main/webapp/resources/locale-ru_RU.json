@@ -37,6 +37,7 @@
     "DIALOGS_NOTIFICATION": "Уведомление",
     "DIALOGS_CONTINUE": "Продолжить",
     "DIALOGS_CREATE": "Создать",
+    "DIALOGS_CANCELLATION": "Отмена",
     "common.hint": "Заполните обязательные поля (отмечены желтым)",
     "common.error.message.caption.stackTrace": "Ошибка",
     "common.error.message.seemore": "Смотреть подробности",

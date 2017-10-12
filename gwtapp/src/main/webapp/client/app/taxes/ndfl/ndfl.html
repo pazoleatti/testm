@@ -90,6 +90,10 @@
                             </div>
                         </div>
                         <div class="header-col w350">
+                            <div ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
+                                <label>{{::'title.nameAsnu' | translate}}:</label>
+                                <label class="font-normal info-text200">{{declarationData.asnuName}}</label>
+                            </div>
                             <div>
                                 <label>{{::'title.nameAsnu' | translate}}:</label>
                                 <label class="font-normal info-text200">{{declarationData.asnuName}}</label>
@@ -243,4 +247,5 @@
         </data-uib-tab>
 
     </data-uib-tabset>
+</div>
 </div>
