@@ -329,6 +329,7 @@
     "filesComment.button.add": "Добавить",
     "filesComment.button.remove": "Удалить",
     "filesComment.system": "Система",
+    "filesComment.tooLongNoteMessage": "Количество символов для комментария превысило допустимое значение 512.",
 
     "ndflJournal.filter.period": "Период",
     "ndflJournal.filter.department": "Подразделение",
