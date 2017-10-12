@@ -2385,6 +2385,9 @@
                         page = parseInt(ts.p.page,10),
                         totalpages = Math.ceil(total / recordsperpage),
                         retresult = {};
+                    if (totalpages === 0) {
+                        totalpages = 1;
+                    }
                     if((ts.p.search || ts.p.resetsearch) && ts.p.grouping && ts.p.groupingView._locgr) {
                         ts.p.groupingView.groups =[];
                         var j, grPrepare = $.jgrid.getMethod("groupingPrepare"), key, udc;
