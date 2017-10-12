@@ -63,7 +63,7 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Проверикак налоговой формы";
+        return "Проверка налоговой формы";
     }
 
     @Override

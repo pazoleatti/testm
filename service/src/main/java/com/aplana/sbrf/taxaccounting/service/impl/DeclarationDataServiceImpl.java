@@ -1200,9 +1200,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
-    public void deleteIfExists(long declarationDataId, TAUserInfo userInfo) {
-        if (existDeclarationData(declarationDataId)) {
-            delete(declarationDataId, userInfo);
+    public void deleteIfExists(long id, TAUserInfo userInfo) {
+        if (existDeclarationData(id)) {
+            delete(id, userInfo);
         }
     }
 
