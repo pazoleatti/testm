@@ -137,8 +137,25 @@ a {
 
 a.collapse-link {
   cursor: pointer;
+  background: url('../img/arrow-double-down.png') no-repeat;
+  background-position: right;
+  height: 26px;
+  width: min-content;
+  padding: 6px 27px 0 0;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.33;
+  text-align: left;
+  color: #269238;
 }
-
+.accordion-heading a.accordion-toggle.collapsed,
+a.collapse-link.collapsed {
+  background: url('../img/arrow-double.png') no-repeat;
+  background-position: right;
+  width: min-content;
+  padding: 6px 27px 0 0;
+  height: 26px;
+}
 //TODO для bootstrap найти исходники less, управлять переменными, а не переопределять стили
 h1,
 .h1 {
@@ -194,12 +211,31 @@ input::-ms-clear {
   width: 0;
   height: 0;
 }
-
+.nav-tabs{
+  margin: 0 -12px 0 -12px;
+  box-shadow: inset 3px -4px 4px -2px rgba(0, 0, 0, 0.1);
+}
+.nav-tabs > li:first-child{
+  margin: 0 0 0 20px;
+}
 .nav-tabs > li > a {
   padding: 5px 20px;
-  font-weight: bold
+  font-weight: bold;
+  border-radius: 0;
+  height: 35px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: solid 1px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  line-height: 1.78;
+  text-align: left;
+  color: #336ed0;
+  border-bottom: none;
 }
-
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus{
+    border-top: 3px solid  #6ec151;
+}
 /* Звездочка для обязательных полей*/
 .form-group.required .control-label:after {
   content: "*";
@@ -521,9 +557,9 @@ label.required:after {
   color: @red;
 }
 
-.header-details {
+/*.header-details {
   margin-left: 15px;
-}
+}*/
 .width66{
   width: 66px;
 }
@@ -1123,12 +1159,14 @@ hr {
   float: right;
 }
 label[class="ng-binding"],label[class="w100 ng-binding"] {
-  font-weight: 700;
+  font-size: 12px;
   vertical-align: middle;
 }
 .info-text200{
   width: 236px;
   vertical-align: middle;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .menuitem {
@@ -1136,4 +1174,22 @@ label[class="ng-binding"],label[class="w100 ng-binding"] {
 }
 .menuitem a {
   color: grey !important;
+}
+/*-------------------tabs-style---------*/
+.tab-wrapper{
+  background: @white;
+}
+.btn-link{
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.33;
+  text-align: left;
+  color: #269238;
+}
+.info-wrapper{
+  background-color: rgba(245,237,225,0.8);
+  margin: 0 0 0 17px;
+  width: 97.6%;
+  border-top: 2px solid rgba(0, 0, 0, 0.3);
+  padding: 10px 12px 0;
 }
