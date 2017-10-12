@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -781,17 +782,33 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationDataFileComment saveDeclarationFilesComment(DeclarationDataFileComment dataFileComment) {
+    @Transactional(readOnly = false)
+    public DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment dataFileComment) {
         long declarationDataId = dataFileComment.getDeclarationDataId();
 
         DeclarationDataFileComment result = new DeclarationDataFileComment();
         if (!existDeclarationData(declarationDataId)) {
             throw new ServiceLoggerException(String.format(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationDataId), null);
         }
-        //TODO: Добавить логирование и проверку на доступность изменений для текущего пользователя.
 
-        saveFilesComments(declarationDataId, dataFileComment.getComment(), dataFileComment.getDeclarationDataFiles());
+        Logger logger = new Logger();
+        LockData lockData = lock(declarationDataId, userInfo);
+        if (lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
+            try {
+                declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
+            } catch (AccessDeniedException e) {
+                //удаляем блокировку, если пользователю недоступно редактирование
+                unlock(declarationDataId, userInfo);
+                throw e;
+            }
+            saveFilesComments(declarationDataId, dataFileComment.getComment(), dataFileComment.getDeclarationDataFiles());
+            logger.info("Данные успешно сохранены.");
+        } else {
+            logger.error("Сохранение не выполнено, так как файлы и комментарии данного экземпляра %s не заблокированы текущим пользователем.",
+                    "налоговой формы");
+        }
 
+        result.setUuid(logEntryService.save(logger.getEntries()));
         result.setDeclarationDataFiles(getFiles(declarationDataId));
         result.setComment(getNote(declarationDataId));
         result.setDeclarationDataId(declarationDataId);
@@ -825,7 +842,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             List<Long> asnuIds = new ArrayList<Long>();
             if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
                 List<RefBookAsnu> avaliableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
-                if(!avaliableAsnuList.isEmpty()) {
+                if (!avaliableAsnuList.isEmpty()) {
                     for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
                         asnuIds.add(asnu.getId());
                     }

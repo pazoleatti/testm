@@ -174,7 +174,7 @@ public class NdflPersonController {
             filterParams.put(SubreportAliasConstants.MIDDLE_NAME, ndflPersonFilter.getMiddleName());
         }
         if (ndflPersonFilter.getDateFrom() != null) {
-            filterParams.put(SubreportAliasConstants.MIDDLE_NAME, ndflPersonFilter.getDateFrom());
+            filterParams.put(SubreportAliasConstants.FROM_BIRTHDAY, ndflPersonFilter.getDateFrom());
         }
 
         if (ndflPersonFilter.getDateTo() != null) {

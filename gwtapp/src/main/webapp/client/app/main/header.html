@@ -7,7 +7,7 @@
     <div class="navbar-header">
         <span class="sub-logo">АС «Учет налогов»</span>
     </div>
-    <ul class="nav navbar-nav" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)">
+    <ul class="nav navbar-nav" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES)">
         <li class="dropdown">
             <a data-toggle="dropdown">{{::'menu.taxes' | translate}}</a>
             <tree tree='treeTaxes'></tree>

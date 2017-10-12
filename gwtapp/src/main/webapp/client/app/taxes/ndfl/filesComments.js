@@ -156,8 +156,13 @@
                         },
                         function (data) {
                             if (data) {
-                                $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
-                                $scope.comment = data.comment;
+                                if (data.uuid && data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', data.uuid);
+                                }
+                                if (data.declarationDataFiles !== null && data.comment !== null) {
+                                    $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
+                                    $scope.comment = data.comment;
+                                }
                             }
                         });
                 };

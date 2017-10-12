@@ -1,11 +1,11 @@
 merge into CONFIGURATION_SCHEDULER a using
-(select 1 as id, 'CLEAR_BLOB_DATA' as task_name, '0 15 22 * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
+(select 1 as id, 'Очистка файлового хранилища' as task_name, '0 15 22 * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
 union all
-select 2 as id, 'CLEAR_LOCK_DATA' as task_name, '0 10 22 * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
+select 2 as id, 'Удаление истекших блокировок' as task_name, '0 10 22 * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
 union all
-select 3 as id, 'CLEAR_TEMP_DIR' as task_name, '0 5 22 * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
+select 3 as id, 'Очистка хранилища временных файлов' as task_name, '0 5 22 * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
 union all
-select 4 as id, 'ASYNC_TASK_MONITORING' as task_name, '0/5 * * * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual) b
+select 4 as id, 'Мониторинг асинхронных задач' as task_name, '0/5 * * * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual) b
 on (a.id=b.id)
 when matched then 
     update set a.task_name = b.task_name, a.schedule=b.schedule, a.active=b.active, a.modification_date=b.modification_date, a.last_fire_date=b.last_fire_date
