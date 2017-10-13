@@ -148,6 +148,7 @@ a.collapse-link {
   text-align: left;
   color: #269238;
 }
+
 .accordion-heading a.accordion-toggle.collapsed,
 a.collapse-link.collapsed {
   background: url('../img/arrow-double.png') no-repeat;
@@ -156,6 +157,7 @@ a.collapse-link.collapsed {
   padding: 6px 27px 0 0;
   height: 26px;
 }
+
 //TODO для bootstrap найти исходники less, управлять переменными, а не переопределять стили
 h1,
 .h1 {
@@ -211,13 +213,16 @@ input::-ms-clear {
   width: 0;
   height: 0;
 }
-.nav-tabs{
+
+.nav-tabs {
   margin: 0 -12px 0 -12px;
   box-shadow: inset 3px -4px 4px -2px rgba(0, 0, 0, 0.1);
 }
-.nav-tabs > li:first-child{
+
+.nav-tabs > li:first-child {
   margin: 0 0 0 20px;
 }
+
 .nav-tabs > li > a {
   padding: 5px 20px;
   font-weight: bold;
@@ -231,11 +236,13 @@ input::-ms-clear {
   color: #336ed0;
   border-bottom: none;
 }
+
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
-.nav-tabs > li.active > a:focus{
-    border-top: 3px solid  #6ec151;
+.nav-tabs > li.active > a:focus {
+  border-top: 3px solid #6ec151;
 }
+
 /* Звездочка для обязательных полей*/
 .form-group.required .control-label:after {
   content: "*";
@@ -544,7 +551,7 @@ input[type="checkbox"] {
 .build_info {
   position: fixed; /* Фиксированное положение */
   left: 16px;
-  bottom: 5px;/* Левый нижний угол */
+  bottom: 5px; /* Левый нижний угол */
   font-size: 12px;
   line-height: 1.33;
   text-align: left;
@@ -560,9 +567,11 @@ label.required:after {
 /*.header-details {
   margin-left: 15px;
 }*/
-.width66{
+
+.width66 {
   width: 66px;
 }
+
 .w100 {
   width: 100px;
 }
@@ -663,7 +672,7 @@ hr {
     border: none;
     font-weight: bold;
     &:hover {
-     color: @white;
+      color: @white;
     }
     &.logout_link {
       width: 24px;
@@ -678,7 +687,7 @@ hr {
   }
   .app-header-user-info {
     font-size: 11px;
-    margin-top: 7px!important;
+    margin-top: 7px !important;
   }
   .new-message {
     width: 28px;
@@ -707,256 +716,240 @@ hr {
   }
 }
 
-  .logo {
-    width: 132px;
-    height: 54px;
-    margin: 13px 9px -17px 24px;
-    background: #fff;
-    padding: 15px 11px;
-    border-radius: 0 0 16px 0;
-    background: url('../img/sberbank_logo_white.png') no-repeat;
-    background-size: contain;
-  }
-  .logo img {
-    display: none;
-  }
-  .sub-logo {
-    color: #fff;
-    border-left: 1px solid;
-    border-right: 1px solid;
-    padding: 6px 30px;
-    margin: 12px 0 0 0;
-    display: inline-block;
-    vertical-align: top;
-    font-style: italic;
-  }
-  .navbar-right {
-    color: @white;
-    margin-right: 0;
-  }
-  .info-icon {
-    width: 22px;
-    height: 22px;
-    display: inline-block;
-    vertical-align: top;
-    background: url('../img/info-icon.png') no-repeat 0 0;
-    background-size: contain;
-    margin: 11px 0 0 0;
-  }
-  .question-icon {
-    width: 24px;
-    height: 24px;
-    display: inline-block;
-    vertical-align: top;
-    background: url('../img/question.png') no-repeat 0 0;
-    background-size: contain;
-    margin: -2px 0 0 0;
-  }
-  button.btn.btn-default:hover:not([disabled]) {
-    border: 1px solid @greenDark !important;
-  }
+.logo {
+  width: 132px;
+  height: 54px;
+  margin: 13px 9px -17px 24px;
+  background: #fff;
+  padding: 15px 11px;
+  border-radius: 0 0 16px 0;
+  background: url('../img/sberbank_logo_white.png') no-repeat;
+  background-size: contain;
+}
 
-  .button_panel button.btn {
-    // padding: 1px 5px;
-  }
+.logo img {
+  display: none;
+}
 
-  button.btn.btn-default.ng-binding {
-    img {
-      width: 27px;
-      margin: 0 0 0 -4px;
-    }
-  }
+.sub-logo {
+  color: #fff;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  padding: 6px 30px;
+  margin: 12px 0 0 0;
+  display: inline-block;
+  vertical-align: top;
+  font-style: italic;
+}
 
-  .ui-select-bootstrap > .ui-select-match > .btn {
-    padding: 3px 5px;
-  }
+.navbar-right {
+  color: @white;
+  margin-right: 0;
+}
 
-  .form-control {
-    &:focus {
-      border-color: @greenDark;
-    }
-  }
+.info-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  vertical-align: top;
+  background: url('../img/info-icon.png') no-repeat 0 0;
+  background-size: contain;
+  margin: 11px 0 0 0;
+}
 
-  .btn-toolbar {
-    margin-left: 0;
-  }
+.question-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: top;
+  background: url('../img/question.png') no-repeat 0 0;
+  background-size: contain;
+  margin: -2px 0 0 0;
+}
 
-  .btn {
-    padding: 3px 5px;
-  }
+button.btn.btn-default:hover:not([disabled]) {
+  border: 1px solid @greenDark !important;
+}
 
-  .btn-danger {
-    color: @white;
-    background-color: @greenDark;
+.button_panel button.btn {
+  // padding: 1px 5px;
+}
+
+button.btn.btn-default.ng-binding {
+  img {
+    width: 27px;
+    margin: 0 0 0 -4px;
+  }
+}
+
+.ui-select-bootstrap > .ui-select-match > .btn {
+  padding: 3px 5px;
+}
+
+.form-control {
+  &:focus {
     border-color: @greenDark;
-    &:focus, &.focus {
-      background: #59bf57;
-      color: hsla(0, 0%, 100%, .85);
-      border-color: @greenDark;
-    }
-    &:hover {
-      background: #59bf57;
-      color: hsla(0, 0%, 100%, .85);
-      border-color: @greenDark;
-    }
-    &:active, &.active {
-      background: #59bf57;
-      color: hsla(0, 0%, 100%, .85);
-      border-color: @greenDark;
-    }
   }
+}
 
-  .btn-danger:active:hover,
-  .btn-danger.active:hover,
-  .open > .dropdown-toggle.btn-danger:hover,
-  .btn-danger:active:focus,
-  .btn-danger.active:focus,
-  .open > .dropdown-toggle.btn-danger:focus,
-  .btn-danger:active.focus,
-  .btn-danger.active.focus,
-  .open > .dropdown-toggle.btn-danger.focus {
+.btn-toolbar {
+  margin-left: 0;
+}
+
+.btn {
+  padding: 3px 5px;
+}
+
+.btn-danger {
+  color: @white;
+  background-color: @greenDark;
+  border-color: @greenDark;
+  &:focus, &.focus {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
     border-color: @greenDark;
   }
-
-  .btn-danger:active:hover,
-  .btn-danger.active:hover,
-  .open > .dropdown-toggle.btn-danger:hover,
-  .btn-danger:active:focus,
-  .btn-danger.active:focus,
-  .open > .dropdown-toggle.btn-danger:focus,
-  .btn-danger:active.focus,
-  .btn-danger.active.focus,
-  .open > .dropdown-toggle.btn-danger.focus {
+  &:hover {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
     border-color: @greenDark;
   }
+  &:active, &.active {
+    background: #59bf57;
+    color: hsla(0, 0%, 100%, .85);
+    border-color: @greenDark;
+  }
+}
 
-  .ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell {
-    background-color: rgba(26, 159, 41, 0.11);
-  }
+.btn-danger:active:hover,
+.btn-danger.active:hover,
+.open > .dropdown-toggle.btn-danger:hover,
+.btn-danger:active:focus,
+.btn-danger.active:focus,
+.open > .dropdown-toggle.btn-danger:focus,
+.btn-danger:active.focus,
+.btn-danger.active.focus,
+.open > .dropdown-toggle.btn-danger.focus {
+  background: #59bf57;
+  color: hsla(0, 0%, 100%, .85);
+  border-color: @greenDark;
+}
 
-  #overlay-parent > div {
-    border-top: 6px solid @greenDark;
-  }
+.btn-danger:active:hover,
+.btn-danger.active:hover,
+.open > .dropdown-toggle.btn-danger:hover,
+.btn-danger:active:focus,
+.btn-danger.active:focus,
+.open > .dropdown-toggle.btn-danger:focus,
+.btn-danger:active.focus,
+.btn-danger.active.focus,
+.open > .dropdown-toggle.btn-danger.focus {
+  background: #59bf57;
+  color: hsla(0, 0%, 100%, .85);
+  border-color: @greenDark;
+}
 
-  .btn-sm {
-    line-height: 1.42;
-  }
+.ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell {
+  background-color: rgba(26, 159, 41, 0.11);
+}
 
-  .button_panel {
-    margin-bottom: 8px;
-  }
+#overlay-parent > div {
+  border-top: 6px solid @greenDark;
+}
 
-  //Главное меню
-  .dropdown-submenu {
-    position: relative;
-  }
+.btn-sm {
+  line-height: 1.42;
+}
 
-  .dropdown-submenu > .dropdown-menu {
-    top: 0;
-    left: 100%;
-    margin-top: -6px;
-    margin-left: -1px;
-    -webkit-border-radius: 0 6px 6px 6px;
-    -moz-border-radius: 0 6px 6px;
-    border-radius: 0 6px 6px 6px;
-  }
+.button_panel {
+  margin-bottom: 8px;
+}
 
-  .dropdown-submenu:hover > .dropdown-menu {
-    display: block;
-  }
+//Главное меню
+.dropdown-submenu {
+  position: relative;
+}
 
-  .dropdown-submenu > a:after {
-    display: block;
-    content: " ";
-    float: right;
-    width: 0;
-    height: 0;
-    border-color: transparent;
-    border-style: solid;
-    border-width: 5px 0 5px 5px;
-    border-left-color: #ccc;
-    margin-top: 5px;
-    margin-right: -10px;
-  }
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  -webkit-border-radius: 0 6px 6px 6px;
+  -moz-border-radius: 0 6px 6px;
+  border-radius: 0 6px 6px 6px;
+}
 
-  .dropdown-submenu:hover > a:after {
-    border-left-color: @white;
-  }
+.dropdown-submenu:hover > .dropdown-menu {
+  display: block;
+}
 
-  .dropdown-submenu.pull-left {
-    float: none;
-  }
+.dropdown-submenu > a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #ccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
 
-  .dropdown-submenu.pull-left > .dropdown-menu {
-    left: -100%;
-    margin-left: 10px;
-    -webkit-border-radius: 6px 0 6px 6px;
-    -moz-border-radius: 6px 0 6px 6px;
-    border-radius: 6px 0 6px 6px;
-  }
+.dropdown-submenu:hover > a:after {
+  border-left-color: @white;
+}
 
-  .dropdown-menu {
-    border-width: 1px;
-    border-color: #59bf57;
-  }
+.dropdown-submenu.pull-left {
+  float: none;
+}
 
-  .ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell {
-    background-color: rgba(26, 159, 41, 0.11);
-  }
+.dropdown-submenu.pull-left > .dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  -webkit-border-radius: 6px 0 6px 6px;
+  -moz-border-radius: 6px 0 6px 6px;
+  border-radius: 6px 0 6px 6px;
+}
 
-  #overlay-parent > div {
-    border-top: 6px solid @greenDark;
-  }
+.dropdown-menu {
+  border-width: 1px;
+  border-color: #59bf57;
+}
 
-  .btn-sm {
-    line-height: 1.42;
-  }
+.ui-grid-row-selected.ui-grid-row:nth-child(odd) .ui-grid-cell, .ui-grid-row-selected.ui-grid-row:nth-child(even) .ui-grid-cell {
+  background-color: rgba(26, 159, 41, 0.11);
+}
 
-  .button_panel {
-    margin-bottom: 8px;
-  }
+#overlay-parent > div {
+  border-top: 6px solid @greenDark;
+}
 
-  .filter-col .control-label {
-    padding-top: 5px;
-    float: right;
-    margin-right: -20px !important;
-  }
+.btn-sm {
+  line-height: 1.42;
+}
 
-  .ui-grid-pager-container {
-    float: right;
-    margin-right: 6px;
-  }
+.button_panel {
+  margin-bottom: 8px;
+}
 
-  .form-horizontal {
-    .form-group-sm {
-      .control-label {
-        margin: 0 -20px 0 30px;
-      }
-    }
-    .controls {
-      margin-top: 21px;
-    }
-  }
+.filter-col .control-label {
+  padding-top: 5px;
+  float: right;
+  margin-right: -20px !important;
+}
 
-  .btn-default {
-    &:hover, &:active:hover {
-      background-color: @white;
-    }
-  }
-  .border-none {
-    border: none !important;
-  }
-  /*================hint-style============*/
-  .error {
-    position: relative;;
-    .help-bottom-popup {
-      position: absolute !important;
-      left: 0 !important;
-      min-width: 125px;
+.ui-grid-pager-container {
+  float: right;
+  margin-right: 6px;
+}
+
+.form-horizontal {
+  .form-group-sm {
+    .control-label {
+      margin: 0 -20px 0 30px;
     }
   }
   .container-grid {
@@ -971,198 +964,260 @@ hr {
   }
   div [ui-view] {
     height: 100%;
+    .controls {
+      margin-top: 21px;
+    }
   }
-  /**
-   * 2-х-колночная структура
-   */
-  .cbr-page-layout {
-    position: absolute;
-    top: 20px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-    z-index: 10;
-  }
-  .cbr-page-layout:after {
-    content: " ";
-    clear: both;
-    display: table;
-  }
-  .cbr-page-layout__side {
-    float: left;
-    position: relative;
-    box-sizing: border-box;
-    height: 100%;
-    width: 370px;
+}
+
+.btn-default {
+  &:hover, &:active:hover {
     background-color: @white;
   }
-  .cbr-side-content {
-    box-sizing: border-box;
-    height: 100%;
-    padding: 12px 8px;
-    overflow: auto;
-    transition: .2s;
-  }
-  /* модификация jquery UI для боковой панели */
-  .cbr-page-layout__side .ui-resizable-handle {
-    width: 4px;
-    right: 0;
-    background-color: #515e5e;
-    box-shadow: 2px 0 3px rgba(68, 75, 75, 0.5);
-  }
-  .cbr-page-layout__side .ui-resizable-handle:before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto 0;
-    width: 16px;
-    height: 87px;
-    background: url("../img/drag.png") no-repeat;
-  }
-  .cbr-page-layout__side_colapsed .ui-resizable-handle {
-    background-color: #444b4b;
-  }
-  .cbr-page-layout__side_colapsed .ui-resizable-handle:before {
-    background-position: -16px 0;
-  }
-  .cbr-page-layout__main {
-    position: relative;
-    height: 100%;
-    box-sizing: border-box;
-    overflow: auto;
-  }
-  .cbr-page-layout__view {
-    position: relative;
-    height: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    overflow: hidden;
-  }
-  /*.cbr-page-layout__view{
-    margin-top: 30px;
-  }*/
-  .ui-jqgrid {
-    width: 100% !important;
-  }
-  .cbr-page-layout {
-    top: 46px;
-  }
-  .select2-choice {
-    box-shadow: inset 0 0 3px rgba(255, 0, 0, 0);
-  }
-  /*----------valid-block----------------*/
-  input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
-    box-shadow: inset 0 0 3px rgba(255, 0, 0, 0);
-  }
+}
 
-  .uib-day button, .uib-month button, .uib-year button {
-    color: #333333;
-  }
+.border-none {
+  border: none !important;
+}
 
-  .text-muted {
-    color: #ccc;
+/*================hint-style============*/
+.error {
+  position: relative;;
+  .help-bottom-popup {
+    position: absolute !important;
+    left: 0 !important;
+    min-width: 125px;
   }
+}
 
-  .uib-datepicker-popup {
-    .btn {
-      padding: 6px 9px;
+.container-grid {
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+  padding: 6px;
+}
+
+div [ui-view] {
+  height: 100%;
+}
+
+/**
+ * 2-х-колночная структура
+ */
+.cbr-page-layout {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.cbr-page-layout:after {
+  content: " ";
+  clear: both;
+  display: table;
+}
+
+.cbr-page-layout__side {
+  float: left;
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  width: 370px;
+  background-color: @white;
+}
+
+.cbr-side-content {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 12px 8px;
+  overflow: auto;
+  transition: .2s;
+}
+
+/* модификация jquery UI для боковой панели */
+.cbr-page-layout__side .ui-resizable-handle {
+  width: 4px;
+  right: 0;
+  background-color: #515e5e;
+  box-shadow: 2px 0 3px rgba(68, 75, 75, 0.5);
+}
+
+.cbr-page-layout__side .ui-resizable-handle:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 16px;
+  height: 87px;
+  background: url("../img/drag.png") no-repeat;
+}
+
+.cbr-page-layout__side_colapsed .ui-resizable-handle {
+  background-color: #444b4b;
+}
+
+.cbr-page-layout__side_colapsed .ui-resizable-handle:before {
+  background-position: -16px 0;
+}
+
+.cbr-page-layout__main {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.cbr-page-layout__view {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  overflow: hidden;
+}
+
+/*.cbr-page-layout__view{
+  margin-top: 30px;
+}*/
+.ui-jqgrid {
+  width: 100% !important;
+}
+
+.cbr-page-layout {
+  top: 46px;
+}
+
+.select2-choice {
+  box-shadow: inset 0 0 3px rgba(255, 0, 0, 0);
+}
+
+/*----------valid-block----------------*/
+input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
+  box-shadow: inset 0 0 3px rgba(255, 0, 0, 0);
+}
+
+.uib-day button, .uib-month button, .uib-year button {
+  color: #333333;
+}
+
+.text-muted {
+  color: #ccc;
+}
+
+.uib-datepicker-popup {
+  .btn {
+    padding: 6px 9px;
+  }
+}
+
+.form-horizontal {
+  .modal-body {
+    .control-label {
+      text-align: left;
     }
   }
-  .form-horizontal {
-    .modal-body {
-      .control-label {
-        text-align: left;
-      }
-    }
-  }
-
-  /*================панель уведомлений============*/
-  #log-panel-header {
-    position: relative;
-    top: -18px;
-    height: 20px;
-    text-align: center;
-    color: #fff;
-  }
-
-  #log-panel-header-message {
-    text-align: center;
-    display: inline-block;
-    margin: 0 0 0 69px;
-  }
-
-  #log-panel-header-print {
-    display: inline-block;
-  }
-  #log-panel-header-print a {
-    color: #fff;
-  }
-  #log-panel-header-print img {
-    border: none;
-    vertical-align: middle;
-  }
-
-  #log-panel-header .close {
-    float: right;
-    display: inline-block;
-  }
-
-  .log-error-message {
-    color: red;
-  }
-
-  .log-normal-message {
-    color: darkgreen;
-  }
-  .splitter-icon-chevron-up {
-    cursor: pointer;
-  }
-  #main-page {
-    width: 39%;
-    height: 60%;
-    padding: 40px;
-    overflow: auto;
-    margin: auto;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    font-size: 26px;
-    text-align: center;
-    color: #aeaeac;
-    text-wrap: none;
-    white-space: nowrap;
-    font-family: Tahoma, helvetica, arial, sans-serif !important;
-  }
-  .caret {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    margin-left: 4px;
-    vertical-align: middle;
-    border-top: 9px dashed;
-    border-top: 4px solid \9;
-    border-right: 5px solid transparent;
-    border-left: 5px solid transparent;
-    margin-top: -2px;
-  }
-
-.ui-jqgrid-view, .ui-jqgrid-bdiv, .ui-jqgrid-hdiv, .ui-corner-bottom {
-  width: 100%!important;
 }
-/*==================page PNF/KNF NDFL=======================*/
-.child-btn-right button{
-  float: right;
+
+/*================панель уведомлений============*/
+#log-panel-header {
+  position: relative;
+  top: -18px;
+  height: 20px;
+  text-align: center;
+  color: #fff;
 }
-label[class="ng-binding"],label[class="w100 ng-binding"] {
-  font-size: 12px;
+
+#log-panel-header-message {
+  text-align: center;
+  display: inline-block;
+  margin: 0 0 0 69px;
+}
+
+#log-panel-header-print {
+  display: inline-block;
+}
+
+#log-panel-header-print a {
+  color: #fff;
+}
+
+#log-panel-header-print img {
+  border: none;
   vertical-align: middle;
 }
-.info-text200{
+
+#log-panel-header .close {
+  float: right;
+  display: inline-block;
+}
+
+.log-error-message {
+  color: red;
+}
+
+.log-normal-message {
+  color: darkgreen;
+}
+
+.splitter-icon-chevron-up {
+  cursor: pointer;
+}
+
+#main-page {
+  width: 39%;
+  height: 60%;
+  padding: 40px;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-size: 26px;
+  text-align: center;
+  color: #aeaeac;
+  text-wrap: none;
+  white-space: nowrap;
+  font-family: Tahoma, helvetica, arial, sans-serif !important;
+}
+
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  vertical-align: middle;
+  border-top: 9px dashed;
+  border-top: 4px solid \9;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  margin-top: -2px;
+}
+
+.ui-jqgrid-view, .ui-jqgrid-bdiv, .ui-jqgrid-hdiv, .ui-corner-bottom {
+  width: 100% !important;
+}
+
+/*==================page PNF/KNF NDFL=======================*/
+.child-btn-right button {
+  float: right;
+}
+
+label[class="ng-binding"], label[class="w100 ng-binding"] {
+  font-size: 12px;
+}
+
+label[class="ng-binding"], label[class="w100 ng-binding"] {
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.info-text200 {
   width: 236px;
   vertical-align: middle;
   font-size: 12px;
@@ -1172,24 +1227,33 @@ label[class="ng-binding"],label[class="w100 ng-binding"] {
 .menuitem {
   margin: 10px;
 }
+
 .menuitem a {
   color: grey !important;
 }
+
 /*-------------------tabs-style---------*/
-.tab-wrapper{
+.tab-wrapper {
   background: @white;
 }
-.btn-link{
+
+.btn-link {
   font-size: 12px;
   font-weight: bold;
   line-height: 1.33;
   text-align: left;
   color: #269238;
 }
-.info-wrapper{
-  background-color: rgba(245,237,225,0.8);
+
+.info-wrapper {
+  background-color: rgba(245, 237, 225, 0.8);
   margin: 0 0 0 17px;
   width: 97.6%;
   border-top: 2px solid rgba(0, 0, 0, 0.3);
   padding: 10px 12px 0;
 }
+
+.modal-lg {
+  width: 1245px;
+}
+
