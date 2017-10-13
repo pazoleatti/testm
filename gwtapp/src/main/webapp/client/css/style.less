@@ -19,10 +19,10 @@ html {
 
 body {
   color: #333;
-  background-color: @white;
   min-width: 1200px;
   font-family: 'Open Sans', sans-serif;
   font-size: @basic-font-size;
+  background-color: @grayMoreLighter;
 }
 
 .clear {
@@ -137,6 +137,25 @@ a {
 
 a.collapse-link {
   cursor: pointer;
+  background: url('../img/arrow-double-down.png') no-repeat;
+  background-position: right;
+  height: 26px;
+  width: min-content;
+  padding: 6px 27px 0 0;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.33;
+  text-align: left;
+  color: #269238;
+}
+
+.accordion-heading a.accordion-toggle.collapsed,
+a.collapse-link.collapsed {
+  background: url('../img/arrow-double.png') no-repeat;
+  background-position: right;
+  width: min-content;
+  padding: 6px 27px 0 0;
+  height: 26px;
 }
 
 //TODO для bootstrap найти исходники less, управлять переменными, а не переопределять стили
@@ -195,9 +214,33 @@ input::-ms-clear {
   height: 0;
 }
 
+.nav-tabs {
+  margin: 0 -12px 0 -12px;
+  box-shadow: inset 3px -4px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.nav-tabs > li:first-child {
+  margin: 0 0 0 20px;
+}
+
 .nav-tabs > li > a {
   padding: 5px 20px;
-  font-weight: bold
+  font-weight: bold;
+  border-radius: 0;
+  height: 35px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: solid 1px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  line-height: 1.78;
+  text-align: left;
+  color: #336ed0;
+  border-bottom: none;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  border-top: 3px solid #6ec151;
 }
 
 /* Звездочка для обязательных полей*/
@@ -506,10 +549,13 @@ input[type="checkbox"] {
 
 /* Панель для отображения информации о версии приложения и его сборке */
 .build_info {
-  font-size: 100%;
   position: fixed; /* Фиксированное положение */
-  left: 0;
-  bottom: 0; /* Левый нижний угол */
+  left: 16px;
+  bottom: 5px; /* Левый нижний угол */
+  font-size: 12px;
+  line-height: 1.33;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /* Признак обязательности поля */
@@ -518,9 +564,9 @@ label.required:after {
   color: @red;
 }
 
-.header-details {
+/*.header-details {
   margin-left: 15px;
-}
+}*/
 
 .width66 {
   width: 66px;
@@ -910,8 +956,21 @@ button.btn.btn-default.ng-binding {
       margin: 0 -20px 0 30px;
     }
   }
-  .controls {
-    margin-top: 21px;
+  .container-grid {
+    overflow: hidden;
+    height: 92%;
+    position: relative;
+    padding: 6px;
+    background: @white;
+    margin: 16px 11px 0;
+    box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.1);
+    border: solid 1px rgba(0, 0, 0, 0.1);
+  }
+  div [ui-view] {
+    height: 100%;
+    .controls {
+      margin-top: 21px;
+    }
   }
 }
 
@@ -1154,13 +1213,15 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 }
 
 label[class="ng-binding"], label[class="w100 ng-binding"] {
-  font-weight: 700;
+  font-size: 12px;
   vertical-align: middle;
 }
 
 .info-text200 {
   width: 236px;
   vertical-align: middle;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .menuitem {
@@ -1171,8 +1232,53 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   color: grey !important;
 }
 
+/*-------------------tabs-style---------*/
+.tab-wrapper {
+  background: @white;
+}
+
+.btn-link {
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.33;
+  text-align: left;
+  color: #269238;
+}
+
+.info-wrapper {
+  background-color: rgba(245, 237, 225, 0.8);
+  margin: 0 0 0 17px;
+  width: 97.6%;
+  border-top: 2px solid rgba(0, 0, 0, 0.3);
+  padding: 10px 12px 0;
+}
 .modal-lg {
   width: 1245px;
 }
-
-
+.box-shadow-block{
+  height: 91%;
+  margin-top: 14px;
+  box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.1);
+  border: solid 1px rgba(0, 0, 0, 0.1);
+}
+.ui-jqgrid .ui-jqgrid-bdiv{
+  border: 1px solid #d9d9d9;
+  box-shadow: inset 2px 2px 0 2px rgba(0, 0, 0, 0.05);
+}
+.ui-jqgrid,
+.ui-jqgrid .ui-jqgrid-pager{
+  border: none!important;
+}
+.ui-jqgrid .ui-jqgrid-htable thead{
+  background: rgba(0, 0, 0, 0.2);
+}
+span.ui-jqgrid-resize.ui-jqgrid-resize-ltr::after {
+  content: "";
+  width: 1px;
+  height: 33px;
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  border-right: 2px dotted rgba(0, 0, 0, 0.2);
+  z-index: 34;
+}

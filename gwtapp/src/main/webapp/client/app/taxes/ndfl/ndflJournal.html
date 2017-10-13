@@ -1,17 +1,16 @@
+<div class="row">
+    <div class="header-col" style="margin: 14px 0 0 28px;">
+        <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
+    </div>
+    <div class="header-col w200" style="float: right; margin-top: 14px;  margin-right: -11px;">
+        <button type="button" class="btn btn-danger" data-ng-click="showCreateDeclarationModal()"
+                data-ng-show="declarationCreateAllowed">
+            <span data-translate-once="ndflJournal.button.create"></span>
+        </button>
+    </div>
+</div>
 <div id="production-planning" class="container-grid" >
-    <div class="top-wrapper">
-        <div class="row" style="min-width: 1400px;">
-            <div class="header-col" style="margin-left: 15px;">
-                <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
-            </div>
-            <div class="header-col w200" style="float: right; margin-top: 20px; margin-bottom: -14px;">
-                <button type="button" class="btn btn-danger" data-ng-click="showCreateDeclarationModal()"
-                        data-ng-show="declarationCreateAllowed">
-                    <span data-translate-once="ndflJournal.button.create"></span>
-                </button>
-            </div>
-        </div>
-
+    <div class="top-wrapper" style="min-height: 72px; margin: -13px 0 -7px 0;">
         <!-- Фильтр -->
         <div class='container-grid-top'>
             <span data-ng-include="'client/app/taxes/ndfl/ndflJournalFilter.html'"></span>

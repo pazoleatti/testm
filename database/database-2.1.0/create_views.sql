@@ -16,7 +16,7 @@ WITH dep_with (id, parent_id, shortname) AS
     SELECT 
       dp.id, 
       dp.parent_id, 
-      dep_with.shortname ||'/'|| dp.shortname
+      case when dep_with.shortname='Банк' then dp.shortname else dep_with.shortname ||'/'|| + dp.shortname end
     FROM dep_with dep_with
     INNER JOIN department dp ON dp.parent_id = dep_with.id
   )
