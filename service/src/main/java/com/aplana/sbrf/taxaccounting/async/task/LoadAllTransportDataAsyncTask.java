@@ -17,8 +17,6 @@ import java.util.UUID;
 
 /**
  * Реализация таска "Загрузка файлов"
- *
- * @author Lhaziev
  */
 @Component("LoadAllTransportDataAsyncTask")
 public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {

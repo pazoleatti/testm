@@ -57,7 +57,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTypeService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.AsyncManager"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.async.AsyncManager"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService"/>

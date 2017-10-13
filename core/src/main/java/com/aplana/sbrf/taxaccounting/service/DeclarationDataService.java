@@ -490,6 +490,15 @@ public interface DeclarationDataService {
      * @return название
      */
     String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
+    /**
+     * Возвращает полное название декларации с указанием подразделения, периода и прочего
+     *
+     * @param declarationTypeId тип декларации
+     * @param departmentReportPeriodId  идентификатор отчетного периода привязанного к подразделению
+     * @param taskType  тип асинхронной задачи, формирующей имя
+     * @return название
+     */
+    String getDeclarationFullName(int declarationTypeId, int departmentReportPeriodId, AsyncTaskType taskType);
 
     /**
      * Проверяет существование операции, по которым требуется удалить блокировку

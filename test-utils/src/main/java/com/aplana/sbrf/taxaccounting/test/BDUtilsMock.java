@@ -57,7 +57,7 @@ public final class BDUtilsMock {
 			public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
 				List<Long> ids = new ArrayList<Long>();
 				Object[] args = invocationOnMock.getArguments();
-				int count = ((Long) args[0]).intValue();
+				int count = (Integer) args[0];
 				for (int i = 0; i < count; i++) {
 					ids.add(cnt++);
 				}

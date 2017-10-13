@@ -71,6 +71,6 @@ public class PdfGeneratorAsyncTask extends AbstractDeclarationAsyncTask {
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long declarationDataId = (Long) params.get("declarationDataId");
         return String.format(getAsyncTaskType().getDescription(),
-                declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType()));
+                declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
     }
 }

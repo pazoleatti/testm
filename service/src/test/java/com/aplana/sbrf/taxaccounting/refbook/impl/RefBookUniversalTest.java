@@ -95,7 +95,7 @@ public class RefBookUniversalTest {
         attributes.add(attributeName);
         when(refBook.getAttributes()).thenReturn(attributes);
 
-        when(lockService.lock(any(String.class), any(Integer.class), any(String.class))).thenReturn(new LockData());
+        when(lockService.lock(any(String.class), any(Integer.class), any(String.class))).thenReturn(null);
     }
 
     /**************** Создание версии **************************/

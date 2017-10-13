@@ -527,4 +527,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         declarationDataService.check(logger, declarationDataId, userInfo, lockStateLogger);
     }
+
+    @Override
+    public String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args) {
+        return declarationDataService.getDeclarationFullName(declarationId, ddReportType);
+    }
 }

@@ -469,4 +469,13 @@ public interface DeclarationService {
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
+
+    /**
+     * Возвращает полное название декларации с указанием подразделения, периода и прочего
+     *
+     * @param declarationId идентификатор декларации
+     * @param ddReportType  тип отчета. Может быть null
+     * @return название
+     */
+    String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
 }

@@ -89,7 +89,7 @@
     "menu.taxes.commonParameters": "Общие параметры",
     "menu.nsi.refbooks": "Справочники",
     "menu.administration.blockList": "Список блокировок",
-  "menu.administration.asyncTaskList": "Асинхронные задачи",
+    "menu.administration.asyncTaskList": "Асинхронные задачи",
     "menu.administration.configParams": "Конфигурационные параметры",
     "menu.administration.schedulerTaskList": "Планировщик задач",
     "menu.administration.settings": "Настройки",
@@ -119,7 +119,7 @@
     "link.ndfl.reporting.formForFL": "Сформировать \"РНУ НДФЛ по физическому лицу\"",
     "link.ndfl.reporting.formForFLs": "Сформировать \"РНУ НДФЛ по всем ФЛ\"",
     "link.ndfl.reporting.download": "(Скачать)",
-  "link.ndfl.historyOfChange": "История изменений",
+    "link.ndfl.historyOfChange": "История изменений",
     "link.ndfl.filesAndComment": "Файлы и комментарии",
     "link.ndfl.sources": "Источники и приемники",
 
@@ -370,7 +370,7 @@
     "taskList.title.nextStartDate": "Дата следующего запуска",
     "taskList.button.runTasks": "Запустить выполнение по расписанию",
     "taskList.button.stopTasks": "Остановить выполнение по расписанию",
-    "taskList.button.update": "Обновить"
+    "taskList.button.update": "Обновить",
 
     "locks.title": "Список блокировок",
     "locks.title.dateLock": "Дата установки блокировки",

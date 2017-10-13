@@ -19,6 +19,3 @@ INSERT INTO lock_data (id, key, user_id) VALUES (2, 'b', 1);
 INSERT INTO lock_data (id, key, user_id) VALUES (3, 'FORM_DATA_1', 2);
 INSERT INTO lock_data (id, key, user_id) VALUES (4, 'aaa', 0);
 INSERT INTO lock_data (id, key, user_id) VALUES (5, 'q', 0);
-
-INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES ('a', 1);
-INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES ('a', 2);

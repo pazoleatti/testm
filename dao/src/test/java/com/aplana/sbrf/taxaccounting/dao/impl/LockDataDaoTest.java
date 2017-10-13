@@ -91,9 +91,7 @@ public class LockDataDaoTest extends Assert {
 		data = dao.getLocks("a", paging);
 		assertEquals(4, data.size());
 		data = dao.getLocks("", paging);
-		assertEquals(0, data.size());
-		data = dao.getLocks("", paging);
-		assertEquals(0, data.size());
+		assertEquals(5, data.size());
 		data = dao.getLocks("", paging);
 		assertEquals(5, data.size());
 		data = dao.getLocks(null, paging);
@@ -139,7 +137,6 @@ public class LockDataDaoTest extends Assert {
 	 * Метод предназначен для проверки обработки исключительных ситуаций
 	 */
 	private void dropTable() {
-		jdbc.update("ALTER TABLE lock_data_subscribers DROP CONSTRAINT lock_data_subscr_fk_lock_data", new HashMap());
 		jdbc.update("DROP TABLE lock_data", new HashMap());
 	}
 
@@ -203,7 +200,7 @@ public class LockDataDaoTest extends Assert {
 		dao.unlockAllByUserId(0, false);
 		PagingResult<LockData> locks = dao.getLocks("", new PagingParams(0, 10));
 		System.out.println(locks);
-		assertEquals(3, locks.size());
+		assertEquals(2, locks.size());
 
 		dropTable();
 		dao.unlockAllByUserId(0, true);

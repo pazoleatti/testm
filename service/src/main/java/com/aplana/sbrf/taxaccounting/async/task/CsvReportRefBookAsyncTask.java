@@ -19,7 +19,7 @@ import java.util.Map;
 
 
 /**
- * @author lhaziev
+ * Формирование CSV-отчета по справочнику
  */
 @Component("CsvReportRefBookAsyncTask")
 public class CsvReportRefBookAsyncTask extends AbstractAsyncTask {

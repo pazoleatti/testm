@@ -37,7 +37,7 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     @Override
     public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
         DeclarationData declarationData = getDeclaration(userInfo, params);
-        DeclarationDataReportType ddReportType = getDeclarationDataReportType();
+        DeclarationDataReportType ddReportType = getDeclarationDataReportType(userInfo, params);
 
         Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), ddReportType);
         if (value == null) {
@@ -51,7 +51,7 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
         return String.format("xml файл налоговой формы имеет слишком большой размер(%s Кбайт)!", value);
     }
 
-    protected DeclarationDataReportType getDeclarationDataReportType() {
+    protected DeclarationDataReportType getDeclarationDataReportType(TAUserInfo userInfo, Map<String, Object> params) {
         return DeclarationDataReportType.getDDReportTypeByReportType(getAsyncTaskType());
     }
 

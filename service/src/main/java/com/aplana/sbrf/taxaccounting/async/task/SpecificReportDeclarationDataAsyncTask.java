@@ -110,6 +110,15 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
     }
 
     @Override
+    protected DeclarationDataReportType getDeclarationDataReportType(TAUserInfo userInfo, Map<String, Object> params) {
+        String alias = (String) params.get("alias");
+        DeclarationData declarationData = getDeclaration(userInfo, params);
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
+        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
+        return ddReportType;
+    }
+
+    @Override
     protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         return getMessage(taskData, false, unexpected);
     }

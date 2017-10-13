@@ -19,7 +19,7 @@ import java.util.Map;
 
 
 /**
- * @author lhaziev
+ * Формирование специфичных отчетов налоговых форм
  */
 @Component("SpecificReportRefBookAsyncTask")
 public class SpecificReportRefBookAsyncTask extends AbstractAsyncTask {

@@ -17,9 +17,8 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Map;
 
-
 /**
- * @author lhaziev
+ * Формирование Excel-отчета по справочнику
  */
 @Component("ExcelReportRefBookAsyncTask")
 public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {

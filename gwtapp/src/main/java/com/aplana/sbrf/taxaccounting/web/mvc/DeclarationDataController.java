@@ -59,12 +59,10 @@ public class DeclarationDataController {
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
     private DeclarationDataService declarationDataService;
-    private LogEntryService logEntryService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, DeclarationDataService declarationDataService,
-                                     LogEntryService logEntryService) {
+                                     TAUserService taUserService, DeclarationDataService declarationDataService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -73,7 +71,6 @@ public class DeclarationDataController {
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
         this.declarationDataService = declarationDataService;
-        this.logEntryService = logEntryService;
     }
 
     /**

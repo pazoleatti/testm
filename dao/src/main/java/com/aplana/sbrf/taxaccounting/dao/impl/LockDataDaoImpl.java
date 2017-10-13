@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
@@ -36,7 +37,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public LockData get(String key, boolean like) {
         try {
-            String sql = "SELECT id, key, user_id, date_lock, description FROM lock_data WHERE key " + (like ? "LIKE ?" : "= ?");
+            String sql = "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key " + (like ? "LIKE ?" : "= ?");
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {like ? "%" + key + "%" : key},
                     new int[] {Types.VARCHAR},
@@ -54,7 +55,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT id, key, user_id, date_lock, description FROM lock_data WHERE key = ? and date_lock = ?",
+                    "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key = ? and date_lock = ?",
                     new Object[] {key, lockDate},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
@@ -70,7 +71,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public List<LockData> getStartsWith(String key) {
         try {
-            String sql = "SELECT id, key, user_id, date_lock, description FROM lock_data WHERE key LIKE ?";
+            String sql = "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key LIKE ?";
             return getJdbcTemplate().query(sql,
                     new Object[] {key+"%"},
                     new int[] {Types.VARCHAR},
@@ -153,21 +154,22 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("start", pagingParams.getStartIndex() + 1);
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
-			String filterParam = filter == null ? "" : filter;
-            params.put("filter", "%" + filterParam.toLowerCase() + "%");
-            String sql = " (SELECT ld.id, ld.key, ld.user_id, ld.date_lock, ld.description, u.login, \n" +
+            if (!StringUtils.isEmpty(filter)) {
+                params.put("filter", "%" + filter.toLowerCase() + "%");
+            }
+            String sql = " (SELECT ld.id, ld.key, ld.user_id, ld.task_id, ld.date_lock, ld.description, u.login, \n" +
 					(isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY date_lock)" : "ROWNUM") +
 					" AS rn \n" +
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
                     "WHERE ld.task_id is null" +
-                    (!filterParam.isEmpty() ?
+                    (!StringUtils.isEmpty(filter) ?
                     " AND (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter) "
                     : "")
                     + ") \n";
 			if (LOG.isTraceEnabled()) {
 				LOG.trace(params);
-				LOG.trace(sql.toString());
+				LOG.trace(sql);
 			}
             String fullSql = "SELECT * FROM" + sql + "WHERE rn BETWEEN :start AND :count";
             String countSql = "SELECT COUNT(*) FROM" + sql;
@@ -197,6 +199,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             result.setId(rs.getLong("id"));
             result.setKey(rs.getString("key"));
             result.setUserId(rs.getInt("user_id"));
+            result.setTaskId(SqlUtils.getLong(rs, "task_id"));
             result.setDateLock(rs.getTimestamp("date_lock"));
             result.setDescription(rs.getString("description"));
             return result;

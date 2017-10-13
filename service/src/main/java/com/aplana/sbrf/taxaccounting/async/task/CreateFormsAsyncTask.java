@@ -10,10 +10,11 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.util.Map;
 
-
+/**
+ * Создание Отчетности
+ */
 @Component("CreateFormsAsyncTask")
 public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
@@ -22,9 +23,6 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private DeclarationDataService declarationDataService;
-
-    @Autowired
-    private DeclarationTypeService declarationTypeService;
 
     @Autowired
     private DepartmentService departmentService;
@@ -37,13 +35,6 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private AsyncManager asyncManager;
-
-    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
 
     @Override
     protected AsyncTaskType getAsyncTaskType() {
@@ -124,8 +115,8 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        long declarationDataId = (Long) params.get("declarationDataId");
-        return String.format(getAsyncTaskType().getDescription(),
-                declarationDataService.getDeclarationFullName(declarationDataId, DeclarationDataReportType.getDDReportTypeByReportType(getAsyncTaskType())));
+        int declarationTypeId = (Integer) params.get("declarationTypeId");
+        int departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
+        return declarationDataService.getDeclarationFullName(declarationTypeId, departmentReportPeriodId, getAsyncTaskType());
     }
 }

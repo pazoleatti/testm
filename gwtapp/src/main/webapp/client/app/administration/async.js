@@ -55,17 +55,17 @@
                             {
                                 name: 'createDate',
                                 index: 'create_date',
-                                width: 100,
+                                width: 120,
                                 formatter: $filter('dateFormatter')
                             },
-                            {name: 'user', index: 'user', width: 220},
-                            {name: 'node', index: 'node', width: 100},
-                            {name: 'queue', index: 'queue', width: 200},
-                            {name: 'state', index: 'state', width: 220},
+                            {name: 'user', index: 'user', width: 250},
+                            {name: 'node', index: 'node', width: 150},
+                            {name: 'queue', index: 'queue', width: 250},
+                            {name: 'state', index: 'state', width: 250},
                             {
                                 name: 'stateDate',
                                 index: 'stateDate',
-                                width: 175,
+                                width: 200,
                                 formatter: $filter('dateTimeFormatter')
                             },
                             {name: 'description', index: 'description', width: 350}

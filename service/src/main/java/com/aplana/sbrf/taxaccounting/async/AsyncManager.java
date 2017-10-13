@@ -48,6 +48,7 @@ public interface AsyncManager {
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params, Logger logger, boolean cancelConfirmed, AbstractStartupAsyncTaskHandler handler);
 
     /**
+     * Выполняет попытку запуска асинхронной задачи, если не удалось - возвращает сообщение для диалога
      * Возвращает пару (lock, restartMsg)
      * если lock == true, то существует блокировка и нужно вызвать диалог перезапуска с текстом restartMsg
      * если lock == false, добавили пользователя в очередь ожидания, выходим из сценария
