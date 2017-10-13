@@ -96,13 +96,21 @@
                             } else {
                                 //noinspection JSUnresolvedVariable
                                 messageType = addMessage.messageType;
-                                //noinspection JSUnresolvedVariable
-                                message = $filter('translate')(addMessage.messageCode);
-                                if (messageType == 'MULTI_ERROR'){
+                                if (messageType == 'MULTI_ERROR' || messageType == 'BUSINESS_ERROR'){
                                     //Отображаем список ошибок
                                     $injector.invoke(['$logPanel', function ($logPanel) {
                                         $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);
                                     }]);
+                                    //noinspection JSUnresolvedVariable
+                                    if (addMessage.exceptionCause && addMessage.exceptionCause.length > 0) {
+                                        //Достаем корневое сообщение из стека исключений
+                                        message = addMessage.exceptionCause[0].message;
+                                    } else {
+                                        message = $filter('translate')(addMessage.messageCode);
+                                    }
+                                } else {
+                                    //noinspection JSUnresolvedVariable
+                                    message = $filter('translate')(addMessage.messageCode);
                                 }
                             }
 
