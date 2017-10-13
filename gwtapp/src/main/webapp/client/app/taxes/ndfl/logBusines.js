@@ -43,12 +43,12 @@
                     ],
                     colModel: [
                         {name: 'id', index: 'id', width: 176, key: true, hidden: true},
-                        {name: 'eventName', index: 'eventName', width: 100},
-                        {name: 'logDate', index: 'logDate', width: 100, formatter: $filter('dateFormatter')},
-                        {name: 'userFullName', index: 'userFullName', width: 140},
+                        {name: 'eventName', index: 'eventName', width: 216},
+                        {name: 'logDate', index: 'logDate', width: 167, formatter: $filter('dateFormatter')},
+                        {name: 'userFullName', index: 'userFullName', width: 173},
                         {name: 'roles', index: 'roles', width: 165},
                         {name: 'departmentName', index: 'departmentName', width: 220},
-                        {name: 'note', index: 'note', width: 140}
+                        {name: 'note', index: 'note', width: 273}
                     ],
                     rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                     rowList: APP_CONSTANTS.COMMON.PAGINATION,
