@@ -37,12 +37,13 @@
     "DIALOGS_NOTIFICATION": "Уведомление",
     "DIALOGS_CONTINUE": "Продолжить",
     "DIALOGS_CREATE": "Создать",
+    "DIALOGS_CANCELLATION": "Отмена",
     "common.hint": "Заполните обязательные поля (отмечены желтым)",
     "common.error.message.caption.stackTrace": "Ошибка",
     "common.error.message.seemore": "Смотреть подробности",
 
     "common.button.search": "Найти",
-    "common.button.create": "Сформировать",
+    "common.button.formation": "Сформировать",
     "common.button.clear": "Сбросить",
     "common.button.add": "Добавить",
     "common.button.cancel": "Отменить",
@@ -329,6 +330,7 @@
     "filesComment.button.add": "Добавить",
     "filesComment.button.remove": "Удалить",
     "filesComment.system": "Система",
+    "filesComment.tooLongNoteMessage": "Количество символов для комментария превысило допустимое значение 512.",
 
     "ndflJournal.filter.period": "Период",
     "ndflJournal.filter.department": "Подразделение",

@@ -520,14 +520,20 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      */
     def createSpecificReportPersonDb() {
         DataRow<Cell> row = scriptSpecificReportHolder.getSelectedRecord()
-        NdflPerson ndflPerson = ndflPersonService.get(Long.valueOf(row.id))
+        NdflPerson ndflPerson = null
+        if (row != null) {
+            ndflPerson = ndflPersonService.get(Long.valueOf(row.id))
 
-        Map<String, String> subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
-        subReportViewParams.put('Фамилия', (String) row.lastName)
-        subReportViewParams.put('Имя', (String) row.firstName)
-        subReportViewParams.put('Отчество', (String) row.middleName)
-        subReportViewParams.put('Дата рождения', row.birthDay ? ((Date) row.birthDay)?.format(DATE_FORMAT) : "")
-        subReportViewParams.put('№ ДУЛ', (String) row.idDocNumber)
+            Map<String, String> subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
+            subReportViewParams.put('Фамилия', (String) row.lastName)
+            subReportViewParams.put('Имя', (String) row.firstName)
+            subReportViewParams.put('Отчество', (String) row.middleName)
+            subReportViewParams.put('Дата рождения', row.birthDay ? ((Date) row.birthDay)?.format(DATE_FORMAT) : "")
+            subReportViewParams.put('№ ДУЛ', (String) row.idDocNumber)
+
+        } else {
+            ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
+        }
         if (ndflPerson != null) {
             Map<String, Object> params = [NDFL_PERSON_ID: (Object) ndflPerson.id];
 

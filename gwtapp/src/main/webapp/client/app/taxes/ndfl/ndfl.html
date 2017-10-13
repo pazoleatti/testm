@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="header-col w350">
-                        <div>
+                        <div ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
                             <label>{{::'title.nameAsnu' | translate}}:</label>
                             <label class="font-normal info-text200">{{declarationData.asnuName}}</label>
                         </div>

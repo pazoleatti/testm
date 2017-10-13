@@ -379,7 +379,8 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/rest/declarationData", params = "projection=filesComments")
     public DeclarationDataFileComment saveDeclarationFilesComment(@RequestBody DeclarationDataFileComment dataFileComment) {
-        return declarationService.saveDeclarationFilesComment(dataFileComment);
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.saveDeclarationFilesComment(userInfo, dataFileComment);
     }
 
     /**
@@ -392,7 +393,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=businessLogs")
     public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@PathVariable long declarationDataId, @RequestParam PagingParams pagingParams) {
         ArrayList<LogBusinessModel> logBusinessModelArrayList = new ArrayList<LogBusinessModel>();
-        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, HistoryBusinessSearchOrdering.DATE, true)) {
+        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, HistoryBusinessSearchOrdering.DATE, false)) {
             LogBusinessModel logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
                     taUserService.getUser(logBusiness.getUserLogin()).getName());
             logBusinessModelArrayList.add(logBusinessModel);

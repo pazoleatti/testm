@@ -39,18 +39,18 @@
                         ],
                         colModel: [
                             {name: 'uuid', index: 'uuid', width: 176, key: true, hidden: true},
-                            {name: 'fileName', index: 'fileName', width: 176},
+                            {name: 'fileName', index: 'fileName', width: 415},
                             {
-                                name: 'fileTypeId', index: 'fileTypeId', width: 176,
+                                name: 'fileTypeId', index: 'fileTypeId', width: 90,
                                 editable: true,
                                 edittype: 'select',
                                 formatter: 'select',
                                 editoptions: {value: attachFileType}
                             },
-                            {name: 'note', index: 'note', width: 176, editable: true, edittype: 'text'},
-                            {name: 'date', index: 'date', width: 135, formatter: $filter('dateFormatter')},
+                            {name: 'note', index: 'note', width: 200, editable: true, edittype: 'text'},
+                            {name: 'date', index: 'date', width: 119, formatter: $filter('dateFormatter')},
                             {name: 'userName', index: 'userName', width: 135},
-                            {name: 'userDepartmentName', index: 'userDepartmentName', width: 250, sortable: false}
+                            {name: 'userDepartmentName', index: 'userDepartmentName', width: 220, sortable: false}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
@@ -156,8 +156,13 @@
                         },
                         function (data) {
                             if (data) {
-                                $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
-                                $scope.comment = data.comment;
+                                if (data.uuid && data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', data.uuid);
+                                }
+                                if (data.declarationDataFiles !== null && data.comment !== null) {
+                                    $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
+                                    $scope.comment = data.comment;
+                                }
                             }
                         });
                 };

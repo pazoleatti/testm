@@ -20,7 +20,7 @@
             /**
              * @description Создание рну ндфл для физ лица
              */
-            $scope.createRNU = function () {
+            $scope.formationRNU = function () {
                 $http({
                     method: "POST",
                     url: "controller/actions/declarationData/" + $scope.$resolve.data.declarationDataId + "/rnuDoc",

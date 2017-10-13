@@ -31,7 +31,8 @@
                 EDIT_GENERAL_PARAMS: 1 << 16,
                 VIEW_REF_BOOK: 1 << 17,
                 EDIT_REF_BOOK: 1 << 18,
-                VIEW_NSI: 1 << 19
+                VIEW_NSI: 1 << 19,
+                VIEW_TAXES: 1 << 20
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

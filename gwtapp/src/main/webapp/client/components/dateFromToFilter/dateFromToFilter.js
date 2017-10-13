@@ -47,6 +47,11 @@
                         scope.labelGridClass = 'col-md-' + labelWidth;
                         scope.pickerGridClass = 'col-md-' + (12 - labelWidth);
                     }
+                    scope.paragraph = 'standartParagraphForDate';
+                    if (attributes.paragraph !== undefined) {
+                        var paragraph = attributes.paragraph;
+                        scope.paragraph = paragraph;
+                    }
                 }
             };
         });
