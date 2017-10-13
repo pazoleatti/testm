@@ -35,13 +35,13 @@
                             {
                                 name: 'createDate',
                                 index: 'createDate',
-                                width: 135,
+                                width: 155,
                                 formatter: $filter('dateTimeFormatter')
                             },
                             {
                                 name: 'text',
                                 index: 'text',
-                                width: 520,
+                                width: 830,
                                 formatter: $filter('notificationTextFormatter'),
                                 classes: 'grid-cell-white-space'
                             },

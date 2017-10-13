@@ -68,39 +68,39 @@
                             {
                                 name: 'srcOrDest',
                                 index: 'srcOrDest',
-                                width: 150,
+                                width: 157,
                                 sortable: false,
                                 formatter: $filter('sourceFormatter')
                             },
                             {
                                 name: 'declarationDataId',
                                 index: 'declarationDataId',
-                                width: 100,
+                                width: 106,
                                 sortable: false,
                                 formatter: $filter('declarationDataIdFormatter')
                             },
-                            {name: 'fullDepartmentName', index: 'fullDepartmentName', width: 150, sortable: false},
+                            {name: 'fullDepartmentName', index: 'fullDepartmentName', width: 113, sortable: false},
                             {
                                 name: 'correctionDate',
                                 index: 'correctionDate',
-                                width: 180,
+                                width: 188,
                                 sortable: false,
                                 formatter: $filter('dateFormatter')
                             },
                             {
                                 name: 'declarationTemplate.declarationFormKind',
                                 index: 'declarationTemplate.declarationFormKind',
-                                width: 100,
+                                width: 131,
                                 sortable: false,
                                 formatter: $filter('declarationFormKindFormatter')
                             },
-                            {name: 'declarationTypeName', index: 'declarationTypeName', width: 150, sortable: false},
+                            {name: 'declarationTypeName', index: 'declarationTypeName', width: 203, sortable: false},
                             {name: 'year', index: 'year', width: 40, sortable: false},
                             {name: 'periodName', index: 'periodName', width: 70, sortable: false},
                             {
                                 name: 'declarationState',
                                 index: 'declarationState',
-                                width: 130,
+                                width: 126,
                                 sortable: false,
                                 formatter: $filter('declarationStateFormatter')
                             }
