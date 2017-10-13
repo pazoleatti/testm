@@ -116,7 +116,9 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
                  */
                 $scope.createReport = function () {
-                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html', 'rnuNdflPersonFaceFormCtrl', {declarationDataId: $scope.declarationDataId});
+                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html', 'rnuNdflPersonFaceFormCtrl',
+                        {declarationDataId: $scope.declarationDataId});
+
                 };
 
                 /**
