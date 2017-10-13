@@ -73,9 +73,8 @@
                                     firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
                                     middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
                                     inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
-                                    innNp: (typeof($scope.searchFilter.params.innNp) !== 'undefined') ? '%' + $scope.searchFilter.params.innNp + '%' : $scope.searchFilter.params.innNp,
-                                    innForeign: (typeof($scope.searchFilter.params.innForeign) !== 'undefined') ? '%' + $scope.searchFilter.params.innForeign + '%' : $scope.searchFilter.params.innForeign,
                                     snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
+                                    innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
                                     idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
                                     dateFrom: $scope.searchFilter.params.dateFrom,
                                     dateTo: $scope.searchFilter.params.dateTo

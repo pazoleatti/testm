@@ -36,7 +36,7 @@ public class UserDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
         TAUser user = userInfo.getUser();
         Department department = departmentService.getDepartment(user.getDepartmentId());
-        userPermissionSetter.setPermissions(user, UserPermission.VIEW_TAXES, UserPermission.VIEW_TAXES_NDFL, UserPermission.VIEW_TAXES_NDFL_SETTINGS,
+        userPermissionSetter.setPermissions(user, UserPermission.VIEW_TAXES_NDFL, UserPermission.VIEW_TAXES_NDFL_SETTINGS,
                 UserPermission.VIEW_TAXES_NDFL_REPORTS, UserPermission.VIEW_TAXES_GENERAL, UserPermission.VIEW_NSI,
                 UserPermission.VIEW_ADMINISTRATION_BLOCK, UserPermission.VIEW_ADMINISTRATION_CONFIG, UserPermission.VIEW_ADMINISTRATION_SETTINGS,
                 UserPermission.VIEW_MANUAL_USER, UserPermission.VIEW_MANUAL_DESIGNER, UserPermission.VIEW_JOURNAL,

@@ -1,6 +1,6 @@
 // Overrides style from ui.jqgrid.css, jquery-ui.css and new styles 
 .ui-jqgrid {
-  border: 1px solid #C8C8C8;
+  //border: 1px solid #C8C8C8;
 }
 
 .ui-jqgrid .ui-jqgrid-titlebar {
@@ -42,20 +42,20 @@
 .ui-jqgrid .ui-jqgrid-htable th div.ui-jqgrid-sortable {
   padding-right: 16px;
   white-space: nowrap;
-  border-right: 1px dotted #333;
+  border-right: 2px dotted rgba(0, 0, 0, 0.2);
   font-weight: 700;
 }
 
 .ui-jqgrid .ui-jqgrid-htable th.ui-th-column .ui-jqgrid-sortable .s-ico {
   height: 18px;
   width: 13px;
-  border: 1px solid #828282;
-  background-color: white;
+  //border: 1px solid #828282;
+  //background-color: white;
   .border-radius(4px);
   /*float: right;*/
   position: absolute;
   right: 7px;
-  top: 0;
+  top: 8px;
 }
 
 .ui-th-column,
@@ -351,8 +351,10 @@ height: 2000px - for IE because height: 100% not work
 .ui-jqgrid .ui-jqgrid-resize-ltr {
   float: none;
   left: 100%;
-  margin: 0 0 0 -3px;
-  width: 5px;
+  //margin: 0 0 0 -3px;
+  //width: 5px;
+  width: 8px;
+  margin: 0 0 0 -5px;
 }
 
 .ui-jqgrid .ui-jqgrid-resize-rtl {
