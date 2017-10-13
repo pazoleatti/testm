@@ -40,6 +40,7 @@ import static com.aplana.sbrf.taxaccounting.model.QDeclarationKind.declarationKi
 import static com.aplana.sbrf.taxaccounting.model.QDeclarationTemplate.declarationTemplate;
 import static com.aplana.sbrf.taxaccounting.model.QDeclarationType.declarationType;
 import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
+import static com.aplana.sbrf.taxaccounting.model.QDepartmentFullpath.departmentFullpath;
 import static com.aplana.sbrf.taxaccounting.model.QDepartmentReportPeriod.departmentReportPeriod;
 import static com.aplana.sbrf.taxaccounting.model.QLogBusiness.logBusiness;
 import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
@@ -74,7 +75,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             declarationData.id.as("declarationDataId"),
             declarationKind.name.as("declarationKind"),
             declarationType.name.as("declarationType"),
-            department.name.as("department"),
+            departmentFullpath.shortname.as("department"),
             refBookAsnu.name.as("asnuName"),
             taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).as("reportPeriod"),
             state.name.as("state"),
@@ -335,7 +336,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             where.and(declarationData.taxOrganCode.containsIgnoreCase(filter.getTaxOrganCode()));
         }
 
-        if(!CollectionUtils.isEmpty(filter.getDocStateIds())){
+        if (!CollectionUtils.isEmpty(filter.getDocStateIds())) {
             where.and(declarationData.docStateId.in(filter.getDocStateIds()));
         }
 
@@ -346,22 +347,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         OrderSpecifier ordering = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
                 dataJournalItemQBean, orderingProperty, ascDescOrder, declarationData.id.desc());
 
-        SQLQuery<Tuple> queryBase = sqlQueryFactory.select(
-                declarationData.id.as("declarationDataId"),
-                declarationKind.name.as("declarationKind"),
-                declarationType.name.as("declarationType"),
-                department.name.as("department"),
-                refBookAsnu.name.as("asnuName"),
-                taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).as("reportPeriod"),
-                state.name.as("state"),
-                declarationData.fileName,
-                logBusiness.logDate.as("creationDate"),
-                secUser.name.as("creationUserName"),
-                declarationData.kpp.as("kpp"),
-                declarationData.oktmo.as("oktmo"),
-                declarationData.taxOrganCode.as("taxOrganCode"),
-                refBookDocState.name.as("docState"),
-                declarationData.note.as("note"))
+        SQLQuery<Tuple> queryBase = sqlQueryFactory.select()
                 .from(declarationData)
                 .leftJoin(declarationData.declarationDataFkAsnuId, refBookAsnu)
                 .leftJoin(declarationData._logBusinessFkDeclarationId, logBusiness).on(logBusiness.eventId.eq((short) 1))
@@ -375,6 +361,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .innerJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
                 .leftJoin(declarationData.declDataDocStateFk, refBookDocState)
+                .innerJoin(departmentFullpath).on(departmentFullpath.id.eq(department.id))
                 .orderBy(ordering)
                 .where(where);
 
