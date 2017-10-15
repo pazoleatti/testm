@@ -96,60 +96,22 @@
                             } else {
                                 //noinspection JSUnresolvedVariable
                                 messageType = addMessage.messageType;
-                                if (messageType == 'MULTI_ERROR' || messageType == 'BUSINESS_ERROR'){
+                                if (messageType == 'MULTI_ERROR'){
                                     //Отображаем список ошибок
                                     $injector.invoke(['$logPanel', function ($logPanel) {
                                         $logPanel.open('log-panel-container', addMessage.additionInfo.uuid);
                                     }]);
-                                    //noinspection JSUnresolvedVariable
+                                } else {
                                     if (addMessage.exceptionCause && addMessage.exceptionCause.length > 0) {
                                         //Достаем корневое сообщение из стека исключений
                                         message = addMessage.exceptionCause[0].message;
                                     } else {
                                         message = $filter('translate')(addMessage.messageCode);
                                     }
-                                } else {
-                                    //noinspection JSUnresolvedVariable
-                                    message = $filter('translate')(addMessage.messageCode);
+                                    $injector.invoke(['appModals', function (appModals) {
+                                        appModals.errorWithStack($filter('translate')('DIALOGS_ERROR'), message, {addMessage: addMessage});
+                                    }]);
                                 }
-                            }
-
-                            var handled = false;
-
-                            for (var idx = 0; idx < responseHandlers.length; idx++) {
-                                if (responseHandlers[idx].handle(status, addMessage)) {
-                                    handled = true;
-                                    break;
-                                }
-                            }
-
-                            // Показывать или нет стектрейс
-                            var isShowException = function(message) {
-                                if (!message.exceptionCause) {
-                                    return false;
-                                }
-
-                                if (Array.isArray(message.exceptionCause)) {
-                                    for (var i = 0; i < message.exceptionCause.length; ++i) {
-                                        if (message.exceptionCause[i].serverException.length > 0) {
-                                            return true;
-                                        }
-                                    }
-
-                                    return false;
-                                } else {
-                                    return message.exceptionCause.serverException.length > 0;
-                                }
-                            };
-
-                            if (!handled) {
-                                $injector.invoke(['$alertService', function ($alertService) {
-                                    if (isShowException(addMessage)) {
-                                        $alertService.showClickableDetails(messageType.toLowerCase(), message, addMessage);
-                                    } else {
-                                        $alertService.show(message, messageType.toLowerCase());
-                                    }
-                                }]);
                             }
                         },
 
