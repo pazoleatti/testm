@@ -796,7 +796,7 @@
 			replaceIfExists="true"
             viewName="DEPARTMENT_FULLPATH">WITH dep_with (id, parent_id, shortname) AS 
 	(
-    SELECT 
+	SELECT 
       dp.id, 
       dp.parent_id, 
       dp.shortname
@@ -806,12 +806,201 @@
     SELECT 
       dp.id, 
       dp.parent_id, 
-      case when dep_with.shortname='Банк' then dp.shortname else dep_with.shortname ||'/'|| + dp.shortname end
+      dep_with.shortname ||'/'|| + nvl(dp.shortname,dp.name)
     FROM dep_with dep_with
     INNER JOIN department dp ON dp.parent_id = dep_with.id
 	)
 	select id, shortname from dep_with
 	order by id</createView>
 	</changeSet>
+	
+	<!--SBRFNDFL-2314-->
+	<changeSet id="2.1-rnurgaleev-92" author="rnurgaleev">
+		<delete
+            tableName="async_task">
+		</delete>
+	</changeSet>	
+	
+	<changeSet id="2.1-rnurgaleev-93" author="rnurgaleev">
+		<renameColumn 
+            newColumnName="queue"
+            oldColumnName="balancing_variant"
+            tableName="async_task"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-94" author="rnurgaleev">
+		<addColumn tableName="async_task">
+			<column name="user_id" type="number(9)" remarks="Идентификатор пользователя, запустившего задачу">
+				<constraints nullable="false"/> 
+			</column>
+		</addColumn>
+	</changeSet>
 
+	<changeSet id="2.1-rnurgaleev-95" author="rnurgaleev">
+		<addColumn tableName="async_task">
+			<column name="state" type="number(6)" remarks="Статус выполнения задачи" defaultValue="1">
+				<constraints nullable="false"/> 
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-96" author="rnurgaleev">
+		<addColumn tableName="async_task">
+			<column name="state_date" type="timestamp" remarks="Дата последнего изменения статуса" defaultValueComputed="CURRENT_TIMESTAMP"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-97" author="rnurgaleev">
+		<addColumn tableName="async_task">
+			<column name="priority_node" type="varchar2(500)" remarks="Узел, которому принудительно будет назначена задача"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-98" author="rnurgaleev">
+		<addColumn tableName="async_task">
+			<column name="description" type="varchar2(400)" remarks="Описание задачи"/>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-99" author="rnurgaleev">
+		<delete
+            tableName="lock_data_subscribers">
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-100" author="rnurgaleev">
+		<dropForeignKeyConstraint baseTableName="lock_data_subscribers" constraintName="lock_data_subscr_fk_lock_data"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-101" author="rnurgaleev">
+		<dropPrimaryKey
+            constraintName="lock_data_subscribers_pk"
+            tableName="lock_data_subscribers"/>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-102" author="rnurgaleev">
+		<renameTable
+            newTableName="async_task_subscribers"
+            oldTableName="lock_data_subscribers"/>
+	</changeSet>
+
+	<changeSet id="2.1-rnurgaleev-103" author="rnurgaleev">
+		<dropColumn
+            columnName="lock_key"
+            tableName="async_task_subscribers"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-104" author="rnurgaleev">
+		<addColumn tableName="async_task_subscribers">
+			<column name="async_task_id" type="number(18)" remarks="Идентификатор задачи, после завершения которой, будет выполнено оповещение">
+				<constraints nullable="false"/> 
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-105" author="rnurgaleev">
+        <createIndex
+                indexName="idx_async_t_subscr"
+                tableName="async_task_subscribers">
+            <column name="async_task_id"/>
+        </createIndex>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-106" author="rnurgaleev">
+		<addPrimaryKey 
+            columnNames="async_task_id, user_id"
+            constraintName="async_task_subscribers_pk"
+            tableName="async_task_subscribers"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-107" author="rnurgaleev">
+		<addForeignKeyConstraint baseColumnNames="async_task_id"
+            baseTableName="async_task_subscribers"
+            constraintName="async_t_subscr_fk_async_task"
+			onDelete="CASCADE"
+            referencedColumnNames="id"
+            referencedTableName="async_task"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-108" author="rnurgaleev">
+		<dropIndex indexName="lock_data_subscr_fk_sec_user"
+				   tableName="async_task_subscribers"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-109" author="rnurgaleev">
+		<dropForeignKeyConstraint baseTableName="lock_data_subscr_fk_sec_user" constraintName="async_task_subscribers"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-110" author="rnurgaleev">
+		<addForeignKeyConstraint baseColumnNames="user_id"
+            baseTableName="async_task_subscribers"
+            constraintName="async_t_subscr_fk_sec_user"
+			onDelete="CASCADE"
+            referencedColumnNames="id"
+            referencedTableName="sec_user"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-111" author="rnurgaleev">
+		<delete
+            tableName="lock_data">
+		</delete>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-112" author="rnurgaleev">
+		<dropColumn
+            columnName="state"
+            tableName="lock_data"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-113" author="rnurgaleev">
+		<dropColumn
+            columnName="state_date"
+            tableName="lock_data"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-114" author="rnurgaleev">
+		<dropColumn
+            columnName="queue"
+            tableName="lock_data"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-115" author="rnurgaleev">
+		<dropColumn
+            columnName="server_node"
+            tableName="lock_data"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-116" author="rnurgaleev">
+		<dropPrimaryKey
+            constraintName="lock_data_subscribers_pk"
+            tableName="lock_data_pk"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-117" author="rnurgaleev">
+		<addColumn tableName="lock_data">
+			<column name="task_id" type="number(18)" remarks="Ссылка на асинхронную задачу, связанную с блокировкой"/> 
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-118" author="rnurgaleev">
+		<addColumn tableName="lock_data">
+			<column name="id" type="number(18)" remarks="Идентификатор блокировки">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="lock_data_pk"/> 
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-119" author="rnurgaleev">
+		<createSequence
+            incrementBy="1"
+            sequenceName=" seq_lock_data"
+            startValue="1"/>
+	</changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-120" author="rnurgaleev">
+		<addUniqueConstraint tableName="lock_data"
+                             columnNames="key"
+                             constraintName="lock_data_uniq_key"/>
+	</changeSet>
+	
 </databaseChangeLog>

@@ -25,6 +25,7 @@ public class QueryDSLConfiguration extends AbstractDao {
         configuration.register(new LocalDateTimeType());
         configuration.register(new InputStreamType());
         configuration.register(new EnumByOrdinalType<DepartmentType>(DepartmentType.class));
+        configuration.register(new NotificationTypeQueryDSLType(10000));
         return configuration;
     }
 
