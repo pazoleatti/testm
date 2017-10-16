@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 /**
@@ -418,12 +417,12 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            return VIEW_TAXES_NDFL.isGranted(currentUser, entity);
+            return PermissionUtils.isAuthentificated();
         }
     }
 
     /**
-     * Право доступа к пункту меню "НСИ"
+     * Право доступа к пункту меню "Налоги"
      */
     public static final class ViewTaxesPermission extends UserPermission {
 
@@ -433,7 +432,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
 
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
-            return VIEW_TAXES_NDFL.isGranted(currentUser, entity) || PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN);
+            return PermissionUtils.isAuthentificated();
         }
     }
 }

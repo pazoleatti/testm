@@ -16,7 +16,7 @@ WITH dep_with (id, parent_id, shortname) AS
     SELECT 
       dp.id, 
       dp.parent_id, 
-      dep_with.shortname ||'/'|| dp.shortname
+      dep_with.shortname ||'/'|| + nvl(dp.shortname,dp.name)
     FROM dep_with dep_with
     INNER JOIN department dp ON dp.parent_id = dep_with.id
   )

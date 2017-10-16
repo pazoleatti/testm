@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -48,6 +49,8 @@ public class ErrorServiceImpl implements ErrorService {
         if (exception instanceof ServiceLoggerException) {
             result.getAdditionInfo().put("uuid", ((ServiceLoggerException) exception).getUuid());
             result.setMessageType(MessageType.MULTI_ERROR);
+        } else if (exception instanceof ServiceException){
+            result.setMessageType(MessageType.BUSINESS_ERROR);
         } else {
             result.setMessageType(MessageType.ERROR);
         }
