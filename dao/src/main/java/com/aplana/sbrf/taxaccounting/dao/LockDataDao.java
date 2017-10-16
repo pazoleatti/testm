@@ -42,10 +42,9 @@ public interface LockDataDao extends PermissionDao {
      * @param key код блокировки
      * @param userId код пользователя, установившего блокировку
      * @param description описание блокировки
-     * @param state Статус асинхронной задачи, связанной с блокировкой
-     * @param serverNode Наименование узла кластера, на котором выполняется связанная асинхронная задача
      */
-	void lock(String key, int userId, String description, String state, String serverNode);
+	void lock(String key, int userId, String description);
+	void lock(String key, int userId);
 
 	/**
 	 * Снимает блокировку
@@ -63,50 +62,24 @@ public interface LockDataDao extends PermissionDao {
     void unlockAllByUserId(int userId, boolean ignoreError);
 
     /**
-     * Возвращает список идентификаторов пользователей, которые ожидают разблокировки указанного объекта
-     * @param key ключ заблокированного объекта
-     * @return список идентификаторов пользователей
+     * Удаляет все блокировки, связанные с асинхронной задачей
+     * @param taskId идентификатор задачи
      */
-    List<Integer> getUsersWaitingForLock(String key);
-
-    /**
-     * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки
-     * @param key ключ блокировки
-     * @param userId идентификатор пользователя
-     */
-    void addUserWaitingForLock(String key, int userId);
+    void unlockAllByTask(long taskId);
 
     /**
      * Получает список всех блокировок с учетом фильтра + пейджинг. Используется на форме просмотра блокировок.
      * @return все блокировки
      * @param filter ограничение по имени пользователя или ключу. Необязательный параметр. Может быть null
-     * @param queues тип очереди. Необязательный параметр. По умолчанию LockQueues.ALL. Может быть null
      * @param pagingParams параметры пэйджинга. Обязательный параметр
      */
-    PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams);
+    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки
      * @param keys список ключей блокировок
      */
-    void unlockAll(List<String> keys);
-
-    /**
-     * Обновляет статус выполнения асинхронной задачи, связанной с блокировкой
-     * @param key код блокировки
-     * @param lockDate дата начала действия блокировки
-     * @param state новый статус
-     * @param serverNode Наименование узла кластера, на котором выполняется связанная асинхронная задача
-     */
-    void updateState(String key, Date lockDate, String state, String serverNode);
-
-    /**
-     * Обновляет очередь, к которой относится асинхронная задача, связанная с указанной блокировкой
-     * @param key код блокировки
-     * @param lockDate дата начала действия блокировки
-     * @param queue очередь
-     */
-    void updateQueue(String key, Date lockDate, LockData.LockQueues queue);
+    void unlockAll(List<Long> keys);
 
     /**
      * Возвращяет список истекших блокировок
@@ -114,4 +87,11 @@ public interface LockDataDao extends PermissionDao {
      * @return список истекший блокировок
      */
     List<String> getLockIfOlderThan(long seconds);
+
+    /**
+     * Связывает блокировку с асинхронной задачей
+     * @param lockKey ключ блокировки
+     * @param taskId идентификатор задачи
+     */
+    void bindTask(String lockKey, long taskId);
 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
@@ -459,7 +460,7 @@ public class DeclarationDataPresenter
                                                 }
                                             });
                                         } else if (CreateAsyncTaskStatus.EXIST_TASK.equals(result.getStatus()) && !cancelTask) {
-                                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                            Dialog.confirmMessage(AsyncTask.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                                                 @Override
                                                 public void yes() {
                                                     onRecalculateClicked(docDate, force, true);
@@ -499,7 +500,7 @@ public class DeclarationDataPresenter
                                             if (!checkExistDeclarationData(result)) return;
                                             LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                                             if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                                                Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.ACCEPT_DEC.getReportType().getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
+                                                Dialog.infoMessage("Для текущего экземпляра налоговой формы не выполнен расчет.");
                                             } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
                                                 Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                                     @Override
@@ -508,7 +509,7 @@ public class DeclarationDataPresenter
                                                     }
                                                 });
                                             } else if (CreateAsyncTaskStatus.EXIST_TASK.equals(result.getStatus()) && !cancelTask) {
-                                                Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                                Dialog.confirmMessage(AsyncTask.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                                                     @Override
                                                     public void yes() {
                                                         accept(true, force, true);
@@ -590,7 +591,7 @@ public class DeclarationDataPresenter
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                         if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.CHECK_DEC.getReportType().getDescription().replaceAll("\\%s", "данных") + " невозможна");
+                            Dialog.infoMessage("Для текущего экземпляра налоговой формы не выполнен расчет. ");
                         } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
@@ -649,7 +650,7 @@ public class DeclarationDataPresenter
         getView().stopTimerReport(DeclarationDataReportType.XML_DEC);
         getView().stopTimerReport(DeclarationDataReportType.PDF_DEC);
         getView().stopTimerReport(DeclarationDataReportType.EXCEL_DEC);
-        getView().stopTimerReport(new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, null));
+        getView().stopTimerReport(new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null));
     }
 
     @Override
@@ -674,7 +675,7 @@ public class DeclarationDataPresenter
                             LogCleanEvent.fire(DeclarationDataPresenter.this);
                             LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                             if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                                Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + DeclarationDataReportType.PDF_DEC.getReportType().getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
+                                Dialog.infoMessage("Для текущего экземпляра налоговой формы не выполнен расчет. ");
                             } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
                                 Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                     @Override
@@ -705,7 +706,7 @@ public class DeclarationDataPresenter
                         @Override
                         public void onFailure(Throwable caught) {
                             super.onFailure(caught);
-                            if (type.getReportType().equals(ReportType.SPECIFIC_REPORT_DEC))
+                            if (type.getReportType().equals(AsyncTaskType.SPECIFIC_REPORT_DEC))
                                 onTimerReport(type, false);
                             else
                                 onTimerSubsreport(false);

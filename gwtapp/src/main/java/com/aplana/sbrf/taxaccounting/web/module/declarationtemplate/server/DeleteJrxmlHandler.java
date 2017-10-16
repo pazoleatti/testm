@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.LockData;
@@ -25,7 +26,7 @@ public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction,
     @Autowired
     DeclarationDataService declarationDataService;
     @Autowired
-    LockDataService lockDataService;
+    AsyncManager asyncManager;
     @Autowired
     SecurityService securityService;
     @Autowired
@@ -44,10 +45,8 @@ public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction,
         for (Long id : declarationTemplateService.getLockDataIdsThatUseJrxml(action.getDtId())){
             String keyPDF = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.PDF_DEC);
             String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, DeclarationDataReportType.EXCEL_DEC);
-            LockData pdfLock = lockDataService.getLock(keyPDF);
-            LockData excelLock = lockDataService.getLock(keyEXCEL);
-            lockDataService.interruptTask(pdfLock, securityService.currentUserInfo(), false, TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
-            lockDataService.interruptTask(excelLock, securityService.currentUserInfo(), false, TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
+            asyncManager.interruptTask(keyPDF, securityService.currentUserInfo(), TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
+            asyncManager.interruptTask(keyEXCEL, securityService.currentUserInfo(), TaskInterruptCause.DECLARATION_TEMPLATE_JRXML_CHANGE);
         }
         declarationTemplateService.deleteJrxml(action.getDtId());
         return new DeleteJrxmlResult();

@@ -478,7 +478,7 @@ public interface DeclarationDataService {
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
-    Long getTaskLimit(ReportType reportType);
+    Long getTaskLimit(AsyncTaskType reportType);
 
     Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType reportType);
 
@@ -490,6 +490,15 @@ public interface DeclarationDataService {
      * @return название
      */
     String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
+    /**
+     * Возвращает полное название декларации с указанием подразделения, периода и прочего
+     *
+     * @param declarationTypeId тип декларации
+     * @param departmentReportPeriodId  идентификатор отчетного периода привязанного к подразделению
+     * @param taskType  тип асинхронной задачи, формирующей имя
+     * @return название
+     */
+    String getDeclarationFullName(int declarationTypeId, int departmentReportPeriodId, AsyncTaskType taskType);
 
     /**
      * Проверяет существование операции, по которым требуется удалить блокировку
@@ -499,7 +508,7 @@ public interface DeclarationDataService {
      * @param logger
      * @return
      */
-    boolean checkExistAsyncTask(long declarationDataId, ReportType reportType, Logger logger);
+    boolean checkExistAsyncTask(long declarationDataId, AsyncTaskType reportType, Logger logger);
 
     /**
      * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
@@ -509,7 +518,7 @@ public interface DeclarationDataService {
      * @param reportType
      * @param cause             причина остановки задачи
      */
-    void interruptAsyncTask(long declarationDataId, TAUserInfo userInfo, ReportType reportType, TaskInterruptCause cause);
+    void interruptAsyncTask(long declarationDataId, TAUserInfo userInfo, AsyncTaskType reportType, TaskInterruptCause cause);
 
     /**
      * Метод для очитски blob-ов у деклараций.
@@ -519,24 +528,6 @@ public interface DeclarationDataService {
      * @param reportTypes типы отчетов, которые надо удалить
      */
     void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes);
-
-    /**
-     * Формирует название операции
-     *
-     * @param ddReportType
-     * @param taxType
-     * @return
-     */
-    String getAsyncTaskName(DeclarationDataReportType ddReportType, TaxType taxType);
-
-    /**
-     * Формирует название операции
-     *
-     * @param reportType
-     * @param taxType
-     * @return
-     */
-    String getAsyncTaskName(ReportType reportType, TaxType taxType, Map<String, Object> params);
 
     /**
      * Формирование jasper-отчета
@@ -682,4 +673,13 @@ public interface DeclarationDataService {
      * @return
      */
     CreateDeclarationReportResult createReports(TAUserInfo userInfo, Integer declarationTypeId, Integer departmentId, Integer periodId);
+
+    /**
+     * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
+     * @param userInfo
+     * @param declarationDataId
+     * @param force если true, то удаляем старую задачу(и оправляем оповещения подписавщимся пользователям), иначе, если задача уже запущена, вызываем диалог
+     * @param cancelTask если true, то удаляем задачи, которые должны удаляться при запуске текущей, иначе, если есть такие задачи, вызываем диалог
+     */
+    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, final long declarationDataId, final boolean force, final boolean cancelTask);
 }

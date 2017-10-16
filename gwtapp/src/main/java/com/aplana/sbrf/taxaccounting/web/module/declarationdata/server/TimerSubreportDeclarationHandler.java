@@ -20,7 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
         DeclarationData declaration = declarationDataService.get(action.getDeclarationDataId(), userInfo);
         List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
         for(DeclarationSubreport subreport: subreports) {
-            final DeclarationDataReportType ddReportType = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, subreport);
+            final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
             TimerSubreportResult.Status status = getStatus(userInfo, action.getDeclarationDataId(), ddReportType);
             mapExistReport.put(subreport.getAlias(), status);
         }

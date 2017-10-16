@@ -1,0 +1,36 @@
+<div id="ndfl" style="height: 90%;">
+    <!--Заголовок-->
+    <div class="row" style="min-width: 1400px;">
+        <div class="header-col" style="margin-left: 15px;">
+            <h1>{{::'async.title' | translate}}</h1>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="form100" style="height:66%;">
+        <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
+            <!-- Остановить задачу -->
+            <button type="button" class="btn btn-danger"
+                    data-ng-click="interruptTask()" data-ng-disabled="asyncGrid.value.length == 0">
+                <span data-translate-once="async.button.interrupt"></span>
+            </button>
+            <!--Фильтр-->
+            <input type="text" data-ng-model="searchFilter.filter" />
+            <!--Найти-->
+            <button type="button" class="btn btn-danger"
+                    data-ng-click="refreshGrid(1)">
+                <span data-translate-once="async.button.search"></span>
+            </button>
+        </div>
+        <div data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector=".form100"
+             data-grid-fill-space-container-selector-top=".container-grid-top"
+             data-grid-options="asyncGrid.options"
+             data-grid-ctrl="asyncGrid.ctrl"
+             data-ng-model="asyncGrid.value"
+             id="asyncTable"
+             style="float: left; width: 100%; margin-top: 5px;"></div>
+    </div>
+</div>

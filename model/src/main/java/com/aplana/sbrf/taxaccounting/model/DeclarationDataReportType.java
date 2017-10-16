@@ -10,43 +10,45 @@ import java.io.Serializable;
 public class DeclarationDataReportType implements Serializable {
     private static final long serialVersionUID = -1156464397165684964L;
 
-    public static final DeclarationDataReportType EXCEL_DEC = new DeclarationDataReportType(ReportType.EXCEL_DEC, null);
-    public static final DeclarationDataReportType XML_DEC = new DeclarationDataReportType(ReportType.XML_DEC, null);
-    public static final DeclarationDataReportType PDF_DEC = new DeclarationDataReportType(ReportType.PDF_DEC, null);
-    public static final DeclarationDataReportType JASPER_DEC = new DeclarationDataReportType(ReportType.JASPER_DEC, null);
-    public static final DeclarationDataReportType ACCEPT_DEC = new DeclarationDataReportType(ReportType.ACCEPT_DEC, null);
-    public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(ReportType.CHECK_DEC, null);
-    public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(ReportType.IMPORT_TF_DEC, null);
-    public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(ReportType.EDIT_FILE_COMMENT_DEC, null);
-    public static final DeclarationDataReportType SPECIFIC_REPORT_DEC = new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, new DeclarationSubreport()); //фиктивный тип отчета
-    public static final DeclarationDataReportType DELETE_DEC = new DeclarationDataReportType(ReportType.DELETE_DEC, null);
-    public static final DeclarationDataReportType TO_CREATE_DEC = new DeclarationDataReportType(ReportType.TO_CREATE_DEC, null);
+    //Типы отчетов, связанные с асинхронными задачами
+    public static final DeclarationDataReportType EXCEL_DEC = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
+    public static final DeclarationDataReportType XML_DEC = new DeclarationDataReportType(AsyncTaskType.XML_DEC, null);
+    public static final DeclarationDataReportType PDF_DEC = new DeclarationDataReportType(AsyncTaskType.PDF_DEC, null);
+    public static final DeclarationDataReportType ACCEPT_DEC = new DeclarationDataReportType(AsyncTaskType.ACCEPT_DEC, null);
+    public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(AsyncTaskType.CHECK_DEC, null);
+
+    //Какая то фигня, которая не связана с асинхронными задачами
+    public static final DeclarationDataReportType JASPER_DEC = new DeclarationDataReportType(AsyncTaskType.JASPER_DEC, null);
+    public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(AsyncTaskType.IMPORT_TF_DEC, null);
+    public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(AsyncTaskType.EDIT_FILE_COMMENT_DEC, null);
+    public static final DeclarationDataReportType DELETE_DEC = new DeclarationDataReportType(AsyncTaskType.DELETE_DEC, null);
+    public static final DeclarationDataReportType TO_CREATE_DEC = new DeclarationDataReportType(AsyncTaskType.TO_CREATE_DEC, null);
 
     /**
      * Тип задачи
      */
-    private ReportType reportType;
+    private AsyncTaskType reportType;
     /**
      * Тип специфичного отчета
      */
     private DeclarationSubreport subreport;
 
-    public DeclarationDataReportType(ReportType reportType, DeclarationSubreport subreport) {
-        if (!ReportType.EXCEL_DEC.equals(reportType) && subreport != null && ReportType.EXCEL_DEC.getName().equals(subreport.getAlias()) ||
-                !ReportType.XML_DEC.equals(reportType) && subreport != null && ReportType.XML_DEC.getName().equals(subreport.getAlias()) ||
-                !ReportType.PDF_DEC.equals(reportType) && subreport != null && ReportType.PDF_DEC.getName().equals(subreport.getAlias()) ||
-                !ReportType.JASPER_DEC.equals(reportType) && subreport != null && ReportType.JASPER_DEC.getName().equals(subreport.getAlias()) ||
-                !ReportType.ACCEPT_DEC.equals(reportType) && subreport != null && ReportType.ACCEPT_DEC.getName().equals(subreport.getAlias()) ||
-                !ReportType.CHECK_DEC.equals(reportType) && subreport != null && ReportType.CHECK_DEC.getName().equals(subreport.getAlias()) ||
-                !ReportType.EDIT_FILE_COMMENT_DEC.equals(reportType) && subreport != null && ReportType.EDIT_FILE_COMMENT_DEC.getName().equals(subreport.getAlias()) ||
-                !ReportType.IMPORT_TF_DEC.equals(reportType) && subreport != null && ReportType.IMPORT_TF_DEC.getName().equals(subreport.getAlias())) {
+    public DeclarationDataReportType(AsyncTaskType reportType, DeclarationSubreport subreport) {
+        if (!AsyncTaskType.EXCEL_DEC.equals(reportType) && subreport != null && AsyncTaskType.EXCEL_DEC.getName().equals(subreport.getAlias()) ||
+                !AsyncTaskType.XML_DEC.equals(reportType) && subreport != null && AsyncTaskType.XML_DEC.getName().equals(subreport.getAlias()) ||
+                !AsyncTaskType.PDF_DEC.equals(reportType) && subreport != null && AsyncTaskType.PDF_DEC.getName().equals(subreport.getAlias()) ||
+                !AsyncTaskType.JASPER_DEC.equals(reportType) && subreport != null && AsyncTaskType.JASPER_DEC.getName().equals(subreport.getAlias()) ||
+                !AsyncTaskType.ACCEPT_DEC.equals(reportType) && subreport != null && AsyncTaskType.ACCEPT_DEC.getName().equals(subreport.getAlias()) ||
+                !AsyncTaskType.CHECK_DEC.equals(reportType) && subreport != null && AsyncTaskType.CHECK_DEC.getName().equals(subreport.getAlias()) ||
+                !AsyncTaskType.EDIT_FILE_COMMENT_DEC.equals(reportType) && subreport != null && AsyncTaskType.EDIT_FILE_COMMENT_DEC.getName().equals(subreport.getAlias()) ||
+                !AsyncTaskType.IMPORT_TF_DEC.equals(reportType) && subreport != null && AsyncTaskType.IMPORT_TF_DEC.getName().equals(subreport.getAlias())) {
             throw new IllegalArgumentException("Некорректное тип отчета: " + subreport.getAlias());
         }
         this.reportType = reportType;
         setSubreport(subreport);
     }
 
-    public ReportType getReportType() {
+    public AsyncTaskType getReportType() {
         return reportType;
     }
 
@@ -55,7 +57,7 @@ public class DeclarationDataReportType implements Serializable {
     }
 
     public void setSubreport(DeclarationSubreport subreport) {
-        if (ReportType.SPECIFIC_REPORT_DEC.equals(reportType))
+        if (AsyncTaskType.SPECIFIC_REPORT_DEC.equals(reportType))
             this.subreport = subreport;
         else if (subreport != null)
             throw new IllegalArgumentException("Некорректный тип отчета: " + subreport.getAlias());
@@ -70,7 +72,7 @@ public class DeclarationDataReportType implements Serializable {
     }
 
     public boolean isSubreport() {
-        return getReportType().equals(ReportType.SPECIFIC_REPORT_DEC);
+        return getReportType().equals(AsyncTaskType.SPECIFIC_REPORT_DEC);
     }
 
     public static DeclarationDataReportType getDDReportTypeByName(String name) {
@@ -91,11 +93,11 @@ public class DeclarationDataReportType implements Serializable {
         } else if (EDIT_FILE_COMMENT_DEC.getReportType().getName().equals(name)) {
             return EDIT_FILE_COMMENT_DEC;
         } else {
-            return new DeclarationDataReportType(ReportType.SPECIFIC_REPORT_DEC, null);
+            return new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
         }
     }
 
-    public static DeclarationDataReportType getDDReportTypeByReportType(ReportType reportType) {
+    public static DeclarationDataReportType getDDReportTypeByReportType(AsyncTaskType reportType) {
         if (EXCEL_DEC.getReportType().equals(reportType)) {
             return EXCEL_DEC;
         } else if (XML_DEC.getReportType().equals(reportType)) {

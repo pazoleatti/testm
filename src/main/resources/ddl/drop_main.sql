@@ -23,7 +23,7 @@ drop table role_event;
 drop table sec_role;
 drop sequence seq_sec_user;
 drop sequence seq_notification;
-drop table lock_data_subscribers;
+drop table async_task_subscribers;
 drop table lock_data;
 drop table sec_user;
 drop table form_data_source;

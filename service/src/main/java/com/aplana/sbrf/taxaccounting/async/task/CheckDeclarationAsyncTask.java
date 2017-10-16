@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
@@ -15,8 +14,9 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.async.AsyncTask.RequiredParams.*;
-
+/**
+ * Проверка налоговой формы
+ */
 @Component("CheckDeclarationAsyncTask")
 public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
 
@@ -30,55 +30,54 @@ public class CheckDeclarationAsyncTask extends AbstractDeclarationAsyncTask {
     private DeclarationDataService declarationDataService;
 
     @Autowired
-    private LockDataService lockService;
+    private AsyncManager asyncManager;
 
     @Override
-    protected ReportType getReportType() {
-        return ReportType.CHECK_DEC;
+    protected AsyncTaskType getAsyncTaskType() {
+        return AsyncTaskType.CHECK_DEC;
     }
 
     @Override
-    protected AbstractAsyncTask.TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        long declarationDataId = (Long)params.get("declarationDataId");
-        int userId = (Integer)params.get(USER_ID.name());
+    protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
+        long declarationDataId = (Long) taskData.getParams().get("declarationDataId");
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-        final String lock = (String) params.get(LOCKED_OBJECT.name());
-        final Date lockDate = (Date) params.get(LOCK_DATE.name());
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
             declarationDataService.check(logger, declarationDataId, userInfo, new LockStateLogger() {
                 @Override
-                public void updateState(String state) {
-                    lockService.updateState(lock, lockDate, state);
+                public void updateState(AsyncTaskState state) {
+                    asyncManager.updateState(taskData.getId(), state);
                 }
             });
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
-            return new AbstractAsyncTask.TaskStatus(false, null);
+            return new BusinessLogicResult(false, null);
         }
-        return new AbstractAsyncTask.TaskStatus(true, null);
+        return new BusinessLogicResult(true, null);
     }
 
     @Override
-    protected String getAsyncTaskName() {
-        return "Проверка налоговой формы";
+    protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
+        return getMessage(taskData, false);
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        return getMessage(params, false, unexpected);
+    protected String getNotificationMsg(AsyncTaskData taskData) {
+        return getMessage(taskData, true);
     }
 
-    @Override
-    protected String getNotificationMsg(Map<String, Object> params) {
-        return getMessage(params, true, false);
-    }
-
-    private String getMessage(Map<String, Object> params, boolean isSuccess, boolean unexpected) {
+    private String getMessage(AsyncTaskData taskData, boolean isSuccess) {
         String template = isSuccess ? SUCCESS : FAIL;
         return String.format(template,
-                getDeclarationDescription(params));
+                getDeclarationDescription(taskData.getUserId(), taskData.getParams()));
+    }
+
+    @Override
+    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+        long declarationDataId = (Long) params.get("declarationDataId");
+        return String.format(getAsyncTaskType().getDescription(),
+                declarationDataService.getDeclarationFullName(declarationDataId, getDeclarationDataReportType(userInfo, params)));
     }
 }

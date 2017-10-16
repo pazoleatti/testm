@@ -1,5 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.AsyncTask;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
@@ -43,7 +47,10 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
     private TAUserService userService;
 
     @Autowired
-    private AsyncTaskManagerService asyncTaskManagerService;
+    private AsyncManager asyncManager;
+
+    @Autowired
+    private AsyncTaskDao asyncTaskDao;
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -72,7 +79,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
             String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
             if (uuidXml != null) {
                 String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ddReportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType()), userInfo, action.isForce(), logger);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, action.isForce(), logger);
                 if (restartStatus != null && restartStatus.getFirst()) {
                     result.setStatus(CreateAsyncTaskStatus.LOCKED);
                     result.setRestartMsg(restartStatus.getSecond());
@@ -82,30 +89,11 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("declarationDataId", action.getDeclarationId());
-                    asyncTaskManagerService.createTask(keyTask, ddReportType.getReportType(), params, false, userInfo, logger, new AsyncTaskHandler() {
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                         @Override
-                        public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    declarationDataService.getDeclarationFullName(action.getDeclarationId(), ddReportType),
-                                    LockData.State.IN_QUEUE.getText());
-                        }
-
-                        @Override
-                        public void executePostCheck() {
-                        }
-
-                        @Override
-                        public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                            return false;
-                        }
-
-                        @Override
-                        public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                        }
-
-                        @Override
-                        public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return declarationDataService.getAsyncTaskName(ddReportType, action.getTaxType());
+                                    declarationDataService.getDeclarationFullName(action.getDeclarationId(), ddReportType));
                         }
                     });
                 }
@@ -114,17 +102,19 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
             }
         } else {
             try {
-                lockDataService.addUserWaitingForLock(lockDataAccept.getKey(), userInfo.getUser().getId());
+                asyncManager.addUserWaitingForTask(lockDataAccept.getTaskId(), userInfo.getUser().getId());
             } catch (Exception e) {
+                logger.error(e);
             }
+            AsyncTaskData acceptTaskData = asyncTaskDao.getLightTaskData(lockDataAccept.getTaskId());
             logger.error(
                     String.format(
-                            LockData.LOCK_CURRENT,
+                            AsyncTask.LOCK_CURRENT,
                             sdf.get().format(lockDataAccept.getDateLock()),
                             userService.getUser(lockDataAccept.getUserId()).getName(),
-                            declarationDataService.getAsyncTaskName(DeclarationDataReportType.ACCEPT_DEC, action.getTaxType()))
+                            acceptTaskData.getDescription())
             );
-            throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), action.getTaxType().getDeclarationShortName());
+            throw new ServiceLoggerException("Для текущего экземпляра налоговой формы запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()));
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
 	    return result;

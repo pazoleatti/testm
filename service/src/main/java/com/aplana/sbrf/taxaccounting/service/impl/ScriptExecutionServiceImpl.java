@@ -218,8 +218,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
                         //Проверяем не заблокирован ли справочник
                         RefBook refBook = SerializationUtils.clone(refBookDao.get(refBookId));
-                        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBookId);
-                        String lockUser = canImportScript(lockType != null ? lockType.getSecond().getKey() : null, userInfo.getUser());
+                        String lockUser = canImportScript(refBookFactory.generateTaskKey(refBookId), userInfo.getUser());
                         if (lockUser == null) {
                             Logger localLogger = new Logger();
                             refBookScriptingService.importScript(refBookId, script, localLogger, userInfo);

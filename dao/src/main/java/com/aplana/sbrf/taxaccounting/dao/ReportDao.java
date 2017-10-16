@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 
 import java.util.Collection;
 import java.util.List;

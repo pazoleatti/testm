@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -10,11 +10,11 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.async.AsyncTask.RequiredParams.*;
-
+/**
+ * Создание Отчетности
+ */
 @Component("CreateFormsAsyncTask")
 public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
@@ -34,27 +34,25 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
     private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
-    private LockDataService lockService;
+    private AsyncManager asyncManager;
 
     @Override
-    protected ReportType getReportType() {
-        return ReportType.CREATE_FORMS_DEC;
+    protected AsyncTaskType getAsyncTaskType() {
+        return AsyncTaskType.CREATE_FORMS_DEC;
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
-        return BalancingVariants.LONG;
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) throws AsyncTaskException {
+        return AsyncQueue.LONG;
     }
 
     @Override
-    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        Integer declarationTypeId = (Integer)params.get("declarationTypeId");
-        Integer departmentReportPeriodId = (Integer)params.get("departmentReportPeriodId");
-        int userId = (Integer)params.get(USER_ID.name());
+    protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
+        Map<String, Object> params = taskData.getParams();
+        Integer declarationTypeId = (Integer) params.get("declarationTypeId");
+        Integer departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-        final String lock = (String) params.get(LOCKED_OBJECT.name());
-        final Date lockDate = (Date) params.get(LOCK_DATE.name());
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
 
@@ -64,25 +62,19 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
 
         declarationDataService.createForms(logger, userInfo, departmentReportPeriod, declarationTypeId, new LockStateLogger() {
             @Override
-            public void updateState(String state) {
-                lockService.updateState(lock, lockDate, state);
+            public void updateState(AsyncTaskState state) {
+                asyncManager.updateState(taskData.getId(), state);
             }
         });
-        return new TaskStatus(true, null);
+        return new BusinessLogicResult(true, null);
     }
 
     @Override
-    protected String getAsyncTaskName() {
-        return "Создание отчетных форм";
-    }
-
-    @Override
-    protected String getNotificationMsg(Map<String, Object> params) {
-        int userId = (Integer)params.get(USER_ID.name());
+    protected String getNotificationMsg(AsyncTaskData taskData) {
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-        Integer declarationTypeId = (Integer)params.get("declarationTypeId");
-        Integer departmentReportPeriodId = (Integer)params.get("departmentReportPeriodId");
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
+        Integer declarationTypeId = (Integer) taskData.getParams().get("declarationTypeId");
+        Integer departmentReportPeriodId = (Integer) taskData.getParams().get("departmentReportPeriodId");
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -100,12 +92,11 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        int userId = (Integer)params.get(USER_ID.name());
+    protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-        Integer declarationTypeId = (Integer)params.get("declarationTypeId");
-        Integer departmentReportPeriodId = (Integer)params.get("departmentReportPeriodId");
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
+        Integer declarationTypeId = (Integer) taskData.getParams().get("declarationTypeId");
+        Integer departmentReportPeriodId = (Integer) taskData.getParams().get("departmentReportPeriodId");
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -120,5 +111,12 @@ public class CreateFormsAsyncTask extends AbstractAsyncTask {
                 declarationTemplate.getName(),
                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod,
                 department.getName());
+    }
+
+    @Override
+    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+        int declarationTypeId = (Integer) params.get("declarationTypeId");
+        int departmentReportPeriodId = (Integer) params.get("departmentReportPeriodId");
+        return declarationDataService.getDeclarationFullName(declarationTypeId, departmentReportPeriodId, getAsyncTaskType());
     }
 }

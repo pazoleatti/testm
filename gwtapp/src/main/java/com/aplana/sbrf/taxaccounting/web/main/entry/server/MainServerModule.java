@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server.Decla
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server.DeclarationVersionListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentConfigServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server.DepartmentConfigPropertyServerModule;
-import com.aplana.sbrf.taxaccounting.web.module.lock.server.LockServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.server.PeriodsServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
@@ -41,7 +40,7 @@ import org.springframework.context.annotation.Import;
         RefBookListServerModule.class, RefBookDataServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,
         RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, ScriptsImportServerModule.class,
-        UploadTransportDataServerModule.class, LockServerModule.class, CommonParameterServerModule.class})
+        UploadTransportDataServerModule.class, CommonParameterServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

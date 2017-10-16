@@ -56,21 +56,20 @@ public class LockDataDaoTest extends Assert {
 
 	@Test (expected = LockException.class)
 	public void createLockTest() {
-		dao.lock("a", 0, "", "", ""); // дубликат
+		dao.lock("a", 0, ""); // дубликат
 	}
 
 	@Test
 	public void createLockTest2() {
-		dao.lock("c", 0, "", "", "");
+		dao.lock("c", 0, "");
 		LockData data = dao.get("c", false);
 		Assert.assertEquals("c", data.getKey());
 		Assert.assertEquals(0, data.getUserId());
 
-        dao.lock("abc", 0, "", "", "test");
+        dao.lock("abc", 0, "");
         data = dao.get("abc", false);
         data = dao.get("abc", data.getDateLock());
         Assert.assertNotNull(data);
-        Assert.assertEquals(data.getServerNode(), "test");
 	}
 
 	@Test
@@ -85,92 +84,38 @@ public class LockDataDaoTest extends Assert {
 	}
 
 	@Test
-	public void getUsersWaitingForLock() {
-		List<Integer> uids = dao.getUsersWaitingForLock("a");
-		assertEquals(2, uids.size());
-		uids = dao.getUsersWaitingForLock("b");
-		assertEquals(0, uids.size());
-
-		dropTable();
-		uids = dao.getUsersWaitingForLock("b");
-		assertEquals(0, uids.size());
-	}
-
-	@Test
-	 public void addUserWaitingForLock() {
-		dao.addUserWaitingForLock("b", 2);
-		dao.addUserWaitingForLock("b", 0);
-		dao.addUserWaitingForLock("b", 1);
-		List<Integer> uids = dao.getUsersWaitingForLock("b");
-		assertEquals(3, uids.size());
-	}
-
-	@Test
-	public void addUserWaitingForLock2() {
-		dao.addUserWaitingForLock("a", 1);
-	}
-
-	@Test
 	public void getLocks() {
 		PagingParams paging = new PagingParams(0, 100);
-		PagingResult<LockData> data = dao.getLocks("", LockData.LockQueues.ALL, paging);
+		PagingResult<LockData> data = dao.getLocks("", paging);
 		assertEquals(5, data.size());
-		data = dao.getLocks("a", LockData.LockQueues.ALL, paging);
+		data = dao.getLocks("a", paging);
 		assertEquals(4, data.size());
-		data = dao.getLocks("", LockData.LockQueues.SHORT, paging);
-		assertEquals(0, data.size());
-		data = dao.getLocks("", LockData.LockQueues.LONG, paging);
-		assertEquals(0, data.size());
-		data = dao.getLocks("", LockData.LockQueues.NONE, paging);
+		data = dao.getLocks("", paging);
 		assertEquals(5, data.size());
-		data = dao.getLocks(null, LockData.LockQueues.NONE, paging);
+		data = dao.getLocks("", paging);
 		assertEquals(5, data.size());
-		data = dao.getLocks("a", null, paging);
+		data = dao.getLocks(null, paging);
+		assertEquals(5, data.size());
+		data = dao.getLocks("a", paging);
 		assertEquals(4, data.size());
-		data = dao.getLocks("non exists", LockData.LockQueues.ALL, paging);
+		data = dao.getLocks("non exists", paging);
 		assertEquals(0, data.size());
 	}
 
 	@Test
 	public void unlockAll() {
-		List<String> keys = Arrays.asList(new String[] {"a", "q"});
-		dao.unlockAll(keys);
+		List<Long> ids = Arrays.asList(1L, 5L);
+		dao.unlockAll(ids);
 		// проверяем, что блокировки были удалены
 		PagingParams paging = new PagingParams(0, 100);
-		PagingResult<LockData> data = dao.getLocks("", LockData.LockQueues.ALL, paging);
+		PagingResult<LockData> data = dao.getLocks("", paging);
 		assertEquals(3, data.size());
-	}
-
-	@Test
-	public void updateState() {
-		LockData lock = dao.get("a", false);
-		dao.updateState(lock.getKey(), lock.getDateLock(), ":)", ":(");
-		lock = dao.get("a", false);
-		assertEquals(":)", lock.getState());
-		assertEquals(":(", lock.getServerNode());
-	}
-
-	@Test
-	public void updateQueue() {
-		LockData lock = dao.get("a", false);
-		dao.updateQueue(lock.getKey(), lock.getDateLock(), LockData.LockQueues.ALL);
-		lock = dao.get("a", false);
-		assertEquals(LockData.LockQueues.ALL, lock.getQueue());
-		dao.updateQueue(lock.getKey(), lock.getDateLock(), LockData.LockQueues.SHORT);
-		lock = dao.get("a", false);
-		assertEquals(LockData.LockQueues.SHORT, lock.getQueue());
-		dao.updateQueue(lock.getKey(), lock.getDateLock(), LockData.LockQueues.LONG);
-		lock = dao.get("a", false);
-		assertEquals(LockData.LockQueues.LONG, lock.getQueue());
-		dao.updateQueue(lock.getKey(), lock.getDateLock(), LockData.LockQueues.NONE);
-		lock = dao.get("a", false);
-		assertEquals(LockData.LockQueues.NONE, lock.getQueue());
 	}
 
 	private int unlockIfOlderThan(long seconds) {
 		List<String> keyList = dao.getLockIfOlderThan(seconds);
-		if (keyList.size() > 0) {
-			dao.unlockAll(keyList);
+		for (String key : keyList) {
+			dao.unlock(key);
 		}
 		return keyList.size();
 	}
@@ -181,7 +126,7 @@ public class LockDataDaoTest extends Assert {
 		Thread.sleep(2000);
 		assertEquals(4, unlockIfOlderThan(1));
 		// создаем новую блокировку
-		dao.lock("test_key", 1, "test_description", "test_state", "test server");
+		dao.lock("test_key", 1, "test_description");
 		Thread.sleep(1000);
 		assertEquals(0, unlockIfOlderThan(2));
 		Thread.sleep(2000);
@@ -192,7 +137,6 @@ public class LockDataDaoTest extends Assert {
 	 * Метод предназначен для проверки обработки исключительных ситуаций
 	 */
 	private void dropTable() {
-		jdbc.update("ALTER TABLE lock_data_subscribers DROP CONSTRAINT lock_data_subscr_fk_lock_data", new HashMap());
 		jdbc.update("DROP TABLE lock_data", new HashMap());
 	}
 
@@ -254,9 +198,9 @@ public class LockDataDaoTest extends Assert {
 	@Test
 	public void unlockAllByUserId() {
 		dao.unlockAllByUserId(0, false);
-		PagingResult<LockData> locks = dao.getLocks("", LockData.LockQueues.ALL, new PagingParams(0, 10));
+		PagingResult<LockData> locks = dao.getLocks("", new PagingParams(0, 10));
 		System.out.println(locks);
-		assertEquals(3, locks.size());
+		assertEquals(2, locks.size());
 
 		dropTable();
 		dao.unlockAllByUserId(0, true);

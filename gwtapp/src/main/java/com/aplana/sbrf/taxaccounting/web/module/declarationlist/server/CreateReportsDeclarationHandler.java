@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
+import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -46,14 +47,14 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
     private LogEntryService logEntryService;
 
     @Autowired
-    private AsyncTaskManagerService asyncTaskManagerService;
+    private AsyncManager asyncManager;
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Override
     public CreateReportsDeclarationResult execute(final CreateReportsDeclarationAction action, ExecutionContext executionContext) throws ActionException {
-        final ReportType reportType = ReportType.CREATE_REPORTS_DEC;
+        final AsyncTaskType reportType = AsyncTaskType.CREATE_REPORTS_DEC;
         CreateReportsDeclarationResult result = new CreateReportsDeclarationResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
@@ -90,7 +91,7 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
         params.put("departmentReportPeriodId", departmentReportPeriod.getId());
 
         String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationTypeId(), action.getReportPeriodId(), action.getDepartmentId());
-        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getAsyncTaskName(reportType, action.getTaxType(), params), userInfo, action.isForce(), logger);
+        Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, action.isForce(), logger);
         if (restartStatus != null && restartStatus.getFirst()) {
             result.setStatus(false);
             result.setRestartMsg(restartStatus.getSecond());
@@ -98,30 +99,10 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
             result.setStatus(true);
         } else {
             result.setStatus(true);
-            asyncTaskManagerService.createTask(keyTask, reportType, params, false, userInfo, logger, new AsyncTaskHandler() {
+            asyncManager.executeTask(keyTask, reportType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                 @Override
-                public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            declarationDataService.getAsyncTaskName(reportType, action.getTaxType(), params),
-                            LockData.State.IN_QUEUE.getText());
-                }
-
-                @Override
-                public void executePostCheck() {
-                }
-
-                @Override
-                public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
-                    return false;
-                }
-
-                @Override
-                public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                }
-
-                @Override
-                public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                    return declarationDataService.getAsyncTaskName(reportType, action.getTaxType(), params);
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lockAsync(keyTask, userInfo.getUser().getId());
                 }
             });
         }

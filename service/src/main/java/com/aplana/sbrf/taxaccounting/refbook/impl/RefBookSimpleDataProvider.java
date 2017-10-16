@@ -203,8 +203,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId(), ReportType.EDIT_REF_BOOK);
-        if (isNotLocked(getRefBook(), userId, lockKey)) {
+        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId());
+        if (lockRefBook(getRefBook(), userId, lockKey)) {
             try {
                 lockedObjects.add(lockKey);
                 lockReferencedBooks(logger, lockedObjects);
@@ -236,7 +236,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
             //Признак того, что для проверок дата окончания была изменена (была использована дата начала следующей версии)
             boolean dateToChangedForChecks = false;
 
-            long countIds = 0;
+            int countIds = 0;
             for (RefBookRecord record : records) {
                 if (record.getRecordId() == null) {
                     countIds++;
@@ -292,8 +292,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId(), ReportType.EDIT_REF_BOOK);
-        if (isNotLocked(getRefBook(), userId, lockKey)) {
+        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId());
+        if (lockRefBook(getRefBook(), userId, lockKey)) {
             try {
                 lockedObjects.add(lockKey);
                 lockReferencedBooks(logger, lockedObjects);
@@ -324,8 +324,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId(), ReportType.EDIT_REF_BOOK);
-        if (isNotLocked(getRefBook(), userId, lockKey)) {
+        String lockKey = refBookFactory.generateTaskKey(getRefBook().getId());
+        if (lockRefBook(getRefBook(), userId, lockKey)) {
             try {
                 lockedObjects.add(lockKey);
                 lockReferencedBooks(logger, lockedObjects);
@@ -352,10 +352,9 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
     }
 
-    private boolean isNotLocked(RefBook refBook, int userId, String lockKey) {
-        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(refBook.getId());
-        return lockType == null && lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null;
+    private boolean lockRefBook(RefBook refBook, int userId, String lockKey) {
+        return lockService.lock(lockKey, userId,
+                String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null;
     }
 
     private void lockReferencedBooks(@NotNull Logger logger, List<String> lockedObjects) {
@@ -364,9 +363,9 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         for (RefBookAttribute attribute : attributes) {
             if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                 RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
+                String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
                 if (!lockedObjects.contains(referenceLockKey)) {
-                    if (isNotLocked(attributeRefBook, userId, referenceLockKey)) {
+                    if (lockRefBook(attributeRefBook, userId, referenceLockKey)) {
                         lockedObjects.add(referenceLockKey);
                     } else {
                         throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
@@ -565,8 +564,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         //Устанавливаем блокировку на текущий справочник
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(getRefBookId(), ReportType.EDIT_REF_BOOK);
-        if (isNotLocked(getRefBook(), userId, lockKey)) {
+        String lockKey = refBookFactory.generateTaskKey(getRefBookId());
+        if (lockRefBook(getRefBook(), userId, lockKey)) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -621,9 +620,9 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(getRefBookId(), ReportType.EDIT_REF_BOOK);
+        String lockKey = refBookFactory.generateTaskKey(getRefBookId());
         RefBook refBook = refBookDao.get(getRefBookId());
-        if (isNotLocked(getRefBook(), userId, lockKey)) {
+        if (lockRefBook(getRefBook(), userId, lockKey)) {
             try {
                 lockedObjects.add(lockKey);
                 lockReferencedBooks(logger, lockedObjects);

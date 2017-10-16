@@ -14,11 +14,8 @@ INSERT INTO sec_role (id, alias, name) VALUES (1, 'ROLE_CONTROL', 'Контро�
 INSERT INTO sec_role (id, alias, name) VALUES (2, 'ROLE_OPER', 'Оператор');
 INSERT INTO sec_role (id, alias, name) VALUES (3, 'ROLE_CONTROL_UNP', 'Контролёр УНП');
 
-INSERT INTO lock_data (key, user_id, date_lock) VALUES ('a', 0, TIMESTAMP '2013-01-01 00:05:00.000000');
-INSERT INTO lock_data (key, user_id) VALUES ('b', 1);
-INSERT INTO lock_data (key, user_id) VALUES ('FORM_DATA_1', 2);
-INSERT INTO lock_data (key, user_id) VALUES ('aaa', 0);
-INSERT INTO lock_data (key, user_id) VALUES ('q', 0);
-
-INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES ('a', 1);
-INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES ('a', 2);
+INSERT INTO lock_data (id, key, user_id, date_lock) VALUES (1, 'a', 0, TIMESTAMP '2013-01-01 00:05:00.000000');
+INSERT INTO lock_data (id, key, user_id) VALUES (2, 'b', 1);
+INSERT INTO lock_data (id, key, user_id) VALUES (3, 'FORM_DATA_1', 2);
+INSERT INTO lock_data (id, key, user_id) VALUES (4, 'aaa', 0);
+INSERT INTO lock_data (id, key, user_id) VALUES (5, 'q', 0);

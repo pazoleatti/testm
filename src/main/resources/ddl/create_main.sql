@@ -665,25 +665,23 @@ comment on column role_event.role_id is 'Идентификатор роли';
 --------------------------------------------------------------------------------------------------------
 create table lock_data
 (
+  id          number(18) not null,
   key         varchar2(1000)       not null,
   user_id     number(9)            not null,
+  task_id     number(18),
   date_lock   date default sysdate not null,
-  state       varchar2(500),
-  state_date  date,
-  description varchar2(4000),
-  queue       number(9) default 0  not null,
-  server_node varchar2(100)
+  description varchar2(4000)
 );
 
 comment on table lock_data is 'Информация о блокировках';
 comment on column lock_data.key is 'Код блокировки';
 comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
+comment on column lock_data.task_id is 'Идентификатор пользователя, установившего блокировку';
 comment on column lock_data.date_lock is 'Дата установки блокировки';
-comment on column lock_data.state is 'Статус выполнения асинхронной задачи, связанной с блокировкой';
-comment on column lock_data.state_date is 'Дата последнего изменения статуса';
 comment on column lock_data.description is 'Описание блокировки';
-comment on column lock_data.queue is 'Очередь, в которой находится связанная асинхронная задача';
-comment on column lock_data.server_node is 'Наименование узла кластера, на котором выполняется связанная асинхронная задача';
+
+
+create sequence seq_lock_data start with 100;
 --------------------------------------------------------------------------------------------------------
 create table department_type
 (
@@ -714,8 +712,37 @@ comment on column async_task_type.task_limit is 'Ограничение на в�
 comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
 comment on column async_task_type.limit_kind is 'Вид ограничения';
 
-create sequence seq_async_task start with 100000 increment by 100;
+--------------------------------------------------------------------------------------------------------
+create table async_task (
+  id number(18) not null,
+  user_id     number(9) not null,
+  type_id number(18) not null,
+  create_date timestamp default current_timestamp,
+  start_process_date timestamp default null,
+  node varchar2(500) default null,
+  priority_node varchar2(500) default null,
+  queue number(1) not null,
+  state number(6) default 1,
+  state_date timestamp default current_timestamp,
+  serialized_params blob,
+  description varchar2(4000)
+);
 
+comment on table async_task is 'Асинхронные задачи';
+comment on column async_task.id is 'Идентификатор задачи';
+comment on column async_task.user_id is 'Идентификатор пользователя, запустившего задачу';
+comment on column async_task.type_id is 'Ссылка на тип задачи';
+comment on column async_task.create_date is 'Дата создания задачи';
+comment on column async_task.start_process_date is 'Дата начала выполнения задачи';
+comment on column async_task.node is 'Название узла, на котором выполняется задача';
+comment on column async_task.priority_node is 'Узел, которому принудительно будет назначена задача';
+comment on column async_task.queue is 'Тип очереди, в которую помещена задача. 1 - короткие, 2 - длинные';
+comment on column async_task.state is 'Статус выполнения задачи';
+comment on column async_task.state_date is 'Дата последнего изменения статуса';
+comment on column async_task.serialized_params is 'Сериализованные параметры, которые нужны для выполнения задачи';
+comment on column async_task.description is 'Описание задачи';
+
+create sequence seq_async_task start with 1 increment by 100;
 --------------------------------------------------------------------------------------------------------
 create table form_data_report
 (
@@ -774,15 +801,15 @@ comment on column declaration_subreport.select_record is 'Возможность
 comment on table declaration_subreport is 'Спец. отчеты версии макета налоговой формы';
 
 --------------------------------------------------------------------------------------------------------
-create table lock_data_subscribers
+create table async_task_subscribers
 (
-  lock_key varchar2(1000 byte) not null,
+  async_task_id number(18) not null,
   user_id  number(9)           not null
 );
 
-comment on table lock_data_subscribers is 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
-comment on column lock_data_subscribers.lock_key is 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
-comment on column lock_data_subscribers.user_id is 'Идентификатор пользователя, который получит оповещение';
+comment on table async_task_subscribers is 'Cписок пользователей, ожидающих выполнения операций над объектом блокировки';
+comment on column async_task_subscribers.async_task_id is 'Идентификатор задачи, после завершения которой, будет выполнено оповещение';
+comment on column async_task_subscribers.user_id is 'Идентификатор пользователя, который получит оповещение';
 
 --------------------------------------------------------------------------------------------------------
 create table ifrs_data

@@ -110,7 +110,14 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.blockList'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!lockList"
+                                onClick: function () {
+                                    $state.go('lockDataList');
+                                }
+                            }, {
+                                name: $filter('translate')('menu.administration.asyncTaskList'),
+                                onClick: function () {
+                                    $state.go('asyncTaskList');
+                                }
                             });
                         }
 

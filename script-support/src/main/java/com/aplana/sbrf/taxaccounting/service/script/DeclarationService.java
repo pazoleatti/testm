@@ -452,13 +452,6 @@ public interface DeclarationService {
     LockData createDeleteLock(long declarationDataId, TAUserInfo userInfo);
 
     /**
-     * Формирует название операции
-     * @param ddReportType
-     * @return
-     */
-    String getTaskName(DeclarationDataReportType ddReportType);
-
-    /**
      * Удаляет все формы заданного вида в заданном отчетном периоде
      * @param declarationTypeId вид НФ
      * @param departmentReportPeriodId отчетный период
@@ -476,4 +469,13 @@ public interface DeclarationService {
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
+
+    /**
+     * Возвращает полное название декларации с указанием подразделения, периода и прочего
+     *
+     * @param declarationId идентификатор декларации
+     * @param ddReportType  тип отчета. Может быть null
+     * @return название
+     */
+    String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
 }
