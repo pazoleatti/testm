@@ -87,6 +87,7 @@
                         }
                         $scope.treeTaxes.push({
                             name: $filter('translate')('menu.taxes.service'),
+                            href: "",
                             subtree: [{
                                 name: $filter('translate')('menu.taxes.service.loadFiles'),
                                 onClick: function () {
