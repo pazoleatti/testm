@@ -87,6 +87,7 @@
                         }
                         $scope.treeTaxes.push({
                             name: $filter('translate')('menu.taxes.service'),
+                            href: "",
                             subtree: [{
                                 name: $filter('translate')('menu.taxes.service.loadFiles'),
                                 onClick: function () {
@@ -178,6 +179,7 @@
                 $scope.logout = function () {
                     // Сообщаем клиентской части системы, что выходим. Если есть несохраненные данные - нужно ловить это сообщение
                     $rootScope.$broadcast('LOGOUT_MSG');
+                    sessionStorage.clear();
 
                     $.ajax({
                         type: "GET",

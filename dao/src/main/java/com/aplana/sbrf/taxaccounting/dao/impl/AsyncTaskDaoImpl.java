@@ -146,13 +146,14 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public int lockTask(String node, int timeout, AsyncQueue queue, int maxTasksPerNode) {
+    public int lockTask(String node, String priorityNode, int timeout, AsyncQueue queue, int maxTasksPerNode) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("node", node);
+        params.addValue("priorityNode", priorityNode);
         params.addValue("maxTasksPerNode", maxTasksPerNode);
         params.addValue("queue", queue.getId());
         return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp where (select count(*) from async_task where node = :node) < :maxTasksPerNode and id = (select id from (" +
-                        "select * from async_task where (priority_node is null or priority_node = :node) and queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) order by create_date" +
+                        "select * from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) order by create_date" +
                         ") where rownum = 1)",
                 params);
     }

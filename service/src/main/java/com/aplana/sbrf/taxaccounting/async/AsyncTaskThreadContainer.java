@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ public class AsyncTaskThreadContainer {
     private ServerInfo serverInfo;
     @Autowired
     private TAUserService taUserService;
+    @Autowired
+    private ApplicationInfo applicationInfo;
 
     /**
      * Метод запускает потоки обработки асинхронных задач для каждой очереди
@@ -131,7 +134,8 @@ public class AsyncTaskThreadContainer {
     private final class AsyncTaskShortQueueProcessor extends AbstractQueueProcessor {
         @Override
         protected AsyncTaskData getNextTask(int taskTimeout) {
-            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, AsyncQueue.SHORT, getThreadCount());
+            String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
+            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, taskTimeout, AsyncQueue.SHORT, getThreadCount());
         }
 
         @Override
@@ -146,7 +150,8 @@ public class AsyncTaskThreadContainer {
     private final class AsyncTaskLongQueueProcessor extends AbstractQueueProcessor {
         @Override
         protected AsyncTaskData getNextTask(int taskTimeout) {
-            return asyncManager.reserveTask(serverInfo.getServerName(), taskTimeout, AsyncQueue.LONG, getThreadCount());
+            String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
+            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, taskTimeout, AsyncQueue.LONG, getThreadCount());
         }
 
         @Override
