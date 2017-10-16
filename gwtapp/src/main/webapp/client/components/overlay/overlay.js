@@ -109,7 +109,10 @@
                                         message = $filter('translate')(addMessage.messageCode);
                                     }
                                     $injector.invoke(['appModals', function (appModals) {
-                                        appModals.errorWithStack($filter('translate')('DIALOGS_ERROR'), message, {addMessage: addMessage});
+                                        appModals.errorWithStack($filter('translate')('DIALOGS_ERROR'), message, {
+                                            addMessage: addMessage,
+                                            size:'lg'
+                                        });
                                     }]);
                                 }
                             }
