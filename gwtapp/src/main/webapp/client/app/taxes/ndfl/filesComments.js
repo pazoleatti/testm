@@ -139,6 +139,8 @@
                  * @description Обработчик кнопки "Сохранить"
                  **/
                 $scope.save = function () {
+
+                    $scope.comment = $scope.general.comment.$$lastCommittedViewValue;
                     var grid = $scope.fileCommentGrid.ctrl.getGrid();
                     var ids = grid.getDataIDs();
                     var files = [];
