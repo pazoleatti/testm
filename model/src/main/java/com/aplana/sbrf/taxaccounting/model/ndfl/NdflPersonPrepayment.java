@@ -3,16 +3,12 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import org.joda.time.LocalDateTime;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * @author Andrey Drunk
  * Cведения о доходах в виде авансовых платежей
  */
 public class NdflPersonPrepayment extends NdflPersonOperation {
-
-    //ИНП (Графа 2)
-    private String inp;
 
     // Сумма фиксированного авансового платежа (Графа 4)
     private BigDecimal summ;
@@ -51,14 +47,6 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
         return FIELDS;
     }
 
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
-
     public BigDecimal getSumm() {
         return summ;
     }
@@ -94,7 +82,6 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     public String toString() {
         return "NdflPersonPrepayment{" +
                 "summ=" + summ +
-                ", inp='" + inp + '\'' +
                 ", notifNum='" + notifNum + '\'' +
                 ", notifDate=" + notifDate +
                 ", notifSource='" + notifSource + '\'' +

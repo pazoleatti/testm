@@ -1345,7 +1345,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personDeduction.setPeriodCurrDate(SqlUtils.getLocalDateTime(rs, "period_curr_date"));
             personDeduction.setPeriodCurrSumm(rs.getBigDecimal("period_curr_summ"));
             personDeduction.setSourceId(SqlUtils.getLong(rs, "source_id"));
-            personDeduction.setInp(rs.getString("inp"));
 
             return personDeduction;
         }
@@ -1367,7 +1366,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
             personPrepayment.setNotifDate(SqlUtils.getLocalDateTime(rs, "notif_date"));
             personPrepayment.setNotifSource(rs.getString("notif_source"));
             personPrepayment.setSourceId(SqlUtils.getLong(rs, "source_id"));
-            personPrepayment.setInp(rs.getString("inp"));
 
             return personPrepayment;
         }
