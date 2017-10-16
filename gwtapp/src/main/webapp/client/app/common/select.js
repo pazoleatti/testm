@@ -27,7 +27,7 @@
                 };
             };
 
-            var buildBasicSelectOptions = function(isMultiple, allowClear, formatter) {
+            var buildBasicSelectOptions = function (isMultiple, allowClear, formatter) {
                 if (formatter === undefined) {
                     formatter = 'nameFormatter';
                 }
@@ -44,7 +44,7 @@
              */
             this.getBasicSingleSelectOptions = function (allowClear, allowSearch, formatter) {
                 var select = buildBasicSelectOptions(false, allowClear, formatter);
-                if(!allowSearch) {
+                if (!allowSearch) {
                     select.options.minimumResultsForSearch = -1;
                 }
                 return select;
@@ -90,10 +90,11 @@
              * @param allowClear Возможна ли очистка
              * @param url URL, по которому запрашиваются элементы списка
              * @param dataFilter Объект с параметрами для фильтрации данных
+             * @param sortParams Параметры сортировки: property - поле, по которому выполняется сортировка, direction - порядок
              * @param formatter Фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
              * @param searchField Поле, по которому выполняется поиск. Значение по умолчанию: name
              */
-            this.getAjaxSelectOptions = function (isMultiple, allowClear, url, dataFilter, formatter, searchField) {
+            this.getAjaxSelectOptions = function (isMultiple, allowClear, url, dataFilter, sortParams, formatter, searchField) {
                 if (formatter === undefined) {
                     formatter = 'nameFormatter';
                 }
@@ -111,7 +112,8 @@
                     url: url,
                     quietMillis: 200,
                     data: function (term, page) {
-                        var dataObject = {pagingParams: JSON.stringify({count: 50, page: page})};
+                        var pagingParams = {count: 50, page: page, property: sortParams.property, direction: sortParams.direction};
+                        var dataObject = {pagingParams: JSON.stringify(pagingParams)};
                         dataObject[searchField] = term;
                         //Добавить в запрос поля для фильтрации данных
                         if (select.options.dataFilter) {
@@ -284,7 +286,7 @@
                  * Инициализировать список с загрузкой всех подразделений через ajax
                  */
                 $scope.initSelectWithAllDepartments = function () {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=allDepartments");
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {property: "fullPath", direction: "asc"}, "fullPathFormatter");
                 };
 
                 /**
@@ -292,7 +294,7 @@
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
                  */
                 $scope.initDepartmentSelectWithOpenPeriod = function (periodObject) {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriod");
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriod", {}, {property: "fullPath", direction: "asc"}, "fullPathFormatter");
                     $scope.$watch(periodObject, function (period) {
                         if (period) {
                             $scope.departmentsSelect.options.dataFilter = {reportPeriodId: period.id};
