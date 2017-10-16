@@ -178,6 +178,7 @@
                 $scope.logout = function () {
                     // Сообщаем клиентской части системы, что выходим. Если есть несохраненные данные - нужно ловить это сообщение
                     $rootScope.$broadcast('LOGOUT_MSG');
+                    sessionStorage.clear();
 
                     $.ajax({
                         type: "GET",
