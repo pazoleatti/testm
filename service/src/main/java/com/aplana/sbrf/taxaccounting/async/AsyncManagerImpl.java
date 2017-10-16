@@ -317,8 +317,8 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Transactional
     @Override
-    public AsyncTaskData reserveTask(String node, int timeout, AsyncQueue balancingVariants, int maxTasksPerNode) {
-        int rowsUpdated = asyncTaskDao.lockTask(node, timeout, balancingVariants, maxTasksPerNode);
+    public AsyncTaskData reserveTask(String node, String priorityNode, int timeout, AsyncQueue balancingVariants, int maxTasksPerNode) {
+        int rowsUpdated = asyncTaskDao.lockTask(node, priorityNode, timeout, balancingVariants, maxTasksPerNode);
         if (rowsUpdated != 0) {
             LOG.debug(String.format("Node '%s' reserve tasks: %s", node, rowsUpdated));
         }
