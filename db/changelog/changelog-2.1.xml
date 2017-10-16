@@ -928,7 +928,7 @@
 	</changeSet>
 	
 	<changeSet id="2.1-rnurgaleev-109" author="rnurgaleev">
-		<dropForeignKeyConstraint baseTableName="lock_data_subscr_fk_sec_user" constraintName="async_task_subscribers"/>
+		<dropForeignKeyConstraint baseTableName="async_task_subscribers" constraintName="lock_data_subscr_fk_sec_user"/>
 	</changeSet>
 	
 	<changeSet id="2.1-rnurgaleev-110" author="rnurgaleev">
@@ -972,8 +972,8 @@
 	
 	<changeSet id="2.1-rnurgaleev-116" author="rnurgaleev">
 		<dropPrimaryKey
-            constraintName="lock_data_subscribers_pk"
-            tableName="lock_data_pk"/>
+            constraintName="lock_data_pk"
+            tableName="lock_data"/>
 	</changeSet>
 	
 	<changeSet id="2.1-rnurgaleev-117" author="rnurgaleev">

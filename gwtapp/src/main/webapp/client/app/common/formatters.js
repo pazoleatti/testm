@@ -111,6 +111,16 @@
         })
 
         /**
+         * @description Форматтер для получения полного пути
+         * @param entity Сущность
+         */
+        .filter('fullPathFormatter', function () {
+            return function (entity) {
+                return entity ? entity.fullPath : "";
+            };
+        })
+
+        /**
          * @description Форматтер для получения наименования отчетного периода в нужном формате "год: наименование периода"
          * @param reportPeriod Отчетный период
          */

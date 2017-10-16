@@ -12,8 +12,6 @@ declare
   vFormerReportPeriodID number(9) := :old.report_period_id;
   vCurrentIsActive number(1) := :new.is_active;
   vFormerIsActive number(1) := :old.is_active;
-  vCurrentIsBalancePeriod number(1) := :new.is_balance_period;
-  vFormerIsBalancePeriod number(1) := :old.is_balance_period;
   vCurrentCorrectionDate date := trunc(:new.correction_date);
   vFormerCorrectionDate date := trunc(:old.correction_date);
   vMaxCorrectionDatePerGroup date;
@@ -31,28 +29,6 @@ begin
   end if;
 
   --------------------------------------------------------------------------------------------
-  -- Общие проверки при добавлении и обновлении
-  -- --  Корр. периоду не может быть присвоен признак ввода остатков
-  if vCurrentCorrectionDate is not null and vCurrentIsBalancePeriod = 1 then
-     raise_application_error(-20101, 'Корректирующему периоду не может быть присвоен признак ввода остатков');
-  end if;
-
-  -- -- Если есть период ввода остатков, то других периодов не может быть (is_balance_period)
-  select coalesce(max(tHasBalancePeriod), 0) into vHasOtherBalancePeriod
-          from (select 1 as tHasBalancePeriod
-            from dual
-            where exists (select 1
-                         from department_report_period
-                         where department_id = vCurrentDepartmentID
-                               and report_period_id = vCurrentReportPeriodID
-                               and id <> vCurrentID
-                               and is_balance_period = 1
-                               and vCurrentIsBalancePeriod <> 1));
-
-  if vHasOtherBalancePeriod = 1 then
-     raise_application_error(-20102, 'Если есть период ввода остатков, то других периодов не может быть');
-  end if;
-
   select max(trunc(correction_date)) into vMaxCorrectionDatePerGroup
            from department_report_period
            where department_id = vCurrentDepartmentID
@@ -65,10 +41,6 @@ begin
                  and id <> vCurrentID
                  and is_active = 1;
 
-  -- -- Если для периода есть корректирующий период, то ему не может быть присвоен признак ввода остатков
-  if vCurrentCorrectionDate is null and vMaxCorrectionDatePerGroup is not null and vCurrentIsBalancePeriod = 1 then
-     raise_application_error(-20103, 'Если для периода есть корректирующий период, то ему не может быть присвоен признак ввода остатков');
-  end if;
 
   -- -- Проверки на открытый период
   if (vCurrentIsActive = 1 and (vCntOpenPeriods <> 0 or vCurrentCorrectionDate < vMaxCorrectionDatePerGroup)) then
@@ -95,7 +67,7 @@ begin
   if updating then
     begin
      -- -- Нельзя изменить период, если он не открыт
-    if vFormerIsActive <> 1 and vCurrentIsActive <> 1 and (updating('IS_BALANCE_PERIOD') or updating('CORRECTION_DATE')) then
+    if vFormerIsActive <> 1 and vCurrentIsActive <> 1 and updating('CORRECTION_DATE') then
        raise_application_error(-20106, 'Нельзя изменить период, если он не открыт');
     end if;
 
@@ -107,11 +79,6 @@ begin
           (select 1
            from declaration_data
            where department_report_period_id = vCurrentID));
-
-     -- Запрет изменений, если на запись существуют ссылки
-     if vHasLinks = 1 and (updating('IS_BALANCE_PERIOD') and vFormerIsBalancePeriod<>vCurrentIsBalancePeriod)  then
-        raise_application_error(-20107, 'Нельзя изменить период, если на него есть ссылка в DECLARATION_DATA');
-     end if;
 
      -- Нельзя удалить дату корректировки
      if vCurrentCorrectionDate is null and vFormerCorrectionDate is not null then

@@ -185,9 +185,6 @@ class Report6Ndfl extends AbstractScriptClass {
                 } finally {
                     break
                 }
-            case FormDataEvent.COMPOSE: // Консолидирование
-                println "!COMPOSE!"
-                break
             case FormDataEvent.GET_SOURCES: //формирование списка источников
                 println "!GET_SOURCES!"
                 getSources()
@@ -426,6 +423,8 @@ class Report6Ndfl extends AbstractScriptClass {
                             }
                             incomesWithNullTaxRateMap.get(incomeWithNullTaxRate.operationId).add(incomeWithNullTaxRate)
                         }
+
+                        incomesGroupedByRate.remove(null)
 
                         // Объединенные доходы без ставки и доходы имеющие одинаковый номер операции, ключ ставка - значение список операций
                         incomesGroupedByRate.each { key, value ->
