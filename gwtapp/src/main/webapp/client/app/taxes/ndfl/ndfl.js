@@ -32,9 +32,9 @@
          */
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', 'appModals', '$rootScope',
-            'RefBookValuesResource', 'APP_CONSTANTS', '$state',
+            'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appModals, $rootScope,
-                      RefBookValuesResource, APP_CONSTANTS, $state) {
+                      RefBookValuesResource, APP_CONSTANTS, $state, $interval) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -71,7 +71,7 @@
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     $scope.availableSpecificReport = data.downloadSpecificAvailable;
                                     if (!$scope.intervalId){
-                                        $scope.intervalId = setInterval(function () {
+                                        $scope.intervalId = $interval(function () {
                                             updateAvailableReports();
                                         }, 60000);
                                     }
@@ -79,12 +79,15 @@
                             }
                         );
                     } else {
-                        clearInterval($scope.intervalId);
+                        $interval.cancel($scope.intervalId);
                     }
                 }
 
                 updateAvailableReports();
 
+                $rootScope.$on("$locationChangeStart", function () {
+                    $interval.cancel($scope.intervalId);
+                });
 
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();
@@ -245,9 +248,7 @@
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).success(function () {
-                                $state.go("ndflJournal", {}).then(function () {
-                                    clearInterval($scope.intervalId);
-                                });
+                                $state.go("ndflJournal", {});
                             });
                         });
                 };
