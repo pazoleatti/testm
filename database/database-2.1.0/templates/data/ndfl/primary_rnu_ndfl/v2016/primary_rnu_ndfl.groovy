@@ -1,6 +1,7 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
@@ -10,23 +11,23 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.service.script.*
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import groovy.util.slurpersupport.NodeChild
 import groovy.util.slurpersupport.GPathResult
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import groovy.util.slurpersupport.NodeChild
+import net.sf.jasperreports.engine.JasperPrint
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
+import org.joda.time.LocalDateTime
+import org.joda.time.format.DateTimeFormat
 
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.*
 import java.text.SimpleDateFormat
-import org.joda.time.LocalDateTime
-import org.joda.time.format.DateTimeFormat
+import com.aplana.sbrf.taxaccounting.service.script.*
 
 new PrimaryRnuNdfl(this).run();
 
@@ -264,7 +265,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     def prepareSpecificReport() {
         def reportAlias = scriptSpecificReportHolder?.declarationSubreport?.alias;
-        if ('rnu_ndfl_person_db' != reportAlias) {
+        if (SubreportAliasConstants.RNU_NDFL_PERSON_DB != reportAlias) {
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
         }
         PrepareSpecificReportResult result = new PrepareSpecificReportResult();
@@ -284,7 +285,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         reportParameters.each { key, value ->
             if (value != null) {
                 def val = value;
-                if (!(key in ["fromBirthDay", "toBirthDay"])) {
+                if (!(key in [SubreportAliasConstants.FROM_BIRTHDAY, SubreportAliasConstants.TO_BIRTHDAY])) {
                     val = '%' + value + '%'
                 }
                 resultReportParameters.put(key, val)
@@ -304,7 +305,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         if (pagingResult.isEmpty()) {
             Closure subreportParamsToString = {
-                it.collect { Map<String, Object> param ->
+                it.collect { Map.Entry<String, Object> param ->
                     (param.value != null ? (((param.value instanceof Date) ? ((Date) param.value).format('dd.MM.yyyy') : (String) param.value) + ";") : "")
                 } join " "
             }
@@ -503,10 +504,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     def createSpecificReport() {
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
-            case 'rnu_ndfl_person_db':
+            case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 createSpecificReportPersonDb();
                 break;
-            case 'rnu_ndfl_person_all_db':
+            case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
                 createSpecificReportDb();
                 scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break;
@@ -518,9 +519,24 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * Спец. отчет "РНУ НДФЛ по физическому лицу". Данные макет извлекает непосредственно из бд
      */
     def createSpecificReportPersonDb() {
-        NdflPerson ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
+        DataRow<Cell> row = scriptSpecificReportHolder.getSelectedRecord()
+        NdflPerson ndflPerson = null
+        if (row != null) {
+            ndflPerson = ndflPersonService.get(Long.valueOf(row.id))
+
+            Map<String, String> subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
+            subReportViewParams.put('Фамилия', (String) row.lastName)
+            subReportViewParams.put('Имя', (String) row.firstName)
+            subReportViewParams.put('Отчество', (String) row.middleName)
+            subReportViewParams.put('Дата рождения', row.birthDay ? ((Date) row.birthDay)?.format(DATE_FORMAT) : "")
+            subReportViewParams.put('№ ДУЛ', (String) row.idDocNumber)
+
+        } else {
+            ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
+        }
         if (ndflPerson != null) {
-            def params = [NDFL_PERSON_ID: (Object) ndflPerson.id];
+            Map<String, Object> params = [NDFL_PERSON_ID: (Object) ndflPerson.id];
+
             JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params);
             exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
             scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
@@ -731,7 +747,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def imya = ndflPerson.firstName != null ? ndflPerson.firstName + " " : ""
         def otchestvo = ndflPerson.middleName != null ? ndflPerson.middleName : ""
         def fio = familia + imya + otchestvo
-        Object test = infoPart.'СведОпер'
         Iterator ndflPersonOperations = infoPart.'СведОпер'.iterator()
 
         // Коды видов доходов Map<REF_BOOK_INCOME_TYPE.ID, REF_BOOK_INCOME_TYPE>

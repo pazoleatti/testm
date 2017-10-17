@@ -424,6 +424,8 @@ class Report6Ndfl extends AbstractScriptClass {
                             incomesWithNullTaxRateMap.get(incomeWithNullTaxRate.operationId).add(incomeWithNullTaxRate)
                         }
 
+                        incomesGroupedByRate.remove(null)
+
                         // Объединенные доходы без ставки и доходы имеющие одинаковый номер операции, ключ ставка - значение список операций
                         incomesGroupedByRate.each { key, value ->
                             def pickedIncomes = []
@@ -1142,7 +1144,7 @@ class Report6Ndfl extends AbstractScriptClass {
                 logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
                 notDeletedDeclarationPair.each() {
                     logger.error("Форма %d, выполняется операция \"%s\"",
-                            it.first, declarationService.getTaskName(it.second)
+                            it.first, declarationService.getDeclarationFullName(it.first, it.second)
                     )
                 }
                 logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")

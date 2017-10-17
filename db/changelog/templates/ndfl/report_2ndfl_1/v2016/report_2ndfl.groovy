@@ -1650,7 +1650,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
                 notDeletedDeclarationPair.each() {
                     logger.error("Форма %d, выполняется операция \"%s\"",
-                            it.first, declarationService.getTaskName(it.second)
+                            it.first, declarationService.getDeclarationFullName(it.first, it.second)
                     )
                 }
                 logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")

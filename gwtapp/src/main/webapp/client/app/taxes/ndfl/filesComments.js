@@ -48,7 +48,7 @@
                                 editoptions: {value: attachFileType}
                             },
                             {name: 'note', index: 'note', width: 200, editable: true, edittype: 'text'},
-                            {name: 'date', index: 'date', width: 119, formatter: $filter('dateFormatter')},
+                            {name: 'date', index: 'date', width: 119, formatter: $filter('dateTimeFormatter')},
                             {name: 'userName', index: 'userName', width: 135},
                             {name: 'userDepartmentName', index: 'userDepartmentName', width: 220, sortable: false}
                         ],
@@ -139,6 +139,8 @@
                  * @description Обработчик кнопки "Сохранить"
                  **/
                 $scope.save = function () {
+
+                    $scope.comment = $scope.general.comment.$$lastCommittedViewValue;
                     var grid = $scope.fileCommentGrid.ctrl.getGrid();
                     var ids = grid.getDataIDs();
                     var files = [];

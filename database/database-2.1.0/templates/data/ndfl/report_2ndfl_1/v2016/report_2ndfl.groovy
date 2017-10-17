@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParam
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.model.StringColumn
+import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.XmlUtil
@@ -1649,7 +1650,7 @@ class Report2Ndfl extends AbstractScriptClass {
                 logger.error("Невозможно выполнить повторное создание отчетных форм. Заблокировано удаление ранее созданных отчетных форм выполнением операций:")
                 notDeletedDeclarationPair.each() {
                     logger.error("Форма %d, выполняется операция \"%s\"",
-                            it.first, declarationService.getTaskName(it.second)
+                            it.first, declarationService.getDeclarationFullName(it.first, it.second)
                     )
                 }
                 logger.error("Дождитесь завершения выполнения операций или выполните отмену операций вручную.")
@@ -2377,7 +2378,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
 
     def prepareSpecificReport() {
         def reportAlias = scriptSpecificReportHolder?.declarationSubreport?.alias;
-        if ('report_2ndfl' != reportAlias) {
+        if (SubreportAliasConstants.REPORT_2NDFL != reportAlias) {
             throw new ServiceException("Обработка данного спец. отчета не предусмотрена!");
         }
         PrepareSpecificReportResult result = new PrepareSpecificReportResult();
@@ -2396,7 +2397,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         Map<String, Object> resultReportParameters = [:]
         reportParameters.each { String key, Object value ->
             if (value != null) {
-                if (key == "toBirthDay" || key == "fromBirthDay") {
+                if (key == SubreportAliasConstants.TO_BIRTHDAY || key == SubreportAliasConstants.FROM_BIRTHDAY) {
                     resultReportParameters.put(key, ScriptUtils.formatDate((Date) value, "dd.MM.yyyy"))
                 } else {
                     resultReportParameters.put(key, value)
@@ -2577,16 +2578,16 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         Файл.Документ.each { doc ->
             boolean passed = true
             String idDoc = null
-            if (params['idDocNumber'] != null) {
-                idDoc = params['idDocNumber'].replaceAll("[\\s-]", "")
+            if (params[SubreportAliasConstants.ID_DOC_NUMBER] != null) {
+                idDoc = params[SubreportAliasConstants.ID_DOC_NUMBER].replaceAll("[\\s-]", "")
             }
-            if (params['pNumSpravka'] != null && !StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params['pNumSpravka'])) passed = false
-            if (params['lastName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params['lastName'])) passed = false
-            if (params['firstName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params['firstName'])) passed = false
-            if (params['middleName'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params['middleName'])) passed = false
-            if (params['inn'] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.@ИННФЛ.text(), params['inn'])) passed = false
-            if ((params['fromBirthDay'] != null || params['toBirthDay'] != null) && searchBirthDay(params, doc.ПолучДох.@ДатаРожд.text())) passed = false
-            if (params['idDocNumber'] != null && !((StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), idDoc) ||
+            if (params[SubreportAliasConstants.P_NUM_SPRAVKA] != null && !StringUtils.containsIgnoreCase(doc.@НомСпр.text(), params[SubreportAliasConstants.P_NUM_SPRAVKA])) passed = false
+            if (params[SubreportAliasConstants.LAST_NAME] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Фамилия.text(), params[SubreportAliasConstants.LAST_NAME])) passed = false
+            if (params[SubreportAliasConstants.FIRST_NAME] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Имя.text(), params[SubreportAliasConstants.FIRST_NAME])) passed = false
+            if (params[SubreportAliasConstants.MIDDLE_NAME] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.ФИО.@Отчество.text(), params[SubreportAliasConstants.MIDDLE_NAME])) passed = false
+            if (params[SubreportAliasConstants.INN] != null && !StringUtils.containsIgnoreCase(doc.ПолучДох.@ИННФЛ.text(), params[SubreportAliasConstants.INN])) passed = false
+            if ((params[SubreportAliasConstants.FROM_BIRTHDAY] != null || params[SubreportAliasConstants.TO_BIRTHDAY] != null) && searchBirthDay(params, doc.ПолучДох.@ДатаРожд.text())) passed = false
+            if (params[SubreportAliasConstants.ID_DOC_NUMBER] != null && !((StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text(), idDoc) ||
                     StringUtils.containsIgnoreCase(doc.ПолучДох.УдЛичнФЛ.@СерНомДок.text().replaceAll("[\\s-]", ""), idDoc)))) passed = false
             if (passed) docs << doc
         }
@@ -2604,16 +2605,16 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
 
     def searchBirthDay(Map<String, Object> params, String birthDate) {
         Date date = ScriptUtils.parseDate(DATE_FORMAT_DOTTED, birthDate)
-        if (params.get('fromBirthDay') != null && params.get('toBirthDay') != null) {
-            if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get('fromBirthDay')) && date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get('toBirthDay'))) {
+        if (params.get(SubreportAliasConstants.FROM_BIRTHDAY) != null && params.get(SubreportAliasConstants.TO_BIRTHDAY) != null) {
+            if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get(SubreportAliasConstants.FROM_BIRTHDAY)) && date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get(SubreportAliasConstants.TO_BIRTHDAY))) {
                 return false
             }
-        } else if (params.get('fromBirthDay') != null) {
-            if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get('fromBirthDay'))) {
+        } else if (params.get(SubreportAliasConstants.FROM_BIRTHDAY) != null) {
+            if (date >= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get(SubreportAliasConstants.FROM_BIRTHDAY))) {
                 return false
             }
-        } else if (params.get('toBirthDay') != null) {
-            if (date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get('toBirthDay'))) {
+        } else if (params.get(SubreportAliasConstants.TO_BIRTHDAY) != null) {
+            if (date <= ScriptUtils.parseDate(DATE_FORMAT_DOTTED, (String) params.get(SubreportAliasConstants.TO_BIRTHDAY))) {
                 return false
             }
         }
@@ -2633,7 +2634,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         }
         def row = scriptSpecificReportHolder.getSelectedRecord()
         def params = scriptSpecificReportHolder.subreportParamValues ?: new HashMap<String, Object>()
-        params.put('pNumSpravka', row.pNumSpravka)
+        params.put(SubreportAliasConstants.P_NUM_SPRAVKA, row.pNumSpravka)
 
         Map<String, String> subReportViewParams = scriptSpecificReportHolder.getViewParamValues()
         subReportViewParams.put('Номер справки', row.pNumSpravka.toString())
