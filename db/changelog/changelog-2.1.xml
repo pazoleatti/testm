@@ -1002,20 +1002,6 @@
                              columnNames="key"
                              constraintName="lock_data_uniq_key"/>
 	</changeSet>
-
-	<changeSet id="2.1-dloshkarev-1" author="dloshkarev">
-		<update tableName="DECLARATION_TEMPLATE">
-			<column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
-			<where>id=102</where>
-		</update>
-	</changeSet>
-
-	<changeSet id="2.1-dloshkarev-2" author="dloshkarev">
-		<update tableName="DECLARATION_TEMPLATE">
-			<column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
-			<where>id=103</where>
-		</update>
-	</changeSet>
 	
 	<changeSet id="2.1-ytrofimov-1" author="ytrofimov">
         <update tableName="BLOB_DATA">
@@ -1033,4 +1019,12 @@
                  splitStatements="false"/>
     </changeSet>
 	
+	<changeSet id="2.1-rnurgaleev-122" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+				 endDelimiter=""
+                 path="/scripts/fias_pkg_body2.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
