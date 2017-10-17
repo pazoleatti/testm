@@ -732,7 +732,7 @@
         </update>
     </changeSet>
 	
-	<changeSet id="2.1-rnurgaleev-83" author="ytrofimov">
+	<changeSet id="2.1-rnurgaleev-83" author="rnurgaleev">
         <update tableName="BLOB_DATA">
             <column name="data" valueBlobFile="templates/refbook/fias.groovy"/>
 			<where>id='39327388-9684-4fd5-a522-c40a21680156'</where>
@@ -1002,5 +1002,12 @@
                              columnNames="key"
                              constraintName="lock_data_uniq_key"/>
 	</changeSet>
+	
+	<changeSet id="2.1-ytrofimov-1" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/fias.groovy"/>
+			<where>id='39327388-9684-4fd5-a522-c40a21680156'</where>
+        </update>
+    </changeSet>
 	
 </databaseChangeLog>
