@@ -58,11 +58,11 @@ public class DeclarationDataController {
     private DeclarationTemplateService declarationTemplateService;
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
-    private AsyncTaskManagerService asyncTaskManagerService;
+    private DeclarationDataService declarationDataService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, AsyncTaskManagerService asyncTaskManagerService) {
+                                     TAUserService taUserService, DeclarationDataService declarationDataService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -70,7 +70,7 @@ public class DeclarationDataController {
         this.declarationTemplateService = declarationTemplateService;
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
-        this.asyncTaskManagerService = asyncTaskManagerService;
+        this.declarationDataService = declarationDataService;
     }
 
     /**
@@ -342,7 +342,7 @@ public class DeclarationDataController {
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/accept")
     public AcceptDeclarationResult acceptDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
-        return asyncTaskManagerService.createAcceptDeclarationTask(securityService.currentUserInfo(), declarationDataId, force, cancelTask);
+        return declarationDataService.createAcceptDeclarationTask(securityService.currentUserInfo(), declarationDataId, force, cancelTask);
     }
 
     /**

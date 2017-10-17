@@ -41,8 +41,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
     public List<RefBookDepartment> fetchAllAvailableDepartments(TAUser user) {
         List<Integer> declarationDepartments = departmentService.getNDFLDeclarationDepartments(user);
-        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(declarationDepartments)).keySet();
-        return refBookDepartmentDataDao.fetchDepartments(departmentIds);
+        return refBookDepartmentDataDao.fetchDepartments(declarationDepartments);
     }
 
     /**

@@ -75,24 +75,11 @@ public interface RefBookFactory {
     String getSearchQueryStatement(String query, Long refBookId);
 
     /**
-     * Название задачи для справочника
-     * @param reportType
-     * @param refBookId
-     * @param specificReportType
-     * @return
+     * Получает описание справочника
+     * @param descriptionTemplate шаблон описания
+     * @param refBookId идентификатор справочника
      */
-    String getTaskName(ReportType reportType, Long refBookId, String specificReportType);
-
-    /**
-     * Подробное описание задачи
-     * @param reportType
-     * @param refBookId
-     * @param version
-     * @param filter
-     * @param specificReportType
-     * @return
-     */
-    String getTaskFullName(ReportType reportType, Long refBookId, Date version, String filter, String specificReportType);
+    String getRefBookDescription(DescriptionTemplate descriptionTemplate, Long refBookId);
 
     /**
      * Получить список доступных отчётов
@@ -113,17 +100,17 @@ public interface RefBookFactory {
     Map<FormDataEvent, Boolean> getEventScriptStatus(long refBookId);
 
     /**
-     * Получение блокировки и её типа для справочника, null если для справочника нет блокировок
-     * @param refBookId
-     * @return
-     */
-    Pair<ReportType, LockData> getLockTaskType(long refBookId);
-
-    /**
      * Формирует ключ блокировки для задачи
      * @param refBookId
-     * @param reportType
      * @return
      */
-    String generateTaskKey(long refBookId, ReportType reportType);
+    String generateTaskKey(long refBookId);
+
+	/**
+	 * Возвращает описание блокировки для справочника
+	 * @param lockData данные блокировки
+	 * @param refBookId идентификатор справочника
+	 * @return информация о блокировке с деталями
+     */
+	String getRefBookLockDescription(LockData lockData, long refBookId);
 }

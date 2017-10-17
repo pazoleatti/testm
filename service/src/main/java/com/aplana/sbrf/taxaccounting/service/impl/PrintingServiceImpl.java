@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.ScriptSpecificRefBookReportHolder;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -102,7 +99,7 @@ public class PrintingServiceImpl implements PrintingService {
                 scriptSpecificReportHolder.setSortAttribute(sortAttribute);
                 scriptSpecificReportHolder.setSortAscending(isSortAscending);
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
-                stateLogger.updateState("Формирование отчета");
+                stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
                 if (!refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
                     throw new ServiceException("Не предусмотрена возможность формирования отчета \"%s\"", specificReportType);
                 }
@@ -112,7 +109,7 @@ public class PrintingServiceImpl implements PrintingService {
             } finally {
                 IOUtils.closeQuietly(outputStream);
             }
-            stateLogger.updateState("Сохранение отчета в базе данных");
+            stateLogger.updateState(AsyncTaskState.SAVING_REPORT);
             return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
@@ -164,10 +161,10 @@ public class PrintingServiceImpl implements PrintingService {
                 } while(!refBookPage.isEmpty());
                 refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, sortAttribute);
             }
-            stateLogger.updateState("Формирование отчета");
+            stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
             reportPath = refBookCSVReportBuilder.createReport();
             String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
-            stateLogger.updateState("Сохранение отчета в базе данных");
+            stateLogger.updateState(AsyncTaskState.SAVING_REPORT);
             return blobDataService.create(reportPath, fileName);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -219,10 +216,10 @@ public class PrintingServiceImpl implements PrintingService {
                 } while(!refBookPage.isEmpty());
                 refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, version, searchPattern, sortAttribute);
             }
-            stateLogger.updateState("Формирование отчета");
+            stateLogger.updateState(AsyncTaskState.BUILDING_REPORT);
             reportPath = refBookExcelReportBuilder.createReport();
             String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
-            stateLogger.updateState("Сохранение отчета в базе данных");
+            stateLogger.updateState(AsyncTaskState.SAVING_REPORT);
             return blobDataService.create(reportPath, fileName);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);

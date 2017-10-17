@@ -156,7 +156,7 @@ public abstract class AbstractLoadTransportDataService {
     /**
      * Логгирование в области уведомлений и ЖА при импорте из ТФ
      */
-    protected final String log(TAUserInfo userInfo, LogData logData, Logger logger, String lockId, Object... args) {
+    protected final String log(TAUserInfo userInfo, LogData logData, Logger logger, long taskId, Object... args) {
         // Область уведомлений
         switch (logData.getLevel()) {
             case INFO:
@@ -177,7 +177,7 @@ public abstract class AbstractLoadTransportDataService {
             if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
                 prefix = "Событие инициировано Системой. ";
             }
-            String lockInfo = String.format("Номер загрузки: %s. ", lockId);
+            String lockInfo = String.format("Номер загрузки: %s. ", taskId);
             String note = String.format(logData.getText(), args);
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
                     null, null, null, prefix + lockInfo + note, null);
@@ -205,8 +205,8 @@ public abstract class AbstractLoadTransportDataService {
      * @param errorFileSrc Файл с ошибкой, который должен быть перенесен
      */
     protected final boolean moveToErrorDirectory(TAUserInfo userInfo, String errorPath, FileWrapper errorFileSrc,
-                                                 List<LogEntry> errorList, Logger logger, String lock) {
-        return moveToDirectory(userInfo, errorPath, errorFileSrc, errorList, logger, LogData.L28, LogData.L26, LogData.L27, lock);
+                                                 List<LogEntry> errorList, Logger logger, long taskId) {
+        return moveToDirectory(userInfo, errorPath, errorFileSrc, errorList, logger, LogData.L28, LogData.L26, LogData.L27, taskId);
     }
 
     /**
@@ -216,15 +216,15 @@ public abstract class AbstractLoadTransportDataService {
      * @param archiveFileSrc Файл, который должен быть перенесен
      */
     protected final boolean moveToArchiveDirectory(TAUserInfo userInfo, String archivePath, FileWrapper archiveFileSrc,
-                                                   Logger logger, String lock) {
-        return moveToDirectory(userInfo, archivePath, archiveFileSrc, null, logger, LogData.L29, LogData.L11, LogData.L12, lock);
+                                                   Logger logger, long taskId) {
+        return moveToDirectory(userInfo, archivePath, archiveFileSrc, null, logger, LogData.L29, LogData.L11, LogData.L12, taskId);
     }
 
     /**
      * Перенос ТФ в каталог ошибок или архива
      */
     private boolean moveToDirectory(TAUserInfo userInfo, String rootPath, FileWrapper file, List<LogEntry> errorList,
-                                    Logger logger, LogData deleteErrorLogData, LogData successLogData, LogData moveErrorLogData, String lock) {
+                                    Logger logger, LogData deleteErrorLogData, LogData successLogData, LogData moveErrorLogData, long taskId) {
         boolean success = true;
         try {
             boolean isArchive = getFileExtension(file.getName()).equalsIgnoreCase("zip") || getFileExtension(file.getName()).equalsIgnoreCase("rar");
@@ -287,14 +287,14 @@ public abstract class AbstractLoadTransportDataService {
                 file.delete();
             } catch (Exception e) {
                 success = false;
-                log(userInfo, deleteErrorLogData, logger, lock, file.getPath(), e.getMessage());
+                log(userInfo, deleteErrorLogData, logger, taskId, file.getPath(), e.getMessage());
 				LOG.error(e.getMessage(), e);
             }
 
-            log(userInfo, successLogData, logger, lock, fileDst.getName());
+            log(userInfo, successLogData, logger, taskId, fileDst.getName());
         } catch (Exception e) {
             success = false;
-            log(userInfo, moveErrorLogData, logger, lock, e.getMessage());
+            log(userInfo, moveErrorLogData, logger, taskId, e.getMessage());
 			LOG.error(e.getMessage(), e);
         }
         return success;

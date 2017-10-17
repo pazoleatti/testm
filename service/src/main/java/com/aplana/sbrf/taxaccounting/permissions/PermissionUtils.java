@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 
 /**
@@ -22,5 +23,13 @@ public abstract class PermissionUtils {
             }
         }
         return result;
+    }
+
+    /**
+     * Определяет аутентифицирован ли пользователь
+     * @return
+     */
+    public static boolean isAuthentificated() {
+        return SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
     }
 }

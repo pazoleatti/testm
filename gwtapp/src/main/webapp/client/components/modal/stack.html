@@ -1,0 +1,36 @@
+<div class="modal-header dialog-header-error">
+    <button type="button" class="close" data-ng-click="cancel()">×</button>
+    <h4 class="modal-title text-danger" style="color: red;">
+        <span class="glyphicon glyphicon-exclamation-sign" style="color: red;"></span>&nbsp;Ошибка
+    </h4>
+</div>
+<div class="modal-body">
+    <div class="text-danger" style="font-size: 16px; margin-bottom: 20px">
+        {{header}}
+    </div>
+    <a href data-ng-click="showDetails()" data-ng-hide="needDetails">Посмотреть технические детали</a>
+    <div data-ng-show="needDetails">
+        <div>
+           <span>
+               {{:: stackTrace.additionInfo.serverDate| date: "dd.MM.yyyy HH:mm:ss"}} {{:: stackTrace.exceptionCause[0].errorClass}}: {{::stackTrace.exceptionCause[0].message | translate}}
+           </span>
+        </div>
+        <div class="stack-trace">
+            <div data-ng-repeat="arrayStack in stackTrace.exceptionCause track by $index" >
+                <div>
+                    <span data-ng-if="!$first" style="font-weight: bold;">
+                       Cause by: {{::arrayStack.errorClass}}: {{:: arrayStack.message |translate }}
+                    </span>
+                    <div style="padding-left: 10px;">
+                        <div data-ng-repeat="item in arrayStack.serverException track by $index" >
+                            at {{:: item }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" id="cancelButton" data-ng-click="cancel()">{{labelNo ? labelNo : "DIALOGS_CLOSE" | translate}}</button>
+</div>

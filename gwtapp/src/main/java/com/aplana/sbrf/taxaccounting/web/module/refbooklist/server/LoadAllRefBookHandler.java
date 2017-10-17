@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
@@ -86,11 +83,12 @@ public class LoadAllRefBookHandler extends AbstractActionHandler<LoadRefBookActi
             }
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             lockDataService.lock(key, userInfo.getUser().getId(),
-                    LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
+                    DescriptionTemplate.CONFIGURATION_PARAMS.getText());
             try {
                 String lockId = UUID.randomUUID().toString().toLowerCase();
                 logger.info("Номер загрузки: %s", lockId);
-                loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger, lockId, false);
+                //TODO: убрал импорт справочников, т.к на этом проекте его нет
+                //loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger, lockId, false);
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
             }

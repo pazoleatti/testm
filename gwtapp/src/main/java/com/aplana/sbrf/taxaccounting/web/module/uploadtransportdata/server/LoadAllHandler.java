@@ -1,13 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.server;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -23,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -58,23 +52,12 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         TAUserInfo userInfo = securityService.currentUserInfo();
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        BalancingVariants balancingVariant = BalancingVariants.LONG;
-        LockData lockData = lockDataService.lock(key, userId,
-                LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
-                LockData.State.IN_QUEUE.getText());
+        LockData lockData = lockDataService.lock(key, userId, DescriptionTemplate.LOAD_TRANSPORT_DATA.getText());
         if (lockData == null) {
             try {
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
-                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                lockData = lockDataService.getLock(key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
-                    lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
-							params, balancingVariant);
-					LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
-                    lockDataService.updateQueue(key, lockData.getDateLock(), queue);
+                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, AsyncQueue.LONG);
+                    asyncManager.addUserWaitingForTask(taskData.getId(), userId);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);

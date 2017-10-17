@@ -5,10 +5,14 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -17,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
+import static com.aplana.sbrf.taxaccounting.model.QDepartmentFullpath.departmentFullpath;
 import static com.querydsl.core.types.Projections.bean;
 
 /**
@@ -42,7 +47,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
             .as("type");
 
     final private QBean<RefBookDepartment> refBookDepartmentBean = bean(RefBookDepartment.class, department.id, department.name, department.shortname, department.parentId,
-            departmentTypeExpression, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code);
+            departmentTypeExpression, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code, departmentFullpath.shortname.as("fullPath"));
 
     /**
      * Получение значений справочника по идентификаторам
@@ -57,6 +62,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
         return sqlQueryFactory
                 .select(refBookDepartmentBean)
                 .from(department)
+                .innerJoin(departmentFullpath).on(department.id.eq(departmentFullpath.id))
                 .where(where)
                 .fetch();
     }
@@ -78,16 +84,24 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
             where = where.and(department.name.containsIgnoreCase(name));
         }
 
-        long totalCount = sqlQueryFactory
+        SQLQuery<RefBookDepartment> queryBase = sqlQueryFactory
                 .select(refBookDepartmentBean)
                 .from(department)
-                .where(where)
-                .fetchCount();
+                .innerJoin(departmentFullpath).on(department.id.eq(departmentFullpath.id))
+                .where(where);
 
-        List<RefBookDepartment> departments = sqlQueryFactory
-                .select(refBookDepartmentBean)
-                .from(department)
-                .where(where)
+        if (StringUtils.isNotBlank(pagingParams.getProperty()) && StringUtils.isNotBlank(pagingParams.getDirection())) {
+            String orderingProperty = pagingParams.getProperty();
+            Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+            OrderSpecifier ordering = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(refBookDepartmentBean, orderingProperty, ascDescOrder);
+            if (ordering != null) {
+                queryBase = queryBase.orderBy(ordering);
+            }
+        }
+
+        long totalCount = queryBase.fetchCount();
+
+        List<RefBookDepartment> departments = queryBase
                 .limit(pagingParams.getCount())
                 .offset(pagingParams.getStartIndex())
                 .fetch();

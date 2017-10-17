@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -13,10 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.async.AsyncTask.RequiredParams.*;
 
 @Component("SpecificReportDeclarationDataAsyncTask")
 public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationAsyncTask {
@@ -34,29 +31,24 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
     private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
-    private LockDataService lockService;
+    private AsyncManager asyncManager;
 
     @Autowired
     private ReportService reportService;
 
-    @Autowired
-    private RefBookHelper refBookHelper;
-
     @Override
-    protected ReportType getReportType() {
-        return ReportType.SPECIFIC_REPORT_DEC;
+    protected AsyncTaskType getAsyncTaskType() {
+        return AsyncTaskType.SPECIFIC_REPORT_DEC;
     }
 
     @Override
-    protected AbstractAsyncTask.TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected BusinessLogicResult executeBusinessLogic(final AsyncTaskData taskData, Logger logger) {
+        Map<String, Object> params = taskData.getParams();
         long declarationDataId = (Long) params.get("declarationDataId");
         String alias = (String) params.get("alias");
 
-        int userId = (Integer) params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-        final String lock = (String) params.get(LOCKED_OBJECT.name());
-        final Date lockDate = (Date) params.get(LOCK_DATE.name());
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
@@ -76,32 +68,18 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
         if (declarationData != null) {
             String uuid = declarationDataService.createSpecificReport(logger, declarationData, ddReportType, subreportParamValues, viewParamValues, selectedRecord, userInfo, new LockStateLogger() {
                 @Override
-                public void updateState(String state) {
-                    lockService.updateState(lock, lockDate, state);
+                public void updateState(AsyncTaskState state) {
+                    asyncManager.updateState(taskData.getId(), state);
                 }
             });
             if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
-                return new AbstractAsyncTask.TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
+                return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
             } else {
                 reportService.createDec(declarationData.getId(), uuid, ddReportType);
-                return new AbstractAsyncTask.TaskStatus(true, NotificationType.REF_BOOK_REPORT, uuid);
+                return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
             }
         }
-        return new AbstractAsyncTask.TaskStatus(true, null);
-    }
-
-    @Override
-    protected DeclarationDataReportType getDeclarationDataReportType(Map<String, Object> params) {
-        String alias = (String) params.get("alias");
-        DeclarationData declarationData = getDeclaration(params);
-        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
-        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
-        return ddReportType;
-    }
-
-    @Override
-    protected String getAsyncTaskName() {
-        return "Формирование специфичного отчета налоговой формы";
+        return new BusinessLogicResult(true, null);
     }
 
     @Override
@@ -132,30 +110,50 @@ public class SpecificReportDeclarationDataAsyncTask extends AbstractDeclarationA
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        return getMessage(params, false, unexpected);
+    protected DeclarationDataReportType getDeclarationDataReportType(TAUserInfo userInfo, Map<String, Object> params) {
+        String alias = (String) params.get("alias");
+        DeclarationData declarationData = getDeclaration(userInfo, params);
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
+        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
+        return ddReportType;
     }
 
     @Override
-    protected String getNotificationMsg(Map<String, Object> params) {
-        return getMessage(params, true, false);
+    protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
+        return getMessage(taskData, false, unexpected);
     }
 
-    private String getMessage(Map<String, Object> params, boolean isSuccess, boolean unexpected) {
-        String alias = (String) params.get("alias");
-        DeclarationData declaration = getDeclaration(params);
+    @Override
+    protected String getNotificationMsg(AsyncTaskData taskData) {
+        return getMessage(taskData, true, false);
+    }
+
+    private String getMessage(AsyncTaskData taskData, boolean isSuccess, boolean unexpected) {
+        String alias = (String) taskData.getParams().get("alias");
+        DeclarationData declaration = getDeclaration(taskData.getUserId(), taskData.getParams());
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias);
 
         String template = isSuccess ? SUCCESS : FAIL;
         if (isSuccess) {
             return String.format(template,
                     subreport.getName(),
-                    getDeclarationDescription(params));
+                    getDeclarationDescription(taskData.getUserId(), taskData.getParams()));
         } else {
             return String.format(template,
                     unexpected ? "непредвиденная " : "",
                     subreport.getName(),
-                    getDeclarationDescription(params));
+                    getDeclarationDescription(taskData.getUserId(), taskData.getParams()));
         }
+    }
+
+    @Override
+    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+        String alias = (String) params.get("alias");
+        DeclarationData declarationData = getDeclaration(userInfo, params);
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(alias);
+        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), alias));
+
+        long declarationDataId = (Long) params.get("declarationDataId");
+        return String.format(ddReportType.getReportType().getDescription(), ddReportType.getSubreport().getName(), declarationDataService.getDeclarationFullName(declarationDataId, ddReportType));
     }
 }

@@ -138,5 +138,23 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        /**
+         * @description Блокировки
+         */
+        .factory('lockDataResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/locks', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Асинхронные задачи
+         */
+        .factory('asyncTaskResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/async', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

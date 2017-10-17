@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
@@ -192,25 +191,13 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             int userId = userInfo.getUser().getId();
             String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-            BalancingVariants balancingVariant = BalancingVariants.SHORT;
-            LockData lockData = lockDataService.lock(key, userId,
-                    String.format(LockData.DescriptionTemplate.IMPORT_TRANSPORT_DATA.getText(), fileName),
-                    LockData.State.IN_QUEUE.getText());
+            LockData lockData = lockDataService.lock(key, userId, String.format(DescriptionTemplate.IMPORT_TRANSPORT_DATA.getText(), fileName));
             if (lockData == null) {
                 try {
                     Map<String, Object> params = new HashMap<String, Object>();
-                    params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
-                    params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
                     params.put("blobDataId", uuid);
-
-                    lockData = lockDataService.getLock(key);
-                    params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     try {
-                        lockDataService.addUserWaitingForLock(key, userId);
-                        asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
-                                params, balancingVariant);
-                        LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
-                        lockDataService.updateQueue(key, lockData.getDateLock(), queue);
+                        asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, AsyncQueue.SHORT, params);
                         logger.info(String.format(CREATE_TASK, "Загрузка файла"));
                     } catch (AsyncTaskException e) {
                         lockDataService.unlock(key, userId);
@@ -241,22 +228,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     public ActionResult uploadAll(TAUserInfo userInfo, Logger logger) {
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        BalancingVariants balancingVariant = BalancingVariants.SHORT;
-        LockData lockData = lockDataService.lock(key, userId, LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
-                LockData.State.IN_QUEUE.getText());
+        LockData lockData = lockDataService.lock(key, userId, DescriptionTemplate.LOAD_TRANSPORT_DATA.getText());
         if (lockData == null) {
             try {
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
-                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                lockData = lockDataService.getLock(key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
-                    lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(),
-                            params, balancingVariant);
-                    LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
-                    lockDataService.updateQueue(key, lockData.getDateLock(), queue);
+                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, AsyncQueue.LONG);
+                    asyncManager.addUserWaitingForTask(taskData.getId(), userId);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);

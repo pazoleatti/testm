@@ -35,6 +35,8 @@
             'app.ndflJournal',
             'app.ndflReportJournal',
             'app.schedulerTaskList',
+            'app.lockDataList',
+            'app.asyncTaskList',
             'app.filterUtils',
             'app.rest',
             'app.formatters',
@@ -109,13 +111,15 @@
      */
     window.addEventListener("keydown", function (event) {
         if (event.keyCode === 13) {
-            event.preventDefault();
-            event.stopPropagation();
-            var doc = $(event.target).closest(".grid-filter");
+            var tableFilter = $(event.target).closest(".grid-filter");
+            var isModal = $(event.target).closest(".modal-body").length != 0;
+            var isTable = tableFilter.length != 0;
 
-            if (doc) {
-                var buttonSearch = doc.find("#searchButton");
+            if (!isModal && isTable) {
+                var buttonSearch = tableFilter.find("#searchButton");
                 if (buttonSearch) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     buttonSearch.click();
                 }
             }

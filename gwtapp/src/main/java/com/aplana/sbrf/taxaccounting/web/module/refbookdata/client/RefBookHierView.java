@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
@@ -26,7 +26,6 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import java.util.Date;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode.EDIT;
 import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode.VIEW;
 
 /**
@@ -76,8 +75,6 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     @UiField
     DropdownButton printAnchor;
     @UiField
-    LinkButton upload;
-    @UiField
     Label lockInformation;
     @UiField
     SplitLayoutPanel hierarchyPanel;
@@ -112,7 +109,6 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(false);
-                upload.setVisible(uploadAvailable);
                 break;
             case READ:
                 addRow.setVisible(false);
@@ -124,7 +120,6 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
-                upload.setVisible(false);
                 break;
             case VIEW:
                 edit.setVisible(true);
@@ -136,7 +131,6 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
-                upload.setVisible(false);
                 break;
             case CREATE:
                 addRow.setVisible(false);
@@ -147,17 +141,9 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
                 printAnchor.setVisible(false);
-                upload.setVisible(false);
                 break;
         }
         cancelEdit.setVisible(!isVersion&&mode==FormMode.EDIT);
-    }
-
-    @UiHandler("upload")
-    void showUploadDialog(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().showUploadDialogClicked();
-        }
     }
 
     @Override
@@ -221,7 +207,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.EXCEL_REF_BOOK.getName());
+                    getUiHandlers().onPrintClicked(AsyncTaskType.EXCEL_REF_BOOK.getName());
                 }
             }
         });
@@ -233,7 +219,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.CSV_REF_BOOK.getName());
+                    getUiHandlers().onPrintClicked(AsyncTaskType.CSV_REF_BOOK.getName());
                 }
             }
         });
@@ -363,8 +349,8 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     @Override
     public void setSpecificReportTypes(List<String> specificReportTypes) {
         printAnchor.clear();
-        printAnchor.addItem(ReportType.EXCEL_REF_BOOK.getName(), printToExcel);
-        printAnchor.addItem(ReportType.CSV_REF_BOOK.getName(), printToCSV);
+        printAnchor.addItem(AsyncTaskType.EXCEL_REF_BOOK.getName(), printToExcel);
+        printAnchor.addItem(AsyncTaskType.CSV_REF_BOOK.getName(), printToCSV);
         for(final String specificReportType: specificReportTypes) {
             LinkButton linkButton = new LinkButton("Сформировать \"" + specificReportType + "\"");
             linkButton.setHeight("20px");

@@ -1,15 +1,14 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import static com.querydsl.core.types.PathMetadataFactory.*;
-
-import com.querydsl.core.types.dsl.*;
-
-import com.querydsl.core.types.PathMetadata;
-import javax.annotation.Generated;
 import com.querydsl.core.types.Path;
-
+import com.querydsl.core.types.PathMetadata;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.sql.ColumnMetadata;
+
+import javax.annotation.Generated;
 import java.sql.Types;
+
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 
 
 
@@ -46,7 +45,7 @@ public class QNotification extends com.querydsl.sql.RelationalPathBase<QNotifica
 
     public final StringPath text = createString("text");
 
-    public final NumberPath<Integer> type = createNumber("type", Integer.class);
+    public final SimplePath<com.aplana.sbrf.taxaccounting.model.NotificationType> type = createSimple("notificationType", com.aplana.sbrf.taxaccounting.model.NotificationType.class);
 
     public final NumberPath<Integer> userId = createNumber("userId", Integer.class);
 

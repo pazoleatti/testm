@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -10,15 +11,12 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.aplana.sbrf.taxaccounting.async.AsyncTask.RequiredParams.*;;
 
 /**
  * Реализация таска "Загрузка файлов"
- * @author Lhaziev
  */
 @Component("LoadAllTransportDataAsyncTask")
 public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
@@ -30,6 +28,9 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     private LockDataService lockDataService;
 
     @Autowired
+    private AsyncManager asyncManager;
+
+    @Autowired
     BlobDataService blobDataService;
 
     @Autowired
@@ -39,54 +40,47 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     private LoadDeclarationDataService loadDeclarationDataService;
 
     @Override
-    protected ReportType getReportType() {
-        return ReportType.LOAD_ALL_TF;
+    protected AsyncTaskType getAsyncTaskType() {
+        return AsyncTaskType.LOAD_ALL_TF;
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) {
-        return BalancingVariants.LONG;
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) {
+        return AsyncQueue.LONG;
     }
 
     private String msg;
 
     @Override
-    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        int userId = (Integer)params.get(USER_ID.name());
+    protected BusinessLogicResult executeBusinessLogic(AsyncTaskData taskData, Logger logger) {
+        Map<String, Object> params = taskData.getParams();
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(userService.getUser(userId));
-        final String lock = (String) params.get(LOCKED_OBJECT.name());
-        final Date lockDate = (Date) params.get(LOCK_DATE.name());
+        userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         if (params.containsKey("blobDataId")) {
             final String blobDataId = (String) params.get("blobDataId");
             BlobData blobData = blobDataService.get(blobDataId);
-            lockDataService.updateState(lock, lockDate, "Загрузка файлов");
-            msg = loadDeclarationDataService.uploadFile(logger, userInfo, blobData.getName(), blobData.getInputStream(), lock);
+            asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
+            msg = loadDeclarationDataService.uploadFile(logger, userInfo, blobData.getName(), blobData.getInputStream(), taskData.getId());
         } else {
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             lockDataService.lock(key, userInfo.getUser().getId(),
-                    LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
+                    DescriptionTemplate.CONFIGURATION_PARAMS.getText());
             try {
-                logger.info("Номер загрузки: %s", lock);
-                // Справочники
-                loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
+                logger.info("Номер загрузки: %s", taskData.getId());
+                //Импорт справочника ФИАС
+                loadRefBookDataService.importRefBookFias(userInfo, null, logger, taskData.getId());
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
             }
         }
-        return new TaskStatus(true, null);
+        return new BusinessLogicResult(true, null);
     }
 
     @Override
-    protected String getAsyncTaskName() {
-        return "Загрузка файлов";
-    }
-
-    @Override
-    protected String getNotificationMsg(Map<String, Object> params) {
-        if (params.containsKey("blobDataId")) {
-            final String blobDataId = (String) params.get("blobDataId");
+    protected String getNotificationMsg(AsyncTaskData taskData) {
+        if (taskData.getParams().containsKey("blobDataId")) {
+            final String blobDataId = (String) taskData.getParams().get("blobDataId");
             BlobData blobData = blobDataService.get(blobDataId);
             String fileName;
             if (blobData != null) {
@@ -101,9 +95,9 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected String getErrorMsg(Map<String, Object> params, boolean unexpected) {
-        if (params.containsKey("blobDataId")) {
-            final String blobDataId = (String) params.get("blobDataId");
+    protected String getErrorMsg(AsyncTaskData taskData, boolean unexpected) {
+        if (taskData.getParams().containsKey("blobDataId")) {
+            final String blobDataId = (String) taskData.getParams().get("blobDataId");
             BlobData blobData = blobDataService.get(blobDataId);
             String fileName;
             if (blobData != null) {
@@ -115,5 +109,10 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         } else {
             return "Произошла непредвиденная ошибка при загрузке файлов";
         }
+    }
+
+    @Override
+    public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
+        return getAsyncTaskType().getDescription();
     }
 }

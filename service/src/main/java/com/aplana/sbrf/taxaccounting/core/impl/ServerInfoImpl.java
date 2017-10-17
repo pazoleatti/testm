@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Сервис предоставляет информацию о сервере
@@ -17,15 +19,20 @@ public class ServerInfoImpl implements ServerInfo {
 
 	@Override
 	public String getServerName() {
-		// получаем информацию о сервере приложений
+		String serverName = "?";
 		try {
 			Class clazz = Class.forName("com.ibm.websphere.runtime.ServerName");
 			Method method =	clazz.getMethod("getDisplayName", null);
-			return (String) method.invoke(null, null);
+			serverName = (String) method.invoke(null, null);
 		} catch (Exception e) {
-			// do nothing (dev mode)
+			//dev mode
+			InetAddress addr;
+			try {
+				addr = InetAddress.getLocalHost();
+				serverName = addr.getHostName();
+			} catch (UnknownHostException e1) {}
 		}
-		return "?";
+		return serverName;
 	}
 
 }

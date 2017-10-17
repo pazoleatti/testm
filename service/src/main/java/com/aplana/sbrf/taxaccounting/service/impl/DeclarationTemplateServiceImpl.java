@@ -440,7 +440,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         Date endVersion = getDTEndDate(declarationTemplateId);
         LockData objectLock = lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser().getId(),
                 String.format(
-                        LockData.DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
+                        DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
                         declarationTemplate.getName(),
                         TaxType.NDFL.getName(),
                         sdf.get().format(declarationTemplate.getVersion()),

@@ -3,16 +3,12 @@ package com.aplana.sbrf.taxaccounting.model.ndfl;
 import org.joda.time.LocalDateTime;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * Сведения о доходах физического лица
  * @author Andrey Drunk
  */
 public class NdflPersonIncome extends NdflPersonOperation {
-
-    //ИНП (Графа 2)
-    private String inp;
 
     // Доход.Вид.Код (Графа 4) (КодДох)
     private String incomeCode;
@@ -107,14 +103,6 @@ public class NdflPersonIncome extends NdflPersonOperation {
     @Override
     public String[] getFields() {
         return FIELDS;
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
     }
 
     public String getIncomeCode() {
@@ -289,7 +277,6 @@ public class NdflPersonIncome extends NdflPersonOperation {
     @Override
     public String toString() {
         return "NdflPersonIncomeFilter{" +
-                "inp='" + inp + '\'' +
                 ", incomeCode='" + incomeCode + '\'' +
                 ", incomeType='" + incomeType + '\'' +
                 ", oktmo='" + oktmo + '\'' +

@@ -3,9 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.DescriptionTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -45,13 +44,13 @@ import java.util.Map;
 public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction, UnitEditingResult> {
 
     @Autowired
-	private SecurityService securityService;
+    private SecurityService securityService;
     @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
     @Autowired
-	private AuditService auditService;
+    private AuditService auditService;
     @Autowired
-	private RefBookDao refBookDao;
+    private RefBookDao refBookDao;
     @Autowired
     private LockDataService lockService;
     @Autowired
@@ -61,7 +60,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
     @Autowired
     private DepartmentService departmentService;
 
-	private static final String LOCK_MESSAGE = "Справочник \"%s\" заблокирован, попробуйте выполнить операцию позже!";
+    private static final String LOCK_MESSAGE = "Справочник \"%s\" заблокирован, попробуйте выполнить операцию позже!";
 
     public UnitEditingHandler() {
         super(UnitEditingAction.class);
@@ -72,11 +71,10 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
         List<String> lockedObjects = new ArrayList<String>();
         Logger logger = new Logger();
         int userId = securityService.currentUserInfo().getUser().getId();
-        String lockKey = refBookFactory.generateTaskKey(RefBookDepartmentDao.REF_BOOK_ID, ReportType.EDIT_REF_BOOK);
+        String lockKey = refBookFactory.generateTaskKey(RefBookDepartmentDao.REF_BOOK_ID);
         RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
-        Pair<ReportType, LockData> lockType = refBookFactory.getLockTaskType(RefBookDepartmentDao.REF_BOOK_ID);
-        if (lockType == null && lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName())) == null) {
+        if (lockService.lock(lockKey, userId,
+                String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), refBook.getName())) == null) {
             try {
                 //Блокировка установлена
                 lockedObjects.add(lockKey);
@@ -85,10 +83,10 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId(), ReportType.EDIT_REF_BOOK);
+                        String referenceLockKey = refBookFactory.generateTaskKey(attribute.getRefBookId());
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
+                                    String.format(DescriptionTemplate.REF_BOOK_EDIT.getText(), attributeRefBook.getName()));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
@@ -101,7 +99,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                 }
 
                 Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
-                for(Map.Entry<String, RefBookValueSerializable> v : action.getValueToSave().entrySet()) {
+                for (Map.Entry<String, RefBookValueSerializable> v : action.getValueToSave().entrySet()) {
                     RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
                     valueToSave.put(v.getKey(), value);
                 }
@@ -131,9 +129,9 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
         //Nothing
     }
 
-    private String assembleMessage(Map<String, RefBookValue> records){
+    private String assembleMessage(Map<String, RefBookValue> records) {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, RefBookValue> record : records.entrySet()){
+        for (Map.Entry<String, RefBookValue> record : records.entrySet()) {
             if (!record.getKey().equals("NAME"))
                 sb.append(String.format(" %s- %s ", record.getKey(), record.getValue().toString()));
         }

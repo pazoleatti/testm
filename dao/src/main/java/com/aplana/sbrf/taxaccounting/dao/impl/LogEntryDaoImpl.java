@@ -5,19 +5,32 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLQueryFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.model.QLogEntry.logEntry;
+import static com.querydsl.core.types.Projections.bean;
+
 @Repository
 public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
+
+    final private SQLQueryFactory sqlQueryFactory;
+
+    public LogEntryDaoImpl(SQLQueryFactory sqlQueryFactory) {
+        this.sqlQueryFactory = sqlQueryFactory;
+    }
+
+    final private QBean<LogEntry> logEntryBean = bean(LogEntry.class, logEntry.logId, logEntry.creationDate,
+            logEntry.logLevel, logEntry.message, logEntry.object, logEntry.ord, logEntry.type);
 
     /**
      * Максимальный размер сообщения
@@ -31,7 +44,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
             result.setLogId(rs.getString("log_id"));
             result.setOrd(rs.getInt("ord"));
-            result.setDate(new Date(rs.getTimestamp("creation_date").getTime()));
+            result.setDate(new org.joda.time.LocalDateTime(rs.getTimestamp("creation_date")).toDate());
             result.setLevel(LogLevel.fromId(rs.getInt("log_level")));
 
             String msg = rs.getString("message");
@@ -105,29 +118,22 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     private void saveShift(List<LogEntry> logEntries, final String logId, final int shift) {
         final List<LogEntry> splitLogEntries = splitBigMessage(logEntries);
 
-        getJdbcTemplate().batchUpdate(
-                "insert into log_entry (log_id, ord, creation_date, log_level, message, type, object) values (?, ?, ?, ?, ?, ?, ?)",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        LogEntry logEntry = splitLogEntries.get(i);
-                        logEntry.setLogId(logId);
-                        logEntry.setOrd(shift + i);
+        String id = logId;
+        int i = 0;
+        for (LogEntry aLogEntry : splitLogEntries) {
+            aLogEntry.setOrd(shift + i++);
 
-                        ps.setString(1, logEntry.getLogId());
-                        ps.setInt(2, logEntry.getOrd());
-                        ps.setTimestamp(3, new java.sql.Timestamp(logEntry.getDate().getTime()));
-                        ps.setInt(4, logEntry.getLevel().getId());
-                        ps.setString(5, logEntry.getMessage());
-                        ps.setString(6, logEntry.getType());
-                        ps.setString(7, logEntry.getObject());
-                    }
+            sqlQueryFactory.insert(logEntry)
+                    .set(logEntry.logId, id)
+                    .set(logEntry.creationDate, LocalDateTime.fromDateFields(aLogEntry.getDate()))
+                    .set(logEntry.logLevel, (byte) aLogEntry.getLevel().getId())
+                    .set(logEntry.type, aLogEntry.getType())
+                    .set(logEntry.message, aLogEntry.getMessage())
+                    .set(logEntry.ord, aLogEntry.getOrd())
+                    .set(logEntry.object, aLogEntry.getObject())
+                    .execute();
 
-                    @Override
-                    public int getBatchSize() {
-                        return splitLogEntries.size();
-                    }
-                });
+        }
     }
 
     @Override

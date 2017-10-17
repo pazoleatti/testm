@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
-import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import com.aplana.sbrf.taxaccounting.util.DBUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class DeclarationSubreportParamDaoImpl extends AbstractDao implements Dec
 	private static final Log LOG = LogFactory.getLog(DeclarationSubreportParamDaoImpl.class);
 
     @Autowired
-    private BDUtils bdUtils;
+    private DBUtils bdUtils;
 
 	private class DeclarationSubreportParamMapper implements RowMapper<DeclarationSubreportParam> {
 		@Override
@@ -126,7 +126,7 @@ public class DeclarationSubreportParamDaoImpl extends AbstractDao implements Dec
 
     private List<Long> createDeclarationSubreports(final List<DeclarationSubreportParam> newSubreportParamss, final long declarationSubreportId) {
         // Сгенерированый ключ -> реальный ключ в БД
-        List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.DECLARATION_SUBREPORT, (long) newSubreportParamss.size());
+        List<Long> genKeys = bdUtils.getNextIds(DBUtils.Sequence.DECLARATION_SUBREPORT, newSubreportParamss.size());
         for (int i = 0; i<newSubreportParamss.size(); i++) {
             newSubreportParamss.get(i).setId(genKeys.get(i).intValue());
         }

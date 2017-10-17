@@ -89,6 +89,25 @@
                         return dialogs.error(header, msg, opts);
                     },
                     /**
+                     * Сообщение об ошибке
+                     *
+                     * @param header строка, заголовок
+                     * @param msg строка, текст сообщения
+                     * @param opts объект, параметры диалогового окна
+                     */
+                    errorWithStack: function (header, msg, opts) {
+                        var data = {
+                            header: angular.copy(header),
+                            msg: angular.copy(msg),
+                            addMessage: opts.addMessage,
+                            labelYes: opts && opts.labelYes ? opts.labelYes : $translate.instant('DIALOGS_CONTINUE'),
+                            labelNo: opts && opts.labelNo ? opts.labelNo : $translate.instant('DIALOGS_CANCEL')
+                        };
+
+                        opts = _setOpts(opts);
+                        return dialogs.create('client/components/modal/stack.html', 'modalStackCtrl', data, opts);
+                    },
+                    /**
                      * Диалог для ввода строки
                      *
                      * @param header строка, заголовок
@@ -112,6 +131,22 @@
                 };
             };
         }])
+        .controller('modalStackCtrl', ['$log', '$scope', '$uibModalInstance', 'data',
+            function ($log, $scope, $uibModalInstance, data) {
+                $scope.header = data.msg;
+                $scope.stackTrace = data.addMessage;
+                $scope.needDetails = false;
+
+                if (!Array.isArray($scope.stackTrace.exceptionCause)) {
+                    $scope.stackTrace.exceptionCause = [$scope.stackTrace.exceptionCause];
+                }
+                $scope.showDetails = function () {
+                    $scope.needDetails = true;
+                };
+                $scope.cancel = function () {
+                    $uibModalInstance.dismiss('Canceled');
+                };
+            }])
         .controller('confirmCtrl', ['$scope', '$uibModalInstance', '$translate', 'data',
             function ($scope, $uibModalInstance, $translate, data) {
                 $scope.header = (angular.isDefined(data.header)) ? data.header : $translate.instant('DIALOGS_CONFIRMATION');

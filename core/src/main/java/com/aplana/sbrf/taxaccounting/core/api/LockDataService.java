@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Date;
 import java.util.List;
@@ -54,16 +53,13 @@ public interface LockDataService {
 	 */
 	LockData lock(String key, int userId, String description);
 
-    /**
-     * Устанавливает новую блокировку. Если блокировка успешно установилась, то возвращается null.
-     * Если блокировка уже существовала, то возвращется информация по этой блокировке в виде объекта LockData
-     * @param key код блокировки
-     * @param userId код установившего блокировку пользователя
-     * @param description описание блокировки
-     * @param state Статус асинхронной задачи, связанной с блокировкой
-     * @return информация о блокировке
+	/**
+	 * Устанавливает блокировки для выполнения асинхронной задачи над объектом
+	 * @param key код блокировки
+	 * @param userId код установившего блокировку пользователя
+	 * @return информация о блокировке
      */
-	LockData lock(String key, int userId, String description, String state);
+	LockData lockAsync(String key, int userId);
 
     /**
      * Возвращает данные блокировки по ключу
@@ -124,50 +120,19 @@ public interface LockDataService {
      */
     boolean isLockExists(String key, Date lockDate);
 
-    /**
-     * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки
-     * @param key ключ блокировки
-     * @param userId идентификатор пользователя
-     */
-    void addUserWaitingForLock(String key, int userId);
-
-    /**
-     * Возвращает список идентификаторов пользователей, которые ожидают разблокировки указанного объекта
-     * @param key ключ заблокированного объекта
-     * @return список идентификаторов пользователей
-     */
-    List<Integer> getUsersWaitingForLock(String key);
-
-    /**
-     * Получает список всех блокировок
-     * @return все блокировки
-     * @param filter ограничение по имени пользователя или ключу
-     * @param queues тип очереди
-     * @param pagingParams параметры пэйджинга
-     */
-    PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams);
+	/**
+	 * Получает список всех блокировок в виде объектов предназначенных для отображения в GUI
+	 * @return все блокировки
+	 * @param filter ограничение по имени пользователя или ключу
+	 * @param pagingParams параметры пэйджинга
+	 */
+	PagingResult<LockDataItem> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки
-     * @param keys список ключей блокировок
+     * @param ids идентификаторы блокировок
      */
-    void unlockAll(List<String> keys);
-
-    /**
-     * Обновляет статус выполнения асинхронной задачи, связанной с блокировкой
-     * @param key код блокировки
-     * @param lockDate дата начала действия блокировки
-     * @param state новый статус
-     */
-    void updateState(String key, Date lockDate, String state);
-
-    /**
-     * Обновляет очередь, к которой относится асинхронная задача, связанная с указанной блокировкой
-     * @param key код блокировки
-     * @param lockDate дата начала действия блокировки
-     * @param queue очередь
-     */
-    void updateQueue(String key, Date lockDate, LockData.LockQueues queue);
+    void unlockAll(List<Long> ids);
 
 	/**
 	 * Удаляет блокировки, созданные ранее "seconds" секунд назад. Предполагается, что данный метод
@@ -177,29 +142,16 @@ public interface LockDataService {
 	 */
 	int unlockIfOlderThan(long seconds);
 
-    /**
-     * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
-     * отправляет оповещения ожидающим блокировку пользователям
-	 * @param lockData блокировка
-     * @param userInfo идентификатор пользователя, отменяющего блокировку
-	 * @param force признак принудительного снятия блокировки
-	 * @param cause причина остановки задачи
+	/**
+	 * Удаляет все блокировки, связанные с асинхронной задачей
+	 * @param taskId идентификатор задачи
 	 */
-    void interruptTask(LockData lockData, TAUserInfo userInfo, boolean force, TaskInterruptCause cause);
+	void unlockAllByTask(long taskId);
 
-    /**
-     * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
-     * отправляет оповещения ожидающим блокировку пользователям
-	 * @param lockKeys ключи блокировок на удаление
-     * @param userInfo идентификатор пользователя, отменяющего блокировку
-	 * @param cause причина остановки задачи
+	/**
+	 * Связывает блокировку с асинхронной задачей
+	 * @param lockKey ключ блокировки
+	 * @param taskId идентификатор задачи
 	 */
-    void interruptAllTasks(List<String> lockKeys, TAUserInfo userInfo, TaskInterruptCause cause);
-
-    /**
-     * Выводит в logger информации о блокировке
-     * @param lockData
-     * @param logger
-     */
-    void lockInfo(LockData lockData, Logger logger);
+	void bindTask(String lockKey, long taskId);
 }

@@ -40,8 +40,8 @@ alter table event add constraint event_pk primary key (id);
 alter table log_clob_query add constraint log_clob_query_pk primary key (id);
 alter table role_event add constraint role_event_pk primary key (event_id, role_id);
 alter table template_changes add constraint template_changes_pk primary key (id);
-alter table lock_data add constraint lock_data_pk primary key (key);
-alter table lock_data_subscribers add constraint lock_data_subscribers_pk primary key (lock_key, user_id);
+alter table lock_data add constraint lock_data_pk primary key (id);
+alter table async_task_subscribers add constraint async_task_subscribers_pk primary key (async_task_id, user_id);
 alter table async_task_type add constraint async_task_type_pk primary key (id);
 alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id,type, manual,checking,absolute);
 alter table declaration_subreport add constraint decl_subrep_pk primary key(id);
@@ -55,6 +55,7 @@ alter table state add constraint pk_state primary key(id);
 alter table state_change add constraint pk_state_change primary key(id);
 alter table declaration_template_file add constraint pk_declaration_template_file primary key (blob_data_id,declaration_template_id);
 alter table department_decl_type_performer add constraint pk_department_decl_type_perf primary key (department_decl_type_id, performer_dep_id);
+alter table async_task add constraint async_task_pk primary key (id);
 
 --unique
 alter table tax_period add constraint tax_period_uniq_taxtype_year unique (tax_type, year);
@@ -75,6 +76,7 @@ alter table task_context add constraint task_context_uniq_task_name unique (task
 alter table declaration_subreport add constraint decl_subrep_unq_combo unique (declaration_template_id, alias);
 alter table declaration_report add constraint declaration_report_unq_combo unique (declaration_data_id, type, subreport_id);
 alter table configuration_email add constraint configuration_email_unqname unique (name);
+alter table lock_data add constraint lock_data_uniq_key unique (key);
 
 --foreign keys
 alter table form_type add constraint form_type_fk_taxtype foreign key (tax_type) references tax_type(id);
@@ -147,8 +149,8 @@ alter table template_changes add constraint template_changes_fk_user_id foreign 
 alter table template_changes add constraint template_changes_fk_event foreign key (event) references event(id);
 alter table template_changes add constraint template_changes_fk_dec_t foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
 alter table lock_data add constraint lock_data_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
-alter table lock_data_subscribers add constraint lock_data_subscr_fk_lock_data foreign key (lock_key) references lock_data(key) on delete cascade;
-alter table lock_data_subscribers add constraint lock_data_subscr_fk_sec_user foreign key (user_id) references sec_user(id) on delete cascade;
+alter table async_task_subscribers add constraint async_t_subscr_fk_async_task foreign key (async_task_id) references async_task(id) on delete cascade;
+alter table async_task_subscribers add constraint async_t_subscr_fk_sec_user foreign key (user_id) references sec_user(id) on delete cascade;
 alter table form_data_report add constraint form_data_rep_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_report add constraint form_data_rep_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
 alter table declaration_subreport add constraint decl_subrep_fk_decl_template foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
