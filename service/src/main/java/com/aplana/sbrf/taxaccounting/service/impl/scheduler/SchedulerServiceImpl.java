@@ -255,10 +255,6 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
     public void asyncTasksMonitoring() {
-        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.ASYNC_TASK_MONITORING);
-        if (schedulerTask.isActive()) {
-            schedulerTaskService.updateTaskStartDate(SchedulerTask.ASYNC_TASK_MONITORING);
-            asyncTaskThreadContainer.processQueues();
-        }
+        asyncTaskThreadContainer.processQueues();
     }
 }
