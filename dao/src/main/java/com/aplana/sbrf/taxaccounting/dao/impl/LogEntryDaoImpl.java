@@ -121,8 +121,8 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         String id = logId;
         int i = 0;
         for (LogEntry aLogEntry : splitLogEntries) {
-            aLogEntry.setOrd(shift + i++);
-
+            aLogEntry.setOrd(shift + i);
+            i++;
             sqlQueryFactory.insert(logEntry)
                     .set(logEntry.logId, id)
                     .set(logEntry.creationDate, LocalDateTime.fromDateFields(aLogEntry.getDate()))
