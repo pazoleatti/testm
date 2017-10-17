@@ -6,9 +6,9 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			classpath:com/aplana/sbrf/taxaccounting/permissions.xml
+			classpath:com/aplana/sbrf/taxaccounting/datasource.xml
 			/WEB-INF/security.xml
 			/WEB-INF/applicationContext.xml
-			/WEB-INF/spring-ejb.xml
 			/WEB-INF/mvc-dispatcher-servlet-jetty.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
 			classpath:com/aplana/sbrf/taxaccounting/script-support.xml
@@ -122,70 +122,6 @@
 		<res-type>javax.sql.DataSource</res-type> 
 		<res-auth>Container</res-auth>
 	</resource-ref>
-	
-	<!--resource-ref>
-		<description>TaxAccounting FormType Dynacache Reference</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/FormType</res-ref-name>
-		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>
-	
-	<resource-ref>
-		<description>TaxAccounting FormTemplate Dynacache Reference</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/FormTemplate</res-ref-name>
-		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>
-	
-	<resource-ref>
-		<description>TaxAccounting Department Dynacache Reference</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/Department</res-ref-name>
-		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>	
-	
-	<resource-ref>
-		<description>TaxAccounting User Dynacache Reference</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/User</res-ref-name>
-		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>
-
-    <resource-ref>
-        <description>Permanent Data Dynacache Reference</description>
-        <res-ref-name>services/cache/aplana/taxaccounting/PermanentData</res-ref-name>
-        <res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-        <res-auth>Container</res-auth>
-        <res-sharing-scope>Shareable</res-sharing-scope>
-    </resource-ref>
-
-    <resource-ref>
-		<description>TaxAccounting DeclarationType Dynacache Reference</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/DeclarationType</res-ref-name>
-		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>
-
-	<resource-ref>
-		<description>TaxAccounting DeclarationTemplate Dynacache Reference</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/DeclarationTemplate</res-ref-name>
-		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref>	
-	
-	<resource-ref>
-		<description>Хранилище для кэширования бинарных данных</description>
-		<res-ref-name>services/cache/aplana/taxaccounting/DataBlobsCache</res-ref-name>
-		<res-type>com.ibm.websphere.cache.DistributedMap</res-type>
-		<res-auth>Container</res-auth>
-		<res-sharing-scope>Shareable</res-sharing-scope>
-	</resource-ref-->
 
 	<security-role>
 		<description>Все аутентифицированные пользователи</description>	
@@ -228,14 +164,6 @@
             <url-pattern>/controller/actions/cache/clear-cache</url-pattern>
             <url-pattern>/controller/actions/clearAuthenticationCache</url-pattern>
             <url-pattern>/resources/*</url-pattern>
-			<url-pattern>/GenericAccountManagementService</url-pattern>
-			<url-pattern>/GenericAccountManagementService/*</url-pattern>
-			<url-pattern>/TaxAccountingSupportingData</url-pattern>
-			<url-pattern>/TaxAccountingSupportingData/*</url-pattern>
-            <url-pattern>/DepartmentManagementService</url-pattern>
-            <url-pattern>/DepartmentManagementService/*</url-pattern>
-			<url-pattern>/AuditManagementService</url-pattern>
-			<url-pattern>/AuditManagementService/*</url-pattern>
             <url-pattern>/favicon.ico</url-pattern>
 		</web-resource-collection>
 	</security-constraint>
@@ -249,5 +177,15 @@
         <extension>wsdl</extension>
         <mime-type>text/xml;charset=utf-8</mime-type>
     </mime-mapping>
+
+	<!-- Фильтр для кэширования запросов -->
+	<filter>
+		<filter-name>etagFilter</filter-name>
+		<filter-class>org.springframework.web.filter.ShallowEtagHeaderFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>etagFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
 </web-app>

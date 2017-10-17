@@ -9,12 +9,6 @@
 
 	<cache:annotation-driven mode="aspectj"/>
 
-	<jee:jndi-lookup id="formTypeCacheStore"
-		jndi-name="services/cache/aplana/taxaccounting/FormType"/>
-
-	<jee:jndi-lookup id="formTemplateCacheStore"
-		jndi-name="services/cache/aplana/taxaccounting/FormTemplate"/>
-
 	<jee:jndi-lookup id="declarationTypeCacheStore"
 		jndi-name="services/cache/aplana/taxaccounting/DeclarationType"/>
 
@@ -23,21 +17,11 @@
 
     <jee:jndi-lookup id="permanentDataCacheStore" jndi-name="services/cache/aplana/taxaccounting/PermanentData"/>
 
-    <jee:jndi-lookup id="dataBlobsCacheStore" jndi-name="services/cache/aplana/taxaccounting/DataBlobsCache"/>
-
 	<jee:jndi-lookup id="declarationTemplateEventScriptCacheStore" jndi-name="services/cache/aplana/taxaccounting/DeclarationTemplateEventScript" />
 				
 	<bean id="cacheManager" class="com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager">
 		<property name="caches">
 			<set>
-				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
-					<constructor-arg value="FormType" />
-					<constructor-arg ref="formTypeCacheStore" />
-				</bean>
-				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
-					<constructor-arg value="FormTemplate" />
-					<constructor-arg ref="formTemplateCacheStore" />
-				</bean>
 				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
 					<constructor-arg value="DeclarationType" />
 					<constructor-arg ref="declarationTypeCacheStore" />
@@ -49,10 +33,6 @@
                 <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
                     <constructor-arg value="PermanentData" />
                     <constructor-arg ref="permanentDataCacheStore" />
-                </bean>
-                <bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
-                    <constructor-arg value="DataBlobsCache" />
-                    <constructor-arg ref="dataBlobsCacheStore" />
                 </bean>
 				<bean class="com.aplana.sbrf.taxaccounting.cache.MapCache">
 					<constructor-arg value="DeclarationTemplateEventScript" />
