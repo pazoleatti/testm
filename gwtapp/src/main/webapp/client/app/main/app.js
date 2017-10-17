@@ -111,6 +111,7 @@
      */
     window.addEventListener("keydown", function (event) {
         if (event.keyCode === 13) {
+            //TODO: (dloshkarev) Нужна нормальная реализация не завязанная на CSS-селекторы
             var tableFilter = $(event.target).closest(".grid-filter");
             var isModal = $(event.target).closest(".modal-body").length != 0;
             var isTable = tableFilter.length != 0;
