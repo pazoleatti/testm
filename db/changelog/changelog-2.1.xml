@@ -1010,4 +1010,13 @@
         </update>
     </changeSet>
 	
+	<changeSet id="2.1-rnurgaleev-121" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+				 endDelimiter=""
+                 path="/scripts/fias_pkg_body.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+	
 </databaseChangeLog>
