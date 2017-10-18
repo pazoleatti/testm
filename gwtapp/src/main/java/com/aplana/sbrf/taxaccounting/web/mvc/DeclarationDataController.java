@@ -486,4 +486,15 @@ public class DeclarationDataController {
         return declarationService.checkAvailabilityReports(userInfo, declarationDataId);
     }
 
+
+    /**
+     * Выгрузка отчетности
+     * @param declarationDataIds
+     * @return
+     */
+    @PostMapping(value = "/actions/declarationData/downloadReports")
+    public ActionResult downloadReports(@RequestParam Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.downloadReports(userInfo, Arrays.asList(declarationDataIds));
+    }
 }

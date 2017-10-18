@@ -647,15 +647,6 @@ public interface DeclarationDataService {
     boolean existDeclarationData(long declarationDataId);
 
     /**
-     * Проверки перед созданием отчетности для выгрузки
-     *
-     * @param departmentReportPeriod - отчетный период
-     * @param declarationTypeId      идентификатор типа декларации
-     * @return возвращает сообщение об ошибке, иначе null
-     */
-    String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId);
-
-    /**
      * Получает мапу созданных блокировок по основным операциям формы
      *
      * @param declarationDataId
@@ -682,4 +673,11 @@ public interface DeclarationDataService {
      * @param cancelTask если true, то удаляем задачи, которые должны удаляться при запуске текущей, иначе, если есть такие задачи, вызываем диалог
      */
     AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, final long declarationDataId, final boolean force, final boolean cancelTask);
+
+    /**
+     * Выгрузка отчетности
+     * @param userInfo
+     * @return
+     */
+    ActionResult downloadReports(TAUserInfo userInfo, List<Long> declarationDataIdList);
 }

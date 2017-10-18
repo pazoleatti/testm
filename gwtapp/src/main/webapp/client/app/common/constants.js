@@ -60,7 +60,8 @@
                 ACCEPTED: 1 << 4,
                 DELETE: 1 << 5,
                 RETURN_TO_CREATED: 1 << 6,
-                EDIT_ASSIGNMENT: 1 << 7
+                EDIT_ASSIGNMENT: 1 << 7,
+                DOWNLOAD_REPORTS: 1 << 8
             },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},

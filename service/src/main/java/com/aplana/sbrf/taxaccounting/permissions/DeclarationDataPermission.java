@@ -59,6 +59,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final Permission<DeclarationData> EDIT_ASSIGNMENT = new EditAssignmentPermission(1 << 7);
 
+    /**
+     * Право на выгрузку отчетных форм
+     */
+    public static final Permission<DeclarationData> DOWNLOAD_REPORTS = new DownloadReportsPermission(1 << 8);
+
     public DeclarationDataPermission(long mask) {
         super(mask);
     }
@@ -319,6 +324,22 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+        }
+    }
+
+    /**
+     * Право на выгрузку отчетности
+     */
+    public static  final class DownloadReportsPermission extends DeclarationDataPermission {
+
+        public DownloadReportsPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject) {
+            return targetDomainObject.getState() == State.ACCEPTED && PermissionUtils.hasRole(user,
+                    TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 }
