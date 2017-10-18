@@ -90,7 +90,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     };
 
     @Override
-    @Cacheable(value = CacheConstants.PERMANENT_DATA, key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
@@ -128,7 +127,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @Cacheable(value = CacheConstants.PERMANENT_DATA, key = "'RefBook_attribute_'+#attributeId.toString()")
     public RefBook getByAttribute(Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForObject(
@@ -1456,7 +1454,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.PERMANENT_DATA, key = "'RefBook_'+#refBookId.toString()")
     public void setScriptId(Long refBookId, String scriptId) {
         getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
     }
