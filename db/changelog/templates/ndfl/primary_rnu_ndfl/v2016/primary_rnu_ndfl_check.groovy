@@ -484,7 +484,13 @@ class Check extends AbstractScriptClass {
 
                     if (FORM_DATA_KIND.equals(FormDataKind.PRIMARY)) {
                         // Спр12 ИНП первичная (Обязательное поле)
-                        def inpList = inpMap.get(personRecord.get("id")?.value)
+                        List<Map<String, RefBookValue>> record = inpMap.get(personRecord.get("id")?.value)
+                        List<String> inpList = new LinkedList<String>()
+                        for (Map<String, RefBookValue> value : record) {
+                            if (value.get("INP") != null) {
+                                inpList.add(value.get("INP").getStringValue())
+                            }
+                        }
                         if (!(ndflPerson.inp == personRecord.get(RF_SNILS)?.value || inpList?.contains(ndflPerson.inp))) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "ИНП не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
@@ -501,9 +507,8 @@ class Check extends AbstractScriptClass {
                                     String.format(LOG_TYPE_PERSON_MSG, "ИНП", ndflPerson.inp ?: "", R_PERSON))
                         }
                     }
-
                     // Спр13 Дата рождения (Обязательное поле)
-                    if (personRecord.get(RF_BIRTH_DATE).value != null && !ndflPerson.birthDay.equals(personRecord.get(RF_BIRTH_DATE).value)) {
+                    if (personRecord.get(RF_BIRTH_DATE).value != null && !ndflPerson.birthDay.equals(new LocalDateTime(personRecord.get(RF_BIRTH_DATE).getDateValue()))) {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                         logger.warnExp("%s. %s.", "Дата рождения не соответствует справочнику \"Физические лица\"", fioAndInp, pathError,
                                 String.format(LOG_TYPE_PERSON_MSG, "Дата рождения", ndflPerson.birthDay ? ScriptUtils.formatDate(ndflPerson.birthDay) : "", R_PERSON))
