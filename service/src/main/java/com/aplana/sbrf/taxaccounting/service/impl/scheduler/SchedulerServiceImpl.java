@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
-import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,8 +66,6 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private LockDataService lockDataService;
     @Autowired
     private AsyncTaskThreadContainer asyncTaskThreadContainer;
-    @Autowired
-    private ApplicationInfo applicationInfo;
 
     /**
      * Инициализация планировщика
