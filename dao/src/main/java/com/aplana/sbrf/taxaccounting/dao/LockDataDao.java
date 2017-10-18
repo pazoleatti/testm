@@ -30,13 +30,6 @@ public interface LockDataDao extends PermissionDao {
      */
     LockData get(String key, Date lockDate);
 
-    /**
-     * Возвращает информацию о всех блокировках, код которых начинающинается c key
-     * @param key
-     * @return
-     */
-    List<LockData> getStartsWith(String key);
-
 	/**
 	 * Создает новую блокировку
      * @param key код блокировки
@@ -44,6 +37,13 @@ public interface LockDataDao extends PermissionDao {
      * @param description описание блокировки
      */
 	void lock(String key, int userId, String description);
+
+    /**
+     * Создает новую блокировку без описания. Используется для создания блокировок для асинхронных задач для упрощения кода,
+     * т.к в этом случае описание хранится в самой асинхронной задаче
+     * @param key код блокировки
+     * @param userId код пользователя, установившего блокировку
+     */
 	void lock(String key, int userId);
 
 	/**

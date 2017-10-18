@@ -68,8 +68,6 @@ public class LockDataServiceImplTest {
             }
         };
         ReflectionTestUtils.setField(service, "tx", tx);
-        ServerInfo serverInfo = mock(ServerInfo.class);
-        ReflectionTestUtils.setField(service, "serverInfo", serverInfo);
     }
 
 	@Test

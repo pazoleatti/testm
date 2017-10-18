@@ -31,12 +31,23 @@ public interface AsyncManager {
      * @return данные задачи, которая была поставлена в очередь, либо null, если она поставлена не была
      */
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, AsyncQueue queue, Map<String, Object> params) throws AsyncTaskException;
+
+    /**
+     * Аналогично {@link AsyncManager#executeTask(java.lang.String, com.aplana.sbrf.taxaccounting.model.AsyncTaskType, com.aplana.sbrf.taxaccounting.model.TAUserInfo, com.aplana.sbrf.taxaccounting.model.AsyncQueue, java.util.Map)}
+     * но вместо произвольных параметров используется пустая мапа
+     */
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, AsyncQueue queue) throws AsyncTaskException;
 
     /**
+     * Аналогично {@link AsyncManager#executeTask(java.lang.String, com.aplana.sbrf.taxaccounting.model.AsyncTaskType, com.aplana.sbrf.taxaccounting.model.TAUserInfo, com.aplana.sbrf.taxaccounting.model.AsyncQueue, java.util.Map)}
      * Очередь будет определена на основе расчета лимитирующих параметров
      */
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user) throws AsyncTaskException;
+
+    /**
+     * Аналогично com.aplana.sbrf.taxaccounting.async.AsyncManager#executeTask(java.lang.String, com.aplana.sbrf.taxaccounting.model.AsyncTaskType, com.aplana.sbrf.taxaccounting.model.TAUserInfo)
+     * но вместо произвольных параметров используется пустая мапа
+     */
     AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params) throws AsyncTaskException;
 
     /**
@@ -69,7 +80,17 @@ public interface AsyncManager {
      * @param cause причина остановки задачи
      */
     void interruptTask(long taskId, TAUserInfo user, TaskInterruptCause cause);
+
+    /**
+     * Аналогично {@link AsyncManager#interruptTask(long, com.aplana.sbrf.taxaccounting.model.TAUserInfo, com.aplana.sbrf.taxaccounting.model.TaskInterruptCause)}
+     * но id задачи берется из объекта AsyncTaskData
+     */
     void interruptTask(AsyncTaskData taskData, TAUserInfo user, TaskInterruptCause cause);
+
+    /**
+     * Аналогично {@link AsyncManager#interruptTask(long, com.aplana.sbrf.taxaccounting.model.TAUserInfo, com.aplana.sbrf.taxaccounting.model.TaskInterruptCause)}
+     * но идентификатор задачи получается из блокировки, которая в свою очередь получается по ключу lockKey
+     */
     void interruptTask(String lockKey, TAUserInfo user, TaskInterruptCause cause);
 
     /**

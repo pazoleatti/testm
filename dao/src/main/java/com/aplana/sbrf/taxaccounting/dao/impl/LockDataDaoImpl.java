@@ -2,7 +2,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -15,11 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Реализация дао блокировок
@@ -31,16 +30,16 @@ import java.util.Map;
 public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     private static final Log LOG = LogFactory.getLog(LockDataDaoImpl.class);
-	private static final String LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок. %s";
-	private static final String USER_LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок для пользователя с id = %d. %s";
+    private static final String LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок. %s";
+    private static final String USER_LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок для пользователя с id = %d. %s";
 
     @Override
     public LockData get(String key, boolean like) {
         try {
             String sql = "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key " + (like ? "LIKE ?" : "= ?");
             return getJdbcTemplate().queryForObject(sql,
-                    new Object[] {like ? "%" + key + "%" : key},
-                    new int[] {Types.VARCHAR},
+                    new Object[]{like ? "%" + key + "%" : key},
+                    new int[]{Types.VARCHAR},
                     new LockDataMapper()
             );
         } catch (EmptyResultDataAccessException e) {
@@ -56,8 +55,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key = ? and date_lock = ?",
-                    new Object[] {key, lockDate},
-                    new int[] {Types.VARCHAR, Types.TIMESTAMP},
+                    new Object[]{key, lockDate},
+                    new int[]{Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
             );
         } catch (EmptyResultDataAccessException e) {
@@ -69,33 +68,16 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public List<LockData> getStartsWith(String key) {
-        try {
-            String sql = "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key LIKE ?";
-            return getJdbcTemplate().query(sql,
-                    new Object[] {key+"%"},
-                    new int[] {Types.VARCHAR},
-                    new LockDataMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new LockException("Ошибка при поиске блокировки с кодом = %s", key);
-        }
-    }
-
-    @Override
     public void lock(String key, int userId, String description) {
         try {
             Date lockDate = new Date();
             getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock, description) VALUES (seq_lock_data.nextval, ?, ?, ?, ?)",
-                    new Object[] {key,
+                    new Object[]{key,
                             userId,
                             lockDate,
                             description
                     },
-                    new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP, Types.VARCHAR});
+                    new int[]{Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP, Types.VARCHAR});
         } catch (DataAccessException e) {
             throw new LockException("Ошибка при создании блокировки (%s, %s). %s", key, userId, e.getMessage());
         }
@@ -106,11 +88,11 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         try {
             Date lockDate = new Date();
             getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock) VALUES (seq_lock_data.nextval, ?, ?, ?)",
-                    new Object[] {key,
+                    new Object[]{key,
                             userId,
                             lockDate
                     },
-                    new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP});
+                    new int[]{Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP});
         } catch (DataAccessException e) {
             throw new LockException("Ошибка при создании блокировки (%s, %s). %s", key, userId, e.getMessage());
         }
@@ -120,13 +102,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public void unlock(String key) {
         try {
             int affectedCount = getJdbcTemplate().update("DELETE FROM lock_data WHERE key = ?",
-                    new Object[] {key},
-                    new int[] {Types.VARCHAR});
+                    new Object[]{key},
+                    new int[]{Types.VARCHAR});
             if (affectedCount == 0) {
                 throw new LockException("Ошибка удаления. Блокировка с кодом \"%s\" не найдена в БД.", key);
             }
         } catch (DataAccessException e) {
-			LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
+            LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
             throw new LockException("Ошибка при удалении блокировки с кодом \"%s\". %s", key, e.getMessage());
         }
     }
@@ -136,9 +118,9 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         try {
             getJdbcTemplate().update("DELETE FROM lock_data ld WHERE user_id = ?", userId);
         } catch (Exception e) {
-			LOG.error(String.format(USER_LOCK_DATA_DELETE_ERROR, userId, e.getMessage()), e);
+            LOG.error(String.format(USER_LOCK_DATA_DELETE_ERROR, userId, e.getMessage()), e);
             if (!ignoreError) {
-				throw new LockException(USER_LOCK_DATA_DELETE_ERROR, userId, e.getMessage());
+                throw new LockException(USER_LOCK_DATA_DELETE_ERROR, userId, e.getMessage());
             }
         }
     }
@@ -158,26 +140,26 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                 params.put("filter", "%" + filter.toLowerCase() + "%");
             }
             String sql = " (SELECT ld.id, ld.key, ld.user_id, ld.task_id, ld.date_lock, ld.description, u.login, \n" +
-					(isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY date_lock)" : "ROWNUM") +
-					" AS rn \n" +
+                    (isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY date_lock)" : "ROWNUM") +
+                    " AS rn \n" +
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
                     "WHERE ld.task_id is null" +
                     (!StringUtils.isEmpty(filter) ?
-                    " AND (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter) "
-                    : "")
+                            " AND (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter) "
+                            : "")
                     + ") \n";
-			if (LOG.isTraceEnabled()) {
-				LOG.trace(params);
-				LOG.trace(sql);
-			}
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(params);
+                LOG.trace(sql);
+            }
             String fullSql = "SELECT * FROM" + sql + "WHERE rn BETWEEN :start AND :count";
             String countSql = "SELECT COUNT(*) FROM" + sql;
             List<LockData> records = getNamedParameterJdbcTemplate().query(fullSql, params, new LockDataMapper());
             int count = getNamedParameterJdbcTemplate().queryForObject(countSql, params, Integer.class);
             return new PagingResult<LockData>(records, count);
         } catch (EmptyResultDataAccessException e) {
-			// недостижимое место из-за особенности запроса
+            // недостижимое место из-за особенности запроса
             return new PagingResult<LockData>(new ArrayList<LockData>(), 0);
         }
     }
@@ -211,7 +193,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         try {
             return getJdbcTemplate().queryForList(
                     "SELECT key FROM lock_data WHERE date_lock < (SYSDATE - INTERVAL '" + seconds + "' SECOND)", String.class);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
             throw new LockException(LOCK_DATA_DELETE_ERROR, e.getMessage());
         }

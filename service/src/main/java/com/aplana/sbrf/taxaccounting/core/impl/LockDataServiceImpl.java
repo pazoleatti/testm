@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,41 +27,36 @@ import java.util.List;
 public class LockDataServiceImpl implements LockDataService {
 
     private static final Log LOG = LogFactory.getLog(LockDataServiceImpl.class);
-	private static final long SLEEP_TIME = 500; //шаг времени между проверками освобождения блокировки, миллисекунды
 
-	@Autowired
-	private LockDataDao dao;
-	@Autowired
-	private TAUserDao userDao;
     @Autowired
-    private NotificationService notificationService;
+    private LockDataDao dao;
+    @Autowired
+    private TAUserDao userDao;
     @Autowired
     private TransactionHelper tx;
     @Autowired
-    private ServerInfo serverInfo;
-    @Autowired
     AuditService auditService;
 
-	@Override
-	public LockData lock(final String key, final int userId, final String description) {
+    @Override
+    public LockData lock(final String key, final int userId, final String description) {
         return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData execute() {
-				try {
-					synchronized(LockDataServiceImpl.class) {
-						LockData lock = dao.get(key, false);
-						if (lock != null) {
-							return lock;
-						}
-						internalLock(key, userId, description);
-					}
-					return null;
-				} catch (Exception e) {
-					throw new ServiceException("Не удалось установить блокировку объекта", e);
-				}
-			}
+                try {
+                    synchronized (LockDataServiceImpl.class) {
+                        LockData lock = dao.get(key, false);
+                        if (lock != null) {
+                            return lock;
+                        }
+                        internalLock(key, userId, description);
+                    }
+                    return null;
+                } catch (Exception e) {
+                    throw new ServiceException("Не удалось установить блокировку объекта", e);
+                }
+            }
         });
-	}
+    }
 
     @Override
     public LockData lockAsync(final String key, final int userId) {
@@ -72,7 +64,7 @@ public class LockDataServiceImpl implements LockDataService {
             @Override
             public LockData execute() {
                 try {
-                    synchronized(LockDataServiceImpl.class) {
+                    synchronized (LockDataServiceImpl.class) {
                         LockData lock = dao.get(key, false);
                         if (lock != null) {
                             return lock;
@@ -89,18 +81,13 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public LockData getLock(String key) {
-        synchronized(LockDataServiceImpl.class) {
+        synchronized (LockDataServiceImpl.class) {
             return dao.get(key, false);
         }
     }
 
     @Override
-    public List<LockData> getLockStartsWith(String key) {
-        return dao.getStartsWith(key);
-    }
-
-    @Override
-	public Boolean unlock(final String key, final int userId) {
+    public Boolean unlock(final String key, final int userId) {
         return unlock(key, userId, false);
     }
 
@@ -110,7 +97,7 @@ public class LockDataServiceImpl implements LockDataService {
             @Override
             public Boolean execute() {
                 try {
-                    synchronized(LockDataServiceImpl.class) {
+                    synchronized (LockDataServiceImpl.class) {
                         LockData lock = dao.get(key, false);
                         if (lock != null) {
                             if (!force && lock.getUserId() != userId) {
@@ -129,14 +116,9 @@ public class LockDataServiceImpl implements LockDataService {
                 } catch (Exception e) {
                     throw new ServiceException("Не удалось снять блокировку с объекта", e);
                 }
-				return true;
+                return true;
             }
         });
-	}
-
-    @Override
-    public void unlockAll(TAUserInfo userInfo) {
-        dao.unlockAllByUserId(userInfo.getUser().getId(), false);
     }
 
     @Override
@@ -146,21 +128,9 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public boolean isLockExists(final String key, boolean like) {
-        synchronized(LockDataServiceImpl.class) {
+        synchronized (LockDataServiceImpl.class) {
             return dao.get(key, like) != null;
         }
-    }
-
-    @Override
-    public boolean isLockExists(final String key, final Date lockDate) {
-        return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
-            @Override
-            public Boolean execute() {
-                synchronized (LockDataServiceImpl.class) {
-                    return dao.get(key, lockDate) != null;
-                }
-            }
-        });
     }
 
     @Override
@@ -194,8 +164,8 @@ public class LockDataServiceImpl implements LockDataService {
         }
     }
 
-	@Override
-	public int unlockIfOlderThan(long seconds) {
+    @Override
+    public int unlockIfOlderThan(long seconds) {
         TaskInterruptCause cause = TaskInterruptCause.SCHEDULER_OLD_LOCK_DELETE;
         List<String> keyList = dao.getLockIfOlderThan(seconds);
 
@@ -210,7 +180,7 @@ public class LockDataServiceImpl implements LockDataService {
         }
 
         return keyList.size();
-	}
+    }
 
     @Override
     public void unlockAllByTask(long taskId) {
@@ -231,9 +201,9 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     /**
-	 * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
-	 */
-	private void internalLock(String key, int userId, String description) {
-		dao.lock(key, userId, description);
-	}
+     * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
+     */
+    private void internalLock(String key, int userId, String description) {
+        dao.lock(key, userId, description);
+    }
 }
