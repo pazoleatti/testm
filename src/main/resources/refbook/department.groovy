@@ -1,4 +1,4 @@
-package refbook
+package refbook // department_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.Department

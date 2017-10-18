@@ -182,7 +182,8 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 try {
                     String line = reader.readLine();
-                    if (line != null && line.equals("package " + packageName) && line.contains(file.getName().substring(0, file.getName().indexOf(".groovy")))) {
+                    if (line != null && line.equals("package " + packageName) && line.contains(file.getName().substring(0, file.getName().indexOf(".groovy")))
+                            || (packageName.contains("refbook") && packageName.contains(file.getName().substring(0, file.getName().indexOf(".groovy"))))) {
                         return file.getAbsolutePath();
                     }
                 } finally {
