@@ -44,18 +44,18 @@
                         colNames: [
                             $filter('translate')('locks.title.dateLock'),
                             $filter('translate')('locks.title.key'),
-                            $filter('translate')('locks.title.description'),
-                            $filter('translate')('locks.title.user')],
+                            $filter('translate')('locks.title.user'),
+                            $filter('translate')('locks.title.description')],
                         colModel: [
                             {
                                 name: 'dateLock',
                                 index: 'date_lock',
-                                width: 240,
-                                formatter: $filter('dateFormatter')
+                                width: 200,
+                                formatter: $filter('dateTimeFormatter')
                             },
-                            {name: 'key', index: 'key', width: 175},
-                            {name: 'description', index: 'description', width: 175},
-                            {name: 'user', index: 'user', width: 175}
+                            {name: 'key', index: 'key', width: 220},
+                            {name: 'user', index: 'user', width: 250},
+                            {name: 'description', index: 'description', width: 350}
                         ],
                         rowNum: 10,
                         rowList: [10, 20, 30],
