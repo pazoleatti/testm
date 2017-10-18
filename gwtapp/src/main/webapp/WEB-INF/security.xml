@@ -13,14 +13,6 @@
 	<http pattern="/j_security_check" security="none"/>
     <http pattern="/controller/actions/cache/clear-cache" security="none"/>
     <http pattern="/controller/actions/clearAuthenticationCache" security="none"/>
-	<http pattern="/GenericAccountManagementService" security="none"/>
-	<http pattern="/GenericAccountManagementService/**" security="none"/>
-	<http pattern="/TaxAccountingSupportingData" security="none"/>
-	<http pattern="/TaxAccountingSupportingData/**" security="none"/>
-    <http pattern="/DepartmentManagementService" security="none"/>
-    <http pattern="/DepartmentManagementService/**" security="none"/>
-	<http pattern="/AuditManagementService" security="none"/>
-	<http pattern="/AuditManagementService/**" security="none"/>
 
 	<!--
 		А вот здесь мы уже определяем фильтры аутентификации.
@@ -33,7 +25,6 @@
 		<custom-filter position="PRE_AUTH_FILTER" ref="j2eePreAuthFilter"/>
 		<form-login login-processing-url="/j_security_check" default-target-url="/Main.jsp"/>
 	</http>
-	<!--<global-method-security pre-post-annotations="enabled" proxy-target-class="true" />-->
 
 	<global-method-security pre-post-annotations="enabled">
 		<expression-handler ref="expressionHandler"/>

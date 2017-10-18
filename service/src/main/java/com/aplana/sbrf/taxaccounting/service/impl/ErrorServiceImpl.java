@@ -1,27 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.ErrorService;
 import com.aplana.sbrf.taxaccounting.model.error.ExceptionCause;
 import com.aplana.sbrf.taxaccounting.model.error.ExceptionMessage;
 import com.aplana.sbrf.taxaccounting.model.error.MessageType;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.service.ErrorService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Service
 public class ErrorServiceImpl implements ErrorService {
-
-    @Autowired
-    private LogEntryService logEntryService;
 
     /**
      * Перегоняет из StackTraceElement[] в Set<String> с учётом настройки по количеству строк стэка, отображаемого на клиенте

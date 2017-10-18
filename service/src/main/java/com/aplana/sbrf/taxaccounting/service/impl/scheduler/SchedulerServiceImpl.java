@@ -251,7 +251,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     }
 
     /**
-     * Задача для удаления блокировок, которые старше заданого времени
+     * Задача для мониторинга появление новых асинхронных задач и их запуска
      */
     @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
     public void asyncTasksMonitoring() {

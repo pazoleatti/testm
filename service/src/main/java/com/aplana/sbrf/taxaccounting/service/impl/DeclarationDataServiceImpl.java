@@ -1206,7 +1206,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
             Logger logger = new Logger();
             TAUser blocker = taUserService.getUser(lockData.getUserId());
-            logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), lockData.getDescription());
+            String description = lockData.getDescription();
+            if (lockData.getTaskId() != null) {
+                AsyncTaskData taskData = asyncManager.getLightTaskData(lockData.getTaskId());
+                if (taskData != null) {
+                    description = taskData.getDescription();
+                }
+            }
+            logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), description);
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
@@ -1225,15 +1232,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logger.info("Успешно удалён объект: %s.", declarationFullName);
                     sendNotification("Успешно удалён объект: " + declarationFullName, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
                     logger.clear();
+                } catch (ServiceLoggerException e) {
+                    logger.getEntries().addAll(logEntryService.getAll(e.getUuid()));
                 } catch (Exception e) {
-                    logger.error("При удалении объекта: %s возникли ошибки:", declarationFullName);
                     logger.error(e);
                 }
             } else {
                 logger.warn(DeclarationDataDao.DECLARATION_NOT_FOUND_MESSAGE, declarationId);
             }
         }
-
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.logTopMessage(LogLevel.ERROR, "При удалении возникли ошибки:");
+            throw new ServiceLoggerException("При удалении возникли ошибки", logEntryService.save(logger.getEntries()));
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
