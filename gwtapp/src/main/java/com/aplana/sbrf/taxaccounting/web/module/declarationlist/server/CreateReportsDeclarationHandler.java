@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -75,7 +74,7 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriods.get(0);
 
-        String errMsg = declarationDataService.preCreateReports(logger, userInfo, departmentReportPeriod, action.getDeclarationTypeId());
+        /*String errMsg = declarationDataService.preCreateReports(logger, userInfo, departmentReportPeriod, action.getDeclarationTypeId());
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             if (errMsg.contains("Отсутствует отчетность")) {
@@ -84,7 +83,7 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
             result.setStatus(true);
             result.setUuid(logEntryService.save(logger.getEntries()));
             return result;
-        }
+        }*/
 
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put("declarationTypeId", action.getDeclarationTypeId());
