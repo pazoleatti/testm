@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ScriptServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -50,6 +51,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private AsyncTaskDao asyncTaskDao;
     @Autowired
     protected TAUserService userService;
+    @Autowired
+    private ConfigurationDao configurationDao;
+
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -105,9 +109,10 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     /**
      * Выполняет обработку результата проверки лимитов задачи
-     * @param value вычисленное значение лимита
+     *
+     * @param value    вычисленное значение лимита
      * @param taskName название задачи
-     * @param msg описание результата проверки лимитов
+     * @param msg      описание результата проверки лимитов
      * @return очередь в которую будет направлена задача
      * @throws AsyncTaskException в случае, если проверка не была пройдена
      */
@@ -134,12 +139,17 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         final Logger logger = new Logger();
         final Date startDate = new Date();
 
+        ConfigurationParamModel paramModel = configurationDao.getConfigByGroup(ConfigurationParamGroup.COMMON_PARAM);
+        String showTiming = paramModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
+        final boolean isShowTiming = showTiming.equals("1");
+
         //Запускаем мониторинг состояния задачи для ее остановки в случае отмены.
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new TaskStateMonitor(Thread.currentThread(), taskData.getId()));
         executorService.shutdown();
-
-        logger.info("Начало выполнения операции %s", sdf_time.get().format(startDate));
+        if (isShowTiming) {
+            logger.info("Начало выполнения операции %s", sdf_time.get().format(startDate));
+        }
         asyncManager.updateState(taskData.getId(), AsyncTaskState.STARTED);
         final BusinessLogicResult taskStatus = tx.executeInNewTransaction(new TransactionLogic<BusinessLogicResult>() {
             @Override
@@ -149,7 +159,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     BusinessLogicResult taskStatus = executeBusinessLogic(taskData, logger);
                     LOG.debug("Business logic execution is complete");
                     Date endDate = new Date();
-                    logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                    if (isShowTiming) {
+                        logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                    }
                     return taskStatus;
                 } catch (final Throwable e) {
                     LOG.error(String.format("Exception occurred during execution of async task with id %s", taskData.getId()), e);
@@ -168,7 +180,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             if (e.getMessage() != null && !e.getMessage().isEmpty()) {
                                 logger.error(e);
                             }
-                            logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                            if (isShowTiming) {
+                                logger.info("Длительность выполнения операции: %d мс (%s - %s)", (endDate.getTime() - startDate.getTime()), sdf_time.get().format(startDate), sdf_time.get().format(endDate));
+                            }
                             sendNotifications(taskData.getId(), msg, logEntryService.save(logger.getEntries()), NotificationType.DEFAULT, null);
                             return null;
                         }
