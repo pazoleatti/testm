@@ -5,7 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -249,7 +249,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
                                                     AddLogAction addLogAction = new AddLogAction();
                                                     addLogAction.setOldUUID(uuid[0]);
-                                                    addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
+                                                    addLogAction.setMessages(Arrays.asList(new GWTLogEntry(LogLevel.WARNING,
                                                             "Для актуализации данных в найденных экземплярах налоговых форм их необходимо рассчитать/обновить")));
                                                     dispatcher.execute(addLogAction, CallbackUtils
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {

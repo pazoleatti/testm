@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.log;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryDateCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryImageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryIndexCell;
@@ -26,7 +26,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 	}
 
 	@UiField
-    GenericCellTable<LogEntry> logCellTable;
+    GenericCellTable<GWTLogEntry> logCellTable;
 
     @UiField
     FlexiblePager pager;
@@ -34,71 +34,71 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
     @UiField
     DockLayoutPanel dock;
 
-    private AsyncDataProvider<LogEntry> dataProvider;
+    private AsyncDataProvider<GWTLogEntry> dataProvider;
 
 	public LogEntriesWidget() {
 		initWidget(uiBinder.createAndBindUi(this));
 
-		Column<LogEntry, LogEntry> messageColumn = new Column<LogEntry, LogEntry>(
+		Column<GWTLogEntry, GWTLogEntry> messageColumn = new Column<GWTLogEntry, GWTLogEntry>(
 				new LogEntryTextCell(){
                     @Override
-                    public String getStringValue(LogEntry value) {
+                    public String getStringValue(GWTLogEntry value) {
                         return value.getMessage();
                     }
                 }) {
 
 			@Override
-			public LogEntry getValue(LogEntry object) {
+			public GWTLogEntry getValue(GWTLogEntry object) {
 				return object;
 			}
 		};
 		
-		Column<LogEntry, LogEntry> imageColumn = new Column<LogEntry, LogEntry>(
+		Column<GWTLogEntry, GWTLogEntry> imageColumn = new Column<GWTLogEntry, GWTLogEntry>(
 				new LogEntryImageCell()) {
 			@Override
-			public LogEntry getValue(LogEntry object) {
+			public GWTLogEntry getValue(GWTLogEntry object) {
 				return object;
 			}
 		};
 
-        Column<LogEntry, LogEntry> dateColumn = new Column<LogEntry, LogEntry>(
+        Column<GWTLogEntry, GWTLogEntry> dateColumn = new Column<GWTLogEntry, GWTLogEntry>(
                 new LogEntryDateCell()) {
             @Override
-            public LogEntry getValue(LogEntry object) {
+            public GWTLogEntry getValue(GWTLogEntry object) {
                 return object;
             }
         };
 
-		Column<LogEntry, LogEntry> indexColumn = new Column<LogEntry, LogEntry>(
+		Column<GWTLogEntry, GWTLogEntry> indexColumn = new Column<GWTLogEntry, GWTLogEntry>(
 				new LogEntryIndexCell()) {
 			@Override
-			public LogEntry getValue(LogEntry object) {
+			public GWTLogEntry getValue(GWTLogEntry object) {
 				return object;
 			}
 		};
 
-        Column<LogEntry, LogEntry> typeColumn = new Column<LogEntry, LogEntry>(
+        Column<GWTLogEntry, GWTLogEntry> typeColumn = new Column<GWTLogEntry, GWTLogEntry>(
                 new LogEntryTextCell(){
                     @Override
-                    public String getStringValue(LogEntry value) {
+                    public String getStringValue(GWTLogEntry value) {
                         return value.getType()!=null?value.getType():"";
                     }
                 }) {
             @Override
-            public LogEntry getValue(LogEntry object) {
+            public GWTLogEntry getValue(GWTLogEntry object) {
                 return object;
             }
         };
 
-        Column<LogEntry, LogEntry> objectColumn = new Column<LogEntry, LogEntry>(
+        Column<GWTLogEntry, GWTLogEntry> objectColumn = new Column<GWTLogEntry, GWTLogEntry>(
                 new LogEntryTextCell(){
                     @Override
-                    public String getStringValue(LogEntry value) {
+                    public String getStringValue(GWTLogEntry value) {
                         return value.getObject()!=null?value.getObject():"";
                     }
                 }) {
             @Override
-            public LogEntry getValue(LogEntry object) {
+            public GWTLogEntry getValue(GWTLogEntry object) {
                 return object;
             }
         };
@@ -134,7 +134,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
     }
 
     @Override
-    public void setLogEntries(int start, int totalCount, List<LogEntry> logEntries) {
+    public void setLogEntries(int start, int totalCount, List<GWTLogEntry> logEntries) {
         if (logEntries == null || logEntries.isEmpty()) {
             clearLogEntries();
             return;
@@ -149,7 +149,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
     }
 
     @Override
-    public void setDataProvider(AsyncDataProvider<LogEntry> dataProvider) {
+    public void setDataProvider(AsyncDataProvider<GWTLogEntry> dataProvider) {
         this.dataProvider = dataProvider;
     }
 

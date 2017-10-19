@@ -1182,4 +1182,43 @@
         </update>
     </changeSet>
 
+	<!--SBRFNDFL-2371-->
+	<changeSet id="2.1-rnurgaleev-125" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="COLOR"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-126" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="DEPARTMENT_FORM_TYPE_PERFORMER"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-127" author="rnurgaleev">
+        <dropForeignKeyConstraint baseTableName="declaration_source" constraintName="DECL_SOURCE_FK_DEPT_FORMTYPE"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-128" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="DEPARTMENT_FORM_TYPE"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-129" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="LOG_CLOB_QUERY"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-130" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="ROLE_EVENT"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-131" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="STATE_CHANGE"/>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-132" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="TASK_CONTEXT"/>
+    </changeSet>
 </databaseChangeLog>
