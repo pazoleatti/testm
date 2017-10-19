@@ -1153,4 +1153,26 @@
         </update>
     </changeSet>
 
+    <!-- SBRFNDFL-2080 НДФЛ. Реализовать выгрузку отчетных форм, выбранных пользователем, в состоянии "Принята"  -->
+    <changeSet id="2.1-ytrofimov-10" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=102</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-11" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>id=103</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-12" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=104</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
