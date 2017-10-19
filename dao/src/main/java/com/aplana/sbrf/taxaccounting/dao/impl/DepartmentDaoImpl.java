@@ -694,6 +694,27 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
+    public List<Integer> fetchAllParentDepartmentsIds(int childDepartmentId) {
+        //В department_child_view подразделение не является родителем (потомком) самого себя, поэтому его тоже нужно
+        // добавить в список. Но нужно убедиться, что подразделение существует в БД
+
+        SubQueryExpression<Integer> parentsQuery = sqlQueryFactory
+                .select(departmentChildView.parentId)
+                .from(departmentChildView)
+                .where(departmentChildView.id.eq(childDepartmentId).and(departmentChildView.parentId.isNotNull()));
+
+        SubQueryExpression<Integer> departmentQuery = sqlQueryFactory
+                .select(department.id)
+                .from(department)
+                .where(department.id.eq(childDepartmentId));
+
+        return sqlQueryFactory
+                .query()
+                .union(parentsQuery, departmentQuery)
+                .fetch();
+    }
+
+    @Override
     public List<Integer> getDepartmentsByDeclarationsPerformers(List<Integer> performersIds) {
         return sqlQueryFactory
                 .select(departmentDeclarationType.departmentId)

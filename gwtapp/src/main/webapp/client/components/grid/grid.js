@@ -1350,6 +1350,7 @@
                                 edit: false,
                                 add: false,
                                 del: false,
+                                refresh: gridConfig.datatype !== 'local',
                                 refreshstate: "current"
                             });
 

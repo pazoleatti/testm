@@ -187,6 +187,16 @@ public interface DeclarationDataDao extends PermissionDao {
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
 
     /**
+     * Найти все формы созданные в отчетном периоде
+     *
+     * @param declarationTypeId Идентификатор вида налоговой формы
+     * @param departmentIds     Список идентификаторов подразделений
+     * @param reportPeriodId    Идентификатор отчетного периода
+     * @return Список налоговых форм заданного вида, созданных в заданном периоде и принадлежащих заданным подразделениям
+     */
+    List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId);
+
+    /**
      * Найти НФ НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
      *
      * @param declarationTypeId

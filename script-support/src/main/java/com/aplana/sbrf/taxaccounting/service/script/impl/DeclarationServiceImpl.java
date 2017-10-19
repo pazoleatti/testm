@@ -124,6 +124,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    public List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId) {
+        return declarationDataDao.fetchAllDeclarationData(declarationTypeId, departmentIds, reportPeriodId);
+    }
+
+    @Override
     public String getXmlData(long declarationDataId) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);

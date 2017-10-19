@@ -1,4 +1,4 @@
-package refbook
+package refbook // declaration_type_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import groovy.transform.TypeChecked
