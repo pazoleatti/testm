@@ -127,7 +127,6 @@ alter table department_form_type add constraint dept_form_type_fk_kind foreign k
 alter table department_form_type_performer add constraint dept_form_type_perf_fk_perf foreign key (performer_dep_id) references department (id);
 alter table department_form_type_performer add constraint dept_form_type_perf_fk_id foreign key (department_form_type_id) references department_form_type (id) on delete cascade; 
 alter table declaration_source add constraint decl_source_fk_dept_decltype foreign key (department_declaration_type_id) references department_declaration_type(id) on delete cascade;
-alter table declaration_source add constraint decl_source_fk_dept_formtype foreign key (src_department_form_type_id) references department_form_type (id) on delete cascade;
 alter table form_data_source add constraint form_data_source_fk_dep_id foreign key (department_form_type_id) references department_form_type(id) on delete cascade;
 alter table form_data_source add constraint form_data_source_fk_src_dep_id foreign key (src_department_form_type_id) references department_form_type(id) on delete cascade;
 alter table sec_user_role add constraint sec_user_role_fk_user_id foreign key (user_id) references sec_user(id);

@@ -453,20 +453,6 @@ comment on column form_data_performer.phone is 'Телефон';
 comment on column form_data_performer.print_department_id is 'Подразделение, которое печатает налоговую форму';
 comment on column form_data_performer.report_department_name is 'Наименование подразделения, которое должно быть использовано в печатной форме';
 ---------------------------------------------------------------------------------------------------
-create table department_form_type (
-  id            number(9) not null,
-  department_id number(9) not null,
-  form_type_id  number(9) not null,
-  kind          number(9) not null
-);
-comment on table department_form_type is 'Связь подразделения банка с формой';
-comment on column department_form_type.id is 'Первичный ключ';
-comment on column department_form_type.department_id is 'Идентификатор подразделения';
-comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
-comment on column department_form_type.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
-
-create sequence seq_department_form_type start with 10000;
----------------------------------------------------------------------------------------------------
 create table declaration_source (
   department_declaration_type_id number(9) not null,
   src_department_form_type_id    number(9) not null,
@@ -567,28 +553,6 @@ comment on column department_report_period.correction_date is 'Период сд
 
 create sequence seq_department_report_period start with 1000;
 ------------------------------------------------------------------------------------------------------
-create table task_context (
-  id                  number(18, 0),
-  task_id             number(18, 0) not null,
-  task_name           varchar2(100) not null,
-  modification_date   date          not null,
-  user_task_jndi      varchar2(500) not null,
-  custom_params_exist number(9, 0)  not null,
-  serialized_params   blob          null,
-  user_id             number(9)     not null
-);
-comment on table task_context is 'Контекст пользовательских задач планировщика';
-comment on column task_context.id is 'Уникальный идентификатор записи';
-comment on column task_context.task_id is 'Идентификатор задачи планировщика websphere';
-comment on column task_context.task_name is 'Название задачи';
-comment on column task_context.user_task_jndi is 'JNDI-имя класса-обработчика задачи';
-comment on column task_context.custom_params_exist is 'Признак наличия пользовательских параметров';
-comment on column task_context.serialized_params is 'Сериализованные пользователькие параметры';
-comment on column task_context.modification_date is 'Дата последнего редактирования задачи';
-comment on column task_context.user_id is 'Идентификатор пользователя';
-
-create sequence seq_task_context start with 100;
-------------------------------------------------------------------------------------------------------
 create table notification (
   id                     number(18),
   report_period_id       number(9)              null,
@@ -654,14 +618,6 @@ comment on column event.id is 'Идентификатор события';
 comment on column event.name is 'Наименование события';
 
 create sequence seq_template_changes start with 10000;
---------------------------------------------------------------------------------------------------------
-create table role_event (
-  event_id number(9) not null,
-  role_id  number(9) not null
-);
-comment on table role_event is 'Настройка прав доступа к событиям журнала аудита по ролям';
-comment on column role_event.event_id is 'Идентификатор события';
-comment on column role_event.role_id is 'Идентификатор роли';
 --------------------------------------------------------------------------------------------------------
 create table lock_data
 (
@@ -886,30 +842,6 @@ comment on column form_data_ref_book.record_id is 'Идентификатор з
 create sequence seq_form_data_nnn start with 10000;
 
 --------------------------------------------------------------------------------------------------------
-create table log_clob_query
-(
-  id               number(9)                              not null,
-  form_template_id number(9),
-  sql_mode         varchar2(10),
-  text_query       clob,
-  log_date         timestamp(6) default current_timestamp not null,
-  session_id       number(18) default 0                   not null,
-  form_type_id     number(9,0)
-);
-
-comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
-comment on column log_clob_query.id is 'Идентификатор записи (seq_log_query)';
-comment on column log_clob_query.form_template_id is 'Идентификатор шаблона';
-comment on column log_clob_query.sql_mode is 'DDL/DML';
-comment on column log_clob_query.text_query is 'Текст запроса';
-comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
-comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
-comment on column log_clob_query.form_type_id is 'Идентификатор типа (при вызове из процедуры удаления)';
-
-create sequence seq_log_query start with 1;
-create sequence seq_log_query_session start with 1;
---------------------------------------------------------------------------------------------------------
-
 create table form_data_file
 (
   form_data_id         number(18)     not null,
@@ -926,34 +858,6 @@ comment on column form_data_file.user_name is 'Полное имя пользо�
 comment on column form_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
 comment on column form_data_file.note is 'Комментарий к файлу';
 
---------------------------------------------------------------------------------------------------------
-create table color
-(
-  id   number(3)     not null,
-  name varchar2(100) not null,
-  r    number(3)     not null,
-  g    number(3)     not null,
-  b    number(3)     not null,
-  hex  varchar2(7)   not null
-);
-
-comment on table color is 'Справочник цветов';
-comment on column color.id is 'Идентификатор записи';
-comment on column color.name is 'Наименование цвета';
-comment on column color.r is 'R';
-comment on column color.g is 'G';
-comment on column color.b is 'B';
-comment on column color.hex is 'Hex';
---------------------------------------------------------------------------------------------------------
-create table department_form_type_performer
-(
-  department_form_type_id number(9) not null,
-  performer_dep_id        number(9) not null
-);
-
-comment on table department_form_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
-comment on column department_form_type_performer.department_form_type_id is 'Идентификатор связи подразделения с формой';
-comment on column department_form_type_performer.performer_dep_id is 'Исполнитель';
 --------------------------------------------------------------------------------------------------------
 create table form_search_result
 (
@@ -1501,18 +1405,6 @@ create table state
 comment on table state is 'Статус формы';
 comment on column state.id is 'Уникальный идентификатор';
 comment on column state.name is 'Наименование';
-
-create table state_change
-(
- id number(18) not null,
- from_id number(1),
- to_id number(1) not null
-);
-
-comment on table state_change is 'Возможные переходы между статусами';
-comment on column state_change.id is 'Уникальный идентификатор';
-comment on column state_change.from_id is 'Из какого статуса переход';
-comment on column state_change.to_id is 'В какой статус переходим';
 --------------------------------------------------------------------------------------------------------------------------
 -- Журналирование действий пользователей
 --------------------------------------------------------------------------------------------------------------------------
