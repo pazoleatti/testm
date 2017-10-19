@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -386,9 +386,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             }
         } catch (BadValueException bve) {
             Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
-            List<GWTLogEntry> logEntries = new ArrayList<GWTLogEntry>();
+            List<LogEntry> logEntries = new ArrayList<LogEntry>();
             for (String entry : bve){
-                logEntries.add(new GWTLogEntry(LogLevel.ERROR, entry));
+                logEntries.add(new LogEntry(LogLevel.ERROR, entry));
             }
 
             SaveLogEntriesAction action = new SaveLogEntriesAction();

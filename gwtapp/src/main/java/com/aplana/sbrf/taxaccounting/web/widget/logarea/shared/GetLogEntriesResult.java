@@ -1,21 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.widget.logarea.shared;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.Map;
 
 public class GetLogEntriesResult implements Result {
-    private PagingResult<GWTLogEntry> logEntries;
+    private PagingResult<LogEntry> logEntries;
     private Map<LogLevel, Integer> logEntriesCount;
 
-    public PagingResult<GWTLogEntry> getLogEntries() {
+    public PagingResult<LogEntry> getLogEntries() {
         return logEntries;
     }
 
-    public void setLogEntries(PagingResult<GWTLogEntry> logEntries) {
+    public void setLogEntries(PagingResult<LogEntry> logEntries) {
         this.logEntries = logEntries;
     }
 

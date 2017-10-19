@@ -44,7 +44,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
             result.setLogId(rs.getString("log_id"));
             result.setOrd(rs.getInt("ord"));
-            result.setDate(new org.joda.time.LocalDateTime(rs.getTimestamp("creation_date")));
+            result.setDate(new org.joda.time.LocalDateTime(rs.getTimestamp("creation_date")).toDate());
             result.setLevel(LogLevel.fromId(rs.getInt("log_level")));
 
             String msg = rs.getString("message");
@@ -125,7 +125,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             i++;
             sqlQueryFactory.insert(logEntry)
                     .set(logEntry.logId, id)
-                    .set(logEntry.creationDate, aLogEntry.getDate())
+                    .set(logEntry.creationDate, LocalDateTime.fromDateFields(aLogEntry.getDate()))
                     .set(logEntry.logLevel, (byte) aLogEntry.getLevel().getId())
                     .set(logEntry.type, aLogEntry.getType())
                     .set(logEntry.message, aLogEntry.getMessage())

@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -472,7 +472,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                     super.yes();
                                                     AddLogAction addLogAction = new AddLogAction();
                                                     addLogAction.setOldUUID(result.getUuid());
-                                                    addLogAction.setMessages(Arrays.asList(new GWTLogEntry(LogLevel.WARNING,
+                                                    addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
                                                             "Для актуализации данных в найденных экземплярах налоговых форм их необходимо рассчитать/обновить")));
                                                     dispatcher.execute(addLogAction, CallbackUtils
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {

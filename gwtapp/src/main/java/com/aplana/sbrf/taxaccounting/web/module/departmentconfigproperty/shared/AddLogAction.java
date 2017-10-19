@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared;
 
-import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.List;
 
 public class AddLogAction extends UnsecuredActionImpl<AddLogResult> {
     String oldUUID;
-    List<GWTLogEntry> messages;
+    List<LogEntry> messages;
 
-    public List<GWTLogEntry> getMessages() {
+    public List<LogEntry> getMessages() {
         return messages;
     }
 
-    public void setMessages(List<GWTLogEntry> messages) {
+    public void setMessages(List<LogEntry> messages) {
         this.messages = messages;
     }
 
