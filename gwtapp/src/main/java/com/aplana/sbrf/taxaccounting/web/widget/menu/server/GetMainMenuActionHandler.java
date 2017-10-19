@@ -131,8 +131,8 @@ public class GetMainMenuActionHandler extends
             MenuItem adminMenuItem = new MenuItem("Администрирование");
             if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                     TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
-                //adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", NUMBER_SIGN
-                //        + LockTokens.lockList));
+                adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", "index.html#/administration/locks"));
+                adminMenuItem.getSubMenu().add(new MenuItem("Асинхронные задачи", "index.html#/administration/async"));
             }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {

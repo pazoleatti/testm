@@ -10,11 +10,6 @@
                 <span class="glyphicon glyphicon-file"></span>
                 <span data-translate-once="ndflReportJournal.button.createReport"></span>
             </button>
-            <button type="button" class="btn btn-default" style="width: 175px;"
-                    data-ng-click="downloadReport()">
-                <span class="glyphicon glyphicon-file"></span>
-                <span data-translate-once="ndflReportJournal.button.downloadReport"></span>
-            </button>
         </div>
     </div>
 
@@ -58,6 +53,14 @@
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)"
                                 data-ng-click="returnToCreated()">
                             <span data-translate-once="button.return"></span>
+                        </button>
+                    </span>
+                    <!--Выгрузить отчетность-->
+                    <span>
+                        <button type="button" class="btn btn-danger"
+                                data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DOWNLOAD_REPORTS)"
+                                data-ng-click="downloadReports()">
+                            <span data-translate-once="ndflReportJournal.button.downloadReport"></span>
                         </button>
                     </span>
                 </div>

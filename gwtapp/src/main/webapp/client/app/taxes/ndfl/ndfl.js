@@ -63,7 +63,8 @@
                     if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableSpecificReport)) {
                         DeclarationDataResource.query({
                                 declarationDataId: $stateParams.declarationDataId,
-                                projection: "availableReports"
+                                projection: "availableReports",
+                                nooverlay: true
                             },
                             function (data) {
                                 if (data) {

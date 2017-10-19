@@ -43,6 +43,8 @@ import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -582,8 +584,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
 
-        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
+        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
+                DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
+                DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
+                DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
 
         result.setPermissions(declaration.getPermissions());
 
@@ -876,8 +881,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
             for (DeclarationDataJournalItem item : page) {
                 DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
-                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW, DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK, DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE, DeclarationDataPermission.EDIT_ASSIGNMENT);
+                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
+                        DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
+                        DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
+                        DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
                 item.setPermissions(declaration.getPermissions());
             }
         }
@@ -2790,26 +2798,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return declarationDataDao.existDeclarationData(declarationDataId);
     }
 
-    @Override
-    public String preCreateReports(Logger logger, TAUserInfo userInfo, DepartmentReportPeriod departmentReportPeriod, int declarationTypeId) {
-        String toReturn = null;
-        DeclarationData declarationDataTemp = new DeclarationData();
-        declarationDataTemp.setDeclarationTemplateId(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
-        declarationDataTemp.setDepartmentReportPeriodId(departmentReportPeriod.getId());
-
+    private boolean preCreateReports(Logger logger, TAUserInfo userInfo, DeclarationData declarationData) {
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
         exchangeParams.put("paramMap", paramMap);
 
         declarationDataScriptingService.executeScript(userInfo,
-                declarationDataTemp, FormDataEvent.PRE_CREATE_REPORTS, logger, exchangeParams);
-        // Проверяем ошибки
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            if (paramMap.containsKey("errMsg")) {
-                toReturn = (String) paramMap.get("errMsg");
-            }
-        }
-        return toReturn;
+                declarationData, FormDataEvent.PRE_CREATE_REPORTS, logger, exchangeParams);
+        return (Boolean) paramMap.get("successfullPreCreate");
     }
 
     @Override
@@ -2934,5 +2930,107 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             notifications.add(notification);
             notificationService.saveList(notifications);
         }
+    }
+
+
+    @Override
+    public ActionResult downloadReports(TAUserInfo userInfo, List<Long> declarationDataIdList) {
+        Logger logger = new Logger();
+        ActionResult result = new ActionResult();
+        List<DeclarationData> declarationDataList = declarationDataDao.get(declarationDataIdList);
+        List<DeclarationData> succesfullPreCreateDeclarationDataList = new LinkedList<DeclarationData>();
+        List<DeclarationData> unsuccesfullPreCreateDeclarationDataList = new LinkedList<DeclarationData>();
+        for (DeclarationData declarationData : declarationDataList) {
+            if (preCreateReports(logger, userInfo, declarationData)) {
+                succesfullPreCreateDeclarationDataList.add(declarationData);
+            } else {
+                unsuccesfullPreCreateDeclarationDataList.add(declarationData);
+            }
+        }
+        if (succesfullPreCreateDeclarationDataList.isEmpty()) {
+            logger.error("Отчетность не выгружена. В выбранных отчетных формах некорректное количество файлов " +
+                    "формата xml, категория которых равна \"Исходящий в ФНС\", должно быть файлов: один");
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        }
+        for (DeclarationData declarationData : unsuccesfullPreCreateDeclarationDataList) {
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
+            Department department = departmentService.getDepartment(departmentReportPeriod.getId());
+            String strCorrPeriod = "";
+            if (departmentReportPeriod.getCorrectionDate() != null) {
+                SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+                strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
+            }
+            String msg = String.format("Отчетность %s за период %s, подразделение: \"%s\" не выгружена. В налоговой" +
+                            "форме № %d некорректное количество файлов формата xml, категория которых равна \"Исходящий в ФНС\"," +
+                            "должно быть файлов: один",
+                    declarationTemplate.getName(),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                    department.getShortName(),
+                    declarationData.getId());
+            logger.warn(msg);
+        }
+
+
+        String reportId = createReports(succesfullPreCreateDeclarationDataList, userInfo);
+
+        sendNotification("Подготовлена к выгрузке отчетность", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.REF_BOOK_REPORT, reportId);
+
+        return result;
+    }
+
+    private String createReports(List<DeclarationData> declarationDataList, TAUserInfo userInfo) {
+        File reportFile = null;
+        ZipArchiveOutputStream zos = null;
+        try {
+            reportFile = File.createTempFile("reports", ".dat");
+            zos = new ZipArchiveOutputStream(new BufferedOutputStream(new FileOutputStream(reportFile)));
+            Map<Integer, Department> departmentMap = new HashMap<Integer, Department>();
+            Map<Integer, DepartmentReportPeriod> departmentReportPeriodMap = new HashMap<Integer, DepartmentReportPeriod>();
+            for (DeclarationData declarationData : declarationDataList) {
+                Department department = departmentMap.get(declarationData.getDepartmentId());
+                DepartmentReportPeriod drp = departmentReportPeriodMap.get(declarationData.getDepartmentReportPeriodId());
+                if (department == null) {
+                    department = departmentService.getDepartment(declarationData.getDepartmentId());
+                    departmentMap.put(department.getId(), department);
+                }
+                if (drp == null) {
+                    drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
+                    departmentReportPeriodMap.put(drp.getId(), drp);
+                }
+                String departmentName = department.getShortName();
+                String strCorrPeriod = "";
+                if (drp.getCorrectionDate() != null) {
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+                    strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(drp.getCorrectionDate());
+                }
+                ZipArchiveEntry ze = new ZipArchiveEntry("Отчетность подразделения: " + departmentName + "/"
+                        + "Период: " + drp.getReportPeriod().getTaxPeriod().getYear()
+                        + ", " + drp.getReportPeriod().getName() + strCorrPeriod + "/" + declarationData.getTaxOrganCode()
+                        + "/" + declarationData.getFileName() + ".xml");
+                zos.putArchiveEntry(ze);
+                ZipInputStream zipXml = null;
+                try {
+                    zipXml = new ZipInputStream(getXmlDataAsStream(declarationData.getId(), userInfo));
+                    zipXml.getNextEntry();
+                    IOUtils.copy(zipXml, zos);
+                    zos.closeArchiveEntry();
+                } catch (IOException e) {
+                    throw new ServiceException(e.getLocalizedMessage(), e);
+                } finally {
+                    IOUtils.closeQuietly(zipXml);
+                }
+            }
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            if (zos != null) {
+                IOUtils.closeQuietly(zos);
+            }
+        }
+        Date creationDate = new Date();
+        String fileName = "Выгрузка отчетности " + new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(creationDate) + ".zip";
+        return blobDataService.create(reportFile, fileName, new LocalDateTime(creationDate));
     }
 }

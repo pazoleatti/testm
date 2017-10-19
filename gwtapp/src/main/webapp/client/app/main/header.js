@@ -204,7 +204,8 @@
 
                 $scope.updateNotificationCount = function () {
                     NotificationResource.query({
-                        projection: 'count'
+                        projection: 'count',
+                        nooverlay: true
                     }, function (data) {
                         if (parseInt(data.notifications_count) !== 0) {
                             $scope.notificationsCount = parseInt(data.notifications_count);

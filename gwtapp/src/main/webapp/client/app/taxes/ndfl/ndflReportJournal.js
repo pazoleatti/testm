@@ -14,8 +14,8 @@
             });
         }])
 
-        .controller('ndflReportJournalCtrl', ['$scope', '$state', '$stateParams', '$rootScope', 'ShowToDoDialog', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals', 'APP_CONSTANTS', 'PermissionChecker',
-            function ($scope, $state, $stateParams, $rootScope, $showToDoDialog, $filter, DeclarationDataResource, $http, $logPanel, appModals, APP_CONSTANTS, PermissionChecker) {
+        .controller('ndflReportJournalCtrl', ['$scope', '$state', '$stateParams', '$rootScope', '$filter', 'DeclarationDataResource', '$http', '$logPanel', 'appModals', 'APP_CONSTANTS', 'PermissionChecker',
+            function ($scope, $state, $stateParams, $rootScope, $filter, DeclarationDataResource, $http, $logPanel, appModals, APP_CONSTANTS, PermissionChecker) {
                 $scope.reportCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_REPORT);
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
                 var defaultCorrectionTag = APP_CONSTANTS.CORRETION_TAG.ALL;
@@ -59,10 +59,6 @@
                         }
                     });
                 };
-                $scope.downloadReport = function () {
-                    $showToDoDialog();
-                };
-
 
                 /**
                  * Проверка, может ли текущий пользоватеть выполнить операцию над выделенными налоговыми формами
@@ -262,6 +258,23 @@
                                 $state.go($state.current, params, {reload: true});
                             });
                         });
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Выгрузить отчетность"
+                 */
+                $scope.downloadReports = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/downloadReports",
+                        params: {
+                            declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
+                        }
+                    }).then(function (response) {
+                        //Обновить страницу и, если есть сообщения, показать их
+                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                        $state.go($state.current, params, {reload: false});
+                    });
                 };
 
                 /**

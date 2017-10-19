@@ -106,6 +106,21 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     }
 
     @Override
+    protected String getPackageName(String script) {
+        try {
+            String packageWord = "package";
+            String scriptLines[] = script.split("\\r\\n|\\n|\\r");
+            String packageName = scriptLines[0].substring(script.indexOf(packageWord) + packageWord.length() + 1, scriptLines[0].indexOf("//")).trim();
+            String searchComment = scriptLines[0].substring(scriptLines[0].indexOf("//") + 3).trim();
+            String fileName = searchComment.substring(0, searchComment.indexOf(" ")).trim();
+            return packageName + "." + fileName;
+        } catch (Exception e) {
+            LOG.warn(e.getMessage(), e);
+            throw new ServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public boolean executeScriptInNewReadOnlyTransaction(final TAUserInfo userInfo, final RefBook refBook, final String script, final FormDataEvent event, final Logger logger, final Map<String, Object> additionalParameters) {
         boolean result = tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
             @Override

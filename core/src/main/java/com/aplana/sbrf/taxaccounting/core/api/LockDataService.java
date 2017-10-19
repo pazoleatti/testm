@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.core.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -68,13 +67,6 @@ public interface LockDataService {
      */
     LockData getLock(String key);
 
-    /**
-     * Возвращает информацию о всех блокировках, код которых начинающинается c key
-     * @param key
-     * @return
-     */
-    List<LockData> getLockStartsWith(String key);
-
 	/**
 	 * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
 	 *
@@ -94,8 +86,6 @@ public interface LockDataService {
      */
     Boolean unlock(String key, int userId, boolean force);
 
-    void unlockAll(TAUserInfo userInfo);
-
     /**
      * Убрать все блокировки пользователя.
      *
@@ -111,14 +101,6 @@ public interface LockDataService {
      * @return блокировка установлена?
      */
     boolean isLockExists(String key, boolean like);
-
-    /**
-     * Проверяет, установлена ли блокировка на указанном объекте с определенной датой окончания действия блокировки
-     * @param key код блокировки
-     * @param lockDate дата начала действия блокировки
-     * @return блокировка установлена?
-     */
-    boolean isLockExists(String key, Date lockDate);
 
 	/**
 	 * Получает список всех блокировок в виде объектов предназначенных для отображения в GUI
