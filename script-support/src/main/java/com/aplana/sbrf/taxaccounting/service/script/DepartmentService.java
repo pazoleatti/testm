@@ -30,12 +30,21 @@ public interface DepartmentService {
      */
     List<Department> getAllChildren(int parentDepartmentId);
 
+    /**
+     * Получить список идентификаторов подразделений, для которых заланное является дочерним. К списку добавляется само подразделение
+     *
+     * @param childDepartmentId Идентификатор дочернего подразделения
+     * @return Список идентификаторов родительских подразделений
+     */
+    List<Integer> fetchAllParentDepartmentsIds(int childDepartmentId);
+
     Integer getParentTBId(int departmentId);
 
     Department getBankDepartment();
 
     /**
      * Получение идентификаторов подразделений по типу
+     *
      * @param type тип подразделения
      * @return список идентификаторов подразделений
      */
@@ -48,6 +57,7 @@ public interface DepartmentService {
 
     /**
      * Получить подразделения по списку идентификаторов
+     *
      * @param departmentIds список идентификаторов
      * @return набор сочетаний идентификатор-подразделение
      */
@@ -55,6 +65,7 @@ public interface DepartmentService {
 
     /**
      * Возвращает путь в иерархии до указанного подразделения использую краткое имя подразделения
+     *
      * @param departmentId подразделение до которого строится иерархия
      * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
      */
@@ -62,6 +73,7 @@ public interface DepartmentService {
 
     /**
      * Поиск названия подразделения по паре КПП/ОКТМО с учетом версии настроек подразделения
+     *
      * @param kpp
      * @param oktmo
      * @param reportPeriodEndDate
