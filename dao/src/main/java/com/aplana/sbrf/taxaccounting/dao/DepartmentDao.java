@@ -64,6 +64,14 @@ public interface DepartmentDao extends PermissionDao {
     List<Integer> getAllChildrenIds(List<Integer> parentDepartmentIds);
 
     /**
+     * Получить список идентификаторов подразделений, для которых заланное является дочерним. К списку добавляется само подразделение
+     *
+     * @param childDepartmentId Идентификатор дочернего подразделения
+     * @return Список идентификаторов родительских подразделений
+     */
+    List<Integer> fetchAllParentDepartmentsIds(int childDepartmentId);
+
+    /**
      * Возвращает путь в иерархии до указанного подразделения до корневого (не включительно),
      * если в параметр departmentId передается id корневого подразделения, то возвращается его наименование
      *

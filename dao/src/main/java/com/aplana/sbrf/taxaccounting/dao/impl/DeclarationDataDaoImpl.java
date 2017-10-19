@@ -10,9 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -87,6 +89,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             declarationData.taxOrganCode.as("taxOrganCode"),
             refBookDocState.name.as("docState"),
             declarationData.note.as("note"));
+
+    final private Expression<State> declarationStateExpression = new CaseBuilder()
+            .when(declarationData.state.eq((byte) 1)).then(State.CREATED)
+            .when(declarationData.state.eq((byte) 2)).then(State.PREPARED)
+            .when(declarationData.state.eq((byte) 3)).then(State.ACCEPTED)
+            .otherwise(State.NOT_EXIST)
+            .as("state");
+
+    final private QBean<DeclarationData> declarationDataQBean = bean(DeclarationData.class, declarationData.id, declarationData.declarationTemplateId,
+            declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo, declarationStateExpression,
+            declarationData.departmentReportPeriodId.intValue().as("departmentReportPeriodId"), declarationData.asnuId,
+            declarationData.note, declarationData.fileName, declarationData.docStateId.as("docState"),
+            departmentReportPeriod.reportPeriodId.as("reportPeriodId"), departmentReportPeriod.departmentId.as("departmentId"));
 
     public DeclarationDataDaoImpl(SQLQueryFactory sqlQueryFactory) {
         this.sqlQueryFactory = sqlQueryFactory;
@@ -845,6 +860,19 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId) {
+        return sqlQueryFactory
+                .select(declarationDataQBean)
+                .from(declarationData)
+                .innerJoin(declarationData.declarationDataFkDeclTId, declarationTemplate)
+                .innerJoin(declarationData.declDataFkDepRepPerId, departmentReportPeriod)
+                .where(declarationTemplate.declarationTypeId.eq((long) declarationTypeId)
+                        .and(departmentReportPeriod.departmentId.in(departmentIds))
+                        .and(departmentReportPeriod.reportPeriodId.eq(reportPeriodId)))
+                .fetch();
     }
 
     @Override

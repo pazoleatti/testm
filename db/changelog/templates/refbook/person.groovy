@@ -1,4 +1,4 @@
-package refbook.person
+package refbook.person // person_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import groovy.transform.TypeChecked

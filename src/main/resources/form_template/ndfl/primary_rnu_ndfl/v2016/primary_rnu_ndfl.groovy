@@ -167,11 +167,11 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
-        //Идентификатор подразделения по которому формируется консолидированная форма
-        def parentDepartmentId = declarationData.departmentId
-        Department department = departmentService.get(parentDepartmentId)
-        List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
+        //Получаем список всех родительских подразделений и ищем для них консолидированные формы в нужном периоде
+        List<Integer> parentDepartments = departmentService.fetchAllParentDepartmentsIds(declarationData.departmentId)
+        List<DeclarationData> declarationDataList = declarationService.fetchAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, parentDepartments, declarationDataReportPeriod.id);
         for (DeclarationData declarationDataDestination : declarationDataList) {
+            Department department = departmentService.get(declarationDataDestination.departmentId)
             if (departmentReportPeriod.correctionDate != null) {
                 DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
                 if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {

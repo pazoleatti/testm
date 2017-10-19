@@ -31,6 +31,7 @@ public interface DeclarationService {
 
     /**
      * Получить декларации
+     *
      * @param declarationDataIds идентификатор декларации
      * @return объект декларации
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
@@ -49,6 +50,7 @@ public interface DeclarationService {
 
     /**
      * Поиск деклараций по имени файла
+     *
      * @param fileName - имя файла
      * @return
      */
@@ -64,6 +66,16 @@ public interface DeclarationService {
      * Найти все декларации созданные в отчетном периоде
      */
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);
+
+    /**
+     * Найти все налоговые формы, созданные в отчетном периоде и принадлежащие заданным подразделениям
+     *
+     * @param declarationTypeId Вид налоговой формы
+     * @param departmentIds     Список идентификаторов подразделений
+     * @param reportPeriodId    Идентификатор отчетного периода
+     * @return Список налоговых форм заданного вида, созданных в отчетном периоде и принадлежащих заданным подразделениям
+     */
+    List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
@@ -156,7 +168,7 @@ public interface DeclarationService {
      *
      * @param jrxml      исходный jrxml-шаблон отчета
      * @param parameters
-     * @param xmlData   xml поток входных данных
+     * @param xmlData    xml поток входных данных
      * @return сформированный отчет
      */
     JasperPrint createJasperReport(InputStream jrxml, Map<String, Object> parameters, InputStream xmlData);
@@ -196,6 +208,7 @@ public interface DeclarationService {
 
     /**
      * Получение вида декларации по ее идентификатору
+     *
      * @param declarationTypeId
      * @return
      */
@@ -203,6 +216,7 @@ public interface DeclarationService {
 
     /**
      * Получение вида декларации по идентификатору шаблона
+     *
      * @param declarationTemplateId
      * @return
      */
@@ -210,6 +224,7 @@ public interface DeclarationService {
 
     /**
      * Получение шаблона налоговой декларации по ее идентификатору
+     *
      * @param declarationTemplateId
      * @return
      */
@@ -225,46 +240,52 @@ public interface DeclarationService {
 
     /**
      * Удаляет все отчеты налоговой формы
+     *
      * @param declarationDataId
      */
     void deleteReport(long declarationDataId);
 
     /**
      * Удаляет отчеты заданных типов
+     *
      * @param declarationDataId
      */
     void deleteReport(long declarationDataId, List<DeclarationDataReportType> declarationDataReportTypeList);
 
     /**
      * Метод передающий управление на проверку декларации сторонней утилите
+     *
      * @param declarationData
      * @param userInfo
      * @param logger
-     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
+     * @param dataFile        - если не задан, то вызывается проверка привязанной к форме xml
      */
     void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile);
 
     /**
      * Метод передающий управление на проверку декларации сторонней утилите
+     *
      * @param declarationData
      * @param userInfo
      * @param logger
-     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
+     * @param dataFile        - если не задан, то вызывается проверка привязанной к форме xml
      */
     void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName);
 
     /**
      * Метод передающий управление на проверку декларации сторонней утилите
+     *
      * @param declarationData
      * @param userInfo
      * @param logger
-     * @param dataFile - если не задан, то вызывается проверка привязанной к форме xml
+     * @param dataFile        - если не задан, то вызывается проверка привязанной к форме xml
      * @param xsdBlobDataId
      */
     void validateDeclaration(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, File dataFile, String fileName, String xsdBlobDataId);
 
     /**
      * Метод передающий управление на проверку xml по xsd схеме сторонней утилите
+     *
      * @param userInfo
      * @param logger
      * @param xmlFile
@@ -276,15 +297,17 @@ public interface DeclarationService {
     /**
      * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации
      * Такое описание для каждого вида декларации в любой момент времени может быть только одно
+     *
      * @param declarationTypeId идентификатор вида декларации
      * @return идентификатор описания декларации
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не удалось найти активное описание декларации по заданному типу,
-     * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
+     *                                                                    или если обнаружено несколько действуюшие описаний по данному виду декларации
      */
     int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId);
 
     /**
      * Получение тела скрипта.
+     *
      * @param declarationTemplateId идентификатор вида декларации
      * @return тело скрипта
      */
@@ -303,6 +326,7 @@ public interface DeclarationService {
 
     /**
      * Получние id для всех деклараций по фильтру.
+     *
      * @param declarationFilter
      * @param ordering
      * @param asc
@@ -311,7 +335,6 @@ public interface DeclarationService {
     List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc);
 
     /**
-     *
      * @param logger
      * @param userInfo
      * @param declarationData
@@ -326,6 +349,7 @@ public interface DeclarationService {
 
     /**
      * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
+     *
      * @param declarationTypeId
      * @param departmentReportPeriodId
      * @param departmentId
@@ -361,8 +385,9 @@ public interface DeclarationService {
 
     /**
      * Установить ссстояние ЭД налоговой формы
+     *
      * @param declarationDataId идентификатор налоговой формы
-     * @param docStateId ссстояние ЭД
+     * @param docStateId        ссстояние ЭД
      * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой налоговой формы не существует
      */
     void setDocStateId(long declarationDataId, Long docStateId);
@@ -374,6 +399,7 @@ public interface DeclarationService {
 
     /**
      * Формирует Pdf отчет формы
+     *
      * @param logger
      * @param declarationData
      * @param userInfo
@@ -382,6 +408,7 @@ public interface DeclarationService {
 
     /**
      * Найти данные по файлам НФ имеющие указаныый тип
+     *
      * @param declarationDataId
      * @param fileTypeName
      * @return
@@ -390,12 +417,13 @@ public interface DeclarationService {
 
     /**
      * Найти id деклараций для периода, вида декларации, вида подразделения, статусу
+     *
      * @param reportPeriodId
-     * @param ndflId id подразделения в шапке справочника подразделений
-     * @param declarationTypeId вид декларации
-     * @param departmentType вид подразделения
+     * @param ndflId                       id подразделения в шапке справочника подразделений
+     * @param declarationTypeId            вид декларации
+     * @param departmentType               вид подразделения
      * @param departmentReportPeriodStatus статус
-     * @param declarationState статус декларации
+     * @param declarationState             статус декларации
      * @return
      */
     List<Integer> findDeclarationDataIdByTypeStatusReportPeriod(Integer reportPeriodId, Long ndflId,
@@ -404,6 +432,7 @@ public interface DeclarationService {
 
     /**
      * Найти все формы всех подразделений в активном периоде по виду и периоду
+     *
      * @param declarationTypeId
      * @param reportPeriodId
      * @return
@@ -412,6 +441,7 @@ public interface DeclarationService {
 
     /**
      * Найти НФ по типу, периоду, и значениям Налоговый орган, КПП, ОКТМО
+     *
      * @param declarationTemplate
      * @param departmentReportPeriodId
      * @param taxOrganCode
@@ -423,13 +453,15 @@ public interface DeclarationService {
 
     /**
      * Находит все пары КПП/ОКТМО которых нет в справочнике Подразделений, но которые представлены у  операций относящихся к НФ
+     *
      * @param declarationDataId
      * @return
      */
-    List<Pair<String, String >> findNotPresentedPairKppOktmo(Long declarationDataId);
+    List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId);
 
     /**
      * Получает мапу созданных блокировок по основным операциям формы
+     *
      * @param declarationDataId
      * @return
      */
@@ -437,6 +469,7 @@ public interface DeclarationService {
 
     /**
      * Генерация ключа блокировки для асинхронных задач по НФ
+     *
      * @param declarationDataId
      * @param type
      * @return код блокировки
@@ -445,6 +478,7 @@ public interface DeclarationService {
 
     /**
      * Создание блокировки на удаление НФ
+     *
      * @param declarationDataId
      * @param userInfo
      * @return если блокировка успешно создана, то возвращает её, иначе null
@@ -453,7 +487,8 @@ public interface DeclarationService {
 
     /**
      * Удаляет все формы заданного вида в заданном отчетном периоде
-     * @param declarationTypeId вид НФ
+     *
+     * @param declarationTypeId        вид НФ
      * @param departmentReportPeriodId отчетный период
      * @param logger
      * @param userInfo
@@ -463,9 +498,10 @@ public interface DeclarationService {
 
     /**
      * метод запускает скрипты с событием проверить
+     *
      * @param declarationDataId идентификатор декларации
-     * @param userInfo информация о пользователе, выполняющего действие
-     * @param logger - объект журнала
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param logger            - объект журнала
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
