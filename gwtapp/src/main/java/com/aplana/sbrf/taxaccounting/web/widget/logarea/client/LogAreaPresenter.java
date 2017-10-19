@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.logarea.client;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -30,9 +30,9 @@ public class LogAreaPresenter extends
 
     private boolean rangeChangeHandle = true;
 
-    private AsyncDataProvider<LogEntry> dataProvider = new AsyncDataProvider<LogEntry>() {
+    private AsyncDataProvider<GWTLogEntry> dataProvider = new AsyncDataProvider<GWTLogEntry>() {
         @Override
-        protected void onRangeChanged(HasData<LogEntry> display) {
+        protected void onRangeChanged(HasData<GWTLogEntry> display) {
             if (!rangeChangeHandle) {
                 return;
             }
@@ -121,7 +121,7 @@ public class LogAreaPresenter extends
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetLogEntriesResult>() {
             @Override
             public void onSuccess(GetLogEntriesResult result) {
-                PagingResult<LogEntry> logEntries = result.getLogEntries();
+                PagingResult<GWTLogEntry> logEntries = result.getLogEntries();
                 if (logEntries.isEmpty()) {
                     clean();
                     hide();

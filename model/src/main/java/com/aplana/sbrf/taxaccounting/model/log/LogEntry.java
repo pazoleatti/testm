@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.log;
 
+import org.joda.time.LocalDateTime;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -24,7 +26,7 @@ public class LogEntry implements Serializable {
     /**
      * Дата и время формирования сообщения
      */
-    private Date date;
+    private LocalDateTime date;
 
     /**
      * Уровень важности сообщения
@@ -61,7 +63,7 @@ public class LogEntry implements Serializable {
     public LogEntry(LogLevel level, String message) {
         this.level = level;
         setMessage(message);
-        this.date = new Date();
+        this.date = new LocalDateTime();
     }
 
     public LogEntry(LogLevel level, String message, String type, String object) {
@@ -69,7 +71,7 @@ public class LogEntry implements Serializable {
         setMessage(message);
         setType(type);
         setObject(object);
-        this.date = new Date();
+        this.date = new LocalDateTime();
     }
 
     /**
@@ -104,11 +106,11 @@ public class LogEntry implements Serializable {
         this.ord = ord;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

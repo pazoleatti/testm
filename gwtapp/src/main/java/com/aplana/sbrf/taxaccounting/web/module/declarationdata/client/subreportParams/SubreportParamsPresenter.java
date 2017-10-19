@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.subrepor
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -275,9 +275,9 @@ public class SubreportParamsPresenter extends PresenterWidget<SubreportParamsPre
     }
 
     private SaveLogEntriesAction createLogEntriesActionFromException(AbstractBadValueException exception, LogLevel logLevel) {
-        List<LogEntry> logEntries = new ArrayList<LogEntry>();
+        List<GWTLogEntry> logEntries = new ArrayList<GWTLogEntry>();
         for (String entry : exception) {
-            logEntries.add(new LogEntry(logLevel, entry));
+            logEntries.add(new GWTLogEntry(logLevel, entry));
         }
 
         SaveLogEntriesAction action = new SaveLogEntriesAction();
