@@ -1,4 +1,4 @@
-package refbook
+package refbook // id_doc_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.PagingResult
