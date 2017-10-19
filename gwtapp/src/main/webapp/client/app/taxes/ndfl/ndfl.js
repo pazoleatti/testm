@@ -59,6 +59,10 @@
 
                 initPage();
 
+                /**
+                 * @description Проверяет готовность отчетов у открытой формы
+                 */
+                // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports () {
                     if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableSpecificReport)) {
                         DeclarationDataResource.query({
@@ -74,7 +78,7 @@
                                     if (!$scope.intervalId){
                                         $scope.intervalId = $interval(function () {
                                             updateAvailableReports();
-                                        }, 60000);
+                                        }, 10000);
                                     }
                                 }
                             }
