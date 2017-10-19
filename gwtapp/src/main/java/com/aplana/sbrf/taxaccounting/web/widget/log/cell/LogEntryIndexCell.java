@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.log.cell;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -11,7 +11,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 /**
  * Ячейка для вывода номера сообщения в журнале выполнения скриптов
  */
-public class LogEntryIndexCell extends AbstractCell<LogEntry> {
+public class LogEntryIndexCell extends AbstractCell<GWTLogEntry> {
 
 	interface Templates extends SafeHtmlTemplates {
 		@SafeHtmlTemplates.Template("<span>{0}</span>")
@@ -21,7 +21,7 @@ public class LogEntryIndexCell extends AbstractCell<LogEntry> {
 	private static Templates templates = GWT.create(Templates.class);
 
 	@Override
-	public void render(com.google.gwt.cell.client.Cell.Context context, LogEntry value, SafeHtmlBuilder sb) {
+	public void render(com.google.gwt.cell.client.Cell.Context context, GWTLogEntry value, SafeHtmlBuilder sb) {
 		if (value == null) {
 			return;
 		}
