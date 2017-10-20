@@ -1221,4 +1221,20 @@
         <dropTable cascadeConstraints="true"
                    tableName="TASK_CONTEXT"/>
     </changeSet>
+
+    <!-- SBRFNDFL-1205 НДФЛ. Формирование отчета "РНУ НДФЛ по всем ФЛ". Ошибка при открытии xls, если в отчете нет ФЛ  -->
+    <changeSet id="2.1-ytrofimov-13" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-14" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>id=101</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
