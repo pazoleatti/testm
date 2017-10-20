@@ -50,6 +50,22 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
             departmentTypeExpression, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code, departmentFullpath.shortname.as("fullPath"));
 
     /**
+     * Получение значения справочника по идентификатору
+     *
+     * @param id Идентификатор подразделения
+     * @return Знечение справочника
+     */
+    @Override
+    public RefBookDepartment fetchDepartmentById(Integer id) {
+        return sqlQueryFactory
+                .select(refBookDepartmentBean)
+                .from(department)
+                .innerJoin(departmentFullpath).on(department.id.eq(departmentFullpath.id))
+                .where(department.isActive.eq((byte) 1).and(department.id.eq(id)))
+                .fetchFirst();
+    }
+
+    /**
      * Получение значений справочника по идентификаторам
      *
      * @param ids Список идентификаторов

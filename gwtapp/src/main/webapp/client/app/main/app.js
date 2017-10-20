@@ -91,7 +91,7 @@
                 $rootScope.user = {
                     name: data.taUserInfo.user.name,
                     login: data.taUserInfo.user.login,
-                    department: {id: data.taUserInfo.user.departmentId, name: data.department},
+                    department: data.department,
                     permissions: data.taUserInfo.user.permissions,
                     roles: data.taUserInfo.user.roles,
                     hasRole: function (role) {

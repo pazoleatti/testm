@@ -101,6 +101,14 @@
                 ALL: {id: 0, name: "Все периоды"},
                 ONLY_PRIMARY: {id: 1, name: "Только не корректирующие"},
                 ONLY_CORRECTIVE: {id: 2, name: "Только корректирующие"},
+            },
+            //Временное решение https://jira.aplana.com/browse/SBRFNDFL-2133, убрать в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
+            DECLARATION_TYPE: {
+                RNU_NDFL_PRIMARY: {id: 100, name: "РНУ_НДФЛ (первичная)"},
+                RNU_NDFL_CONSOLIDATED: {id: 101, name: "РНУ_НДФЛ (консолидированная)"},
+                REPORT_2_NDFL_1: {id: 102, name: "2-НДФЛ (1)"},
+                REPORT_6_NDFL: {id: 103, name: "6-НДФЛ"},
+                REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"},
             }
         });
 }());

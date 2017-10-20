@@ -12,6 +12,14 @@ import java.util.List;
  */
 public interface RefBookDepartmentDataService {
     /**
+     * Получение подркзделения пользователя
+     *
+     * @param user Пользователь
+     * @return Подразделение
+     */
+    RefBookDepartment fetchUserDepartment(TAUser user);
+
+    /**
      * Получение доступных (согласно правам доступа пользователя)  значений справочника
      *
      * @param user Пользователь

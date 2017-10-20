@@ -12,6 +12,14 @@ import java.util.List;
  */
 public interface RefBookDepartmentDataDao {
     /**
+     * Получение значения справочника по идентификатору
+     *
+     * @param id Идентификатор подразделения
+     * @return Знечение справочника
+     */
+    RefBookDepartment fetchDepartmentById(Integer id);
+
+    /**
      * Получение значений справочника по идентификаторам
      *
      * @param ids Список идентификаторов
