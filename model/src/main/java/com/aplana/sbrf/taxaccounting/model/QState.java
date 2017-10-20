@@ -30,10 +30,6 @@ public class QState extends com.querydsl.sql.RelationalPathBase<QState> {
 
     public final com.querydsl.sql.PrimaryKey<QState> statePk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QStateChange> _stateChangeFromFk = createInvForeignKey(id, "FROM_ID");
-
-    public final com.querydsl.sql.ForeignKey<QStateChange> _stateChangeToFk = createInvForeignKey(id, "TO_ID");
-
     public final com.querydsl.sql.ForeignKey<QDeclarationData> _declarationDataStateFk = createInvForeignKey(id, "STATE");
 
     public QState(String variable) {

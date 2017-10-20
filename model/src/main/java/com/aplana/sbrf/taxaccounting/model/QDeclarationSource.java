@@ -36,8 +36,6 @@ public class QDeclarationSource extends com.querydsl.sql.RelationalPathBase<QDec
 
     public final com.querydsl.sql.ForeignKey<QDepartmentDeclarationType> declSourceFkDeptDecltype = createForeignKey(departmentDeclarationTypeId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QDepartmentFormType> declSourceFkDeptFormtype = createForeignKey(srcDepartmentFormTypeId, "ID");
-
     public QDeclarationSource(String variable) {
         super(QDeclarationSource.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_SOURCE");
         addMetadata();

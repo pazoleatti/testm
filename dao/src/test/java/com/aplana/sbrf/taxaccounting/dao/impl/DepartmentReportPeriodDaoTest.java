@@ -270,17 +270,4 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
         Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
     }
-
-    @Test
-    public void getClosedForFormTemplate() {
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getClosedForFormTemplate(1);
-        Assert.assertEquals(4, departmentReportPeriodList.size());
-        Assert.assertEquals(301, departmentReportPeriodList.get(0).getId().intValue());
-        Assert.assertEquals(302, departmentReportPeriodList.get(1).getId().intValue());
-        Assert.assertEquals(305, departmentReportPeriodList.get(2).getId().intValue());
-        Assert.assertEquals(306, departmentReportPeriodList.get(3).getId().intValue());
-
-        departmentReportPeriodList = departmentReportPeriodDao.getClosedForFormTemplate(4);
-        Assert.assertEquals(0, departmentReportPeriodList.size());
-    }
 }

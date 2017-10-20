@@ -32,7 +32,7 @@ public class QDeclTemplateEventScript extends com.querydsl.sql.RelationalPathBas
 
     public final StringPath script = createString("script");
 
-    public final com.querydsl.sql.PrimaryKey<QDeclTemplateEventScript> sysC00622164 = createPrimaryKey(id);
+    public final com.querydsl.sql.PrimaryKey<QDeclTemplateEventScript> declTemplateEventScriptPk = createPrimaryKey(id);
 
     public final com.querydsl.sql.ForeignKey<QEvent> decTempEventIdFk = createForeignKey(eventId, "ID");
 

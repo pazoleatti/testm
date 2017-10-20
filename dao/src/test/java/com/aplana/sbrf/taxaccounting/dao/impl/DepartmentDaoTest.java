@@ -163,81 +163,12 @@ public class DepartmentDaoTest {
         Assert.assertTrue(getDepartmentIds(departmentList).containsAll(asList(1, 2, 6)));
     }
 
-    @Test
-    public void getPerformers() {
-        Department department2 = departmentDao.getDepartment(2);
-        List<Integer> performers = departmentDao.getPerformers(asList(department2.getId()), 1);
-        Assert.assertTrue("Department(id=2) has 1 performer", performers.size() == 1);
-        Assert.assertTrue("Department(id=2) has 1 performer with id = 1", performers.get(0) == 1);
-    }
-
-    @Test
-    public void getPerformersGroup() {
-        Department department3 = departmentDao.getDepartment(3);
-        List<Integer> performers = departmentDao.getPerformers(asList(department3.getId()), 2);
-        Assert.assertTrue("Department(id=3) has 1 performer", performers.size() == 1);
-        Assert.assertTrue("Department(id=3) has 1 performer with id = 2", performers.get(0) == 2);
-    }
-
-    @Test
-    public void getDepartmentIdsByExcutorsTest() {
-        List<Integer> result = departmentDao.getDepartmentIdsByExecutors(asList(1, 2, 3, 4, 5, 6),
-                asList(TaxType.INCOME, TaxType.VAT, TaxType.TRANSPORT));
-        Assert.assertEquals(result.size(), 2);
-        Assert.assertTrue(result.containsAll(asList(2, 3)));
-
-        result = departmentDao.getDepartmentIdsByExecutors(asList(2),
-                asList(TaxType.TRANSPORT));
-        Assert.assertEquals(result.size(), 1);
-        Assert.assertTrue(result.containsAll(asList(3)));
-    }
-
     /*@Test
     public void getReportDepartmentNameTest() {
         Assert.assertEquals("ТБ2/ЦСКО 1", departmentDao.getReportDepartmentName(5));
         Assert.assertEquals("ТБ1/ЦСКО 1", departmentDao.getReportDepartmentName(6));
         Assert.assertEquals("ТБ1", departmentDao.getReportDepartmentName(2));
     }*/
-
-    @Test
-    public void getDepartmentsByDestinationSourceTest() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2013, Calendar.JANUARY, 1);
-        Date dateStart = calendar.getTime();
-        calendar.set(2014, Calendar.DECEMBER, 31);
-        Date dateEnd = calendar.getTime();
-        ArrayList<Integer> departments = new ArrayList<Integer>();
-        departments.add(4);
-        departments.add(5);
-        departments.add(6);
-        Assert.assertEquals(0, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, dateEnd).size());
-        departments.add(1);
-        Assert.assertEquals(1, departmentDao.getDepartmentsByDestinationSource(departments, null, null).size());
-        Assert.assertEquals(2, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, null).get(0).getId());
-        departments.add(2);
-        departments.add(3);
-        Assert.assertEquals(1, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, dateEnd).size());
-        calendar.set(2012, Calendar.DECEMBER, 31);
-        dateEnd = calendar.getTime();
-        Assert.assertEquals(0, departmentDao.getDepartmentsByDestinationSource(departments, dateStart, dateEnd).size());
-    }
-
-    @Test
-    public void getDepartmentIdsByDestinationSourceTest() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2013, Calendar.JANUARY, 1);
-        Date dateStart = calendar.getTime();
-        calendar.set(2014, Calendar.DECEMBER, 31);
-        Date dateEnd = calendar.getTime();
-        ArrayList<Integer> departments = new ArrayList<Integer>();
-        departments.add(4);
-        departments.add(5);
-        departments.add(6);
-        Assert.assertEquals(0, departmentDao.getDepartmentIdsByDestinationSource(departments, dateStart, dateEnd).size());
-        departments.add(1);
-        Assert.assertEquals(1, departmentDao.getDepartmentIdsByDestinationSource(departments, null, null).size());
-        Assert.assertEquals(2, (int) departmentDao.getDepartmentIdsByDestinationSource(departments, dateStart, null).get(0));
-    }
 
     @Test
     public void getAlLChildrenIdsTest() {

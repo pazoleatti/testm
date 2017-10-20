@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -11,15 +10,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Тест для сервиса работы с декларациями.
@@ -37,7 +31,6 @@ public class DeclarationServiceTest {
     public static void tearUp() {
         DeclarationDataDao declarationDataDao = mock(DeclarationDataDao.class);
         DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
-        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         DeclarationDataService declarationDataService = mock(DeclarationDataService.class);
         SourceService sourceService = mock(SourceService.class);
 
@@ -57,13 +50,6 @@ public class DeclarationServiceTest {
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(101);
         declarationData.setDepartmentReportPeriodId(1);
-
-        List<DepartmentFormType> sourcesInfo = new ArrayList<DepartmentFormType>();
-        sourcesInfo.add(new DepartmentFormType());
-        sourcesInfo.add(new DepartmentFormType());
-
-        when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
-        when(departmentFormTypeDao.getDeclarationSources(eq(1), eq(1), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);

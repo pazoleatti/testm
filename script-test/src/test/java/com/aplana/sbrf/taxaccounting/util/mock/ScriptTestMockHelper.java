@@ -27,8 +27,6 @@ public interface ScriptTestMockHelper {
 
     FiasRefBookService mockFiasRefBookService();
 
-    DepartmentFormTypeService mockDepartmentFormTypeService();
-
     RefBookFactory mockRefBookFactory();
 
     DepartmentReportPeriodService mockDepartmentReportPeriodService();

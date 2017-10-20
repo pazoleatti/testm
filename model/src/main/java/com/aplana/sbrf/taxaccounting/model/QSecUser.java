@@ -44,15 +44,11 @@ public class QSecUser extends com.querydsl.sql.RelationalPathBase<QSecUser> {
 
     public final com.querydsl.sql.ForeignKey<QSecUserRole> _secUserRoleFkUserId = createInvForeignKey(id, "USER_ID");
 
-    public final com.querydsl.sql.ForeignKey<QLockDataSubscribers> _lockDataSubscrFkSecUser = createInvForeignKey(id, "USER_ID");
-
     public final com.querydsl.sql.ForeignKey<QLog> _logUserFk = createInvForeignKey(id, "USER_ID");
 
     public final com.querydsl.sql.ForeignKey<QLockData> _lockDataFkUserId = createInvForeignKey(id, "USER_ID");
 
     public final com.querydsl.sql.ForeignKey<QTemplateChanges> _templateChangesFkUserId = createInvForeignKey(id, "AUTHOR");
-
-    public final com.querydsl.sql.ForeignKey<QTaskContext> _taskContextFkUserId = createInvForeignKey(id, "USER_ID");
 
     public QSecUser(String variable) {
         super(QSecUser.class, forVariable(variable), "NDFL_UNSTABLE", "SEC_USER");

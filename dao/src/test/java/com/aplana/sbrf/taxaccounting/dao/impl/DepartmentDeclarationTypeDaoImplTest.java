@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -61,27 +58,6 @@ public class DepartmentDeclarationTypeDaoImplTest {
         assertTrue(departmentIds.contains(7));
         assertTrue(departmentIds.contains(9));
 	}
-
-    @Test
-    public void findDestinationsForFormTypeTest(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2013, Calendar.JANUARY, 1);
-        Date dateStart = calendar.getTime();
-        calendar.set(2014, Calendar.DECEMBER, 31);
-        Date dateEnd = calendar.getTime();
-        assertEquals(2, departmentDeclarationTypeDao.findDestinationDTsForFormType(1, dateStart, dateEnd).size());
-    }
-
-    @Test
-    public void findSourcesForFormTypeTest(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2013, Calendar.JANUARY, 1);
-        Date dateStart = calendar.getTime();
-        calendar.set(2014, Calendar.DECEMBER, 31);
-        Date dateEnd = calendar.getTime();
-        List<Pair<DepartmentFormType, Pair<Date, Date>>> pairs = departmentDeclarationTypeDao.findSourceFTsForDeclaration(2, dateStart, dateEnd);
-        assertEquals(1, pairs.size());
-    }
 
     @Test
     public void getDDTByFTTest(){

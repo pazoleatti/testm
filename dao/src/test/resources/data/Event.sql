@@ -66,10 +66,3 @@ INSERT INTO event (id,name) VALUES (902,'Модификация подразде
 INSERT INTO event (id,name) VALUES (903,'Удаление подразделения');
 INSERT INTO event (id,name) VALUES (904,'Импорт скриптов');
 INSERT INTO event (id,name) VALUES (951,'Редактирование конфигурационного параметра');
-
-insert into role_event(event_id, role_id)
-  (select id, 3 from event where id not in (501, 502, 601, 701));
-insert into role_event(event_id, role_id)
-  (select id, 2 from event where id in (1,2,3,6,7) or id like '10_' or id like '40_' or id like '90_');
-insert into role_event(event_id, role_id)
-  (select id, 1 from event where id in (1,2,3,6,7) or id like '10_' or id like '40_' or id like '90_');

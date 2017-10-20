@@ -16,8 +16,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,8 +85,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private ConfigurationService configurationService;
     @Autowired
     private LockDataService lockService;
-    @Autowired
-    private DepartmentFormTypeService departmentFormTypeService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
@@ -507,30 +503,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                 else if (logger.containsLevel(LogLevel.WARNING) && !force){
                     return;
                 }
-
-                //Удаление назначений НФ, у которых совпадает исполнитель с подразделением
-                List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
-                departmentFormTypeService.deleteByIds(dftIds);
-
-                //удаление назначений
-                Collection<Long> dftIsd = CollectionUtils.collect(sourceService.getDFTByDepartment(depId, null, null, null),
-                        new Transformer() {
-                            @Override
-                            public Object transform(Object o) {
-                                return ((DepartmentFormType) o).getId();
-                            }
-                        });
-                if (!dftIsd.isEmpty())
-                    sourceService.deleteDFT(dftIsd);
-                Collection<Long> ddtIds = CollectionUtils.collect(sourceService.getDDTByDepartment(depId, null, null, null),
-                        new Transformer() {
-                            @Override
-                            public Object transform(Object o) {
-                                return ((DepartmentDeclarationType) o).getId();
-                            }
-                        });
-                if (!ddtIds.isEmpty())
-                    sourceService.deleteDDT(ddtIds);
 
                 //удаление настроек подразделений
                 RefBookDataProvider provider;

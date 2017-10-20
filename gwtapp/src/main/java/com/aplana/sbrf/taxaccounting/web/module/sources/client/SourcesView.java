@@ -1078,7 +1078,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         clearDownTable();
         Integer selectedDepartment = leftDepPicker.getSingleValue();
         if (selectedDepartment != null) {
-            if (isForm) {
+            /*if (isForm) {
                 getUiHandlers().getFormsLeft(selectedDepartment, selectedLeftRecord);
             } else {
                 if (isSource()) {
@@ -1086,7 +1086,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 } else {
                     getUiHandlers().getFormsLeft(selectedDepartment, selectedLeftRecord);
                 }
-            }
+            }*/
         }
     }
 
@@ -1103,7 +1103,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         clearRightTable();
         Integer selected = rightDepPicker.getSingleValue();
         if (selected != null) {
-            if (isForm) {
+            /*if (isForm) {
                 getUiHandlers().getFormsRight(selected, leftSM.getSelectedObject());
             } else {
                 if (isSource()) {
@@ -1111,7 +1111,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 } else {
                     getUiHandlers().getDecsRight(selected, leftSM.getSelectedObject());
                 }
-            }
+            }*/
         }
     }
 

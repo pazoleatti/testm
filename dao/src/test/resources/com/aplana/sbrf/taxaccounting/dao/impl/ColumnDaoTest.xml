@@ -8,7 +8,5 @@
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/TaxType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/RefBookDao.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/FormType.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/FormTemplate.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

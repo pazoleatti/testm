@@ -163,7 +163,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     @Override
     public void checkDestinationsSources(int typeId, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        //List<Pair<DepartmentFormType, Pair<Date, Date>>> sourcePairs = sourceService.findSourceFTsForDeclaration(typeId, versionActualDateStart, versionActualDateEnd);
+        //List<Pair<DepartmentFormType, Pair<Date, Date>>> sourcePairs = sourceService.findSourceDTsForDeclaration(typeId, versionActualDateStart, versionActualDateEnd);
         List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> destinationPairs = sourceService.findDestinationDTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
         for (Pair<DepartmentDeclarationType, Pair<Date, Date>> pair : destinationPairs){
             DepartmentDeclarationType first = pair.getFirst();

@@ -1,11 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -13,9 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,22 +53,14 @@ public class SourceServiceImpl implements SourceService {
         }
     };
 
-	private static final Date MIN_DATE = new Date(0);
+    private static final Date MIN_DATE = new Date(0);
 
-    @Autowired
-    private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
     private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
     @Autowired
-    private DepartmentService departmentService;
-    @Autowired
-    private DepartmentDao departmentDao;
-    @Autowired
     private SourceDao sourceDao;
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -77,50 +68,14 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
 
-	/**
-	 * Проверяет начало диапазона дат и если оно не задано, то возвращает значение по умолчанию
-	 * @param date
-	 * @return
-	 */
-	private Date checkMinDate(Date date) {
-		return date != null ? date : MIN_DATE;
-	}
-
-    @Override
-    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                                       Date periodEnd) {
-        QueryParams<SourcesSearchOrdering> filter = getSearchOrderingDefaultFilter();
-        return getDFTSourcesByDFT(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
-                                                       Date periodEnd, QueryParams queryParams) {
-        return departmentFormTypeDao.getFormSources(departmentId, formTypeId, kind, periodStart, periodEnd, queryParams);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId) {
-        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
-        return getDFTSourcesByDFT(departmentId, formTypeId, kind, reportPeriodId, queryParams);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId,
-                                                       QueryParams queryParams) {
-        ReportPeriod period = reportPeriodDao.get(reportPeriodId);
-        return getDFTSourcesByDFT(departmentId, formTypeId, kind, period.getStartDate(), period.getEndDate(), queryParams);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
-        return getDFTSourceByDDT(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd, QueryParams queryParams) {
-        return departmentFormTypeDao.getDeclarationSources(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
+    /**
+     * Проверяет начало диапазона дат и если оно не задано, то возвращает значение по умолчанию
+     *
+     * @param date
+     * @return
+     */
+    private Date checkMinDate(Date date) {
+        return date != null ? date : MIN_DATE;
     }
 
     /**
@@ -139,14 +94,14 @@ public class SourceServiceImpl implements SourceService {
     /**
      * Метод исключает указанные назначения из списка пар источников-приемников
      *
-     * @param logger                   логгер
-     * @param sourcePairs              оригинальный список пар источников-приемников
-     * @param errorPairs               список назначений, которые должны быть исключены
-     * @param isDeclaration            признак того, что идет обработка в режиме "Декларации"
-     * @param emptyIsOk                признак того, что если в результате выполнения входной список оказывается пуст - это нормальная ситуация.
-     *                                 Например в случае пересечения версий, дополнительная обработка не требуется - версии склеиваются на стадии проверки пересечений
-     * @param level                    уровень логгирования
-     * @param messageBuilder           билдер для построения информационных сообщений
+     * @param logger         логгер
+     * @param sourcePairs    оригинальный список пар источников-приемников
+     * @param errorPairs     список назначений, которые должны быть исключены
+     * @param isDeclaration  признак того, что идет обработка в режиме "Декларации"
+     * @param emptyIsOk      признак того, что если в результате выполнения входной список оказывается пуст - это нормальная ситуация.
+     *                       Например в случае пересечения версий, дополнительная обработка не требуется - версии склеиваются на стадии проверки пересечений
+     * @param level          уровень логгирования
+     * @param messageBuilder билдер для построения информационных сообщений
      * @return обрезанный входной список пар источников-приемников
      */
     public List<SourcePair> truncateSources(Logger logger, List<SourcePair> sourcePairs,
@@ -188,7 +143,8 @@ public class SourceServiceImpl implements SourceService {
                     logger.warn(msg);
                     break;
                 }
-                default: logger.info(msg);
+                default:
+                    logger.info(msg);
             }
         }
     }
@@ -205,25 +161,6 @@ public class SourceServiceImpl implements SourceService {
             for (SourcePair pair : sourcePairs) {
                 set.add(pair.getSource());
                 set.add(pair.getDestination());
-            }
-            return new ArrayList<Long>(set);
-        } else {
-            throw new ServiceException("Список назначений пуст!");
-        }
-    }
-    /**
-     *
-     * Формирует общий список идентификаторов назначений из списка пар источников-приемников
-     *
-     * @param objects список объектов-назначений
-     * @return список идентификаторов назначений
-     */
-    public List<Long> unionSourceObjects(List<SourceObject> objects) {
-        if (objects != null && !objects.isEmpty()) {
-            Set<Long> set = new HashSet<Long>();
-            for (SourceObject object : objects) {
-                set.add(object.getSourcePair().getSource());
-                set.add(object.getSourcePair().getDestination());
             }
             return new ArrayList<Long>(set);
         } else {
@@ -255,21 +192,23 @@ public class SourceServiceImpl implements SourceService {
      * Существуют 2 варианта назначений: 1 источник - много приемников и 1 приемник - много источников.
      * Таким образом соотношение 1 к М. Если связка на стороне 1 исключается в результате проверки -  операция не может быть продолжена
      *
-     * @param logger                  логгер
-     * @param sourcePairs             входной набор пар источник-приемник
-     * @param mode                    режим работы: назначение приемников или назначение источников
-     * @param isDeclaration           признак того, что идет обработка в режиме "Декларации"
+     * @param logger        логгер
+     * @param sourcePairs   входной набор пар источник-приемник
+     * @param mode          режим работы: назначение приемников или назначение источников
+     * @param isDeclaration признак того, что идет обработка в режиме "Декларации"
      * @return обрезанный входной список связок источников-приемников, которые все еще существуют
      */
     public List<SourcePair> checkExistence(Logger logger, List<SourcePair> sourcePairs,
                                            SourceMode mode,
                                            final boolean isDeclaration) {
-        List<Long> rightPart = new ArrayList<Long>();
+        //TODO: (dloshkarev) код ниже надо полностью перерабатывать для источников приемников
+        return Collections.emptyList();
+        /*List<Long> rightPart = new ArrayList<Long>();
         if (isDeclaration) {
             if (mode == SourceMode.SOURCES) {
                 //Проверяем единственный приемник
                 if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getDestination())).isEmpty()) {
-                    /** Если единственное назначение было удалено, то продолжать нет смысла */
+                    *//** Если единственное назначение было удалено, то продолжать нет смысла *//*
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
                             "Налоговая форма",
                             sourcePairs.get(0).getDestinationType(),
@@ -283,7 +222,7 @@ public class SourceServiceImpl implements SourceService {
             } else {
                 //Проверяем единственный источник
                 if (sourceDao.checkDFTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
-                    /** Если единственное назначение было удалено, то продолжать нет смысла */
+                    *//** Если единственное назначение было удалено, то продолжать нет смысла *//*
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
                             "Форма",
                             sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.get(0).getSourceType(),
@@ -322,21 +261,19 @@ public class SourceServiceImpl implements SourceService {
                                 isSource ? (sourcePair.getSourceKind() + ": " + sourcePair.getSourceType()) : (sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType()),
                                 isSource ? sourcePair.getSourceDepartmentName() : sourcePair.getDestinationDepartmentName()));
                     }
-                });
+                });*/
     }
-
-
 
     /**
      * Проверяет существование экземпляров нф и заполняет списки id форм-источников и приемников
      * http://conf.aplana.com/pages/viewpage.action?pageId=12321547
      *
-     * @param logger         логгер
-     * @param sourcePairs  входной набор пар источник-приемник
-     * @param newPeriodStart начало нового периода
-     * @param newPeriodEnd   окончание нового периода
-     * @param declaration   признак того, что идет обработка в режиме "Декларации"
-     * @param consolidatedInstances   список идентификаторов экземпляров источник-приемник с предыдущего шага обработки
+     * @param logger                логгер
+     * @param sourcePairs           входной набор пар источник-приемник
+     * @param newPeriodStart        начало нового периода
+     * @param newPeriodEnd          окончание нового периода
+     * @param declaration           признак того, что идет обработка в режиме "Декларации"
+     * @param consolidatedInstances список идентификаторов экземпляров источник-приемник с предыдущего шага обработки
      * @return список идентификаторов экземпляров источник-приемник
      */
     public Set<ConsolidatedInstance> checkFormInstances(Logger logger, List<SourcePair> sourcePairs, Date newPeriodStart, Date newPeriodEnd, boolean declaration, Set<ConsolidatedInstance> consolidatedInstances) {
@@ -349,13 +286,13 @@ public class SourceServiceImpl implements SourceService {
                     /** Получаем экземпляры приемника в промежуточных периодах + идентификаторы экземпляров их источников */
                     consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(
                             empty.getSourcePair().getSource(), empty.getSourcePair().getDestination(),
-                            empty.getPeriodStart(), empty.getPeriodEnd(), declaration));
+                            empty.getPeriodStart(), empty.getPeriodEnd()));
                 }
             } else {
                 /** Получаем экземпляры приемника в новом периоде + идентификаторы экземпляров их источников */
                 consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(
                         sourcePair.getSource(), sourcePair.getDestination(),
-                        newPeriodStart, newPeriodEnd, declaration));
+                        newPeriodStart, newPeriodEnd));
             }
 
             /** Выводим информацию о найденных экземплярах-приемниках */
@@ -380,18 +317,18 @@ public class SourceServiceImpl implements SourceService {
                     }
                     if (!processedDestinations.contains(declaration.getId())) {
                         logger.warn(String.format(DECLARATION_INSTANCE_MSG,
-                                        declaration.getType(),
-                                        declaration.getDepartment(),
-                                        declaration.getPeriod(),
-                                        declaration.getCorrectionDate() != null
-                                                ? " с датой сдачи корректировки " + sdf.get().format(declaration.getCorrectionDate())
-                                                : "",
-                                        declaration.getTaxOrganCode() != null
-                                                ? ", налоговый орган " + declaration.getTaxOrganCode()
-                                                : "",
-                                        declaration.getKpp() != null
-                                                ? ", КПП " + declaration.getKpp()
-                                                : "")
+                                declaration.getType(),
+                                declaration.getDepartment(),
+                                declaration.getPeriod(),
+                                declaration.getCorrectionDate() != null
+                                        ? " с датой сдачи корректировки " + sdf.get().format(declaration.getCorrectionDate())
+                                        : "",
+                                declaration.getTaxOrganCode() != null
+                                        ? ", налоговый орган " + declaration.getTaxOrganCode()
+                                        : "",
+                                declaration.getKpp() != null
+                                        ? ", КПП " + declaration.getKpp()
+                                        : "")
                         );
                         processedDestinations.add(declaration.getId());
                     }
@@ -409,15 +346,15 @@ public class SourceServiceImpl implements SourceService {
                         DepartmentReportPeriod drpCompare = form.getDrpComapreId() != null ?
                                 departmentReportPeriodService.get(form.getDrpComapreId()) : null;
                         logger.warn(MessageGenerator.getFDMsg("",
-                                        form.getType(),
-                                        form.getFormKind().getTitle(),
-                                        form.getDepartment(),
-                                        form.getMonth(),
-                                        form.isManual(),
-                                        form.getPeriod(),
-                                        form.getCorrectionDate(),
-                                        drpCompare != null ?
-                                                drpCompare.getReportPeriod().getName() + " " + drpCompare.getReportPeriod().getTaxPeriod().getYear() : ""
+                                form.getType(),
+                                form.getFormKind().getTitle(),
+                                form.getDepartment(),
+                                form.getMonth(),
+                                form.isManual(),
+                                form.getPeriod(),
+                                form.getCorrectionDate(),
+                                drpCompare != null ?
+                                        drpCompare.getReportPeriod().getName() + " " + drpCompare.getReportPeriod().getTaxPeriod().getYear() : ""
                                 )
                         );
                     }
@@ -564,19 +501,19 @@ public class SourceServiceImpl implements SourceService {
             }
 
             /** Удаляем все назначения, с периодами которых были найдены пересечения. */
-            sourceDao.deleteAll(deleteSources, isDeclaration);
+            sourceDao.deleteAll(deleteSources);
 
             List<SourcePair> intersectingPairs = new ArrayList<SourcePair>(intersections.keySet());
             if (excludedPeriodStart == null) {
                 //Идет создание назначений
                 /** Создаем новые назначения с объединенными периодами */
-                sourceDao.createAll(new ArrayList<SourceObject>(unionSources.keySet()), isDeclaration);
+                sourceDao.createAll(new ArrayList<SourceObject>(unionSources.keySet()));
             } else {
                 //Идет редактирование назначений
                 intersectingPairs = deletePairs;
                 for (Map.Entry<SourceObject, Pair<Date, Date>> sourceEntry : unionSources.entrySet()) {
                     sourceDao.updateAll(Arrays.asList(sourceEntry.getKey()),
-                            sourceEntry.getValue().getFirst(), sourceEntry.getValue().getSecond(), isDeclaration);
+                            sourceEntry.getValue().getFirst(), sourceEntry.getValue().getSecond());
                 }
             }
 
@@ -636,13 +573,13 @@ public class SourceServiceImpl implements SourceService {
                 List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd());
 
                 /** Создаем оставшиеся назначения */
-                sourceDao.createAll(sourceObjects, sourceClientData.isDeclaration());
+                sourceDao.createAll(sourceObjects);
                 for (SourceObject sourceObject : sourceObjects) {
                     if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                         logger.info(SAVE_SUCCESS_MSG,
                                 sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                         (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
+                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                 "приемником",
                                 sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                                 sdf.get().format(sourceObject.getPeriodStart()) + " - " +
@@ -654,7 +591,7 @@ public class SourceServiceImpl implements SourceService {
                                 "источником",
                                 sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                         (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
+                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                 sdf.get().format(sourceObject.getPeriodStart()) + " - " +
                                         (sourceObject.getPeriodEnd() != null ? sdf.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         );
@@ -669,11 +606,12 @@ public class SourceServiceImpl implements SourceService {
     /**
      * Специфичные проверки назначений.
      * Предполагается что этот метод будет вызываться только при создании, когда участвует только одна пара назначений, так что оптимизации вызовов дао не делал
-     * @param logger                  логгер
-     * @param sourcePairs             входной набор пар источник-приемник
-     * @param mode                    режим работы: назначение приемников или назначение источников
-     * @param declaration             признак того, что идет обработка в режиме "Декларации"
-     * @param taxType                 тип налога
+     *
+     * @param logger      логгер
+     * @param sourcePairs входной набор пар источник-приемник
+     * @param mode        режим работы: назначение приемников или назначение источников
+     * @param declaration признак того, что идет обработка в режиме "Декларации"
+     * @param taxType     тип налога
      */
     private void checkSpecifics(Logger logger, List<SourcePair> sourcePairs, SourceMode mode, boolean declaration, TaxType taxType) {
         /*for (SourcePair pair : sourcePairs) {
@@ -704,13 +642,13 @@ public class SourceServiceImpl implements SourceService {
             /** Получаем информацию о приемниках в удаляемом периоде + идентификаторы экземпляров их источников */
             Set<ConsolidatedInstance> consolidatedInstances = new HashSet<ConsolidatedInstance>();
             Set<Long> processedSources = new HashSet<Long>();
-            for (SourceObject sourceObject: sourceObjects) {
+            for (SourceObject sourceObject : sourceObjects) {
                 final Long source = sourceObject.getSourcePair().getSource();
                 final Long destination = sourceObject.getSourcePair().getDestination();
                 if (!processedSources.contains(source)) {
                     consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(
                             source, destination,
-                            sourceObject.getPeriodStart(), sourceObject.getPeriodEnd(), sourceClientData.isDeclaration()));
+                            sourceObject.getPeriodStart(), sourceObject.getPeriodEnd()));
                     processedSources.add(source);
                 }
             }
@@ -721,13 +659,13 @@ public class SourceServiceImpl implements SourceService {
             }
 
             /** Удаляем все назначения, с периодами которых были найдены пересечения. */
-            sourceDao.deleteAll(sourceObjects, sourceClientData.isDeclaration());
+            sourceDao.deleteAll(sourceObjects);
             if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                 for (SourceObject sourceObject : sourceObjects) {
                     logger.info(DELETE_SUCCESS_MSG,
                             sourceObject.getSourcePair().getDestinationDepartmentName() + ", " + (
                                     sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
+                                            sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                             "приемника",
                             sourceClientData.isDeclaration() ? "налоговой формы" : "формы",
                             sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
@@ -743,7 +681,7 @@ public class SourceServiceImpl implements SourceService {
                             sourceClientData.isDeclaration() ? "налоговой формы" : "формы",
                             sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                     (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
+                                            sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                             sdf.get().format(sourceObject.getPeriodStart()) + " - " +
                                     (sourceObject.getPeriodEnd() != null ? sdf.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
@@ -863,7 +801,7 @@ public class SourceServiceImpl implements SourceService {
                             /** Проверка существования экземпляров нф */
                             checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration(), unconsolidatedInstances);
                             checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd, sourceClientData.isDeclaration(), unconsolidatedInstances);
-                        } else if ((periodEnd == null && oldPeriodEnd != null)|| (periodEnd.after(oldPeriodEnd))) {
+                        } else if ((periodEnd == null && oldPeriodEnd != null) || (periodEnd.after(oldPeriodEnd))) {
                             /** Дата окончания нового периода больше даты окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
@@ -905,13 +843,13 @@ public class SourceServiceImpl implements SourceService {
                         }
 
                         List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, oldPeriodStart, oldPeriodEnd);
-                        sourceDao.updateAll(sourceObjects, periodStart, periodEnd, sourceClientData.isDeclaration());
+                        sourceDao.updateAll(sourceObjects, periodStart, periodEnd);
                         if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                             for (SourceObject sourceObject : sourceObjects) {
                                 logger.info(UPDATE_SUCCESS_MSG,
                                         sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                                 (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
+                                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                         "приемником",
                                         sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                                         sdf.get().format(periodStart) + " - " +
@@ -925,7 +863,7 @@ public class SourceServiceImpl implements SourceService {
                                         "источником",
                                         sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
                                                 (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
+                                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                         sdf.get().format(periodStart) + " - " +
                                                 (periodEnd != null ? sdf.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                                 );
@@ -943,11 +881,6 @@ public class SourceServiceImpl implements SourceService {
         if (criticalError != null) {
             throw criticalError;
         }
-    }
-
-    @Override
-    public int getAssignedFormsCount(List<Long> departmentsIds, char taxType) {
-        return departmentFormTypeDao.getAssignedFormsCount(departmentsIds, taxType);
     }
 
     @Override
@@ -976,78 +909,13 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public boolean isFDConsolidationTopical(long fdTargetId) {
-        return sourceDao.isFDConsolidationTopical(fdTargetId);
-    }
-
-    @Override
     public boolean isDDConsolidationTopical(long ddTargetId) {
         return sourceDao.isDDConsolidationTopical(ddTargetId);
     }
 
     @Override
-    public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
-        return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
-    }
-
-    @Override
-    public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, int reportPeriodId) {
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-
-        return getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, reportPeriod.getStartDate(), reportPeriod.getEndDate());
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTSourcesByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        return departmentFormTypeDao.getDepartmentSources(departmentId, taxType, periodStart, periodEnd);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
-        return getDFTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
-        return departmentFormTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
-    }
-
-    @Override
-    public List<Long> getDFTByPerformerDep(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
-        return departmentFormTypeDao.getByPerformerId(performerDepId, Arrays.asList(taxType), kinds);
-    }
-
-    @Override
-    public List<Long> getDFTFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
-        return departmentFormTypeDao.getFormTypeBySource(performerDepId, taxType, kinds);
-    }
-
-    @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
-        return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
-    }
-
-    @Override
-    public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, int reportPeriodId) {
-        ReportPeriod period = reportPeriodDao.get(reportPeriodId);
-
-        return getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, period.getStartDate(), period.getEndDate());
-    }
-
-    @Override
-    public List<FormTypeKind> getFormAssigned(Long departmentId, char taxType) {
-        return departmentFormTypeDao.getFormAssigned(departmentId, taxType);
-    }
-
-    @Override
-    public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
-        return departmentFormTypeDao.getAllFormAssigned(departmentIds, taxType, queryParams);
-    }
-
-    @Override
-    public List<FormTypeKind> getDeclarationAssigned(Long departmentId, char taxType) {
-        return departmentFormTypeDao.getDeclarationAssigned(departmentId, taxType);
+        return departmentDeclarationTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
     }
 
     @Override
@@ -1056,40 +924,11 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void saveDFT(Long departmentId, int typeId, int formId) {
-        departmentFormTypeDao.save(departmentId.intValue(), typeId, formId);
-    }
-
-    @Override
-    public void saveDFT(Long departmentId, int typeId, int formId, List<Integer> performerIds) {
-        long dftId = departmentFormTypeDao.save(departmentId.intValue(), typeId, formId);
-        //Сохраняем исполнителей
-        departmentFormTypeDao.savePerformers(dftId, performerIds);
-    }
-
-    @Override
-    public void updatePerformers(int id, List<Integer> performerIds) {
-        //Удаляем всех исполнителей и назначаем новых
-        departmentFormTypeDao.deletePerformers(id);
-        if (performerIds != null && !performerIds.isEmpty()) {
-            departmentFormTypeDao.savePerformers(id, performerIds);
-        }
-    }
-
-    @Override
     public void updateDDTPerformers(int id, List<Integer> performerIds) {
         //Удаляем всех исполнителей и назначаем новых
         departmentDeclarationTypeDao.deletePerformers(id);
         if (performerIds != null && !performerIds.isEmpty()) {
             departmentDeclarationTypeDao.savePerformers(id, performerIds);
-        }
-    }
-
-    @Override
-    public void deleteDFT(Collection<Long> ids) {
-        for (Long id : ids) {
-            //TODO dloshkarev: можно переделать на in запрос
-            departmentFormTypeDao.delete(id);
         }
     }
 
@@ -1125,47 +964,13 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind) {
-        return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
-    }
-
-
-    @Override
-    public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,
-                                                                FormDataKind sourceKind, Integer reportPeriodId,
-                                                                Date periodStart, Date periodEnd) {
-        return departmentFormTypeDao.existAcceptedDestinations(sourceDepartmentId, sourceFormTypeId,
-                sourceKind, reportPeriodId, periodStart, periodEnd);
-    }
-
-    @Override
     public List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType) {
         return declarationTypeDao.listAllByTaxType(taxType);
     }
 
     @Override
-    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
-        return departmentFormTypeDao.findDestinationsForFormType(typeId, checkMinDate(dateFrom), dateTo);
-    }
-
-    @Override
-    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
-        return departmentFormTypeDao.findSourcesForFormType(typeId, checkMinDate(dateFrom), dateTo);
-    }
-
-    @Override
-    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
-        return departmentDeclarationTypeDao.findSourceFTsForDeclaration(typeId, checkMinDate(dateFrom),dateTo);
-    }
-
-    @Override
     public List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
         return departmentDeclarationTypeDao.findDestinationDTsForFormType(typeId, checkMinDate(dateFrom), dateTo);
-    }
-
-    @Override
-    public List<DepartmentFormType> getDFTByFormType(Integer formTypeId) {
-        return departmentFormTypeDao.getDFTByFormType(formTypeId);
     }
 
     @Override

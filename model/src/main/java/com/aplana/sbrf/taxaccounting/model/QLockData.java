@@ -28,23 +28,17 @@ public class QLockData extends com.querydsl.sql.RelationalPathBase<QLockData> {
 
     public final StringPath description = createString("description");
 
+    public final NumberPath<Long> id = createNumber("id", Long.class);
+
     public final StringPath key = createString("key");
 
-    public final NumberPath<Integer> queue = createNumber("queue", Integer.class);
-
-    public final StringPath serverNode = createString("serverNode");
-
-    public final StringPath state = createString("state");
-
-    public final DateTimePath<org.joda.time.LocalDateTime> stateDate = createDateTime("stateDate", org.joda.time.LocalDateTime.class);
+    public final NumberPath<Long> taskId = createNumber("taskId", Long.class);
 
     public final NumberPath<Integer> userId = createNumber("userId", Integer.class);
 
-    public final com.querydsl.sql.PrimaryKey<QLockData> lockDataPk = createPrimaryKey(key);
+    public final com.querydsl.sql.PrimaryKey<QLockData> sysC00658009 = createPrimaryKey(id);
 
     public final com.querydsl.sql.ForeignKey<QSecUser> lockDataFkUserId = createForeignKey(userId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QLockDataSubscribers> _lockDataSubscrFkLockData = createInvForeignKey(key, "LOCK_KEY");
 
     public QLockData(String variable) {
         super(QLockData.class, forVariable(variable), "NDFL_UNSTABLE", "LOCK_DATA");
@@ -68,12 +62,10 @@ public class QLockData extends com.querydsl.sql.RelationalPathBase<QLockData> {
 
     public void addMetadata() {
         addMetadata(dateLock, ColumnMetadata.named("DATE_LOCK").withIndex(3).ofType(Types.TIMESTAMP).withSize(7).notNull());
-        addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(6).ofType(Types.VARCHAR).withSize(4000));
+        addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(4).ofType(Types.VARCHAR).withSize(4000));
+        addMetadata(id, ColumnMetadata.named("ID").withIndex(6).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(key, ColumnMetadata.named("KEY").withIndex(1).ofType(Types.VARCHAR).withSize(1000).notNull());
-        addMetadata(queue, ColumnMetadata.named("QUEUE").withIndex(7).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(serverNode, ColumnMetadata.named("SERVER_NODE").withIndex(8).ofType(Types.VARCHAR).withSize(100));
-        addMetadata(state, ColumnMetadata.named("STATE").withIndex(4).ofType(Types.VARCHAR).withSize(500));
-        addMetadata(stateDate, ColumnMetadata.named("STATE_DATE").withIndex(5).ofType(Types.TIMESTAMP).withSize(7));
+        addMetadata(taskId, ColumnMetadata.named("TASK_ID").withIndex(5).ofType(Types.DECIMAL).withSize(18));
         addMetadata(userId, ColumnMetadata.named("USER_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
     }
 

@@ -174,61 +174,9 @@ public interface DepartmentDao extends PermissionDao {
     List<Department> getRequiredForTreeDepartments(List<Integer> availableDepartments);
 
     /**
-     * Список подразделений, в которых доступны декларации/НФ (по иерархии подразделений и по связям источник-приемник)
-     * Только для роли "Контролер"
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-     *
-     * @param userDepartmentId Подразделение пользователя
-     * @param taxTypes         Типы налога
-     * @param periodStart      начало периода, в котором действуют назначения
-     * @param periodEnd        окончание периода, в котором действуют назначения
-     * @return Список id доступных подразделений
-     */
-    List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
-
-    /**
-     * Список подразделений, в которых доступны декларации/НФ (по иерархии подразделений и по связям источник-приемник)
-     * Только для роли "Контролер НС"
-     * http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-     *
-     * @param userDepartmentId Подразделение пользователя
-     * @param taxTypes         Типы налога
-     * @param periodStart      начало периода, в котором действуют назначения
-     * @param periodEnd        окончание периода, в котором действуют назначения
-     * @return Список id доступных подразделений
-     */
-    List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd);
-
-    /**
-     * Получение списка исполнителей по списку идентификаторов подразделений
-     *
-     * @param departments список id'шников подразделений
-     * @param formType    id формы
-     * @return писок id'шников подразделений (исполнителей)
-     */
-    List<Integer> getPerformers(List<Integer> departments, int formType);
-
-    /**
-     * Все подразделения, для форм которых, подразделения departments назначены исполнителями
-     */
-    List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes);
-
-    /**
      * Все подразделения, для форм которых, подразделения departments назначены исполнителями
      */
     List<Integer> getDepartmentIdsByExecutors(List<Integer> departments);
-
-    /**
-     * Все подразделения, которым назначены формы, которые являются источниками данных для форм,
-     * назначенных подразделениям departments
-     */
-    List<Department> getDepartmentsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd);
-
-    /**
-     * Все подразделения, которым назначены формы, которые являются источниками данных для форм,
-     * назначенных подразделениям departments
-     */
-    List<Integer> getDepartmentIdsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd);
 
     /**
      * Установка значения поля GARANT_USE
@@ -258,8 +206,6 @@ public interface DepartmentDao extends PermissionDao {
      * @return
      */
     List<Integer> getAllTBPerformers(int userTBDepId, int declarationTypeId);
-
-    List<Integer> getAllPerformers(int userDepId, List<TaxType> taxTypes);
 
     /**
      * Получить список подразделений, исполнителями форм которых являются заданные подразделения

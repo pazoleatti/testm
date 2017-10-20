@@ -16,9 +16,6 @@
         <jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DepartmentReportPeriod.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationData.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/FormType.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/FormTemplate.sql" encoding="UTF-8"/>
-        <jdbc:script location="classpath:data/FormData.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationDataConsolidation.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

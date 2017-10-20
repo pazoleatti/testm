@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
@@ -18,7 +17,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 public class DepartmentServiceImplTest {
@@ -41,14 +39,12 @@ public class DepartmentServiceImplTest {
         departmentService = new DepartmentServiceImpl();
         departmentDao = mock(DepartmentDao.class);
         DepartmentDeclarationTypeDao departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
-        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
         PeriodService periodService = mock(PeriodService.class);
 
         ReflectionTestUtils.setField(departmentService, "departmentDao", departmentDao);
         ReflectionTestUtils.setField(departmentService, "departmentReportPeriodDao", departmentReportPeriodDao);
         ReflectionTestUtils.setField(departmentService, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
-        ReflectionTestUtils.setField(departmentService, "departmentFormTypeDao", departmentFormTypeDao);
         ReflectionTestUtils.setField(departmentService, "periodService", periodService);
 
         root = new Department();
@@ -159,9 +155,6 @@ public class DepartmentServiceImplTest {
         }).when(departmentReportPeriodDao).getListByFilter(any(DepartmentReportPeriodFilter.class));
 
         // Доступность по связям
-        when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-        when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class), any(Date.class), any(Date.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
-
         when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(311))).thenReturn(Arrays.asList(3));
         when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(31))).thenReturn(Arrays.asList(3));
 
@@ -199,7 +192,6 @@ public class DepartmentServiceImplTest {
 
         ArrayList<Department> departments = new ArrayList<Department>();
         departments.add(root);
-        when(departmentDao.getDepartmentsByDestinationSource(anyListOf(Integer.class), any(Date.class), any(Date.class))).thenReturn(departments);
     }
 
     @Test
@@ -505,13 +497,5 @@ public class DepartmentServiceImplTest {
         // test for other
         taUser.getRoles().remove(0);
         Assert.assertEquals(0, departmentService.getSourcesDepartments(taUser, null, null).size());
-    }
-
-    @Test
-    public void getAppointmentDepartmentsTest(){
-        TAUser taUser = new TAUser();
-        taUser.setRoles(taRoles);
-        // test for ROLE_CONTROL_UNP
-        Assert.assertEquals(5, departmentService.getAppointmentDepartments(taUser).size());
     }
 }

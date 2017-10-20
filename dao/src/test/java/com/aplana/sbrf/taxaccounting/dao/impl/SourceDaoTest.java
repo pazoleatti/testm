@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,11 +10,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -28,8 +24,6 @@ public class SourceDaoTest {
 
     @Autowired
     SourceDao sourceDao;
-    @Autowired
-    DepartmentFormTypeDao departmentFormTypeDao;
 
     @Test
     public void deleteConsolidateInfo() {
@@ -66,13 +60,6 @@ public class SourceDaoTest {
         sourceDao.addDeclarationConsolidationInfo(1l, Arrays.asList(1l));
         sourceDao.updateDDConsolidationInfo(1);
         assertFalse(sourceDao.isDDConsolidationTopical(1));
-    }
-
-
-    @Test
-    public void testfindConsolidatedInstances() {
-        assertEquals(0, sourceDao.findConsolidatedInstances(1l, 1l, new Date(), new Date(), true).size());
-        assertEquals(0, sourceDao.findConsolidatedInstances(1l, 1l, new Date(), new Date(), false).size());
     }
 
     /*@Test

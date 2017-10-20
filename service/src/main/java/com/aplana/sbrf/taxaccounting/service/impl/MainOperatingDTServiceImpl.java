@@ -207,14 +207,15 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         int deletedFTid = declarationTemplateService.delete(template.getId());
         List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
-        if (declarationTemplates.isEmpty()){
+        //TODO: (dloshkarev) надо реализовать эту проверку в привязке к DECLARATION_TYPE при реализации источников-приемников
+        /*if (declarationTemplates.isEmpty()){
             for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(template.getType().getId())){
                 logger.error(
                         String.format(HAVE_DDT_MESSAGE,
                                 departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
                 checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
             }
-        }
+        }*/
 
         //Если нет версий макетов, то можно удалить весь макет
         if (declarationTemplates.isEmpty()){

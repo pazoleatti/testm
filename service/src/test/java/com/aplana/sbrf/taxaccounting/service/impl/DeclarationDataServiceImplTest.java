@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -59,8 +58,6 @@ public class DeclarationDataServiceImplTest {
     SourceService sourceService;
     @Autowired
     ReportService reportService;
-    @Autowired
-    DepartmentFormTypeDao departmentFormTypeDao;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -225,18 +222,6 @@ public class DeclarationDataServiceImplTest {
         reportPeriod.setStartDate(new Date());
         reportPeriod.setEndDate(new Date());
 
-        ArrayList<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>(2);
-        DepartmentFormType dft1 = new DepartmentFormType();
-        dft1.setDepartmentId(1);
-        dft1.setFormTypeId(1);
-        dft1.setKind(FormDataKind.ADDITIONAL);
-        DepartmentFormType dft2 = new DepartmentFormType();
-        dft2.setDepartmentId(2);
-        dft2.setFormTypeId(2);
-        dft2.setKind(FormDataKind.CONSOLIDATED);
-        departmentFormTypes.add(dft1);
-        departmentFormTypes.add(dft2);
-        departmentFormTypes.add(dft2);
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
         drp1.setId(1);
         drp1.setCorrectionDate(new Date(0));
@@ -274,7 +259,7 @@ public class DeclarationDataServiceImplTest {
         when(sourceService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger)).thenReturn(sources);
 
         when(departmentService.getDepartment(declarationData.getDepartmentId())).thenReturn(department);
-        when(departmentService.getDepartment(dft2.getDepartmentId())).thenReturn(department);
+        when(departmentService.getDepartment(2)).thenReturn(department);
         when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
         when(reportService.getDec(Matchers.<TAUserInfo>any(), anyLong(), Matchers.<DeclarationDataReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);

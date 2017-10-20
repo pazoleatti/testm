@@ -58,13 +58,9 @@ public class QDepartment extends com.querydsl.sql.RelationalPathBase<QDepartment
 
     public final com.querydsl.sql.ForeignKey<QConfiguration> _configurationFk = createInvForeignKey(id, "DEPARTMENT_ID");
 
-    public final com.querydsl.sql.ForeignKey<QDepartmentFormType> _deptFormTypeFkDepId = createInvForeignKey(id, "DEPARTMENT_ID");
-
     public final com.querydsl.sql.ForeignKey<QDepartmentReportPeriod> _depRepPerFkDepartmentId = createInvForeignKey(id, "DEPARTMENT_ID");
 
     public final com.querydsl.sql.ForeignKey<QNotification> _notificationFkReceiver = createInvForeignKey(id, "RECEIVER_DEPARTMENT_ID");
-
-    public final com.querydsl.sql.ForeignKey<QDepartmentFormTypePerformer> _deptFormTypePerfFkPerf = createInvForeignKey(id, "PERFORMER_DEP_ID");
 
     public final com.querydsl.sql.ForeignKey<QSecUser> _secUserFkDepId = createInvForeignKey(id, "DEPARTMENT_ID");
 

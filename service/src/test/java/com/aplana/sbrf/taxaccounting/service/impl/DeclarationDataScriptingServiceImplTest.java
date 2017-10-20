@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -24,7 +23,10 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
 import static org.junit.Assert.assertFalse;
@@ -81,16 +83,6 @@ public class DeclarationDataScriptingServiceImplTest {
 		when(declarationTemplateEventScriptDao.findScript(eq(REPORT_TEMPLATE_ID1), any(Integer.class))).thenReturn(createScript1);
         when(declarationTemplateEventScriptDao.findScript(eq(REPORT_TEMPLATE_ID2), any(Integer.class))).thenReturn(createScript2);
 		ReflectionTestUtils.setField(service, "declarationTemplateEventScriptDao", declarationTemplateEventScriptDao, DeclarationTemplateEventScriptDao.class);
-
-		DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
-		List<DepartmentFormType> sourcesInfo = new ArrayList<DepartmentFormType>();
-		DepartmentFormType dft = new DepartmentFormType();
-		dft.setFormTypeId(1);
-		dft.setKind(FormDataKind.SUMMARY);
-		dft.setDepartmentId(DEPARTMENT_ID);
-		sourcesInfo.add(dft);
-		when(departmentFormTypeDao.getDeclarationSources(any(Integer.class), any(Integer.class), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
-		//ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao, DepartmentFormTypeDao.class);
 
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(service, "logEntryService", logEntryService);

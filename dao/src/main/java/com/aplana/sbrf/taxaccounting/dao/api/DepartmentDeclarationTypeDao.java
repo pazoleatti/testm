@@ -65,7 +65,7 @@ public interface DepartmentDeclarationTypeDao {
     void delete(Long id);
 
     List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
-    List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+    List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findSourceDTsForDeclaration(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
 
     List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);
 
@@ -91,4 +91,18 @@ public interface DepartmentDeclarationTypeDao {
     void savePerformers(final long ddtId, final List<Integer> performerIds);
 
     void deletePerformers(int ddtId);
+
+    /**
+     * Возвращает информацию о декларациях-потребителях, которые должны использовать
+     * информацию из данной налоговой формы в качестве источника
+     *
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param periodStart  начало периода, в котором действуют назначения
+     * @param periodEnd    окончание периода, в котором действуют назначения
+     * @return информация о декларациях-потребителях в виде списка
+     *         {@link DepartmentDeclarationType}
+     */
+    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
 }

@@ -56,8 +56,8 @@ public class QConfiguration extends com.querydsl.sql.RelationalPathBase<QConfigu
 
     public void addMetadata() {
         addMetadata(code, ColumnMetadata.named("CODE").withIndex(1).ofType(Types.VARCHAR).withSize(50).notNull());
-        addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(3).ofType(Types.DECIMAL).withSize(9).notNull());
-        addMetadata(value, ColumnMetadata.named("VALUE").withIndex(2).ofType(Types.VARCHAR).withSize(2048));
+        addMetadata(departmentId, ColumnMetadata.named("DEPARTMENT_ID").withIndex(2).ofType(Types.DECIMAL).withSize(9).notNull());
+        addMetadata(value, ColumnMetadata.named("VALUE").withIndex(3).ofType(Types.VARCHAR).withSize(2048));
     }
 
 }

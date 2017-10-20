@@ -12,8 +12,6 @@ public class FormStyle implements Serializable {
 
 	private Integer id;
 	private String alias;
-	private Color fontColor;
-	private Color backColor;
 	private boolean italic = false;
 	private boolean bold = false;
 
@@ -47,38 +45,6 @@ public class FormStyle implements Serializable {
 	 */
 	public void setAlias(String alias) {
 		this.alias = alias;
-	}
-	
-	/**
-	 * Получить цвет шрифта, если null, то нужно использовать значение по-умолчанию 
-	 * @return цвет шрифта
-	 */
-	public Color getFontColor() {
-		return fontColor;
-	}
-	
-	/**
-	 * Задат цвет шрифта
-	 * @param fontColor цвет шрифта, если null, то будет использоваться значение по-умолчанию
-	 */
-	public void setFontColor(Color fontColor) {
-		this.fontColor = fontColor;
-	}
-	
-	/**
-	 * Получить цвет фона, если null, то нужно использовать значение по-умолчанию
-	 * @return цвет фона
-	 */
-	public Color getBackColor() {
-		return backColor;
-	}
-	
-	/**
-	 * Задать цвет фона
-	 * @param backColor цвет фона, если null, то будет использоваться значение по-умолчанию
-	 */
-	public void setBackColor(Color backColor) {
-		this.backColor = backColor;
 	}
 	
 	/**

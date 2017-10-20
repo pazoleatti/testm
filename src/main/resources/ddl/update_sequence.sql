@@ -83,17 +83,6 @@ Begin
         execute immediate 'Alter sequence seq_declaration_data INCREMENT BY 1';
      END IF;
   END IF;
-  
-
-  Select max(id) into v_id from department_form_type;
-  IF (v_id IS NOT NULL) THEN 
-     Select seq_department_form_type.NEXTVAL into v_seq from dual;
-     IF (v_id > v_seq) THEN         
-        execute immediate 'alter sequence seq_department_form_type INCREMENT BY '||TO_CHAR(v_id-v_seq); 
-        Select seq_department_form_type.NEXTVAL into v_seq from dual;
-        execute immediate 'Alter sequence seq_department_form_type INCREMENT BY 1';
-     END IF;
-  END IF;
 
   Select max(id) into v_id from sec_user;
   IF (v_id IS NOT NULL) THEN 
@@ -112,16 +101,6 @@ Begin
         execute immediate 'alter sequence seq_log_business INCREMENT BY '||TO_CHAR(v_id-v_seq); 
         Select seq_log_business.NEXTVAL into v_seq from dual;
         execute immediate 'Alter sequence seq_log_business INCREMENT BY 1';
-     END IF;
-  END IF;
-  
-  Select max(id) into v_id from task_context;
-  IF (v_id IS NOT NULL) THEN 
-     Select seq_task_context.NEXTVAL into v_seq from dual;
-     IF (v_id > v_seq) THEN         
-        execute immediate 'alter sequence seq_task_context INCREMENT BY '||TO_CHAR(v_id-v_seq); 
-        Select seq_task_context.NEXTVAL into v_seq from dual;
-        execute immediate 'Alter sequence seq_task_context INCREMENT BY 1';
      END IF;
   END IF;
   
@@ -162,16 +141,6 @@ Begin
         execute immediate 'alter sequence seq_declaration_type INCREMENT BY '||TO_CHAR(v_id-v_seq); 
         Select seq_declaration_type.NEXTVAL into v_seq from dual;
         execute immediate 'Alter sequence seq_declaration_type INCREMENT BY 1';
-     END IF;
-  end if;
-  
-  Select max(id) into v_id from department_form_type;
-  if (v_id is not null) then 
-    Select seq_department_form_type.NEXTVAL into v_seq from dual;
-     IF (v_id > v_seq) THEN         
-        execute immediate 'alter sequence seq_department_form_type INCREMENT BY '||TO_CHAR(v_id-v_seq); 
-        Select seq_department_form_type.NEXTVAL into v_seq from dual;
-        execute immediate 'Alter sequence seq_department_form_type INCREMENT BY 1';
      END IF;
   end if;
 

@@ -157,11 +157,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     }
 
     @Override
-    public DepartmentFormTypeService mockDepartmentFormTypeService() {
-        return mock(DepartmentFormTypeService.class);
-    }
-
-    @Override
     public RefBookFactory mockRefBookFactory() {
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         when(refBookFactory.getDataProvider(anyLong())).thenReturn(refBookDataProvider);

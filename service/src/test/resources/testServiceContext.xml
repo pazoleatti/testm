@@ -14,9 +14,6 @@
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">
-		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao"/>
-	</bean>
-	<bean class="org.mockito.Mockito" factory-method="mock">
 		<constructor-arg value="com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao"/>
 	</bean>
 	<bean class="org.mockito.Mockito" factory-method="mock">

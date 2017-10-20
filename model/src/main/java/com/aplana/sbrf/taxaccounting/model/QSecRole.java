@@ -36,8 +36,6 @@ public class QSecRole extends com.querydsl.sql.RelationalPathBase<QSecRole> {
 
     public final com.querydsl.sql.ForeignKey<QNotification> _notificationFkNotifyRole = createInvForeignKey(id, "ROLE_ID");
 
-    public final com.querydsl.sql.ForeignKey<QRoleEvent> _roleEventFkRoleId = createInvForeignKey(id, "ROLE_ID");
-
     public final com.querydsl.sql.ForeignKey<QSecUserRole> _secUserRoleFkRoleId = createInvForeignKey(id, "ROLE_ID");
 
     public QSecRole(String variable) {

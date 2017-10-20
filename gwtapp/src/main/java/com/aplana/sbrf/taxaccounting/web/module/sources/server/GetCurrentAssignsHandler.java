@@ -44,9 +44,9 @@ public class GetCurrentAssignsHandler extends
         queryParams.setAscending(action.isAscSorting());
         boolean isControlUNP = securityService.currentUserInfo().getUser().hasRole(TARole.N_ROLE_CONTROL_UNP);
         if (action.getMode() == SourceMode.SOURCES) {
-            List<DepartmentFormType> departmentFormTypes = sourceService
+            /*List<DepartmentFormType> departmentFormTypes = sourceService
                     .getDFTSourceByDDT(action.getDepartmentId(), action.getTypeId(), periodFrom, periodTo, queryParams);
-            result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes, TaxType.NDFL, isControlUNP));
+            result.setCurrentSources(sourceAssembler.assembleDFT(departmentFormTypes, TaxType.NDFL, isControlUNP));*/
         } else {
             List<DepartmentDeclarationType> departmentFormTypes = sourceService.
                     getDeclarationDestinations(action.getDepartmentId(), action.getTypeId(), action.getKind(), periodFrom, periodTo);

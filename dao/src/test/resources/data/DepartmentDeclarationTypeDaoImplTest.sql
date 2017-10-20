@@ -41,23 +41,6 @@ insert into department_declaration_type (id, department_id, declaration_type_id)
 insert into department_declaration_type (id, department_id, declaration_type_id) values (4, 7, 2);
 insert into department_declaration_type (id, department_id, declaration_type_id) values (5, 9, 2);
 
--- FORM_TYPE
-insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
-insert into form_type (id, name, tax_type) values (2, 'FormType - Income', 'I');
-insert into form_type (id, name, tax_type) values (3, 'FormType - VAT', 'V');
-insert into form_type (id, name, tax_type) values (4, 'FormType - Property', 'P');
-
--- DEPARTMENT_FORM_TYPE
-insert into department_form_type (id, department_id, form_type_id, kind) values (1, 1, 1, 1);
-insert into department_form_type (id, department_id, form_type_id, kind) values (2, 2, 1, 1);
-insert into department_form_type (id, department_id, form_type_id, kind) values (3, 3, 1, 1);
-insert into department_form_type (id, department_id, form_type_id, kind) values (4, 1, 2, 2);
-insert into department_form_type (id, department_id, form_type_id, kind) values (5, 9, 2, 1);
-insert into department_form_type (id, department_id, form_type_id, kind) values (6, 10, 2, 1);
-insert into department_form_type (id, department_id, form_type_id, kind) values (7, 11, 2, 2);
-insert into department_form_type (id, department_id, form_type_id, kind) values (8, 12, 2, 2);
-insert into department_form_type (id, department_id, form_type_id, kind) values (9, 13, 2, 2);
-
 -- DECLARATION_SOURCE
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (1, 1, date '2013-01-01', date '2014-01-01');
 insert into declaration_source (department_declaration_type_id, src_department_form_type_id, period_start, period_end) values (2, 2, date '2013-01-01', date '2014-01-01');

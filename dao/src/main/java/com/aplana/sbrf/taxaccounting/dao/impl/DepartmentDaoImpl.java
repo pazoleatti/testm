@@ -27,10 +27,6 @@ import static com.aplana.sbrf.taxaccounting.model.QDepartmentChildView.departmen
 import static com.aplana.sbrf.taxaccounting.model.QDepartmentDeclTypePerformer.departmentDeclTypePerformer;
 import static com.aplana.sbrf.taxaccounting.model.QDepartmentDeclarationType.departmentDeclarationType;
 
-//import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-//import org.springframework.cache.annotation.CacheEvict;
-//import org.springframework.cache.annotation.Cacheable;
-
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
@@ -348,154 +344,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> getDepartmentsBySourceControl(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
-        return getDepartmentsBySource(userDepartmentId, taxTypes, periodStart, periodEnd, false);
-    }
-
-    @Override
-    public List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd) {
-        return getDepartmentsBySource(userDepartmentId, taxTypes, periodStart, periodEnd, true);
-    }
-
-    @Override
-    public List<Integer> getPerformers(List<Integer> departments, int formType) {
-        String sql = String.format("SELECT dftp.performer_dep_id " +
-                "FROM department_form_type dft " +
-                "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
-                "WHERE %s AND dftp.performer_dep_id IS NOT null AND dft.form_type_id = :formtype " +
-                "GROUP BY dftp.performer_dep_id", SqlUtils.transformToSqlInStatement("dft.department_id", departments));
-
-        Map<String, Object> parameterMap = new HashMap<String, Object>();
-        parameterMap.put("formtype", formType);
-
-        return getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
-    }
-
-    /**
-     * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений
-     *
-     * @param userDepartmentId Подразделение пользователя
-     * @param taxTypes         Типы налога
-     * @param periodStart      начало периода, в котором действуют назначения
-     * @param periodEnd        окончание периода, в котором действуют назначения
-     * @param isNs             true - для роли "Контролер НС", false для роли "Контролер"  @return Список id подразделений
-     */
-    private List<Integer> getDepartmentsBySource(int userDepartmentId, List<TaxType> taxTypes, Date periodStart, Date periodEnd, boolean isNs) {
-        String recursive = isWithRecursive() ? "recursive" : "";
-
-        Map<String, Object> params = new HashMap<String, Object>();
-        String availableDepartmentsSql;
-        if (isNs) {
-            availableDepartmentsSql = "with " + recursive + " tree1 (id, parent_id, type) as " +
-                    "(select id, parent_id, type from department where id = :userDepartmentId " +
-                    "union all " +
-                    "select d.id, d.parent_id, d.type from department d inner join tree1 t1 on d.id = t1.parent_id " +
-                    "where d.type >= 2), tree2 (id, root_id, type) as " +
-                    "(select id, id root_id, type from department where type = 2 " +
-                    "union all " +
-                    "select d.id, t2.root_id, d.type from department d inner join tree2 t2 on d.parent_id = t2.id) " +
-                    "select tree2.id from tree1, tree2 where tree1.type = 2 and tree2.root_id = tree1.id";
-        } else {
-            availableDepartmentsSql = "with " + recursive + " tree (id) as " +
-                    "(select id from department where id = :userDepartmentId " +
-                    "union all " +
-                    "select d.id from department d inner join tree t on d.parent_id = t.id) " +
-                    "select id from tree";
-        }
-        params.put("userDepartmentId", userDepartmentId);
-
-        String allSql = "select id from " +
-                "(select distinct " +
-                "case when t3.c = 0 then av_dep.id else link_dep.id end as id " +
-                "from (" + availableDepartmentsSql +
-                ") av_dep left join ( " +
-                "select distinct ddt.department_id parent_id, dft.department_id id " +
-                "from declaration_source ds, department_form_type dft, department_declaration_type ddt, declaration_type dt " +
-                "where ds.department_declaration_type_id = ddt.id and ds.src_department_form_type_id = dft.id " +
-                "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd))) " +
-                "and dt.id = ddt.declaration_type_id " +
-                "union " +
-                "select distinct dft.department_id parent_id, dfts.department_id id " +
-                "from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
-                "where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd))) " +
-                "and ft.id = dft.form_type_id and ft.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + ") link_dep " +
-                "on av_dep.id = link_dep.parent_id, (select 0 as c from dual union all select 1 as c from dual) t3) " +
-                "where id is not null";
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-
-        return getNamedParameterJdbcTemplate().queryForList(allSql, params, Integer.class);
-    }
-
-    @Override
-    public List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes) {
-        String sql = String.format("select distinct department_id from department_form_type dft " +
-                "left join form_type ft on dft.form_type_id = ft.id " +
-                "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id " +
-                "where " +
-                "ft.tax_type in (:tt) " +
-                "and %s ", SqlUtils.transformToSqlInStatement("dftp.PERFORMER_DEP_ID", departments));
-
-        MapSqlParameterSource parameterMap = new MapSqlParameterSource();
-        List<String> types = new ArrayList<String>();
-        for (TaxType type : taxTypes) {
-            types.add(String.valueOf(type.getCode()));
-        }
-        parameterMap.addValue("tt", types);
-        return getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
-    }
-
-    @Override
     public List<Integer> getDepartmentIdsByExecutors(List<Integer> departments) {
-        String sql = String.format("select distinct department_id from department_form_type dft " +
-                "left join form_type ft on dft.form_type_id = ft.id " +
-                "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = ft.id \n" +
-                "where %s ", SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", departments));
+        String sql = String.format("select distinct department_id from department_declaration_type ddt \n" +
+                "left join declaration_type dt on ddt.declaration_type_id = dt.id \n" +
+                "left join department_decl_type_performer ddtp on ddtp.department_decl_type_id = dt.id \n" +
+                "where %s ", SqlUtils.transformToSqlInStatement("ddtp.performer_dep_id", departments));
 
         return getJdbcTemplate().queryForList(sql, Integer.class);
-    }
-
-    @Override
-    public List<Department> getDepartmentsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-        String sql = String.format("select id, name, parent_id, type, shortname, tb_index, sbrf_code, is_active, code, garant_use, sunr_use" +
-                " from department where id in " +
-                "   (select distinct dft.department_id from FORM_DATA_SOURCE fds " +
-                "   join DEPARTMENT_FORM_TYPE dft on dft.id = fds.department_form_type_id " +
-                "   where (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) " +
-                "          and (:periodEnd is null or fds.period_start <= :periodEnd))) " +
-                "   and src_department_form_type_id in " +
-                "       (select distinct src_dft.id " +
-                "       from DEPARTMENT_FORM_TYPE src_dft " +
-                "       where %s)" +
-                "   )", SqlUtils.transformToSqlInStatement("department_id", departments));
-        try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new DepartmentJdbcMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Department>(0);
-        }
-    }
-
-    @Override
-    public List<Integer> getDepartmentIdsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-        String sql = String.format("select id " +
-                " from department where id in " +
-                "   (select distinct dft.department_id from FORM_DATA_SOURCE fds " +
-                "   join DEPARTMENT_FORM_TYPE dft on dft.id = fds.department_form_type_id " +
-                "   where (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) " +
-                "          and (:periodEnd is null or fds.period_start <= :periodEnd))) " +
-                "   and src_department_form_type_id in " +
-                "       (select distinct src_dft.id " +
-                "       from DEPARTMENT_FORM_TYPE src_dft " +
-                "       where %s)" +
-                "   )", SqlUtils.transformToSqlInStatement("department_id", departments));
-        return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
     }
 
     @Override
@@ -541,33 +396,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     "    FROM department_declaration_type ddt\n" +
                     "    INNER JOIN department_decl_type_performer ddtp ON ddt.ID = ddtp.department_decl_type_id \n" +
                     "    WHERE ddt.declaration_type_id = :declarationTypeId AND ddtp.performer_dep_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = :userDepId)\n" +
-                    "  )\n" +
-                    ")", params, Integer.class);
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>();
-        }
-    }
-
-
-    @Override
-    public List<Integer> getAllPerformers(int userDepId, List<TaxType> taxTypes) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("userDepId", userDepId);
-        List<String> types = new ArrayList<String>();
-        for (TaxType type : taxTypes) {
-            types.add(String.valueOf(type.getCode()));
-        }
-        params.put("taxTypes", types);
-        try {
-            return getNamedParameterJdbcTemplate().queryForList("SELECT DISTINCT ddt2.department_id\n" +
-                    "FROM department_declaration_type ddt2\n" +
-                    "INNER JOIN declaration_type dt ON dt.id = ddt2.declaration_type_id\n" +
-                    "WHERE ddt2.department_id IN (\n" +
-                    "  SELECT dep.ID FROM department dep CONNECT BY PRIOR dep.ID = dep.parent_id START WITH dep.ID in (\n" +
-                    "    SELECT DISTINCT ddt.department_id\n" +
-                    "    FROM department_declaration_type ddt\n" +
-                    "    INNER JOIN department_decl_type_performer ddtp ON ddt.ID = ddtp.department_decl_type_id \n" +
-                    "    WHERE ddt.declaration_type_id = ddt2.declaration_type_id AND ddtp.performer_dep_id IN (SELECT dep_ddtp.ID FROM department dep_ddtp CONNECT BY PRIOR dep_ddtp.ID = dep_ddtp.parent_id START WITH dep_ddtp.ID = :userDepId)\n" +
                     "  )\n" +
                     ")", params, Integer.class);
         } catch (EmptyResultDataAccessException e) {

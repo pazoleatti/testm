@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -27,9 +26,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Autowired
     DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
-
-    @Autowired
-    DepartmentFormTypeDao departmentFormTypeDao;
 
     @Autowired
     PeriodService periodService;
@@ -446,17 +442,6 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
         }
         return null;
-    }
-
-    private List<Integer> getExecutorsDepartments(List<Integer> departments, int formType) {
-        return departmentDao.getPerformers(departments, formType);
-    }
-
-    /**
-     * Все подразделения, для форм которых, подразделения departments назначены исполнителями
-     */
-    private List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes) {
-        return departmentDao.getDepartmentIdsByExecutors(departments, taxTypes);
     }
 
     @Override

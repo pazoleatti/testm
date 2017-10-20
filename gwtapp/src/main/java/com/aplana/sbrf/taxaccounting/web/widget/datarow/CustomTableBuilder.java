@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
-import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
@@ -244,16 +243,6 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
         out.style()
                 .fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
                 .fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL)
-                .trustedBackgroundColor(convertColorToRGBString(ourStyle.getBackColor()))
-                .trustedColor(convertColorToRGBString(ourStyle.getFontColor()))
                 .endStyle();
     }
-
-	private String convertColorToRGBString(Color color) {
-		return "rgb(" +
-					color.getRed() + "," +
-					color.getGreen() + "," +
-					color.getBlue() +
-				")";
-	}
 }

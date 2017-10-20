@@ -19,14 +19,6 @@ public interface SourcesUiHandlers extends AplanaUiHandlers {
 
     void closeAssignDialog();
 
-    void getFormsRight(Integer departmentId, DepartmentAssign selectedLeft);
-
-    void getFormsLeft(Integer departmentId, DepartmentAssign selectedLeftRecord);
-
-    void getDecsLeft(Integer departmentId, DepartmentAssign selectedLeftRecord);
-
-    void getDecsRight(Integer departmentId, DepartmentAssign selectedLeft);
-
     void getCurrentAssigns(DepartmentAssign departmentAssign);
 
     TaxType getTaxType();

@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.Relation;
-import com.aplana.sbrf.taxaccounting.model.source.*;
+import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
+import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
+import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 
 import java.util.*;
 
@@ -47,16 +47,14 @@ public interface SourceDao {
      * Удаляет указанные связки источников-приемников
      *
      * @param sources связки источников-приемников
-     * @param declaration признак того, что выполняется удаление источников для декларации
      */
-    void deleteAll(List<SourceObject> sources, boolean declaration);
+    void deleteAll(List<SourceObject> sources);
 
     /**
      * Создает новые связки источников-приемников
      * @param sources связки источников-приемников
-     * @param declaration признак того, что выполняется назначение источников для декларации
      */
-    void createAll(List<SourceObject> sources, boolean declaration);
+    void createAll(List<SourceObject> sources);
 
     /**
      * Удаляет указанные связки источников-приемников
@@ -64,9 +62,8 @@ public interface SourceDao {
      * @param sources связки источников-приемников
      * @param periodStart новая дата начала действия
      * @param periodEnd новая дата окончания действия
-     * @param declaration признак того, что выполняется обновление источников для декларации
      */
-    void updateAll(List<SourceObject> sources, Date periodStart, Date periodEnd, boolean declaration);
+    void updateAll(List<SourceObject> sources, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает названия назначений по их идентификаторам
@@ -75,14 +72,6 @@ public interface SourceDao {
      * @return ключ - Идентификатор назначения; значение - Название назначения
      */
     Map<Long, String> getSourceNames(List<Long> sourceIds);
-
-    /**
-     * Проверяет, существует ли список назначенных подразделению форм (с учётом вида и типа)
-     *
-     * @param departmentFormTypeIds список идентификаторов назначений
-     * @return список идентификаторов назначений, которые все еще существуют
-     */
-    List<Long> checkDFTExistence(List<Long> departmentFormTypeIds);
 
     /**
      * Проверяет, существует ли список назначенных подразделению деклараций (с учётом вида и типа)
@@ -107,31 +96,9 @@ public interface SourceDao {
      * @param source идентификатор назначения-источника
      * @param periodStart начало диапазона
      * @param periodEnd окончание диапазона
-     * @param declaration признак того, что экземпляры-приемники надо искать только среди деклараций
      * @return
      */
-    List<ConsolidatedInstance> findConsolidatedInstances(long source, long destination, Date periodStart, Date periodEnd, boolean declaration);
-
-    /**
-     * Возвращает названия подразделений для указанных источников
-     * @param sources пары id источника - название подразделения
-     * @return пары id источника - название подразделения
-     */
-    Map<Long, String> getDepartmentNamesBySource(List<Long> sources);
-
-    /**
-     * Возвращает id подразделения по его назначению НФ
-     * @param departmentFormTypeId id назначения формы подразделению
-     * @return id подразделения
-     */
-    Integer getDepartmentIdByDepartmentFormType(long departmentFormTypeId);
-
-    /**
-     * Возвращает id подразделения по его назначению декларации
-     * @param departmentDeclarationTypeId id назначения декларации подразделению
-     * @return id подразделения
-     */
-    Integer getDepartmentIdByDepartmentDeclarationType(long departmentDeclarationTypeId);
+    List<ConsolidatedInstance> findConsolidatedInstances(long source, long destination, Date periodStart, Date periodEnd);
 
     /**
      * Обновляет информацию о консолидации(т.е. была ли она сделана).
@@ -201,44 +168,4 @@ public interface SourceDao {
      * @return false если есть хоть одна строка где НФ-источник равна null
      */
     boolean isDDConsolidationTopical(long ddTargetId);
-
-    /**
-     * Возвращает список нф-источников для указанной нф (включая несозданные)
-     * @param destinationFormData нф-приемник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные источники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
-     * @return список нф-источников
-     */
-    //List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
-
-    /**
-     * Возвращает список нф-приемников для указанной нф (включая несозданные)
-     * @param sourceFormData нф-источник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные приемники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
-     * @return список нф-приемников
-     */
-    //List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
-
-    /**
-     * Возвращает список декларация-приемников для указанной нф-источника (включая несозданные)
-     * @param sourceFormData нф-источник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные приемники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
-     * @return список нф-источников
-     */
-    //List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
-
-    /**
-     * Возвращает список нф-источников для указанной декларации (включая несозданные)
-     * @param declaration декларация-приемник
-     * @param light true - заполнятся только текстовые данные для GUI и сообщений
-     * @param excludeIfNotExist true - исключить несозданные источники
-     * @param stateRestriction ограничение по состоянию для созданных экземпляров
-     * @return список нф-источников
-     */
-    //List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 }

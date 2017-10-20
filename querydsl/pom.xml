@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ndfl</artifactId>
         <groupId>com.aplana.taxaccounting</groupId>
-        <version>1.0</version>
+        <version>2.1</version>
     </parent>
 
     <artifactId>querydsl</artifactId>
@@ -75,4 +75,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>jcenter</id>
+            <name>jcenter</name>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
+        <repository>
+            <id>taxaccounting-thirdparty</id>
+            <name>Сторонние библиотеки, используемые в проекте</name>
+            <url>http://172.19.214.42:8081/nexus/content/repositories/thirdparty/</url>
+        </repository>
+    </repositories>
 </project>

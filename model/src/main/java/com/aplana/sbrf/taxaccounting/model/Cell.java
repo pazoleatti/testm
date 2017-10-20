@@ -17,29 +17,41 @@ import java.util.List;
  */
 public class Cell extends AbstractCell {
     private static final long serialVersionUID = -3684680064726678753L;
-	//todo надо задуматься о том, что происходит с датами на двух строчках ниже. Написать тесты
-	public static final Date DATE_1900 = new Date(0, 0, 1);
-	public static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
+    //todo надо задуматься о том, что происходит с датами на двух строчках ниже. Написать тесты
+    public static final Date DATE_1900 = new Date(0, 0, 1);
+    public static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
 
     private String stringValue;
     private Date dateValue;
     private BigDecimal numericValue;
     private boolean editable;
     private boolean forceValue;
-	/** Разыменованное значение справочной(зависимой) графы */
+    /**
+     * Разыменованное значение справочной(зависимой) графы
+     */
     private String refBookDereference;
-    /** Исходное значение справочной(зависимой) графы */
+    /**
+     * Исходное значение справочной(зависимой) графы
+     */
     transient private RefBookValue refBookValue;
 
-    /** Стиль ячейки */
+    /**
+     * Стиль ячейки
+     */
     private FormStyle style;
-    /** Временный стиль ячейки. Используется только в режиме ручного ввода и не сохраняется в бд */
+    /**
+     * Временный стиль ячейки. Используется только в режиме ручного ввода и не сохраняется в бд
+     */
     private FormStyle clientStyle;
 
     private List<FormStyle> formStyleList;
-    /** Сообщение, формируемое при проверке ячеек */
+    /**
+     * Сообщение, формируемое при проверке ячеек
+     */
     private String errorMessage;
-    /** Включен ли режим проверки (true - записывать в ячейки, false - бросать исключение) */
+    /**
+     * Включен ли режим проверки (true - записывать в ячейки, false - бросать исключение)
+     */
     private boolean errorMode;
 
     public boolean isForceValue() {
@@ -70,11 +82,15 @@ public class Cell extends AbstractCell {
                 case AUTO:
                 case REFBOOK:
                     return numericValue == null ? null : numericValue.longValueExact();
-                case STRING: return stringValue;
-                case DATE: return dateValue;
-                case NUMBER: return numericValue;
+                case STRING:
+                    return stringValue;
+                case DATE:
+                    return dateValue;
+                case NUMBER:
+                    return numericValue;
                 case REFERENCE:
-                default: return null;
+                default:
+                    return null;
             }
         } else {
             //Для принудительного значения всегда возвращаем строку
@@ -98,26 +114,25 @@ public class Cell extends AbstractCell {
     }
 
     /**
-     *
      * @param value
      * @param rowNumber
-     * @param force - @true устанавливаем только строковое значение
+     * @param force          - @true устанавливаем только строковое значение
      * @param skipValidation - @true перед установкой значения не выполняем проверки
      * @return
      */
     private Object doSetValue(Object value, Integer rowNumber, boolean force, boolean skipValidation) {
-		stringValue = null;
-		dateValue = null;
-		numericValue = null;
-		if (value == null) {
-			return null;
-		}
-		// Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
-		if (!force && hasValueOwner()) {
-			return null;
-		}
-		// Формируем заготовки сообщений. Используются при оформлении ошибок
-		String columnName = getColumn().getName() == null ? "Без названия" : getColumn().getName();
+        stringValue = null;
+        dateValue = null;
+        numericValue = null;
+        if (value == null) {
+            return null;
+        }
+        // Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
+        if (!force && hasValueOwner()) {
+            return null;
+        }
+        // Формируем заготовки сообщений. Используются при оформлении ошибок
+        String columnName = getColumn().getName() == null ? "Без названия" : getColumn().getName();
         String msg = "Графа «" + columnName + "». ";
         String msgValue = "Значение графы «" + columnName + "» ";
         if (rowNumber != null) {
@@ -177,7 +192,7 @@ public class Cell extends AbstractCell {
                 case STRING: {
                     if (value instanceof String) {
                         String temp = (String) value;
-                        if (temp!= null) {
+                        if (temp != null) {
                             temp = StringUtils.cleanString(temp);
                         }
                         if (!skipValidation && !getColumn().getValidationStrategy().matches(temp)) {
@@ -215,7 +230,9 @@ public class Cell extends AbstractCell {
         }
     }
 
-    /** Записывает сообщение об ошибке в ячейку или выбрасывает исключение */
+    /**
+     * Записывает сообщение об ошибке в ячейку или выбрасывает исключение
+     */
     private Object showError(String msg) {
         if (errorMode) {
             errorMessage = msg;
@@ -364,22 +381,6 @@ public class Cell extends AbstractCell {
         this.refBookValue = refBookValue;
     }
 
-    /**
-     * Устанавливает цвет фона и шрифта. Использовать только в режиме ручного ввода для жесткого задания цвета ячеек!
-     * @param alias алиас для нового стиля
-     * @param fontColor цвет шрифта
-     * @param backColor цвет фона
-     */
-    public void setClientStyle(String alias, Color fontColor, Color backColor) {
-        if (formStyleList != null && !formStyleList.isEmpty()) {
-            clientStyle = new FormStyle();
-            clientStyle.setAlias(alias);
-            clientStyle.setBackColor(backColor);
-            clientStyle.setFontColor(fontColor);
-            formStyleList.add(clientStyle);
-        }
-    }
-
     public FormStyle getClientStyle() {
         return clientStyle;
     }
@@ -396,17 +397,17 @@ public class Cell extends AbstractCell {
         this.errorMode = errorMode;
     }
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("Cell{");
-		sb.append("value=").append(getValue());
-		sb.append("; dereference=").append(getRefBookDereference());
-		sb.append("; colspan=").append(getColSpan());
-		sb.append("; rowspan=").append(getRowSpan());
-		sb.append("; style=").append(getStyle());
-		sb.append("; editable=").append(isEditable());
-		sb.append('}');
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Cell{");
+        sb.append("value=").append(getValue());
+        sb.append("; dereference=").append(getRefBookDereference());
+        sb.append("; colspan=").append(getColSpan());
+        sb.append("; rowspan=").append(getRowSpan());
+        sb.append("; style=").append(getStyle());
+        sb.append("; editable=").append(isEditable());
+        sb.append('}');
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 }
