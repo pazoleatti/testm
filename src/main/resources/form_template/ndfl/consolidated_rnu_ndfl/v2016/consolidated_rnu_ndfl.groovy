@@ -654,6 +654,21 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     def createSpecificReport() {
+        int ndflPersonCount = ndflPersonService.getCountNdflPerson(declarationData.id)
+        if (ndflPersonCount == 0) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            Department department = departmentService.get(departmentReportPeriod.departmentId)
+            String strCorrPeriod = ""
+            if (departmentReportPeriod.getCorrectionDate() != null) {
+                strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+            }
+            logger.error("Спецотчет \"%s\" не сформирован, т.к. в форме %d, Период %s, Подразделение %s отсутствуют данные для формирования спецотчета",
+                    scriptSpecificReportHolder.declarationSubreport?.name,
+                    declarationData.id,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                    department.name)
+            return
+        }
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 createSpecificReportPersonDb();
