@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 
 import java.util.List;
 import java.util.Map;
@@ -43,6 +41,19 @@ public interface ConfigurationService {
     ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo);
 
     /**
+     * Получение конф.параметров по коду
+     *
+     * @param code
+     * @return модель
+     */
+    ConfigurationParamModel get(String code);
+
+    /**
+     * Получение конфигурационных параметров (табл. CONFIGURATION)
+     */
+    List<Configuration> getCommonParametr(TAUserInfo userInfo);
+
+    /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
      */
     void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger);
@@ -63,4 +74,14 @@ public interface ConfigurationService {
      * Сохранение общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
      */
     void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo);
+
+    /**
+     * Обновление общего параметра в табл. CONFIGURATION
+     */
+    void update(Configuration config);
+
+    /**
+     * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)
+     */
+    void setCommonParamsDefault();
 }

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import org.junit.Assert;
@@ -11,6 +12,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,20 +45,26 @@ public class ConfigurationDaoTest {
         Assert.assertTrue(model.containsKey(ConfigurationParam.NO_CODE));
         Assert.assertTrue(model.containsKey(ConfigurationParam.SBERBANK_INN));
         Assert.assertEquals("test6", model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1).get(0));
-        Assert.assertEquals("test7", model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 2).get(0));
     }
 
     @Test
     public void save1Test() {
         ConfigurationParamModel model = dao.getAll();
         model.put(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 1, asList("testSaveRegion"));
-        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1, null);
+        model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1, asList("testSaveRegion2"));
         dao.save(model);
         model = dao.getAll();
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
-        Assert.assertNull(model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY).get(1));
-        Assert.assertTrue(model.containsKey(ConfigurationParam.REGION_UPLOAD_DIRECTORY));
-        Assert.assertEquals("testSaveRegion", model.get(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 1).get(0));
+    }
+
+    @Test
+    public void baseOperationTest() {
+        String code = "SignCheckIn";
+        Configuration confg = new Configuration(code, new BigDecimal(0), "123");
+        dao.save(confg);
+        String value = "val2";
+        confg.setValue(value);
+        dao.update(confg);
     }
 
     // Попытка сохраннить запись с ссылкой на несуществующий depatment_id
@@ -69,11 +77,12 @@ public class ConfigurationDaoTest {
 
     @Test
     public void getByDepartmentTest() {
-        ConfigurationParamModel model = dao.getByDepartment(1);
+        ConfigurationParamModel model = dao.getByDepartment(0);
         Assert.assertNotNull(model);
     }
 
     // Удаление
+    @Test
     public void save3Test() {
         ConfigurationParamModel model = dao.getAll();
         model.remove(ConfigurationParam.KEY_FILE);

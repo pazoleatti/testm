@@ -1,22 +1,28 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLExpressions;
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.model.QConfiguration.configuration;
+import static com.querydsl.core.types.Projections.bean;
+
+
 
 /**
  * Реализация ДАО для работа с параметрами приложения
@@ -25,87 +31,109 @@ import java.util.Map;
  * @since 10.10.13 11:41
  */
 
+
 @Repository
 @Transactional
 public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDao {
 
-	private static final Log LOG = LogFactory.getLog(ConfigurationDaoImpl.class);
+    private static final Log LOG = LogFactory.getLog(ConfigurationDaoImpl.class);
     private static final String GET_ALL_ERROR = "Ошибка получения конфигурационных параметров!";
 
-    class ConfigurationRowCallbackHandler implements RowCallbackHandler {
-        final ConfigurationParamModel model;
+    final private SQLQueryFactory sqlQueryFactory;
 
-        public ConfigurationRowCallbackHandler(ConfigurationParamModel model) {
-            this.model = model;
-        }
+    public ConfigurationDaoImpl(SQLQueryFactory sqlQueryFactory) {
+        this.sqlQueryFactory = sqlQueryFactory;
+    }
 
-        @Override
-        public void processRow(ResultSet rs) throws SQLException {
+    final private QBean<Configuration> configurationBean = bean(Configuration.class, configuration.all());
+
+    //метод преобразующий конфигурационные параметры в ConfigurationParamModel используемый в gwt
+    private void configInToConfigurationParamModel(List<Configuration> listConfig, ConfigurationParamModel configurationParamModel) {
+        for (Configuration config : listConfig) {
             try {
-                model.setFullStringValue(ConfigurationParam.valueOf(rs.getString("code")), rs.getInt("department_id"), rs.getString("value"));
-            } catch (IllegalArgumentException e) {
-                // Если параметр не найден в ConfiguratioжnParam, то он просто пропускается (не виден на клиенте)
-            } catch (SQLException e) {
-                throw new DaoException(GET_ALL_ERROR, e);
+                configurationParamModel.setFullStringValue(ConfigurationParam.valueOf(config.getCode().toString()),
+                        config.getDepartmentId().intValue(), config.getValue());
+            } catch (Exception e) {
+                //пропускается
             }
         }
     }
 
     @Override
+    public List<Configuration> getAllConfiguration() {
+        return sqlQueryFactory.select(configuration.code).from(configuration)
+                .transform(GroupBy.groupBy(configuration.code).list(configurationBean));
+    }
+
+
+    @Override
     public ConfigurationParamModel getAll() {
         final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value, department_id from configuration", new ConfigurationRowCallbackHandler(model));
+        List<Configuration> listConfig = getAllConfiguration();
+        configInToConfigurationParamModel(listConfig, model);
         return model;
     }
 
     @Override
     public ConfigurationParamModel getConfigByGroup(final ConfigurationParamGroup group) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value, department_id from configuration", new RowCallbackHandler() {
-            @Override
-            public void processRow(ResultSet rs) throws SQLException {
-                try {
-                    ConfigurationParam configurationParam = ConfigurationParam.valueOf(rs.getString("code"));
-                    if (configurationParam.getGroup().equals(group)) {
-                        model.setFullStringValue(configurationParam, rs.getInt("department_id"), rs.getString("value"));
-                    }
-                } catch (IllegalArgumentException e) {
-                    // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
-                } catch (SQLException e) {
-                    throw new DaoException(GET_ALL_ERROR, e);
+        List<Configuration> listConfig = sqlQueryFactory.select(configuration.code).from(configuration)
+                .transform(GroupBy.groupBy(configuration.code).list(configurationBean));
+        for (Configuration config : listConfig) {
+            try {
+                ConfigurationParam configurationParam = ConfigurationParam.valueOf(config.getCode());
+                if (configurationParam.getGroup().equals(group)) {
+                    model.setFullStringValue(configurationParam, config.getDepartmentId().intValue(), config.getValue());
                 }
+            } catch (IllegalArgumentException e) {
+                // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
             }
-        });
+        }
         return model;
     }
 
+    @Override
+    public List<Configuration> getListConfigByGroup(final ConfigurationParamGroup group) {
+        List<Configuration> resultList = new LinkedList<>();
+        List<Configuration> listConfig = sqlQueryFactory.select(configuration.code).from(configuration)
+                .transform(GroupBy.groupBy(configuration.code).list(configurationBean));
+        for (Configuration config : listConfig) {
+            try {
+                ConfigurationParam configurationParam = ConfigurationParam.valueOf(config.getCode());
+                if (configurationParam.getGroup().equals(group)) {
+                    ConfigurationParam.valueOf(config.getCode());
+                    config.setCode(ConfigurationParam.valueOf(config.getCode()).getCaption());
+                    resultList.add(config);
+                }
+            } catch (IllegalArgumentException e) {
+                // Если параметр не найден в result, то он просто пропускается (не виден на клиенте)
+            }
+        }
+        return resultList;
+    }
 
     @Override
     public ConfigurationParamModel getByDepartment(Integer departmentId) {
-        try {
-            final ConfigurationParamModel model = new ConfigurationParamModel();
-            getJdbcTemplate().query("select code, value, department_id from configuration where department_id = ?",
-                    new Object[]{departmentId},
-                    new ConfigurationRowCallbackHandler(model));
-            return model;
-        } catch (DataAccessException e){
-			LOG.error("", e);
-            throw new DaoException("", e);
-        }
+        final ConfigurationParamModel model = new ConfigurationParamModel();
+        List<Configuration> listConfig = sqlQueryFactory.select(configuration.code).from(configuration)
+                .where(configuration.departmentId.eq(new BigDecimal(departmentId)))
+                .transform(GroupBy.groupBy(configuration.code).list(configurationBean));
+        configInToConfigurationParamModel(listConfig, model);
+        return model;
     }
 
     @Override
     public void save(ConfigurationParamModel model) {
         ConfigurationParamModel oldModel = getAll();
-        List<Object[]> insertParams = new LinkedList<Object[]>();
-        List<Object[]> updateParams = new LinkedList<Object[]>();
-        List<Object[]> deleteParams = new LinkedList<Object[]>();
+        List<Configuration> insertParams = new LinkedList<>();
+        List<Configuration> updateParams = new LinkedList<>();
+        List<Object[]> deleteParams = new LinkedList<>();
 
         for (ConfigurationParam configurationParam : model.keySet()) {
             Map<Integer, List<String>> map = model.get(configurationParam);
             for (int departmentId : map.keySet()) {
-                Object[] entity = new Object[]{model.getFullStringValue(configurationParam, departmentId),
-                        configurationParam.name(), departmentId};
+                Configuration entity = new Configuration(model.getFullStringValue(configurationParam, departmentId),
+                        new BigDecimal(departmentId), configurationParam.name());
                 if (!oldModel.containsKey(configurationParam)
                         || (oldModel.get(configurationParam) != null && !oldModel.get(configurationParam).containsKey(departmentId))) {
                     insertParams.add(entity);
@@ -126,39 +154,92 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         }
 
         if (!insertParams.isEmpty()) {
-            getJdbcTemplate().batchUpdate("INSERT INTO configuration (value, code, department_id) VALUES (?, ?, ?)", insertParams);
+            for (Configuration config : insertParams) {
+                insert(config);
+            }
         }
+
         if (!updateParams.isEmpty()) {
-            getJdbcTemplate().batchUpdate("UPDATE configuration SET VALUE = ? WHERE code = ? AND department_id = ?", updateParams);
+            for (Configuration config : updateParams) {
+                update(config);
+            }
         }
+
         if (!deleteParams.isEmpty()) {
-            getJdbcTemplate().batchUpdate("DELETE FROM configuration WHERE code = ? AND department_id = ?", deleteParams);
+            for (Object[] lObj : deleteParams) {
+                BigDecimal i = new BigDecimal(lObj[1].toString());
+                sqlQueryFactory.delete(configuration)
+                        .where(configuration.code.eq(((String) lObj[0])), configuration.departmentId.eq(i))
+                        .execute();
+            }
         }
     }
 
+    public void insert(Configuration config) {
+        config.setCode(ConfigurationParam.getNameValueAsDB(config.getCode()));
+        sqlQueryFactory.insert(configuration)
+                .columns(configuration.departmentId, configuration.code, configuration.value)
+                .values(config.getDepartmentId(), config.getCode(), config.getValue())
+                .execute();
+    }
+
+    public void update(Configuration config) {
+        config.setCode(ConfigurationParam.getNameValueAsDB(config.getCode()));
+        sqlQueryFactory.update(configuration)
+                .where(configuration.departmentId.eq(config.getDepartmentId()), configuration.code.eq(config.getCode()))
+                .set(configuration.value, config.getValue())
+                .execute();
+    }
+
+    @Override
+    public void setCommonParamsDefault(List<Configuration> listDefaultConfig) {
+        //Общие параметры просто обновляются, так как не предусмотренно удаление общих параметров
+        for (Configuration config : listDefaultConfig) {
+            update(config);
+        }
+    }
+
+    public void delete(Configuration config) {
+        sqlQueryFactory.delete(configuration)
+                .where(configuration.departmentId.eq(config.getDepartmentId()), configuration.code.eq((config.getCode())))
+                .execute();
+    }
+
+
     @Override
     public void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId) {
-        List<Object[]> updateParams = new LinkedList<Object[]>();
+        List<Configuration> updateParams = new LinkedList<>();
 
         for (Map.Entry<ConfigurationParam, String> entry : configurationParamMap.entrySet()) {
-            Object[] entity = new Object[] {
-                    entry.getKey().name(),
-                    entry.getValue(),
-                    departmentId
-            };
-
+            Configuration entity = new Configuration(entry.getKey().name(), new BigDecimal(departmentId), entry.getValue());
             updateParams.add(entity);
         }
 
         if (!updateParams.isEmpty()) {
-            getJdbcTemplate().batchUpdate(
-                    "MERGE INTO configuration dest " +
-                    "USING (SELECT ? code, ? value, ? department_id FROM dual) src " +
-                    "ON (dest.code = src.code) " +
-                    "WHEN MATCHED THEN UPDATE SET dest.value = src.value " +
-                    "WHEN NOT MATCHED THEN INSERT(code, value, department_id) VALUES(src.code, src.value, src.department_id)",
-                    updateParams
-            );
+            for (Configuration config : updateParams) {
+                if (sqlQueryFactory.select(SQLExpressions.all).from(configuration)
+                        .where(configuration.code.eq(config.getCode()), configuration.departmentId.eq(config.getDepartmentId()))
+                        .transform(GroupBy.groupBy(configuration.code).list(configurationBean)).isEmpty()) {
+                    insert(config);
+                } else {
+                    update(config);
+                }
+            }
         }
+    }
+
+
+    @Override
+    public boolean save(Configuration config) {
+        try {
+            sqlQueryFactory.insert(configuration)
+                    .columns(configuration.code, configuration.departmentId, configuration.value)
+                    .values(config.getCode(), config.getDepartmentId(), config.getValue())
+                    .execute();
+
+        } catch (Exception e) {
+
+        }
+        return true;
     }
 }

@@ -76,7 +76,9 @@
     "filter.placeholder.select": "Значение не выбрано",
     "filter.placeholder.empty": "",
     "theNumberOfSelectedItems": "Выбрано значений:",
-
+    "title.redactParametr": "Редактировать параметр",
+    "commonParams.default": "Восстановить значения по умолчанию",
+    "title.commonParams.default": "Восстановление значений по умолчанию",
     "menu.taxes": "Налоги",
     "menu.taxes.ndfl": "НДФЛ",
     "menu.taxes.ndfl.details": "НДФЛ детализация",
@@ -104,10 +106,12 @@
     "move_back":"Назад",
     "header.ndflJournal.forms": "НДФЛ - Список налоговых форм",
     "header.ndflReportJournal.forms": "НДФЛ - Отчетность",
+    "header.configParams": "Администрирование - Конфигурационные параметры",
     "header.ndfl.forms": "РНУ НДФЛ",
     "header.ndfl.form.create": "Создание новой записи",
     "header.ndfl.fl.create": "Добавить запись ФЛ",
     "header.ndfl.fl.edit": "Редактировать запись ФЛ",
+    "header.CommonParams": "Налоги - Общие параметры",
 
     "tab.ndfl.requisites": "Реквизиты",
     "tab.ndfl.informationOnIncomesAndNdfl": "Сведения о доходах и НДФЛ",
@@ -135,6 +139,8 @@
 
     "field.ndfl.requiredField": "Обязательно поле",
     "field.ndfl.isNumber": "В поле должны вводиться только цифры",
+    "title.comParams.param": "Параметр",
+    "title.comParams.paramValue": "Значение параметра",
 
     "title.period": "Период",
     "title.department": "Подразделение",
@@ -244,7 +250,8 @@
   "title.checkImpossible": "Для текущего экземпляра налоговой формы не выполнен расчет. Проверка данных невозможна",
   "title.noCalculationPerformed": "Для текущего экземпляра налоговой формы не выполнен расчет",
   "title.acceptImpossible": "Для текущего экземпляра налоговой формы не выполнен расчет. Принятие налоговой формы невозможно",
-
+    "title.acceptCommonParamsDefault": "Вы уверены, что хотите вернуть значения параметров по умолчанию? Все текущие значения будут заменены.",
+    "title.confirmation": "Восстановление значений по умолчанию",
     "title.notifType": "Подтверждающий документ. Тип",
     "title.notifDate": "Подтверждающий документ. Дата",
     "title.notifNum": "Подтверждающий документ. Номер",
