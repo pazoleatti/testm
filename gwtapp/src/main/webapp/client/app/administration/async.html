@@ -11,14 +11,14 @@
     <div class="form100" style="height:66%;">
         <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
             <!-- Остановить задачу -->
-            <button type="button" class="btn btn-danger"
+            <button type="button" class="btn btn-default"
                     data-ng-click="interruptTask()" data-ng-disabled="asyncGrid.value.length == 0">
                 <span data-translate-once="async.button.interrupt"></span>
             </button>
             <!--Фильтр-->
             <input type="text" data-ng-model="searchFilter.filter" />
             <!--Найти-->
-            <button type="button" class="btn btn-danger"
+            <button type="button" class="btn btn-default"
                     data-ng-click="refreshGrid(1)">
                 <span data-translate-once="async.button.search"></span>
             </button>

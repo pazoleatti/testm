@@ -2,14 +2,15 @@
     <div class="header-col" style="margin: 14px 0 0 28px;">
         <h1>{{::'header.ndflJournal.forms' | translate}}:</h1>
     </div>
-    <div class="header-col w200" style="float: right; margin-top: 14px;  margin-right: -11px;">
-        <button type="button" class="btn btn-danger" data-ng-click="showCreateDeclarationModal()"
+    <div class="header-col w200" style="float: right; margin-top: 14px;  margin-right: 14px;">
+        <button type="button" class="btn btn-default" data-ng-click="showCreateDeclarationModal()"
                 data-ng-show="declarationCreateAllowed">
+            <span class="icon-ok"></span>
             <span data-translate-once="ndflJournal.button.create"></span>
         </button>
     </div>
 </div>
-<div id="production-planning" class="container-grid" >
+<div id="production-planning" class="container-grid box-shadow-block" >
     <div class="top-wrapper" style="min-height: 72px; margin: -13px 0 -7px 0;">
         <!-- Фильтр -->
         <div class='container-grid-top'>
@@ -21,35 +22,35 @@
             <div class="btn-toolbar" role="toolbar">
                 <!--Рассчитать -->
                 <span>
-                <button type="button" class="btn btn-danger" data-ng-click="calculate()"
+                <button type="button" class="btn btn-default" data-ng-click="calculate()"
                         data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CALCULATE)">
                     <span data-translate-once="button.calculate"></span>
                 </button>
             </span>
                 <!--Принять -->
                 <span>
-                <button type="button" class="btn btn-danger" data-ng-click="accept()"
+                <button type="button" class="btn btn-default" data-ng-click="accept()"
                         data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
                     <span data-translate-once="button.accept"></span>
                 </button>
             </span>
                 <!--Проверить -->
                 <span>
-                <button type="button" class="btn btn-danger" data-ng-click="check()"
+                <button type="button" class="btn btn-default" data-ng-click="check()"
                         data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
                     <span data-translate-once="button.check"></span>
                 </button>
             </span>
                 <!--Вернуть в Создана -->
                 <span>
-                <button type="button" class="btn btn-danger" data-ng-click="returnToCreated()"
+                <button type="button" class="btn btn-default" data-ng-click="returnToCreated()"
                         data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)">
                     <span data-translate-once="button.return"></span>
                 </button>
             </span>
                 <!--Удалить-->
                 <span>
-                <button type="button" class="btn btn-danger" data-ng-click="delete()"
+                <button type="button" class="btn btn-default" data-ng-click="delete()"
                         data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
                     <span data-translate-once="button.delete"></span>
                 </button>

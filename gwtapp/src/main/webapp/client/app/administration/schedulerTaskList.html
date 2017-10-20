@@ -11,17 +11,17 @@
     <div class="form100" style="height:66%;">
         <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
             <!--Запустить выполнение по расписанию-->
-            <button type="button" class="btn btn-danger"
+            <button type="button" class="btn btn-default"
                     data-ng-click="activate()" data-ng-disabled="taskListGrid.value.length == 0">
                 <span data-translate-once="taskList.button.runTasks"></span>
             </button>
             <!--Остановить выполнение по расписанию-->
-            <button type="button" class="btn btn-danger"
+            <button type="button" class="btn btn-default"
                     data-ng-click="deactivate()" data-ng-disabled="taskListGrid.value.length == 0">
                 <span data-translate-once="taskList.button.stopTasks"></span>
             </button>
             <!--Обновить-->
-            <button type="button" class="btn btn-danger"
+            <button type="button" class="btn btn-default"
                     data-ng-click="refreshGrid(1)">
                 <span data-translate-once="taskList.button.update"></span>
             </button>
