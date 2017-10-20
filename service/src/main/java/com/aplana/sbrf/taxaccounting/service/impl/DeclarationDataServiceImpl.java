@@ -2438,7 +2438,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case ACCEPT_DEC:
             case CHECK_DEC:
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
-                    if (declarationData.getDeclarationTemplateId() == 103) {
+                    if (declarationTemplate.getType().getId() == DeclarationType.NDFL_6) {
                         // для 6НДФЛ
                         return (long) ndflPersonDao.get6NdflPersonCount(declarationDataId);
                     } else {

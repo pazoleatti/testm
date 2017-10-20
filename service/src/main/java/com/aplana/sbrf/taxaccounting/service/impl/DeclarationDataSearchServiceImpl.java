@@ -54,15 +54,18 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
         // Все типы деклараций, соответствующие виду налога
         List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
 		for(DeclarationType declarationType: declarationTypeDao.listAllByTaxType(taxType)) {
-            if (isReport && (declarationType.getId() == 102 || declarationType.getId() == 103 || declarationType.getId() == 104)
+            if (isReport && (declarationType.getId() == DeclarationType.NDFL_2_1 ||
+                    declarationType.getId() == DeclarationType.NDFL_6 ||
+                    declarationType.getId() == DeclarationType.NDFL_2_2)
                     && userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
                 declarationTypes.add(declarationType);
             } else if (!isReport) {
                 if (userInfo.getUser().hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)
-                        && (declarationType.getId() == 100 || declarationType.getId() == 101)) {
+                        && (declarationType.getId() == DeclarationType.NDFL_PRIMARY ||
+                        declarationType.getId() == DeclarationType.NDFL_CONSOLIDATE)) {
                     declarationTypes.add(declarationType);
                 } else if (userInfo.getUser().hasRole(taxType, TARole.N_ROLE_OPER)
-                        && (declarationType.getId() == 100)) {
+                        && (declarationType.getId() == DeclarationType.NDFL_PRIMARY)) {
                     declarationTypes.add(declarationType);
                 }
             }
