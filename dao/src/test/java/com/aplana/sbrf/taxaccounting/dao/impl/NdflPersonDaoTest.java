@@ -132,7 +132,7 @@ public class NdflPersonDaoTest {
         }
     }*/
 
-    @Test
+    //@Test
     public void testGoodSave() {
 
         NdflPerson goodNdflPerson = createGoodNdflPerson();
