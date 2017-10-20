@@ -76,7 +76,7 @@
                         function (data) {
                             if (data) {
                                 $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
-                                $scope.comment = data.comment;
+                                $scope.commentForm.comment = data.comment;
                             }
                         }
                     );
@@ -140,7 +140,6 @@
                  **/
                 $scope.save = function () {
 
-                    $scope.comment = $scope.general.comment.$$lastCommittedViewValue;
                     var grid = $scope.fileCommentGrid.ctrl.getGrid();
                     var ids = grid.getDataIDs();
                     var files = [];
@@ -153,7 +152,7 @@
                         },
                         {
                             declarationDataFiles: files,
-                            comment: $scope.comment,
+                            comment: $scope.commentForm.comment,
                             declarationDataId: data.declarationDataId
                         },
                         function (data) {
@@ -163,7 +162,7 @@
                                 }
                                 if (data.declarationDataFiles !== null && data.comment !== null) {
                                     $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
-                                    $scope.comment = data.comment;
+                                    $scope.commentForm.comment = data.comment;
                                 }
                             }
                         });
