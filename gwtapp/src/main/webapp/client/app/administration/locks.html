@@ -11,14 +11,14 @@
     <div class="form100" style="height:66%;">
         <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
             <!-- Удалить блокировку -->
-            <button type="button" class="btn btn-danger"
+            <button type="button" class="btn btn-default"
                     data-ng-click="deleteLock()" data-ng-disabled="locksGrid.value.length == 0">
                 <span data-translate-once="locks.button.delete"></span>
             </button>
             <!--Фильтр-->
             <input type="text" data-ng-model="searchFilter.filter" />
             <!--Найти-->
-            <button type="button" class="btn btn-danger"
+            <button type="button" class="btn btn-default"
                     data-ng-click="refreshGrid(1)">
                 <span data-translate-once="locks.button.search"></span>
             </button>
