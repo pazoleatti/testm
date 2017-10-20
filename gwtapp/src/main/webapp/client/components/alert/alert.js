@@ -225,7 +225,7 @@
                 '       </div>' +
                 '    </div>' +
                 '    <div class="modal-footer">' +
-                '        <button class="btn btn-danger" type="button" ng-click="ok()" translate="button.close"></button>' +
+                '        <button class="btn btn-default" type="button" ng-click="ok()" translate="button.close"></button>' +
                 '    </div>' +
                 '</div>'
             )
