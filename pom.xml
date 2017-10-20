@@ -48,6 +48,7 @@
         <releaseName>ndfl${releasePostfix}</releaseName>
         <querydsl.version>4.1.4</querydsl.version>
         <jackson.version>2.6.5</jackson.version>
+        <ttddyy.version>1.4.4</ttddyy.version>
     </properties>
 
     <dependencyManagement>
@@ -416,6 +417,11 @@
                 <groupId>net.sf.sevenzipjbinding</groupId>
                 <artifactId>sevenzipjbinding-all-platforms</artifactId>
                 <version>9.20-2.00beta</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ttddyy</groupId>
+                <artifactId>datasource-proxy</artifactId>
+                <version>${ttddyy.version}</version>
             </dependency>
 
             <!-- Jackson -->

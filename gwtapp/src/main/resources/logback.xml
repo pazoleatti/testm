@@ -19,4 +19,6 @@
 	
 	<!-- Логгеры проекта пишут с уровнем debug -->
 	<logger name="com.aplana.sbrf.taxaccounting" level="all"/>
+	<!-- Логируем sql запросы -->
+	<logger name="net.ttddyy.dsproxy.listener.logging.CommonsQueryLoggingListener" level="DEBUG"/>
 </configuration>
