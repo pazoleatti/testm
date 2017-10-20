@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>АС "Учёт налогов"</title>
+    <title>ФП "НДФЛ"</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
 	<link rel="icon" href="resources/img/favicon.ico" type="image/vnd.microsoft.icon" />
