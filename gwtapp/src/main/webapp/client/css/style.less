@@ -324,7 +324,7 @@ input[type="number"] {
 }
 
 .form-control {
-  height: 25px;
+  //height: 25px;
   padding: 1px 12px;
 }
 
@@ -343,7 +343,7 @@ input[type="number"] {
   font-size: inherit;
 }
 
-.dropdown-menu > li > a, .form-control, .ui-select-bootstrap .ui-select-choices-row > span {
+.ui-select-bootstrap .ui-select-choices-row > span {
   color: @grayDark;
 }
 
@@ -788,7 +788,9 @@ button.btn.btn-default.ng-binding {
 
 .form-control {
   &:focus {
-    border-color: @greenDark;
+    background-color: #fff;
+    box-shadow: inset 2px 2px 0 0 rgba(39, 146, 56, 0.26);
+    border: solid 1px #6ec151;
   }
 }
 

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.web.model.ConfigModel;
 import org.springframework.beans.factory.annotation.Autowired;

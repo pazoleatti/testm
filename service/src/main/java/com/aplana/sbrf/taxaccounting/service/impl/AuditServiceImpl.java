@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -197,7 +197,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("blobDataId", uuid);
                     try {
-                        asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, AsyncQueue.SHORT, params);
+                        asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, params);
                         logger.info(String.format(CREATE_TASK, "Загрузка файла"));
                     } catch (AsyncTaskException e) {
                         lockDataService.unlock(key, userId);
@@ -232,7 +232,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         if (lockData == null) {
             try {
                 try {
-                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, AsyncQueue.LONG);
+                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo);
                     asyncManager.addUserWaitingForTask(taskData.getId(), userId);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {

@@ -8,8 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 
 import java.util.Collection;
 import java.util.Date;

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskState;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskType;

@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.GetConfigurationAction;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.GetConfigurationResult;

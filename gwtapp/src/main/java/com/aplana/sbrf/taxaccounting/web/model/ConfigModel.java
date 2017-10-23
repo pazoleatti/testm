@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.model;
 
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 
 import java.util.Properties;
 

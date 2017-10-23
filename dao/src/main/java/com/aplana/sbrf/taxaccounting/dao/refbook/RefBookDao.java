@@ -631,15 +631,6 @@ public interface RefBookDao {
     Map<String, RefBookValue> getRecordData(Long refBookId, String tableName, Long id);
 
     /**
-     * Формирует имя для записи справочника, основанное на уникальных атрибутах
-     *
-     * @param refBook справочник
-     * @param values  список значений уникальных атрибутов
-     * @return
-     */
-    String buildUniqueRecordName(RefBook refBook, Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> values);
-
-    /**
      * Удаляет указанные версии записи из справочника
      *
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены

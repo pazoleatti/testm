@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
@@ -12,8 +12,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;

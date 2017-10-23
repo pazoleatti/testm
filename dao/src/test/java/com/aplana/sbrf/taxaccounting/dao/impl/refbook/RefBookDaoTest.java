@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.BDUtilsMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

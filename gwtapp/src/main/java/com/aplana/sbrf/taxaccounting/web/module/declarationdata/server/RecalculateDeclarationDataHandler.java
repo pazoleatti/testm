@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;

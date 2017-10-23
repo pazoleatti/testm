@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -11,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Map;
 
 /**

@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TaskInterruptCause;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;

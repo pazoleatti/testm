@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;

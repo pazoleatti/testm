@@ -10,6 +10,7 @@
         'ng.deviceDetector',
         'app.notifications',
         'app.uploadTransportData',
+        'app.commonParams',
         'app.modals',
         'app.formatters',
         'app.constants',
@@ -95,12 +96,13 @@
                                 }
                             }]
                         });
-                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
-                            $scope.treeTaxes.push({
-                                name: $filter('translate')('menu.taxes.commonParameters'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!commonParameter"
-                            });
-                        }
+                        $scope.treeTaxes.push({
+                            name: $filter('translate')('menu.taxes.commonParameters'),
+
+                            onClick: function () {
+                                $state.go('uploadCommonParams');
+                            }
+                        });
 
                         $scope.treeNsi = [{
                             name: $filter('translate')('menu.nsi.refbooks'),

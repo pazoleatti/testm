@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
@@ -13,11 +13,11 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
-import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
-import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import com.aplana.sbrf.taxaccounting.service.ScriptComponentContext;
+import com.aplana.sbrf.taxaccounting.service.ScriptComponentContextHolder;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;

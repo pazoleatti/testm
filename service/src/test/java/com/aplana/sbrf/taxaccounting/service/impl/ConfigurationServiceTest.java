@@ -14,7 +14,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.SignService;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

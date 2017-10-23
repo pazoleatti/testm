@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -25,7 +25,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.util.DBUtils;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -687,9 +687,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (!newParent.equals(oldParent) &&
                         refBookDao.hasLoops(uniqueRecordId, newParent.getReferenceValue())) {
                     //Цикл найден, формируем сообщение
-                    String parentRecordName = refBookDao.buildUniqueRecordName(refBook,
+                    String parentRecordName = buildUniqueRecordName(refBook,
                             refBookDao.getUniqueAttributeValues(refBookId, newParent.getReferenceValue()));
-                    String recordName = refBookDao.buildUniqueRecordName(refBook,
+                    String recordName = buildUniqueRecordName(refBook,
                             refBookDao.getUniqueAttributeValues(refBookId, uniqueRecordId));
                     if (refBook.isVersioned()) {
                         throw new ServiceException("Версия " + parentRecordName + " не может быть указана как родительская, т.к. входит в структуру дочерних элементов версии " + recordName);
@@ -1250,5 +1250,66 @@ public class RefBookUniversal implements RefBookDataProvider {
             return versionEnd;
         }
         return null;
+    }
+
+    /**
+     * Формирует имя для записи справочника, основанное на уникальных атрибутах
+     *
+     * @param refBook справочник
+     * @param groupValues  список значений уникальных атрибутов
+     * @return
+     */
+    private String buildUniqueRecordName(RefBook refBook, Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupValues) {
+        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+        Map<String, String> refAliases = new HashMap<String, String>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
+                refAliases.put(attribute.getAlias(), refAttribute.getAlias());
+            }
+        }
+
+        StringBuilder uniqueValues = new StringBuilder();
+
+        for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> entry : groupValues.entrySet()) {
+            List<Pair<RefBookAttribute, RefBookValue>> values = entry.getValue();
+            for (int i = 0; i < values.size(); i++) {
+                RefBookAttribute attribute = values.get(i).getFirst();
+                RefBookValue value = values.get(i).getSecond();
+                switch (attribute.getAttributeType()) {
+                    case NUMBER:
+                        if (value.getNumberValue() != null) {
+                            uniqueValues.append(value.getNumberValue().toString());
+                        }
+                        break;
+                    case DATE:
+                        if (value.getDateValue() != null) {
+                            uniqueValues.append(value.getDateValue().toString());
+                        }
+                        break;
+                    case STRING:
+                        if (value.getStringValue() != null) {
+                            uniqueValues.append(value.getStringValue());
+                        }
+                        break;
+                    case REFERENCE:
+                        if (value.getReferenceValue() != null) {
+                            Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
+                            uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
+                        }
+                        break;
+                    default:
+                        uniqueValues.append("undefined");
+                        break;
+                }
+                if (i < values.size() - 1) {
+                    uniqueValues.append("/");
+                }
+            }
+        }
+        return uniqueValues.toString();
     }
 }

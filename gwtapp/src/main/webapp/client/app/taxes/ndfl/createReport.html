@@ -56,7 +56,7 @@
                         <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
                              data-ui-select2="declarationTypeSelect.options"
                              data-ng-model="reportData.declarationType"
-                             data-ng-init="initSelectWithDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
+                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
                              data-ng-required="true">
                         </div>
                         <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |

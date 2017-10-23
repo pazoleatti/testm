@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.commonparameter.server;
 
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.GetCommonParameterAction;
 import com.aplana.sbrf.taxaccounting.web.module.commonparameter.shared.GetCommonParameterResult;

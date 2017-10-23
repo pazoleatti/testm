@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
+import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;

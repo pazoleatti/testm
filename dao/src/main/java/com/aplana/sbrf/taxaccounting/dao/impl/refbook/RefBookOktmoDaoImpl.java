@@ -14,7 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.util.DBUtils;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

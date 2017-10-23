@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -45,8 +46,11 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo user, Map<String, Object> params, Logger logger) {
-        return AsyncQueue.LONG;
+    public AsyncQueue checkTaskLimit(String taskDescription, TAUserInfo userInfo, Map<String, Object> params, Logger logger) throws AsyncTaskException {
+        long blobLength = blobDataService.getLength((String) params.get("blobDataId"));
+        long fileSize = (long) Math.ceil(blobLength / 1024.);
+        String msg = String.format("Размер файла(%s) превышает максимально допустимый(%s)!", fileSize, "%s");
+        return checkTask(fileSize, taskDescription, msg);
     }
 
     private String msg;

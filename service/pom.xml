@@ -21,11 +21,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>dao</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -33,12 +28,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>fonts</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>script-support</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- Logging -->

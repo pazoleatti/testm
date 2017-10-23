@@ -22,7 +22,7 @@
     <bean class="com.aplana.sbrf.taxaccounting.service.impl.AuditServiceImpl"/>
 
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.ServerInfo"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ServerInfo"/>
     </bean>
 
 </beans>

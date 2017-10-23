@@ -21,20 +21,9 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>dynacache-spring</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>test-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Logging -->
@@ -106,6 +95,10 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ttddyy</groupId>
+            <artifactId>datasource-proxy</artifactId>
         </dependency>
 
         <!-- AspectJ -->

@@ -3,8 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
@@ -32,7 +32,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
-import com.aplana.sbrf.taxaccounting.util.DBUtils;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -2438,7 +2438,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case ACCEPT_DEC:
             case CHECK_DEC:
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
-                    if (declarationData.getDeclarationTemplateId() == 103) {
+                    if (declarationTemplate.getType().getId() == DeclarationType.NDFL_6) {
                         // для 6НДФЛ
                         return (long) ndflPersonDao.get6NdflPersonCount(declarationDataId);
                     } else {

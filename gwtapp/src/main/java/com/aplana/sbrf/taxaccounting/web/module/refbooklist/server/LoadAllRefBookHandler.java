@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.LoadRefBookResult;
