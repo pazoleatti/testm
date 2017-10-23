@@ -1,15 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.model;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 
 /**
  * Модель данных о пользователе, которые передаются на клиент
  */
 public class UserDataModel {
     private TAUserInfo taUserInfo;
-    private String department;
+    private RefBookDepartment department;
 
-    public UserDataModel(TAUserInfo taUserInfo, String department) {
+    public UserDataModel(TAUserInfo taUserInfo, RefBookDepartment department) {
         this.taUserInfo = taUserInfo;
         this.department = department;
     }
@@ -18,7 +19,7 @@ public class UserDataModel {
         return taUserInfo;
     }
 
-    public String getDepartment() {
+    public RefBookDepartment getDepartment() {
         return department;
     }
 }

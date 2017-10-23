@@ -112,7 +112,12 @@
                     url: url,
                     quietMillis: 200,
                     data: function (term, page) {
-                        var pagingParams = {count: 50, page: page, property: sortParams.property, direction: sortParams.direction};
+                        var pagingParams = {
+                            count: 50,
+                            page: page,
+                            property: sortParams.property,
+                            direction: sortParams.direction
+                        };
                         var dataObject = {pagingParams: JSON.stringify(pagingParams)};
                         dataObject[searchField] = term;
                         //Добавить в запрос поля для фильтрации данных
@@ -194,12 +199,25 @@
             function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, DeclarationTypeForCreateResource) {
                 $scope.declarationTypeSelect = {};
 
+                //TODO: https://jira.aplana.com/browse/SBRFNDFL-2358 Сделать селекты, общие для отчетных и налоговых форм, убрать лишние функции
+                var isTaxForm = function (declarationType) {
+                    return declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id;
+                };
+
+                var isReportForm = function (declarationType) {
+                    return declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id || declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id;
+                };
+
                 /**
                  * Инициализировать список со всеми видами форм
                  */
+                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
                 $scope.initSelectWithAllDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
                     RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
+                        data = data.filter(function(declarationType) {
+                            return isTaxForm(declarationType);
+                        });
                         $scope.declarationTypeSelect.options.data.results = data;
                     });
                 };
@@ -210,6 +228,7 @@
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
                  * @param departmentObject Выражение из scope, по которому отслеживается изменение подразделения
                  */
+                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
                 $scope.initSelectWithDeclarationTypesForCreate = function (declarationKind, periodObject, departmentObject) {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
                     //Список обновляется при изменении отчетного периода и подразделения
@@ -222,6 +241,51 @@
                                 departmentId: department.id,
                                 periodId: period.id
                             }, function (data) {
+                                data = data.filter(function(declarationType) {
+                                    return isTaxForm(declarationType);
+                                });
+                                $scope.declarationTypeSelect.options.data.results = data;
+                            });
+                        }
+                    });
+                };
+
+                /**
+                 * Инициализировать список со всеми видами отчетных форм
+                 */
+                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
+                $scope.initSelectWithAllReportDeclarationTypes = function () {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
+                        data = data.filter(function(declarationType) {
+                            return isReportForm(declarationType);
+                        });
+                        $scope.declarationTypeSelect.options.data.results = data;
+                    });
+                };
+
+                /**
+                 * Инициализировать список с видами отчетных форм, которые можно создать
+                 * @param declarationKind Тип налоговой формы
+                 * @param periodObject Выражение из scope, по которому отслеживается изменение периода
+                 * @param departmentObject Выражение из scope, по которому отслеживается изменение подразделения
+                 */
+                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
+                $scope.initSelectWithReportDeclarationTypesForCreate = function (declarationKind, periodObject, departmentObject) {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicSingleSelectOptions(true);
+                    //Список обновляется при изменении отчетного периода и подразделения
+                    $scope.$watchGroup([periodObject, departmentObject], function (newValues) {
+                        var period = newValues[0];
+                        var department = newValues[1];
+                        if (declarationKind && period && department) {
+                            DeclarationTypeForCreateResource.query({
+                                declarationKind: declarationKind.id,
+                                departmentId: department.id,
+                                periodId: period.id
+                            }, function (data) {
+                                data = data.filter(function(declarationType) {
+                                    return isReportForm(declarationType);
+                                });
                                 $scope.declarationTypeSelect.options.data.results = data;
                             });
                         }
@@ -286,7 +350,10 @@
                  * Инициализировать список с загрузкой всех подразделений через ajax
                  */
                 $scope.initSelectWithAllDepartments = function () {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {property: "fullPath", direction: "asc"}, "fullPathFormatter");
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
+                        property: "fullPath",
+                        direction: "asc"
+                    }, "fullPathFormatter");
                 };
 
                 /**
@@ -294,7 +361,10 @@
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
                  */
                 $scope.initDepartmentSelectWithOpenPeriod = function (periodObject) {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriod", {}, {property: "fullPath", direction: "asc"}, "fullPathFormatter");
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriod", {}, {
+                        property: "fullPath",
+                        direction: "asc"
+                    }, "fullPathFormatter");
                     $scope.$watch(periodObject, function (period) {
                         if (period) {
                             $scope.departmentsSelect.options.dataFilter = {reportPeriodId: period.id};

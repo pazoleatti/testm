@@ -1,15 +1,16 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import static com.querydsl.core.types.PathMetadataFactory.*;
-
-import com.querydsl.core.types.dsl.*;
-
-import com.querydsl.core.types.PathMetadata;
-import javax.annotation.Generated;
 import com.querydsl.core.types.Path;
-
+import com.querydsl.core.types.PathMetadata;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.ColumnMetadata;
+
+import javax.annotation.Generated;
+import java.math.BigDecimal;
 import java.sql.Types;
+
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 
 
 
@@ -26,7 +27,7 @@ public class QConfiguration extends com.querydsl.sql.RelationalPathBase<QConfigu
 
     public final StringPath code = createString("code");
 
-    public final NumberPath<Integer> departmentId = createNumber("departmentId", Integer.class);
+    public final NumberPath<BigDecimal> departmentId = createNumber("departmentId", BigDecimal.class);
 
     public final StringPath value = createString("value");
 

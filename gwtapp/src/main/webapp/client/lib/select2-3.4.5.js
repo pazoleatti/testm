@@ -1274,8 +1274,8 @@
             }
 
             css = {
-                left: dropLeft,
-                width: width
+                left: dropLeft + 15,
+                width: width - 30
             };
 
             if (above) {

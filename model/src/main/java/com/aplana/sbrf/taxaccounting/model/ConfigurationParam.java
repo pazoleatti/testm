@@ -68,6 +68,21 @@ public enum ConfigurationParam {
     }
 
     /**
+     * Находит имя параметра хранящееся в бд по имени, которое видит пользователь
+     */
+    public static String getNameValueAsDB(String nameParamsForUser) {
+        for (ConfigurationParam configParams : ConfigurationParam.values()) {
+            if (nameParamsForUser.equals(configParams.getCaption())) {
+                return configParams.name();
+            }
+        }
+        if (nameParamsForUser == null) {
+            nameParamsForUser = "";
+        }
+        return nameParamsForUser;
+    }
+
+    /**
      * Имя параметра
      */
     public String getCaption() {

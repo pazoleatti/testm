@@ -39,7 +39,6 @@
         }])
         /**
          * @description Данные НДФЛ по физлицу
-         * @description Данные НДФЛ по физлицу
          */
         .factory('NdflPersonResource', ['$resource', function ($resource) {
             return $resource('controller/rest/ndflPerson?projection=:projection', {}, {
@@ -136,6 +135,14 @@
         .factory('schedulerTaskResource', ['$resource', function ($resource) {
             return $resource('controller/rest/schedulerTask', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+        /**
+         * @description Общие параметры
+         */
+        .factory('CommonParams', ['$resource', function ($resource) {
+            return $resource('controller/rest/getCommonParams', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
             });
         }])
 

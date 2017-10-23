@@ -31,6 +31,18 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     }
 
     /**
+     * Получение подркзделения пользователя
+     *
+     * @param user Пользователь
+     * @return Подразделение
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public RefBookDepartment fetchUserDepartment(TAUser user) {
+        return refBookDepartmentDataDao.fetchDepartmentById(user.getDepartmentId());
+    }
+
+    /**
      * Получение доступных (согласно правам доступа пользователя)  значений справочника
      *
      * @param user Пользователь

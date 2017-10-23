@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -54,6 +55,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private RefBookFactory refBookFactory;
     @Autowired
     private AuditService auditService;
+
+    //Значение конфигурационных параметров по умолчанию
+    private List<Configuration> defaultCommonParams() {
+        List<Configuration> defaultCommonConfig = new ArrayList<Configuration>();
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.SBERBANK_INN.getCaption(),
+                new BigDecimal(0), "7707083893"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.NO_CODE.getCaption(),
+                new BigDecimal(0), "9979"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(),
+                new BigDecimal(0), "0"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(),
+                new BigDecimal(0), "0.65"));
+        return defaultCommonConfig;
+    }
+
+
 
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
@@ -119,6 +136,20 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
         return configurationDao.getByDepartment(departmentId);
+    }
+
+    @Override
+    public ConfigurationParamModel get(String code) {
+        return null;//configurationDao.get(code);
+    }
+
+    public List<Configuration> getCommonParametr(TAUserInfo userInfo) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
+                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
+                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
+            throw new AccessDeniedException(ACCESS_READ_ERROR);
+        }
+        return configurationDao.getListConfigByGroup(ConfigurationParamGroup.COMMON_PARAM);
     }
 
     @Override
@@ -499,5 +530,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else {
             return "\"\" -> \"" + newModelFullStringValue + "\"";
         }
+    }
+
+    @Override
+    public void setCommonParamsDefault() {
+        configurationDao.setCommonParamsDefault(defaultCommonParams());
+    }
+
+    @Override
+    public void update(Configuration config) {
+        configurationDao.update(config);
     }
 }
