@@ -11,6 +11,10 @@ import java.io.Serializable;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum DepartmentType implements Serializable {
     /**
+     * 0 Искусственное значение, чтобы нумерация шла с нуля для удобного маппинга Enum на таблицу в базе данных.
+     */
+    UNKNOWN("", 0),
+    /**
      * 1 Банк - ROOT_BANK
      */
     ROOT_BANK("Банк", 1),

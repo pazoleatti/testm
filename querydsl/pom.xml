@@ -4,88 +4,95 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>ndfl</artifactId>
         <groupId>com.aplana.taxaccounting</groupId>
+        <artifactId>ndfl</artifactId>
         <version>2.1</version>
     </parent>
 
     <artifactId>querydsl</artifactId>
-    <description>Модуль генерации Q-классов QueryDSL</description>
+    <packaging>jar</packaging>
+    <description>Модуль генерации QueryDSL классов</description>
 
     <dependencies>
+        <!-- Internal modules -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- QueryDSL -->
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql-codegen</artifactId>
-            <version>4.1.4</version>
+        </dependency>
+
+        <!--
+            Фикс проблемы с запуском сборки на вебсфере
+            https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
+        -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+            <classifier>cdi1.0</classifier>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <artifactId>commons-logging</artifactId>
+            <groupId>commons-logging</groupId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <!-- Misc -->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-maven-plugin</artifactId>
-                <version>4.0.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4.1</version>
+                <configuration>
+                    <!-- get all project dependencies -->
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <!-- MainClass in mainfest make a executable jar -->
+                    <archive>
+                        <manifest>
+                            <mainClass>com.aplana.taxaccounting.querydsl.QueryDSLGenRunner</mainClass>
+                        </manifest>
+                    </archive>
+
+                </configuration>
                 <executions>
                     <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>export</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <jdbcDriver>oracle.jdbc.OracleDriver</jdbcDriver>
-                    <jdbcUrl>jdbc:oracle:thin:@//172.19.214.45:1521/ORCL.APLANA.LOCAL</jdbcUrl>
-                    <jdbcUser>ndfl_unstable</jdbcUser>
-                    <jdbcPassword>ndfl_unstable</jdbcPassword>
-                    <schemaPattern>NDFL_UNSTABLE</schemaPattern>
-                    <packageName>com.aplana.sbrf.taxaccounting.model</packageName>
-                    <sourceFolder></sourceFolder>
-                    <targetFolder>model/src/main/java</targetFolder>
-                    <exportViews>false</exportViews>
-                    <customTypes>
-                        <customType>com.querydsl.sql.types.LocalDateTimeType</customType>
-                        <customType>com.querydsl.sql.types.InputStreamType</customType>
-                    </customTypes>
-                    <numericMappings>
-                        <numericMapping>
-                            <total>2</total>
-                            <decimal>0</decimal>
-                            <javaType>java.lang.Integer</javaType>
-                        </numericMapping>
-                        <numericMapping>
-                            <total>20</total>
-                            <decimal>0</decimal>
-                            <javaType>java.math.BigDecimal</javaType>
-                        </numericMapping>
-                    </numericMappings>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                        <version>1.7.12</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.oracle</groupId>
-                        <artifactId>ojdbc6</artifactId>
-                        <version>11.2.0.1.0</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <id>jcenter</id>
-            <name>jcenter</name>
-            <url>http://jcenter.bintray.com</url>
-        </repository>
-        <repository>
-            <id>taxaccounting-thirdparty</id>
-            <name>Сторонние библиотеки, используемые в проекте</name>
-            <url>http://172.19.214.42:8081/nexus/content/repositories/thirdparty/</url>
-        </repository>
-    </repositories>
 </project>

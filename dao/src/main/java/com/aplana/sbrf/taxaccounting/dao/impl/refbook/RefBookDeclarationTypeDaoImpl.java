@@ -14,9 +14,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.model.QDeclarationTemplate.declarationTemplate;
-import static com.aplana.sbrf.taxaccounting.model.QDeclarationType.declarationType;
-import static com.aplana.sbrf.taxaccounting.model.QDepartmentDeclarationType.departmentDeclarationType;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationTemplate.declarationTemplate;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationType.declarationType;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentDeclarationType.departmentDeclarationType;
 import static com.querydsl.core.types.Projections.bean;
 
 /**

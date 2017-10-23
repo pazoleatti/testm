@@ -5,9 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLQueryFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -17,8 +15,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.QLogEntry.logEntry;
-import static com.querydsl.core.types.Projections.bean;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QLogEntry.logEntry;
 
 @Repository
 public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
@@ -28,9 +25,6 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     public LogEntryDaoImpl(SQLQueryFactory sqlQueryFactory) {
         this.sqlQueryFactory = sqlQueryFactory;
     }
-
-    final private QBean<LogEntry> logEntryBean = bean(LogEntry.class, logEntry.logId, logEntry.creationDate,
-            logEntry.logLevel, logEntry.message, logEntry.object, logEntry.ord, logEntry.type);
 
     /**
      * Максимальный размер сообщения

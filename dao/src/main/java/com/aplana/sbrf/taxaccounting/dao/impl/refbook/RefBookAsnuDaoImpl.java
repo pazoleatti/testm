@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QRefBookAsnu.refBookAsnu;
 import static com.querydsl.core.types.Projections.bean;
 
 /**

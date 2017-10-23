@@ -44,11 +44,11 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.QNdflPerson.ndflPerson;
-import static com.aplana.sbrf.taxaccounting.model.QNdflPersonDeduction.ndflPersonDeduction;
-import static com.aplana.sbrf.taxaccounting.model.QNdflPersonIncome.ndflPersonIncome;
-import static com.aplana.sbrf.taxaccounting.model.QNdflPersonPrepayment.ndflPersonPrepayment;
-import static com.aplana.sbrf.taxaccounting.model.QRefBookPerson.refBookPerson;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QNdflPerson.ndflPerson;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QNdflPersonDeduction.ndflPersonDeduction;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QNdflPersonIncome.ndflPersonIncome;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QNdflPersonPrepayment.ndflPersonPrepayment;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QRefBookPerson.refBookPerson;
 import static com.querydsl.core.types.Projections.bean;
 
 /**
@@ -655,7 +655,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         return new PagingResult<NdflPerson>(ndflPersonList, totalCount);
     }
-
 
 
     @Override
