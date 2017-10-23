@@ -48,4 +48,16 @@ public interface RefBookDepartmentDataService {
      * @return Страница списка значений справочника
      */
     PagingResult<RefBookDepartment> fetchDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams);
+
+    /**
+     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * с фильтрацией по наименованию подразделения и пейджингом для создания отчётности
+     *
+     * @param user           Пользователь
+     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
+     * @param reportPeriodId ID отчетного периода, который должен быть открыт
+     * @param pagingParams   Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    PagingResult<RefBookDepartment> fetchDepartmentWithOpenPeriodForReport(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams);
 }

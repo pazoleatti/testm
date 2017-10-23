@@ -371,6 +371,21 @@
                         }
                     });
                 };
+                /**
+                 * Инициализировать список с загрузкой подразделений с открытым периодом для создания отчётности через ajax
+                 * @param periodObject Выражение из scope, по которому отслеживается изменение периода
+                 */
+                $scope.initDepartmentSelectWithOpenPeriodForReport = function (periodObject) {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriodForReport", {}, {
+                        property: "fullPath",
+                        direction: "asc"
+                    }, "fullPathFormatter");
+                    $scope.$watch(periodObject, function (period) {
+                        if (period) {
+                            $scope.departmentsSelect.options.dataFilter = {reportPeriodId: period.id};
+                        }
+                    });
+                };
             }])
     ;
 }());
