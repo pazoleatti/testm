@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckAddressResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.Map;
 

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckReadWriteAccessAction;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.CheckReadWriteAccessResult;

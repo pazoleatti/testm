@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.script.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.Date;
 import java.util.List;

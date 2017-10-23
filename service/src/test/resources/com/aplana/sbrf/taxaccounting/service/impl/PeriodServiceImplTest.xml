@@ -33,7 +33,7 @@
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.NotificationService"/>
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">
-              <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.LockDataService"/>
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LockDataService"/>
        </bean>
        <bean class="org.mockito.Mockito" factory-method="mock">
               <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService"/>

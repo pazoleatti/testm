@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
@@ -16,15 +15,11 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.util.DBUtils;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -2894,63 +2889,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
-    }
-
-    // TODO Левыкин: можно вынести в сервис
-    @Override
-    public String buildUniqueRecordName(RefBook refBook, Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupValues) {
-        RefBookFactory refBookFactory = applicationContext.getBean("refBookFactory", RefBookFactory.class);
-        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
-        Map<String, String> refAliases = new HashMap<String, String>();
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
-                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
-                RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
-                refAliases.put(attribute.getAlias(), refAttribute.getAlias());
-            }
-        }
-
-        StringBuilder uniqueValues = new StringBuilder();
-
-        for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> entry : groupValues.entrySet()) {
-            List<Pair<RefBookAttribute, RefBookValue>> values = entry.getValue();
-            for (int i = 0; i < values.size(); i++) {
-                RefBookAttribute attribute = values.get(i).getFirst();
-                RefBookValue value = values.get(i).getSecond();
-                switch (attribute.getAttributeType()) {
-                    case NUMBER:
-                        if (value.getNumberValue() != null) {
-                            uniqueValues.append(value.getNumberValue().toString());
-                        }
-                        break;
-                    case DATE:
-                        if (value.getDateValue() != null) {
-                            uniqueValues.append(value.getDateValue().toString());
-                        }
-                        break;
-                    case STRING:
-                        if (value.getStringValue() != null) {
-                            uniqueValues.append(value.getStringValue());
-                        }
-                        break;
-                    case REFERENCE:
-                        if (value.getReferenceValue() != null) {
-                            Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
-                            uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
-                        }
-                        break;
-                    default:
-                        uniqueValues.append("undefined");
-                        break;
-                }
-                if (i < values.size() - 1) {
-                    uniqueValues.append("/");
-                }
-            }
-        }
-        return uniqueValues.toString();
     }
 
     @Override

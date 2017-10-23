@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
+import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
