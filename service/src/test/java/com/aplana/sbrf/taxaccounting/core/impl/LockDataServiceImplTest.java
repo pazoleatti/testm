@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.TAUserDaoImpl;
@@ -11,8 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.impl.LockDataServiceImpl;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

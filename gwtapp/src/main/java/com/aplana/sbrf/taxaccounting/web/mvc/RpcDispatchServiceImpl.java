@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.google.gwt.user.server.rpc.RPCServletUtils;

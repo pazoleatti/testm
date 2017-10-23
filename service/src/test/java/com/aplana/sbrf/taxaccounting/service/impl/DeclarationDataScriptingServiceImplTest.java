@@ -7,9 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
@@ -126,6 +126,10 @@ public class DeclarationDataScriptingServiceImplTest {
 		String xml = XML_HEADER.concat(writer.toString());
         String correctXml = IOUtils.toString(getClass().getResourceAsStream("createDeclaration.xml"), "UTF-8");
 		XMLUnit.setIgnoreWhitespace(true);
+		System.out.println("pone");
+		System.out.println(xml);
+		System.out.println("ptwo");
+		System.out.println(correctXml);
 		Diff xmlDiff = new Diff(xml, correctXml);
 		assertTrue(xmlDiff.similar());
 		

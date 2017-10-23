@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
-import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
+import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.SetActiveTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.SetActiveTaskResult;

@@ -26,11 +26,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>service</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -47,6 +42,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>gwt-widget</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>script-support</artifactId>
             <version>${project.version}</version>
         </dependency>
 

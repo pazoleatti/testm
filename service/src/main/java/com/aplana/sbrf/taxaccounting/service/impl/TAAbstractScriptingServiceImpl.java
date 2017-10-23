@@ -58,10 +58,6 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
             "com.aplana.sbrf.taxaccounting.dao.exсeption"
     };
 
-    private static final String[] PREDEFINED_STATIC_IMPORTS = new String[]{
-            "com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils"
-    };
-
     private GroovyScriptEngine groovyScriptEngine;
     protected CompilerConfiguration config;
 
@@ -74,7 +70,6 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
         config = new CompilerConfiguration();
         ImportCustomizer ic = new ImportCustomizer();
         ic.addStarImports(PREDEFINED_IMPORTS);
-        ic.addStaticStars(PREDEFINED_STATIC_IMPORTS);
         config.addCompilationCustomizers(ic);
 
         GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.Calendar;
 import java.util.Date;

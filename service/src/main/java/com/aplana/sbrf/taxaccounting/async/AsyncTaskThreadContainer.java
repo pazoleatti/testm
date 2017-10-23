@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async;
 
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.TARole;

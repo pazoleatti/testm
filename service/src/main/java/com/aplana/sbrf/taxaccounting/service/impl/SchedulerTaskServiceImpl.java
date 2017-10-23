@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskModel;
-import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
+import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.support.CronSequenceGenerator;

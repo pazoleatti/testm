@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
+import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListResult;

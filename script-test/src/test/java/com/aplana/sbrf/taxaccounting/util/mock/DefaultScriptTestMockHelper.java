@@ -15,7 +15,7 @@ import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

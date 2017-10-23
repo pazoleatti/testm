@@ -95,7 +95,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.util.DBUtils"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.util.DBUtils"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao"/>

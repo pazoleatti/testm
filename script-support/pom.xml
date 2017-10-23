@@ -20,10 +20,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <!-- TODO: Нужно исправить. Скрипты не должны зависеть от модуля CORE,
-                где находятся интерфейсы сервисов с которыми взаимодействуют пользователи -->
             <groupId>${project.groupId}</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>service</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

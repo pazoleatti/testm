@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.Collection;
 import java.util.Date;

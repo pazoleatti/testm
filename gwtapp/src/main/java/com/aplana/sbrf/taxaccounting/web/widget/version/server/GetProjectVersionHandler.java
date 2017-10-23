@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.version.server;
 
-import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersionResult;

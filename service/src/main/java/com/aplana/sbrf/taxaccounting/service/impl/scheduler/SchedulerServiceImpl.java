@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl.scheduler;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
 import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.api.SchedulerTaskService;
+import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;

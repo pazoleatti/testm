@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
-import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Date;
