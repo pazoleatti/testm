@@ -394,8 +394,16 @@ public class DeclarationDataController {
     public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@PathVariable long declarationDataId, @RequestParam PagingParams pagingParams) {
         ArrayList<LogBusinessModel> logBusinessModelArrayList = new ArrayList<LogBusinessModel>();
         for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, HistoryBusinessSearchOrdering.DATE, false)) {
-            LogBusinessModel logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
-                    taUserService.getUser(logBusiness.getUserLogin()).getName());
+
+            LogBusinessModel logBusinessModel;
+            if (FormDataEvent.SAVE.getCode() == logBusiness.getEventId()) {
+                logBusinessModel = new LogBusinessModel(logBusiness, FormDataEvent.DECLARATION_SAVE_EVENT_TITLE_2,
+                        taUserService.getUser(logBusiness.getUserLogin()).getName());
+            } else {
+                logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
+                        taUserService.getUser(logBusiness.getUserLogin()).getName());
+            }
+
             logBusinessModelArrayList.add(logBusinessModel);
         }
         PagingResult<LogBusinessModel> result = new PagingResult<LogBusinessModel>(logBusinessModelArrayList, logBusinessModelArrayList.size());

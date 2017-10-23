@@ -76,6 +76,8 @@ public enum FormDataEvent implements Serializable {
 
 	DELETE_LOCK(960, "Удаление блокировки");
 
+	public static final String DECLARATION_SAVE_EVENT_TITLE_2 = "Обновление";
+
 	private String title;
 	private int code;
 
