@@ -93,6 +93,23 @@ public class RefBookValuesController {
     }
 
     /**
+     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * с фильтрацией по наименованию подразделения и пейджингом для создания отчётности
+     *
+     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
+     * @param reportPeriodId ID отчетного периода
+     * @param pagingParams   Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriodForReport")
+    public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriodForReport(@RequestParam String name, @RequestParam Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
+        TAUser user = securityService.currentUserInfo().getUser();
+        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchDepartmentWithOpenPeriodForReport(user, name, reportPeriodId, pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
+    }
+
+    /**
      * Получение всех значений справочника Виды форм
      *
      * @return Значения справочника

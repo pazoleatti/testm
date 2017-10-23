@@ -100,21 +100,27 @@ public class DeclarationTemplateImpexServiceImpl implements
             }
 
             // JasperTemplate
-            BlobData jrxml = blobDataService.get(dt.getJrxmlBlobId());
-            if (jrxml != null) {
-                ze = new ZipEntry(REPORT_FILE);
-                zos.putNextEntry(ze);
-                IOUtils.copy(jrxml.getInputStream(), zos);
-                zos.closeEntry();
+            String jrxmlBlobId = dt.getJrxmlBlobId();
+            if (jrxmlBlobId != null) {
+                BlobData jrxml = blobDataService.get(jrxmlBlobId);
+                if (jrxml != null) {
+                    ze = new ZipEntry(REPORT_FILE);
+                    zos.putNextEntry(ze);
+                    IOUtils.copy(jrxml.getInputStream(), zos);
+                    zos.closeEntry();
+                }
             }
 
             //Xsd
-            BlobData xsd = blobDataService.get(dt.getXsdId());
-            if (xsd != null) {
-                ze = new ZipEntry(xsd.getName());
-                zos.putNextEntry(ze);
-                IOUtils.copy(xsd.getInputStream(), zos);
-                zos.closeEntry();
+            String xsdId = dt.getXsdId();
+            if (xsdId != null) {
+                BlobData xsd = blobDataService.get(xsdId);
+                if (xsd != null) {
+                    ze = new ZipEntry(xsd.getName());
+                    zos.putNextEntry(ze);
+                    IOUtils.copy(xsd.getInputStream(), zos);
+                    zos.closeEntry();
+                }
             }
 
             zos.finish();
