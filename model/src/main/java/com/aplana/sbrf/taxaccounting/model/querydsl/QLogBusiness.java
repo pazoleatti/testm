@@ -44,9 +44,9 @@ public class QLogBusiness extends com.querydsl.sql.RelationalPathBase<QLogBusine
 
     public final com.querydsl.sql.PrimaryKey<QLogBusiness> logBusinessPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QEvent> logBusinessFkEventId = createForeignKey(eventId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QDeclarationData> logBusinessFkDeclarationId = createForeignKey(declarationDataId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QEvent> logBusinessFkEventId = createForeignKey(eventId, "ID");
 
     public QLogBusiness(String variable) {
         super(QLogBusiness.class, forVariable(variable), "NDFL_UNSTABLE", "LOG_BUSINESS");

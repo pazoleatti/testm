@@ -48,13 +48,13 @@ public class QDeclarationTemplate extends com.querydsl.sql.RelationalPathBase<QD
 
     public final com.querydsl.sql.ForeignKey<QBlobData> decTemFkBlobDataJrxml = createForeignKey(jrxml, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QDeclarationType> declarationTemplateFkDtype = createForeignKey(declarationTypeId, "ID");
+    public final com.querydsl.sql.ForeignKey<QDeclarationKind> declarationTemplateFkindFk = createForeignKey(formKind, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QRefBookFormType> declarationTemplateFtypeFk = createForeignKey(formType, "ID");
+    public final com.querydsl.sql.ForeignKey<QDeclarationType> declarationTemplateFkDtype = createForeignKey(declarationTypeId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QBlobData> declarationTemFkBlobData = createForeignKey(xsd, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QDeclarationKind> declarationTemplateFkindFk = createForeignKey(formKind, "ID");
+    public final com.querydsl.sql.ForeignKey<QRefBookFormType> declarationTemplateFtypeFk = createForeignKey(formType, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplateFile> _declTemplFileTemplateFk = createInvForeignKey(id, "DECLARATION_TEMPLATE_ID");
 

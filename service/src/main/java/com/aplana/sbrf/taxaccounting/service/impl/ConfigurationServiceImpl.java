@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -59,17 +58,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
         List<Configuration> defaultCommonConfig = new ArrayList<Configuration>();
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.SBERBANK_INN.getCaption(),
-                new BigDecimal(0), "7707083893"));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.NO_CODE.getCaption(),
-                new BigDecimal(0), "9979"));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(),
-                new BigDecimal(0), "0"));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(),
-                new BigDecimal(0), "0.65"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.SBERBANK_INN.getCaption(), 0, "7707083893"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.NO_CODE.getCaption(), 0, "9979"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(), 0, "0"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(), 0, "0.65"));
         return defaultCommonConfig;
     }
-
 
 
     @Override

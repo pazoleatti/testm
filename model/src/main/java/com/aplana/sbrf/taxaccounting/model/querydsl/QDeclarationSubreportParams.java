@@ -44,9 +44,9 @@ public class QDeclarationSubreportParams extends com.querydsl.sql.RelationalPath
 
     public final com.querydsl.sql.PrimaryKey<QDeclarationSubreportParams> declSubrepParamsPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookAttribute> declSubrepParsAttribIdFk = createForeignKey(attributeId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QDeclarationSubreport> declSubrepParsSubrepIdFk = createForeignKey(declarationSubreportId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookAttribute> declSubrepParsAttribIdFk = createForeignKey(attributeId, "ID");
 
     public QDeclarationSubreportParams(String variable) {
         super(QDeclarationSubreportParams.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_SUBREPORT_PARAMS");

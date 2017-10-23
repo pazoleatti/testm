@@ -28,9 +28,9 @@ public class QDeclarationDataConsolidation extends com.querydsl.sql.RelationalPa
 
     public final NumberPath<Long> targetDeclarationDataId = createNumber("targetDeclarationDataId", Long.class);
 
-    public final com.querydsl.sql.ForeignKey<QDeclarationData> declDataConsolidationFkSrc = createForeignKey(sourceDeclarationDataId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QDeclarationData> declDataConsolidationFkTgt = createForeignKey(targetDeclarationDataId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QDeclarationData> declDataConsolidationFkSrc = createForeignKey(sourceDeclarationDataId, "ID");
 
     public QDeclarationDataConsolidation(String variable) {
         super(QDeclarationDataConsolidation.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_DATA_CONSOLIDATION");

@@ -54,9 +54,9 @@ public class QDepartment extends com.querydsl.sql.RelationalPathBase<QDepartment
 
     public final com.querydsl.sql.PrimaryKey<QDepartment> departmentPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QDepartmentType> departmentFkType = createForeignKey(type, "ID");
-
     public final com.querydsl.sql.ForeignKey<QDepartment> deptFkParentId = createForeignKey(parentId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QDepartmentType> departmentFkType = createForeignKey(type, "ID");
 
     public final com.querydsl.sql.ForeignKey<QConfiguration> _configurationFk = createInvForeignKey(Arrays.asList(id, id, id, id, id, id), Arrays.asList("DEPARTMENT_ID", "DEPARTMENT_ID", "DEPARTMENT_ID", "DEPARTMENT_ID", "DEPARTMENT_ID", "DEPARTMENT_ID"));
 

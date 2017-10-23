@@ -44,9 +44,9 @@ public class QRefBook extends com.querydsl.sql.RelationalPathBase<QRefBook> {
 
     public final com.querydsl.sql.PrimaryKey<QRefBook> refBookPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookAttribute> refBookFkRegion = createForeignKey(regionAttributeId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QBlobData> refBookFkScriptId = createForeignKey(scriptId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookAttribute> refBookFkRegion = createForeignKey(regionAttributeId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QRefBookAttribute> _refBookAttrFkReferenceId = createInvForeignKey(id, "REFERENCE_ID");
 

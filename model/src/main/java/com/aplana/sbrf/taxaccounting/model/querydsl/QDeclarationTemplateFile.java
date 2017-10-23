@@ -30,9 +30,9 @@ public class QDeclarationTemplateFile extends com.querydsl.sql.RelationalPathBas
 
     public final com.querydsl.sql.PrimaryKey<QDeclarationTemplateFile> declarationTemplateFilePk = createPrimaryKey(blobDataId, declarationTemplateId);
 
-    public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> declTemplFileTemplateFk = createForeignKey(declarationTemplateId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QBlobData> declTemplFileBlobFk = createForeignKey(blobDataId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> declTemplFileTemplateFk = createForeignKey(declarationTemplateId, "ID");
 
     public QDeclarationTemplateFile(String variable) {
         super(QDeclarationTemplateFile.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_TEMPLATE_FILE");

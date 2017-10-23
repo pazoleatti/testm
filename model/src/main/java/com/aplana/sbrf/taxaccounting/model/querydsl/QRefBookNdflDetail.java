@@ -80,25 +80,25 @@ public class QRefBookNdflDetail extends com.querydsl.sql.RelationalPathBase<QRef
 
     public final com.querydsl.sql.PrimaryKey<QRefBookNdflDetail> refBookNdflDetailPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookReorganization> refBookNdflDetReCodeFk = createForeignKey(reorgFormCode, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookSignatoryMark> refBookNdflDetSignatoryFk = createForeignKey(signatoryId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookDetachTaxPay> refBookNdflDetObligFk = createForeignKey(obligation, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QDepartment> refBookNdflDetDepartFk = createForeignKey(departmentId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QRefBookOkved> refBookNdflDetOkvedFk = createForeignKey(okved, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QRefBookPresentPlace> refBookNdflDetPresPlFk = createForeignKey(presentPlace, "ID");
+    public final com.querydsl.sql.ForeignKey<QDepartment> refBookNdflDetDepartFk = createForeignKey(departmentId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QRefBookRegion> refBookNdflDetRegionFk = createForeignKey(region, "ID");
 
     public final com.querydsl.sql.ForeignKey<QRefBookMakeCalc> refBookNdflDetTypeFk = createForeignKey(type, "ID");
 
+    public final com.querydsl.sql.ForeignKey<QRefBookReorganization> refBookNdflDetReCodeFk = createForeignKey(reorgFormCode, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookDetachTaxPay> refBookNdflDetObligFk = createForeignKey(obligation, "ID");
+
     public final com.querydsl.sql.ForeignKey<QRefBookOktmo> refBookNdflDetOktmoFk = createForeignKey(oktmo, "ID");
 
     public final com.querydsl.sql.ForeignKey<QRefBookNdfl> refBookNdflDetParentFk = createForeignKey(refBookNdflId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookSignatoryMark> refBookNdflDetSignatoryFk = createForeignKey(signatoryId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookPresentPlace> refBookNdflDetPresPlFk = createForeignKey(presentPlace, "ID");
 
     public QRefBookNdflDetail(String variable) {
         super(QRefBookNdflDetail.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_NDFL_DETAIL");

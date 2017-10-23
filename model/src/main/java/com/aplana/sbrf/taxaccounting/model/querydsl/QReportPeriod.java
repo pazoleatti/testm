@@ -40,9 +40,9 @@ public class QReportPeriod extends com.querydsl.sql.RelationalPathBase<QReportPe
 
     public final com.querydsl.sql.PrimaryKey<QReportPeriod> reportPeriodPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QTaxPeriod> reportPeriodFkTaxperiod = createForeignKey(taxPeriodId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QReportPeriodType> reportPeriodFkDtpId = createForeignKey(dictTaxPeriodId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QTaxPeriod> reportPeriodFkTaxperiod = createForeignKey(taxPeriodId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDepartmentReportPeriod> _depRepPerFkRepPeriodId = createInvForeignKey(id, "REPORT_PERIOD_ID");
 

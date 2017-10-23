@@ -82,9 +82,9 @@ public class QNdflPerson extends com.querydsl.sql.RelationalPathBase<QNdflPerson
 
     public final com.querydsl.sql.PrimaryKey<QNdflPerson> ndflPersonPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QDeclarationData> ndflPersonFkD = createForeignKey(declarationDataId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QRefBookPerson> ndflPersonFkPersonId = createForeignKey(personId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QDeclarationData> ndflPersonFkD = createForeignKey(declarationDataId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QNdflPersonPrepayment> _ndflPpFkNp = createInvForeignKey(id, "NDFL_PERSON_ID");
 

@@ -40,9 +40,9 @@ public class QRefBookIdTaxPayer extends com.querydsl.sql.RelationalPathBase<QRef
 
     public final com.querydsl.sql.PrimaryKey<QRefBookIdTaxPayer> refBookIdTaxPayerPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookPerson> refBookIdTaxPayerPersFk = createForeignKey(personId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QRefBookAsnu> refBookIdTaxPayerAsNuFk = createForeignKey(asNu, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookPerson> refBookIdTaxPayerPersFk = createForeignKey(personId, "ID");
 
     public QRefBookIdTaxPayer(String variable) {
         super(QRefBookIdTaxPayer.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_ID_TAX_PAYER");

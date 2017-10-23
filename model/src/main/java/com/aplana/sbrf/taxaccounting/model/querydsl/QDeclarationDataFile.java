@@ -38,11 +38,11 @@ public class QDeclarationDataFile extends com.querydsl.sql.RelationalPathBase<QD
 
     public final com.querydsl.sql.PrimaryKey<QDeclarationDataFile> declDataFilePk = createPrimaryKey(blobDataId, declarationDataId);
 
+    public final com.querydsl.sql.ForeignKey<QBlobData> declDataFileFkBlobData = createForeignKey(blobDataId, "ID");
+
     public final com.querydsl.sql.ForeignKey<QRefBookAttachFileType> declDataFileTypeIdFk = createForeignKey(fileTypeId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationData> declDataFileFkDeclData = createForeignKey(declarationDataId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QBlobData> declDataFileFkBlobData = createForeignKey(blobDataId, "ID");
 
     public QDeclarationDataFile(String variable) {
         super(QDeclarationDataFile.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_DATA_FILE");

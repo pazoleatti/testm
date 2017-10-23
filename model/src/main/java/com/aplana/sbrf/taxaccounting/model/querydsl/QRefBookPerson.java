@@ -64,13 +64,13 @@ public class QRefBookPerson extends com.querydsl.sql.RelationalPathBase<QRefBook
 
     public final com.querydsl.sql.PrimaryKey<QRefBookPerson> refBookPersonPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookCountry> refBookPersonCitizenshipFk = createForeignKey(citizenship, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookAsnu> refBookPersonSourceFk = createForeignKey(sourceId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QRefBookAddress> refBookPersonAddressFk = createForeignKey(address, "ID");
 
     public final com.querydsl.sql.ForeignKey<QRefBookTaxpayerState> refBookPersonTaxpayerStFk = createForeignKey(taxpayerState, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookCountry> refBookPersonCitizenshipFk = createForeignKey(citizenship, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookAsnu> refBookPersonSourceFk = createForeignKey(sourceId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QNdflReferences> _ndflRefersPersonFk = createInvForeignKey(id, "PERSON_ID");
 

@@ -44,9 +44,9 @@ public class QRefBookIdDoc extends com.querydsl.sql.RelationalPathBase<QRefBookI
 
     public final com.querydsl.sql.PrimaryKey<QRefBookIdDoc> refBookIdDocPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QRefBookDocType> refBookIdDocDocIdFk = createForeignKey(docId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QRefBookPerson> refBookIdDocPersonFk = createForeignKey(personId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookDocType> refBookIdDocDocIdFk = createForeignKey(docId, "ID");
 
     public QRefBookIdDoc(String variable) {
         super(QRefBookIdDoc.class, forVariable(variable), "NDFL_UNSTABLE", "REF_BOOK_ID_DOC");

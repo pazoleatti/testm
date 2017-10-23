@@ -52,19 +52,19 @@ public class QNotification extends com.querydsl.sql.RelationalPathBase<QNotifica
 
     public final com.querydsl.sql.PrimaryKey<QNotification> notificationPk = createPrimaryKey(id);
 
+    public final com.querydsl.sql.ForeignKey<QDepartment> notificationFkReceiver = createForeignKey(receiverDepartmentId, "ID");
+
     public final com.querydsl.sql.ForeignKey<QDepartment> notificationFkSender = createForeignKey(senderDepartmentId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QBlobData> notificationFkReportId = createForeignKey(reportId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QSecUser> notificationFkNotifyUser = createForeignKey(userId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QReportPeriod> notificationFkReportPeriod = createForeignKey(reportPeriodId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QDepartment> notificationFkReceiver = createForeignKey(receiverDepartmentId, "ID");
+    public final com.querydsl.sql.ForeignKey<QSecRole> notificationFkNotifyRole = createForeignKey(roleId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QLog> notificationLogFk = createForeignKey(logId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QSecRole> notificationFkNotifyRole = createForeignKey(roleId, "ID");
+    public final com.querydsl.sql.ForeignKey<QReportPeriod> notificationFkReportPeriod = createForeignKey(reportPeriodId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QSecUser> notificationFkNotifyUser = createForeignKey(userId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QBlobData> notificationFkReportId = createForeignKey(reportId, "ID");
 
     public QNotification(String variable) {
         super(QNotification.class, forVariable(variable), "NDFL_UNSTABLE", "NOTIFICATION");

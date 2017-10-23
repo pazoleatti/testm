@@ -52,11 +52,11 @@ public class QNdflReferences extends com.querydsl.sql.RelationalPathBase<QNdflRe
 
     public final com.querydsl.sql.PrimaryKey<QNdflReferences> ndflReferencesPk = createPrimaryKey(id);
 
+    public final com.querydsl.sql.ForeignKey<QRefBookPerson> ndflRefersPersonFk = createForeignKey(personId, "ID");
+
     public final com.querydsl.sql.ForeignKey<QDeclarationData> ndflRefersDeclDataFk = createForeignKey(declarationDataId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QNdflPerson> ndflPersonIdFk = createForeignKey(ndflPersonId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookPerson> ndflRefersPersonFk = createForeignKey(personId, "ID");
 
     public QNdflReferences(String variable) {
         super(QNdflReferences.class, forVariable(variable), "NDFL_UNSTABLE", "NDFL_REFERENCES");

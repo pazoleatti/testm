@@ -30,9 +30,9 @@ public class QAsyncTaskSubscribers extends com.querydsl.sql.RelationalPathBase<Q
 
     public final com.querydsl.sql.PrimaryKey<QAsyncTaskSubscribers> asyncTaskSubscribersPk = createPrimaryKey(asyncTaskId, userId);
 
-    public final com.querydsl.sql.ForeignKey<QSecUser> asyncTSubscrFkSecUser = createForeignKey(userId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QAsyncTask> asyncTSubscrFkAsyncTask = createForeignKey(asyncTaskId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QSecUser> asyncTSubscrFkSecUser = createForeignKey(userId, "ID");
 
     public QAsyncTaskSubscribers(String variable) {
         super(QAsyncTaskSubscribers.class, forVariable(variable), "NDFL_UNSTABLE", "ASYNC_TASK_SUBSCRIBERS");

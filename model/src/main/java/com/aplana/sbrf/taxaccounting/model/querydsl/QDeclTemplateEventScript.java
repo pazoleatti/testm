@@ -34,9 +34,9 @@ public class QDeclTemplateEventScript extends com.querydsl.sql.RelationalPathBas
 
     public final com.querydsl.sql.PrimaryKey<QDeclTemplateEventScript> declTemplateEventScriptPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> decTempEventScrDecTempFk = createForeignKey(declarationTemplateId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QEvent> decTempEventIdFk = createForeignKey(eventId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> decTempEventScrDecTempFk = createForeignKey(declarationTemplateId, "ID");
 
     public QDeclTemplateEventScript(String variable) {
         super(QDeclTemplateEventScript.class, forVariable(variable), "NDFL_UNSTABLE", "DECL_TEMPLATE_EVENT_SCRIPT");

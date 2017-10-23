@@ -48,15 +48,15 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
 
     public final com.querydsl.sql.PrimaryKey<QDeclarationData> declarationDataPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QState> declarationDataStateFk = createForeignKey(state, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookAsnu> declarationDataFkAsnuId = createForeignKey(asnuId, "ID");
+    public final com.querydsl.sql.ForeignKey<QRefBookDocState> declDataDocStateFk = createForeignKey(docStateId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDepartmentReportPeriod> declDataFkDepRepPerId = createForeignKey(departmentReportPeriodId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> declarationDataFkDeclTId = createForeignKey(declarationTemplateId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QRefBookDocState> declDataDocStateFk = createForeignKey(docStateId, "ID");
+    public final com.querydsl.sql.ForeignKey<QRefBookAsnu> declarationDataFkAsnuId = createForeignKey(asnuId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QState> declarationDataStateFk = createForeignKey(state, "ID");
 
     public final com.querydsl.sql.ForeignKey<QLogBusiness> _logBusinessFkDeclarationId = createInvForeignKey(id, "DECLARATION_DATA_ID");
 

@@ -30,9 +30,9 @@ public class QDepartmentDeclTypePerformer extends com.querydsl.sql.RelationalPat
 
     public final com.querydsl.sql.PrimaryKey<QDepartmentDeclTypePerformer> departmentDeclTypePerfPk = createPrimaryKey(departmentDeclTypeId, performerDepId);
 
-    public final com.querydsl.sql.ForeignKey<QDepartmentDeclarationType> deptDeclTypePerfIdFk = createForeignKey(departmentDeclTypeId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QDepartment> deptDeclTypePerfPerfFk = createForeignKey(performerDepId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QDepartmentDeclarationType> deptDeclTypePerfIdFk = createForeignKey(departmentDeclTypeId, "ID");
 
     public QDepartmentDeclTypePerformer(String variable) {
         super(QDepartmentDeclTypePerformer.class, forVariable(variable), "NDFL_UNSTABLE", "DEPARTMENT_DECL_TYPE_PERFORMER");

@@ -32,11 +32,11 @@ public class QDeclarationReport extends com.querydsl.sql.RelationalPathBase<QDec
 
     public final NumberPath<Byte> type = createNumber("type", Byte.class);
 
-    public final com.querydsl.sql.ForeignKey<QDeclarationSubreport> declReportFkDeclSubreport = createForeignKey(subreportId, "ID");
+    public final com.querydsl.sql.ForeignKey<QBlobData> declReportFkBlobData = createForeignKey(blobDataId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationData> declReportFkDeclData = createForeignKey(declarationDataId, "ID");
 
-    public final com.querydsl.sql.ForeignKey<QBlobData> declReportFkBlobData = createForeignKey(blobDataId, "ID");
+    public final com.querydsl.sql.ForeignKey<QDeclarationSubreport> declReportFkDeclSubreport = createForeignKey(subreportId, "ID");
 
     public QDeclarationReport(String variable) {
         super(QDeclarationReport.class, forVariable(variable), "NDFL_UNSTABLE", "DECLARATION_REPORT");

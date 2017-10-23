@@ -40,11 +40,11 @@ public class QTemplateChanges extends com.querydsl.sql.RelationalPathBase<QTempl
 
     public final com.querydsl.sql.PrimaryKey<QTemplateChanges> templateChangesPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QSecUser> templateChangesFkUserId = createForeignKey(author, "ID");
-
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> templateChangesFkDecT = createForeignKey(declarationTemplateId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QEvent> templateChangesFkEvent = createForeignKey(event, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QSecUser> templateChangesFkUserId = createForeignKey(author, "ID");
 
     public QTemplateChanges(String variable) {
         super(QTemplateChanges.class, forVariable(variable), "NDFL_UNSTABLE", "TEMPLATE_CHANGES");
