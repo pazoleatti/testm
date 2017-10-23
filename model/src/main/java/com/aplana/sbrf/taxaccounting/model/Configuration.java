@@ -12,7 +12,7 @@ public class Configuration implements Serializable {
 
     private String code;
 
-    private BigDecimal departmentId;
+    private Integer departmentId;
 
     private String value;
 
@@ -24,11 +24,11 @@ public class Configuration implements Serializable {
         this.code = code;
     }
 
-    public BigDecimal getDepartmentId() {
+    public Integer getDepartmentId() {
         return departmentId;
     }
 
-    public void setDepartmentId(BigDecimal departmentId) {
+    public void setDepartmentId(Integer departmentId) {
         this.departmentId = departmentId;
     }
 
@@ -44,7 +44,7 @@ public class Configuration implements Serializable {
 
     }
 
-    public Configuration(String code, BigDecimal departmentId, String value) {
+    public Configuration(String code, Integer departmentId, String value) {
         this.code = code;
         this.departmentId = departmentId;
         this.value = value;

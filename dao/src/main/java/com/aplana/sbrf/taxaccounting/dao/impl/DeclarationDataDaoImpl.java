@@ -10,11 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -37,20 +35,20 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
-import static com.aplana.sbrf.taxaccounting.model.QDeclarationData.declarationData;
-import static com.aplana.sbrf.taxaccounting.model.QDeclarationKind.declarationKind;
-import static com.aplana.sbrf.taxaccounting.model.QDeclarationTemplate.declarationTemplate;
-import static com.aplana.sbrf.taxaccounting.model.QDeclarationType.declarationType;
-import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
-import static com.aplana.sbrf.taxaccounting.model.QDepartmentFullpath.departmentFullpath;
-import static com.aplana.sbrf.taxaccounting.model.QDepartmentReportPeriod.departmentReportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.QLogBusiness.logBusiness;
-import static com.aplana.sbrf.taxaccounting.model.QRefBookAsnu.refBookAsnu;
-import static com.aplana.sbrf.taxaccounting.model.QRefBookDocState.refBookDocState;
-import static com.aplana.sbrf.taxaccounting.model.QReportPeriod.reportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.QSecUser.secUser;
-import static com.aplana.sbrf.taxaccounting.model.QState.state;
-import static com.aplana.sbrf.taxaccounting.model.QTaxPeriod.taxPeriod;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationData.declarationData;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationKind.declarationKind;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationTemplate.declarationTemplate;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationType.declarationType;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartment.department;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentFullpath.departmentFullpath;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentReportPeriod.departmentReportPeriod;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QLogBusiness.logBusiness;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QRefBookAsnu.refBookAsnu;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QRefBookDocState.refBookDocState;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QReportPeriod.reportPeriod;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QSecUser.secUser;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QState.state;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QTaxPeriod.taxPeriod;
 import static com.querydsl.core.types.Projections.bean;
 
 /**
@@ -90,15 +88,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             refBookDocState.name.as("docState"),
             declarationData.note.as("note"));
 
-    final private Expression<State> declarationStateExpression = new CaseBuilder()
-            .when(declarationData.state.eq((byte) 1)).then(State.CREATED)
-            .when(declarationData.state.eq((byte) 2)).then(State.PREPARED)
-            .when(declarationData.state.eq((byte) 3)).then(State.ACCEPTED)
-            .otherwise(State.NOT_EXIST)
-            .as("state");
-
     final private QBean<DeclarationData> declarationDataQBean = bean(DeclarationData.class, declarationData.id, declarationData.declarationTemplateId,
-            declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo, declarationStateExpression,
+            declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo, declarationData.state,
             declarationData.departmentReportPeriodId.intValue().as("departmentReportPeriodId"), declarationData.asnuId,
             declarationData.note, declarationData.fileName, declarationData.docStateId.as("docState"),
             departmentReportPeriod.reportPeriodId.as("reportPeriodId"), departmentReportPeriod.departmentId.as("departmentId"));
@@ -315,7 +306,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         if (filter.getFormState() != null) {
-            where.and(declarationData.state.eq(filter.getFormState().getId().byteValue()));
+            where.and(declarationData.state.eq(filter.getFormState()));
         }
 
         if (StringUtils.isNotBlank(filter.getFileName())) {

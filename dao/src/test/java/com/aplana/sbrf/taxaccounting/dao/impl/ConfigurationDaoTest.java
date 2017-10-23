@@ -60,7 +60,7 @@ public class ConfigurationDaoTest {
     @Test
     public void baseOperationTest() {
         String code = "SignCheckIn";
-        Configuration confg = new Configuration(code, new BigDecimal(0), "123");
+        Configuration confg = new Configuration(code, 0, "123");
         dao.save(confg);
         String value = "val2";
         confg.setValue(value);

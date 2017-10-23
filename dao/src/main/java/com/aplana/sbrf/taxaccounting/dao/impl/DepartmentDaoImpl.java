@@ -21,10 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
-import static com.aplana.sbrf.taxaccounting.model.QDepartmentChildView.departmentChildView;
-import static com.aplana.sbrf.taxaccounting.model.QDepartmentDeclTypePerformer.departmentDeclTypePerformer;
-import static com.aplana.sbrf.taxaccounting.model.QDepartmentDeclarationType.departmentDeclarationType;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartment.department;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentChildView.departmentChildView;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentDeclTypePerformer.departmentDeclTypePerformer;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentDeclarationType.departmentDeclarationType;
 
 @Repository
 @Transactional(readOnly = true)
@@ -39,7 +39,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    //@Cacheable(CacheConstants.DEPARTMENT)
     public Department getDepartment(int id) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Fetching department with id = " + id + " from database");
@@ -354,7 +353,6 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     @Transactional(readOnly = false)
-    //@CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
     public void setUsedByGarant(int depId, boolean used) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);

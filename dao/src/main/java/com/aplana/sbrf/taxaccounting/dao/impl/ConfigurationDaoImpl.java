@@ -19,9 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.model.QConfiguration.configuration;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QConfiguration.configuration;
 import static com.querydsl.core.types.Projections.bean;
-
 
 
 /**
@@ -116,7 +115,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     public ConfigurationParamModel getByDepartment(Integer departmentId) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
         List<Configuration> listConfig = sqlQueryFactory.select(configuration.code).from(configuration)
-                .where(configuration.departmentId.eq(new BigDecimal(departmentId)))
+                .where(configuration.departmentId.eq(departmentId))
                 .transform(GroupBy.groupBy(configuration.code).list(configurationBean));
         configInToConfigurationParamModel(listConfig, model);
         return model;
@@ -132,8 +131,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         for (ConfigurationParam configurationParam : model.keySet()) {
             Map<Integer, List<String>> map = model.get(configurationParam);
             for (int departmentId : map.keySet()) {
-                Configuration entity = new Configuration(model.getFullStringValue(configurationParam, departmentId),
-                        new BigDecimal(departmentId), configurationParam.name());
+                Configuration entity = new Configuration(model.getFullStringValue(configurationParam, departmentId), departmentId, configurationParam.name());
                 if (!oldModel.containsKey(configurationParam)
                         || (oldModel.get(configurationParam) != null && !oldModel.get(configurationParam).containsKey(departmentId))) {
                     insertParams.add(entity);
@@ -167,7 +165,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 
         if (!deleteParams.isEmpty()) {
             for (Object[] lObj : deleteParams) {
-                BigDecimal i = new BigDecimal(lObj[1].toString());
+                Integer i = new Integer(lObj[1].toString());
                 sqlQueryFactory.delete(configuration)
                         .where(configuration.code.eq(((String) lObj[0])), configuration.departmentId.eq(i))
                         .execute();
@@ -211,7 +209,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         List<Configuration> updateParams = new LinkedList<>();
 
         for (Map.Entry<ConfigurationParam, String> entry : configurationParamMap.entrySet()) {
-            Configuration entity = new Configuration(entry.getKey().name(), new BigDecimal(departmentId), entry.getValue());
+            Configuration entity = new Configuration(entry.getKey().name(), (int)departmentId, entry.getValue());
             updateParams.add(entity);
         }
 

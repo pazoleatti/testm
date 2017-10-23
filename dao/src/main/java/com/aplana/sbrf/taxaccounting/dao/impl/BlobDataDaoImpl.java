@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.querydsl.*;
 import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQueryFactory;
@@ -12,7 +13,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.model.QBlobData.blobData;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QBlobData.blobData;
 import static com.querydsl.core.types.Projections.bean;
 import static com.querydsl.sql.oracle.OracleGrammar.sysdate;
 
