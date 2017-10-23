@@ -22,7 +22,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.model.QNotification.notification;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QNotification.notification;
 import static com.querydsl.core.types.Projections.bean;
 
 @Repository
@@ -38,21 +38,17 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
     @Override
     public long save(Notification notificationForSave) {
-        Long id = notificationForSave.getId();
-        if (id == null) {
-            id = generateId("seq_notification", Long.class);
-        }
-
-        sqlQueryFactory.insert(notification)
+        Long id = sqlQueryFactory.insert(notification)
                 .columns(notification.id, notification.reportPeriodId, notification.senderDepartmentId
                         , notification.receiverDepartmentId, notification.isRead, notification.text
                         , notification.createDate, notification.deadline, notification.logId
                         , notification.reportId, notification.type)
-                .values(id, notificationForSave.getReportPeriodId(), notificationForSave.getSenderDepartmentId()
-                        , notificationForSave.getReceiverDepartmentId(), notificationForSave.isRead() ? 1 : 0, notificationForSave.getText()
-                        , notificationForSave.getCreateDate(), notificationForSave.getDeadline(), notificationForSave.getLogId()
-                        , notificationForSave.getReportId(), notificationForSave.getNotificationType().getId())
-                .execute();
+                .values(notificationForSave.getId() == null ? SQLExpressions.nextval("seq_notification") : notificationForSave.getId() == null,
+                        notificationForSave.getReportPeriodId(), notificationForSave.getSenderDepartmentId(),
+                        notificationForSave.getReceiverDepartmentId(), notificationForSave.isRead(), notificationForSave.getText(),
+                        notificationForSave.getCreateDate(), notificationForSave.getDeadline(), notificationForSave.getLogId(),
+                        notificationForSave.getReportId(), notificationForSave.getNotificationType().getId())
+                .executeWithKey(Long.class);
         notificationForSave.setId(id);
         return id;
     }
@@ -80,21 +76,18 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
     @Override
     public void saveList(final List<Notification> notifications) {
-        Long id;
         for (Notification tmpNotification : notifications) {
-            id = tmpNotification.getId();
-            if (id == null) {
-                id = generateId("seq_notification", Long.class);
-            }
             sqlQueryFactory.insert(notification)
-                    .columns(notification.id, notification.reportPeriodId, notification.senderDepartmentId
-                            , notification.receiverDepartmentId, notification.isRead, notification.text
-                            , notification.createDate, notification.deadline, notification.userId
-                            , notification.roleId, notification.logId, notification.reportId, notification.type)
-                    .values(id, tmpNotification.getReportPeriodId(), tmpNotification.getSenderDepartmentId()
-                            , tmpNotification.getReceiverDepartmentId(), tmpNotification.isRead() ? 1 : 0, tmpNotification.getText()
-                            , tmpNotification.getCreateDate(), tmpNotification.getDeadline(), tmpNotification.getUserId()
-                            , tmpNotification.getRoleId(), tmpNotification.getLogId(), tmpNotification.getReportId(), tmpNotification.getNotificationType().getId())
+                    .columns(notification.id,
+                            notification.reportPeriodId, notification.senderDepartmentId,
+                            notification.receiverDepartmentId, notification.isRead, notification.text,
+                            notification.createDate, notification.deadline, notification.userId,
+                            notification.roleId, notification.logId, notification.reportId, notification.type)
+                    .values(tmpNotification.getId() == null ? SQLExpressions.nextval("seq_notification") : tmpNotification.getId(),
+                            tmpNotification.getReportPeriodId(), tmpNotification.getSenderDepartmentId(),
+                            tmpNotification.getReceiverDepartmentId(), tmpNotification.isRead() ? 1 : 0, tmpNotification.getText(),
+                            tmpNotification.getCreateDate(), tmpNotification.getDeadline(), tmpNotification.getUserId(),
+                            tmpNotification.getRoleId(), tmpNotification.getLogId(), tmpNotification.getReportId(), tmpNotification.getNotificationType().getId())
                     .execute();
         }
     }
@@ -165,7 +158,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         }
 
         if (filter.isRead() != null) {
-            where.and(notification.isRead.eq(filter.isRead() ? (byte) 1 : (byte) 0));
+            where.and(notification.isRead.eq(filter.isRead()));
         }
 
         BooleanBuilder whereOut = new BooleanBuilder();
@@ -217,7 +210,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         }
 
         if (filter.isRead() != null) {
-            where.and(notification.isRead.eq(filter.isRead() ? (byte) 1 : (byte) 0));
+            where.and(notification.isRead.eq(filter.isRead()));
         }
 
         BooleanBuilder whereOut = new BooleanBuilder();
@@ -262,7 +255,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             where.or(notification.roleId.in(filter.getUserRoleIds()));
         }
         if (filter.isRead() != null) {
-            where.and(notification.isRead.eq(filter.isRead() ? (byte) 1 : (byte) 0));
+            where.and(notification.isRead.eq(filter.isRead()));
         }
 
         return (int) sqlQueryFactory.from(notification)
@@ -290,10 +283,10 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         if (!(filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty())) {
             where.or(notification.roleId.in(filter.getUserRoleIds()));
         }
-        where.and(notification.isRead.eq((byte) 0));
+        where.and(notification.isRead.eq(false));
         sqlQueryFactory.update(notification)
                 .where(where)
-                .set(notification.isRead, (byte) 1)
+                .set(notification.isRead, true)
                 .execute();
     }
 

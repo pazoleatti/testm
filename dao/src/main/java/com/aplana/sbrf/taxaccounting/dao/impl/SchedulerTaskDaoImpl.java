@@ -15,8 +15,8 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.model.QConfigurationScheduler.configurationScheduler;
-import static com.aplana.sbrf.taxaccounting.model.QConfigurationSchedulerParam.configurationSchedulerParam;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QConfigurationScheduler.configurationScheduler;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QConfigurationSchedulerParam.configurationSchedulerParam;
 import static com.querydsl.core.types.Projections.bean;
 
 /**

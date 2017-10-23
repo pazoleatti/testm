@@ -1,17 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -20,8 +17,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.model.QDepartment.department;
-import static com.aplana.sbrf.taxaccounting.model.QDepartmentFullpath.departmentFullpath;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartment.department;
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentFullpath.departmentFullpath;
 import static com.querydsl.core.types.Projections.bean;
 
 /**
@@ -36,18 +33,8 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
         this.sqlQueryFactory = sqlQueryFactory;
     }
 
-    //TODO https://jira.aplana.com/browse/SBRFNDFL-1880
-
-    final private Expression<DepartmentType> departmentTypeExpression = new CaseBuilder()
-            .when(department.type.eq(1)).then(DepartmentType.ROOT_BANK)
-            .when(department.type.eq(2)).then(DepartmentType.TERR_BANK)
-            .when(department.type.eq(3)).then(DepartmentType.CSKO_PCP)
-            .when(department.type.eq(4)).then(DepartmentType.MANAGEMENT)
-            .otherwise(DepartmentType.INTERNAL)
-            .as("type");
-
     final private QBean<RefBookDepartment> refBookDepartmentBean = bean(RefBookDepartment.class, department.id, department.name, department.shortname, department.parentId,
-            departmentTypeExpression, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code, departmentFullpath.shortname.as("fullPath"));
+            department.type, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code, departmentFullpath.shortname.as("fullPath"));
 
     /**
      * Получение значений справочника по идентификаторам
@@ -106,6 +93,6 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
                 .offset(pagingParams.getStartIndex())
                 .fetch();
 
-        return new PagingResult<RefBookDepartment>(departments, (int) totalCount);
+        return new PagingResult<>(departments, (int) totalCount);
     }
 }

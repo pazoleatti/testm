@@ -12,7 +12,7 @@
 
     <modules>
         <module>model</module>
-        <!--<module>querydsl</module>-->
+        <module>querydsl</module>
         <module>core</module>
         <module>dao</module>
         <module>service</module>
@@ -499,6 +499,21 @@
             <dependency>
                 <groupId>com.querydsl</groupId>
                 <artifactId>querydsl-sql-spring</artifactId>
+                <version>${querydsl.version}</version>
+                <exclusions>
+                    <!--
+                        Фикс проблемы с запуском сборки на вебсфере
+                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
+                    -->
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-sql-codegen</artifactId>
                 <version>${querydsl.version}</version>
                 <exclusions>
                     <!--
