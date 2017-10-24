@@ -682,6 +682,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def sb;
         try {
             while (reader.hasNext()) {
+                ScriptUtils.checkInterrupted()
                 XMLEvent event = reader.nextEvent()
 
                 if (event.isCharacters() && ((Characters) event).isWhiteSpace()) {

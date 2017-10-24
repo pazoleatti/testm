@@ -77,7 +77,7 @@
 
 .ui-jqgrid tr.jqgrow td {
     border-color: #cfcfcf;
-    padding: 0 3px;
+    padding: 10px 8px;
     height: 26px;
     vertical-align: middle;
     white-space: nowrap;
@@ -213,9 +213,11 @@ background-position: -40px 0;*/
 }
 
 .ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
-    background: #fff9cf;
+    background: #dee8f8;
 }
-
+.table-striped > tbody > tr[aria-selected="true"] td{
+    background-color: #dee8f8;
+}
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-hover,
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-hover td.success,
 .ui-jqgrid tr.jqgrow.ui-widget-content.ui-state-hover td.notification,

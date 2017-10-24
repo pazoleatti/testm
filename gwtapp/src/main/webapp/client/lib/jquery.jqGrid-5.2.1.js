@@ -3744,7 +3744,7 @@
             tbody = document.createElement("tbody");
             //$(this).append(firstr);
             this.appendChild(tbody);
-            $(this).addClass(getstyle(stylemodule,"rowTable", true, 'ui-jqgrid-btable ui-common-table')).append(firstr);
+            $(this).addClass(getstyle(stylemodule,"rowTable", true, 'ui-jqgrid-btable ui-common-table table-striped')).append(firstr);
             if(ts.p.altRows) {
                 $(this).addClass(getstyle(stylemodule,"stripedTable", true, ''));
             }

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.error.ExceptionMessage;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.ErrorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
