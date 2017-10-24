@@ -49,6 +49,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     String UploadFileName
     InputStream ImportInputStream
     File dataFile
+    boolean showTiming;
+    int similarityThreshold;
 
     private PrimaryRnuNdfl() {}
 
@@ -1212,6 +1214,22 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             if (declarationList.isEmpty()) {
                 logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде. Отчетные налоговые формы не будут сформированы текущем периоде")
             }
+        }
+    }
+
+    void initConfiguration(){
+        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
+        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
+        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
+        if (showTiming.equals("1")) {
+            this.showTiming = true;
+        }
+        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
+    }
+
+    void logForDebug(String message, Object... args) {
+        if (showTiming) {
+            logger.info(message, args);
         }
     }
 }
