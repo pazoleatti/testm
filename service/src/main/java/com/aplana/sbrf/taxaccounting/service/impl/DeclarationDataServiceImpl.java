@@ -237,7 +237,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (departmentReportPeriod != null) {
             int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId.intValue(), periodId);
             try {
-                Long declarationId = create(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, null, null, null, true);
+                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, null, null, null, true);
                 result.setEntityId(declarationId);
             } catch (DaoException e) {
                 DeclarationTemplate dt = declarationTemplateService.get(activeTemplateId);
@@ -264,10 +264,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
+    /**
+     * Логика создания вынесена в отдельный метод, для решения проблем с транзакциями при вызове из других транзакционных методов
+     */
+    private Long doCreate(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+                          DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode + "_" + fileName;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -361,7 +362,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
+    public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
+                       DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
+        return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit);
+    }
+
+    @Override
+    @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CALCULATE)")
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
         boolean createForm = calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
@@ -503,7 +511,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public ActionResult recalculateDeclarationList(final TAUserInfo userInfo, List<Long> declarationDataIds) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
         final ActionResult result = new ActionResult();
@@ -667,7 +675,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public ActionResult checkDeclarationList(final TAUserInfo userInfo, List<Long> declarationDataIds) {
         final DeclarationDataReportType ddReportType = DeclarationDataReportType.CHECK_DEC;
         final ActionResult result = new ActionResult();
@@ -754,7 +762,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment dataFileComment) {
         long declarationDataId = dataFileComment.getDeclarationDataId();
 
@@ -1150,14 +1158,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public void delete(long id, TAUserInfo userInfo) {
         delete(id, userInfo, true);
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public void deleteIfExists(long id, TAUserInfo userInfo) {
         if (existDeclarationData(id)) {
@@ -1166,7 +1174,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
     public void delete(long id, TAUserInfo userInfo, boolean createLock) {
         LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
@@ -1227,7 +1235,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public ActionResult deleteDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds) {
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
@@ -1259,7 +1267,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).ACCEPTED)")
     public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_PREPARED_TO_ACCEPTED);
@@ -1290,7 +1298,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public ActionResult acceptDeclarationList(final TAUserInfo userInfo, List<Long> declarationDataIds) {
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
@@ -1356,7 +1364,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).RETURN_TO_CREATED)")
     public void cancel(Logger logger, long id, String note, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
@@ -1378,7 +1386,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public ActionResult cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo) {
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
@@ -2256,7 +2264,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public void cleanBlobs(Collection<Long> ids, List<DeclarationDataReportType> reportTypes) {
         if (ids.isEmpty()) {
             return;
