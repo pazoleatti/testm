@@ -13,7 +13,9 @@
         .controller('returnToCreatedCtrl', ['$scope', '$translate', '$uibModalInstance', 'data', function ($scope, $translate, $uibModalInstance, data) {
             $scope.header = (angular.isDefined(data.header)) ? data.header : $translate.instant('DIALOGS_CONFIRMATION');
             $scope.msg = (angular.isDefined(data.msg)) ? data.msg : $translate.instant('DIALOGS_CONFIRMATION_MSG');
-            $scope.reason = "";
+            $scope.returnToCreated = {
+                reason :""
+            };
             $scope.labelYes = $translate.instant('DIALOGS_CONTINUE');
             $scope.labelNo = $translate.instant('DIALOGS_CANCELLATION');
             //-- Methods -----//
@@ -23,7 +25,7 @@
             }; // end close
 
             $scope.yes = function(){
-                $uibModalInstance.close($scope.reason);
+                $uibModalInstance.close($scope.returnToCreated.reason);
             }; // end yes
         }]);
 }());
