@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.script.CalendarService
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
 import com.aplana.sbrf.taxaccounting.service.script.FiasRefBookService
@@ -36,6 +37,9 @@ class Check extends AbstractScriptClass {
     ReportPeriodService reportPeriodService
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
+    boolean showTiming;
+    int similarityThreshold;
+    DeclarationService declarationService
 
     final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" (%d записей)."
     final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" (%d записей)."
@@ -216,6 +220,9 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 
@@ -3188,5 +3195,21 @@ class Check extends AbstractScriptClass {
                 departmentService.get(departmentId).getName(),
                 reportPeriod.getTaxPeriod().getYear() + ", " + reportPeriod.getName()
         ) as Throwable
+    }
+
+    void initConfiguration(){
+        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
+        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
+        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
+        if (showTiming.equals("1")) {
+            this.showTiming = true;
+        }
+        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
+    }
+
+    void logForDebug(String message, Object... args) {
+        if (showTiming) {
+            logger.info(message, args);
+        }
     }
 }

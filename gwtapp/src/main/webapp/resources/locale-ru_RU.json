@@ -137,6 +137,7 @@
     "ndflReportJournal.filter.oktmo": "ОКТМО",
     "ndflReportJournal.filter.codeNO": "Код НО",
 
+    "field.ndfl.tooLongMessage": "Количество символов для комментария превысило допустимое значение",
     "field.ndfl.requiredField": "Обязательно поле",
     "field.ndfl.isNumber": "В поле должны вводиться только цифры",
     "title.comParams.param": "Параметр",
@@ -364,6 +365,8 @@
     "createDeclaration.errorMessage": "Заполнены не все поля отчетности",
     "createDeclaration.cancel.header": "Отмена создания",
     "createDeclaration.cancel.text": "Отменить создание?",
+
+    "returnToCreated.error.noReasonMessage": "Необходимо указать причину возврата",
 
     "taskList.title.taskManager": "Планировщик задач",
     "taskList.title.listTasks": "Список задач",

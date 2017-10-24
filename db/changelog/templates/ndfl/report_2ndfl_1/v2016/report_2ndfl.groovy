@@ -91,6 +91,7 @@ class Report2Ndfl extends AbstractScriptClass {
     Integer partNumber
     String applicationVersion
     Map<String, Object> paramMap
+    DeclarationService declarationService
 
     private Report2Ndfl() {
     }
@@ -169,6 +170,9 @@ class Report2Ndfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("paramMap")) {
             this.paramMap = (Map<String, Object>) scriptClass.getBinding().getProperty("paramMap")
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
         reportType = declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE ? "2-НДФЛ (1)" : "2-НДФЛ (2)"
     }

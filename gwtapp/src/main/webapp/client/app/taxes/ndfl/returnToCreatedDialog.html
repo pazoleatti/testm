@@ -5,11 +5,40 @@
     </h4>
 </div>
 <div class="modal-body">
-    <div>{{msg}}:</div>
-    <textarea data-ng-model="reason" style="width: 550px; height: 100px" maxlength="205"></textarea>
+    <div class="form-horizontal" data-ng-form="returnToCreatedReasonForm">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table" style="margin: 0;">
+            <thead>
+            <tr>
+                <th>
+                    <label class="font-normal" for="reason">{{msg}}</label>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <div data-aplana-field>
+                        <textarea data-ng-model="returnToCreated.reason"
+                                  style="width: 560px; height: 100px"
+                                  data-ng-required="true"
+                                  data-ng-maxlength="205"
+                                  id="reason">
+                        </textarea>
+                        <div data-aplana-validator data-key='maxlength'>{{::'field.ndfl.tooLongMessage'
+                            |translate}} 205
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'returnToCreated.error.noReasonMessage' |
+                            translate}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-default" ng-click="yes()">
+    <button type="button" class="btn btn-default" data-ng-disabled="returnToCreatedReasonForm.$invalid" ng-click="yes()">
         {{labelYes}}
     </button>
     <button type="button" class="btn btn-default" id="cancelButton" ng-click="no()">{{labelNo}}</button>
