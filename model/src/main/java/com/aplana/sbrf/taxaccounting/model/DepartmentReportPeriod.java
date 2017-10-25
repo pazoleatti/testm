@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.io.Serializable;
-import java.util.Date;
 
 public class DepartmentReportPeriod implements Serializable{
 	private static final long serialVersionUID = 5623552659772659276L;
 
-    private Integer id;
+    private Long id;
 
 	private ReportPeriod reportPeriod;
 	
@@ -14,13 +15,13 @@ public class DepartmentReportPeriod implements Serializable{
 	
 	private boolean active;
 
-    private Date correctionDate;
+    private LocalDateTime correctionDate;
 
-    public Integer getId() {
+	public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -48,11 +49,11 @@ public class DepartmentReportPeriod implements Serializable{
 		this.reportPeriod = reportPeriod;
 	}
 
-    public Date getCorrectionDate() {
+    public LocalDateTime getCorrectionDate() {
         return correctionDate;
     }
 
-    public void setCorrectionDate(Date correctionDate) {
+    public void setCorrectionDate(LocalDateTime correctionDate) {
         this.correctionDate = correctionDate;
     }
 }

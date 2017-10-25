@@ -66,7 +66,7 @@
              * @param allowSearch Доступен поиск, отображается поле ввода для поиска среди элементов списка. По умолчанию недоступен
              * @param formatter Фильтр, получающий из сущности текст, который выводится в списке и используется для поиска. По умолчанию nameFormatter
              */
-            this.getBasicSingleSelectOptionsWithResults = function (allowClear, results, allowSearch, formatter) {
+                this.getBasicSingleSelectOptionsWithResults = function (allowClear, results, allowSearch, formatter) {
                 var select = this.getBasicSingleSelectOptions(allowClear, allowSearch, formatter);
                 select.options.data.results = results;
                 return select;
@@ -387,5 +387,21 @@
                     });
                 };
             }])
+
+        /**
+         * Контроллер для выбора периода корректировки
+         */
+        .controller('SelectCorrectPeriodCtrl', ['$scope', 'GetSelectOption',
+            function ($scope, GetSelectOption) {
+                $scope.periodSelect = {};
+
+                /**
+                 * Инициализация списка с загрузкой доступных периодов корректировки
+                 */
+                $scope.initCorrectPeriods = function (departmentId) {
+                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/reportPeriods/allowCorrectionPeriod", {departmentId: departmentId}, {property: "reportPeriod.taxPeriod.year", direction: "asc"}, "correctPeriodFormatter");
+                };
+            }
+        ])
     ;
 }());

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -23,11 +25,11 @@ public class ReportPeriod implements Serializable, SecuredEntity {
 	/** Ссылка на налоговый период */
 	private TaxPeriod taxPeriod;
 	/** Дата начала отчетного периода */
-	private Date startDate;
+	private LocalDateTime startDate;
 	/** Дата окончания отчетного периода */
-	private Date endDate;
+	private LocalDateTime endDate;
 	/** Календарная дата начала отчетного периода (квартала) */
-	private Date calendarStartDate;
+	private LocalDateTime calendarStartDate;
 	/** Ссылка на федеральный справочника для классификации отчетных периодов */
 	private long dictTaxPeriodId;
 	private long permissions;
@@ -94,11 +96,11 @@ public class ReportPeriod implements Serializable, SecuredEntity {
 	 * Возвращает начальную дату отчетного периода. Это может быть 1 января, 1 апреля и т.д.
 	 * @return
 	 */
-	public Date getStartDate() {
+	public LocalDateTime getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
 	}
 
@@ -106,19 +108,19 @@ public class ReportPeriod implements Serializable, SecuredEntity {
 	 * Возвращает последнюю дату в отчетном периоде. Это может быть 31 марта, 31 декабря и т.д.
 	 * @return
 	 */
-	public Date getEndDate() {
+	public LocalDateTime getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
 	}
 
-	public Date getCalendarStartDate() {
+	public LocalDateTime getCalendarStartDate() {
 		return calendarStartDate;
 	}
 
-	public void setCalendarStartDate(Date calendarStartDate) {
+	public void setCalendarStartDate(LocalDateTime calendarStartDate) {
 		this.calendarStartDate = calendarStartDate;
 	}
 

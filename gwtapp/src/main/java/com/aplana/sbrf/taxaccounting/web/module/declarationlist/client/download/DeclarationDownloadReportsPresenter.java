@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -34,14 +35,14 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
     public interface MyView extends PopupView, HasUiHandlers<DeclarationDownloadReportsUiHandlers> {
 
         void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
-        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod);
+        void setAcceptableReportPeriods(List<ReportPeriodViewModel> reportPeriods, ReportPeriodViewModel reportPeriod);
         Integer getDefaultReportPeriodId();
         void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds, Integer departmentsId);
 
         void setSelectedDeclarationType(Integer id);
         void setSelectedReportPeriod(List<Integer> periodIds);
         void setSelectedDepartment(List<Integer> departmentIds);
-        void setCorrectionDate(List<DepartmentReportPeriod> departmentReportPeriods);
+        void setCorrectionDate(List<DepartmentReportPeriodViewModel> departmentReportPeriods);
 
         Integer getSelectedDeclarationType();
         List<Integer> getSelectedReportPeriod();

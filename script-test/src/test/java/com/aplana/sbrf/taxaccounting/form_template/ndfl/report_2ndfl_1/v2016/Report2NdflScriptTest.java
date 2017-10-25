@@ -66,7 +66,7 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
         declarationData.setId(DeclarationTestScriptHelper.CURRENT_DECLARATION_DATA_ID);
         declarationData.setReportPeriodId(REPORT_PERIOD_ID);
         declarationData.setDepartmentId(DEPARTMENT_ID);
-        declarationData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
+        declarationData.setDepartmentReportPeriodId((long) DEPARTMENT_PERIOD_ID);
         declarationData.setDeclarationTemplateId(DECLARATION_TEMPLATE_ID);
         declarationData.setOktmo("11223344");
         return declarationData;

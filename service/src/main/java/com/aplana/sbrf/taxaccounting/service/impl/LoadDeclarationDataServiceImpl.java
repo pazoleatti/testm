@@ -226,7 +226,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
     @Override
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
                                       String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile) {
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declarationData.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(declarationData.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationType declarationType = declarationTemplate.getType();
         String reportPeriodName = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " - "

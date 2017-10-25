@@ -112,7 +112,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(targetDomainObject.getDepartmentReportPeriodId());
             DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
             Long asnuId = targetDomainObject.getAsnuId();
 
@@ -194,7 +194,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(targetDomainObject.getDepartmentReportPeriodId());
 
             return departmentReportPeriod.isActive() && CHECK.isGranted(currentUser, targetDomainObject);
         }
@@ -234,7 +234,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(targetDomainObject.getDepartmentReportPeriodId());
 
             if (departmentReportPeriod.isActive()) {
                 if (VIEW.isGranted(currentUser, targetDomainObject)) {
@@ -284,7 +284,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(targetDomainObject.getDepartmentReportPeriodId());
             //Подразделение декларации
             Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
             //ТБ декларации

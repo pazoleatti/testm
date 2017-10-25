@@ -4,8 +4,8 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -42,7 +42,7 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     @UiField
     DateMaskBoxPicker term;
 
-    List<ReportPeriod> reportPeriods;
+    List<ReportPeriodViewModel> reportPeriods;
 
     @Inject
     public EditCorrectionDialogView(Binder uiBinder, EventBus eventBus) {
@@ -71,7 +71,7 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     @UiHandler("continueButton")
     public void onContinue(ClickEvent event) {
         EditDialogData data = new EditDialogData();
-        ReportPeriod reportPeriod = getSelectedPeriod();
+        ReportPeriodViewModel reportPeriod = getSelectedPeriod();
         data.setReportPeriodId(reportPeriod == null ? null : reportPeriod.getId());
         data.setDepartmentId(departmentPicker.getValue().isEmpty() ? null : departmentPicker.getValue().get(0));
         data.setCorrectionDate(term.getValue());
@@ -96,15 +96,15 @@ public class EditCorrectionDialogView extends PopupViewWithUiHandlers<EditCorrec
     }
 
     @Override
-    public void setPeriods(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
+    public void setPeriods(List<ReportPeriodViewModel> reportPeriods, Integer reportPeriodId) {
         this.reportPeriods = reportPeriods;
         periodList.setPeriods(reportPeriods);
         periodList.setValue(Arrays.asList(reportPeriodId), true);
     }
 
-    private ReportPeriod getSelectedPeriod() {
+    private ReportPeriodViewModel getSelectedPeriod() {
         if (periodList.getValue().size() == 1) {
-            for(ReportPeriod reportPeriod : reportPeriods) {
+            for(ReportPeriodViewModel reportPeriod : reportPeriods) {
                 if (reportPeriod.getId().equals(periodList.getValue().get(0)))
                     return reportPeriod;
             }

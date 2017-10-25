@@ -95,7 +95,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         //то возникает ошибка дубликата ключевых полей таблицы ref_book_record, т.к уже существует версия с полем version = 01.10.xxxx для 9 мес (фактически это фиктивная версия),
         //а сейчас мы пытаемся добавить запись с такой же датой начала для настроек на год
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                addDayToDate(reportPeriod.getEndDate(), -1), null, filter, null);
+                addDayToDate(reportPeriod.getEndDate().toDate(), -1), null, filter, null);
 
         Map<String, RefBookValue> paramsMap = null;
         if (!params.isEmpty()) {
@@ -201,7 +201,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         if (paramsMap != null && action.getOldUUID() == null) {
             //Проверяем справочные значения
-            checkReferenceValues(provider, rbFactory.get(parentRefBookId), paramsMap, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+            checkReferenceValues(provider, rbFactory.get(parentRefBookId), paramsMap, reportPeriod.getCalendarStartDate().toDate(), reportPeriod.getEndDate().toDate(), logger);
             if (logger.getMainMsg() != null) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 result.setErrorMsg(logger.getMainMsg());
@@ -219,8 +219,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             result.setConfigStartDate(version.getVersionStart());
             result.setConfigEndDate(version.getVersionEnd());
         } else {
-            result.setConfigStartDate(reportPeriod.getCalendarStartDate());
-            result.setConfigEndDate(provider.getNextVersion(addDayToDate(reportPeriod.getEndDate(), -1), filter));
+            result.setConfigStartDate(reportPeriod.getCalendarStartDate().toDate());
+            result.setConfigEndDate(provider.getNextVersion(addDayToDate(reportPeriod.getEndDate().toDate(), -1), filter));
         }
         return result;
     }

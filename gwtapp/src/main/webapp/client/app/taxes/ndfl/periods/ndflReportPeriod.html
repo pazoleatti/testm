@@ -1,0 +1,48 @@
+<form class="form-horizontal" role="form">
+    <div ng-controller="reportPeriodCtrl">
+
+        <div class='container-grid-top'>
+            <span data-ng-include="'client/app/taxes/ndfl/periods/ndflReportPeriodFilter.html'"></span>
+        </div>
+
+        <div class="button_panel">
+            <div class="btn-toolbar" role="toolbar">
+                <button type="button" class="btn btn-danger" data-ng-click="openPeriod()"
+                        data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT)">
+                    Open
+                </button>
+                <button type="button" class="btn btn-danger" data-ng-click="closePeriod()"
+                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isOpen()">
+                    Close
+                </button>
+                <button type="button" class="btn btn-danger" data-ng-click="editPeriod()"
+                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isOpen() && !reportPeriodGrid.value[0].correctionDate">
+                    Edit
+                </button>
+                <button type="button" class="btn btn-danger" data-ng-click="openCorrectPeriod()"
+                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isClose()">
+                    Открыть корректирующий период
+                </button>
+                <button type="button" class="btn btn-danger" data-ng-click="deletePeriod()"
+                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && reportPeriodGrid.value[0]">
+                    Delete
+                </button>
+                <button type="button" class="btn btn-danger" data-ng-click="deadlinePeriod()"
+                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isOpen()">
+                    Deadline Period
+                </button>
+            </div>
+        </div>
+
+        <div data-aplana-grid
+             data-grid-fill-space-container-top
+             data-grid-options="reportPeriodGrid.options"
+             data-grid-ctrl="reportPeriodGrid.ctrl"
+             data-grid-name="reportPeriodGrid.gridName"
+             data-ng-model="reportPeriodGrid.value"
+             id="reportPeriodGrid"
+             style="float: left; width: 100%;"></div>
+
+    </div>
+
+</form>

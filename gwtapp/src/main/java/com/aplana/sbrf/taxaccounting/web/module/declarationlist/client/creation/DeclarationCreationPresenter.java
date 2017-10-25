@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -37,7 +38,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
 
         void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
-        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod);
+        void setAcceptableReportPeriods(List<ReportPeriodViewModel> reportPeriods, ReportPeriodViewModel reportPeriod);
         Integer getDefaultReportPeriodId();
         void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds, Integer departmentsId);
 

@@ -3,9 +3,9 @@ package com.aplana.sbrf.taxaccounting.service.script;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
+import org.joda.time.LocalDateTime;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @ScriptExposed
@@ -37,16 +37,19 @@ public interface ReportPeriodService {
 
     /**
      * Возвращает дату начала отчетного периода
+     * @param reportPeriodId
      */
     Calendar getStartDate(int reportPeriodId);
 
     /**
      * Возвращает календарную дату начала отчетного периода
+     * @param reportPeriodId
      */
     Calendar getCalendarStartDate(int reportPeriodId);
 
     /**
      * Возвращает дату конца отчетного периода
+     * @param reportPeriodId
      */
     Calendar getEndDate(int reportPeriodId);
 
@@ -92,7 +95,7 @@ public interface ReportPeriodService {
      * @param endDate Конец периода
      */
     @SuppressWarnings("unused")
-    List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
+    List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, LocalDateTime startDate, LocalDateTime endDate);
 
     /**
      * Номер корректирующего периода

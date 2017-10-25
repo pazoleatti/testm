@@ -1,18 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
 public class GetCorrectPeriodsResult implements Result {
-    List<ReportPeriod> reportPeriod;
+    private List<ReportPeriodViewModel> reportPeriod;
 
-    public List<ReportPeriod> getReportPeriod() {
+    public List<ReportPeriodViewModel> getReportPeriod() {
         return reportPeriod;
     }
 
-    public void setReportPeriod(List<ReportPeriod> reportPeriod) {
+    public void setReportPeriod(List<ReportPeriodViewModel> reportPeriod) {
         this.reportPeriod = reportPeriod;
     }
 }

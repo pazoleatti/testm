@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDecl
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
             for (Long dt : action.getDeclarationTypeId()) {
                 boolean canAssign = true;
                 //TODO тоже надо откуда то брать период
-                for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new Date(), new Date())) {
+                for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new LocalDateTime(), new LocalDateTime())) {
                     if (ddt.getDeclarationTypeId() == dt) {
                         detectRelations = true;
                         canAssign = false;

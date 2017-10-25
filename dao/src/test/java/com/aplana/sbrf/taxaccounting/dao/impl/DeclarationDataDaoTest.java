@@ -132,7 +132,7 @@ public class DeclarationDataDaoTest {
 		DeclarationData d = new DeclarationData();
         d.setState(State.ACCEPTED);
 		d.setDeclarationTemplateId(1);
-        d.setDepartmentReportPeriodId(220);
+        d.setDepartmentReportPeriodId(220L);
         d.setTaxOrganCode(taxOrganCode);
         d.setKpp(kpp);
 
@@ -154,7 +154,7 @@ public class DeclarationDataDaoTest {
 		d.setId(1000l);
         d.setState(State.ACCEPTED);
 		d.setDeclarationTemplateId(1);
-        d.setDepartmentReportPeriodId(111);
+        d.setDepartmentReportPeriodId(111L);
 		declarationDataDao.saveNew(d);
 	}
 
@@ -206,21 +206,21 @@ public class DeclarationDataDaoTest {
 
     @Test
     public void findTest() {
-        DeclarationData declaration = declarationDataDao.find(1, 204, null, null, null, null, null);
+        DeclarationData declaration = declarationDataDao.find(1, 204L, null, null, null, null, null);
         assertEquals(2, declaration.getId().intValue());
     }
 
     @Test(expected = DaoException.class)
     public void findKpp1Test() {
         DeclarationData declarationData = new DeclarationData();
-        declarationData.setDepartmentReportPeriodId(102);
+        declarationData.setDepartmentReportPeriodId(102L);
         declarationData.setDeclarationTemplateId(1);
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
         declarationData.setState(State.CREATED);
         declarationDataDao.saveNew(declarationData);
 
-        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null, null, null, null);
+        DeclarationData declaration = declarationDataDao.find(1, 102L, "123456789", null, null, null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
     }
@@ -228,14 +228,14 @@ public class DeclarationDataDaoTest {
     @Test(expected = DaoException.class)
     public void findKpp2Test() {
         DeclarationData declarationData = new DeclarationData();
-        declarationData.setDepartmentReportPeriodId(102);
+        declarationData.setDepartmentReportPeriodId(102L);
         declarationData.setDeclarationTemplateId(1);
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
         declarationData.setState(State.CREATED);
         declarationDataDao.saveNew(declarationData);
 
-        DeclarationData declaration = declarationDataDao.find(1, 102, null, null, null, null, null);
+        DeclarationData declaration = declarationDataDao.find(1, 102L, null, null, null, null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
     }
@@ -243,24 +243,24 @@ public class DeclarationDataDaoTest {
     @Test
     public void findKpp3Test() {
         DeclarationData declarationData = new DeclarationData();
-        declarationData.setDepartmentReportPeriodId(102);
+        declarationData.setDepartmentReportPeriodId(102L);
         declarationData.setDeclarationTemplateId(1);
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("CD11");
         declarationData.setState(State.CREATED);
         declarationDataDao.saveNew(declarationData);
 
-        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null, "CD12", null, null);
+        DeclarationData declaration = declarationDataDao.find(1, 102L, "123456789", null, "CD12", null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
-        declaration = declarationDataDao.find(1, 102, null, null, "CD12", null, null);
+        declaration = declarationDataDao.find(1, 102L, null, null, "CD12", null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
     }
 
     @Test
     public void findEmptyResultTest() {
-        DeclarationData declaration = declarationDataDao.find(222, 222, null, null, null, null, null);
+        DeclarationData declaration = declarationDataDao.find(222, 222L, null, null, null, null, null);
         assertNull(declaration);
     }
 

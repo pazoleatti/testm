@@ -13,7 +13,7 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
 	private int declarationTemplateId;	
 	private int reportPeriodId;
 	private int departmentId;
-    private Integer departmentReportPeriodId;
+    private Long departmentReportPeriodId;
 
     private String taxOrganCode;
     private String kpp;
@@ -97,11 +97,11 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
 		this.departmentId = departmentId;
 	}
 
-    public Integer getDepartmentReportPeriodId() {
+    public Long getDepartmentReportPeriodId() {
         return departmentReportPeriodId;
     }
 
-    public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
+    public void setDepartmentReportPeriodId(Long departmentReportPeriodId) {
         this.departmentReportPeriodId = departmentReportPeriodId;
     }
 

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class GetDepartmentTreeDataResult implements Result {
     private Set<Integer> availableDepartments;
 
     // Список отчетных периодов
-    private List<ReportPeriod> reportPeriods;
+    private List<ReportPeriodViewModel> reportPeriods;
 
     // Подразделение установленое по умолчанию
     private Department department;
@@ -40,11 +40,11 @@ public class GetDepartmentTreeDataResult implements Result {
         this.availableDepartments = availableDepartments;
     }
 
-    public List<ReportPeriod> getReportPeriods() {
+    public List<ReportPeriodViewModel> getReportPeriods() {
         return reportPeriods;
     }
 
-    public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+    public void setReportPeriods(List<ReportPeriodViewModel> reportPeriods) {
         this.reportPeriods = reportPeriods;
     }
 

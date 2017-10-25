@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.FocusActionEventHandler;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -179,7 +180,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     }
 
     @Override
-	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
+	public void setReportPeriods(List<ReportPeriodViewModel> reportPeriods) {
         reportPeriodPicker.setPeriods(reportPeriods);
 	}
 

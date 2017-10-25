@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -28,12 +28,12 @@ public class PeriodPickerWidget extends SimpleTree implements PeriodPicker{
     }
 
     @Override
-    public void setPeriods(List<ReportPeriod> periods) {
+    public void setPeriods(List<ReportPeriodViewModel> periods) {
         tree.clear();
 
         Map<Integer, MultiSelectTreeItem> periodYearsMap = new LinkedHashMap<Integer, MultiSelectTreeItem>();
 
-        for(ReportPeriod reportPeriod : periods){
+        for(ReportPeriodViewModel reportPeriod : periods){
 
             if (!periodYearsMap.containsKey(reportPeriod.getTaxPeriod().getYear())){
                 MultiSelectTreeItem taxPeriodItem = new MultiSelectTreeItem(String.valueOf(reportPeriod.getTaxPeriod().getYear()), null);
