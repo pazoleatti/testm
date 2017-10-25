@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogDao;
 import com.aplana.sbrf.taxaccounting.dao.LogEntryDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -75,24 +76,39 @@ public class LogEntryDaoTest {
 
     @Test
     public void testGetEmptyPage() {
-        List<LogEntry> emptyPage = logEntryDao.get(UID_WITHOUT_LOG_ENTRY_3, 1, 10);
+        PagingParams pagingParams = PagingParams.getInstance(1, 10);
+        List<LogEntry> emptyPage = logEntryDao.fetch(UID_WITHOUT_LOG_ENTRY_3, pagingParams);
         Assert.assertTrue(emptyPage.isEmpty());
-
     }
 
     @Test
     public void testGetPage() {
-        List<LogEntry> page = logEntryDao.get(UID_WITH_LOG_ENTRY_4, 1, 2);
+        PagingParams pagingParams = PagingParams.getInstance(1, 4);
+        List<LogEntry> page = logEntryDao.fetch(UID_WITH_LOG_ENTRY_6, pagingParams);
 
-        Assert.assertEquals(page.size(), 2);
-        Assert.assertEquals(page.get(0).getOrd(), 2);
-        Assert.assertEquals(page.get(1).getOrd(), 3);
+        Assert.assertEquals(page.size(), 4);
+
+        Assert.assertEquals(page.get(0).getOrd(), 1);
+        Assert.assertEquals(page.get(0).getMessage(), "panic!");
+        Assert.assertEquals(page.get(0).getLevel(), LogLevel.INFO);
+
+        Assert.assertEquals(page.get(1).getOrd(), 2);
+        Assert.assertEquals(page.get(1).getMessage(), "panic!");
+        Assert.assertEquals(page.get(1).getLevel(), LogLevel.WARNING);
         Assert.assertEquals(page.get(1).getType(), "type");
         Assert.assertEquals(page.get(1).getObject(), "obj1");
+
+        Assert.assertEquals(page.get(2).getOrd(), 3);
+        Assert.assertEquals(page.get(2).getMessage(), "panic!");
+        Assert.assertEquals(page.get(2).getLevel(), LogLevel.WARNING);
+
+        Assert.assertEquals(page.get(3).getOrd(), 4);
+        Assert.assertEquals(page.get(3).getMessage(), "panic!");
+        Assert.assertEquals(page.get(3).getLevel(), LogLevel.ERROR);
     }
 
     @Test(expected = RuntimeException.class)
-    public void testGetNull(){
+    public void testGetNull() {
         logEntryDao.get(null);
     }
 
@@ -174,17 +190,17 @@ public class LogEntryDaoTest {
         int size = 1000000;
         long start = System.nanoTime();
         generateLogs(size);
-        System.out.println("Generating file..."+(double) (System.nanoTime() - start) / 1000000000.0);
+        System.out.println("Generating file..." + (double) (System.nanoTime() - start) / 1000000000.0);
         start = System.nanoTime();
         List<LogEntry> entries = loadLogs();
-        System.out.println("Reading file..."+(double) (System.nanoTime() - start) / 1000000000.0);
+        System.out.println("Reading file..." + (double) (System.nanoTime() - start) / 1000000000.0);
         start = System.nanoTime();
         String uuid = UUID.randomUUID().toString().toLowerCase();
         logEntryDao.save(entries, uuid);
-        System.out.println("Saving logs..."+(double) (System.nanoTime() - start) / 1000000000.0);
+        System.out.println("Saving logs..." + (double) (System.nanoTime() - start) / 1000000000.0);
         start = System.nanoTime();
         List<LogEntry> logs = logEntryDao.get(uuid);
-        System.out.println("Getting logs..."+(double) (System.nanoTime() - start) / 1000000000.0);
+        System.out.println("Getting logs..." + (double) (System.nanoTime() - start) / 1000000000.0);
         Assert.assertEquals(logs.size(), size + 1);
         LogEntry testEntry = logs.get(0);
         Assert.assertEquals(testEntry.getMessage(), "test");
@@ -207,7 +223,8 @@ public class LogEntryDaoTest {
         } finally {
             try {
                 br.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
         return null;
     }
@@ -216,7 +233,7 @@ public class LogEntryDaoTest {
         try {
             FileWriter writer = new FileWriter(new File(FILE_NAME));
             Random random = new Random();
-            for (int i=0; i<count; i++) {
+            for (int i = 0; i < count; i++) {
                 writer.write(random.nextInt(10) + String.valueOf(new Date().getTime()) + "\r\n");
             }
             writer.close();

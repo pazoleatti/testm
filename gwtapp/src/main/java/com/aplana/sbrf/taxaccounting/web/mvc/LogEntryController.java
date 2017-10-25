@@ -63,7 +63,7 @@ public class LogEntryController {
      */
     @GetMapping(value = "/rest/logEntry/{uuid}")
     public JqgridPagedList<LogEntry> fetchLogEntries(@PathVariable String uuid, @RequestParam PagingParams pagingParams) {
-        PagingResult<LogEntry> logEntries = logEntryService.get(uuid, pagingParams.getStartIndex(), pagingParams.getCount());
+        PagingResult<LogEntry> logEntries = logEntryService.fetch(uuid, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(logEntries, logEntries.getTotalCount(), pagingParams);
     }
 

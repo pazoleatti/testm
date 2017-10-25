@@ -84,22 +84,34 @@
                                         index: 'ord',
                                         width: 30,
                                         key: true,
+                                        sortable: false,
                                         formatter: $filter('incrementFormatter')
                                     },
-                                    {name: 'date', index: 'date', width: 176, formatter: $filter('dateTimeFormatter')},
-                                    {name: 'icon', index: 'icon', width: 30, formatter: $filter('iconFormatter')},
+                                    {
+                                        name: 'date',
+                                        index: 'date',
+                                        width: 176,
+                                        sortable: false,
+                                        formatter: $filter('dateTimeFormatter')
+                                    },
+                                    {
+                                        name: 'icon',
+                                        index: 'icon',
+                                        width: 30,
+                                        sortable: false,
+                                        formatter: $filter('iconFormatter')
+                                    },
                                     {
                                         name: 'message',
                                         index: 'message',
                                         width: 1658,
+                                        sortable: false,
                                         formatter: $filter('textColorFormatter')
                                     }
                                 ],
                                 rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                                 rowList: APP_CONSTANTS.COMMON.PAGINATION,
                                 viewrecords: true,
-                                sortname: 'date',
-                                sortorder: "asc",
                                 hidegrid: false
                             }
                         };

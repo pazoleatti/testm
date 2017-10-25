@@ -28,7 +28,7 @@ public class QLogEntry extends com.querydsl.sql.RelationalPathBase<QLogEntry> {
 
     public final StringPath logId = createString("logId");
 
-    public final NumberPath<Byte> logLevel = createNumber("logLevel", Byte.class);
+    public final EnumPath<com.aplana.sbrf.taxaccounting.model.log.LogLevel> logLevel = createEnum("logLevel", com.aplana.sbrf.taxaccounting.model.log.LogLevel.class);
 
     public final StringPath message = createString("message");
 
