@@ -130,4 +130,11 @@ public interface AsyncTaskDao {
      * @return все блокировки
      */
     PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams);
+
+    /**
+     * Проверяет существование задачи по ее id
+     * @param taskId идентификатор задачи
+     * @return задача существует?
+     */
+    boolean isTaskExists(long taskId);
 }

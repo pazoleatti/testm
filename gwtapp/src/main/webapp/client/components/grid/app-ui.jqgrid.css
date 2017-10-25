@@ -142,7 +142,7 @@
 }
 
 .ui-state-default .ui-icon {
-    background-image: url("ui-icons_000000_256x240.png");
+    background-image: url("paginator-sprite.png");
     /* background-image: url(../img/sprites_orange/next-prew-arrow.png);
      background-size: cover;*/
 }
@@ -207,7 +207,7 @@ background-position: -40px 0;*/
 .ui-state-disabled .ui-icon,
 .ui-widget-content .ui-state-disabled .ui-icon,
 .ui-widget-header .ui-state-disabled .ui-icon {
-    background-image: url("ui-icons_b2b2b2_256x240.png");
+    background-image: url("paginator-sprite.png");
     /*background-image: url("../img/sprites_orange/next-prew-arrow.png");*/
 .opacity(100);
 }
@@ -276,22 +276,22 @@ background-position: -40px 0;*/
 
 /* jquery-ui */
 .ui-icon-seek-next {
-    background-position: -32px -160px;
+    background-position: -34px 0;
     /*background-position: -40px 0;*/
 }
 
 .ui-icon-seek-prev {
-    background-position: -48px -160px;
+    background-position: -14px 0;
     /*background-position: -28px 0;*/
 }
 
 .ui-icon-seek-first {
-    background-position: -80px -160px;
+    background-position: 0 0;
     /*background-position: -14px 0;*/
 }
 
 .ui-icon-seek-end {
-    background-position: -64px -160px;
+    background-position: -48px 0;
     /*background-position: -54px 0;*/
 }
 
@@ -308,7 +308,7 @@ background-position: -40px 0;*/
 }
 
 .ui-icon {
-    background-image: url("ui-icons_000000_256x240.png");
+    background-image: url("paginator-sprite.png");
     background-repeat: no-repeat;
     display: block;
     overflow: hidden;

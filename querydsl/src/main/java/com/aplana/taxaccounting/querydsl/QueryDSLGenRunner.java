@@ -71,7 +71,6 @@ public class QueryDSLGenRunner {
                     new String[]{"DEPARTMENT", "SEC_ROLE", "SEC_USER", "SEC_USER_ROLE"},
                     configuration);
 
-
             LOG.info("QueryDSLGenRunner finish");
         } catch (Exception e) {
             LOG.error(e);
@@ -138,14 +137,15 @@ public class QueryDSLGenRunner {
         List<String> qClasses = Lists.newArrayList();
         if (tables != null) {
             for (String table : tables) {
-                qClasses.add("Q" + table);
+                qClasses.add("q" + table.replaceAll("_", "").toLowerCase());
             }
         }
         LOG.info("Delete files in " + srcFolder.getAbsolutePath());
         File[] files = srcFolder.listFiles();
         if (files != null) {
             for (File file : files) {
-                if (qClasses.isEmpty() || qClasses.contains(file.getName())) {
+                String qClassName = file.getName().replaceAll("\\.java", "").toLowerCase();
+                if (qClasses.isEmpty() || qClasses.contains(qClassName)) {
                     LOG.info("Delete file " + file.getAbsolutePath());
                     file.delete();
                 }
