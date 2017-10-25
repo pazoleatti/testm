@@ -979,15 +979,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         }
 
                         @Override
-                        public void postCheckProcessing() {
-                        }
-
-                        @Override
-                        public boolean checkExistTasks(AsyncTaskType reportType, TAUserInfo userInfo, Logger logger) {
-                            return false;
-                        }
-
-                        @Override
                         public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
                             if (uuid != null) {
                                 reportService.deleteDec(uuid);

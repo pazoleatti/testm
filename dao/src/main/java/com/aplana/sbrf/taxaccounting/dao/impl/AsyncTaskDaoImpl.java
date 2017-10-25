@@ -276,4 +276,9 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         }
     }
 
+    @Override
+    public boolean isTaskExists(long taskId) {
+        return getJdbcTemplate().queryForObject("select count(*) from async_task where id = ?", Integer.class, taskId) != 0;
+    }
+
 }
