@@ -1267,8 +1267,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Logger scriptLogger = new Logger();
         try {
-            lockStateLogger.updateState(AsyncTaskState.SOURCE_FORM_CHECK);
-            checkSources(declarationData, logger, userInfo);
             lockStateLogger.updateState(AsyncTaskState.FORM_CHECK);
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, scriptLogger, null);
         } finally {
