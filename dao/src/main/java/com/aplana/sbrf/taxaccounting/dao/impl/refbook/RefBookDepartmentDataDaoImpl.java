@@ -40,7 +40,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
      * Получение значения справочника по идентификатору
      *
      * @param id Идентификатор подразделения
-     * @return Знечение справочника
+     * @return Значение справочника
      */
     @Override
     public RefBookDepartment fetchDepartmentById(Integer id) {

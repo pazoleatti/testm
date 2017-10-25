@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface RefBookDepartmentDataService {
     /**
-     * Получение подркзделения пользователя
+     * Получение подразделения пользователя
      *
      * @param user Пользователь
      * @return Подразделение
