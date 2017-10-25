@@ -69,10 +69,10 @@ class Report6Ndfl extends AbstractScriptClass {
     List<Long> ndflPersonKnfId
     Map<Long, Map<String, Object>> formMap
     Map<String, Object> scriptParams
-    OutputStream outputStream
     Boolean excludeIfNotExist
     State stateRestriction
     String applicationVersion
+    Map<String, Object> paramMap
 
     private Report6Ndfl() {
     }
@@ -143,9 +143,6 @@ class Report6Ndfl extends AbstractScriptClass {
         if (scriptClass.getBinding().hasVariable("scriptParams")) {
             this.scriptParams = (Map<String, Object>) scriptClass.getBinding().getProperty("scriptParams");
         }
-        if (scriptClass.getBinding().hasVariable("outputStream")) {
-            this.outputStream = (OutputStream) scriptClass.getBinding().getProperty("outputStream");
-        }
         if (scriptClass.getBinding().hasVariable("excludeIfNotExist")) {
             this.excludeIfNotExist = (Boolean) scriptClass.getBinding().getProperty("excludeIfNotExist");
         }
@@ -154,6 +151,9 @@ class Report6Ndfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("applicationVersion")) {
             this.applicationVersion = (String) scriptClass.getBinding().getProperty("applicationVersion");
+        }
+        if (scriptClass.getBinding().hasVariable("paramMap")) {
+            this.paramMap = (Map<String, Object>) scriptClass.getBinding().getProperty("paramMap")
         }
     }
 
@@ -201,10 +201,6 @@ class Report6Ndfl extends AbstractScriptClass {
             case FormDataEvent.PRE_CREATE_REPORTS:
                 preCreateReports()
                 break
-            case FormDataEvent.CREATE_REPORTS:
-                println "!CREATE_REPORTS!"
-                createReports()
-                break
         }
     }
 
@@ -240,6 +236,7 @@ class Report6Ndfl extends AbstractScriptClass {
     final String DATE_FORMAT_DOTTED = "dd.MM.yyyy"
     final String DATE_FORMAT_FULL = "yyyy-MM-dd_HH-mm-ss"
     int pairKppOktmoSize = 0
+    final String OUTCOMING_ATTACH_FILE_TYPE = "Исходящий в ФНС"
 
 // Кэш провайдеров
     Map<Long, RefBookDataProvider> providerCache = [:]
@@ -1285,98 +1282,14 @@ class Report6Ndfl extends AbstractScriptClass {
         return prevDepartmentReportPeriod
     }
 
-    def createReports() {
-        if (!preCreateReports()) {
-            return
-        }
+    void preCreateReports() {
         ScriptUtils.checkInterrupted()
-        ZipArchiveOutputStream zos = new ZipArchiveOutputStream(outputStream);
-        scriptParams.put("fileName", "reports.zip")
-        try {
-            DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
-            Department department = departmentService.get(departmentReportPeriod.departmentId);
-            String strCorrPeriod = "";
-            if (departmentReportPeriod.getCorrectionDate() != null) {
-                strCorrPeriod = " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
-            }
-            String path = String.format("Отчетность %s, %s, %s, %s%s",
-                    declarationTemplate.getName(),
-                    department.getName(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(), departmentReportPeriod.getReportPeriod().getName(), strCorrPeriod)
-                    .replaceAll('[~!@/\\#\$%^&*=|`]', "_").replaceAll('"', "'");
-            scriptParams.put("fileName", path + ".zip")
-            def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
-            declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId).each {
-                ScriptUtils.checkInterrupted()
-                if (it.fileName == null) {
-                    return
-                }
-                ZipArchiveEntry ze = new ZipArchiveEntry(path + "/" + it.taxOrganCode + "/" + it.fileName + ".xml");
-                zos.putArchiveEntry(ze);
-                IOUtils.copy(declarationService.getXmlStream(it.id), zos)
-                zos.closeArchiveEntry();
-            }
-        } finally {
-            IOUtils.closeQuietly(zos);
+        List<DeclarationDataFile> declarationDataFileList = declarationService.findFilesWithSpecificType(declarationData.id, OUTCOMING_ATTACH_FILE_TYPE)
+        if (declarationDataFileList.size() != 1) {
+            paramMap.put("successfullPreCreate", false)
+        } else {
+            paramMap.put("successfullPreCreate", true)
         }
-    }
-
-    boolean preCreateReports() {
-        ScriptUtils.checkInterrupted()
-        Map<String, Object> paramMap = (Map<String, Object>) getProperty("paramMap")
-        DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId);
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId);
-        Department department = departmentService.get(departmentReportPeriod.departmentId);
-        String strCorrPeriod = "";
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            // Отчетность вообще НЕ сформирована. Для заданных пользователем параметров в Системе нет ни одной отчетной формы
-            strCorrPeriod = " с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
-        }
-        def declarationTypeId = declarationService.getTemplate(declarationData.declarationTemplateId).type.id
-        def declarationList = declarationService.find(declarationTypeId, declarationData.departmentReportPeriodId)
-        if (declarationList.isEmpty()) {
-            String msg = String.format("Отсутствует отчетность \"%s\" для \"%s\", \"%s\". Сформируйте отчетность и повторите операцию",
-                    declarationTemplate.getName(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                    department.getName())
-            logger.error(msg)
-            if (paramMap != null) {
-                paramMap.put("errMsg", msg)
-            }
-            return false
-        }
-
-        List<PairKppOktmo> pairKppOktmoList = getPairKppOktmoList()
-
-        if (pairKppOktmoList.isEmpty() && departmentReportPeriod.getCorrectionDate() != null) {
-            String msg = String.format("Не найдены отчетные формы с ошибкой для \"%s\", \"%s\", \"%s\"",
-                    declarationTemplate.getName(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                    department.getName())
-            return false
-        }
-
-        declarationList.each {
-            // Применил removAll, поскольку в справочнике могут быть повторяющиеся пары КПП+ОКТМО
-            pairKppOktmoList.removeAll([new PairKppOktmo(it.kpp, it.oktmo, it.taxOrganCode)])
-        }
-
-        if (!pairKppOktmoList.isEmpty()) {
-            List<String> kppOktmo = []
-            pairKppOktmoList.each {
-                kppOktmo.add("" + it.kpp + "/" + it.oktmo)
-            }
-            String msg = String.format("Отсутствуют отчетные формы для следующих КПП+ОКТМО: %s. Сформируйте отчетность и повторите операцию",
-                    com.aplana.sbrf.taxaccounting.model.util.StringUtils.join(kppOktmo.toArray(), ", ", null))
-            logger.error(msg)
-            if (paramMap != null) {
-                paramMap.put("errMsg", msg)
-            }
-
-            return false
-        }
-        return true
     }
 
 /*********************************ПОЛУЧИТЬ ИСТОЧНИКИ*******************************************************************/
