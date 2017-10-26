@@ -10,10 +10,10 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
-import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -30,9 +30,6 @@ class Calculate extends AbstractScriptClass {
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
     FileWriter xml
-    boolean showTiming;
-    int similarityThreshold;
-    DeclarationService declarationService
 
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
 
@@ -735,19 +732,4 @@ class Calculate extends AbstractScriptClass {
         builder.name(attributes)
     }
 
-    void initConfiguration(){
-        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
-        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
-        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
-        if (showTiming.equals("1")) {
-            this.showTiming = true;
-        }
-        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
-    }
-
-    void logForDebug(String message, Object... args) {
-        if (showTiming) {
-            logger.info(message, args);
-        }
-    }
 }

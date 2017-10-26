@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookSimpleReadOnly
 import com.aplana.sbrf.taxaccounting.model.ScriptStatus
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import java.io.*;
 import net.sf.sevenzipjbinding.*;
 import groovy.transform.Field
