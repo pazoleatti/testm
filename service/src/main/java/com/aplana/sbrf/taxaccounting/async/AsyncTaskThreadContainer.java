@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
  */
 @Component
 public class AsyncTaskThreadContainer {
-    private static final Log LOG = LogFactory.getLog(AsyncTaskShortQueueProcessor.class);
+    private static final Log LOG = LogFactory.getLog(AsyncTaskThreadContainer.class);
     // Таймаут, после которого задача считается упавшей и ее выполнение надо передать другому узлу (ч)
     private static final int TASK_TIMEOUT = 10;
 
@@ -43,15 +43,15 @@ public class AsyncTaskThreadContainer {
     private TAUserService taUserService;
     @Autowired
     private ApplicationInfo applicationInfo;
+    @Autowired
+    private ExecutorService asyncTaskExecutorService;
 
     /**
      * Метод запускает потоки обработки асинхронных задач для каждой очереди
      */
     public void processQueues() {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        executorService.submit(new AsyncTaskShortQueueProcessor());
-        executorService.submit(new AsyncTaskLongQueueProcessor());
-        executorService.shutdown();
+        new AsyncTaskShortQueueProcessor().processQueue();
+        new AsyncTaskLongQueueProcessor().processQueue();
     }
 
     /**
@@ -61,15 +61,14 @@ public class AsyncTaskThreadContainer {
      * - Резервирование задачи на текущий узел кластера
      * - Запуск выполнения задачи
      */
-    private abstract class AbstractQueueProcessor implements Runnable {
+    private abstract class AbstractQueueProcessor {
 
         /**
          * Возвращает следующую в очереди задачу на выполнение
          *
-         * @param taskTimeout таймаут на выполнение задачи, после окончания которого считается, что узел ее выполняющий упал и надо передать выполнение другому узлу
          * @return данные задачи
          */
-        protected abstract AsyncTaskData getNextTask(int taskTimeout);
+        protected abstract AsyncTaskData getNextTask();
 
         /**
          * Возвращает количество потоков, обрабатывающих задачи из очереди
@@ -78,51 +77,52 @@ public class AsyncTaskThreadContainer {
          */
         protected abstract int getThreadCount();
 
-        @Override
-        public void run() {
-            final ExecutorService executorService = Executors.newFixedThreadPool(getThreadCount());
+        /**
+         * Запускает обработку задач в очереди, каждая задача выполняется в отдельном потоке
+         */
+        public void processQueue() {
             for (int i = 0; i < getThreadCount(); i++) {
                 //Получаем первую в списке незарезирвированную задачу и резервируем ее под текущий узел
-                final AsyncTaskData taskData = getNextTask(TASK_TIMEOUT);
+                final AsyncTaskData taskData = getNextTask();
+                if (taskData == null) {
+                    //Новых задач нет, либо текущий узел занят
+                    return;
+                }
                 try {
-                    if (taskData != null) {
-                        //Запускаем выполнение бина-обработчика задачи в новом потоке
-                        LOG.info("Task started: " + taskData);
-                        final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
-                        executorService.submit(new Thread() {
-                            @Override
-                            public void run() {
-                                Thread.currentThread().setName("AsyncTask-" + taskData.getId());
+                    //Запускаем выполнение бина-обработчика задачи в новом потоке
+                    LOG.info("Task started: " + taskData);
+                    final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
+                    asyncTaskExecutorService.submit(new Thread() {
+                        @Override
+                        public void run() {
+                            Thread.currentThread().setName("AsyncTask-" + taskData.getId());
 
-                                try {
-                                    //Запускаем задачу под нужным пользователем
-                                    TAUser user = taUserService.getUser(taskData.getUserId());
-                                    List<String> roles = new ArrayList<String>();
-                                    for (TARole role : user.getRoles()) {
-                                        roles.add(role.getAlias());
-                                    }
-                                    Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[roles.size()]));
-                                    Authentication authentication = new UsernamePasswordAuthenticationToken(
-                                            new User(user.getLogin(), "user", authorities),
-                                            user.getLogin(),
-                                            authorities
-                                    );
-                                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                                    task.execute(taskData);
-                                } catch (Exception e) {
-                                    LOG.error("Unexpected error during async task execution", e);
-                                } finally {
-                                    asyncManager.finishTask(taskData.getId());
+                            try {
+                                //Запускаем задачу под нужным пользователем
+                                TAUser user = taUserService.getUser(taskData.getUserId());
+                                List<String> roles = new ArrayList<String>();
+                                for (TARole role : user.getRoles()) {
+                                    roles.add(role.getAlias());
                                 }
+                                Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(roles.toArray(new String[roles.size()]));
+                                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                        new User(user.getLogin(), "user", authorities),
+                                        user.getLogin(),
+                                        authorities
+                                );
+                                SecurityContextHolder.getContext().setAuthentication(authentication);
+                                task.execute(taskData);
+                            } catch (Exception e) {
+                                LOG.error("Unexpected error during async task execution", e);
+                            } finally {
+                                asyncManager.finishTask(taskData.getId());
                             }
-                        });
-                    }
+                        }
+                    });
                     Thread.sleep(500);
                 } catch (Exception e) {
                     LOG.info("Unexpected error during startup async task execution", e);
-                    if (taskData != null) {
-                        asyncManager.finishTask(taskData.getId());
-                    }
+                    asyncManager.finishTask(taskData.getId());
                 }
             }
         }
@@ -133,9 +133,9 @@ public class AsyncTaskThreadContainer {
      */
     private final class AsyncTaskShortQueueProcessor extends AbstractQueueProcessor {
         @Override
-        protected AsyncTaskData getNextTask(int taskTimeout) {
+        protected AsyncTaskData getNextTask() {
             String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, taskTimeout, AsyncQueue.SHORT, getThreadCount());
+            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, TASK_TIMEOUT, AsyncQueue.SHORT, getThreadCount());
         }
 
         @Override
@@ -149,9 +149,9 @@ public class AsyncTaskThreadContainer {
      */
     private final class AsyncTaskLongQueueProcessor extends AbstractQueueProcessor {
         @Override
-        protected AsyncTaskData getNextTask(int taskTimeout) {
+        protected AsyncTaskData getNextTask() {
             String priorityNode = applicationInfo.isProductionMode() ? null : serverInfo.getServerName();
-            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, taskTimeout, AsyncQueue.LONG, getThreadCount());
+            return asyncManager.reserveTask(serverInfo.getServerName(), priorityNode, TASK_TIMEOUT, AsyncQueue.LONG, getThreadCount());
         }
 
         @Override
