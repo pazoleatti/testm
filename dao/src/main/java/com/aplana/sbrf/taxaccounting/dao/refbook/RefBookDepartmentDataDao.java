@@ -15,7 +15,7 @@ public interface RefBookDepartmentDataDao {
      * Получение значения справочника по идентификатору
      *
      * @param id Идентификатор подразделения
-     * @return Знечение справочника
+     * @return Значение справочника
      */
     RefBookDepartment fetchDepartmentById(Integer id);
 

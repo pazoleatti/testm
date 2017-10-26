@@ -979,15 +979,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         }
 
                         @Override
-                        public void postCheckProcessing() {
-                        }
-
-                        @Override
-                        public boolean checkExistTasks(AsyncTaskType reportType, TAUserInfo userInfo, Logger logger) {
-                            return false;
-                        }
-
-                        @Override
                         public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
                             if (uuid != null) {
                                 reportService.deleteDec(uuid);
@@ -1276,8 +1267,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Logger scriptLogger = new Logger();
         try {
-            lockStateLogger.updateState(AsyncTaskState.SOURCE_FORM_CHECK);
-            checkSources(declarationData, logger, userInfo);
             lockStateLogger.updateState(AsyncTaskState.FORM_CHECK);
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, scriptLogger, null);
         } finally {

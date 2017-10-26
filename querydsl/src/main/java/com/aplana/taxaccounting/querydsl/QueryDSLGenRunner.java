@@ -3,6 +3,7 @@ package com.aplana.taxaccounting.querydsl;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.querydsl.sql.Configuration;
@@ -46,6 +47,7 @@ public class QueryDSLGenRunner {
             configuration.register("NOTIFICATION", "IS_READ", new NumericBooleanType());
             configuration.register("NOTIFICATION", "TYPE", new EnumByOrdinalType<>(NotificationType.class));
             configuration.register("DECLARATION_DATA", "STATE", new EnumByOrdinalType<>(State.class));
+            configuration.register("LOG_ENTRY", "LOG_LEVEL", new EnumByOrdinalType<>(LogLevel.class));
 
             exportScheme(dbUrl,
                     "ndfl_unstable",
@@ -70,7 +72,6 @@ public class QueryDSLGenRunner {
                     targetFolder,
                     new String[]{"DEPARTMENT", "SEC_ROLE", "SEC_USER", "SEC_USER_ROLE"},
                     configuration);
-
 
             LOG.info("QueryDSLGenRunner finish");
         } catch (Exception e) {
@@ -138,14 +139,15 @@ public class QueryDSLGenRunner {
         List<String> qClasses = Lists.newArrayList();
         if (tables != null) {
             for (String table : tables) {
-                qClasses.add("Q" + table);
+                qClasses.add("q" + table.replaceAll("_", "").toLowerCase());
             }
         }
         LOG.info("Delete files in " + srcFolder.getAbsolutePath());
         File[] files = srcFolder.listFiles();
         if (files != null) {
             for (File file : files) {
-                if (qClasses.isEmpty() || qClasses.contains(file.getName())) {
+                String qClassName = file.getName().replaceAll("\\.java", "").toLowerCase();
+                if (qClasses.isEmpty() || qClasses.contains(qClassName)) {
                     LOG.info("Delete file " + file.getAbsolutePath());
                     file.delete();
                 }

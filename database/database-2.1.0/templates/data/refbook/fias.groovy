@@ -1,4 +1,4 @@
-package refbook
+package refbook // fias_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException

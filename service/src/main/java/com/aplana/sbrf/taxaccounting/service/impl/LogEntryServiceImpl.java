@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogDao;
 import com.aplana.sbrf.taxaccounting.dao.LogEntryDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -26,13 +27,13 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Autowired
     private LogDao logDao;
-    
+
     @Autowired
     private TransactionHelper tx;
 
     @Override
-    public PagingResult<LogEntry> get(String uuid, int offset, int length) {
-        return logEntryDao.get(uuid, offset, length);
+    public PagingResult<LogEntry> fetch(String uuid, PagingParams pagingParams) {
+        return logEntryDao.fetch(uuid, pagingParams);
     }
 
     @Override

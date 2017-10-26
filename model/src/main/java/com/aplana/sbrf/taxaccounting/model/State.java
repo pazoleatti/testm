@@ -9,6 +9,10 @@ import javax.validation.constraints.NotNull;
  */
 public enum State {
     /**
+     * Статус "Не создана"
+     */
+    NOT_EXIST(null, "Не создана", "Создание"),
+    /**
      * Статус "Создана"
      */
     CREATED(1, "Создана", "Создание"),
@@ -19,11 +23,7 @@ public enum State {
     /**
      * Статус "Принята"
      */
-    ACCEPTED(3, "Принята", "Принятие"),
-    /**
-     * Статус "Не создана"
-     */
-    NOT_EXIST(null, "Не создана", "Создание");
+    ACCEPTED(3, "Принята", "Принятие");
 
     private final Integer id;
     private final String title;

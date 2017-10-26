@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonOperation
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
 import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
@@ -29,6 +30,9 @@ class Calculate extends AbstractScriptClass {
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
     FileWriter xml
+    boolean showTiming;
+    int similarityThreshold;
+    DeclarationService declarationService
 
     final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
 
@@ -68,6 +72,9 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("xml")) {
             this.xml = (FileWriter) scriptClass.getProperty("xml");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 
@@ -113,7 +120,7 @@ class Calculate extends AbstractScriptClass {
             throw new ServiceException("Ошибка консолидации. Не найдено ни одной формы-источника.");
         }
 
-        logForDebug("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + calcTimeMillis(time));
+        logForDebug("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList + " (" + declarationDataIdList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
         List<NdflPerson> ndflPersonList = collectNdflPersonList(sourcesInfo);
 
@@ -128,17 +135,17 @@ class Calculate extends AbstractScriptClass {
 
         //record_id, Map<String, RefBookValue>
         Map<Long, Map<String, RefBookValue>> refBookPersonMap = getActualRefPersonsByDeclarationDataIdList(declarationDataIdList);
-        logForDebug("Выгрузка справочника Физические лица (" + refBookPersonMap.size() + " записей, " + calcTimeMillis(time));
+        logForDebug("Выгрузка справочника Физические лица (" + refBookPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
         //id, Map<String, RefBookValue>
         Map<Long, Map<String, RefBookValue>> addressMap = getRefAddressByPersons(refBookPersonMap);
-        logForDebug("Выгрузка справочника Адреса физических лиц (" + addressMap.size() + " записей, " + calcTimeMillis(time));
+        logForDebug("Выгрузка справочника Адреса физических лиц (" + addressMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
         //id, List<Map<String, RefBookValue>>
         Map<Long, List<Map<String, RefBookValue>>> personDocMap = getActualRefDulByDeclarationDataIdList(declarationDataIdList)
-        logForDebug("Выгрузка справочника Документы физических лиц (" + personDocMap.size() + " записей, " + calcTimeMillis(time));
+        logForDebug("Выгрузка справочника Документы физических лиц (" + personDocMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
-        logForDebug("Инициализация кэша справочников (" + calcTimeMillis(time));
+        logForDebug("Инициализация кэша справочников (" + ScriptUtils.calcTimeMillis(time));
 
         //Карта в которой хранится актуальный record_id и NdflPerson в котором объединяются данные о даходах
         Map<Long, NdflPerson> ndflPersonMap = consolidateNdflPerson(ndflPersonList, declarationDataIdList);
@@ -244,7 +251,7 @@ class Calculate extends AbstractScriptClass {
 
         }
 
-        logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + calcTimeMillis(time));
+        logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + ScriptUtils.calcTimeMillis(time));
         logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") + " (всего " + declarationDataIdList.size() + " форм)")
     }
 
@@ -726,5 +733,21 @@ class Calculate extends AbstractScriptClass {
     @TypeChecked(TypeCheckingMode.SKIP)
     def createXmlNode(builder, name, attributes) {
         builder.name(attributes)
+    }
+
+    void initConfiguration(){
+        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
+        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
+        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
+        if (showTiming.equals("1")) {
+            this.showTiming = true;
+        }
+        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
+    }
+
+    void logForDebug(String message, Object... args) {
+        if (showTiming) {
+            logger.info(message, args);
+        }
     }
 }

@@ -39,6 +39,7 @@ import java.util.Map;
  *
  * @author dloshkarev
  */
+@Transactional
 @Component
 public class AsyncManagerImpl implements AsyncManager {
     private static final Log LOG = LogFactory.getLog(AsyncManagerImpl.class);
@@ -333,7 +334,11 @@ public class AsyncManagerImpl implements AsyncManager {
 
     @Override
     public void addUserWaitingForTask(long taskId, int userId) {
-        asyncTaskDao.addUserWaitingForTask(taskId, userId);
+        if (asyncTaskDao.isTaskExists(taskId)) {
+            asyncTaskDao.addUserWaitingForTask(taskId, userId);
+        } else {
+            LOG.warn(String.format("Cannot add subscriber with id = %s to task with id = %s. Cause: task doesn't exists", taskId, userId));
+        }
     }
 
     @Override

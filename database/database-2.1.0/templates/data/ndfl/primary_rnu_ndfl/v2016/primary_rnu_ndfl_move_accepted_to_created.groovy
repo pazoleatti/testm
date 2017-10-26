@@ -15,6 +15,7 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
     DeclarationData declarationData
     DepartmentService departmentService
     DepartmentReportPeriodService departmentReportPeriodService
+    DeclarationService declarationService
 
     final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
     final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
@@ -40,6 +41,9 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 

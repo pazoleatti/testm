@@ -62,5 +62,48 @@ begin
 	if v_count>0 then
 		execute immediate 'DROP TABLE DEPARTMENT_CHANGE';
 	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'COLOR';
+	if v_count>0 then
+		execute immediate 'DROP TABLE COLOR';
+	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'DEPARTMENT_FORM_TYPE_PERFORMER';
+	if v_count>0 then
+		execute immediate 'DROP TABLE DEPARTMENT_FORM_TYPE_PERFORMER';
+	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'DEPARTMENT_FORM_TYPE';
+	if v_count>0 then
+		execute immediate 'alter table declaration_source drop DECL_SOURCE_FK_DEPT_FORMTYPE ';
+		execute immediate 'DROP TABLE DEPARTMENT_FORM_TYPE';
+	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'LOG_CLOB_QUERY';
+	if v_count>0 then
+		execute immediate 'DROP TABLE LOG_CLOB_QUERY';
+	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'ROLE_EVENT';
+	if v_count>0 then
+		execute immediate 'DROP TABLE ROLE_EVENT';
+	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'STATE_CHANGE';
+	if v_count>0 then
+		execute immediate 'DROP TABLE STATE_CHANGE';
+	end if;
+	
+	v_count := 0;
+	select count(1) into v_count from user_tables where table_name = 'TASK_CONTEXT';
+	if v_count>0 then
+		execute immediate 'DROP TABLE TASK_CONTEXT';
+	end if;
 end;
 /
