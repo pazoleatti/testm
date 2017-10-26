@@ -47,6 +47,9 @@
                         restore: function () {
                             if ($scope.filterStorage.isNeedStore()) {
                                 $scope.searchFilter.params = $webStorage.get('filterStorage', $scope.searchFilter.filterName, $scope.searchFilter.params, true);
+                                if($scope.searchFilter.onFilterRestore) {
+                                    $scope.searchFilter.onFilterRestore();
+                                }
                             }
                         },
                         // Использовать или нет webStorage
