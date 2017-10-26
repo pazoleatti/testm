@@ -337,6 +337,7 @@
     "filesComment.system": "Система",
     "filesComment.tooLongNoteMessage": "Количество символов для комментария превысило допустимое значение 512.",
 
+    "ndflJournal.filter.periodType": "Тип периода",
     "ndflJournal.filter.period": "Период",
     "ndflJournal.filter.department": "Подразделение",
     "ndflJournal.filter.declarationNumber": "Номер формы",

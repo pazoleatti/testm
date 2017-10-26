@@ -8,6 +8,16 @@
                     <div class="filter-col w450">
                         <div class="form-group">
                             <div class="col-md-4">
+                                <label class="control-label">{{::'ndflJournal.filter.periodType' | translate}}:</label>
+                            </div>
+                            <div data-ng-controller="SelectCorrectionTagCtrl"
+                                 data-ui-select2="correctionTagSelect.options"
+                                 data-ng-model="searchFilter.params.correctionTag"
+                                 class="col-md-8">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
                                 <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
                             </div>
                             <div data-ng-controller="SelectPeriodCtrl"
@@ -19,7 +29,8 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{::'ndflJournal.filter.department' | translate}}:</label>
+                                <label class="control-label">{{::'ndflJournal.filter.department' |
+                                    translate}}:</label>
                             </div>
                             <div data-ng-controller="SelectDepartmentCtrl"
                                  data-ui-select2="departmentsSelect.options"
@@ -38,13 +49,6 @@
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"/>
                             </div>
-                        </div>
-                    </div>
-                    <div class="filter-col w250">
-                        <div data-ng-controller="SelectCorrectionTagCtrl"
-                             data-ui-select2="correctionTagSelect.options"
-                             data-ng-model="searchFilter.params.correctionTag"
-                             class="col-md-12">
                         </div>
                     </div>
                     <div class="filter-col w500">
@@ -83,7 +87,8 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-4">
-                                <label class="control-label">{{::'ndflReportJournal.filter.note' | translate}}:</label>
+                                <label class="control-label">{{::'ndflReportJournal.filter.note' |
+                                    translate}}:</label>
                             </div>
                             <div class="col-md-8">
                                 <input data-ng-model="searchFilter.params.note"
@@ -106,7 +111,8 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-3">
-                                <label class="control-label">{{::'ndflReportJournal.filter.kpp' | translate}}:</label>
+                                <label class="control-label">{{::'ndflReportJournal.filter.kpp' |
+                                    translate}}:</label>
                             </div>
                             <div class="col-md-9">
                                 <input data-ng-model="searchFilter.params.kpp"
@@ -116,7 +122,8 @@
                         </div>
                         <div class="form-group">
                             <div class="col-md-3">
-                                <label class="control-label">{{::'ndflReportJournal.filter.oktmo' | translate}}:</label>
+                                <label class="control-label">{{::'ndflReportJournal.filter.oktmo' |
+                                    translate}}:</label>
                             </div>
                             <div class="col-md-9">
                                 <input data-ng-model="searchFilter.params.oktmo"
