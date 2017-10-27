@@ -1016,7 +1016,7 @@ class DeclarationType extends AbstractScriptClass {
 
         //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
         if (!departmentCode.equals(handler.getListValueAttributesTag().get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
+            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
         }
 
         if (!asnuCode.equals(handler.getListValueAttributesTag().get(KOD_ASNU))) {
