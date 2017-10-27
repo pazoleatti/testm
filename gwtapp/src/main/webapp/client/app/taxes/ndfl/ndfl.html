@@ -36,7 +36,15 @@
                             <div class="row menuitem">
                                 <a ng-click="createReportAllRnu()">{{::'link.ndfl.reporting.formForFLs' |
                                     translate}}</a>
-                                <a ng-click="downloadSpecific()" ng-show="availableSpecificReport">{{::'link.ndfl.reporting.download'
+                                <a ng-click="downloadSpecific()" ng-show="availableRnuNdflPersonAllDb">{{::'link.ndfl.reporting.download'
+                                    | translate}}</a>
+                            </div>
+                        </li>
+                        <li role="menuitem" ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                            <div class="row menuitem">
+                                <a ng-click="createPairKppOktmo(false, true)">{{::'link.ndfl.reporting.formForKppOktmo' |
+                                    translate}}</a>
+                                <a ng-click="createPairKppOktmo(false, false)" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
                                     | translate}}</a>
                             </div>
                         </li>

@@ -270,6 +270,8 @@ public interface DeclarationDataService {
      */
     CreateDeclarationReportResult createReportAllRnu(TAUserInfo userInfo, final long declarationDataId, boolean force);
 
+    CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force, boolean create);
+
     /**
      * Формирование отчета в xlsx
      *

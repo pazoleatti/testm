@@ -469,6 +469,12 @@ public class DeclarationDataController {
         return declarationService.createReportAllRnu(userInfo, declarationDataId, force);
     }
 
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/pairKppOktmoReport")
+    public CreateDeclarationReportResult createPairKppOktmo(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force, @RequestParam boolean create) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createPairKppOktmoReport(userInfo, declarationDataId, force, create);
+    }
+
     /**
      * Формирование отчета в xlsx
      *

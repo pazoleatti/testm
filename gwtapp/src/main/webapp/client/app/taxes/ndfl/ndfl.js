@@ -64,7 +64,7 @@
                  */
                 // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports () {
-                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableSpecificReport)) {
+                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableRnuNdflPersonAllDb && $scope.availableReportKppOktmo)) {
                         DeclarationDataResource.query({
                                 declarationDataId: $stateParams.declarationDataId,
                                 projection: "availableReports",
@@ -74,8 +74,9 @@
                                 if (data) {
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    $scope.availableSpecificReport = data.downloadSpecificAvailable;
-                                    if (!$scope.intervalId){
+                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
+                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    if (!$scope.intervalId) {
                                         $scope.intervalId = $interval(function () {
                                             updateAvailableReports();
                                         }, 10000);
@@ -128,6 +129,24 @@
                         {declarationDataId: $scope.declarationDataId});
 
                 };
+
+                function performReportSuccessResponse (response, location) {
+                    if (response.uuid && response.uuid !== null) {
+                        $logPanel.open('log-panel-container', response.uuid);
+                    } else {
+                        if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
+                            appModals.message($filter('translate')('title.noCalculationPerformed'));
+                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                            appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
+                                .result.then(
+                                function () {
+                                    $scope.createPairKppOktmo(true, create);
+                                });
+                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
+                            $window.location = location;
+                        }
+                    }
+                }
 
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
@@ -228,7 +247,10 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {header: $filter('translate')('title.indicateReasonForReturn'), msg: $filter('translate')('title.reasonForReturn')}, {size : 'md'})
+                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {
+                        header: $filter('translate')('title.indicateReasonForReturn'),
+                        msg: $filter('translate')('title.reasonForReturn')
+                    }, {size: 'md'})
                         .result.then(
                         function (reason) {
                             $http({
@@ -266,7 +288,7 @@
                     appModals.create('client/app/taxes/ndfl/formSources.html', 'sourcesFormCtrl');
                 };
 
-                $scope.selectTab = function(tab) {
+                $scope.selectTab = function (tab) {
                     $rootScope.$broadcast('tabSelected', tab);
                 };
 
@@ -288,21 +310,7 @@
                             force: force ? force : false
                         }
                     }).success(function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                        } else {
-                            if (response.status === "LOCKED" && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                    .result.then(
-                                    function () {
-                                        $scope.createReportXlsx(true);
-                                    });
-                            } else if (response.status === "NOT_EXIST_XML") {
-                                $window.alert($filter('translate')('title.noCalculationPerformed'));
-                            } else if (response.status === "EXIST") {
-                                $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
-                            }
-                        }
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx");
                     });
                 };
 
@@ -314,22 +322,22 @@
                             force: force ? force : false
                         }
                     }).success(function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                        } else {
-                            if (response.status === "LOCKED" && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                    .result.then(
-                                    function () {
-                                        $scope.createReportXlsx(true);
-                                    });
-                            } else if (response.status === "NOT_EXIST_XML") {
-                                $window.alert($filter('translate')('title.noCalculationPerformed'));
-                            } else if (response.status === "EXIST") {
-                                $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
-                            }
-                        }
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB);
                     });
                 };
+
+                $scope.createPairKppOktmo = function (force, create) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pairKppOktmoReport",
+                        params: {
+                            force: force,
+                            create: create
+                        }
+                    }).success(function (response) {
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO);
+                    });
+                };
+
             }]);
 }());

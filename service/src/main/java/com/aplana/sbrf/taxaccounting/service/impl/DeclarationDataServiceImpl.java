@@ -1063,7 +1063,63 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createReportXlsx(final TAUserInfo userInfo, final long declarationDataId, boolean force) {
+    public CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, final long declarationDataId, boolean force, boolean create) {
+        CreateDeclarationReportResult result = new CreateDeclarationReportResult();
+        if (!existDeclarationData(declarationDataId)) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(declarationDataId);
+            return result;
+        }
+        DeclarationData declarationData = get(declarationDataId, userInfo);
+        DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), SubreportAliasConstants.REPORT_KPP_OKTMO);
+        final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
+        Logger logger = new Logger();
+        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        if (uuidXml != null) {
+            final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            if (uuid != null && !create) {
+                result.setStatus(CreateAsyncTaskStatus.EXIST);
+                return result;
+            } else {
+                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("declarationDataId", declarationDataId);
+                    params.put("alias", ddReportType.getReportAlias());
+                    params.put("viewParamValues", new LinkedHashMap<String, String>());
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                        @Override
+                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    getDeclarationFullName(declarationDataId, ddReportType));
+                        }
+
+                        @Override
+                        public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
+                            if (uuid != null) {
+                                reportService.deleteDec(uuid);
+                            }
+                        }
+                    });
+                }
+            }
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    @Override
+    public CreateDeclarationReportResult createReportXlsx(final TAUserInfo userInfo, final long declarationDataId,
+                                                          boolean force) {
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
@@ -1123,11 +1179,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData declaration = get(declarationDataId, userInfo);
         List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
         for (DeclarationSubreport subreport : subreports) {
-            if ("rnu_ndfl_person_all_db".equals(subreport.getAlias())) {
-                reportAvailableResult.setDownloadSpecificAvailable((reportService.getDec(userInfo, declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+            switch (subreport.getAlias()) {
+                case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB: {
+                    reportAvailableResult.setDownloadRnuNdflPersonAllDb((reportService.getDec(userInfo, declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+                }
+                case SubreportAliasConstants.REPORT_KPP_OKTMO: {
+                    reportAvailableResult.setDownloadReportKppOktmo((reportService.getDec(userInfo, declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+                }
             }
         }
-
         return reportAvailableResult;
     }
 

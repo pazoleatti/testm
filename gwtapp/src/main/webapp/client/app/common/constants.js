@@ -109,6 +109,19 @@
                 REPORT_2_NDFL_1: {id: 102, name: "2-НДФЛ (1)"},
                 REPORT_6_NDFL: {id: 103, name: "6-НДФЛ"},
                 REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"},
+            },
+            SUBREPORT_ALIAS_CONSTANTS: {
+                RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу
+                RNU_NDFL_PERSON_ALL_DB: "rnu_ndfl_person_all_db", // РНУ НДФЛ по всем ФЛ
+                REPORT_KPP_OKTMO: "report_kpp_oktmo", // Реестр сформированной отчетности
+                REPORT_2NDFL: "report_2ndfl" // 2-НДФЛ (1) по физическому лицу
+            },
+            CREATE_ASYNC_TASK_STATUS: {
+                NOT_EXIST_XML: "NOT_EXIST_XML", //не существует XML
+                EXIST: "EXIST", //существует/задача успешно завершена
+                LOCKED: "LOCKED", //есть блокировка
+                EXIST_TASK: "EXIST_TASK", //существуют задачи, которые будут удалены при выполнении данной
+                CREATE: "CREATE" //создана новая задача
             }
         });
 }());

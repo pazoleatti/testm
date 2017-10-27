@@ -3,7 +3,8 @@ package com.aplana.sbrf.taxaccounting.model;
 public class ReportAvailableResult {
     boolean downloadXmlAvailable;
     boolean downloadXlsxAvailable;
-    boolean downloadSpecificAvailable;
+    boolean downloadRnuNdflPersonAllDb;
+    boolean downloadReportKppOktmo;
 
     public boolean isDownloadXmlAvailable() {
         return downloadXmlAvailable;
@@ -21,11 +22,19 @@ public class ReportAvailableResult {
         this.downloadXlsxAvailable = downloadXlsxAvailable;
     }
 
-    public boolean isDownloadSpecificAvailable() {
-        return downloadSpecificAvailable;
+    public boolean isDownloadRnuNdflPersonAllDb() {
+        return downloadRnuNdflPersonAllDb;
     }
 
-    public void setDownloadSpecificAvailable(boolean downloadSpecificAvailable) {
-        this.downloadSpecificAvailable = downloadSpecificAvailable;
+    public void setDownloadRnuNdflPersonAllDb(boolean downloadRnuNdflPersonAllDb) {
+        this.downloadRnuNdflPersonAllDb = downloadRnuNdflPersonAllDb;
+    }
+
+    public boolean isDownloadReportKppOktmo() {
+        return downloadReportKppOktmo;
+    }
+
+    public void setDownloadReportKppOktmo(boolean downloadReportKppOktmo) {
+        this.downloadReportKppOktmo = downloadReportKppOktmo;
     }
 }
