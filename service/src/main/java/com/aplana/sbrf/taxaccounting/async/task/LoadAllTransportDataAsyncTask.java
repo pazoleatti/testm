@@ -15,9 +15,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.UUID;
 
-
 /**
- * Реализация таска "Загрузка файлов"
+ * Загрузка ТФ и загрузка ТФ из каталога загрзки
  */
 @Component("LoadAllTransportDataAsyncTask")
 public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
@@ -66,6 +65,7 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
         if (params.containsKey("blobDataId")) {
+            //Загрузка одиночного ТФ
             final String blobDataId = (String) params.get("blobDataId");
             BlobData blobData = blobDataService.get(blobDataId);
             asyncManager.updateState(taskData.getId(), AsyncTaskState.FILES_UPLOADING);
@@ -121,6 +121,11 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        return getAsyncTaskType().getDescription();
+        if (params.containsKey("blobDataId")) {
+            //Загрузка одиночного ТФ
+            return String.format(getAsyncTaskType().getDescription(), "");
+        } else {
+            return String.format(getAsyncTaskType().getDescription(), " из каталога загрузки");
+        }
     }
 }
