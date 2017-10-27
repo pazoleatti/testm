@@ -130,7 +130,13 @@
 
                 };
 
-                function performReportSuccessResponse (response, location) {
+                /**
+                 * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
+                 * @param response
+                 * @param location
+                 * @param create
+                 */
+                function performReportSuccessResponse (response, location, create) {
                     if (response.uuid && response.uuid !== null) {
                         $logPanel.open('log-panel-container', response.uuid);
                     } else {
@@ -314,6 +320,10 @@
                     });
                 };
 
+                /**
+                 * формирование спецотчета "РНУ НДФЛ по всем ФЛ"
+                 * @param force
+                 */
                 $scope.createReportAllRnu = function (force) {
                     $http({
                         method: "POST",
@@ -326,6 +336,11 @@
                     });
                 };
 
+                /**+
+                 * Создание спецотчета "Реестр сформированной отчетности"
+                 * @param force
+                 * @param create
+                 */
                 $scope.createPairKppOktmo = function (force, create) {
                     $http({
                         method: "POST",
@@ -335,7 +350,7 @@
                             create: create
                         }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO);
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO, create);
                     });
                 };
 
