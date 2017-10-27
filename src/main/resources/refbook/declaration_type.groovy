@@ -1,20 +1,7 @@
-package refbook
+package refbook // declaration_type_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-
-// declaration_type_ref комментарий для локального поиска скрипта
-import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
-import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
 import groovy.transform.TypeChecked
-import org.apache.commons.io.IOUtils
-import org.joda.time.LocalDateTime
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
@@ -24,6 +11,18 @@ import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
+import org.joda.time.LocalDateTime
+import org.apache.commons.io.IOUtils
+import com.aplana.sbrf.taxaccounting.model.DeclarationType
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 
 /**
  * Created by lhaziev on 09.02.2017.

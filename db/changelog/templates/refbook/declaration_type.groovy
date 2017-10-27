@@ -17,12 +17,12 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationType
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
-import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 
 /**
  * Created by lhaziev on 09.02.2017.

@@ -15,7 +15,7 @@
                     </button>
                     <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button"
                         style="margin-left: -180px;">
-                        <li role="menuitem">
+                        <li role="menuitem" ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
                             <div class="row menuitem">
                                 <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
                             </div>
@@ -167,13 +167,6 @@
                     <div class="" style="height: 100%">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
-                            <div>
-                                <button type="button" class="btn btn-default"
-                                        data-ng-click="showToDoDialog()">
-                                    <span data-translate-once="button.updateFLData"></span>
-                                </button>
-                            </div>
-
                         </div>
                     </div>
                     <div data-aplana-grid
@@ -194,16 +187,6 @@
                     <div class="container-grid" style="height: 100%;">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/incomesAndTaxFilter.html'"></span>
-                            <div class="row" style="margin: 0;">
-                                <button type="button" class="btn btn-default"
-                                        data-ng-click="showToDoDialog()">
-                                    <span data-translate-once="button.fillTransferTerm"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" style="margin: 0 0 0 10px"
-                                        data-ng-click="showToDoDialog()">
-                                    <span data-translate-once="button.fillIncomeAttr"></span>
-                                </button>
-                            </div>
                         </div>
                     </div>
                     <div data-aplana-grid

@@ -19,7 +19,6 @@
         <module>ndfl-ear</module>
         <module>dynacache-spring</module>
         <module>test-utils</module>
-        <module>script-support</module>
         <module>fonts</module>
         <module>gwt-widget</module>
         <module>script-test</module>

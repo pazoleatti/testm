@@ -3,7 +3,7 @@ package refbook.person // person_ref комментарий для локаль�
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 

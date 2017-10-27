@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.GPathResult
@@ -27,14 +27,13 @@ import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.*
 import java.text.SimpleDateFormat
-import com.aplana.sbrf.taxaccounting.service.script.*
+import com.aplana.sbrf.taxaccounting.script.service.*
 
 new PrimaryRnuNdfl(this).run();
 
 @TypeChecked
 class PrimaryRnuNdfl extends AbstractScriptClass {
 
-    DeclarationService declarationService
     DeclarationData declarationData
     TAUserInfo userInfo
     NdflPersonService ndflPersonService
@@ -49,8 +48,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     String UploadFileName
     InputStream ImportInputStream
     File dataFile
-    boolean showTiming;
-    int similarityThreshold;
 
     private PrimaryRnuNdfl() {}
 
@@ -62,9 +59,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
@@ -1215,22 +1209,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             if (declarationList.isEmpty()) {
                 logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде. Отчетные налоговые формы не будут сформированы текущем периоде")
             }
-        }
-    }
-
-    void initConfiguration(){
-        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
-        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
-        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
-        if (showTiming.equals("1")) {
-            this.showTiming = true;
-        }
-        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
-    }
-
-    void logForDebug(String message, Object... args) {
-        if (showTiming) {
-            logger.info(message, args);
         }
     }
 }

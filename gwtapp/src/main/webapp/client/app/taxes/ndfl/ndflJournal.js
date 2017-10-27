@@ -36,7 +36,10 @@
                     },
                     ajaxFilter: [],
                     isClear: false,
-                    filterName: 'ndflJournalFilter'
+                    filterName: 'ndflJournalFilter',
+                    onCreateComplete: function () {
+                        $scope.refreshGrid();
+                    }
                 };
 
                 // Флаг отображения кнопки "Сбросить"
@@ -153,6 +156,7 @@
                         sortorder: "desc",
                         hidegrid: false,
                         multiselect: true,
+                        disableAutoLoad: true,
                         ondblClickRow: function (rowId) {
                             $state.go("ndfl", {
                                 declarationId: rowId
