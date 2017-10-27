@@ -86,10 +86,11 @@ public interface AsyncTaskDao {
 
     /**
      * Отменяет задачу (проставляет статус CANCELLED)
+     * если была отменена ранее, то удаляет задачу
      *
-     * @param taskId идентификатор задачи
+     * @param taskData задача
      */
-    void cancelTask(long taskId);
+    void cancelTask(AsyncTaskData taskData);
 
     /**
      * Освобождает задачу от резервирования узлом

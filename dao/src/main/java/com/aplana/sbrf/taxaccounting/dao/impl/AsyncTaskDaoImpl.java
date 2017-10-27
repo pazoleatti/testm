@@ -206,9 +206,13 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public void cancelTask(long taskId) {
-        LOG.info("Cancelling task: " + taskId);
-        getJdbcTemplate().update("update async_task set state = ? where id = ?", AsyncTaskState.CANCELLED.getId(), taskId);
+    public void cancelTask(AsyncTaskData taskData) {
+        LOG.info("Cancelling task: " + taskData.getId());
+        if (taskData.getState() != AsyncTaskState.CANCELLED) {
+            getJdbcTemplate().update("update async_task set state = ? where id = ?", AsyncTaskState.CANCELLED.getId(), taskData.getId());
+        } else {
+            getJdbcTemplate().update("delete from async_task where id = ?", taskData.getId());
+        }
     }
 
     @Override

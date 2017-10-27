@@ -79,10 +79,8 @@
                  * без cellValue и options ссылка формируется некорректно
                  */
                 function linkFileFormatter(cellValue, options, row) {
-
-                    if (row.reportId != null) {
+                    if (row.reportId) {
                         return "<a target='_self' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
-
                     } else {
                         return "";
                     }
@@ -130,7 +128,11 @@
          */
         .filter('notificationTextFormatter', ['$filter', function ($filter) {
             return function (value, row, notification) {
-                return '<a class="notification-link" data-log-id="' + notification.logId + '">' + value + '</a>';
+                if (notification.logId) {
+                    return '<a class="notification-link" data-log-id="' + notification.logId + '">' + value + '</a>';
+                } else {
+                    return value
+                }
 
             };
         }]);

@@ -254,7 +254,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                                        }
                                                        notificationService.saveList(notifications);
                                                    }
-                                                   asyncTaskDao.cancelTask(taskData.getId());
+                                                   asyncTaskDao.cancelTask(taskData);
                                                } catch (Exception e) {
                                                    throw new ServiceException("Не удалось прервать задачу", e);
                                                }
