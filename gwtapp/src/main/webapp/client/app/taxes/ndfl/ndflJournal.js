@@ -37,7 +37,7 @@
                     ajaxFilter: [],
                     isClear: false,
                     filterName: 'ndflJournalFilter',
-                    onFilterRestore: function () {
+                    onCreateComplete: function () {
                         $scope.refreshGrid();
                     }
                 };

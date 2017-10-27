@@ -969,11 +969,7 @@ class DeclarationType extends AbstractScriptClass {
         def asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
         if (asnuCode != null) {
             List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
-            if (asnuIds.size() != 1) {
-                RefBook refBook = refBookFactory.get(900L);
-                logger.error("В справочнике «%s» отсутствует код АСНУ, поле «%s» которого равно «%s»! Загрузка файла «%s» не выполнена.", refBook.getName(), refBook.getAttribute("CODE").getName(), asnuCode, UploadFileName)
-                return
-            } else {
+            if (asnuIds.size() == 1) {
                 asnuId = asnuIds.get(0);
             }
         }
