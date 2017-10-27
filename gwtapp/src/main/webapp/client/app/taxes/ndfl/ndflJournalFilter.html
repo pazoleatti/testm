@@ -8,6 +8,16 @@
                     <div class="filter-col w450">
                         <div class="form-group">
                             <div class="col-md-4">
+                                <label class="control-label">{{::'ndflJournal.filter.periodType' | translate}}:</label>
+                            </div>
+                            <div data-ng-controller="SelectCorrectionTagCtrl"
+                                 data-ui-select2="correctionTagSelect.options"
+                                 data-ng-model="searchFilter.params.correctionTag"
+                                 class="col-md-8">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
                                 <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
                             </div>
                             <div data-ng-controller="SelectPeriodCtrl"
@@ -38,12 +48,6 @@
                                        title="{{ndflJournal.filter.declarationNumber}}"/>
                             </div>
                         </div>
-                    </div>
-                    <div class="filter-col w250">
-                        <div data-ng-controller="SelectCorrectionTagCtrl"
-                             data-ui-select2="correctionTagSelect.options"
-                             data-ng-model="searchFilter.params.correctionTag"
-                             class="col-md-12"></div>
                     </div>
                     <div class="filter-col w500">
                         <div class="form-group">

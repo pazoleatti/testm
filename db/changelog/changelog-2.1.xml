@@ -1366,6 +1366,13 @@
             <where>id=11</where>
         </update>
     </changeSet>
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2405 -->
+    <changeSet id="2.1-vlednev-1" author="vlednev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-2189 (удаление модуля script-support) -->
     <changeSet id="2.1-ytrofimov-31" author="ytrofimov">

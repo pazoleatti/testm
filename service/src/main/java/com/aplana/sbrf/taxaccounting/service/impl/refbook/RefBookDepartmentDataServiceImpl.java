@@ -31,7 +31,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     }
 
     /**
-     * Получение подркзделения пользователя
+     * Получение подразделения пользователя
      *
      * @param user Пользователь
      * @return Подразделение

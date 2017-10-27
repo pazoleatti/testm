@@ -7,9 +7,9 @@
 </div>
 <div class="modal-body" style="height: 500px">
 
-    <div class="form-horizontal" data-ng-form="commentForm">
+    <div class="form-horizontal" data-ng-form="commentForm" style="height: 510px;">
 
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table" style="margin: 0;">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table" style="margin: 0; min-height: 100px;">
             <thead>
             <tr>
                 <td>
@@ -22,7 +22,7 @@
                 <td>
                     <div data-aplana-field>
                         <textarea
-                                style="width: 850px;"
+                                style="width: 1213px;"
                                 rows="6"
                                 data-ng-model="commentForm.comment"
                                 data-ng-maxlength="512"
@@ -40,6 +40,9 @@
         <div>
             <label class="font-normal" for="fileCommentGrid">{{::'filesComment.files' |translate}}</label>
             <div data-aplana-grid
+                 data-grid-fill-space="true"
+                 data-grid-fill-space-container-selector=".form-horizontal"
+                 data-grid-fill-space-container-selector-top=".horizontal-input-table"
                  data-grid-options="fileCommentGrid.options"
                  data-grid-ctrl="fileCommentGrid.ctrl"
                  data-ng-model="fileCommentGrid.value"
@@ -52,12 +55,12 @@
             <div class="btn-toolbar" role="toolbar">
             <span>
                 <button type="file" class="btn btn-success" ngf-select="addFileClick($file)">
-                    <span class="glyphicon glyphicon-plus-sign"></span>{{::'filesComment.button.add' |translate}}
+                     {{::'filesComment.button.add' |translate}}
                 </button>
             </span>
                 <span>
                 <button type="button" class="btn btn-default" data-ng-click="removeFileClick()">
-                    <span class="glyphicon glyphicon-remove-sign"></span>{{::'filesComment.button.remove' |translate}}
+                     {{::'filesComment.button.remove' |translate}}
                 </button>
             </span>
             </div>

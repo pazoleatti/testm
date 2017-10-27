@@ -969,11 +969,7 @@ class DeclarationType extends AbstractScriptClass {
         def asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
         if (asnuCode != null) {
             List<Long> asnuIds = asnuProvider.getUniqueRecordIds(null, "CODE = '" + asnuCode + "'");
-            if (asnuIds.size() != 1) {
-                RefBook refBook = refBookFactory.get(900L);
-                logger.error("В справочнике «%s» отсутствует код АСНУ, поле «%s» которого равно «%s»! Загрузка файла «%s» не выполнена.", refBook.getName(), refBook.getAttribute("CODE").getName(), asnuCode, UploadFileName)
-                return
-            } else {
+            if (asnuIds.size() == 1) {
                 asnuId = asnuIds.get(0);
             }
         }
@@ -1020,15 +1016,15 @@ class DeclarationType extends AbstractScriptClass {
 
         //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
         if (!departmentCode.equals(handler.getListValueAttributesTag().get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())) {
-            logger.error("В ТФ не совпадают значения параметров имени «Код подразделения» = «%s» и содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
+            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
         }
 
         if (!asnuCode.equals(handler.getListValueAttributesTag().get(KOD_ASNU))) {
-            logger.error("В ТФ не совпадают значения параметров имени «Код АСНУ» = «%s» и содержимого «Файл.СлЧасть.КодАС» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
+            logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
         }
 
         if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))) {
-            logger.error("В ТФ не совпадают значения параметров имени «Имя ТФ без расширения» = «%s» и содержимого «Файл.СлЧасть.ИдФайл» = «%s»", UploadFileName.trim()[0..-5], handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
+            logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»", UploadFileName.trim()[0..-5], handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
         }
 
         //достать из XML файла атрибуты тега СлЧасть
@@ -1044,7 +1040,7 @@ class DeclarationType extends AbstractScriptClass {
 
         //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
         if (!reportPeriodCode.equals(handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))) {
-            logger.error("В ТФ не совпадают значения параметров имени «Код периода» = «%s» и содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
+            logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
         }
 
         Integer reportYear;
@@ -1055,7 +1051,7 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         if (!year.equals(reportYear)) {
-            logger.error("В ТФ не совпадают значения параметров имени «Год» = «%s» и содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
+            logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
         }
 
         // Проверка не загружен ли уже такой файл в систему

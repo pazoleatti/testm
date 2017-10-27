@@ -5,17 +5,16 @@
         translate}}
     </h4>
 </div>
-<div class="modal-body form100" style="height: 370px;">
-    <div class="row container-grid-top" style="margin-left: 0;">
-        <i class="glyphicon glyphicon-remove" style="color: red;"></i>
-        <a class="aplanaLink" data-aplana-link-click="delete()"
-           data-aplana-link="'notifications.title.deleteLink' | translate">
-        </a>
+<div class="modal-body form100" style="height: 500px;">
+    <div class="row container-grid-top" style="margin: 0 0 10px 0; height: 34px;">
+
+        <a class="aplanaLink btn btn-default" data-aplana-link-click="delete()"
+           data-aplana-link="'notifications.title.deleteLink' | translate" style="margin: 0 0 10px 0; height: 34px;">
+            <i class="glyphicon glyphicon-remove" style="color: red;"></i></a>
     </div>
     <div data-aplana-grid
          data-grid-fill-space="true"
-         data-grid-fill-space-container-selector=".form100"
-         data-grid-fill-space-container-selector-top=".container-grid-top"
+         data-grid-fill-space-container-selector=".modal-body"
          data-grid-options="notificationsGrid.options"
          data-grid-ctrl="notificationsGrid.ctrl"
          data-ng-model="notificationsGrid.value"

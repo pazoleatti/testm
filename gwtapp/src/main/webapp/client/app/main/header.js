@@ -96,13 +96,15 @@
                                 }
                             }]
                         });
-                        $scope.treeTaxes.push({
-                            name: $filter('translate')('menu.taxes.commonParameters'),
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
+                            $scope.treeTaxes.push({
+                                name: $filter('translate')('menu.taxes.commonParameters'),
 
-                            onClick: function () {
-                                $state.go('uploadCommonParams');
-                            }
-                        });
+                                onClick: function () {
+                                    $state.go('uploadCommonParams');
+                                }
+                            });
+                        }
 
                         $scope.treeNsi = [{
                             name: $filter('translate')('menu.nsi.refbooks'),

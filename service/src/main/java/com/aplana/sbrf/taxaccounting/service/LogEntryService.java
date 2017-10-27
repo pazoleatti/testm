@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -17,10 +18,11 @@ public interface LogEntryService {
     /**
      * Получить LogEntry постранично
      *
-     * @param uuid
+     * @param uuid         идентификатор группы логов
+     * @param pagingParams Параметры пейджинга
      * @return
      */
-    PagingResult<LogEntry> get(String uuid, int start, int length);
+    PagingResult<LogEntry> fetch(String uuid, PagingParams pagingParams);
 
     /**
      * Получить LogEntry целиком
@@ -50,7 +52,7 @@ public interface LogEntryService {
      * Обновить ранее сохраненный список сообщений, добавив новые логи в конец имеющихся.
      *
      * @param logEntries новые сообщения
-     * @param uuid идентификатор записи
+     * @param uuid       идентификатор записи
      * @return
      */
     String update(List<LogEntry> logEntries, String uuid);
@@ -59,7 +61,7 @@ public interface LogEntryService {
      * Обновить ранее сохраненный список сообщений, добавив новые логи в начало имеющихся.
      *
      * @param logEntries новые сообещения
-     * @param uuid идентификатор записи
+     * @param uuid       идентификатор записи
      * @return идентификатор записи
      */
     String addFirst(List<LogEntry> logEntries, String uuid);
