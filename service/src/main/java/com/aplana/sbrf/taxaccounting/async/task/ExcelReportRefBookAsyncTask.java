@@ -101,9 +101,7 @@ public class ExcelReportRefBookAsyncTask extends AbstractAsyncTask {
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
         long refBookId = (Long) params.get("refBookId");
-        String filter = (String) params.get("filter");
-        Date version = (Date) params.get("version");
         RefBook refBook = refBookFactory.get(refBookId);
-        return String.format(getAsyncTaskType().getDescription(), refBook.getName(), version, filter);
+        return String.format(getAsyncTaskType().getDescription(), refBook.getName());
     }
 }
