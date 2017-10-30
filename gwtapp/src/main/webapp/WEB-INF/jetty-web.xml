@@ -91,13 +91,6 @@
 	</New>
 
     <New class="org.mortbay.jetty.plus.naming.Resource">
-		<Arg>java:comp/env/services/cache/aplana/taxaccounting/PermanentData</Arg>
-		<Arg>
-			<New class="java.util.concurrent.ConcurrentHashMap" />
-		</Arg>
-	</New>
-
-    <New class="org.mortbay.jetty.plus.naming.Resource">
         <Arg>java:comp/env/services/cache/aplana/taxaccounting/DataBlobsCache</Arg>
         <Arg>
             <New class="java.util.concurrent.ConcurrentHashMap" />
