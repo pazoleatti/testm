@@ -212,12 +212,6 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public void releaseTask(long taskId) {
-        LOG.info("Releasing task: " + taskId);
-        getJdbcTemplate().update("update async_task set node = null, start_process_date = null, state = 1 where id = ?", taskId);
-    }
-
-    @Override
     public boolean isTaskActive(long taskId) {
         try {
             int state = getJdbcTemplate().queryForObject("select state from async_task where id = ?", Integer.class, taskId);
@@ -278,10 +272,9 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public List<Long> getTasksByNode(String node) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("node", node);
-        return getNamedParameterJdbcTemplate().queryForList("select id from async_task where node = :node", params, Long.class);
+    public void releaseNodeTasks(String node) {
+        LOG.info("Releasing tasks by node: " + node);
+        getJdbcTemplate().update("update async_task set node = null, start_process_date = null, state = 1 where node = ?", node);
     }
 
     @Override

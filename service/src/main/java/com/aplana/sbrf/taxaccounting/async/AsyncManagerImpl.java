@@ -292,24 +292,6 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public void releaseTask(final long taskId) {
-        tx.executeInNewTransaction(new TransactionLogic() {
-            @Override
-            public Object execute() {
-                try {
-                    synchronized (AsyncManagerImpl.class) {
-                        asyncTaskDao.releaseTask(taskId);
-                        lockDataService.unlockAllByTask(taskId);
-                    }
-                } catch (Exception e) {
-                    throw new ServiceException("Не удалось освободить асинхронную задачу", e);
-                }
-                return null;
-            }
-        });
-    }
-
-    @Override
     public void interruptAllTasks(List<Long> taskIds, TAUserInfo user, TaskInterruptCause cause) {
         for (Long id : taskIds) {
             interruptTask(id, user, cause);
@@ -372,16 +354,11 @@ public class AsyncManagerImpl implements AsyncManager {
     public void releaseNodeTasks() {
         String currentNode = serverInfo.getServerName();
         LOG.info("Освобождение задач для узла: " + currentNode);
-        List<Long> taskIds;
         if (applicationInfo.isProductionMode()) {
-            taskIds = asyncTaskDao.getTasksByNode(currentNode);
+            asyncTaskDao.releaseNodeTasks(currentNode);
         } else {
-            taskIds = asyncTaskDao.getTasksByPriorityNode(currentNode);
-        }
-        for (Long id : taskIds) {
-            if (applicationInfo.isProductionMode()) {
-                releaseTask(id);
-            } else {
+            List<Long> taskIds = asyncTaskDao.getTasksByPriorityNode(currentNode);
+            for (Long id : taskIds) {
                 finishTask(id);
             }
         }
