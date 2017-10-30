@@ -5,27 +5,26 @@
      * @description Модуль для работы окном 'Общие параметры'
      */
 
-    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.logPanel', 'app.redactParams', 'app.confirmationAction'])
+    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.logPanel', 'app.uploadParams', 'app.confirmationAction'])
 
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('uploadCommonParams', {
+            $stateProvider.state('commonParams', {
                 url: '/taxes/commonParams/uploadCommonParams',
                 templateUrl: 'client/app/taxes/commonParams/commonParams.html',
-                controller: 'controllerCommonParams'
+                controller: 'commonParamsCtrl'
             });
         }])
 
-        .controller('controllerCommonParams', ['$scope', 'CommonParams', '$filter', '$http', 'appModals', 'APP_CONSTANTS',
+        /**
+         * @description Контроллер для общих параметров
+         */
+        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', 'appModals', 'APP_CONSTANTS',
             function ($scope, CommonParams, $filter, $http, appModals, APP_CONSTANTS) {
-
-                //Доступность кнопки редактировать
-                $scope.enabledRedact = false;
-
 
                 /**
                  * @description Создание и заполнение грида
                  */
-                $scope.CommonParamsGrid = {
+                $scope.commonParamsGrid = {
                     ctrl: {},
                     value: [],
                     options: {
@@ -52,36 +51,25 @@
                         multiselect: false
                     }
                 };
-                /**
-                 * @description Отвечает за доступность недоступность кнопки 'сформировать'
-                 */
-                $scope.chekRow = function () {
-                    if ($scope.CommonParamsGrid.value.length !== null) {
-                        $scope.enabledRedact = true;
-                    }
-                };
 
+                /**
+                 * @description Изменение общих параметров на значения по умолчанию
+                 */
                 $scope.changeToDefault = function () {
-                    appModals.create('client/app/taxes/commonParams/confirmationAction.html', 'controllerConfirmationAction', {commonParamsGrid: $scope.CommonParamsGrid}, {size: 'md'});
+                    appModals.create('client/app/taxes/commonParams/confirmationAction.html', 'confirmationActionCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
                 };
 
 
                 /**
                  * @description Редактирование параметра
                  */
-                $scope.redact = function () {
-                    $scope.valOiu = $scope.CommonParamsGrid.value;
-                    $scope.CommonParamsGrid.ctrl.refreshGrid();
-                    appModals.create('client/app/taxes/commonParams/redactCommonParams.html', 'controllerRedactParams', {commonParamsGrid: $scope.CommonParamsGrid}, {size: 'md'});
-                };
-                $scope.chekRow = function () {
-                    if ($scope.CommonParamsGrid.value.length !== null) {
-                        $scope.enabledRedact = true;
-                    }
+                $scope.upload = function () {
+                    $scope.valOiu = $scope.commonParamsGrid.value;
+                    $scope.commonParamsGrid.ctrl.refreshGrid();
+                    appModals.create('client/app/taxes/commonParams/uploadCommonParams.html', 'uploadParamsCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
                 };
 
             }]);
-
 }());
 
 

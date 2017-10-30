@@ -101,7 +101,7 @@
                                 name: $filter('translate')('menu.taxes.commonParameters'),
 
                                 onClick: function () {
-                                    $state.go('uploadCommonParams');
+                                    $state.go('commonParams');
                                 }
                             });
                         }
