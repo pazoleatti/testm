@@ -359,6 +359,10 @@
     "ndflJournal.grid.columnName.creationDateTime": "Дата и время создания формы",
     "ndflJournal.grid.columnName.creator": "Создал",
 
+    "createReport.period": "Период",
+    "createReport.department": "Подразделение",
+    "createReport.reportType": "Вид отчетности" ,
+
     "createDeclaration.title": "Создание налоговой формы",
     "createDeclaration.period": "Период",
     "createDeclaration.department": "Подразделение",
