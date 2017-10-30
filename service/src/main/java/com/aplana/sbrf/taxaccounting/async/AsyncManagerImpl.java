@@ -2,18 +2,13 @@ package com.aplana.sbrf.taxaccounting.async;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -297,6 +292,24 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
+    public void releaseTask(final long taskId) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public Object execute() {
+                try {
+                    synchronized (AsyncManagerImpl.class) {
+                        asyncTaskDao.releaseTask(taskId);
+                        lockDataService.unlockAllByTask(taskId);
+                    }
+                } catch (Exception e) {
+                    throw new ServiceException("Не удалось освободить асинхронную задачу", e);
+                }
+                return null;
+            }
+        });
+    }
+
+    @Override
     public void interruptAllTasks(List<Long> taskIds, TAUserInfo user, TaskInterruptCause cause) {
         for (Long id : taskIds) {
             interruptTask(id, user, cause);
@@ -359,10 +372,18 @@ public class AsyncManagerImpl implements AsyncManager {
     public void releaseNodeTasks() {
         String currentNode = serverInfo.getServerName();
         LOG.info("Освобождение задач для узла: " + currentNode);
+        List<Long> taskIds;
         if (applicationInfo.isProductionMode()) {
-            asyncTaskDao.releaseNodeTasks(currentNode);
+            taskIds = asyncTaskDao.getTasksByNode(currentNode);
         } else {
-            asyncTaskDao.deleteByPriorityNode(currentNode);
+            taskIds = asyncTaskDao.getTasksByPriorityNode(currentNode);
+        }
+        for (Long id : taskIds) {
+            if (applicationInfo.isProductionMode()) {
+                releaseTask(id);
+            } else {
+                finishTask(id);
+            }
         }
     }
 

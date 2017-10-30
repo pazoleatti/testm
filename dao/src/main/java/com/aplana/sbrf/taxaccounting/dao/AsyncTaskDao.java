@@ -132,21 +132,23 @@ public interface AsyncTaskDao {
     PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams);
 
     /**
+     * Получает список идентификаторов задач, выполняющихся на указанном узле
+     * @param node узел
+     * @return список идентификаторов
+     */
+    List<Long> getTasksByNode(String node);
+
+    /**
+     * Получает список идентификаторов задач, привязанных к указанному узлу. Используется только в dev-моде
+     * @param priorityNode узел, назначенный для выполнения
+     * @return список идентификаторов
+     */
+    List<Long> getTasksByPriorityNode(String priorityNode);
+
+    /**
      * Проверяет существование задачи по ее id
      * @param taskId идентификатор задачи
      * @return задача существует?
      */
     boolean isTaskExists(long taskId);
-
-    /**
-     * Очищает поле ASYNC_TASK.NODE и проставляет статус "В очереди на выполнение" для всех задач, выполняющихя на узле
-     * @param node узел
-     */
-    void releaseNodeTasks(String node);
-
-    /**
-     * Удаляет всех задачи с указанным значением в поле PRIORITY_NODE. Используется только в dev-mode
-     * @param priorityNode узел
-     */
-    void deleteByPriorityNode(String priorityNode);
 }
