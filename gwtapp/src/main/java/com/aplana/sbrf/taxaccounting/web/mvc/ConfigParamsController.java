@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
@@ -13,12 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
- * Контроллер для работы с конфигурационными данными приложения
+ * Контроллер для работы с конфигурационными параметрами приложения
  */
-
 @RestController
 public class ConfigParamsController {
-
     /**
      * Привязка данных из параметров запроса
      *
@@ -26,10 +23,7 @@ public class ConfigParamsController {
      */
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
-        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
         binder.registerCustomEditor(Configuration.class, new RequestParamEditor(Configuration.class));
-
-
     }
 
     private ConfigurationService configurationService;
@@ -44,8 +38,8 @@ public class ConfigParamsController {
     /**
      * Возвращает список общих параметров
      */
-    @GetMapping(value = "/rest/getCommonParams")
-    public List<Configuration> getCommonParams(HttpServletResponse response) {
+    @GetMapping(value = "/rest/fetchCommonParams")
+    public List<Configuration> fetchCommonParams(HttpServletResponse response) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return configurationService.getCommonParametr(userInfo);
     }
@@ -55,15 +49,15 @@ public class ConfigParamsController {
      *
      * @param config редактируемый параметр
      */
-    @PostMapping(value = "/actions/redactCommonParams")
-    public void redactCommonParams(@RequestParam Configuration config) {
+    @PostMapping(value = "/actions/uploadCommonParams")
+    public void uploadCommonParams(@RequestParam Configuration config) {
         configurationService.update(config);
     }
 
     /**
      * Установка значений общих параметров по умолчанию
      */
-    @PostMapping(value = "/actions/defaultCommonParams")
+    @PostMapping(value = "/actions/changeToDefaultCommonParams")
     public void setCommonParamsDefault() {
         configurationService.setCommonParamsDefault();
     }
