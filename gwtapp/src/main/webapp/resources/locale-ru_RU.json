@@ -130,7 +130,7 @@
     "link.ndfl.sources": "Источники и приемники",
 
     "ndflReportJournal.button.createReport": "Создать отчетность",
-    "ndflReportJournal.button.downloadReport": "Выгрузить отчетность",
+    "ndflReportJournal.button.downloadReport": "Выгрузить",
     "ndflReportJournal.message.emptyFilterFields": "Заполнены не все поля отчетности",
     "ndflReportJournal.filter.documentState": "Состояние ЭД",
     "ndflReportJournal.filter.note": "Примечание",
@@ -228,7 +228,7 @@
     "title.note": "Примечание",
     "title.reasonForReturn": "Причина возврата:",
     "title.indicateReasonForReturn": "Укажите причину возврата",
-    "title.creatingReport": "Создание отчетности",
+    "title.creatingReport": "Создание отчетности по НДФЛ",
 
   "title.amountCalcIncome": "Сумма начисленного дохода",
   "title.amountPaymentIncome": "Сумма выплаченного дохода",
@@ -361,6 +361,10 @@
     "ndflJournal.grid.columnName.tfFile": "Файл ТФ",
     "ndflJournal.grid.columnName.creationDateTime": "Дата и время создания формы",
     "ndflJournal.grid.columnName.creator": "Создал",
+
+    "createReport.period": "Период",
+    "createReport.department": "Подразделение",
+    "createReport.reportType": "Вид отчетности" ,
 
     "createDeclaration.title": "Создание налоговой формы",
     "createDeclaration.period": "Период",

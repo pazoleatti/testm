@@ -206,17 +206,14 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public void cancelTask(AsyncTaskData taskData) {
-        LOG.info("Cancelling task: " + taskData.getId());
-        if (taskData.getState() != AsyncTaskState.CANCELLED) {
-            getJdbcTemplate().update("update async_task set state = ? where id = ?", AsyncTaskState.CANCELLED.getId(), taskData.getId());
-        } else {
-            getJdbcTemplate().update("delete from async_task where id = ?", taskData.getId());
-        }
+    public void cancelTask(long taskId) {
+        LOG.info("Cancelling task: " + taskId);
+        getJdbcTemplate().update("update async_task set state = ? where id = ?", AsyncTaskState.CANCELLED.getId(), taskId);
     }
 
     @Override
     public void releaseTask(long taskId) {
+        LOG.info("Releasing task: " + taskId);
         getJdbcTemplate().update("update async_task set node = null, start_process_date = null where id = ?", taskId);
     }
 
@@ -283,6 +280,18 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     @Override
     public boolean isTaskExists(long taskId) {
         return getJdbcTemplate().queryForObject("select count(*) from async_task where id = ?", Integer.class, taskId) != 0;
+    }
+
+    @Override
+    public void releaseNodeTasks(String node) {
+        LOG.info("Releasing tasks by node: " + node);
+        getJdbcTemplate().update("update async_task set node = null, state = 1 where node = ?", node);
+    }
+
+    @Override
+    public void deleteByPriorityNode(String priorityNode) {
+        LOG.info("Deleting tasks by priority_node: " + priorityNode);
+        getJdbcTemplate().update("delete from async_task where priority_node = ?", priorityNode);
     }
 
 }

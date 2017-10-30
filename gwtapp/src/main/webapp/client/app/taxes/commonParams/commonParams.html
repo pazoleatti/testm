@@ -8,7 +8,7 @@
     <button type="button" class="btn btn-danger" data-ng-click="changeToDefault()">{{::'commonParams.default' |
         translate}}
     </button>
-    <button type="button" class="btn btn-danger" data-ng-show="enabledRedact" data-ng-click="redact()">{{::'button.edit'
+    <button type="button" class="btn btn-danger" data-ng-show="commonParamsGrid.value.length !== 0" data-ng-click="upload()">{{::'button.edit'
         | translate}}
     </button>
 
@@ -16,24 +16,16 @@
 
 <div class="modal-body" style="height: 350px;">
     <div data-aplana-grid
-         data-grid-options="CommonParamsGrid.options"
-         data-grid-ctrl="CommonParamsGrid.ctrl"
-         data-ng-model="CommonParamsGrid.value"
-         data-ng-click="chekRow()"
-         id="CommonParamsGrid"
+         data-grid-options="commonParamsGrid.options"
+         data-grid-ctrl="commonParamsGrid.ctrl"
+         data-ng-model="commonParamsGrid.value"
+         data-ng-click="checkRow()"
+         id="commonParamsGrid"
          style="float: left; width: 100%;"></div>
 </div>
 
 
-<div class="modal-body" id="FindGrid" style="height: 300px;" data-ng-show="enabledGrid">
-    <div data-aplana-grid
-         data-grid-options="rnuNdflGrid.options"
-         data-grid-ctrl="rnuNdflGrid.ctrl"
-         data-ng-model="rnuNdflGrid.value"
-         data-ng-click="chekRow()"
-         id="rnuNdflTable"
-         style="float: left; width: 100%;"></div>
-</div>
+
 
 
 

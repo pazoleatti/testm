@@ -198,7 +198,7 @@ public class AsyncManagerImpl implements AsyncManager {
     public Pair<Boolean, String> restartTask(String lockKey, TAUserInfo user, boolean force, Logger logger) {
         LockData lockData = lockDataService.getLock(lockKey);
         if (lockData != null) {
-            AsyncTaskData taskData = asyncTaskDao.getTaskData(lockData.getTaskId());
+            AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lockData.getTaskId());
             if (taskData != null) {
                 if (taskData.getUserId() == user.getUser().getId()) {
                     if (force) {
@@ -225,7 +225,7 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     public void interruptTask(final long taskId, final TAUserInfo user, final TaskInterruptCause cause) {
-        final AsyncTaskData taskData = asyncTaskDao.getTaskData(taskId);
+        final AsyncTaskData taskData = asyncTaskDao.getLightTaskData(taskId);
         interruptTask(taskData, user, cause);
     }
 
@@ -237,24 +237,28 @@ public class AsyncManagerImpl implements AsyncManager {
                                            @Override
                                            public Object execute() {
                                                try {
-                                                   List<Integer> waitingUsers = getUsersWaitingForTask(taskData.getId());
-                                                   if (!waitingUsers.contains(user.getUser().getId())) {
-                                                       waitingUsers.add(user.getUser().getId());
-                                                   }
-                                                   String msg = String.format(AsyncTask.CANCEL_TASK, user.getUser().getName(), taskData.getDescription(), cause.toString());
-                                                   List<Notification> notifications = new ArrayList<Notification>();
-                                                   //Создаем оповещение для каждого пользователя из списка
-                                                   if (!waitingUsers.isEmpty()) {
-                                                       for (Integer waitingUser : waitingUsers) {
-                                                           Notification notification = new Notification();
-                                                           notification.setUserId(waitingUser);
-                                                           notification.setCreateDate(new LocalDateTime());
-                                                           notification.setText(msg);
-                                                           notifications.add(notification);
+                                                   if (taskData.getState() != AsyncTaskState.CANCELLED) {
+                                                       List<Integer> waitingUsers = getUsersWaitingForTask(taskData.getId());
+                                                       if (!waitingUsers.contains(user.getUser().getId())) {
+                                                           waitingUsers.add(user.getUser().getId());
                                                        }
-                                                       notificationService.saveList(notifications);
+                                                       String msg = String.format(AsyncTask.CANCEL_TASK, user.getUser().getName(), taskData.getDescription(), cause.toString());
+                                                       List<Notification> notifications = new ArrayList<Notification>();
+                                                       //Создаем оповещение для каждого пользователя из списка
+                                                       if (!waitingUsers.isEmpty()) {
+                                                           for (Integer waitingUser : waitingUsers) {
+                                                               Notification notification = new Notification();
+                                                               notification.setUserId(waitingUser);
+                                                               notification.setCreateDate(new LocalDateTime());
+                                                               notification.setText(msg);
+                                                               notifications.add(notification);
+                                                           }
+                                                           notificationService.saveList(notifications);
+                                                       }
+                                                       asyncTaskDao.cancelTask(taskData.getId());
+                                                   } else {
+                                                       asyncTaskDao.finishTask(taskData.getId());
                                                    }
-                                                   asyncTaskDao.cancelTask(taskData);
                                                } catch (Exception e) {
                                                    throw new ServiceException("Не удалось прервать задачу", e);
                                                }
@@ -269,7 +273,7 @@ public class AsyncManagerImpl implements AsyncManager {
     public void interruptTask(String lockKey, TAUserInfo user, TaskInterruptCause cause) {
         LockData lockData = lockDataService.getLock(lockKey);
         if (lockData != null) {
-            final AsyncTaskData taskData = asyncTaskDao.getTaskData(lockData.getTaskId());
+            final AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lockData.getTaskId());
             interruptTask(taskData, user, cause);
         }
     }
@@ -349,6 +353,17 @@ public class AsyncManagerImpl implements AsyncManager {
     @Override
     public PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams) {
         return asyncTaskDao.getTasks(filter, pagingParams);
+    }
+
+    @Override
+    public void releaseNodeTasks() {
+        String currentNode = serverInfo.getServerName();
+        LOG.info("Освобождение задач для узла: " + currentNode);
+        if (applicationInfo.isProductionMode()) {
+            asyncTaskDao.releaseNodeTasks(currentNode);
+        } else {
+            asyncTaskDao.deleteByPriorityNode(currentNode);
+        }
     }
 
     /**

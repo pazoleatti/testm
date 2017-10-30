@@ -5,10 +5,12 @@
      * @description Модуль для редактирования общих параметров'
      */
 
-    angular.module('app.redactParams', ['ui.router', 'app.rest', 'app.logPanel'])
+    angular.module('app.uploadParams', ['ui.router', 'app.rest', 'app.logPanel'])
 
-
-        .controller('controllerRedactParams', ['$scope', '$filter', '$http', '$uibModalInstance',
+    /**
+     * @description Модуль для редактирования общих параметров'
+     */
+        .controller('uploadParamsCtrl', ['$scope', '$filter', '$http', '$uibModalInstance',
             function ($scope, $filter, $http, $uibModalInstance) {
 
                 /**
@@ -17,7 +19,7 @@
                 $scope.save = function () {
                     $http({
                         method: "POST",
-                        url: "/controller/actions/redactCommonParams/",
+                        url: "/controller/actions/uploadCommonParams/",
                         params: {
                             config: $scope.parameter
                         }
@@ -26,6 +28,10 @@
                     $uibModalInstance.dismiss('Canceled');
                     $scope.$resolve.data.commonParamsGrid.ctrl.refreshGrid();
                 };
+
+                /**
+                 * @description Переменная содержащая значения редактируемое значение
+                 */
                 $scope.parameter = $scope.$resolve.data.commonParamsGrid.value[0];
 
                 /**
