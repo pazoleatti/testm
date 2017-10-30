@@ -130,7 +130,7 @@
     "link.ndfl.sources": "Источники и приемники",
 
     "ndflReportJournal.button.createReport": "Создать отчетность",
-    "ndflReportJournal.button.downloadReport": "Выгрузить отчетность",
+    "ndflReportJournal.button.downloadReport": "Выгрузить",
     "ndflReportJournal.message.emptyFilterFields": "Заполнены не все поля отчетности",
     "ndflReportJournal.filter.documentState": "Состояние ЭД",
     "ndflReportJournal.filter.note": "Примечание",
