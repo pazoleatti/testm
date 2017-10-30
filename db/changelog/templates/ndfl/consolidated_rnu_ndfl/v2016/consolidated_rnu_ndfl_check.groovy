@@ -180,7 +180,7 @@ class Check extends AbstractScriptClass {
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
 
-    final FormDataKind FORM_DATA_KIND = FormDataKind.PRIMARY;
+    final FormDataKind FORM_DATA_KIND = FormDataKind.CONSOLIDATED;
 
     // Дата окончания отчетного периода
     Date periodEndDate = null
