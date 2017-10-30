@@ -1,79 +1,75 @@
-<div id="ndflReportJournal" class="container-grid" style="height: 100%">
-    <div class="row" style="min-width: 1400px;">
-        <div class="header-col" style="margin-left: 15px;">
-            <h1>{{::'header.ndflReportJournal.forms' | translate}}</h1>
-        </div>
-        <div style="float: right; margin-right: 20px;">
-            <button type="button" class="btn btn-default" style="width: 175px;"
-                    data-ng-click="createReport()"
-                    data-ng-show="reportCreateAllowed">
-                <span class="glyphicon glyphicon-file"></span>
-                <span data-translate-once="ndflReportJournal.button.createReport"></span>
-            </button>
-        </div>
+<div class="row" style="min-width: 1400px;">
+    <div class="header-col" style="margin: 14px 0 0 28px;">
+        <h1>{{::'header.ndflReportJournal.forms' | translate}}</h1>
     </div>
-
-    <hr/>
+    <div style="float: right; margin-top: 14px; margin-right: 32px;">
+        <button type="button" class="btn btn-default" style="width: 175px;"
+                data-ng-click="createReport()"
+                data-ng-show="reportCreateAllowed">
+            <span class="glyphicon glyphicon-file"></span>
+            <span data-translate-once="ndflReportJournal.button.createReport"></span>
+        </button>
+    </div>
+</div>
+<div id="ndflReportJournal" class="container-grid box-shadow-block" style="height: 92%">
     <!-- Фильтр -->
     <div class='container-grid-top'>
         <span data-ng-include="'client/app/taxes/ndfl/ndflReportJournalFilter.html'"></span>
     </div>
-    <div class="container-grid" style="margin-left: -5px;">
-        <div class='container-grid-top'>
-            <!--Панель кнопок -->
-            <div class="button_panel">
-                <div class="btn-toolbar" role="toolbar">
-                    <!--Проверить -->
-                    <span>
+    <div class='container-grid-top'>
+        <!--Панель кнопок -->
+        <div class="button_panel">
+            <div class="btn-toolbar" role="toolbar">
+                <!--Проверить -->
+                <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)"
                                 data-ng-click="check()">
                             <span data-translate-once="button.check"></span>
                         </button>
                     </span>
-                    <!--Удалить-->
-                    <span>
+                <!--Удалить-->
+                <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)"
                                 data-ng-click="delete()">
                             <span data-translate-once="button.delete"></span>
                         </button>
                     </span>
-                    <!--Принять -->
-                    <span>
+                <!--Принять -->
+                <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)"
                                 data-ng-click="accept()">
                             <span data-translate-once="button.accept"></span>
                         </button>
                     </span>
-                    <!--Вернуть в Создана -->
-                    <span>
+                <!--Вернуть в Создана -->
+                <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)"
                                 data-ng-click="returnToCreated()">
                             <span data-translate-once="button.return"></span>
                         </button>
                     </span>
-                    <!--Выгрузить отчетность-->
-                    <span>
+                <!--Выгрузить отчетность-->
+                <span>
                         <button type="button" class="btn btn-danger"
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DOWNLOAD_REPORTS)"
                                 data-ng-click="downloadReports()">
                             <span data-translate-once="ndflReportJournal.button.downloadReport"></span>
                         </button>
                     </span>
-                </div>
             </div>
         </div>
-        <div data-aplana-grid
-             data-grid-fill-space="true"
-             data-grid-fill-space-container-selector=".form100"
-             data-grid-fill-space-container-selector-top=".container-grid-top"
-             data-grid-options="ndflReportJournalGrid.options"
-             data-grid-ctrl="ndflReportJournalGrid.ctrl"
-             data-init-grid="ndflReportJournalGrid.init(ctrl)"
-             id="ndflReportJournalTable"
-             style="float: left; width: 100%; margin-top: 5px;"></div>
     </div>
+    <div data-aplana-grid
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector=".container-grid"
+         data-grid-fill-space-container-selector-top=".container-grid-top"
+         data-grid-options="ndflReportJournalGrid.options"
+         data-grid-ctrl="ndflReportJournalGrid.ctrl"
+         data-init-grid="ndflReportJournalGrid.init(ctrl)"
+         id="ndflReportJournalTable"
+         style="float: left; width: 100%; margin-top: 5px;"></div>
 </div>
