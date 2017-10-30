@@ -47,17 +47,77 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         DeclarationData declaration = declarationDataService.get(action.getDeclarationId(), userInfo);
-        List<Relation> relationList = new ArrayList<Relation>();
+        List<RelationViewModel> relationViewModelList = new ArrayList<>();
 
         //Получаем нф-источники
-        relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
-        relationList.addAll(sourceService.getDeclarationDestinationsInfo(declaration, true, false, null, userInfo, logger));
-        result.setData(relationList);
+        relationViewModelList.addAll(toRelationViewModel(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger)));
+        relationViewModelList.addAll(toRelationViewModel(sourceService.getDeclarationDestinationsInfo(declaration, true, false, null, userInfo, logger)));
+        result.setData(relationViewModelList);
         return result;
+    }
+
+    private List<RelationViewModel> toRelationViewModel(List<Relation> relationList) {
+        List<RelationViewModel> relationViewModelList = new ArrayList<>();
+        for (Relation relation : relationList){
+            RelationViewModel model = new RelationViewModel();
+            model.setAccruing(relation.isAccruing());
+            model.setAsnuId(relation.getAsnuId());
+            model.setComparativePeriod(toPeriodViewModel(relation.getComparativePeriod()));
+            model.setComparativePeriodName(relation.getComparativePeriodName());
+            model.setComparativePeriodStartDate(relation.getComparativePeriodStartDate());
+            model.setComparativePeriodYear(relation.getComparativePeriodYear());
+            model.setCorrectionDate(relation.getCorrectionDate());
+            model.setCreated(relation.isCreated());
+            model.setDeclarationDataId(relation.getDeclarationDataId());
+            model.setDeclarationState(relation.getDeclarationState());
+            model.setDeclarationTemplate(relation.getDeclarationTemplate());
+            model.setDeclarationTypeName(relation.getDeclarationTypeName());
+            model.setDepartment(relation.getDepartment());
+            model.setDepartmentId(relation.getDepartmentId());
+            model.setDepartmentReportPeriod(toPeriodViewModel(relation.getDepartmentReportPeriod()));
+            model.setFormDataId(relation.getFormDataId());
+            model.setFormDataKind(relation.getFormDataKind());
+            model.setFormTypeName(relation.getFormTypeName());
+            model.setFullDepartmentName(relation.getFullDepartmentName());
+            model.setKpp(relation.getKpp());
+            model.setManual(relation.isManual());
+            model.setMonth(relation.getMonth());
+            model.setPerformerNames(relation.getPerformerNames());
+            model.setPerformers(relation.getPerformers());
+            model.setPeriodName(relation.getPeriodName());
+            model.setSource(relation.isSource());
+            model.setStatus(relation.isStatus());
+            model.setTaxOrganCode(relation.getTaxOrganCode());
+            model.setTaxType(relation.getTaxType());
+            model.setYear(relation.getYear());
+            relationViewModelList.add(model);
+        }
+        return relationViewModelList;
+    }
+
+    private DepartmentReportPeriodViewModel toPeriodViewModel(DepartmentReportPeriod period) {
+
+        return new DepartmentReportPeriodViewModel(period.getId(), toReportPeriodViewModel(period.getReportPeriod()), period.getDepartmentId(), period.isActive(), period.getCorrectionDate().toDate());
+    }
+
+    private ReportPeriodViewModel toReportPeriodViewModel(ReportPeriod reportPeriod) {
+        ReportPeriodViewModel viewModel = new ReportPeriodViewModel();
+        viewModel.setId(reportPeriod.getId());
+        viewModel.setName(reportPeriod.getName());
+        viewModel.setAccName(reportPeriod.getAccName());
+        viewModel.setOrder(reportPeriod.getOrder());
+        viewModel.setTaxPeriod(reportPeriod.getTaxPeriod());
+        viewModel.setStartDate(reportPeriod.getStartDate().toDate());
+        viewModel.setEndDate(reportPeriod.getEndDate().toDate());
+        viewModel.setCalendarStartDate(reportPeriod.getCalendarStartDate().toDate());
+        viewModel.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+        return viewModel;
     }
 
     @Override
     public void undo(SourcesAction sourcesAction, SourcesResult sourcesResult, ExecutionContext executionContext) throws ActionException {
 
     }
+
+
 }

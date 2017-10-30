@@ -84,8 +84,18 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
 
     private List<ReportPeriodViewModel> initReportPeriodModelList(List<ReportPeriod> reportPeriods) {
         List<ReportPeriodViewModel> models = new ArrayList<>();
-        for (ReportPeriod period : reportPeriods){
-            models.add(new ReportPeriodViewModel(period));
+        for (ReportPeriod reportPeriod : reportPeriods){
+            ReportPeriodViewModel model = new ReportPeriodViewModel();
+            model.setId(reportPeriod.getId());
+            model.setName(reportPeriod.getName());
+            model.setAccName(reportPeriod.getAccName());
+            model.setOrder(reportPeriod.getOrder());
+            model.setTaxPeriod(reportPeriod.getTaxPeriod());
+            model.setStartDate(reportPeriod.getStartDate().toDate());
+            model.setEndDate(reportPeriod.getEndDate().toDate());
+            model.setCalendarStartDate(reportPeriod.getCalendarStartDate().toDate());
+            model.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+            models.add(model);
         }
         return models;
     }
@@ -101,7 +111,6 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
         reportPeriod.setEndDate(selectedPeriod.getEndDate().toDate());
         reportPeriod.setCalendarStartDate(selectedPeriod.getCalendarStartDate().toDate());
         reportPeriod.setDictTaxPeriodId(selectedPeriod.getDictTaxPeriodId());
-        reportPeriod.setPermissions(selectedPeriod.getPermissions());
         return reportPeriod;
     }
 

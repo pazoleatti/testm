@@ -59,7 +59,6 @@ public class OpenCorrectPeriodHandler extends AbstractActionHandler<OpenCorrectP
         reportPeriod.setEndDate(new LocalDateTime(selectedPeriod.getEndDate()));
         reportPeriod.setCalendarStartDate(new LocalDateTime(selectedPeriod.getCalendarStartDate()));
         reportPeriod.setDictTaxPeriodId(selectedPeriod.getDictTaxPeriodId());
-        reportPeriod.setPermissions(selectedPeriod.getPermissions());
         return reportPeriod;
     }
 }
