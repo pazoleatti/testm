@@ -74,7 +74,8 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
      * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param ids          Список идентификаторов
-     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
      * @param pagingParams Параметры пейджинга
      * @return Страница списка значений справочника
      */
@@ -84,7 +85,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
         where.and(department.isActive.eq((byte) 1).and(department.id.in(ids)));
 
         if (!StringUtils.isBlank(name)) {
-            where = where.and(department.name.containsIgnoreCase(name));
+            where = where.and(department.name.containsIgnoreCase(name).or(departmentFullpath.shortname.containsIgnoreCase(name)));
         }
 
         SQLQuery<RefBookDepartment> queryBase = sqlQueryFactory
