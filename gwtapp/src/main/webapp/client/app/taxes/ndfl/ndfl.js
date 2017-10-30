@@ -63,7 +63,7 @@
                  * @description Проверяет готовность отчетов у открытой формы
                  */
                 // TODO: Убрать использование постоянных запросов
-                function updateAvailableReports () {
+                function updateAvailableReports() {
                     if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableRnuNdflPersonAllDb && $scope.availableReportKppOktmo)) {
                         DeclarationDataResource.query({
                                 declarationDataId: $stateParams.declarationDataId,
@@ -72,6 +72,15 @@
                             },
                             function (data) {
                                 if (data) {
+                                    if (!data.declarationDataExist) {
+                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                        appModals.error($filter('translate')('DIALOGS_ERROR'), message).result.then(
+                                            function () {
+                                                $state.go("/");
+                                            }
+                                        );
+                                        return;
+                                    }
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
@@ -136,7 +145,7 @@
                  * @param location
                  * @param create
                  */
-                function performReportSuccessResponse (response, location, create) {
+                function performReportSuccessResponse(response, location, create) {
                     if (response.uuid && response.uuid !== null) {
                         $logPanel.open('log-panel-container', response.uuid);
                     } else {

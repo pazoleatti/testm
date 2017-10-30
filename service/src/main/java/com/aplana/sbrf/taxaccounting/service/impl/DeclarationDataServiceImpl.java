@@ -1173,6 +1173,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId) {
         ReportAvailableResult reportAvailableResult = new ReportAvailableResult();
+        if (!existDeclarationData(declarationDataId)) {
+            reportAvailableResult.setDeclarationDataExist(false);
+            return reportAvailableResult;
+        }
         reportAvailableResult.setDownloadXlsxAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
         reportAvailableResult.setDownloadXmlAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) != null);
 
