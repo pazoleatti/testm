@@ -1666,7 +1666,7 @@ class Check extends AbstractScriptClass {
                             BigDecimal ndflPersonPrepaymentSum = new BigDecimal(0)
                             ndflPersonPrepaymentCurrentList.each { NdflPersonPrepayment ndflPersonPrepaymentCurrent ->
                                 if (ndflPersonPrepaymentCurrent.summ != null) {
-                                    ndflPersonPrepaymentSum.add(ndflPersonPrepaymentCurrent.summ)
+                                    ndflPersonPrepaymentSum = ndflPersonPrepaymentSum.add(ndflPersonPrepaymentCurrent.summ)
                                 }
                             }
                             if (!(ndflPersonIncome.calculatedTax ==
