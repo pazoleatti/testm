@@ -1908,12 +1908,19 @@ class Check extends AbstractScriptClass {
                             }
                         }
                         if (ndflPersonIncomeFind != null) {
+                            // Графа21(текущей строки) должна быть равна Графа7(следующей строки) + 1 рабочий день
+                            // Берём Графу21 из текущей проверяемой строки
+                            // Берём Графу7 из следующей найденной строки
+                            NdflPersonIncome ndflPersonIncomeCheck = new NdflPersonIncome()
+                            ndflPersonIncomeCheck.taxTransferDate = new LocalDateTime(ndflPersonIncome.taxTransferDate.getLocalMillis())
+                            ndflPersonIncomeCheck.incomePayoutDate = new LocalDateTime(ndflPersonIncomeFind.incomePayoutDate.getLocalMillis())
+
                             Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
-                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
+                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeCheck, dateConditionWorkDay)) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день",
                                         C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ScriptUtils.formatDate(ndflPersonIncome.taxTransferDate) : "",
-                                        C_INCOME_PAYOUT_DATE, ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""
+                                        C_INCOME_PAYOUT_DATE, ndflPersonIncomeFind.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncomeFind.incomePayoutDate) : ""
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                 logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInp, pathError, errMsg)
