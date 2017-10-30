@@ -86,11 +86,10 @@ public interface AsyncTaskDao {
 
     /**
      * Отменяет задачу (проставляет статус CANCELLED)
-     * если была отменена ранее, то удаляет задачу
      *
-     * @param taskData задача
+     * @param taskId идентификатор задачи
      */
-    void cancelTask(AsyncTaskData taskData);
+    void cancelTask(long taskId);
 
     /**
      * Освобождает задачу от резервирования узлом
@@ -138,4 +137,16 @@ public interface AsyncTaskDao {
      * @return задача существует?
      */
     boolean isTaskExists(long taskId);
+
+    /**
+     * Очищает поле ASYNC_TASK.NODE и проставляет статус "В очереди на выполнение" для всех задач, выполняющихя на узле
+     * @param node узел
+     */
+    void releaseNodeTasks(String node);
+
+    /**
+     * Удаляет всех задачи с указанным значением в поле PRIORITY_NODE. Используется только в dev-mode
+     * @param priorityNode узел
+     */
+    void deleteByPriorityNode(String priorityNode);
 }
