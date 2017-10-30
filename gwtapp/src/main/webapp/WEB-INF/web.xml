@@ -6,7 +6,7 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			classpath:com/aplana/sbrf/taxaccounting/permissions.xml
-			classpath:com/aplana/sbrf/taxaccounting/datasource-prod.xml
+			classpath:com/aplana/sbrf/taxaccounting/datasource.xml
 			/WEB-INF/security.xml
 			/WEB-INF/applicationContext.xml
             /WEB-INF/mvc-dispatcher-servlet.xml

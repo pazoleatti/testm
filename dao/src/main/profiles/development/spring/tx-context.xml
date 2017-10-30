@@ -1,7 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		                  http://www.springframework.org/schema/beans/spring-beans.xsd
+		                  http://www.springframework.org/schema/jee
+		                  http://www.springframework.org/schema/jee/spring-jee.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <tx:jta-transaction-manager/>
+
+    <jee:jndi-lookup id="actualDataSource" jndi-name="java:comp/env/jdbc/TaxAccDS"/>
+    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg index="0" ref="dataSource"/>
+    </bean>
+
+    <bean id="dataSource" primary="true" class="net.ttddyy.dsproxy.support.ProxyDataSource">
+        <property name="dataSource" ref="actualDataSource"/>
+        <property name="proxyConfig" ref="proxyConfig"/>
+    </bean>
+
+    <bean id="proxyConfig"
+          factory-bean="proxyConfigSupport"
+          factory-method="create"/>
+
+    <bean id="proxyConfigSupport" class="net.ttddyy.dsproxy.support.ProxyConfigSpringXmlSupport">
+        <property name="dataSourceName" value="TaxAccDS"/>
+        <property name="queryListener" ref="queryListener"/>
+    </bean>
+
+    <bean id="queryListener" class="net.ttddyy.dsproxy.listener.ChainListener">
+        <property name="listeners">
+            <list>
+                <bean class="net.ttddyy.dsproxy.listener.logging.CommonsQueryLoggingListener">
+                    <property name="queryLogEntryCreator" ref="queryLogEntryCreator"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="queryLogEntryCreator" class="net.ttddyy.dsproxy.listener.logging.DefaultQueryLogEntryCreator">
+        <property name="multiline" value="true" />
+    </bean>
 </beans>
