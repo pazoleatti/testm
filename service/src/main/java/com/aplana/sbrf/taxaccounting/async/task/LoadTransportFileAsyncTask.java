@@ -30,7 +30,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        return String.format(getAsyncTaskType().getDescription(), "");
+        return getAsyncTaskType().getDescription();
     }
 
     @Override
@@ -50,11 +50,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         final String blobDataId = (String) taskData.getParams().get("blobDataId");
         BlobData blobData = blobDataService.get(blobDataId);
         String fileName;
-        if (blobData != null) {
-            fileName = blobData.getName();
-        } else {
-            fileName = blobDataId;
-        }
+        fileName = blobData.getName();
         return "Загрузка файла \"" + fileName + "\" завершена" + (msg.isEmpty() ? "" : (": " + msg));
     }
 
@@ -63,11 +59,7 @@ public class LoadTransportFileAsyncTask extends AbstractAsyncTask {
         final String blobDataId = (String) taskData.getParams().get("blobDataId");
         BlobData blobData = blobDataService.get(blobDataId);
         String fileName;
-        if (blobData != null) {
-            fileName = blobData.getName();
-        } else {
-            fileName = blobDataId;
-        }
+        fileName = blobData.getName();
         return "Произошла непредвиденная ошибка при загрузке файла \"" + fileName + "\"";
     }
 

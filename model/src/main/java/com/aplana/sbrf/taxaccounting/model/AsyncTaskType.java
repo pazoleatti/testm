@@ -15,7 +15,7 @@ public enum AsyncTaskType {
     EXCEL_DEC(0, "XLSX", "Формирование XLSX-отчета для НФ. ", 5L),
     PDF_DEC(2, "PDF", "Создание формы предварительного просмотра. %s", 7L),
     SPECIFIC_REPORT_DEC(4, "SPECIFIC", "Формирование отчета \"%s\" %s", 26L),
-    LOAD_TRANSPORT_FILE(12, "LoadTF", "Импорт транспортного файла%s", 12L),
+    LOAD_TRANSPORT_FILE(12, "LoadTF", "Импорт транспортного файла", 12L),
     LOAD_ALL_TRANSPORT_DATA(1, "LoadAllTransporData", "Импорт из каталога загрузки", 13L),
     SPECIFIC_REPORT_REF_BOOK(3, "SPECIFIC", "Формирование специфического отчета \"%s\" справочника \"%s\": Версия: %s, Фильтр: \"%s\"", 25L),
     EXCEL_REF_BOOK(0, "XLSX", "Формирование отчета справочника \"%s\" в XLSX-формате", 23L),
