@@ -49,9 +49,7 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.forms'),
-                                onClick: function () {
-                                    $state.go('ndflJournal');
-                                }
+                                href: $state.href('ndflJournal')
                             });
                         }
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
@@ -72,9 +70,7 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_REPORTS)) {
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.accountability'),
-                                onClick: function () {
-                                    $state.go('ndflReportJournal');
-                                }
+                                href: $state.href('ndflReportJournal')
                             });
                         }
 
@@ -91,18 +87,13 @@
                             href: "",
                             subtree: [{
                                 name: $filter('translate')('menu.taxes.service.loadFiles'),
-                                onClick: function () {
-                                    $state.go('uploadTransportData');
-                                }
+                                href: $state.href('uploadTransportData')
                             }]
                         });
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
                             $scope.treeTaxes.push({
                                 name: $filter('translate')('menu.taxes.commonParameters'),
-
-                                onClick: function () {
-                                    $state.go('commonParams');
-                                }
+                                href: $state.href('commonParams')
                             });
                         }
 
@@ -115,14 +106,10 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.blockList'),
-                                onClick: function () {
-                                    $state.go('lockDataList');
-                                }
+                                href: $state.href('lockDataList')
                             }, {
                                 name: $filter('translate')('menu.administration.asyncTaskList'),
-                                onClick: function () {
-                                    $state.go('asyncTaskList');
-                                }
+                                href: $state.href('asyncTaskList')
                             });
                         }
 
@@ -132,9 +119,7 @@
                                 href: "Main.jsp" + $scope.gwtMode + "#!configuration"
                             }, {
                                 name: $filter('translate')('menu.administration.schedulerTaskList'),
-                                onClick: function () {
-                                    $state.go('schedulerTaskList');
-                                }
+                                href: $state.href('schedulerTaskList')
                             });
                         }
 
