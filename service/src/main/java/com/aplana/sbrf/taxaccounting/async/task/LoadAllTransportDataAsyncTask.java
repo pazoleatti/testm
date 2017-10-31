@@ -69,6 +69,6 @@ public class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
-        return String.format(getAsyncTaskType().getDescription(), " из каталога загрузки");
+        return getAsyncTaskType().getDescription();
     }
 }
