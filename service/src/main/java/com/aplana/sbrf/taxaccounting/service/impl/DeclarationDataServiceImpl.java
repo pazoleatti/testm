@@ -2392,67 +2392,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             : "");
 
         switch (ddReportType.getReportType()) {
-            case EXCEL_DEC:
-            case PDF_DEC:
-            case XML_DEC:
-            case CHECK_DEC:
-            case ACCEPT_DEC:
-                return String.format(DescriptionTemplate.DECLARATION.getText(),
-                        "Налоговая форма",
-                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
-                                : "",
-                        department.getName(),
-                        declarationTemplate.getType().getName(),
-                        ", № " + declaration.getId(),
-                        declaration.getTaxOrganCode() != null
-                                ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
-                                : "",
-                        declaration.getKpp() != null
-                                ? ", КПП: \"" + declaration.getKpp() + "\""
-                                : "",
-                        declaration.getOktmo() != null
-                                ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
-                                : "");
-            case SPECIFIC_REPORT_DEC:
-                return String.format(DescriptionTemplate.DECLARATION.getText(),
-                        "Налоговая форма",
-                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
-                                : "",
-                        department.getName(),
-                        declarationTemplate.getType().getName(),
-                        ", № " + declaration.getId(),
-                        declaration.getTaxOrganCode() != null
-                                ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
-                                : "",
-                        declaration.getKpp() != null
-                                ? ", КПП: \"" + declaration.getKpp() + "\""
-                                : "",
-                        declaration.getOktmo() != null
-                                ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
-                                : "");
-            case DELETE_DEC:
-                return String.format(DescriptionTemplate.DECLARATION.getText(),
-                        "Налоговая форма",
-                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + sdf.get().format(reportPeriod.getCorrectionDate())
-                                : "",
-                        department.getName(),
-                        declarationTemplate.getType().getName(),
-                        ", № " + declaration.getId(),
-                        declaration.getTaxOrganCode() != null
-                                ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
-                                : "",
-                        declaration.getKpp() != null
-                                ? ", КПП: \"" + declaration.getKpp() + "\""
-                                : "",
-                        declaration.getOktmo() != null
-                                ? ", ОКТМО: \"" + declaration.getOktmo() + "\""
-                                : "");
             case CREATE_REPORTS_DEC:
             case CREATE_FORMS_DEC:
                 return String.format(ddReportType.getReportType().getDescription(),
