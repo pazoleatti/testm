@@ -1601,6 +1601,7 @@
         </insert>
     </changeSet>
 	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2015 НДФЛ: Добавление текстового блока в печатное предстваление формы 2-НДФЛ-->
 	<changeSet id="2.1-rnurgaleev-135" author="rnurgaleev">
         <update tableName="BLOB_DATA">
             <column name="data"
