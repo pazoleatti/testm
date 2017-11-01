@@ -3018,14 +3018,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         for (DeclarationData declarationData : unsuccesfullPreCreateDeclarationDataList) {
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
-            Department department = departmentService.getDepartment(departmentReportPeriod.getId());
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
             String strCorrPeriod = "";
             if (departmentReportPeriod.getCorrectionDate() != null) {
                 SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
                 strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
             }
-            String msg = String.format("Отчетность %s за период %s, подразделение: \"%s\" не выгружена. В налоговой" +
-                            "форме № %d некорректное количество файлов формата xml, категория которых равна \"Исходящий в ФНС\"," +
+            String msg = String.format("Отчетность %s за период %s, подразделение: \"%s\" не выгружена. В налоговой " +
+                            "форме № %d некорректное количество файлов формата xml, категория которых равна \"Исходящий в ФНС\", " +
                             "должно быть файлов: один",
                     declarationTemplate.getName(),
                     departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
@@ -3036,8 +3036,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 
         String reportId = createReports(succesfullPreCreateDeclarationDataList, userInfo);
-
-        sendNotification("Подготовлена к выгрузке отчетность", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.REF_BOOK_REPORT, reportId);
+        String uuid = logEntryService.save(logger.getEntries());
+        sendNotification("Подготовлена к выгрузке отчетность", uuid, userInfo.getUser().getId(), NotificationType.REF_BOOK_REPORT, reportId);
 
         return result;
     }
