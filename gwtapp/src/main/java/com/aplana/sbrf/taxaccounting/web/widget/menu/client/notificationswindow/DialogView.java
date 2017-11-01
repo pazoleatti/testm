@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow;
 
-import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
@@ -158,13 +157,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
                         if (notificationTableRow == null) {
                             return;
                         }
-                        if (NotificationType.REF_BOOK_REPORT.equals(notificationTableRow.getNotificationType())) {
-                            if (notificationTableRow.getReportId() != null) {
-                                sb.appendHtmlConstant("<div class=\"LinkDiv\">"
-                                        + "Скачать" + "</div>");
-                            } else {
-                                sb.appendHtmlConstant("Отчет удален");
-                            }
+                        if (notificationTableRow.getReportId() != null) {
+                            sb.appendHtmlConstant( "<a target='_self' href='controller/rest/blobData/" + notificationTableRow.getReportId() + "/conf'>" + "скачать" + " </a>");
                         } else {
                             sb.appendHtmlConstant("");
                         }
