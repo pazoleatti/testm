@@ -92,13 +92,6 @@ public interface AsyncTaskDao {
     void cancelTask(long taskId);
 
     /**
-     * Освобождает задачу от резервирования узлом
-     *
-     * @param taskId идентификатор задачи
-     */
-    void releaseTask(long taskId);
-
-    /**
      * Проверяет, активна ли задача с указанным идентификатором
      *
      * @param taskId идентификатор задачи
@@ -132,21 +125,22 @@ public interface AsyncTaskDao {
     PagingResult<AsyncTaskDTO> getTasks(String filter, PagingParams pagingParams);
 
     /**
-     * Проверяет существование задачи по ее id
-     * @param taskId идентификатор задачи
-     * @return задача существует?
-     */
-    boolean isTaskExists(long taskId);
-
-    /**
      * Очищает поле ASYNC_TASK.NODE и проставляет статус "В очереди на выполнение" для всех задач, выполняющихя на узле
      * @param node узел
      */
     void releaseNodeTasks(String node);
 
     /**
-     * Удаляет всех задачи с указанным значением в поле PRIORITY_NODE. Используется только в dev-mode
-     * @param priorityNode узел
+     * Получает список идентификаторов задач, привязанных к указанному узлу. Используется только в dev-моде
+     * @param priorityNode узел, назначенный для выполнения
+     * @return список идентификаторов
      */
-    void deleteByPriorityNode(String priorityNode);
+    List<Long> getTasksByPriorityNode(String priorityNode);
+
+    /**
+     * Проверяет существование задачи по ее id
+     * @param taskId идентификатор задачи
+     * @return задача существует?
+     */
+    boolean isTaskExists(long taskId);
 }

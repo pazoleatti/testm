@@ -8,12 +8,8 @@
 	<virtual-host name="default_host" />
 
     <resource-ref name="jdbc/TaxAccDS" binding-name="jdbc/TaxAccDS${releasePostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/FormType" binding-name="services/cache/aplana/taxaccounting/FormType${releasePostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/FormTemplate" binding-name="services/cache/aplana/taxaccounting/FormTemplate${releasePostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/PermanentData" binding-name="services/cache/aplana/taxaccounting/PermanentData${releasePostfix}"/>
     <resource-ref name="services/cache/aplana/taxaccounting/DeclarationType" binding-name="services/cache/aplana/taxaccounting/DeclarationType${releasePostfix}"/>
     <resource-ref name="services/cache/aplana/taxaccounting/DeclarationTemplate" binding-name="services/cache/aplana/taxaccounting/DeclarationTemplate${releasePostfix}"/>
-    <resource-ref name="services/cache/aplana/taxaccounting/DataBlobsCache" binding-name="services/cache/aplana/taxaccounting/DataBlobsCache${releasePostfix}"/>
     <resource-ref name="services/cache/aplana/taxaccounting/DeclarationTemplateEventScript" binding-name="services/cache/aplana/taxaccounting/DeclarationTemplateEventScript${releasePostfix}"/>
 
 </web-bnd>

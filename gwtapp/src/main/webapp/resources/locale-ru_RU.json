@@ -228,7 +228,7 @@
     "title.note": "Примечание",
     "title.reasonForReturn": "Причина возврата:",
     "title.indicateReasonForReturn": "Укажите причину возврата",
-    "title.creatingReport": "Создание отчетности",
+    "title.creatingReport": "Создание отчетности по НДФЛ",
 
   "title.amountCalcIncome": "Сумма начисленного дохода",
   "title.amountPaymentIncome": "Сумма выплаченного дохода",
@@ -337,6 +337,9 @@
     "filesComment.button.remove": "Удалить",
     "filesComment.system": "Система",
     "filesComment.tooLongNoteMessage": "Количество символов для комментария превысило допустимое значение 512.",
+
+    "ndfl.removedDeclarationDataBegin": "Налоговая форма с номером = ",
+    "ndfl.removedDeclarationDataEnd": " не существует либо была удалена. Вы будете перенаправлены на главную страницу",
 
     "ndflJournal.filter.periodType": "Тип периода",
     "ndflJournal.filter.period": "Период",

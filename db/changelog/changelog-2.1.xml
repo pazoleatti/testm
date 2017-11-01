@@ -1574,4 +1574,31 @@
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2036 Не формируется сообщение об ошибке при проверке срока перечисления НДФЛ в бюджет -->
+    <changeSet id="2.1-vlednev-2" author="vlednev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2495 Добавить изменения в БД для ASYNC_TASK_TYPE-->
+	 <changeSet id="2.1-rnurgaleev-133" author="rnurgaleev">
+        <update
+                tableName="async_task_type">
+            <column name="name" value="Обработка справочника из каталога загрузки"/>
+            <where>id = 13</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-134" author="rnurgaleev">
+        <insert tableName="async_task_type">
+            <column name="id" value="12"/>
+            <column name="name" value="Обработка ТФ налоговой формы"/>
+            <column name="handler_bean" value="LoadTransportFileAsyncTask"/>
+            <column name="short_queue_limit" value="10000"/>
+            <column name="limit_kind" value="Размер файла (Кбайт)"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

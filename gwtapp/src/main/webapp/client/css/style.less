@@ -364,14 +364,18 @@ input[type="number"] {
   border-radius: 6px;
 }
 
-.modal-header h4, .modal-header .glyphicon, .modal-header .close, .empty-consolidated-remain, .positive-undisposed-amount, .restricted-remain {
+.modal-header .glyphicon, .modal-header .close, .empty-consolidated-remain, .positive-undisposed-amount, .restricted-remain {
   color: @greenDark;
 }
 
-.modal-header h4, .empty-consolidated-remain, .restricted-remain {
+.empty-consolidated-remain, .restricted-remain {
   font-weight: bold;
 }
-
+.modal-header h4{
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 400;
+}
 .modal-header .close {
   font-weight: normal;
   font-size: 35px;
@@ -394,10 +398,21 @@ input[type="number"] {
 
 .modal-dialog {
   margin: 9% auto;
+  .modal-content{
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
+    border: solid 1px #e5e5e5;
+    padding: 18px 32px;
+    border-radius: 0;
+    .modal-header{
+      border-radius: 0;
+      padding: 11px 0;
+    }
+  }
 }
 
 .modal-body {
-  padding: 9px 13px 9px;
+  padding: 10px 13px;
 }
 
 .button_panel {
@@ -1277,3 +1292,4 @@ span.ui-jqgrid-resize.ui-jqgrid-resize-ltr::after {
   color: #fff;
   border: 1px solid @white;
 }
+/*------------------------------------------------------------------*/

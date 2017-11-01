@@ -5,6 +5,7 @@ public class ReportAvailableResult {
     boolean downloadXlsxAvailable;
     boolean downloadRnuNdflPersonAllDb;
     boolean downloadReportKppOktmo;
+    boolean declarationDataExist = true;
 
     public boolean isDownloadXmlAvailable() {
         return downloadXmlAvailable;
@@ -36,5 +37,13 @@ public class ReportAvailableResult {
 
     public void setDownloadReportKppOktmo(boolean downloadReportKppOktmo) {
         this.downloadReportKppOktmo = downloadReportKppOktmo;
+    }
+
+    public boolean isDeclarationDataExist() {
+        return declarationDataExist;
+    }
+
+    public void setDeclarationDataExist(boolean declarationDataExist) {
+        this.declarationDataExist = declarationDataExist;
     }
 }

@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,12 +212,6 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public void releaseTask(long taskId) {
-        LOG.info("Releasing task: " + taskId);
-        getJdbcTemplate().update("update async_task set node = null, start_process_date = null where id = ?", taskId);
-    }
-
-    @Override
     public boolean isTaskActive(long taskId) {
         try {
             int state = getJdbcTemplate().queryForObject("select state from async_task where id = ?", Integer.class, taskId);
@@ -278,20 +272,21 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     }
 
     @Override
-    public boolean isTaskExists(long taskId) {
-        return getJdbcTemplate().queryForObject("select count(*) from async_task where id = ?", Integer.class, taskId) != 0;
-    }
-
-    @Override
     public void releaseNodeTasks(String node) {
         LOG.info("Releasing tasks by node: " + node);
-        getJdbcTemplate().update("update async_task set node = null, state = 1 where node = ?", node);
+        getJdbcTemplate().update("update async_task set node = null, start_process_date = null, state = 1 where node = ?", node);
     }
 
     @Override
-    public void deleteByPriorityNode(String priorityNode) {
-        LOG.info("Deleting tasks by priority_node: " + priorityNode);
-        getJdbcTemplate().update("delete from async_task where priority_node = ?", priorityNode);
+    public List<Long> getTasksByPriorityNode(String priorityNode) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("priorityNode", priorityNode);
+        return getNamedParameterJdbcTemplate().queryForList("select id from async_task where priority_node = :priorityNode", params, Long.class);
+    }
+
+    @Override
+    public boolean isTaskExists(long taskId) {
+        return getJdbcTemplate().queryForObject("select count(*) from async_task where id = ?", Integer.class, taskId) != 0;
     }
 
 }

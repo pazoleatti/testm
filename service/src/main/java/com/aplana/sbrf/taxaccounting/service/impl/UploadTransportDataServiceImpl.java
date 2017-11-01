@@ -197,7 +197,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("blobDataId", uuid);
                     try {
-                        asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, params);
+                        asyncManager.executeTask(key, AsyncTaskType.LOAD_TRANSPORT_FILE, userInfo, params);
                         logger.info(String.format(CREATE_TASK, "Загрузка файла"));
                     } catch (AsyncTaskException e) {
                         lockDataService.unlock(key, userId);
@@ -232,7 +232,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         if (lockData == null) {
             try {
                 try {
-                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo);
+                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TRANSPORT_DATA, userInfo);
                     asyncManager.addUserWaitingForTask(taskData.getId(), userId);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {
