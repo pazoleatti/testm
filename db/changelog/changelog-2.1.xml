@@ -1600,5 +1600,12 @@
             <column name="limit_kind" value="Размер файла (Кбайт)"/>
         </insert>
     </changeSet>
-
+	
+	<changeSet id="2.1-rnurgaleev-135" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.jrxml"/>
+            <where>id in ('047f207c-113e-488d-8390-9afc248a3bc8','04d9b114-1782-4d09-ad88-729e5605c6ff')</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
