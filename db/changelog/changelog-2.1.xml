@@ -1618,4 +1618,13 @@
             <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-1892 Добавить дату подписи в печ форму 6-НДФЛ-->
+	<changeSet id="2.1-rnurgaleev-137" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

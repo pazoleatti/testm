@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="1823"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -355,6 +355,9 @@
 	</field>
 	<field name="Ставка2" class="java.lang.String">
 		<fieldDescription><![CDATA[ОбобщПоказ/СумСтавка[2]/@Ставка]]></fieldDescription>
+	</field>
+	<field name="ДатаДок" class="java.lang.String">
+		<fieldDescription><![CDATA[ancestor::Документ/@ДатаДок]]></fieldDescription>
 	</field>
 	<variable name="ИННЮЛ" class="java.lang.String">
 		<variableExpression><![CDATA[$F{ИННЮЛ} == null ?     "------------" :     ($F{ИННЮЛ}+"------------").substring(0,12)]]></variableExpression>
@@ -8874,7 +8877,7 @@
 				<text><![CDATA[за №]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="16d69bda-8ed4-4674-870b-9d9b36ca7942" x="410" y="13" width="155" height="32"/>
+				<reportElement uuid="16d69bda-8ed4-4674-870b-9d9b36ca7942" x="409" y="13" width="156" height="32"/>
 				<textElement>
 					<font fontName="Arial" size="7"/>
 				</textElement>
@@ -15343,16 +15346,6 @@
 		<band height="32">
 			<printWhenExpression><![CDATA[($V{PAGE_NUMBER}>1)]]></printWhenExpression>
 			<staticText>
-				<reportElement uuid="073459a6-6902-41de-830b-55660715d20d" x="334" y="12" width="96" height="13"/>
-				<box>
-					<bottomPen lineWidth="0.5"/>
-				</box>
-				<textElement>
-					<font fontName="Arial" size="9"/>
-				</textElement>
-				<text><![CDATA[]]></text>
-			</staticText>
-			<staticText>
 				<reportElement uuid="77dd5e84-b175-4e50-a792-b2778d688b50" mode="Transparent" x="207" y="12" width="127" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
 					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
@@ -15392,6 +15385,16 @@
 				</textElement>
 				<text><![CDATA[(дата)]]></text>
 			</staticText>
+			<textField>
+				<reportElement uuid="03a0c6a6-34a8-4c6d-bad5-df0ea4774f44" x="334" y="12" width="96" height="13"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ДатаДок}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageFooter>
 </jasperReport>
