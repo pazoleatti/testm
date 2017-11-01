@@ -73,6 +73,7 @@
                             function (data) {
                                 if (data) {
                                     if (!data.declarationDataExist) {
+                                        $interval.cancel($scope.intervalId);
                                         var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
                                         appModals.error($filter('translate')('DIALOGS_ERROR'), message).result.then(
                                             function () {
