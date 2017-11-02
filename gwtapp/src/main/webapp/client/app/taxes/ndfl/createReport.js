@@ -32,17 +32,19 @@
                  * Создание отчётности
                  */
                 $scope.save = function () {
-                        $http({
-                            method: "POST",
-                            url: "controller/actions/declarationData/createReport",
-                            params: {
-                                declarationTypeId: $scope.reportData.declarationType.id,
-                                departmentId: $scope.reportData.department.id,
-                                periodId: $scope.reportData.period.id
-                            }
-                        }).then(function (response) {
-                            $uibModalInstance.close(response);
-                        });
+                    // Запоминаем период выбранный пользователем
+                    $rootScope.latestSelectedPeriod = $scope.reportData.period;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/createReport",
+                        params: {
+                            declarationTypeId: $scope.reportData.declarationType.id,
+                            departmentId: $scope.reportData.department.id,
+                            periodId: $scope.reportData.period.id
+                        }
+                    }).then(function (response) {
+                        $uibModalInstance.close(response);
+                    });
                 };
                 /**
                  * Закрытие окна
