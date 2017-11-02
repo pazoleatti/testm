@@ -30,7 +30,10 @@
                     },
                     ajaxFilter: [],
                     isClear: false,
-                    filterName: 'ndflReportsFilter'
+                    filterName: 'ndflReportsFilter',
+                    onCreateComplete: function () {
+                        $scope.refreshGrid();
+                    }
                 };
                 /**
                  * @description Обновление грида
@@ -185,6 +188,7 @@
                         sortorder: "desc",
                         hidegrid: false,
                         multiselect: true,
+                        disableAutoLoad: true,
                         ondblClickRow: function (rowId) {
                             $state.go("ndfl", {
                                 declarationId: rowId

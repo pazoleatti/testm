@@ -1600,5 +1600,39 @@
             <column name="limit_kind" value="Размер файла (Кбайт)"/>
         </insert>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2015 НДФЛ: Добавление текстового блока в печатное предстваление формы 2-НДФЛ-->
+	<changeSet id="2.1-rnurgaleev-135" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.jrxml"/>
+            <where>id in ('047f207c-113e-488d-8390-9afc248a3bc8','04d9b114-1782-4d09-ad88-729e5605c6ff')</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2414 НДФЛ: Добавление текстового блока в печатное предстваление формы 6-НДФЛ-->
+	<changeSet id="2.1-rnurgaleev-136" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-1892 Добавить дату подписи в печ форму 6-НДФЛ-->
+	<changeSet id="2.1-rnurgaleev-137" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
+        </update>
+    </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2054 Статическая компиляция скрипта groovy для ФИАС-->
+    <changeSet id="2.1-ytrofimov-56" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/fias.groovy"/>
+            <where>id='39327388-9684-4fd5-a522-c40a21680156'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
