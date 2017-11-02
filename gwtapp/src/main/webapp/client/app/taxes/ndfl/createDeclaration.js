@@ -37,6 +37,8 @@
                  * Сохранение
                  */
                 $scope.save = function () {
+                    // Запоминаем период выбранный пользователем
+                    $rootScope.latestSelectedPeriod = $scope.declarationData.period;
                     if ($scope.declarationData.period && $scope.declarationData.department && $scope.declarationData.declarationType) {
                         $http({
                             method: "POST",

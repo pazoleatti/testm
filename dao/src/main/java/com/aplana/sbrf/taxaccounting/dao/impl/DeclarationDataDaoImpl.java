@@ -10,9 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -70,14 +72,21 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     final private SQLQueryFactory sqlQueryFactory;
 
-    //Период формируется как "год: наименование периода", как и в списке периодов. Также это нужно, чтобы в таблице отображался период с годом
+    /*Период формируется как "наименование периода год", или как "наименование периода год коррелирующий период"
+      В зависимости от принадлежности формы к открытому корр. периоду*/
+    final private Expression<String> caseStringForReportPeriod = new CaseBuilder()
+        .when(departmentReportPeriod.correctionDate.isNotNull()).then(reportPeriod.name.concat(" ").concat(taxPeriod.year.stringValue()).
+                concat(" с датой сдачи корректировки ").concat(departmentReportPeriod.correctionDate.stringValue()))
+        .otherwise(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name))
+            .as("reportPeriod");
+
     final private QBean<DeclarationDataJournalItem> dataJournalItemQBean = bean(DeclarationDataJournalItem.class,
             declarationData.id.as("declarationDataId"),
             declarationKind.name.as("declarationKind"),
             declarationType.name.as("declarationType"),
             departmentFullpath.shortname.as("department"),
             refBookAsnu.name.as("asnuName"),
-            taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).as("reportPeriod"),
+            caseStringForReportPeriod,
             state.name.as("state"),
             declarationData.fileName,
             logBusiness.logDate.as("creationDate"),
@@ -362,7 +371,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .innerJoin(declarationTemplate.declarationTemplateFkindFk, declarationKind)
                 .innerJoin(declarationData.declDataFkDepRepPerId, departmentReportPeriod)
                 .innerJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .innerJoin(declarationData.declarationDataStateFk, state)
+                .innerJoin(declarationData.declarationDataStateFk, state )
                 .innerJoin(departmentReportPeriod.depRepPerFkDepartmentId, department)
                 .innerJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
