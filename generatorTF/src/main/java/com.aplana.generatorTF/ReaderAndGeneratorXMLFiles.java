@@ -55,7 +55,7 @@ public class ReaderAndGeneratorXMLFiles {
                                     : RandomStringUtils.randomAlphanumeric(29) + "-" + Integer.toString(i + 1));
                     destFile = new File(tmpPath);
                     FileUtils.copyFile(sourceFile, destFile);
-                    changeXmlFile(destFile, tmpPath.substring(tmpPath.lastIndexOf("/") + 1, tmpPath.length() - 4));
+                    changeXmlFile(destFile, tmpPath.substring(tmpPath.lastIndexOf("/") + 1, tmpPath.length() - 4), args.length == 2 ? 0 : Integer.parseInt(args[2]));
                 }
             }
 
@@ -64,7 +64,7 @@ public class ReaderAndGeneratorXMLFiles {
         }
     }
 
-    private static void changeXmlFile(File fXmlFile, String fileName) {
+    private static void changeXmlFile(File fXmlFile, String fileName, int countTF) {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -82,8 +82,22 @@ public class ReaderAndGeneratorXMLFiles {
                 element.setAttribute("ИдФайл", fileName);
             }
 
+            if (countTF != 0 && countTF > doc.getElementsByTagName("ИнфЧасть").getLength()){
+                Node infoPiece = doc.getElementsByTagName("ИнфЧасть").item(0);
+                int countNewNode = countTF - doc.getElementsByTagName("ИнфЧасть").getLength();
+                System.out.println("Количество новых объектов = " + countNewNode);
+                Node nodeForInsert;
+                for (int i = 0; i < countNewNode; i++){
+                    nodeForInsert = infoPiece.cloneNode(true);
+                    infoPiece.getParentNode().insertBefore(nodeForInsert, infoPiece);
+                }
+            }
+
+            System.out.println("Началось изменение атрибутов " + new Date());
+
             NodeList nList = doc.getElementsByTagName("ПолучДох");
 
+            System.out.println("Количество ПолучДох = " + nList.getLength());
             Random r = new Random(System.currentTimeMillis());
             String alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
             for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -123,6 +137,7 @@ public class ReaderAndGeneratorXMLFiles {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(fXmlFile);
             transformer.transform(source, result);
+            System.out.println("Время окончания: " + new Date());
         } catch (Exception e) {
             e.printStackTrace();
         }
