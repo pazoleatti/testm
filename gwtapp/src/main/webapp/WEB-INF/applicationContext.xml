@@ -46,4 +46,14 @@
         </mvc:interceptor>
     </mvc:interceptors>
 
+    <mvc:resources mapping="/client/**" location="/client/">
+        <mvc:resource-chain resource-cache="false">
+            <mvc:resolvers>
+                <mvc:version-resolver>
+                    <mvc:content-version-strategy patterns="/**"/>
+                </mvc:version-resolver>
+            </mvc:resolvers>
+        </mvc:resource-chain>
+    </mvc:resources>
+
 </beans>
