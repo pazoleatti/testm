@@ -44,7 +44,7 @@
                             $filter('translate')('taskList.title.nextStartDate')],
                         colModel: [
                             {name: 'id', index: 'id', width: 60, key: true},
-                            {name: 'name', index: 'task_name', width: 170},
+                            {name: 'name', index: 'task_name', width: 260},
                             {name: 'state', index: 'active', width: 200},
                             {name: 'schedule', index: 'schedule', width: 175},
                             {
