@@ -21,6 +21,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * Класс для генерации ТФ РНУ
+ */
 public class ReaderAndGeneratorXMLFiles {
 
     private static List<String> lastnameDictionary;
@@ -66,6 +69,7 @@ public class ReaderAndGeneratorXMLFiles {
 
     private static void changeXmlFile(File fXmlFile, String fileName, int countTF) {
         try {
+            System.out.println("Время начала: " + new Date());
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -81,6 +85,7 @@ public class ReaderAndGeneratorXMLFiles {
                 Element element = (Element) slPeace;
                 element.setAttribute("ИдФайл", fileName);
             }
+
 
             if (countTF != 0 && countTF > doc.getElementsByTagName("ИнфЧасть").getLength()){
                 Node infoPiece = doc.getElementsByTagName("ИнфЧасть").item(0);
@@ -98,6 +103,7 @@ public class ReaderAndGeneratorXMLFiles {
             NodeList nList = doc.getElementsByTagName("ПолучДох");
 
             System.out.println("Количество ПолучДох = " + nList.getLength());
+
             Random r = new Random(System.currentTimeMillis());
             String alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
             for (int temp = 0; temp < nList.getLength(); temp++) {
