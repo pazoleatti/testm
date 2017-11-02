@@ -48,7 +48,7 @@
                  */
                 $scope.createReport = function () {
                     appModals.create('client/app/taxes/ndfl/createReport.html', 'createReportCtrl',
-                        {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'})
+                        {latestSelectedPeriod: $rootScope.latestSelectedPeriod}, {size: 'md'})
                         .result.then(function (response) {
                         if (response.data && response.data.entityId && response.data.entityId !== null) {
                             $state.go('ndfl', {
@@ -197,11 +197,17 @@
                     }
                 };
                 // Запоминаем самый поздний период для создания отчётности
+                // Флаг на загрузку страницы, когда страница загружается -
+                // значение последнего выбранного периода не должно сбрасываться
+                var isLoadingPage = true;
                 $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
                     if (selectedPeriods && selectedPeriods.length > 0) {
-                        $scope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                        $rootScope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                        isLoadingPage = false;
                     } else {
-                        $scope.latestSelectedPeriod = null;
+                        if (!isLoadingPage) {
+                            $rootScope.latestSelectedPeriod = null;
+                        }
                     }
                 });
 
