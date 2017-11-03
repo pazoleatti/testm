@@ -1653,4 +1653,13 @@
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-140" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg_body4.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
