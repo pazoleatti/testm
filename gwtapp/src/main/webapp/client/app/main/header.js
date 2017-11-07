@@ -18,7 +18,7 @@
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'client/app/main/header.html',
+                templateUrl: 'client/app/main/header.html?v=${buildUuid}',
                 controller: 'MainMenuController'
             };
         })
@@ -188,7 +188,7 @@
                 };
 
                 $scope.openNotifications = function () {
-                    appModals.create('client/app/main/notifications.html', 'notificationsCtrl');
+                    appModals.create('client/app/main/notifications.html?v=${buildUuid}', 'notificationsCtrl');
                 };
 
                 $scope.updateNotificationCount = function () {

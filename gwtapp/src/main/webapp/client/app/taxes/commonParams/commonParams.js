@@ -10,7 +10,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('commonParams', {
                 url: '/taxes/commonParams/uploadCommonParams',
-                templateUrl: 'client/app/taxes/commonParams/commonParams.html',
+                templateUrl: 'client/app/taxes/commonParams/commonParams.html?v=${buildUuid}',
                 controller: 'commonParamsCtrl'
             });
         }])
@@ -56,7 +56,7 @@
                  * @description Изменение общих параметров на значения по умолчанию
                  */
                 $scope.changeToDefault = function () {
-                    appModals.create('client/app/taxes/commonParams/confirmationAction.html', 'confirmationActionCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
+                    appModals.create('client/app/taxes/commonParams/confirmationAction.html?v=${buildUuid}', 'confirmationActionCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
                 };
 
 
@@ -66,7 +66,7 @@
                 $scope.upload = function () {
                     $scope.valOiu = $scope.commonParamsGrid.value;
                     $scope.commonParamsGrid.ctrl.refreshGrid();
-                    appModals.create('client/app/taxes/commonParams/uploadCommonParams.html', 'uploadParamsCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
+                    appModals.create('client/app/taxes/commonParams/uploadCommonParams.html?v=${buildUuid}', 'uploadParamsCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
                 };
 
             }]);

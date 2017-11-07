@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReportJournal', {
                 url: '/taxes/ndflReportJournal',
-                templateUrl: 'client/app/taxes/ndfl/ndflReportJournal.html',
+                templateUrl: 'client/app/taxes/ndfl/ndflReportJournal.html?v=${buildUuid}',
                 controller: 'ndflReportJournalCtrl',
                 params: {uuid: null}
             });
@@ -47,7 +47,7 @@
                  * Показ МО "Создание отчётности"
                  */
                 $scope.createReport = function () {
-                    appModals.create('client/app/taxes/ndfl/createReport.html', 'createReportCtrl',
+                    appModals.create('client/app/taxes/ndfl/createReport.html?v=${buildUuid}', 'createReportCtrl',
                         {latestSelectedPeriod: $rootScope.latestSelectedPeriod}, {size: 'md'})
                         .result.then(function (response) {
                         if (response.data && response.data.entityId && response.data.entityId !== null) {
@@ -249,7 +249,7 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {
+                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}', 'returnToCreatedCtrl', {
                         header: $filter('translate')('title.indicateReasonForReturn'),
                         msg: $filter('translate')('title.reasonForReturn')
                     }, {size: 'md'})

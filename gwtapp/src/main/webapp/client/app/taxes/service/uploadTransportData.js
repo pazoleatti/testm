@@ -9,7 +9,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('uploadTransportData', {
                 url: '/taxes/service/uploadTransportData',
-                templateUrl: 'client/app/taxes/service/uploadTransportData.html',
+                templateUrl: 'client/app/taxes/service/uploadTransportData.html?v=${buildUuid}',
                 controller: 'uploadTransportDataController'
             });
         }])

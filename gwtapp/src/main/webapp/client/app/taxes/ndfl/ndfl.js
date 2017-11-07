@@ -22,7 +22,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
-                templateUrl: 'client/app/taxes/ndfl/ndfl.html',
+                templateUrl: 'client/app/taxes/ndfl/ndfl.html?v=${buildUuid}',
                 controller: 'ndflCtrl'
             });
         }])
@@ -112,7 +112,7 @@
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
 
                 $scope.openHistoryOfChange = function () {
-                    appModals.create('client/app/taxes/ndfl/logBusines.html', 'logBusinesFormCtrl', {declarationDataId: $scope.declarationDataId});
+                    appModals.create('client/app/taxes/ndfl/logBusines.html?v=${buildUuid}', 'logBusinesFormCtrl', {declarationDataId: $scope.declarationDataId});
                 };
 
                 /**
@@ -126,7 +126,7 @@
                         angular.forEach(data, function (fileType) {
                             attachFileTypes[fileType.id] = fileType.name;
                         });
-                        appModals.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsCtrl',
+                        appModals.create('client/app/taxes/ndfl/filesComments.html?v=${buildUuid}', 'filesCommentsCtrl',
                             {declarationDataId: $scope.declarationDataId, attachFileTypes: attachFileTypes}, {copy: true});
                     });
                 };
@@ -135,7 +135,7 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
                  */
                 $scope.createReport = function () {
-                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html', 'rnuNdflPersonFaceFormCtrl',
+                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html?v=${buildUuid}', 'rnuNdflPersonFaceFormCtrl',
                         {declarationDataId: $scope.declarationDataId});
 
                 };
@@ -263,7 +263,7 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {
+                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}', 'returnToCreatedCtrl', {
                         header: $filter('translate')('title.indicateReasonForReturn'),
                         msg: $filter('translate')('title.reasonForReturn')
                     }, {size: 'md'})
@@ -301,7 +301,7 @@
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"
                  */
                 $scope.showSourcesClick = function () {
-                    appModals.create('client/app/taxes/ndfl/formSources.html', 'sourcesFormCtrl');
+                    appModals.create('client/app/taxes/ndfl/formSources.html?v=${buildUuid}', 'sourcesFormCtrl');
                 };
 
                 $scope.selectTab = function (tab) {

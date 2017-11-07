@@ -11,7 +11,7 @@
         .directive('aplanaAlert', ['AplanaUtils', '$timeout', function (AplanaUtils, $timeout) {
             return {
                 restrict: 'EA',
-                templateUrl: AplanaUtils.templatePath + 'alert/alert.html',
+                templateUrl: AplanaUtils.templatePath + 'alert/alert.html?v=${buildUuid}',
                 transclude: true,
                 replace: true,
                 scope: {
