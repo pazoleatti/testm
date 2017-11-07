@@ -56,11 +56,7 @@ public interface RefBookDepartmentDataService {
      * с фильтрацией по наименованию подразделения и пейджингом для создания отчётности
      *
      * @param user           Пользователь
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                       наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param reportPeriodId ID отчетного периода, который должен быть открыт
-     * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
-    PagingResult<RefBookDepartment> fetchDepartmentWithOpenPeriodForReport(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams);
+    List<RefBookDepartment> fetchDepartmentWithOpenPeriodForReport(TAUser user);
 }

@@ -342,8 +342,8 @@
         /**
          * Контроллер для выбора подразделений
          */
-        .controller('SelectDepartmentCtrl', ['$scope', 'GetSelectOption',
-            function ($scope, GetSelectOption) {
+        .controller('SelectDepartmentCtrl', ['$scope', 'GetSelectOption','APP_CONSTANTS','RefBookValuesResource',
+            function ($scope, GetSelectOption,APP_CONSTANTS,RefBookValuesResource) {
                 $scope.departmentsSelect = {};
 
                 /**
@@ -374,12 +374,21 @@
                 /**
                  * Инициализировать список с загрузкой подразделений с открытым периодом для создания отчётности через ajax
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
+                 * @param userTBDepartment Объект из scope, по которому проставляется ТБ пользователя
                  */
-                $scope.initDepartmentSelectWithOpenPeriodForReport = function (periodObject) {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriodForReport", {}, {
-                        property: "fullPath",
-                        direction: "asc"
-                    }, "fullPathFormatter");
+                $scope.initDepartmentSelectWithOpenPeriodForReport = function (periodObject, userTBDepartment) {
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, false, "fullPathFormatter");
+                    RefBookValuesResource.query({
+                        refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
+                        projection: "departmentsWithOpenPeriodForReport"
+                    }, function (data) {
+                        $scope.departmentsSelect.options.data.results = data;
+                        angular.forEach(data, function (department) {
+                            if (userTBDepartment.id === department.id){
+                                userTBDepartment.department = department;
+                            }
+                        });
+                    });
                     $scope.$watch(periodObject, function (period) {
                         if (period) {
                             $scope.departmentsSelect.options.dataFilter = {reportPeriodId: period.id};

@@ -98,18 +98,14 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
      * с фильтрацией по наименованию подразделения и пейджингом для создания отчётности
      *
      * @param user           Пользователь
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param reportPeriodId ID отчетного периода, который должен быть открыт
-     * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
-    public PagingResult<RefBookDepartment> fetchDepartmentWithOpenPeriodForReport(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams) {
+    public List<RefBookDepartment> fetchDepartmentWithOpenPeriodForReport(TAUser user) {
         List<Integer> departmentsWithOpenPeriod = departmentService.getTBDepartmentIds(user, TaxType.NDFL);
         Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(departmentsWithOpenPeriod)).keySet();
-        return refBookDepartmentDataDao.fetchDepartments(departmentIds, name, pagingParams);
+        return refBookDepartmentDataDao.fetchDepartments(departmentIds);
     }
 }

@@ -16,9 +16,10 @@
 
                 //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
                 $scope.latestReportPeriod = {};
+                $scope.reportData = {};
 
-                $scope.reportData = {
-                    department: $rootScope.user.department
+                $scope.userTBDepartment = {
+                    id : $rootScope.user.department.parentId
                 };
 
                 if (data.latestSelectedPeriod) {
@@ -28,6 +29,10 @@
                         $scope.reportData.period = value;
                     });
                 }
+
+                $scope.$watch("userTBDepartment.department", function (department) {
+                    $scope.reportData.department = department;
+                });
                 /**
                  * Создание отчётности
                  */
