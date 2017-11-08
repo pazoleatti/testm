@@ -10,8 +10,8 @@
     /**
      * @description Контроллер модального окна, в котором выводятся источники и приемники формы
      */
-        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter", 'DeclarationDataResource', 'APP_CONSTANTS',
-            function ($scope, $http, $state, $stateParams, $uibModalInstance, $filter, DeclarationDataResource, APP_CONSTANTS) {
+        .controller('sourcesFormCtrl', ["$scope", "$http", '$state', '$stateParams', "$modalInstance", "$filter", 'DeclarationDataResource', 'APP_CONSTANTS',
+            function ($scope, $http, $state, $stateParams, $modalInstance, $filter, DeclarationDataResource, APP_CONSTANTS) {
                 $scope.sourcesGridData = [];
 
                 //Чекбоксы
@@ -133,7 +133,7 @@
                  * Закрытие окна
                  */
                 $scope.close = function () {
-                    $uibModalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss('Canceled');
                 };
 
                 //Переход по ссылке на другую форму

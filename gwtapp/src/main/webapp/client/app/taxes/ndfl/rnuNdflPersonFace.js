@@ -8,8 +8,8 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson', 'APP_CONSTANTS',
-            function ($scope, $uibModalInstance, $filter, $http, RnuPerson, APP_CONSTANTS) {
+        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter', '$http', 'RnuPerson', 'APP_CONSTANTS',
+            function ($scope, $modalInstance, $shareData, $filter, $http, RnuPerson, APP_CONSTANTS) {
 
             //Доступгость грида
             $scope.enabledGrid = false;
@@ -23,10 +23,10 @@
             $scope.formationRNU = function () {
                 $http({
                     method: "POST",
-                    url: "controller/actions/declarationData/" + $scope.$resolve.data.declarationDataId + "/rnuDoc",
+                    url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/rnuDoc",
                     params: {
                         ndflPersonFilter: JSON.stringify({
-                            declarationDataId: $scope.$resolve.data.declarationDataId,
+                            declarationDataId: $shareData.declarationDataId,
                             lastName: $scope.searchFilter.params.lastName,
                             firstName: $scope.searchFilter.params.firstName,
                             middleName: $scope.searchFilter.params.middleName,
@@ -44,14 +44,14 @@
                 }).then(function (response) {
 
                 });
-                $uibModalInstance.dismiss('Canceled');
+                $modalInstance.dismiss('Canceled');
             };
 
             /**
              * @description Закрытие окна
              */
             $scope.close = function () {
-                $uibModalInstance.dismiss('Canceled');
+                $modalInstance.dismiss('Canceled');
             };
 
             /**
@@ -68,7 +68,7 @@
                             return {
                                 projection: 'rnuPersons',
                                 ndflPersonFilter: JSON.stringify({
-                                    declarationDataId: $scope.$resolve.data.declarationDataId,
+                                    declarationDataId: $shareData.declarationDataId,
                                     lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' :  $scope.searchFilter.params.lastName ,
                                     firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
                                     middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,

@@ -4,14 +4,14 @@
     /**
      * @description Модуль для создания отчетности
      */
-    angular.module('app.createReport', ['app.constants', 'app.modals', 'app.rest', 'app.formatters'])
+    angular.module('app.createReport', ['app.constants', 'app.rest', 'app.formatters'])
 
     /**
      * @description Контроллер окна "Создание отчетности"
      */
         .controller('createReportCtrl', [
-            '$http', '$scope', '$rootScope', '$filter', 'appModals', '$uibModalInstance', 'APP_CONSTANTS', 'data',
-            function ($http, $scope, $rootScope, $filter, appModals, $uibModalInstance, APP_CONSTANTS, data) {
+            '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData',
+            function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData) {
                 $scope.reportFormKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS;
 
                 //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
@@ -22,8 +22,8 @@
                     id : $rootScope.user.department.parentId
                 };
 
-                if (data.latestSelectedPeriod) {
-                    $scope.reportData.period = data.latestSelectedPeriod;
+                if ($shareData.latestSelectedPeriod) {
+                    $scope.reportData.period = $shareData.latestSelectedPeriod;
                 } else {
                     $scope.$watch("latestReportPeriod.period", function (value) {
                         $scope.reportData.period = value;
@@ -48,16 +48,21 @@
                             periodId: $scope.reportData.period.id
                         }
                     }).then(function (response) {
-                        $uibModalInstance.close(response);
+                        $modalInstance.close(response);
                     });
                 };
                 /**
                  * Закрытие окна
                  */
                 $scope.cancel = function () {
-                    appModals.confirm($filter('translate')('createDeclaration.cancel.header'), $filter('translate')('createDeclaration.cancel.text'))
-                        .result.then(function () {
-                        $uibModalInstance.dismiss('Canceled');
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('createDeclaration.cancel.header'),
+                        content: $filter('translate')('createDeclaration.cancel.text'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $modalInstance.dismiss('Canceled');
+                        }
                     });
                 };
             }])
