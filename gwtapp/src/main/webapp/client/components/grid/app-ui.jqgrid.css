@@ -44,9 +44,14 @@
     border-right: 2px dotted rgba(0, 0, 0, 0.2);
     /*font-weight: 700;*/
     font-weight: 100;
-    padding: 8px 0 8px 0;
+    padding: 8px 0 8px 6px;
+    border-left: 2px dotted rgba(0, 0, 0, 0.2);
+    margin: 0 0 0 -4px;
 }
-
+.ui-jqgrid .ui-jqgrid-htable th:nth-child(2) div.ui-jqgrid-sortable{
+    border-left: none;
+    border-right: 2px dotted rgba(0, 0, 0, 0.2);
+}
 .ui-jqgrid .ui-jqgrid-htable th.ui-th-column .ui-jqgrid-sortable .s-ico {
     height: 18px;
     width: 13px;
@@ -350,9 +355,9 @@ height: 2000px - for IE because height: 100% not work
     z-index: 5;
 }
 
-.ui-jqgrid .ui-jqgrid-resize:hover {
+/*.ui-jqgrid .ui-jqgrid-resize:hover {
     background-color: #cfcfcf;
-}
+}*/
 
 .ui-jqgrid .ui-jqgrid-resize-ltr {
     float: none;
