@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.querydsl.sql.OracleTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
@@ -28,6 +29,7 @@ public class QueryDSLConfiguration extends AbstractDao {
         configuration.register(new EnumByOrdinalType<>(DepartmentType.class));
         configuration.register(new EnumByOrdinalType<>(State.class));
         configuration.register(new EnumByOrdinalType<>(NotificationType.class));
+        configuration.register(new EnumByOrdinalType<>(LogLevel.class));
 
         return configuration;
     }

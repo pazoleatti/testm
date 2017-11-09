@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -51,11 +52,11 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public LockData get(String key, Date lockDate) {
+    public LockData get(String key, LocalDateTime lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
                     "SELECT id, key, user_id, task_id, date_lock, description FROM lock_data WHERE key = ? and date_lock = ?",
-                    new Object[]{key, lockDate},
+                    new Object[]{key, lockDate.toDate()},
                     new int[]{Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
             );
@@ -70,7 +71,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void lock(String key, int userId, String description) {
         try {
-            Date lockDate = new Date();
+            Date lockDate = LocalDateTime.now().toDate();
             getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock, description) VALUES (seq_lock_data.nextval, ?, ?, ?, ?)",
                     new Object[]{key,
                             userId,
@@ -86,7 +87,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void lock(String key, int userId) {
         try {
-            Date lockDate = new Date();
+            Date lockDate = LocalDateTime.now().toDate();
             getJdbcTemplate().update("INSERT INTO lock_data (id, key, user_id, date_lock) VALUES (seq_lock_data.nextval, ?, ?, ?)",
                     new Object[]{key,
                             userId,
@@ -182,7 +183,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             result.setKey(rs.getString("key"));
             result.setUserId(rs.getInt("user_id"));
             result.setTaskId(SqlUtils.getLong(rs, "task_id"));
-            result.setDateLock(rs.getTimestamp("date_lock"));
+            result.setDateLock(new LocalDateTime(rs.getTimestamp("date_lock")));
             result.setDescription(rs.getString("description"));
             return result;
         }
@@ -190,9 +191,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     @Override
     public List<String> getLockIfOlderThan(long seconds) {
+        Date now = LocalDateTime.now().toDate();
         try {
             return getJdbcTemplate().queryForList(
-                    "SELECT key FROM lock_data WHERE date_lock < (SYSDATE - INTERVAL '" + seconds + "' SECOND)", String.class);
+                    "SELECT key FROM lock_data WHERE date_lock < (? - INTERVAL '" + seconds + "' SECOND)",
+                    new Object[]{now},
+                    new int[]{Types.TIMESTAMP},
+                    String.class);
         } catch (DataAccessException e) {
             LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
             throw new LockException(LOCK_DATA_DELETE_ERROR, e.getMessage());

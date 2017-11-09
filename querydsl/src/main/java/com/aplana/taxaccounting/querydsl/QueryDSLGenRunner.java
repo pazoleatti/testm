@@ -3,6 +3,7 @@ package com.aplana.taxaccounting.querydsl;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.State;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.querydsl.sql.Configuration;
@@ -47,6 +48,7 @@ public class QueryDSLGenRunner {
             configuration.register("NOTIFICATION", "TYPE", new EnumByOrdinalType<>(NotificationType.class));
             configuration.register("DECLARATION_DATA", "STATE", new EnumByOrdinalType<>(State.class));
             configuration.register("TAX_PERIOD", "YEAR", Integer.class);
+            configuration.register("LOG_ENTRY", "LOG_LEVEL", new EnumByOrdinalType<>(LogLevel.class));
 
             exportScheme(dbUrl,
                     "ndfl_unstable",

@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		                  http://www.springframework.org/schema/beans/spring-beans.xsd
+		                  http://www.springframework.org/schema/jee
+		                  http://www.springframework.org/schema/jee/spring-jee.xsd">
 
     <bean id="transactionManager" class="org.springframework.transaction.jta.WebSphereUowTransactionManager">
         <property name="allowCustomIsolationLevels" value="true"/>
+    </bean>
+
+    <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
+    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg index="0" ref="dataSource"/>
     </bean>
 </beans>

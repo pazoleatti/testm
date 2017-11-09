@@ -38,4 +38,11 @@ prompt compile DEP_REP_PER_BEFORE_INS_UPD
 prompt compile person_pkg
 @@person_pkg.sql;
 
+-- compile source
+prompt compile fias_pkg
+@@fias_pkg.sql;
+
+prompt async_task
+@@async_task.sql;
+
 exit;

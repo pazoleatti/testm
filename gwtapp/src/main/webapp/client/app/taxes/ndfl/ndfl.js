@@ -14,7 +14,6 @@
             'app.formSources',
             'app.logBusines',
             'app.logPanel',
-            'app.modals',
             'app.filesComments',
             'app.rest',
             'app.rnuNdflPersonFace',
@@ -22,7 +21,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
-                templateUrl: 'client/app/taxes/ndfl/ndfl.html',
+                templateUrl: 'client/app/taxes/ndfl/ndfl.html?v=${buildUuid}',
                 controller: 'ndflCtrl'
             });
         }])
@@ -31,10 +30,10 @@
          * @description Контроллер страницы РНУ НДФЛ и вкладки "Реквизиты"
          */
         .controller('ndflCtrl', [
-            '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', 'appModals', '$rootScope',
-            'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval',
-            function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, appModals, $rootScope,
-                      RefBookValuesResource, APP_CONSTANTS, $state, $interval) {
+            '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
+            '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval',
+            function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter, $logPanel, $aplanaModal, $dialogs,
+                      $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -63,8 +62,8 @@
                  * @description Проверяет готовность отчетов у открытой формы
                  */
                 // TODO: Убрать использование постоянных запросов
-                function updateAvailableReports () {
-                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableSpecificReport)) {
+                function updateAvailableReports() {
+                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableRnuNdflPersonAllDb && $scope.availableReportKppOktmo)) {
                         DeclarationDataResource.query({
                                 declarationDataId: $stateParams.declarationDataId,
                                 projection: "availableReports",
@@ -72,10 +71,22 @@
                             },
                             function (data) {
                                 if (data) {
+                                    if (!data.declarationDataExist) {
+                                        $interval.cancel($scope.intervalId);
+                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                        $dialogs.errorDialog({
+                                            content: message
+                                        }).result.then(
+                                            function () {
+                                                $state.go("/");
+                                        });
+                                        return;
+                                    }
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    $scope.availableSpecificReport = data.downloadSpecificAvailable;
-                                    if (!$scope.intervalId){
+                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
+                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    if (!$scope.intervalId) {
                                         $scope.intervalId = $interval(function () {
                                             updateAvailableReports();
                                         }, 10000);
@@ -101,7 +112,19 @@
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
 
                 $scope.openHistoryOfChange = function () {
-                    appModals.create('client/app/taxes/ndfl/logBusines.html', 'logBusinesFormCtrl', {declarationDataId: $scope.declarationDataId});
+                    $aplanaModal.open({
+                        title: $filter('translate')('logBusiness.title'),
+                        templateUrl: 'client/app/taxes/ndfl/logBusines.html?v=${buildUuid}',
+                        controller: 'logBusinesFormCtrl',
+                        windowClass: 'modal1000',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    declarationDataId: $scope.declarationDataId
+                                };
+                            }
+                        }
+                    });
                 };
 
                 /**
@@ -115,8 +138,20 @@
                         angular.forEach(data, function (fileType) {
                             attachFileTypes[fileType.id] = fileType.name;
                         });
-                        appModals.create('client/app/taxes/ndfl/filesComments.html', 'filesCommentsCtrl',
-                            {declarationDataId: $scope.declarationDataId, attachFileTypes: attachFileTypes}, {copy: true});
+                        $aplanaModal.open({
+                            title: $filter('translate')('filesComment.header'),
+                            templateUrl: 'client/app/taxes/ndfl/filesComments.html?v=${buildUuid}',
+                            controller: 'filesCommentsCtrl',
+                            windowClass: 'modalMax',
+                            resolve: {
+                                $shareData: function () {
+                                    return {
+                                        declarationDataId: $scope.declarationDataId,
+                                        attachFileTypes: attachFileTypes
+                                    };
+                                }
+                            }
+                        });
                     });
                 };
 
@@ -124,10 +159,50 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
                  */
                 $scope.createReport = function () {
-                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html', 'rnuNdflPersonFaceFormCtrl',
-                        {declarationDataId: $scope.declarationDataId});
-
+                    $aplanaModal.open({
+                        title: $filter('translate')('rnuPersonFace.title'),
+                        templateUrl: 'client/app/taxes/ndfl/rnuNdflPersonFace.html',
+                        controller: 'rnuNdflPersonFaceFormCtrl',
+                        windowClass: 'modal1000',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    declarationDataId: $scope.declarationDataId
+                                };
+                            }
+                        }
+                    });
                 };
+
+                /**
+                 * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
+                 * @param response
+                 * @param location
+                 * @param create
+                 */
+                function performReportSuccessResponse(response, location, create) {
+                    if (response.uuid && response.uuid !== null) {
+                        $logPanel.open('log-panel-container', response.uuid);
+                    } else {
+                        if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
+                            $dialogs.messageDialog({
+                                content: $filter('translate')('title.noCalculationPerformed')
+                            });
+                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                            $dialogs.confirmDialog({
+                                title: $filter('translate')('title.confirm'),
+                                content: response.restartMsg,
+                                okBtnCaption: $filter('translate')('common.button.yes'),
+                                cancelBtnCaption: $filter('translate')('common.button.no'),
+                                okBtnClick: function () {
+                                    $scope.createPairKppOktmo(true, create);
+                                }
+                            });
+                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
+                            $window.location = location;
+                        }
+                    }
+                }
 
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
@@ -145,17 +220,23 @@
                             $logPanel.open('log-panel-container', response.data.uuid);
                         } else {
                             if (response.data.status === "LOCKED" && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.data.restartMsg)
-                                    .result.then(
-                                    function () {
+                                $dialogs.confirmDialog({
+                                    content: response.data.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
                                         $scope.calculate(true, cancelTask);
-                                    });
+                                    }
+                                });
                             } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
-                                appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnExistTask'))
-                                    .result.then(
-                                    function () {
+                                $dialogs.confirmDialog({
+                                    content: $filter('translate')('title.returnExistTask'),
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
                                         $scope.calculate(force, true);
-                                    });
+                                    }
+                                });
                             }
                         }
                     });
@@ -178,17 +259,23 @@
                             initPage();
                         } else {
                             if (response.data.status === "LOCKED" && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.data.restartMsg)
-                                    .result.then(
-                                    function () {
+                                $dialogs.confirmDialog({
+                                    content: response.data.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
                                         $scope.accept(true, cancelTask);
-                                    });
+                                    }
+                                });
                             } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
-                                appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnExistTask'))
-                                    .result.then(
-                                    function () {
+                                $dialogs.confirmDialog({
+                                    content: $filter('translate')('title.returnExistTask'),
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
                                         $scope.accept(force, true);
-                                    });
+                                    }
+                                });
                             } else if (response.data.status === "NOT_EXIST_XML") {
                                 $window.alert($filter('translate')('title.acceptImpossible'));
                             }
@@ -212,11 +299,14 @@
                             initPage();
                         } else {
                             if (response.data.status === "LOCKED" && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.data.restartMsg)
-                                    .result.then(
-                                    function () {
+                                $dialogs.confirmDialog({
+                                    content: response.data.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
                                         $scope.check(true);
-                                    });
+                                    }
+                                });
                             } else if (response.data.status === "NOT_EXIST_XML") {
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }
@@ -228,8 +318,19 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {header: $filter('translate')('title.indicateReasonForReturn'), msg: $filter('translate')('title.reasonForReturn')}, {size : 'md'})
-                        .result.then(
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.indicateReasonForReturn'),
+                        templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}',
+                        controller: 'returnToCreatedCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    msg: $filter('translate')('title.reasonForReturn')
+                                };
+                            }
+                        }
+                    }).result.then(
                         function (reason) {
                             $http({
                                 method: "POST",
@@ -246,16 +347,19 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Удалить"
                  */
                 $scope.delete = function () {
-                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.deleteDeclaration'))
-                        .result.then(
-                        function () {
+                    $dialogs.confirmDialog({
+                        content: $filter('translate')('title.deleteDeclaration'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).success(function () {
                                 $state.go("ndflJournal", {});
                             });
-                        });
+                        }
+                    });
                 };
 
 
@@ -263,10 +367,15 @@
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"
                  */
                 $scope.showSourcesClick = function () {
-                    appModals.create('client/app/taxes/ndfl/formSources.html', 'sourcesFormCtrl');
+                    $aplanaModal.open({
+                        title: $filter('translate')('sources.title.sourcesList'),
+                        templateUrl: 'client/app/taxes/ndfl/formSources.html?v=${buildUuid}',
+                        controller: 'sourcesFormCtrl',
+                        windowClass: 'modal1200'
+                    });
                 };
 
-                $scope.selectTab = function(tab) {
+                $scope.selectTab = function (tab) {
                     $rootScope.$broadcast('tabSelected', tab);
                 };
 
@@ -288,24 +397,14 @@
                             force: force ? force : false
                         }
                     }).success(function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                        } else {
-                            if (response.status === "LOCKED" && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                    .result.then(
-                                    function () {
-                                        $scope.createReportXlsx(true);
-                                    });
-                            } else if (response.status === "NOT_EXIST_XML") {
-                                $window.alert($filter('translate')('title.noCalculationPerformed'));
-                            } else if (response.status === "EXIST") {
-                                $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
-                            }
-                        }
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx");
                     });
                 };
 
+                /**
+                 * формирование спецотчета "РНУ НДФЛ по всем ФЛ"
+                 * @param force
+                 */
                 $scope.createReportAllRnu = function (force) {
                     $http({
                         method: "POST",
@@ -314,22 +413,27 @@
                             force: force ? force : false
                         }
                     }).success(function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                        } else {
-                            if (response.status === "LOCKED" && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                    .result.then(
-                                    function () {
-                                        $scope.createReportXlsx(true);
-                                    });
-                            } else if (response.status === "NOT_EXIST_XML") {
-                                $window.alert($filter('translate')('title.noCalculationPerformed'));
-                            } else if (response.status === "EXIST") {
-                                $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
-                            }
-                        }
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB);
                     });
                 };
+
+                /**+
+                 * Создание спецотчета "Реестр сформированной отчетности"
+                 * @param force
+                 * @param create
+                 */
+                $scope.createPairKppOktmo = function (force, create) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pairKppOktmoReport",
+                        params: {
+                            force: force,
+                            create: create
+                        }
+                    }).success(function (response) {
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO, create);
+                    });
+                };
+
             }]);
 }());

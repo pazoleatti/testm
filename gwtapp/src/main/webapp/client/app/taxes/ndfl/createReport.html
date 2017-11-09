@@ -1,20 +1,15 @@
-<div class="modal-header">
-    <button type="button" class="close" ng-click="cancel()">×</button>
-    <h4 class="modal-title">
-        <span class="glyphicon glyphicon-file"></span>&nbsp;{{'title.creatingReport' | translate}}
-    </h4>
-</div>
 <div class="modal-body">
-    <div class="form-horizontal" data-ng-form="general">
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
+    <div class="form-horizontal" data-ng-form="createReportForm">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
+               style="height: 100px;">
             <tbody>
             <tr>
                 <td>
-                    <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
+                    <label class="control-label">{{::'createReport.period' | translate}}:</label>
                 </td>
                 <td>
-                    <div  data-aplana-field>
-                        <div style="width: 355px;"   data-ng-controller="SelectPeriodCtrl"
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectPeriodCtrl"
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
                              data-ng-model="reportData.period"
@@ -29,18 +24,20 @@
 
             <tr>
                 <td>
-                    <label class="control-label">{{::'ndflJournal.filter.department' | translate}}:</label>
+                    <label class="control-label">{{::'createReport.department' | translate}}:</label>
                 </td>
                 <td>
-                    <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
-                             data-ui-select2="departmentsSelect.options"
-                             data-ng-init="initDepartmentSelectWithOpenPeriodForReport('reportData.period')"
-                             data-ng-model="reportData.department"
-                             data-ng-required="true">
-                        </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
-                            translate}}
+                    <div data-ng-if="reportData.period">
+                        <div data-aplana-field>
+                            <div style="width: 355px;" data-ng-controller="SelectDepartmentCtrl"
+                                 data-ui-select2="departmentsSelect.options"
+                                 data-ng-init="initDepartmentSelectWithOpenPeriodForReport('reportData.period',userTBDepartment)"
+                                 data-ng-model="reportData.department"
+                                 data-ng-required="true">
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </td>
@@ -48,19 +45,21 @@
 
             <tr>
                 <td>
-                    <label class="control-label">{{::'ndflJournal.filter.declarationType' |
+                    <label class="control-label">{{::'createReport.reportType' |
                         translate}}:</label>
                 </td>
                 <td>
-                    <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
-                             data-ui-select2="declarationTypeSelect.options"
-                             data-ng-model="reportData.declarationType"
-                             data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
-                             data-ng-required="true">
-                        </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
-                            translate}}
+                    <div data-ng-if="reportData.department && reportData.period">
+                        <div data-aplana-field>
+                            <div style="width: 355px;" data-ng-controller="SelectDeclarationTypeCtrl"
+                                 data-ui-select2="declarationTypeSelect.options"
+                                 data-ng-model="reportData.declarationType"
+                                 data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
+                                 data-ng-required="true">
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                translate}}
+                            </div>
                         </div>
                     </div>
                 </td>

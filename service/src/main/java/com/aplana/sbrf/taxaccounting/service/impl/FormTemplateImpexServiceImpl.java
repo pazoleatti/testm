@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateEventScript;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.Translator;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -17,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.zip.ZipEntry;
 
 @Service
 @Transactional
@@ -100,9 +101,9 @@ public class FormTemplateImpexServiceImpl implements
             throw new ServiceException("Ошибки при создании временной директории.");
         }
         try {
-
+            Map<String, List<String>> eventScriptPaths = new HashMap<>();
             List<DeclarationTemplate> declarationTemplates = declarationTemplateService.listAll();
-            ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
+            ArrayList<String> paths = new ArrayList<>(declarationTemplates.size());
             for (DeclarationTemplate template : declarationTemplates){
                 String translatedName = Translator.transliterate(template.getType().getName());
                 String folderTemplateName =
@@ -124,18 +125,33 @@ public class FormTemplateImpexServiceImpl implements
                     tempFile.close();
                     //
                     tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
-                    String ftScript = declarationTemplateService.getDeclarationTemplateScript(template.getId());
-                    if (ftScript != null) {
-                        tempFile.write(ftScript.getBytes(ENCODING));
+                    if (template.getCreateScript() != null) {
+                        String ftScript = declarationTemplateService.getDeclarationTemplateScript(template.getId());
+                        if (ftScript != null) {
+                            tempFile.write(ftScript.getBytes(ENCODING));
+                        }
                     }
                     tempFile.close();
+
+                    List<String> eventScriptNameList = new LinkedList<>();
+                    for (DeclarationTemplateEventScript eventScript : template.getEventScripts()) {
+                        tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + eventScript.getEventId() + DeclarationTemplateImpexServiceImpl.SCRIPT_FILE));
+                        eventScriptNameList.add(eventScript.getEventId() + DeclarationTemplateImpexServiceImpl.SCRIPT_FILE);
+                        tempFile.write(eventScript.getScript().getBytes(ENCODING));
+                        tempFile.close();
+                    }
+                    eventScriptPaths.put(folderTemplateName, eventScriptNameList);
+
                     //
                     tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + DeclarationTemplateImpexServiceImpl.REPORT_FILE));
-                    String dtJrxm = declarationTemplateService.getJrxml(template.getId());
-                    if (dtJrxm != null)
-                        tempFile.write(dtJrxm.getBytes(ENCODING));
-                    tempFile.close();
+                    if (template.getJrxmlBlobId() != null) {
 
+                        String dtJrxm = declarationTemplateService.getJrxml(template.getId());
+                        if (dtJrxm != null)
+                            tempFile.write(dtJrxm.getBytes(ENCODING));
+
+                    }
+                    tempFile.close();
                     paths.add(folderTemplateName);
                 } catch (IOException e) {
                     LOG.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
@@ -167,6 +183,20 @@ public class FormTemplateImpexServiceImpl implements
 				} finally {
                 	IOUtils.closeQuietly(in);
 				}
+
+                List<String> eventScriptNames = eventScriptPaths.get(path);
+
+				for (String eventScripName: eventScriptNames) {
+				    ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, eventScripName));
+                    zipOutputStream.putArchiveEntry(ze);
+                    in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, eventScripName));
+                    try {
+                        IOUtils.copy(in, zipOutputStream);
+                        zipOutputStream.closeArchiveEntry();
+                    } finally {
+                        IOUtils.closeQuietly(in);
+                    }
+                }
 
                 // JasperTemplate
                 ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.REPORT_FILE));

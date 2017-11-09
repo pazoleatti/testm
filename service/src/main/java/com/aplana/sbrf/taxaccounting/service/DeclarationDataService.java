@@ -271,6 +271,16 @@ public interface DeclarationDataService {
     CreateDeclarationReportResult createReportAllRnu(TAUserInfo userInfo, final long declarationDataId, boolean force);
 
     /**
+     * Формирование Реестра сформированной отчетности
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force признак для перезапуска задачи
+     * @param create признак существования отчета
+     * @return
+     */
+    CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force, boolean create);
+
+    /**
      * Формирование отчета в xlsx
      *
      * @param userInfo          информация о пользователе, выполняющего действие

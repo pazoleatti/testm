@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('lockDataList', {
                 url: '/administration/locks',
-                templateUrl: 'client/app/administration/locks.html',
+                templateUrl: 'client/app/administration/locks.html?v=${buildUuid}',
                 controller: 'locksCtrl'
             });
         }])
@@ -16,8 +16,8 @@
         /**
          * @description Контроллер страницы "Список блокировок"
          */
-        .controller('locksCtrl', ['$scope', '$filter', 'lockDataResource', '$http',
-            function ($scope, $filter, lockDataResource, $http) {
+        .controller('locksCtrl', ['$scope', '$filter', 'lockDataResource', '$http', 'APP_CONSTANTS',
+            function ($scope, $filter, lockDataResource, $http, APP_CONSTANTS) {
 
                 $scope.searchFilter = {};
 
@@ -40,7 +40,6 @@
                                 filter: $scope.searchFilter.filter
                             };
                         },
-                        height: 250,
                         colNames: [
                             $filter('translate')('locks.title.dateLock'),
                             $filter('translate')('locks.title.key'),
@@ -57,8 +56,8 @@
                             {name: 'user', index: 'user', width: 250},
                             {name: 'description', index: 'description', width: 350}
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         sortname: 'id',
                         viewrecords: true,
                         sortorder: "asc",

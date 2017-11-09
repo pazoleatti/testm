@@ -24,8 +24,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
-import com.aplana.sbrf.taxaccounting.service.script.*
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.*
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import groovy.transform.TypeChecked
@@ -45,9 +45,6 @@ class Calculate extends AbstractScriptClass {
     NdflPersonService ndflPersonService
     ReportPeriodService reportPeriodService
     RefBookFactory refBookFactory
-    DeclarationService declarationService
-    boolean showTiming;
-    int similarityThreshold;
 
     /**
      * Получить версию используемую для поиска записей в справочнике ФЛ
@@ -117,9 +114,6 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 
@@ -1136,22 +1130,6 @@ class Calculate extends AbstractScriptClass {
                 }
             }
             throw e;
-        }
-    }
-
-    void initConfiguration(){
-        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
-        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
-        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
-        if (showTiming.equals("1")) {
-            this.showTiming = true;
-        }
-        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
-    }
-
-    void logForDebug(String message, Object... args) {
-        if (showTiming) {
-            logger.info(message, args);
         }
     }
 }

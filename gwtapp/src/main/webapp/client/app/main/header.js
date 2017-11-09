@@ -11,20 +11,19 @@
         'app.notifications',
         'app.uploadTransportData',
         'app.commonParams',
-        'app.modals',
         'app.formatters',
         'app.constants',
         'app.permissionUtils'
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'client/app/main/header.html',
+                templateUrl: 'client/app/main/header.html?v=${buildUuid}',
                 controller: 'MainMenuController'
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', '$aplanaModal', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, $aplanaModal, amountCasesFormatterFilter) {
 
                 $scope.security = {
                     user: $rootScope.user
@@ -49,9 +48,7 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL)) {
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.forms'),
-                                onClick: function () {
-                                    $state.go('ndflJournal');
-                                }
+                                href: $state.href('ndflJournal')
                             });
                         }
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
@@ -74,9 +71,7 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_REPORTS)) {
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.accountability'),
-                                onClick: function () {
-                                    $state.go('ndflReportJournal');
-                                }
+                                href: $state.href('ndflReportJournal')
                             });
                         }
 
@@ -93,18 +88,15 @@
                             href: "",
                             subtree: [{
                                 name: $filter('translate')('menu.taxes.service.loadFiles'),
-                                onClick: function () {
-                                    $state.go('uploadTransportData');
-                                }
+                                href: $state.href('uploadTransportData')
                             }]
                         });
-                        $scope.treeTaxes.push({
-                            name: $filter('translate')('menu.taxes.commonParameters'),
-
-                            onClick: function () {
-                                $state.go('uploadCommonParams');
-                            }
-                        });
+                        if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_GENERAL)) {
+                            $scope.treeTaxes.push({
+                                name: $filter('translate')('menu.taxes.commonParameters'),
+                                href: $state.href('commonParams')
+                            });
+                        }
 
                         $scope.treeNsi = [{
                             name: $filter('translate')('menu.nsi.refbooks'),
@@ -115,14 +107,10 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_BLOCK)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.blockList'),
-                                onClick: function () {
-                                    $state.go('lockDataList');
-                                }
+                                href: $state.href('lockDataList')
                             }, {
                                 name: $filter('translate')('menu.administration.asyncTaskList'),
-                                onClick: function () {
-                                    $state.go('asyncTaskList');
-                                }
+                                href: $state.href('asyncTaskList')
                             });
                         }
 
@@ -132,9 +120,7 @@
                                 href: "Main.jsp" + $scope.gwtMode + "#!configuration"
                             }, {
                                 name: $filter('translate')('menu.administration.schedulerTaskList'),
-                                onClick: function () {
-                                    $state.go('schedulerTaskList');
-                                }
+                                href: $state.href('schedulerTaskList')
                             });
                         }
 
@@ -203,7 +189,12 @@
                 };
 
                 $scope.openNotifications = function () {
-                    appModals.create('client/app/main/notifications.html', 'notificationsCtrl');
+                    $aplanaModal.open({
+                        title: $filter('translate')('notifications.title.listNotifications'),
+                        templateUrl: 'client/app/main/notifications.html?v=${buildUuid}',
+                        controller: 'notificationsCtrl',
+                        windowClass: 'modal1200'
+                    });
                 };
 
                 $scope.updateNotificationCount = function () {

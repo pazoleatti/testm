@@ -470,6 +470,19 @@ public class DeclarationDataController {
     }
 
     /**
+     * Формирование реестра сформированной отчетности
+     * @param declarationDataId
+     * @param force
+     * @param create
+     * @return
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/pairKppOktmoReport")
+    public CreateDeclarationReportResult createPairKppOktmo(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force, @RequestParam boolean create) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createPairKppOktmoReport(userInfo, declarationDataId, force, create);
+    }
+
+    /**
      * Формирование отчета в xlsx
      *
      * @param declarationDataId идентификатор декларации

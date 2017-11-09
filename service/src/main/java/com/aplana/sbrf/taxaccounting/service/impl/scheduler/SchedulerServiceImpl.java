@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.scheduler;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
@@ -10,10 +11,12 @@ import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
+import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -45,7 +48,7 @@ import java.util.concurrent.Executors;
  */
 @Component
 @EnableScheduling
-public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerService, DisposableBean {
+public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerService, DisposableBean, InitializingBean {
     private static final Log LOG = LogFactory.getLog(SchedulerServiceImpl.class);
 
     private static final long DAY_TIME = 24 * 60 * 60 * 1000;
@@ -66,6 +69,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private LockDataService lockDataService;
     @Autowired
     private AsyncTaskThreadContainer asyncTaskThreadContainer;
+    @Autowired
+    private AsyncManager asyncManager;
+    @Autowired
+    private ApplicationInfo applicationInfo;
 
     /**
      * Инициализация планировщика
@@ -98,9 +105,24 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         });
     }
 
+    /**
+     * При старте приложения очищает назначение текущему узлу всех асинхронных задач. Чтобы задачи не оставались висеть, в случае если сервер некорректно завершил работу
+     * @throws Exception
+     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        //TODO: (dloshkarev) возможно в этом случае будет лучше удалять задачи и их блокировки (как в dev-моде), т.к если стенд упал из-за какой то задачи, то она снова его положит
+        asyncManager.releaseNodeTasks();
+    }
+
+    /**
+     * При завершении работы приложения останавливает выполнение всех задач планировщика
+     * @throws Exception
+     */
     @Override
     public void destroy() throws Exception {
         shutdownAllTasks();
+        asyncManager.releaseNodeTasks();
     }
 
     @Override

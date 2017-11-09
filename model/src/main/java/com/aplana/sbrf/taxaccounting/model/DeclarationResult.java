@@ -41,6 +41,11 @@ public class DeclarationResult {
      */
     private long permissions;
 
+    /**
+     * Вид НФ
+     */
+    private int declarationType;
+
     public String getDepartment() {
         return department;
     }
@@ -111,5 +116,13 @@ public class DeclarationResult {
 
     public void setPermissions(long permissions) {
         this.permissions = permissions;
+    }
+
+    public int getDeclarationType() {
+        return declarationType;
+    }
+
+    public void setDeclarationType(int declarationType) {
+        this.declarationType = declarationType;
     }
 }

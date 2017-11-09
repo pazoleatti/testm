@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.model;
 
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
-
-import java.util.Date;
+import org.joda.time.LocalDateTime;
 
 /**
  * Модель данных для истории изменений декларации
@@ -12,7 +11,7 @@ public class LogBusinessModel {
     /**
      * Дата
      */
-    private Date logDate;
+    private LocalDateTime logDate;
 
     /**
      * Роль пользователя
@@ -45,7 +44,7 @@ public class LogBusinessModel {
     private String userFullName;
 
     public LogBusinessModel(LogBusiness logBusiness, String eventName, String userFullName) {
-        this.logDate = logBusiness.getLogDate();
+        this.logDate = LocalDateTime.fromDateFields(logBusiness.getLogDate());
         this.roles = logBusiness.getRoles();
         this.declarationDataId = logBusiness.getDeclarationId();
         this.departmentName = logBusiness.getDepartmentName();
@@ -54,7 +53,7 @@ public class LogBusinessModel {
         this.userFullName = userFullName;
     }
 
-    public Date getLogDate() {
+    public LocalDateTime getLogDate() {
         return logDate;
     }
 

@@ -3,12 +3,12 @@
     /**
      * @description Модуль модального окна оповещений
      */
-    angular.module('app.notifications', ['app.modals'])
+    angular.module('app.notifications', [])
     /**
      * @description Контроллер модального окна оповещений
      */
-        .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope', 'APP_CONSTANTS',
-            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope, APP_CONSTANTS) {
+        .controller('notificationsCtrl', ['$scope', '$http', '$modalInstance', 'NotificationResource', '$filter', '$logPanel', '$dialogs', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $http, $modalInstance, NotificationResource, $filter, $logPanel, $dialogs, $rootScope, APP_CONSTANTS) {
                 // Пометим все оповещения как прочтённые
                 $http({
                     method: "POST",
@@ -79,10 +79,8 @@
                  * без cellValue и options ссылка формируется некорректно
                  */
                 function linkFileFormatter(cellValue, options, row) {
-
-                    if (row.reportId != null) {
+                    if (row.reportId) {
                         return "<a target='_self' href='controller/rest/blobData/" + row.reportId + "/conf'>" + $filter('translate')('title.link.download') + " </a>";
-
                     } else {
                         return "";
                     }
@@ -94,9 +92,12 @@
                  */
                 $scope.delete = function () {
                     if ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length !== 0) {
-                        appModals.confirm($filter('translate')('notifications.title.delete'), $filter('translate')('notifications.title.deleteText'))
-                            .result.then(
-                            function () {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('notifications.title.delete'),
+                            content: $filter('translate')('notifications.title.deleteText'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
                                 $http({
                                     method: "POST",
                                     url: "controller/actions/notification/delete",
@@ -106,7 +107,8 @@
                                 }).success(function () {
                                     $scope.notificationsGrid.ctrl.refreshGrid();
                                 });
-                            });
+                            }
+                        });
                     }
                 };
 
@@ -115,7 +117,7 @@
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $uibModalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss('Canceled');
                 };
 
                 // Открытие панели уведомлений при клике по ссылке в оповещении
@@ -130,7 +132,11 @@
          */
         .filter('notificationTextFormatter', ['$filter', function ($filter) {
             return function (value, row, notification) {
-                return '<a class="notification-link" data-log-id="' + notification.logId + '">' + value + '</a>';
+                if (notification.logId) {
+                    return '<a class="notification-link" data-log-id="' + notification.logId + '">' + value + '</a>';
+                } else {
+                    return value
+                }
 
             };
         }]);

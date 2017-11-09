@@ -226,6 +226,7 @@
                 <filtering>false</filtering>
                 <includes>
                     <include>**/service.xml</include>
+                    <include>**/script-support.xml</include>
                     <include>**/permissions.xml</include>
                     <include>**/acctax.xlsm</include>
                     <include>**/VSAX3.exe</include>

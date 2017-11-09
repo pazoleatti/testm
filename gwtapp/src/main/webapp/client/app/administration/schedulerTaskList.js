@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('schedulerTaskList', {
                 url: '/administration/schedulerTaskList',
-                templateUrl: 'client/app/administration/schedulerTaskList.html',
+                templateUrl: 'client/app/administration/schedulerTaskList.html?v=${buildUuid}',
                 controller: 'schedulerTaskListCtrl'
             });
         }])
@@ -44,7 +44,7 @@
                             $filter('translate')('taskList.title.nextStartDate')],
                         colModel: [
                             {name: 'id', index: 'id', width: 60, key: true},
-                            {name: 'name', index: 'task_name', width: 170},
+                            {name: 'name', index: 'task_name', width: 260},
                             {name: 'state', index: 'active', width: 200},
                             {name: 'schedule', index: 'schedule', width: 175},
                             {

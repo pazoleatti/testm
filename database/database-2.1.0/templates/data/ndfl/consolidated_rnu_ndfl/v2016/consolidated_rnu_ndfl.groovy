@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
+import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
 import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
@@ -39,6 +40,9 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder
     DepartmentReportPeriodService departmentReportPeriodService
     FileWriter xml
+    boolean showTiming;
+    int similarityThreshold;
+    DeclarationService declarationService
 
     private ConsolidatedRnuNdfl() {}
 
@@ -80,6 +84,9 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("xml")) {
             this.xml = (FileWriter) scriptClass.getProperty("xml");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 
@@ -654,6 +661,21 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
     }
 
     def createSpecificReport() {
+        int ndflPersonCount = ndflPersonService.getCountNdflPerson(declarationData.id)
+        if (ndflPersonCount == 0) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            Department department = departmentService.get(departmentReportPeriod.departmentId)
+            String strCorrPeriod = ""
+            if (departmentReportPeriod.getCorrectionDate() != null) {
+                strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+            }
+            logger.error("Спецотчет \"%s\" не сформирован, т.к. в форме %d, Период %s, Подразделение %s отсутствуют данные для формирования спецотчета",
+                    scriptSpecificReportHolder.declarationSubreport?.name,
+                    declarationData.id,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                    department.name)
+            return
+        }
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 createSpecificReportPersonDb();
@@ -835,6 +857,22 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             if (declarationList.isEmpty()) {
                 logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде, Отчетные налоговые формы не будут сформированы текущем периоде")
             }
+        }
+    }
+
+    void initConfiguration(){
+        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
+        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
+        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
+        if (showTiming.equals("1")) {
+            this.showTiming = true;
+        }
+        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
+    }
+
+    void logForDebug(String message, Object... args) {
+        if (showTiming) {
+            logger.info(message, args);
         }
     }
 }

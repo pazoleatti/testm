@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogEntryDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -16,6 +19,7 @@ import java.sql.Types;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.querydsl.QLogEntry.logEntry;
+import static com.querydsl.core.types.Projections.bean;
 
 @Repository
 public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
@@ -25,6 +29,9 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     public LogEntryDaoImpl(SQLQueryFactory sqlQueryFactory) {
         this.sqlQueryFactory = sqlQueryFactory;
     }
+
+    final private QBean<LogEntry> logEntryBean = bean(LogEntry.class, logEntry.logId, logEntry.creationDate.as("date"),
+            logEntry.logLevel.as("level"), logEntry.message, logEntry.object, logEntry.ord, logEntry.type);
 
     /**
      * Максимальный размер сообщения
@@ -120,7 +127,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             sqlQueryFactory.insert(logEntry)
                     .set(logEntry.logId, id)
                     .set(logEntry.creationDate, aLogEntry.getDate())
-                    .set(logEntry.logLevel, (byte) aLogEntry.getLevel().getId())
+                    .set(logEntry.logLevel, aLogEntry.getLevel())
                     .set(logEntry.type, aLogEntry.getType())
                     .set(logEntry.message, aLogEntry.getMessage())
                     .set(logEntry.ord, aLogEntry.getOrd())
@@ -151,21 +158,21 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     }
 
     @Override
-    public PagingResult<LogEntry> get(@NotNull String logId, int offset, int length) {
-        List<LogEntry> records = getJdbcTemplate().query(
-                "select " +
-                        "t.log_id, t.ord, t.creation_date, t.log_level, t.message, t.type, t.object " +
-                        "from " +
-                        "(select l.*, row_number() " + (isSupportOver() ? "over(order by l.ord)" : "over()") + " as rn from log_entry l where l.log_id = ?) t " +
-                        "where " +
-                        "t.rn between ? and ? " +
-                        "order by t.rn ",
-                new Object[]{logId, offset + 1, offset + length},
-                new int[]{Types.VARCHAR, Types.INTEGER, Types.INTEGER},
-                new LogEntryMapper()
-        );
+    public PagingResult<LogEntry> fetch(@NotNull String logId, PagingParams pagingParams) {
+        SQLQuery<LogEntry> queryBase = sqlQueryFactory
+                .select(logEntryBean)
+                .from(logEntry)
+                .where(logEntry.logId.eq(logId));
 
-        return new PagingResult<LogEntry>(records, count(logId));
+        List<LogEntry> logEntryList = queryBase
+                .limit(pagingParams.getCount())
+                .offset(pagingParams.getStartIndex())
+                .orderBy(logEntry.ord.asc())
+                .fetch();
+
+        long count = queryBase.fetchCount();
+
+        return new PagingResult<>(logEntryList, (int) count);
     }
 
     public int count(@NotNull String logId) {

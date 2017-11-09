@@ -161,6 +161,10 @@
 
                     $scope.updateIsClear();
                     $scope.updateHideExtended();
+
+                    if($scope.searchFilter.onCreateComplete) {
+                        $scope.searchFilter.onCreateComplete();
+                    }
                 }
             ])
         ;

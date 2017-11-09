@@ -45,6 +45,9 @@ class Calculate extends AbstractScriptClass {
     NdflPersonService ndflPersonService
     ReportPeriodService reportPeriodService
     RefBookFactory refBookFactory
+    DeclarationService declarationService
+    boolean showTiming;
+    int similarityThreshold;
 
     /**
      * Получить версию используемую для поиска записей в справочнике ФЛ
@@ -114,6 +117,9 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 
@@ -457,13 +463,13 @@ class Calculate extends AbstractScriptClass {
             }
 
             if (msgCnt <= maxMsgCnt) {
-                logForDebug("Идентификация (" + calcTimeMillis(inTime));
+                logForDebug("Идентификация (" + ScriptUtils.calcTimeMillis(inTime));
             }
 
             msgCnt++;
         }
 
-        logForDebug("Идентификация ФЛ, обновление адресов (" + calcTimeMillis(time));
+        logForDebug("Идентификация ФЛ, обновление адресов (" + ScriptUtils.calcTimeMillis(time));
 
         insertBatchRecords(RefBook.Id.PERSON_ADDRESS.getId(), insertAddressList, { Address address ->
             mapAddressAttr(address)
@@ -588,14 +594,14 @@ class Calculate extends AbstractScriptClass {
             }
 
             if (msgCnt < maxMsgCnt) {
-                logForDebug("Обновление (" + calcTimeMillis(inTime));
+                logForDebug("Обновление (" + ScriptUtils.calcTimeMillis(inTime));
             }
 
             msgCnt++;
 
         }
 
-        logForDebug("Обновление ФЛ, документов (" + calcTimeMillis(time));
+        logForDebug("Обновление ФЛ, документов (" + ScriptUtils.calcTimeMillis(time));
         time = System.currentTimeMillis();
         //println "crete and update reference"
 
@@ -607,7 +613,7 @@ class Calculate extends AbstractScriptClass {
             updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
         }
 
-        logForDebug("Обновление справочников (" + calcTimeMillis(time));
+        logForDebug("Обновление справочников (" + ScriptUtils.calcTimeMillis(time));
         time = System.currentTimeMillis();
 
         insertBatchRecords(RefBook.Id.ID_DOC.getId(), insertDocumentList, { PersonDocument personDocument ->
@@ -651,7 +657,7 @@ class Calculate extends AbstractScriptClass {
             getProvider(RefBook.Id.ID_TAX_PAYER.getId()).updateRecordVersionWithoutLock(logger, uniqueId, getRefBookPersonVersionFrom(), null, refBookValues);
         }
 
-        logForDebug("Идентификация и обновление (" + calcTimeMillis(time));
+        logForDebug("Идентификация и обновление (" + ScriptUtils.calcTimeMillis(time));
 
         logForDebug("Обновлено записей: " + updCnt);
 
@@ -1130,6 +1136,22 @@ class Calculate extends AbstractScriptClass {
                 }
             }
             throw e;
+        }
+    }
+
+    void initConfiguration(){
+        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
+        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
+        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
+        if (showTiming.equals("1")) {
+            this.showTiming = true;
+        }
+        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
+    }
+
+    void logForDebug(String message, Object... args) {
+        if (showTiming) {
+            logger.info(message, args);
         }
     }
 }

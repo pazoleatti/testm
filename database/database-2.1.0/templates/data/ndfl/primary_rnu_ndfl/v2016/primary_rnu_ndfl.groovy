@@ -49,6 +49,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     String UploadFileName
     InputStream ImportInputStream
     File dataFile
+    boolean showTiming;
+    int similarityThreshold;
 
     private PrimaryRnuNdfl() {}
 
@@ -167,11 +169,11 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         ReportPeriod declarationDataReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
-        //Идентификатор подразделения по которому формируется консолидированная форма
-        def parentDepartmentId = declarationData.departmentId
-        Department department = departmentService.get(parentDepartmentId)
-        List<DeclarationData> declarationDataList = declarationService.findAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, department.id, declarationDataReportPeriod.id);
+        //Получаем список всех родительских подразделений и ищем для них консолидированные формы в нужном периоде
+        List<Integer> parentDepartments = departmentService.fetchAllParentDepartmentsIds(declarationData.departmentId)
+        List<DeclarationData> declarationDataList = declarationService.fetchAllDeclarationData(CONSOLIDATED_RNU_NDFL_TEMPLATE_ID, parentDepartments, declarationDataReportPeriod.id);
         for (DeclarationData declarationDataDestination : declarationDataList) {
+            Department department = departmentService.get(declarationDataDestination.departmentId)
             if (departmentReportPeriod.correctionDate != null) {
                 DepartmentReportPeriod departmentReportPeriodDestination = getDepartmentReportPeriodById(declarationDataDestination.departmentReportPeriodId)
                 if (departmentReportPeriodDestination.correctionDate == null || departmentReportPeriod.correctionDate > departmentReportPeriodDestination.correctionDate) {
@@ -503,6 +505,21 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     def createSpecificReport() {
+        int ndflPersonCount = ndflPersonService.getCountNdflPerson(declarationData.id)
+        if (ndflPersonCount == 0) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.departmentReportPeriodId)
+            Department department = departmentService.get(departmentReportPeriod.departmentId)
+            String strCorrPeriod = ""
+            if (departmentReportPeriod.getCorrectionDate() != null) {
+                strCorrPeriod = ", с датой сдачи корректировки " + departmentReportPeriod.getCorrectionDate().format("dd.MM.yyyy");
+            }
+            logger.error("Спецотчет \"%s\" не сформирован, т.к. в форме %d, Период %s, Подразделение %s отсутствуют данные для формирования спецотчета",
+                    scriptSpecificReportHolder.declarationSubreport?.name,
+                    declarationData.id,
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                    department.name)
+            return
+        }
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
                 createSpecificReportPersonDb();
@@ -665,6 +682,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         def sb;
         try {
             while (reader.hasNext()) {
+                ScriptUtils.checkInterrupted()
                 XMLEvent event = reader.nextEvent()
 
                 if (event.isCharacters() && ((Characters) event).isWhiteSpace()) {
@@ -808,7 +826,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
     NdflPerson transformNdflPersonNode(NodeChild node) {
         NdflPerson ndflPerson = new NdflPerson()
-        ndflPerson.inp = toString((GPathResult) node.getProperty( '@ИНП'))
+        ndflPerson.inp = toString((GPathResult) node.getProperty('@ИНП'))
         ndflPerson.snils = toString((GPathResult) node.getProperty('@СНИЛС'))
         ndflPerson.lastName = toString((GPathResult) node.getProperty('@ФамФЛ'))
         ndflPerson.firstName = toString((GPathResult) node.getProperty('@ИмяФЛ'))
@@ -972,7 +990,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return personPrepayment;
     }
 
-    Integer toInteger(GPathResult  xmlNode) {
+    Integer toInteger(GPathResult xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
             try {
                 return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Integer.valueOf(xmlNode.text()) : null;
@@ -984,7 +1002,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    Long toLong(GPathResult  xmlNode) {
+    Long toLong(GPathResult xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
             try {
                 return xmlNode.text() != null && !xmlNode.text().isEmpty() ? Long.valueOf(xmlNode.text()) : null;
@@ -996,7 +1014,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    BigDecimal toBigDecimal(GPathResult  xmlNode) throws NumberFormatException {
+    BigDecimal toBigDecimal(GPathResult xmlNode) throws NumberFormatException {
         if (xmlNode != null && !xmlNode.isEmpty()) {
             try {
                 return xmlNode.text() != null && !xmlNode.text().isEmpty() ? new BigDecimal(xmlNode.text()) : null;
@@ -1008,7 +1026,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    LocalDateTime toDate(GPathResult  xmlNode) {
+    LocalDateTime toDate(GPathResult xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
             if (xmlNode.text() != null && !xmlNode.text().isEmpty()) {
                 LocalDateTime date = LocalDateTime.parse(xmlNode.text(), DateTimeFormat.forPattern(DATE_FORMAT));
@@ -1024,7 +1042,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    String toString(GPathResult  xmlNode) {
+    String toString(GPathResult xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
             return xmlNode.text() != null && !xmlNode.text().isEmpty() ? StringUtils.cleanString(xmlNode.text()) : null;
         } else {
@@ -1040,7 +1058,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-     //>------------------< REF BOOK >----------------------<
+    //>------------------< REF BOOK >----------------------<
 
     // Дата начала отчетного периода
     def periodStartDate = null
@@ -1197,6 +1215,22 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             if (declarationList.isEmpty()) {
                 logger.warn("Отсутствуют отчетные налоговые формы в некорректировочном периоде. Отчетные налоговые формы не будут сформированы текущем периоде")
             }
+        }
+    }
+
+    void initConfiguration(){
+        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
+        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
+        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
+        if (showTiming.equals("1")) {
+            this.showTiming = true;
+        }
+        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
+    }
+
+    void logForDebug(String message, Object... args) {
+        if (showTiming) {
+            logger.info(message, args);
         }
     }
 }

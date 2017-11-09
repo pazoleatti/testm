@@ -1,36 +1,44 @@
-<div id="ndfl" style="height: 90%;">
-    <!--Заголовок-->
-    <div class="row" style="min-width: 1400px;">
-        <div class="header-col" style="margin-left: 15px;">
-            <h1>{{::'locks.title' | translate}}</h1>
+<div class="row">
+    <div class="header-col" style="margin: 14px 0 0 28px;">
+        <h1>{{::'locks.title' | translate}}:</h1>
+    </div>
+</div>
+<div id="locks" class="container-grid box-shadow-block" >
+    <div class="top-wrapper" style="min-height: 50px; margin-bottom: -17px">
+
+        <!--Панель кнопок -->
+        <div class="button_panel">
+            <div class="btn-toolbar" role="toolbar">
+                <span>
+                    <!-- Удалить блокировку -->
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="deleteLock()" data-ng-disabled="locksGrid.value.length == 0">
+                        <span data-translate-once="locks.button.delete"></span>
+                    </button>
+                </span>
+                <span>
+                    <!--Фильтр-->
+                    <input style="float: left; margin-right: 4px; margin-top: 3px;" type="text" data-ng-model="searchFilter.filter" />
+                </span>
+                <span>
+                    <!--Найти-->
+                    <button type="button" class="btn btn-default"
+                            data-ng-click="refreshGrid(1)">
+                        <span data-translate-once="locks.button.search"></span>
+                    </button>
+                </span>
+            </div>
         </div>
     </div>
 
-    <hr>
-
-    <div class="form100" style="height:66%;">
-        <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
-            <!-- Удалить блокировку -->
-            <button type="button" class="btn btn-default"
-                    data-ng-click="deleteLock()" data-ng-disabled="locksGrid.value.length == 0">
-                <span data-translate-once="locks.button.delete"></span>
-            </button>
-            <!--Фильтр-->
-            <input type="text" data-ng-model="searchFilter.filter" />
-            <!--Найти-->
-            <button type="button" class="btn btn-default"
-                    data-ng-click="refreshGrid(1)">
-                <span data-translate-once="locks.button.search"></span>
-            </button>
-        </div>
-        <div data-aplana-grid
-             data-grid-fill-space="true"
-             data-grid-fill-space-container-selector=".form100"
-             data-grid-fill-space-container-selector-top=".container-grid-top"
-             data-grid-options="locksGrid.options"
-             data-grid-ctrl="locksGrid.ctrl"
-             data-ng-model="locksGrid.value"
-             id="locksTable"
-             style="float: left; width: 100%; margin-top: 5px;"></div>
-    </div>
+    <!-- Таблица -->
+    <div data-aplana-grid
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector=".cbr-page-layout__view"
+         data-grid-fill-space-container-selector-top=".top-wrapper"
+         data-grid-options="locksGrid.options"
+         data-grid-ctrl="locksGrid.ctrl"
+         data-ng-model="locksGrid.value"
+         id="locksTable"
+         style="float: left; width: 100%;"></div>
 </div>

@@ -36,11 +36,12 @@ public class GetLogEntriesHandler extends AbstractActionHandler<GetLogEntriesAct
             return result;
         }
 
-        PagingResult<LogEntry> logEntries = logEntryService.get(action.getUuid(), action.getStart(), action.getLength());
+        PagingParams pagingParams = PagingParams.getInstance(action.getStart() / action.getLength() + 1, action.getLength());
+        PagingResult<LogEntry> logEntries = logEntryService.fetch(action.getUuid(), pagingParams);
 
         List<GWTLogEntry> listGwtLogEntries = new ArrayList<GWTLogEntry>();
 
-        for (LogEntry logEntry:
+        for (LogEntry logEntry :
                 logEntries) {
             GWTLogEntry gwtLogEntry = new GWTLogEntry();
             gwtLogEntry.setLogId(logEntry.getLogId());
@@ -54,7 +55,7 @@ public class GetLogEntriesHandler extends AbstractActionHandler<GetLogEntriesAct
             listGwtLogEntries.add(gwtLogEntry);
         }
 
-        PagingResult<GWTLogEntry>  gwtLogEntries = new PagingResult<GWTLogEntry>(listGwtLogEntries,logEntries.getTotalCount());
+        PagingResult<GWTLogEntry> gwtLogEntries = new PagingResult<GWTLogEntry>(listGwtLogEntries, logEntries.getTotalCount());
 
         result.setLogEntries(gwtLogEntries);
         result.setLogEntriesCount(logEntryService.getLogCount(action.getUuid()));

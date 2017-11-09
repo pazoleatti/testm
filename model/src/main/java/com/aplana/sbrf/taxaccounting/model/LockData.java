@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.util.Date;
+import org.joda.time.LocalDateTime;
 
 /**
  * Модельный класс с информацией о блокировке
@@ -20,7 +20,7 @@ public final class LockData implements SecuredEntity {
     /* Код пользователя, установившего блокировку*/
     private int userId;
     /* Дата установки блокировки */
-    private Date dateLock;
+    private LocalDateTime dateLock;
     /* Описание блокировки */
     private String description;
     /* Идентификатор асинхронной задачи, связанной с блокировкой */
@@ -71,11 +71,11 @@ public final class LockData implements SecuredEntity {
         this.userId = userId;
     }
 
-    public Date getDateLock() {
+    public LocalDateTime getDateLock() {
         return dateLock;
     }
 
-    public void setDateLock(Date dateLock) {
+    public void setDateLock(LocalDateTime dateLock) {
         this.dateLock = dateLock;
     }
 

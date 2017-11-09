@@ -12,7 +12,7 @@ import groovy.util.slurpersupport.GPathResult
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import groovy.transform.TypeChecked
@@ -49,13 +49,13 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService
-import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
-import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.RefBookService
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
@@ -91,7 +91,6 @@ class Report2Ndfl extends AbstractScriptClass {
     Integer partNumber
     String applicationVersion
     Map<String, Object> paramMap
-    DeclarationService declarationService
 
     private Report2Ndfl() {
     }
@@ -170,9 +169,6 @@ class Report2Ndfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("paramMap")) {
             this.paramMap = (Map<String, Object>) scriptClass.getBinding().getProperty("paramMap")
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
         reportType = declarationData.declarationTemplateId == NDFL_2_1_DECLARATION_TYPE ? "2-НДФЛ (1)" : "2-НДФЛ (2)"
     }

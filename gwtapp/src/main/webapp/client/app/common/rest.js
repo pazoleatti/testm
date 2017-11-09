@@ -141,7 +141,7 @@
          * @description Общие параметры
          */
         .factory('CommonParams', ['$resource', function ($resource) {
-            return $resource('controller/rest/getCommonParams', {}, {
+            return $resource('controller/rest/fetchCommonParams', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
             });
         }])

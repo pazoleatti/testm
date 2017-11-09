@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.script.*;
+import com.aplana.sbrf.taxaccounting.script.service.*;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import net.sf.sevenzipjbinding.IInArchive;
 

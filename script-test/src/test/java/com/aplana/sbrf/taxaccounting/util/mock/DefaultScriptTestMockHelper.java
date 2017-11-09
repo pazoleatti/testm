@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util.mock;
 
-import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
@@ -9,12 +9,12 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.script.service.*;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.script.*;
-import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.script.impl.ReportPeriodServiceImpl;
+import com.aplana.sbrf.taxaccounting.script.service.impl.DeclarationServiceImpl;
+import com.aplana.sbrf.taxaccounting.script.service.impl.ImportServiceImpl;
+import com.aplana.sbrf.taxaccounting.script.service.impl.ReportPeriodServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.mockito.invocation.InvocationOnMock;

@@ -15,6 +15,7 @@ class Check extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     DepartmentService departmentService
     ReportPeriodService reportPeriodService
+    DeclarationService declarationService
 
     final FORM_NAME_NDFL6 = "6-НДФЛ"
     final FORM_NAME_NDFL2 = "2-НДФЛ (1)"
@@ -69,6 +70,9 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
+        }
+        if (scriptClass.getBinding().hasVariable("declarationService")) {
+            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 

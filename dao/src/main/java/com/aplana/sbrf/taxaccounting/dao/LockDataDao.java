@@ -3,8 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import org.joda.time.LocalDateTime;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,7 +28,7 @@ public interface LockDataDao extends PermissionDao {
      * @param lockDate дата начала блокировки
      * @return возвращает null, если блокировка по данному коду не найдена
      */
-    LockData get(String key, Date lockDate);
+    LockData get(String key, LocalDateTime lockDate);
 
 	/**
 	 * Создает новую блокировку

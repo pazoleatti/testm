@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Модель блокировок для отображения в таблице
@@ -19,7 +20,7 @@ public class LockDataItem implements Serializable {
     /* Полное имя пользователя, установившего блокировку*/
     private String user;
     /* Дата установки блокировки */
-    private Date dateLock;
+    private LocalDateTime dateLock;
 
     public long getId() {
         return id;
@@ -37,11 +38,11 @@ public class LockDataItem implements Serializable {
         this.key = key;
     }
 
-    public Date getDateLock() {
+    public LocalDateTime getDateLock() {
         return dateLock;
     }
 
-    public void setDateLock(Date dateLock) {
+    public void setDateLock(LocalDateTime dateLock) {
         this.dateLock = dateLock;
     }
 

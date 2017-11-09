@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -19,7 +20,7 @@ public interface LogEntryDao {
      * Создание записей в логах
      *
      * @param logEntries список новых логов
-     * @param logId идентификатор группы логов
+     * @param logId      идентификатор группы логов
      */
     void save(List<LogEntry> logEntries, String logId);
 
@@ -27,8 +28,8 @@ public interface LogEntryDao {
      * Добавляет логи в уже существующую группу
      *
      * @param logEntries список новых логов
-     * @param logId идентификатор группы логов
-     * @param first добавить в начало списка
+     * @param logId      идентификатор группы логов
+     * @param first      добавить в начало списка
      */
     void update(List<LogEntry> logEntries, String logId, boolean first);
 
@@ -42,11 +43,10 @@ public interface LogEntryDao {
     /**
      * Получение страницы логов по идентификатору группы
      *
-     * @param logId идентификатор группы логов
-     * @param length размер страницы
-     * @param offset смещение
+     * @param logId        идентификатор группы логов
+     * @param pagingParams Параметры пейджинга
      */
-    PagingResult<LogEntry> get(@NotNull String logId, int offset, int length);
+    PagingResult<LogEntry> fetch(@NotNull String logId, PagingParams pagingParams);
 
     /**
      * Получает минимальное значение order у группы логов
@@ -66,6 +66,7 @@ public interface LogEntryDao {
 
     /**
      * Расчитывает количество сообщений на каждом уровне важности
+     *
      * @param logId идентификатор группы логов
      */
     Map<LogLevel, Integer> countLogLevel(@NotNull String logId);

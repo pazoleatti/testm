@@ -1,8 +1,8 @@
 package form_template.ndfl.report_6ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
-import com.aplana.sbrf.taxaccounting.service.script.*
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.*
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 
@@ -15,7 +15,6 @@ class Check extends AbstractScriptClass {
     DepartmentReportPeriodService departmentReportPeriodService
     DepartmentService departmentService
     ReportPeriodService reportPeriodService
-    DeclarationService declarationService
 
     final FORM_NAME_NDFL6 = "6-НДФЛ"
     final FORM_NAME_NDFL2 = "2-НДФЛ (1)"
@@ -70,9 +69,6 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 

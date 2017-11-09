@@ -75,7 +75,9 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         // пользователь может удалить оповещение:
         // если заполнен ID пользователя-получателя (для любой роли) или ID роли получателя (для любой роли)
         // или ID подразделения-получателя (для роли Контролёр УНП или Контролёр НС)
-        return notification.getUserId() > 0 || notification.getRoleId() > 0 ||
+        //ID пользователя и роли проверяются на != null, а не на > 0 (как было раньше), потому что в JDBC, если поле
+        //в таблице содержит значение NULL, то при чтении возвращается 0, в querydsl возвращается null
+        return notification.getUserId() != null || notification.getRoleId() != null ||
                 (notification.getReceiverDepartmentId() != null && (user.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP) ||
                                 (user.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS) && user.getDepartmentId() == notification.getReceiverDepartmentId())));
 

@@ -2,7 +2,7 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.service.script.*
+import com.aplana.sbrf.taxaccounting.script.service.*
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 
@@ -15,7 +15,6 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
     DeclarationData declarationData
     DepartmentService departmentService
     DepartmentReportPeriodService departmentReportPeriodService
-    DeclarationService declarationService
 
     final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
     final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
@@ -41,9 +40,6 @@ class MoveAcceptedToCreated extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 

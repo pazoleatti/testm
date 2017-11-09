@@ -1,0 +1,24 @@
+<div class="row">
+    <div class="filter-col w450" style=" width: 800px;">
+        <div class="form-group" style=" height : 130px; display: flex; align-items: center">
+            <div class="col-md-3">
+                <label style="width: 200px; vertical-align: middle" class="control-label">{{parameter.code}}:</label>
+            </div>
+            <div class="col-md-9">
+                <input data-ng-model="parameter.value"
+                       style=" vertical-align: middle; width: 320px"
+                       value={{parameter.value}}
+                       type="text" class="form-control"
+                       title="value"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" id="saveButton" data-ng-click="save()">
+        <span data-translate-once="button.save"></span>
+    </button>
+    <button type="button" class="btn btn-danger" id="closeButton" data-ng-click="close()">
+        <span data-translate-once="button.close"></span>
+    </button>
+</div>

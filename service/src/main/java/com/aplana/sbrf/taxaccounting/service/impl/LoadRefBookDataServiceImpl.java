@@ -117,7 +117,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         if (checkPathArchiveError(userInfo, logger, taskId)) {
             asyncManager.updateState(taskId, AsyncTaskState.FIAS_IMPORT);
             try {
-                long maxFileSize = asyncTaskDao.getTaskTypeData(AsyncTaskType.LOAD_ALL_TF.getAsyncTaskTypeId()).getTaskLimit();
+                long maxFileSize = asyncTaskDao.getTaskTypeData(AsyncTaskType.LOAD_ALL_TRANSPORT_DATA.getAsyncTaskTypeId()).getTaskLimit();
                 importCounter = importRefBook(userInfo, logger, ConfigurationParam.FIAS_UPLOAD_DIRECTORY,
                         fiasMappingMap, FIAS_NAME, true, loadedFileNameList, taskId, maxFileSize);
             } catch (Exception e) {

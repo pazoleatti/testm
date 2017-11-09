@@ -65,7 +65,8 @@ public class RefBookValuesController {
     /**
      * Получение доступных (согласно правам доступа пользователя) значений справочника с фильтрацией по наименованию подразделения и пейджингом
      *
-     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
      * @param pagingParams Параметры пейджинга
      * @return Страница списка значений справочника
      */
@@ -80,7 +81,8 @@ public class RefBookValuesController {
      * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом
      *
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
+     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                       наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
      * @param reportPeriodId ID отчетного периода
      * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
@@ -96,17 +98,13 @@ public class RefBookValuesController {
      * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом для создания отчётности
      *
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части наименования
-     * @param reportPeriodId ID отчетного периода
-     * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
 
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriodForReport")
-    public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriodForReport(@RequestParam String name, @RequestParam Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
+    public List<RefBookDepartment> fetchDepartmentsWithOpenPeriodForReport() {
         TAUser user = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchDepartmentWithOpenPeriodForReport(user, name, reportPeriodId, pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
+        return refBookDepartmentDataService.fetchDepartmentWithOpenPeriodForReport(user);
     }
 
     /**

@@ -5,16 +5,16 @@
      * @description Модуль для создания налоговых форм
      */
 
-    angular.module('app.createDeclaration', ['ui.router', 'app.rest', 'app.modals', 'app.formatters'])
+    angular.module('app.createDeclaration', ['ui.router', 'app.rest', 'app.formatters'])
 
     /**
      * @description Контроллер МО Создания налоговой формы
      */
-        .controller('createDeclarationFormCtrl', ["$scope", "$rootScope", "$http", '$state', '$stateParams', "$uibModalInstance", "$filter",
+        .controller('createDeclarationFormCtrl', ["$scope", "$rootScope", "$http", '$state', '$stateParams', "$modalInstance", "$filter",
             "RefBookValuesResource", 'DeclarationTypeForCreateResource', "APP_CONSTANTS",
-            'data', 'appModals',
-            function ($scope, $rootScope, $http, $state, $stateParams, $uibModalInstance, $filter,
-                      RefBookValuesResource, DeclarationTypeForCreateResource, APP_CONSTANTS, data, appModals) {
+            '$shareData', '$dialogs',
+            function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $filter,
+                      RefBookValuesResource, DeclarationTypeForCreateResource, APP_CONSTANTS, $shareData, $dialogs) {
                 //По нажатию на кнопку пользователь может создать только консолидированную форму
                 $scope.declarationKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED;
 
@@ -25,8 +25,8 @@
                     department: $rootScope.user.department
                 };
 
-                if (data.latestSelectedPeriod) {
-                    $scope.declarationData.period = data.latestSelectedPeriod;
+                if ($shareData.latestSelectedPeriod) {
+                    $scope.declarationData.period = $shareData.latestSelectedPeriod;
                 } else {
                     $scope.$watch("latestReportPeriod.period", function (value) {
                         $scope.declarationData.period = value;
@@ -37,6 +37,8 @@
                  * Сохранение
                  */
                 $scope.save = function () {
+                    // Запоминаем период выбранный пользователем
+                    $rootScope.latestSelectedPeriod = $scope.declarationData.period;
                     if ($scope.declarationData.period && $scope.declarationData.department && $scope.declarationData.declarationType) {
                         $http({
                             method: "POST",
@@ -47,10 +49,12 @@
                                 periodId: $scope.declarationData.period.id
                             }
                         }).then(function (response) {
-                            $uibModalInstance.close(response);
+                            $modalInstance.close(response);
                         });
                     } else {
-                        appModals.error($filter('translate')('DIALOGS_ERROR'), $filter('translate')('createDeclaration.errorMessage'));
+                        $dialogs.errorDialog({
+                            content: $filter('translate')('createDeclaration.errorMessage')
+                        });
                     }
                 };
 
@@ -58,9 +62,14 @@
                  * Закрытие окна
                  */
                 $scope.close = function () {
-                    appModals.confirm($filter('translate')('createDeclaration.cancel.header'), $filter('translate')('createDeclaration.cancel.text'))
-                        .result.then(function () {
-                        $uibModalInstance.dismiss('Canceled');
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('createDeclaration.cancel.header'),
+                        content: $filter('translate')('createDeclaration.cancel.text'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $modalInstance.dismiss('Canceled');
+                        }
                     });
                 };
             }]);

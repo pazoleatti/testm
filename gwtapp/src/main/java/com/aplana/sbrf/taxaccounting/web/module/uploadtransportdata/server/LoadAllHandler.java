@@ -56,7 +56,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         if (lockData == null) {
             try {
                 try {
-                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TF, userInfo, AsyncQueue.LONG);
+                    AsyncTaskData taskData = asyncManager.executeTask(key, AsyncTaskType.LOAD_ALL_TRANSPORT_DATA, userInfo, AsyncQueue.LONG);
                     asyncManager.addUserWaitingForTask(taskData.getId(), userId);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {

@@ -4,11 +4,11 @@
     /**
      * @description Модуль для работы со формами ндфл
      */
-    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.modals', 'app.rest', 'app.createDeclaration', 'app.logPanel', 'app.formatters', 'app.select.common'])
+    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.rest', 'app.createDeclaration', 'app.logPanel', 'app.formatters', 'app.select.common'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflJournal', {
                 url: '/taxes/ndflJournal',
-                templateUrl: 'client/app/taxes/ndfl/ndflJournal.html',
+                templateUrl: 'client/app/taxes/ndfl/ndflJournal.html?v=${buildUuid}',
                 controller: 'ndflJournalCtrl',
                 params: {uuid: null}
             });
@@ -18,8 +18,8 @@
          * @description Контроллер списка форм
          */
         .controller('ndflJournalCtrl', [
-            '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', 'appModals', '$logPanel', 'PermissionChecker', '$http',
-            function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, appModals, $logPanel, PermissionChecker, $http) {
+            '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http',
+            function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http) {
                 $scope.declarationCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
 
                 if ($stateParams.uuid) {
@@ -36,7 +36,10 @@
                     },
                     ajaxFilter: [],
                     isClear: false,
-                    filterName: 'ndflJournalFilter'
+                    filterName: 'ndflJournalFilter',
+                    onCreateComplete: function () {
+                        $scope.refreshGrid();
+                    }
                 };
 
                 // Флаг отображения кнопки "Сбросить"
@@ -63,12 +66,18 @@
                 $scope.searchFilter.resetFilterParams = function () {
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
                 };
-
+                // Запоминаем самый поздний период для создания налоговой формы
+                // Флаг на загрузку страницы, когда страница загружается -
+                // значение последнего выбранного периода не должно сбрасываться
+                var isLoadingPage = true;
                 $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
                     if (selectedPeriods && selectedPeriods.length > 0) {
-                        $scope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                        $rootScope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                        isLoadingPage = false;
                     } else {
-                        $scope.latestSelectedPeriod = null;
+                        if (!isLoadingPage) {
+                            $rootScope.latestSelectedPeriod = null;
+                        }
                     }
                 });
 
@@ -153,6 +162,7 @@
                         sortorder: "desc",
                         hidegrid: false,
                         multiselect: true,
+                        disableAutoLoad: true,
                         ondblClickRow: function (rowId) {
                             $state.go("ndfl", {
                                 declarationId: rowId
@@ -173,20 +183,31 @@
                  * Показ МО "Создание налоговой формы"
                  */
                 $scope.showCreateDeclarationModal = function () {
-                    var modal = appModals.create('client/app/taxes/ndfl/createDeclaration.html', 'createDeclarationFormCtrl',
-                        {latestSelectedPeriod: $scope.latestSelectedPeriod}, {size: 'md'});
-                    modal.result.then(function (response) {
-                        if (response.data && response.data.entityId && response.data.entityId !== null) {
-                            $state.go('ndfl', {
-                                declarationDataId: response.data.entityId,
-                                uuid: response.data.uuid
-                            });
-                        } else {
-                            if (response.data && response.data.uuid && response.data.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
+                    $aplanaModal.open({
+                        title: $filter('translate')('createDeclaration.title'),
+                        templateUrl: 'client/app/taxes/ndfl/createDeclaration.html?v=${buildUuid}',
+                        controller: 'createDeclarationFormCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    latestSelectedPeriod: $rootScope.latestSelectedPeriod
+                                };
                             }
                         }
-                    });
+                    }).result.then(
+                        function (response) {
+                            if (response.data && response.data.entityId && response.data.entityId !== null) {
+                                $state.go('ndfl', {
+                                    declarationDataId: response.data.entityId,
+                                    uuid: response.data.uuid
+                                });
+                            } else {
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
+                            }
+                        });
                 };
 
                 /**
@@ -258,11 +279,19 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {
-                        header: $filter('translate')('title.indicateReasonForReturn'),
-                        msg: $filter('translate')('title.reasonForReturn')
-                    }, {size: 'md'})
-                        .result.then(
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.indicateReasonForReturn'),
+                        templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}',
+                        controller: 'returnToCreatedCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    msg: $filter('translate')('title.reasonForReturn')
+                                };
+                            }
+                        }
+                    }).result.then(
                         function (reason) {
                             $http({
                                 method: "POST",
@@ -283,9 +312,11 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Удалить"
                  */
                 $scope.delete = function () {
-                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.deleteDeclarations'))
-                        .result.then(
-                        function () {
+                    $dialogs.confirmDialog({
+                        content: $filter('translate')('title.deleteDeclarations'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/delete",
@@ -297,7 +328,8 @@
                                 var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
                                 $state.go($state.current, params, {reload: true});
                             });
-                        });
+                        }
+                    });
                 };
             }])
 

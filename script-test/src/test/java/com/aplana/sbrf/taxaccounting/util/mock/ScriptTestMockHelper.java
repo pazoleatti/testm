@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.util.mock;
 
-import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService;
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.script.*;
+import com.aplana.sbrf.taxaccounting.script.service.*;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 
 import java.util.Map;

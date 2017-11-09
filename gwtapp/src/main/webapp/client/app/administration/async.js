@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('asyncTaskList', {
                 url: '/administration/async',
-                templateUrl: 'client/app/administration/async.html',
+                templateUrl: 'client/app/administration/async.html?v=${buildUuid}',
                 controller: 'asyncCtrl'
             });
         }])
@@ -16,8 +16,8 @@
         /**
          * @description Контроллер страницы "Список блокировок"
          */
-        .controller('asyncCtrl', ['$scope', '$filter', 'asyncTaskResource', '$http',
-            function ($scope, $filter, asyncTaskResource, $http) {
+        .controller('asyncCtrl', ['$scope', '$filter', 'asyncTaskResource', '$http', 'APP_CONSTANTS',
+            function ($scope, $filter, asyncTaskResource, $http, APP_CONSTANTS) {
 
                 $scope.searchFilter = {};
 
@@ -40,7 +40,6 @@
                                 filter: $scope.searchFilter.filter
                             };
                         },
-                        height: 250,
                         colNames: [
                             $filter('translate')('async.title.number'),
                             $filter('translate')('async.title.createDate'),
@@ -70,8 +69,8 @@
                             },
                             {name: 'description', index: 'description', width: 350}
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
+                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         sortname: 'id',
                         viewrecords: true,
                         sortorder: "asc",

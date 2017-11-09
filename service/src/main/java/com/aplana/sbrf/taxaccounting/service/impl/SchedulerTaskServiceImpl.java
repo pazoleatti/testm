@@ -52,7 +52,7 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
             item.setState(task.getSchedule() != null ? (task.getActive() == 1 ? "Активна" : "Остановлена") : "Не задано расписание");
             item.setModificationDate(task.getModificationDate().toString("dd-MM-yyyy, HH:mm:ss"));
             item.setLastFireTime(task.getLastFireDate() != null ? task.getLastFireDate().toString("dd-MM-yyyy, HH:mm:ss") : "");
-            Date nextFireTime = schedulerService.nextExecutionTime(task.getTaskName());
+            Date nextFireTime = schedulerService.nextExecutionTime(SchedulerTask.getByTaskId(task.getId()).name());
             item.setNextFireTime(nextFireTime != null ? new SimpleDateFormat("dd-MM-yyyy, HH:mm:ss").format(nextFireTime) : "");
             records.add(item);
         }

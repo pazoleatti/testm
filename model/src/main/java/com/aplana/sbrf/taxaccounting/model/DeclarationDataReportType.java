@@ -19,6 +19,7 @@ public class DeclarationDataReportType implements Serializable {
 
     //Какая то фигня, которая не связана с асинхронными задачами
     public static final DeclarationDataReportType JASPER_DEC = new DeclarationDataReportType(AsyncTaskType.JASPER_DEC, null);
+    //TODO: (dloshkarev) судя по всему это уже не используется, т.к для импорта ставится блокировка с LockData.LockObjects.LOAD_TRANSPORT_DATA
     public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(AsyncTaskType.IMPORT_TF_DEC, null);
     public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(AsyncTaskType.EDIT_FILE_COMMENT_DEC, null);
     public static final DeclarationDataReportType DELETE_DEC = new DeclarationDataReportType(AsyncTaskType.DELETE_DEC, null);
