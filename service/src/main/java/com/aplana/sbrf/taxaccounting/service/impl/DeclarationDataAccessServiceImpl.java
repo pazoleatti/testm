@@ -136,7 +136,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
         // Просматривать декларацию может только контролёр УНП и контролёр
         // текущего уровня для обособленных подразделений
-        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId()), declaration.getAsnuId(), checkedSet, null);
+        checkRolesForReading(userInfo, declarationTemplate, departmentReportPeriodDao.findOne(declaration.getDepartmentReportPeriodId()), declaration.getAsnuId(), checkedSet, null);
     }
 
     private void canCreate(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod, Long asnuId,
@@ -179,7 +179,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Переход в состояние \"" + State.ACCEPTED.getTitle() + "\" из текущего состояния невозможен");
         }
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(declaration.getDepartmentReportPeriodId());
 
         // Нельзя принимать декларацию в закрытом периоде
         if (!departmentReportPeriod.isActive()) {
@@ -204,7 +204,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Налоговая форма уже находиться в статусе \"Создана\"");
         }
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(declaration.getDepartmentReportPeriodId());
 
         // Нельзя возвращать декларацию в закрытом периоде
         if (!departmentReportPeriod.isActive()) {
@@ -229,7 +229,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Налоговая форма должна находиться в статусе \"Создана\"");
         }
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(declaration.getDepartmentReportPeriodId());
 
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
@@ -244,7 +244,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Налоговая форма принята");
         }
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(declaration.getDepartmentReportPeriodId());
 
         // Нельзя обновить декларацию в закрытом периоде
         if (!departmentReportPeriod.isActive()) {
@@ -265,7 +265,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Налоговая форма должна находиться в статусе \"Принята\"");
         }
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(declaration.getDepartmentReportPeriodId());
 
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 
@@ -289,7 +289,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
             throw new AccessDeniedException("Налоговая форма должна находиться в статусе отличной от \"Принята\"");
         }
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.findOne(declaration.getDepartmentReportPeriodId());
 
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declaration.getDeclarationTemplateId());
 

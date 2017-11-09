@@ -149,6 +149,27 @@ public class RefBookValuesController {
     }
 
     /**
+     * Получение всех типов Отчетных периодов по имени
+     *
+     * @return Список периодов
+     */
+    @GetMapping(value = "/rest/refBookValues/reportPeriodType")
+    public JqgridPagedList<ReportPeriodType> fetchReportPeriodsType(@RequestParam PagingParams pagingParams) {
+        PagingResult<ReportPeriodType> result = periodService.getPeriodType(pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение типа Отчетных периодов по id
+     *
+     * @return Список периодов
+     */
+    @GetMapping(value = "/rest/refBookValues/reportPeriodTypeById")
+    public ReportPeriodType fetchReportPeriodsTypeById(@RequestParam Long id) {
+        return periodService.getPeriodTypeById(id);
+    }
+
+    /**
      * Получение открытых Отчетных периодов
      *
      * @return Список периодов
@@ -156,6 +177,6 @@ public class RefBookValuesController {
     @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=openPeriods")
     public List<ReportPeriod> fetchOpenReportPeriods() {
         TAUser user = securityService.currentUserInfo().getUser();
-        return new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
+        return new ArrayList<>(periodService.getOpenForUser(user, TaxType.NDFL));
     }
 }

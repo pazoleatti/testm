@@ -2,8 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 
 import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
@@ -75,12 +75,12 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
     }
 
     @Override
-    public void setPeriods(List<ReportPeriod> periods) {
+    public void setPeriods(List<ReportPeriodViewModel> periods) {
         dereferenceValue = new HashMap<Integer, String>();
         reportPeriodDates = new HashMap<Integer, Pair<Date, Date>>();
         reportPeriodYears = new HashMap<Integer, Integer>();
         reportPeriodIds = new HashSet<Integer>();
-        for (ReportPeriod reportPeriod : periods) {
+        for (ReportPeriodViewModel reportPeriod : periods) {
             reportPeriodIds.add(reportPeriod.getId());
             dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
             reportPeriodDates.put(reportPeriod.getId(), new Pair<Date, Date>(reportPeriod.getStartDate(), reportPeriod.getEndDate()));

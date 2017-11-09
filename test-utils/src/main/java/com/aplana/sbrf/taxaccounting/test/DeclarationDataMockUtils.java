@@ -30,7 +30,7 @@ public final class DeclarationDataMockUtils {
 	}
 	public static DeclarationData mockDeclarationData(long id, State state, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod) {
 		DeclarationData d = mockDeclarationData(id, departmentReportPeriod.getDepartmentId(), state, declarationTemplateId, departmentReportPeriod.getReportPeriod().getId());
-        Integer departmentReportPeriodId = departmentReportPeriod.getId();
+        Long departmentReportPeriodId = departmentReportPeriod.getId();
         when(d.getDepartmentReportPeriodId()).thenReturn(departmentReportPeriodId);
 		return d;
 	}

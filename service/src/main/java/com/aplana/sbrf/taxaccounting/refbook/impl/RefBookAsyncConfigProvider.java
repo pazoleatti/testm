@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +64,7 @@ public class RefBookAsyncConfigProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
+    public List<Pair<Long, Long>> checkRecordExistence(LocalDateTime version, String filter) {
         throw new UnsupportedOperationException();
     }
 

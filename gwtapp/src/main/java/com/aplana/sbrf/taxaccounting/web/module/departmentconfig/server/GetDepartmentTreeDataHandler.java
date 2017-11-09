@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -73,12 +74,30 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
             }
 
             result.setAvailableDepartments(avSet);
-            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(currUser.getDepartmentId())));
+            result.setReportPeriods(initReportPeriodModelList(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(currUser.getDepartmentId()))));
         } else {
-            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(action.getDepartmentId())));
+            result.setReportPeriods(initReportPeriodModelList(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(action.getDepartmentId()))));
         }
 
         return result;
+    }
+
+    private List<ReportPeriodViewModel> initReportPeriodModelList(List<ReportPeriod> reportPeriods) {
+        List<ReportPeriodViewModel> models = new ArrayList<>();
+        for (ReportPeriod reportPeriod : reportPeriods){
+            ReportPeriodViewModel model = new ReportPeriodViewModel();
+            model.setId(reportPeriod.getId());
+            model.setName(reportPeriod.getName());
+            model.setAccName(reportPeriod.getAccName());
+            model.setOrder(reportPeriod.getOrder());
+            model.setTaxPeriod(reportPeriod.getTaxPeriod());
+            model.setStartDate(reportPeriod.getStartDate().toDate());
+            model.setEndDate(reportPeriod.getEndDate().toDate());
+            model.setCalendarStartDate(reportPeriod.getCalendarStartDate().toDate());
+            model.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+            models.add(model);
+        }
+        return models;
     }
 
     @Override

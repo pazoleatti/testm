@@ -2,9 +2,12 @@ package com.aplana.sbrf.taxaccounting.service;
 
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import org.joda.time.LocalDateTime;
 
-import java.util.Date;
 import java.util.List;
 
 public interface DepartmentReportPeriodService {
@@ -18,36 +21,37 @@ public interface DepartmentReportPeriodService {
      */
     List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
-    List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
+    List<Long> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     /**
      * Сохранение отчетноего периода подразделения
      */
-    int save(DepartmentReportPeriod departmentReportPeriod);
+    DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriod);
 
     void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
-    void updateActive(int id, boolean active);
+    void updateActive(long id, boolean active);
 
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
-    void updateActive(List<Integer> ids, Integer report_period_id, boolean active);
+    void updateActive(List<Long> ids, Integer report_period_id, boolean active);
 
     /**
      * Изменить дату корректировки
      */
-    void updateCorrectionDate(int id, Date correctionDate);
+    void updateCorrectionDate(Long id, LocalDateTime correctionDate);
 
     /**
      * Удаление отчетного периода подразделения
+     * @param id
      */
-    void delete(int id);
+    void delete(long id);
 
-    void delete(List<Integer> ids);
+    void delete(List<Long> ids);
 
     /**
      * Проверяет существование периода для подразделения
@@ -76,5 +80,23 @@ public interface DepartmentReportPeriodService {
      * @param correctionDate дата выбранного периода
      * @return true - если существует
      */
-    boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
+    boolean existLargeCorrection(int departmentId, int reportPeriodId, LocalDateTime correctionDate);
+
+
+    /**
+     * Возвращает отчетные периоды подразделений с фильтрацией и пагинацией
+     * @param departmentReportPeriodFilter - фильтр отчетных периодов подразделений
+     * @param pagingParams - параметры пагинации
+     * @return отчетные периоды подразделений
+     */
+    PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter departmentReportPeriodFilter, PagingParams pagingParams);
+
+    /**
+     * Проверка периода на декларации, которые не в статусе "Принят"
+     * @param id - параметры проверяемого периода
+     * @return uuid - идентификатор логгера
+     */
+    String checkHasNotAccepted(Long id);
+
+    DepartmentReportPeriod findOne(Long departmentRPId);
 }

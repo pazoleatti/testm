@@ -41,7 +41,11 @@
             'app.asyncTaskList',
             'app.filterUtils',
             'app.rest',
-            'app.formatters'
+            'app.formatters',
+            'app.reportPeriod',
+            'app.reportPeriodModal',
+            'app.reportPeriodTypeModal',
+            'app.deadlinePeriodModal'
         ])
         /**
          * @description Отображение модального окна с сообщением "Функционал находится в разработке".

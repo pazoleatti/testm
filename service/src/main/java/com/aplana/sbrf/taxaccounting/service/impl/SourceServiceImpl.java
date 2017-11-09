@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
+import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -15,6 +16,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +67,7 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private DepartmentReportPeriodService departmentReportPeriodService;
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
 
@@ -344,7 +347,7 @@ public class SourceServiceImpl implements SourceService {
                     }
                     if (!processedDestinations.contains(form.getId())) {
                         DepartmentReportPeriod drpCompare = form.getDrpComapreId() != null ?
-                                departmentReportPeriodService.get(form.getDrpComapreId()) : null;
+                                departmentReportPeriodDao.get(form.getDrpComapreId()) : null;
                         logger.warn(MessageGenerator.getFDMsg("",
                                 form.getType(),
                                 form.getFormKind().getTitle(),
@@ -947,15 +950,20 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart,
-                                                              Date periodEnd) {
+    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, LocalDateTime periodStart,
+                                                              LocalDateTime periodEnd) {
         QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDDTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
+    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd, QueryParams queryParams) {
         return departmentDeclarationTypeDao.getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
+    }
+
+    @Override
+    public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, LocalDateTime periodStart, LocalDateTime periodEnd) {
+        return departmentDeclarationTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart.toDate(), periodEnd.toDate());
     }
 
     @Override

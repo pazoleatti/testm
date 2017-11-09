@@ -7,11 +7,13 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -50,11 +52,12 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
         } else {
             reportPeriods.addAll(periodService.getOpenForUser(userInfo.getUser(), action.getTaxType()));
         }
-        result.setReportPeriods(reportPeriods);
+
+        result.setReportPeriods(initReportPeriodModelList(reportPeriods));
 
         if (action.getReportPeriodId() != null) {
             // проверяем доступность для пользователя
-            for(ReportPeriod reportPeriod: reportPeriods)
+            for(ReportPeriodViewModel reportPeriod: initReportPeriodModelList(reportPeriods))
                 if (reportPeriod.getId().equals(action.getReportPeriodId())) {
                     result.setDefaultReportPeriod(reportPeriod);
                     break;
@@ -64,11 +67,11 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
             if (reportPeriods != null && !reportPeriods.isEmpty()) {
                 ReportPeriod maxPeriod = reportPeriods.get(0);
                 for (ReportPeriod per : reportPeriods) {
-                    if (per.getEndDate().after(maxPeriod.getEndDate())) {
+                    if (per.getEndDate().isAfter(maxPeriod.getEndDate())) {
                         maxPeriod = per;
                     }
                 }
-                result.setDefaultReportPeriod(maxPeriod);
+                result.setDefaultReportPeriod(toReportPeriod(maxPeriod));
             }
         }
         return result;
@@ -78,4 +81,38 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
 	public void undo(GetReportPeriodsAction getTaxPeriods, GetReportPeriodsResult getTaxPeriodsResult, ExecutionContext executionContext) throws ActionException {
 		//Do nothing
 	}
+
+    private List<ReportPeriodViewModel> initReportPeriodModelList(List<ReportPeriod> reportPeriods) {
+        List<ReportPeriodViewModel> models = new ArrayList<>();
+        for (ReportPeriod reportPeriod : reportPeriods){
+            ReportPeriodViewModel model = new ReportPeriodViewModel();
+            model.setId(reportPeriod.getId());
+            model.setName(reportPeriod.getName());
+            model.setAccName(reportPeriod.getAccName());
+            model.setOrder(reportPeriod.getOrder());
+            model.setTaxPeriod(reportPeriod.getTaxPeriod());
+            model.setStartDate(reportPeriod.getStartDate().toDate());
+            model.setEndDate(reportPeriod.getEndDate().toDate());
+            model.setCalendarStartDate(reportPeriod.getCalendarStartDate().toDate());
+            model.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+            models.add(model);
+        }
+        return models;
+    }
+
+    public ReportPeriodViewModel toReportPeriod(ReportPeriod selectedPeriod) {
+        ReportPeriodViewModel reportPeriod = new ReportPeriodViewModel();
+        reportPeriod.setId(selectedPeriod.getId());
+        reportPeriod.setName(selectedPeriod.getName());
+        reportPeriod.setAccName(selectedPeriod.getAccName());
+        reportPeriod.setOrder(selectedPeriod.getOrder());
+        reportPeriod.setTaxPeriod(selectedPeriod.getTaxPeriod());
+        reportPeriod.setStartDate(selectedPeriod.getStartDate().toDate());
+        reportPeriod.setEndDate(selectedPeriod.getEndDate().toDate());
+        reportPeriod.setCalendarStartDate(selectedPeriod.getCalendarStartDate().toDate());
+        reportPeriod.setDictTaxPeriodId(selectedPeriod.getDictTaxPeriodId());
+        return reportPeriod;
+    }
+
+
 }

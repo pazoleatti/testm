@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -61,8 +62,8 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		res.setFilterValues(declarationFilterValues);
 
         // Периоды, связанные с доступными подразделениями
-		res.setPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
-                new ArrayList<Integer>(declarationFilterValues.getDepartmentIds())));
+		res.setPeriods(initReportPeriodModelList(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
+                new ArrayList<Integer>(declarationFilterValues.getDepartmentIds()))));
 
 		List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
 		reportPeriods.addAll(periodService.getOpenForUser(currentUser.getUser(), action.getTaxType()));
@@ -109,4 +110,23 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
                      ExecutionContext executionContext) throws ActionException {
 		//Do nothing
 	}
+
+    private List<ReportPeriodViewModel> initReportPeriodModelList(List<ReportPeriod> reportPeriods) {
+        List<ReportPeriodViewModel> models = new ArrayList<>();
+        for (ReportPeriod reportPeriod : reportPeriods){
+            ReportPeriodViewModel model = new ReportPeriodViewModel();
+            model.setId(reportPeriod.getId());
+            model.setName(reportPeriod.getName());
+            model.setAccName(reportPeriod.getAccName());
+            model.setOrder(reportPeriod.getOrder());
+            model.setTaxPeriod(reportPeriod.getTaxPeriod());
+            model.setStartDate(reportPeriod.getStartDate().toDate());
+            model.setEndDate(reportPeriod.getEndDate().toDate());
+            model.setCalendarStartDate(reportPeriod.getCalendarStartDate().toDate());
+            model.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+            models.add(model);
+
+        }
+        return models;
+    }
 }

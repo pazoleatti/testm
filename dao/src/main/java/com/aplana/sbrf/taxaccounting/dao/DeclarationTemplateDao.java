@@ -33,7 +33,8 @@ public interface DeclarationTemplateDao {
 	 * Возвращает идентификатор действующего {@link com.aplana.sbrf.taxaccounting.model.DeclarationTemplate описания декларации} по виду декларации
 	 * Такое описание для каждого вида декларации в любой отчетном периоде может быть только одно
 	 * @param declarationTypeId идентификатор вида декларации
-	 * @return идентификатор описания декларации
+	 * @param reportPeriodId
+     * @return идентификатор описания декларации
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не удалось найти активное описание декларации по заданному типу,
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
 	 */

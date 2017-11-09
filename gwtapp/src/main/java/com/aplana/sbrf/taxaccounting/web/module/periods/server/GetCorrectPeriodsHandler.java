@@ -24,7 +24,7 @@ public class GetCorrectPeriodsHandler extends AbstractActionHandler<GetCorrectPe
     @Override
     public GetCorrectPeriodsResult execute(GetCorrectPeriodsAction action, ExecutionContext executionContext) throws ActionException {
         GetCorrectPeriodsResult result = new GetCorrectPeriodsResult();
-        result.setReportPeriod(periodService.getCorrectPeriods(action.getTaxType(), action.getDepartmentId()));
+        //result.setReportPeriod(periodService.getCorrectPeriods(action.getTaxType(), action.getDepartmentId(), ));
         return result;
     }
 

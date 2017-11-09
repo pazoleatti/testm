@@ -91,7 +91,6 @@ public class DeclarationTemplateDaoTest {
         assertEquals(id, savedDeclarationTemplate.getId().intValue());
         assertNull(savedDeclarationTemplate.getCreateScript());
         assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
-		/*assertTrue(savedDeclarationTemplate.isActive());*/
         assertEquals(null, savedDeclarationTemplate.getXsdId());
     }
 

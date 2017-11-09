@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -44,7 +42,7 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
         departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(departmentService.getBankDepartment().getId()));
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
         departmentReportPeriodFilter.setTaxTypeList(Arrays.asList(action.getTaxType()));
-        result.setDepartmentReportPeriods(departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter));
+        result.setDepartmentReportPeriods(toModel(departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter)));
 
         // Доступные подразделения
         List<Integer> departments;
@@ -78,6 +76,28 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
             }
         }
         return result;
+    }
+
+    private List<DepartmentReportPeriodViewModel> toModel(List<DepartmentReportPeriod> reportPeriods) {
+        List<DepartmentReportPeriodViewModel> periodViewModels = new ArrayList<>();
+        for (DepartmentReportPeriod period : reportPeriods){
+            periodViewModels.add(new DepartmentReportPeriodViewModel(period.getId(), toReportPeriodViewModel(period.getReportPeriod()), period.getDepartmentId(), period.isActive(), period.getCorrectionDate().toDate()));
+        }
+        return periodViewModels;
+    }
+
+    public ReportPeriodViewModel toReportPeriodViewModel(ReportPeriod selectedPeriod) {
+        ReportPeriodViewModel reportPeriod = new ReportPeriodViewModel();
+        reportPeriod.setId(selectedPeriod.getId());
+        reportPeriod.setName(selectedPeriod.getName());
+        reportPeriod.setAccName(selectedPeriod.getAccName());
+        reportPeriod.setOrder(selectedPeriod.getOrder());
+        reportPeriod.setTaxPeriod(selectedPeriod.getTaxPeriod());
+        reportPeriod.setStartDate(selectedPeriod.getStartDate().toDate());
+        reportPeriod.setEndDate(selectedPeriod.getEndDate().toDate());
+        reportPeriod.setCalendarStartDate(selectedPeriod.getCalendarStartDate().toDate());
+        reportPeriod.setDictTaxPeriodId(selectedPeriod.getDictTaxPeriodId());
+        return reportPeriod;
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationFilterDataResult;
@@ -47,7 +48,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap);
 
-		void setReportPeriods(List<ReportPeriod> reportPeriods);
+		void setReportPeriods(List<ReportPeriodViewModel> reportPeriods);
 
         void setFormStateList(List<State> list);
 

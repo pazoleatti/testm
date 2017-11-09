@@ -74,7 +74,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
 
         PagingResult<Map<String, RefBookValue>> paramsMaster = providerMaster.getRecords(
-                addDayToDate(reportPeriod.getEndDate(), -1), null, filterMaster, null);
+                addDayToDate(reportPeriod.getEndDate().toDate(), -1), null, filterMaster, null);
         if (paramsMaster.isEmpty()) {
             return result;
         }
@@ -95,7 +95,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
 
         //Проверяем справочные значения для полученной таблицы
         if (action.getOldUUID() == null) {
-            checkReferenceValues(refBook, result.getTableValues(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), logger);
+            checkReferenceValues(refBook, result.getTableValues(), reportPeriod.getCalendarStartDate().toDate(), reportPeriod.getEndDate().toDate(), logger);
             if (logger.getMainMsg() != null) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 result.setErrorMsg(logger.getMainMsg());
