@@ -18,7 +18,7 @@ import java.util.Date;
 public class CalendarDaoImpl extends AbstractDao implements CalendarDao {
 
 	private static final String GET_NEXT_WORK_DAY_SQL =
-			"select cdate from (select c.*, ROWNUM AS rn from (\n" +
+			"select cdate from (select c.*, ROWNUM AS rn from (select cdate from ref_book_calendar where ctype = 1 and cdate = trunc(:startDate) union \n" +
 					"  select cdate from ref_book_calendar where cdate >= trunc(:startDate) AND ctype = 0 ORDER BY cdate\n" +
 					") c) where rn = :offset";
 	private static final String GET_PREV_WORK_DAY_SQL =
