@@ -47,6 +47,7 @@ public class QueryDSLGenRunner {
             configuration.register("NOTIFICATION", "IS_READ", new NumericBooleanType());
             configuration.register("NOTIFICATION", "TYPE", new EnumByOrdinalType<>(NotificationType.class));
             configuration.register("DECLARATION_DATA", "STATE", new EnumByOrdinalType<>(State.class));
+            configuration.register("LOG_ENTRY", "LOG_LEVEL", new EnumByOrdinalType<>(LogLevel.class));
             configuration.register("TAX_PERIOD", "YEAR", Integer.class);
             configuration.register("LOG_ENTRY", "LOG_LEVEL", new EnumByOrdinalType<>(LogLevel.class));
 
