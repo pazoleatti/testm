@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.util.Date;
+import org.joda.time.LocalDateTime;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public class AsyncTaskData {
     /* Идентификатор пользователя, запустившего задачу*/
     private int userId;
     /* Дата создания/помещения в очередь задачи */
-    private Date createDate;
+    private LocalDateTime createDate;
     /* Описание задачи */
     private String description;
     /* Состояние задачи */
@@ -70,11 +71,11 @@ public class AsyncTaskData {
         return params;
     }
 
-    public Date getCreateDate() {
+    public LocalDateTime getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
 
