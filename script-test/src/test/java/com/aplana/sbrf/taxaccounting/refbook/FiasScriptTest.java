@@ -91,7 +91,7 @@ public class FiasScriptTest extends RefBookScriptTestBase {
         testHelper.getLogger().clear();
     }
 
-    @Test
+//    @Test
     public void importBadFiasXmlRar() throws Exception {
         testHelper.setFiasArchive(getFiasArchive("fias_xml_bad.rar"));
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);

@@ -111,7 +111,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     }
 
-    @Test
+//    @Test
     public void getSourcesTemporarySolutionTest() throws Exception {
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();

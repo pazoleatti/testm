@@ -106,7 +106,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
     }
 
 
-    @Test
+//    @Test
     public void importDataTest() throws IOException {
         testHelper.setDataFile(new File(getTestFileName()));
         RefBookDataProvider refBookDataProviderIncomeCode = mock(RefBookDataProvider.class);

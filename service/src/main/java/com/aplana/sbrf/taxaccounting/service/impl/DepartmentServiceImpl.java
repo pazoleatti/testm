@@ -21,7 +21,7 @@ import java.util.*;
 public class DepartmentServiceImpl implements DepartmentService {
 
     @Autowired
-    private ReportPeriodDao reportPeriodDao;
+    ReportPeriodDao reportPeriodDao;
 
     @Autowired
     DepartmentDao departmentDao;

@@ -2154,7 +2154,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
                         departmentService.getDepartment(departmentId).getName(),
                         period.getName() + " " + period.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", sdf.get().format(drp.getCorrectionDate())) : "",
+                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", sdf.get().format(drp.getCorrectionDate().toDate())) : "",
                         taKPPString.toString())));
             }
         }
