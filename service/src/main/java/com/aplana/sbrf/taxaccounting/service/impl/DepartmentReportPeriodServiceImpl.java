@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,8 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	private DeclarationTemplateService declarationTemplateService;
 	@Autowired
 	private LogEntryService logEntryService;
+	@Autowired
+	private DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter;
 
 	@Override
     public DepartmentReportPeriod get(int id) {
@@ -204,7 +208,20 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
 	@Override
 	public PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter, PagingParams pagingParams) {
-		return departmentReportPeriodDao.findAll(filter, pagingParams);
+		PagingResult<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.findAll(filter, pagingParams);
+		for (DepartmentReportPeriodJournalItem item : page){
+			DepartmentReportPeriod period = new DepartmentReportPeriod();
+			if (item.getIsActive() == 1){
+				period.setActive(true);
+			}else {
+				period.setActive(false);
+			}
+			departmentReportPeriodPermissionSetter.setPermissions(period, DepartmentReportPeriodPermission.EDIT, DepartmentReportPeriodPermission.OPEN,
+					DepartmentReportPeriodPermission.DELETE, DepartmentReportPeriodPermission.CLOSE, DepartmentReportPeriodPermission.OPEN_CORRECT,
+					DepartmentReportPeriodPermission.DEADLINE);
+			item.setPermissions(period.getPermissions());
+		}
+		return page;
 	}
 
 	@Override

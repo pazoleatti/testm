@@ -12,7 +12,6 @@ import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -235,22 +234,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 					.leftJoin(reportPeriod._depRepPerFkRepPeriodId, departmentReportPeriod)
 					.where(where)
 					.orderBy(order)
-//					.offset(pagingParams.getStartIndex())
-//					.limit(pagingParams.getCount())
 					.transform(GroupBy.groupBy(reportPeriod.id).list(reportPeriodQBean));
 
-			return new PagingResult<ReportPeriod>(result, getTotalCount(where));
-//            return getJdbcTemplate().query(
-//                    "select * from REPORT_PERIOD rp " +
-//                            "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
-//                            "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
-//                            "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
-//                            "and drp.IS_ACTIVE=0 and CORRECTION_DATE is null " +
-//                            "order by year",
-//                    new Object[]{String.valueOf(taxType.getCode()), departmentId},
-//                    new int[] { Types.VARCHAR, Types.NUMERIC},
-//                    new ReportPeriodMapper()
-//            );
+			return new PagingResult<>(result, getTotalCount(where));
     }
 
     @Override
@@ -367,31 +353,26 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    public List<ReportPeriodType> getPeriodTypeByActualDate(LocalDateTime actualDate, String name, boolean equal, PagingParams pagingParams){
-		BooleanExpression where;
-		if (equal){
-			where = reportPeriodType.name.eq(name);
-		}else {
-			where = reportPeriodType.name.contains(name);
-		}
-		String orderingProperty = pagingParams.getProperty();
-		Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+    public PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams){
+
+		String orderingProperty = "ID";
+		Order ascDescOrder = Order.valueOf(Order.ASC.name());
 
 		OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
 				reportPeriodTypeQBean, orderingProperty, ascDescOrder, reportPeriodType.id.asc());
 
-		return sqlQueryFactory.select(reportPeriodType.id,
+		List<ReportPeriodType> result =  sqlQueryFactory.select(reportPeriodType.id,
 				reportPeriodType.code,
 				reportPeriodType.name,
 				reportPeriodType.calendarStartDate,
 				reportPeriodType.startDate,
 				reportPeriodType.endDate)
 				.from(reportPeriodType)
-				.where(where)
 				.orderBy(order)
 				.offset(pagingParams.getStartIndex())
 				.limit(pagingParams.getCount())
 				.transform(GroupBy.groupBy(reportPeriodType.id).list(reportPeriodTypeQBean));
+		return new PagingResult<>(result, result.size());
 	}
 
 	@Override
@@ -406,6 +387,14 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 				.where(reportPeriodType.id.eq(id))
 				.transform(GroupBy.groupBy(reportPeriodType.id).list(reportPeriodTypeQBean));
     	return result.isEmpty() ? null : result.get(0);
+	}
+
+	@Override
+	public ReportPeriodType getPeriodTypeById(Long id) {
+		return sqlQueryFactory.select(reportPeriodTypeQBean)
+				.from(reportPeriodType)
+				.where(reportPeriodType.id.eq(id))
+				.fetchOne();
 	}
 
 	private int getTotalCount(BooleanBuilder where) {

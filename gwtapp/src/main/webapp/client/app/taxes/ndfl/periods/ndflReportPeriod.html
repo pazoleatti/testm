@@ -7,35 +7,37 @@
 
         <div class="button_panel">
             <div class="btn-toolbar" role="toolbar">
-                <button type="button" class="btn btn-danger" data-ng-click="openPeriod()"
-                        data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT)">
-                    Open
+                <button type="button" class="btn btn-default" data-ng-click="openPeriod()"
+                        data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN)">
+                    Открыть период
                 </button>
-                <button type="button" class="btn btn-danger" data-ng-click="closePeriod()"
-                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isOpen()">
-                    Close
+                <button type="button" class="btn btn-default" data-ng-click="closePeriod()"
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE))">
+                    Закрыть период
                 </button>
-                <button type="button" class="btn btn-danger" data-ng-click="editPeriod()"
-                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isOpen() && !reportPeriodGrid.value[0].correctionDate">
-                    Edit
+                <button type="button" class="btn btn-default" data-ng-click="editPeriod()"
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT))">
+                    Редактировать перирод
                 </button>
-                <button type="button" class="btn btn-danger" data-ng-click="openCorrectPeriod()"
-                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isClose()">
+                <button type="button" class="btn btn-default" data-ng-click="openCorrectPeriod()"
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT))">
                     Открыть корректирующий период
                 </button>
-                <button type="button" class="btn btn-danger" data-ng-click="deletePeriod()"
-                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && reportPeriodGrid.value[0]">
-                    Delete
+                <button type="button" class="btn btn-default" data-ng-click="deletePeriod()"
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DELETE))">
+                    Удалить период
                 </button>
-                <button type="button" class="btn btn-danger" data-ng-click="deadlinePeriod()"
-                        data-ng-if="checkPermissionForGridValue(APP_CONSTANTS.REPORT_PERIOD_PERMISSION.EDIT) && isOpen()">
-                    Deadline Period
+                <button type="button" class="btn btn-default" data-ng-click="deadlinePeriod()"
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE))">
+                    Назначить срок сдачи
                 </button>
             </div>
         </div>
 
         <div data-aplana-grid
-             data-grid-fill-space-container-top
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector=".cbr-page-layout__view"
+             data-grid-fill-space-container-selector-top=".top-wrapper"
              data-grid-options="reportPeriodGrid.options"
              data-grid-ctrl="reportPeriodGrid.ctrl"
              data-grid-name="reportPeriodGrid.gridName"

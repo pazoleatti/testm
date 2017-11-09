@@ -10,11 +10,6 @@
                             <div class="col-md-12">
                                 <label>{{::'reportPeriod.department' | translate}}:{{department.name}}</label>
                             </div>
-                            <!--<div data-ng-controller="SelectDepartmentCtrl"-->
-                                 <!--data-ui-select2="departmentsSelect.options"-->
-                                 <!--data-ng-init="initSelectWithAllDepartments()"-->
-                                 <!--data-ng-model="searchFilter.params.department"-->
-                                 <!--class="col-md-9"></div>-->
 
                         </div>
                     </div>
@@ -34,11 +29,11 @@
                         </div>
                     </div>
                     <div class="filter-col" style="width: 160px">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="control-label" for="searchFilter_params_yearEnd">{{::'reportPeriod.filter.periodTo'
                                 | translate}}</label>
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-8">
                             <input data-ng-model="searchFilter.params.yearEnd"
                                    type="number"
                                    class="form-control"
@@ -48,7 +43,7 @@
                     <div class="filter-col">
                         <!--Кнопка Найти-->
                         <button type="button"
-                                class="btn btn-danger"
+                                class="btn btn-default"
                                 id="searchButton"
                                 data-ng-click="submitSearch('ndfl')">
                             <span data-translate-once="common.button.search"></span>

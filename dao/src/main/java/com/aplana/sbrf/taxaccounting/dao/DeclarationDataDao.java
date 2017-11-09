@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.querydsl.core.types.Order;
 
 import java.util.Date;
 import java.util.List;
@@ -94,6 +95,9 @@ public interface DeclarationDataDao extends PermissionDao {
                                                            boolean ascSorting, PagingParams paginatedSearchParams);
 
     List<Long> findIdsByFilter(DeclarationDataFilter declarationDataFilter, DeclarationDataSearchOrdering ordering, boolean ascSorting);
+
+    List<Long> findIdsByFilter(DeclarationDataFilter filter, DeclarationDataSearchOrdering ordering, Order order);
+
 
     /**
      * Данный метод основывая на параметрах фильтра делает поиск в базе и возвращает страницу списка идентификаторов данных

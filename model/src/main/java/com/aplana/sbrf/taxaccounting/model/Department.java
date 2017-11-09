@@ -15,7 +15,7 @@ public class Department implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = 2144891300700432727L;
     public static final Long REF_BOOK_ID = 30L;
 
-	private int id;
+	private Integer id;
 	private String name;
 	private String shortName;
 	private Integer parentId;
@@ -61,7 +61,7 @@ public class Department implements Serializable, SecuredEntity {
 	 * 
 	 * @return идентификатор подразделения
 	 */
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -71,7 +71,7 @@ public class Department implements Serializable, SecuredEntity {
 	 * @param id
 	 *            идентификатор подразделения
 	 */
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

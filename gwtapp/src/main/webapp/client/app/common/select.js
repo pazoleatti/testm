@@ -357,6 +357,16 @@
                 };
 
                 /**
+                 * Инициализировать список с загрузкой всех подразделений через ajax
+                 */
+                $scope.initSingleSelectWithAllDepartments = function () {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
+                        property: "fullPath",
+                        direction: "asc"
+                    }, "fullPathFormatter");
+                };
+
+                /**
                  * Инициализировать список с загрузкой подразделений с открытым периодом через ajax
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
                  */
@@ -399,9 +409,18 @@
                  * Инициализация списка с загрузкой доступных периодов корректировки
                  */
                 $scope.initCorrectPeriods = function (departmentId) {
-                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/reportPeriods/allowCorrectionPeriod", {departmentId: departmentId}, {property: "reportPeriod.taxPeriod.year", direction: "asc"}, "correctPeriodFormatter");
+                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/reportPeriods/allowCorrectionPeriod", {departmentId: departmentId}, {
+                        property: "reportPeriod.taxPeriod.year",
+                        direction: "asc"
+                    }, "correctPeriodFormatter");
+                };
+
+                $scope.initReportPeriodType = function () {
+                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/reportPeriodType", {}, {
+                        property: "id",
+                        direction: "asc"
+                    }, 'periodTypeFormatter');
                 };
             }
-        ])
-    ;
+        ]);
 }());

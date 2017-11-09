@@ -126,12 +126,15 @@ public interface ReportPeriodDao extends PermissionDao {
 
 	/**
 	 * Возвращает типы периодов по коду и дате актуальности
-	 * @param actualDate дата актуальности
-	 * @param name
-     *@param equal
-     * @param pagingParams @return список пириодов
-	 */
-	List<ReportPeriodType> getPeriodTypeByActualDate(LocalDateTime actualDate, String name, boolean equal, PagingParams pagingParams);
+     *
+	 * @param pagingParams*/
+	PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams);
 
     ReportPeriodType getReportPeriodType(Long id);
+
+	/**
+	 * Возвращает тип отчетного периода по идентификатору
+	 * @param id - идентификатор
+	 */
+	ReportPeriodType getPeriodTypeById(Long id);
 }

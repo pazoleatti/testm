@@ -30,19 +30,19 @@ public class DepartmentDaoTest {
     @Test
     public void testGet() {
         Department d = departmentDao.getDepartment(1);
-        Assert.assertEquals(1, d.getId());
+        Assert.assertEquals(Integer.valueOf(1), d.getId());
         Assert.assertEquals(DepartmentType.ROOT_BANK, d.getType());
         Assert.assertEquals("Банк", d.getName());
         Assert.assertNull(d.getParentId());
 
         d = departmentDao.getDepartment(2);
-        Assert.assertEquals(2, d.getId());
+        Assert.assertEquals(Integer.valueOf(2), d.getId());
         Assert.assertEquals(DepartmentType.TERR_BANK, d.getType());
         Assert.assertEquals(new Integer(1), d.getParentId());
         Assert.assertEquals("ТБ1", d.getName());
 
         d = departmentDao.getDepartment(3);
-        Assert.assertEquals(3, d.getId());
+        Assert.assertEquals(Integer.valueOf(3), d.getId());
         Assert.assertEquals(DepartmentType.TERR_BANK, d.getType());
         Assert.assertEquals(new Integer(1), d.getParentId());
         Assert.assertEquals("ТБ2", d.getName());
@@ -71,7 +71,7 @@ public class DepartmentDaoTest {
         Department department;
         department = departmentDao.getDepartmentByName("ТБ2");
         Assert.assertNotNull(department);
-        Assert.assertEquals(3, department.getId());
+        Assert.assertEquals(Integer.valueOf(3), department.getId());
     }
 
     @Test
@@ -106,15 +106,15 @@ public class DepartmentDaoTest {
         result = departmentDao.getDepartmentTB(1);
         Assert.assertNull(result);
         result = departmentDao.getDepartmentTB(2);
-        Assert.assertEquals(result.getId(), 2);
+        Assert.assertEquals(result.getId(), Integer.valueOf(2));
         result = departmentDao.getDepartmentTB(3);
-        Assert.assertEquals(result.getId(), 3);
+        Assert.assertEquals(result.getId(), Integer.valueOf(3));
         result = departmentDao.getDepartmentTB(4);
-        Assert.assertEquals(result.getId(), 3);
+        Assert.assertEquals(result.getId(), Integer.valueOf(3));
         result = departmentDao.getDepartmentTB(5);
-        Assert.assertEquals(result.getId(), 3);
+        Assert.assertEquals(result.getId(), Integer.valueOf(3));
         result = departmentDao.getDepartmentTB(6);
-        Assert.assertEquals(result.getId(), 2);
+        Assert.assertEquals(result.getId(), Integer.valueOf(2));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class DepartmentDaoTest {
         // 1 -> 1
         departmentList = departmentDao.getRequiredForTreeDepartments(asList(1));
         Assert.assertEquals(1, departmentList.size());
-        Assert.assertEquals(1, departmentList.get(0).getId());
+        Assert.assertEquals(Integer.valueOf(1), departmentList.get(0).getId());
         // 2,5 -> 1,2,3,5
         departmentList = departmentDao.getRequiredForTreeDepartments(asList(2, 5));
         Assert.assertEquals(4, departmentList.size());

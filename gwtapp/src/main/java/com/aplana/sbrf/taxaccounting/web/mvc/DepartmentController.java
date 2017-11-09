@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class DepartmentController {
 
@@ -18,5 +20,10 @@ public class DepartmentController {
     @GetMapping(value = "rest/getBankDepartment")
     public Department getBankDepartment(){
         return departmentService.getBankDepartment();
+    }
+
+    @GetMapping(value = "rest/getDepartments")
+    public List<Department> getDepartments(){
+        return departmentService.listAll();
     }
 }

@@ -177,5 +177,17 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        .factory('DepartmentGridResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/getDepartments', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
+
+        .factory('ReportPeriodTypeResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookValues/reportPeriodTypeById', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

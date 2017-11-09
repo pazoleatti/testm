@@ -19,6 +19,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import org.joda.time.LocalDateTime;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 
@@ -94,23 +95,23 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
     @Override
     public void deleteList(int reportPeriodId, List<DepartmentPair> departments) {
+
         BooleanBuilder where = new BooleanBuilder();
-        where.and(notification.reportPeriodId.eq(reportPeriodId));
-        BooleanBuilder innerWhere = new BooleanBuilder();
-        for (DepartmentPair pair : departments) {
-            if (pair.getDepartmentId() == null) {
-                innerWhere.or(notification.senderDepartmentId.isNull());
+        for (DepartmentPair pair : departments){
+            BooleanBuilder innerWhere = new BooleanBuilder();
+            if(pair.getDepartmentId() == null) {
+                innerWhere.and(notification.senderDepartmentId.isNull());
             } else {
-                innerWhere.or(notification.senderDepartmentId.eq(pair.getDepartmentId()));
+                innerWhere.and(notification.senderDepartmentId.eq(pair.getDepartmentId()));
             }
-            if (pair.getParentDepartmentId() == null) {
+            if (pair.getParentDepartmentId() == null){
                 innerWhere.and(notification.receiverDepartmentId.isNull());
-            } else {
+            }else {
                 innerWhere.and(notification.receiverDepartmentId.eq(pair.getParentDepartmentId()));
             }
+            where.or(innerWhere);
         }
-
-        where.and(innerWhere);
+        where.and(notification.reportPeriodId.eq(reportPeriodId));
 
         sqlQueryFactory.delete(notification)
                 .where(where)

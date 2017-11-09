@@ -4,7 +4,7 @@ import org.joda.time.LocalDateTime;
 
 import java.io.Serializable;
 
-public class DepartmentReportPeriod implements Serializable{
+public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = 5623552659772659276L;
 
     private Long id;
@@ -16,6 +16,8 @@ public class DepartmentReportPeriod implements Serializable{
 	private boolean active;
 
     private LocalDateTime correctionDate;
+
+	private long permissions;
 
 	public Long getId() {
         return id;
@@ -56,4 +58,14 @@ public class DepartmentReportPeriod implements Serializable{
     public void setCorrectionDate(LocalDateTime correctionDate) {
         this.correctionDate = correctionDate;
     }
+
+	@Override
+	public long getPermissions() {
+		return permissions;
+	}
+
+	@Override
+	public void setPermissions(long permissions) {
+		this.permissions = permissions;
+	}
 }

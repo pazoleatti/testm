@@ -24,6 +24,7 @@ public class DepartmentReportPeriodFilter implements Serializable {
     private Integer departmentId;
     private ReportPeriod reportPeriod;
     private Date simpleCorrectionDate;
+    private LocalDateTime deadline;
 
     public Long getId() {
         return id;
@@ -123,5 +124,13 @@ public class DepartmentReportPeriodFilter implements Serializable {
 
     public void setSimpleCorrectionDate(Date simpleCorrectionDate) {
         this.simpleCorrectionDate = simpleCorrectionDate;
+    }
+
+    public LocalDateTime getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
     }
 }
