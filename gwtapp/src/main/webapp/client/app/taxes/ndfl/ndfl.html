@@ -15,7 +15,8 @@
                     </button>
                     <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button"
                         style="margin-left: -180px;">
-                        <li role="menuitem" ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
+                        <li role="menuitem"
+                            ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
                             <div class="row menuitem">
                                 <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
                             </div>
@@ -40,9 +41,11 @@
                                     | translate}}</a>
                             </div>
                         </li>
-                        <li role="menuitem" ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                        <li role="menuitem"
+                            ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                             <div class="row menuitem">
-                                <a ng-click="createPairKppOktmo(false, true)">{{::'link.ndfl.reporting.formForKppOktmo' |
+                                <a ng-click="createPairKppOktmo(false, true)">{{::'link.ndfl.reporting.formForKppOktmo'
+                                    |
                                     translate}}</a>
                                 <a ng-click="createPairKppOktmo(false, false)" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
                                     | translate}}</a>
@@ -55,7 +58,8 @@
     </div>
 
     <div class="box-shadow-block">
-        <div class="grid-filter" style="min-width: 1400px; background: #ffffff;padding-bottom: 1px;margin: -10px 0 0 0;">
+        <div class="grid-filter"
+             style="min-width: 1400px; background: #ffffff;padding-bottom: 1px;margin: -10px 0 0 0;">
             <div class="header-col " style="float: right;">
                 <!-- ссылка на модальное окно измениий по налоговой форме -->
                 <button type="button" class="btn btn-default-nonBg" style="float: right;"
@@ -172,7 +176,7 @@
 
             <data-uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('ndflFL')">
                 <div data-ng-controller="ndflFLCtrl">
-                    <div class="" style="height: 100%">
+                    <div style="height: 100%">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
                         </div>
@@ -185,27 +189,27 @@
                          data-grid-ctrl="ndflPersonGrid.ctrl"
                          data-ng-model="ndflPersonGrid.value"
                          id="ndflPersonTable"
-                         style="float: left; width: 100%; margin-top: 5px;"></div>
+                         style="float: left; width: 100%;"></div>
                 </div>
             </data-uib-tab>
 
             <data-uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
                           select="selectTab('incomesAndTax')">
                 <div data-ng-controller="incomesAndTaxCtrl">
-                    <div class="container-grid" style="height: 100%;">
+                    <div style="height: 100%;">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/incomesAndTaxFilter.html'"></span>
                         </div>
                     </div>
                     <div data-aplana-grid
                          data-grid-fill-space="true"
-                         data-grid-fill-space-container-selector=".container-grid"
+                         data-grid-fill-space-container-selector=".form100"
                          data-grid-fill-space-container-selector-top=".container-grid-top"
                          data-grid-options="incomesAndTaxGrid.options"
                          data-grid-ctrl="incomesAndTaxGrid.ctrl"
                          data-ng-model="incomesAndTaxGrid.value"
                          id="incomesAndTaxTable"
-                         style="float: left; width: 100%; margin-top: 5px;"></div>
+                         style="float: left; width: 100%;"></div>
 
                 </div>
             </data-uib-tab>
@@ -213,13 +217,13 @@
             <data-uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
                           select="selectTab('deductions')">
                 <div data-ng-controller="deductionCtrl">
-                    <div class="container-grid" style="height: 100%">
+                    <div style="height: 100%">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/deductionFilter.html'"></span>
                         </div>
                         <div data-aplana-grid
                              data-grid-fill-space="true"
-                             data-grid-fill-space-container-selector=".container-grid"
+                             data-grid-fill-space-container-selector=".form100"
                              data-grid-fill-space-container-selector-top=".container-grid-top"
                              data-grid-options="deductionGrid.options"
                              data-grid-ctrl="deductionGrid.ctrl"
@@ -232,13 +236,13 @@
             <data-uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
                           select="selectTab('prepayment')">
                 <div data-ng-controller="prepaymentCtrl">
-                    <div class="container-grid" style="height: 100%">
+                    <div style="height: 100%">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/prepaymentFilter.html'"></span>
                         </div>
                         <div data-aplana-grid
                              data-grid-fill-space="true"
-                             data-grid-fill-space-container-selector=".container-grid"
+                             data-grid-fill-space-container-selector=".form100"
                              data-grid-fill-space-container-selector-top=".container-grid-top"
                              data-grid-options="prepaymentGrid.options"
                              data-grid-ctrl="prepaymentGrid.ctrl"
@@ -251,5 +255,4 @@
         </data-uib-tabset>
     </div>
 
-</div>
 </div>

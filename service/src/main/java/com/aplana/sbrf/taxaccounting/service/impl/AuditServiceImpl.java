@@ -25,11 +25,11 @@ public class AuditServiceImpl implements AuditService {
 	private DepartmentService departmentService;
     @Autowired
     private TransactionHelper tx;
-    @Autowired
+//    @Autowired
     private PeriodService periodService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-    @Autowired
+//    @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
     private ServerInfo serverInfo;
@@ -122,8 +122,8 @@ public class AuditServiceImpl implements AuditService {
                 if (declarationData != null) {
                     int departmentId = declarationData.getDepartmentId();
                     Integer reportPeriodId = declarationData.getReportPeriodId();
-                    int departmentRPId = declarationData.getDepartmentReportPeriodId();
-                    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentRPId);
+                    Long departmentRPId = declarationData.getDepartmentReportPeriodId();
+                    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.findOne(departmentRPId);
                     String corrStr = departmentReportPeriod.getCorrectionDate() != null ? " в корр.периоде " + sdf.get().format(departmentReportPeriod.getCorrectionDate()) : "";
 
 

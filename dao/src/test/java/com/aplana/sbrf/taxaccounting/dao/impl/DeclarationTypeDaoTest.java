@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -83,10 +84,10 @@ public class DeclarationTypeDaoTest {
         Calendar calendar = Calendar.getInstance();
         ReportPeriod reportPeriod = new ReportPeriod();
         calendar.set(2012, Calendar.JANUARY, 1);
-        reportPeriod.setStartDate(calendar.getTime());
-        reportPeriod.setCalendarStartDate(calendar.getTime());
+        reportPeriod.setStartDate(new LocalDateTime(calendar.getTime()));
+        reportPeriod.setCalendarStartDate(new LocalDateTime(calendar.getTime()));
         calendar.set(2013, Calendar.DECEMBER, 31);
-        reportPeriod.setEndDate(calendar.getTime());
+        reportPeriod.setEndDate(new LocalDateTime(calendar.getTime()));
         Assert.assertEquals(0, declarationTypeDao.getTypes(1, reportPeriod, TaxType.INCOME, Arrays.asList(DeclarationFormKind.CONSOLIDATED)).size());
     }
 

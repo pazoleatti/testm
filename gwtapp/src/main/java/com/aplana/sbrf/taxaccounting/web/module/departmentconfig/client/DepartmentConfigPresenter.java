@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -13,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.CheckSettingExistAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.CheckSettingExistResult;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DeleteDepartmentCombinedAction;
@@ -95,7 +95,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * Установка доступных отчетных периодов
          * @param reportPeriods
          */
-        void setReportPeriods(List<ReportPeriod> reportPeriods, boolean fireEvents);
+        void setReportPeriods(List<ReportPeriodViewModel> reportPeriods, boolean fireEvents);
 
         /**
          * Установка выбранного отчетного периода
@@ -358,7 +358,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                             public void onSuccess(GetDepartmentTreeDataResult result) {
                                 // Список отчетных периодов
                                 getView().setReportPeriods(result.getReportPeriods() == null
-                                        ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
+                                        ? new ArrayList<ReportPeriodViewModel>(0) : result.getReportPeriods(), true);
                                 //   createTableColumns();
                                 getView().onFind(false);
                             }
@@ -432,7 +432,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     getView().setDepartment(userDepartment, false);
                                     // Список отчетных периодов
                                     getView().setReportPeriods(result.getReportPeriods() == null
-                                            ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
+                                            ? new ArrayList<ReportPeriodViewModel>(0) : result.getReportPeriods(), true);
                                 }
 
                                 reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId(), null);

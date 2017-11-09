@@ -49,7 +49,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
         declarationData.setReportPeriodId(1);
         declarationData.setState(State.ACCEPTED);
         declarationData.setAsnuId(1L);
-        declarationData.setDepartmentReportPeriodId(1);
+        declarationData.setDepartmentReportPeriodId(1L);
         declarationData.setKpp("123456789");
         declarationData.setTaxOrganCode("0123456789");
         return declarationData;

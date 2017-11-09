@@ -11,20 +11,19 @@
         'app.notifications',
         'app.uploadTransportData',
         'app.commonParams',
-        'app.modals',
         'app.formatters',
         'app.constants',
         'app.permissionUtils'
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'client/app/main/header.html',
+                templateUrl: 'client/app/main/header.html?v=${buildUuid}',
                 controller: 'MainMenuController'
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', '$aplanaModal', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, $aplanaModal, amountCasesFormatterFilter) {
 
                 $scope.security = {
                     user: $rootScope.user
@@ -55,7 +54,9 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
+                                onClick: function () {
+                                    $state.go('reportPeriod');
+                                }
                             });
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),
@@ -188,7 +189,12 @@
                 };
 
                 $scope.openNotifications = function () {
-                    appModals.create('client/app/main/notifications.html', 'notificationsCtrl');
+                    $aplanaModal.open({
+                        title: $filter('translate')('notifications.title.listNotifications'),
+                        templateUrl: 'client/app/main/notifications.html?v=${buildUuid}',
+                        controller: 'notificationsCtrl',
+                        windowClass: 'modal1200'
+                    });
                 };
 
                 $scope.updateNotificationCount = function () {

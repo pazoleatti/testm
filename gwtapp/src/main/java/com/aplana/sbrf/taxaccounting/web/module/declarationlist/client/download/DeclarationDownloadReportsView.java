@@ -7,6 +7,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -44,7 +45,7 @@ public class DeclarationDownloadReportsView extends PopupViewWithUiHandlers<Decl
     @UiField
     PeriodPickerPopupWidget periodPicker;
     @UiField(provided = true)
-    ValueListBox<DepartmentReportPeriod> correction;
+    ValueListBox<DepartmentReportPeriodViewModel> correction;
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
     @UiField
@@ -63,9 +64,9 @@ public class DeclarationDownloadReportsView extends PopupViewWithUiHandlers<Decl
     @Inject
     public DeclarationDownloadReportsView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
-        correction = new ListBoxWithTooltip<DepartmentReportPeriod>(new AbstractRenderer<DepartmentReportPeriod>() {
+        correction = new ListBoxWithTooltip<DepartmentReportPeriodViewModel>(new AbstractRenderer<DepartmentReportPeriodViewModel>() {
             @Override
-            public String render(DepartmentReportPeriod object) {
+            public String render(DepartmentReportPeriodViewModel object) {
                 if (object == null || object.getCorrectionDate() == null) {
                     return "";
                 } else {
@@ -126,7 +127,7 @@ public class DeclarationDownloadReportsView extends PopupViewWithUiHandlers<Decl
     }
 
     @Override
-    public void setCorrectionDate(List<DepartmentReportPeriod> departmentReportPeriods) {
+    public void setCorrectionDate(List<DepartmentReportPeriodViewModel> departmentReportPeriods) {
         if (departmentReportPeriods != null && departmentReportPeriods.size() > 1) {
             correctionPanel.setVisible(true);
             correction.setValue(departmentReportPeriods.get(departmentReportPeriods.size() - 1));
@@ -147,7 +148,7 @@ public class DeclarationDownloadReportsView extends PopupViewWithUiHandlers<Decl
     }
 
     @Override
-    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod) {
+    public void setAcceptableReportPeriods(List<ReportPeriodViewModel> reportPeriods, ReportPeriodViewModel reportPeriod) {
         periodPicker.setPeriods(reportPeriods);
         if (reportPeriod != null)
             periodPicker.setValue(Arrays.asList(reportPeriod.getId()));

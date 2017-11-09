@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import org.joda.time.LocalDateTime;
 
 import java.util.*;
 
@@ -152,7 +153,7 @@ public interface DepartmentService {
      * @param periodEnd   окончание периода, в котором действуют назначения
      * @return
      */
-    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, Date periodStart, Date periodEnd);
+    List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd);
 
     /**
      * Получить id подразделений для доступа к налоговым формам, тип налога НДФЛ
@@ -229,7 +230,7 @@ public interface DepartmentService {
      * @param departmentId список идентификаторов
      * @return набор сочетаний идентификатор-подразделение
      */
-    Map<Integer, Department> getDepartments(List<Integer> departmentId);
+    Map<Integer, Department>    getDepartments(List<Integer> departmentId);
 
     /**
      * Список подразделений передаваемых в СУДИР

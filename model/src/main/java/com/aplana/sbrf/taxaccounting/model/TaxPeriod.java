@@ -12,7 +12,16 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	/** Тип налогового периода {@link TaxType}*/
 	private TaxType taxType;
 	/** Год налогового периода */
-	private int year;
+	private Integer year;
+
+	public TaxPeriod(Integer year, Integer id, TaxType taxType) {
+		this.taxType = taxType;
+		this.year = year;
+		this.id = id;
+	}
+
+	public TaxPeriod() {
+	}
 
 	/**
 	 * @return вид налога
@@ -20,7 +29,7 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	public TaxType getTaxType() {
 		return taxType;
 	}
-	
+
 	/**
 	 * Задать вид налога
 	 * @param taxType вид налога
@@ -33,7 +42,7 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	 * Задать год налогового периода
 	 * @return
 	 */
-	public int getYear() {
+	public Integer getYear() {
 		return year;
 	}
 
@@ -41,7 +50,7 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	 * Вернуть год, к которому относится налоговый период
 	 * @param year
 	 */
-	public void setYear(int year) {
+	public void setYear(Integer year) {
 		this.year = year;
 	}
 

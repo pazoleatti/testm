@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.editdialog;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 
 import java.util.Date;
 import java.util.List;
@@ -10,7 +10,7 @@ public class EditDialogData {
     private Integer departmentId;
     private Long dictTaxPeriodId;
     private Integer reportPeriodId;
-    private List<ReportPeriod> correctionReportPeriods;
+    private List<ReportPeriodViewModel> correctionReportPeriods;
     private Date correctionDate;
     private String periodName;
     private Integer periodYear;
@@ -47,11 +47,11 @@ public class EditDialogData {
         this.reportPeriodId = reportPeriodId;
     }
 
-    public List<ReportPeriod> getCorrectionReportPeriods() {
+    public List<ReportPeriodViewModel> getCorrectionReportPeriods() {
         return correctionReportPeriods;
     }
 
-    public void setCorrectionReportPeriods(List<ReportPeriod> correctionReportPeriods) {
+    public void setCorrectionReportPeriods(List<ReportPeriodViewModel> correctionReportPeriods) {
         this.correctionReportPeriods = correctionReportPeriods;
     }
 

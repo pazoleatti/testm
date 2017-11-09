@@ -139,5 +139,15 @@
                 return !param ? undefined : param;
             };
         })
+
+        /**
+         * @description Форматтер для получения наименования сущности
+         * @param entity Сущность
+         */
+        .filter('periodTypeFormatter', function () {
+            return function (entity) {
+                return entity ? entity.name : "";
+            };
+        })
     ;
 }());

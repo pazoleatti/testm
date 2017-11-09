@@ -156,7 +156,7 @@ public class AsyncTaskThreadContainer {
 
         @Override
         protected int getThreadCount() {
-            return 1;
+            return 3;
         }
     }
 }

@@ -8,13 +8,13 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('logBusinesFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'DeclarationDataResource', 'APP_CONSTANTS',
-            function ($scope, $uibModalInstance, $filter, $http, DeclarationDataResource, APP_CONSTANTS) {
+        .controller('logBusinesFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter', '$http', 'DeclarationDataResource', 'APP_CONSTANTS',
+            function ($scope, $modalInstance, $shareData, $filter, $http, DeclarationDataResource, APP_CONSTANTS) {
             /**
              * @description Закрытие окна
              */
             $scope.close = function () {
-                $uibModalInstance.dismiss('Canceled');
+                $modalInstance.dismiss('Canceled');
             };
 
             /**
@@ -27,7 +27,7 @@
                     requestParameters: function () {
                         return {
                             projection: "businessLogs",
-                            declarationDataId: $scope.$resolve.data.declarationDataId
+                            declarationDataId: $shareData.declarationDataId
                         };
                     },
                     height: 250,

@@ -48,7 +48,7 @@ public class TimerHandler extends AbstractActionHandler<TimerAction, TimerResult
         if (lockData != null) {
             result.setLock(true);
             result.setText(refBookFactory.getRefBookLockDescription(lockData, refBook.getId()));
-            result.setLockId(lockData.getKey() + "_" + lockData.getDateLock().getTime());
+            result.setLockId(lockData.getKey() + "_" + lockData.getDateLock().toDate().getTime());
         } else {
             result.setLock(false);
         }

@@ -39,11 +39,10 @@ public class TaxPeriodDaoTest {
 	@Test
 	public void saveTest() {
 		TaxPeriod taxPeriod = new TaxPeriod();
-		taxPeriod.setTaxType(TaxType.NDFL);
 		taxPeriod.setYear(2015);
 		int id = taxPeriodDao.add(taxPeriod);
 		assertEquals(TaxType.NDFL, taxPeriodDao.get(id).getTaxType());
-		assertEquals(2015, taxPeriodDao.get(id).getYear());
+		assertEquals(new Integer(2015), taxPeriodDao.get(id).getYear());
 	}
 
 	@Test

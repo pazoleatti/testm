@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
 
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.Date;
@@ -11,7 +11,7 @@ public class OpenCorrectPeriodAction extends UnsecuredActionImpl<OpenCorrectPeri
     TaxType taxType;
     List<Integer> selectedDepartments;
     Date term;
-    ReportPeriod selectedPeriod;
+    ReportPeriodViewModel selectedPeriod;
 
     public List<Integer> getSelectedDepartments() {
         return selectedDepartments;
@@ -29,11 +29,11 @@ public class OpenCorrectPeriodAction extends UnsecuredActionImpl<OpenCorrectPeri
         this.term = term;
     }
 
-    public ReportPeriod getSelectedPeriod() {
+    public ReportPeriodViewModel getSelectedPeriod() {
         return selectedPeriod;
     }
 
-    public void setSelectedPeriod(ReportPeriod selectedPeriod) {
+    public void setSelectedPeriod(ReportPeriodViewModel selectedPeriod) {
         this.selectedPeriod = selectedPeriod;
     }
 

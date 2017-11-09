@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.joda.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -120,7 +121,7 @@ public interface RefBookDataProvider {
      * @param filter
      * @return пары идентификатор версии элемента - идентификатор элемента справочника
      */
-    List<Pair<Long, Long>> checkRecordExistence(Date version, String filter);
+    List<Pair<Long, Long>> checkRecordExistence(LocalDateTime version, String filter);
 
     /**
      * Проверяет, существуют ли указанные версии элемента справочника

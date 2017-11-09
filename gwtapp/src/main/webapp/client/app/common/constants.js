@@ -50,7 +50,8 @@
                 DECLARATION_TYPE: 207,
                 ASNU: 900,
                 ATTACH_FILE_TYPE: 934,
-                PERIOD: "reportPeriod"
+                PERIOD: "reportPeriod",
+                PERIOD_TYPE: "reportPeriodType"
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -80,6 +81,14 @@
             },
             REPORT_PERIOD_PERMISSION: {
                 EDIT: 1 << 0
+            },
+            DEPARTMENT_REPORT_PERIOD_PERMISSION: {
+                EDIT: 1 << 0,
+                OPEN: 1 << 1,
+                DELETE: 1 << 2,
+                CLOSE: 1 << 3,
+                OPEN_CORRECT: 1 << 4,
+                DEADLINE: 1 << 5
             },
             DEPARTMENT_PERMISSION: {
                 EDIT: 1 << 0

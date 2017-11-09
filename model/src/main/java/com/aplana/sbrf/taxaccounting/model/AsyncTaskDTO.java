@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import org.joda.time.LocalDateTime;
+
 import java.util.Date;
 
 /**
@@ -11,7 +13,7 @@ public class AsyncTaskDTO {
     /* Идентификатор пользователя, запустившего задачу*/
     private String user;
     /* Дата создания/помещения в очередь задачи */
-    private Date createDate;
+    private LocalDateTime createDate;
     /* Узел кластера (название машины), на котором выполняется задача */
     private String node;
     /* Описание задачи */
@@ -19,7 +21,7 @@ public class AsyncTaskDTO {
     /* Состояние задачи */
     private String state;
     /* Дата последнего изменения состояния задачи */
-    private Date stateDate;
+    private LocalDateTime stateDate;
     /* Очередь, в которой находится связанная асинхронная задача */
     private String queue;
     /* Положение задачи в очереди */
@@ -41,11 +43,11 @@ public class AsyncTaskDTO {
         this.user = user;
     }
 
-    public Date getCreateDate() {
+    public LocalDateTime getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
 
@@ -73,11 +75,11 @@ public class AsyncTaskDTO {
         this.state = state;
     }
 
-    public Date getStateDate() {
+    public LocalDateTime getStateDate() {
         return stateDate;
     }
 
-    public void setStateDate(Date stateDate) {
+    public void setStateDate(LocalDateTime stateDate) {
         this.stateDate = stateDate;
     }
 

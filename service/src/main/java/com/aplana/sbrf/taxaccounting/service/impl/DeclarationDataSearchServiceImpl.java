@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.DeclarationTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.querydsl.core.types.Order;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,11 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 
     @Override
     public List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc) {
-        return declarationDao.findIdsByFilter(declarationFilter, ordering, asc);
+        if (asc){
+            return declarationDao.findIdsByFilter(declarationFilter, ordering, Order.ASC);
+        }else {
+            return declarationDao.findIdsByFilter(declarationFilter, ordering, Order.DESC);
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -10,9 +10,9 @@
     /**
      * @description Контроллер МО возврата декларации в статус "Создана"
      */
-        .controller('returnToCreatedCtrl', ['$scope', '$translate', '$uibModalInstance', 'data', function ($scope, $translate, $uibModalInstance, data) {
-            $scope.header = (angular.isDefined(data.header)) ? data.header : $translate.instant('DIALOGS_CONFIRMATION');
-            $scope.msg = (angular.isDefined(data.msg)) ? data.msg : $translate.instant('DIALOGS_CONFIRMATION_MSG');
+        .controller('returnToCreatedCtrl', ['$scope', '$translate', '$modalInstance', '$shareData',
+            function ($scope, $translate, $modalInstance, $shareData) {
+            $scope.msg = (angular.isDefined($shareData.msg)) ? $shareData.msg : $translate.instant('DIALOGS_CONFIRMATION_MSG');
             $scope.returnToCreated = {
                 reason :""
             };
@@ -21,11 +21,11 @@
             //-- Methods -----//
 
             $scope.no = function(){
-                $uibModalInstance.dismiss('no');
+                $modalInstance.dismiss('no');
             }; // end close
 
             $scope.yes = function(){
-                $uibModalInstance.close($scope.returnToCreated.reason);
+                $modalInstance.close($scope.returnToCreated.reason);
             }; // end yes
         }]);
 }());

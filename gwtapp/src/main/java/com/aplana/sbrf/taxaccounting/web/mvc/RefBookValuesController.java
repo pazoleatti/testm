@@ -98,18 +98,13 @@ public class RefBookValuesController {
      * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом для создания отчётности
      *
-     * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                       наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
-     * @param reportPeriodId ID отчетного периода
-     * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
 
     @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriodForReport")
-    public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriodForReport(@RequestParam String name, @RequestParam Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
+    public List<RefBookDepartment> fetchDepartmentsWithOpenPeriodForReport() {
         TAUser user = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchDepartmentWithOpenPeriodForReport(user, name, reportPeriodId, pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
+        return refBookDepartmentDataService.fetchDepartmentWithOpenPeriodForReport(user);
     }
 
     /**
@@ -154,6 +149,27 @@ public class RefBookValuesController {
     }
 
     /**
+     * Получение всех типов Отчетных периодов по имени
+     *
+     * @return Список периодов
+     */
+    @GetMapping(value = "/rest/refBookValues/reportPeriodType")
+    public JqgridPagedList<ReportPeriodType> fetchReportPeriodsType(@RequestParam PagingParams pagingParams) {
+        PagingResult<ReportPeriodType> result = periodService.getPeriodType(pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
+    }
+
+    /**
+     * Получение типа Отчетных периодов по id
+     *
+     * @return Список периодов
+     */
+    @GetMapping(value = "/rest/refBookValues/reportPeriodTypeById")
+    public ReportPeriodType fetchReportPeriodsTypeById(@RequestParam Long id) {
+        return periodService.getPeriodTypeById(id);
+    }
+
+    /**
      * Получение открытых Отчетных периодов
      *
      * @return Список периодов
@@ -161,6 +177,6 @@ public class RefBookValuesController {
     @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=openPeriods")
     public List<ReportPeriod> fetchOpenReportPeriods() {
         TAUser user = securityService.currentUserInfo().getUser();
-        return new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
+        return new ArrayList<>(periodService.getOpenForUser(user, TaxType.NDFL));
     }
 }

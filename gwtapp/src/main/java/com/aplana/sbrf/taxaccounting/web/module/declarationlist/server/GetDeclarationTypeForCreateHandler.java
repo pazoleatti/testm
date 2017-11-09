@@ -37,7 +37,7 @@ public class GetDeclarationTypeForCreateHandler extends AbstractActionHandler<Ge
     public GetDeclarationTypeResult execute(GetDeclarationTypeAction action, ExecutionContext executionContext) throws ActionException {
         GetDeclarationTypeResult result = new GetDeclarationTypeResult();
         result.setDeclarationTypes(declarationTypeService.getTypes(action.getDepartmentId(), action.getReportPeriod(), action.getTaxType(), Arrays.asList(action.getDeclarationFormKind())));
-        result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId(), action.getReportPeriod()).getCorrectionDate());
+        result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId(), action.getReportPeriod()).getCorrectionDate().toDate());
         result.setTaxType(action.getTaxType());
         return result;
     }

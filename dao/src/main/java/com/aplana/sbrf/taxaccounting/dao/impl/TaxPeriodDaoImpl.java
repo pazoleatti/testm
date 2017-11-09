@@ -6,6 +6,9 @@ import java.sql.Types;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,6 +20,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QTaxPeriod.taxPeriod;
+
 /**
  * Реализация DAO для работы с {@link com.aplana.sbrf.taxaccounting.model.TaxPeriod налоговыми периодами}
  */
@@ -24,12 +29,18 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 @Transactional(readOnly = true)
 public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 
+	private SQLQueryFactory sqlQueryFactory;
+
+	@Autowired
+	public TaxPeriodDaoImpl(SQLQueryFactory sqlQueryFactory) {
+		this.sqlQueryFactory = sqlQueryFactory;
+	}
+
 	private final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
 		@Override
 		public TaxPeriod mapRow(ResultSet rs, int index) throws SQLException {
 			TaxPeriod t = new TaxPeriod();
 			t.setId(SqlUtils.getInteger(rs, "id"));
-			t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 			t.setYear(SqlUtils.getInteger(rs,"year"));
 			return t;
 		}
@@ -78,25 +89,22 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	}
 
 	@Override
-	public int add(TaxPeriod taxPeriod) {
-		JdbcTemplate jt = getJdbcTemplate();
-
-		Integer id = taxPeriod.getId();
+	public int add(TaxPeriod newTaxPeriod) {
+		Integer id = newTaxPeriod.getId();
 		if (id == null) {
 			id = generateId("seq_tax_period", Integer.class);
 		}
-		jt.update(
-				"insert into tax_period (id, tax_type, year)" +
-						" values (?, ?, ?)",
-				new Object[]{
+		sqlQueryFactory.insert(taxPeriod)
+				.columns(
+						taxPeriod.id,
+						taxPeriod.year,
+						taxPeriod.taxType)
+				.values(
 						id,
-						taxPeriod.getTaxType().getCode(),
-						taxPeriod.getYear()
-				},
-				new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC}
-
-		);
-		taxPeriod.setId(id);
+						newTaxPeriod.getYear(),
+						TaxType.NDFL.getCode()
+				)
+				.execute();
 		return id;
 	}
 

@@ -10,7 +10,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('commonParams', {
                 url: '/taxes/commonParams/uploadCommonParams',
-                templateUrl: 'client/app/taxes/commonParams/commonParams.html',
+                templateUrl: 'client/app/taxes/commonParams/commonParams.html?v=${buildUuid}',
                 controller: 'commonParamsCtrl'
             });
         }])
@@ -18,8 +18,8 @@
         /**
          * @description Контроллер для общих параметров
          */
-        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', 'appModals', 'APP_CONSTANTS',
-            function ($scope, CommonParams, $filter, $http, appModals, APP_CONSTANTS) {
+        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS',
+            function ($scope, CommonParams, $filter, $http, $aplanaModal, APP_CONSTANTS) {
 
                 /**
                  * @description Создание и заполнение грида
@@ -56,7 +56,17 @@
                  * @description Изменение общих параметров на значения по умолчанию
                  */
                 $scope.changeToDefault = function () {
-                    appModals.create('client/app/taxes/commonParams/confirmationAction.html', 'confirmationActionCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.commonParams.default'),
+                        templateUrl: 'client/app/taxes/commonParams/confirmationAction.html?v=${buildUuid}',
+                        controller: 'confirmationActionCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            commonParamsGrid: function () {
+                                return $scope.commonParamsGrid;
+                            }
+                        }
+                    });
                 };
 
 
@@ -66,7 +76,17 @@
                 $scope.upload = function () {
                     $scope.valOiu = $scope.commonParamsGrid.value;
                     $scope.commonParamsGrid.ctrl.refreshGrid();
-                    appModals.create('client/app/taxes/commonParams/uploadCommonParams.html', 'uploadParamsCtrl', {commonParamsGrid: $scope.commonParamsGrid}, {size: 'md'});
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.redactParametr'),
+                        templateUrl: 'client/app/taxes/commonParams/uploadCommonParams.html?v=${buildUuid}',
+                        controller: 'uploadParamsCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            commonParamsGrid: function () {
+                                return $scope.commonParamsGrid;
+                            }
+                        }
+                    });
                 };
 
             }]);

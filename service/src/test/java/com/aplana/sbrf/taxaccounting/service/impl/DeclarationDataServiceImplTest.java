@@ -93,19 +93,18 @@ public class DeclarationDataServiceImplTest {
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(1);
         declarationData.setId(1l);
-        declarationData.setDepartmentReportPeriodId(1);
+        declarationData.setDepartmentReportPeriodId(1L);
 
         DeclarationData declarationData1 = new DeclarationData();
         declarationData1.setDeclarationTemplateId(1);
         declarationData1.setDepartmentId(1);
         declarationData1.setReportPeriodId(2);
         declarationData1.setId(2l);
-        declarationData1.setDepartmentReportPeriodId(2);
+        declarationData1.setDepartmentReportPeriodId(2L);
 
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setId(1);
         taxPeriod.setYear(2014);
-        taxPeriod.setTaxType(TaxType.INCOME);
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setId(1);
         reportPeriod.setTaxPeriod(taxPeriod);
@@ -128,10 +127,10 @@ public class DeclarationDataServiceImplTest {
         when(declarationDataDao.get(2)).thenReturn(declarationData1);
 
         DepartmentReportPeriod drp = new DepartmentReportPeriod();
-        when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp);
+        when(departmentReportPeriodService.findOne(declarationData.getDepartmentReportPeriodId())).thenReturn(drp);
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
-        drp1.setCorrectionDate(SDF.parse("01.01.2014"));
-        when(departmentReportPeriodService.get(declarationData1.getDepartmentReportPeriodId())).thenReturn(drp1);
+        drp1.setCorrectionDate(new LocalDateTime(SDF.parse("01.01.2014")));
+        when(departmentReportPeriodService.findOne(declarationData1.getDepartmentReportPeriodId())).thenReturn(drp1);
 
         when(declarationTemplateService.get(1)).thenReturn(declarationTemplate);
 
@@ -201,7 +200,7 @@ public class DeclarationDataServiceImplTest {
         declarationData.setDeclarationTemplateId(1);
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(1);
-        declarationData.setDepartmentReportPeriodId(1);
+        declarationData.setDepartmentReportPeriodId(1L);
 
         Department department = new Department();
         department.setName("Тестовое подразделение");
@@ -216,18 +215,18 @@ public class DeclarationDataServiceImplTest {
         TaxPeriod tp = new TaxPeriod();
         tp.setYear(2015);
         reportPeriod.setTaxPeriod(tp);
-        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setCalendarStartDate(new LocalDateTime());
         reportPeriod.setName("1 квартал");
         reportPeriod.setId(2);
-        reportPeriod.setStartDate(new Date());
-        reportPeriod.setEndDate(new Date());
+        reportPeriod.setStartDate(new LocalDateTime());
+        reportPeriod.setEndDate(new LocalDateTime());
 
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
-        drp1.setId(1);
-        drp1.setCorrectionDate(new Date(0));
+        drp1.setId(1L);
+        drp1.setCorrectionDate(new LocalDateTime(0));
         DepartmentReportPeriod drp2 = new DepartmentReportPeriod();
-        drp2.setId(2);
-        drp2.setCorrectionDate(new Date(0));
+        drp2.setId(2L);
+        drp2.setCorrectionDate(new LocalDateTime(0));
 
 
         ArrayList<Relation> sources = new ArrayList<Relation>();
@@ -265,7 +264,7 @@ public class DeclarationDataServiceImplTest {
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
 
-        when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
+        when(departmentReportPeriodService.findOne(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
 
         when(departmentReportPeriodService.getLast(1, 1)).thenReturn(drp1);
 
@@ -327,7 +326,7 @@ public class DeclarationDataServiceImplTest {
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(1);
         declarationData.setId(1l);
-        declarationData.setDepartmentReportPeriodId(1);
+        declarationData.setDepartmentReportPeriodId(1L);
 
         DeclarationSubreport declarationSubreport = new DeclarationSubreport();
         declarationSubreport.setName("report name");

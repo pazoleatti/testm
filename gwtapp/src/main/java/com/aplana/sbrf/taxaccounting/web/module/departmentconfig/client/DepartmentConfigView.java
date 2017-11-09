@@ -7,8 +7,8 @@ import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -479,7 +479,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	}
 
 	@Override
-	public void setReportPeriods(List<ReportPeriod> reportPeriods, boolean fireEvents) {
+	public void setReportPeriods(List<ReportPeriodViewModel> reportPeriods, boolean fireEvents) {
 		periodPickerPopup.setPeriods(reportPeriods);
         if (reportPeriods == null || reportPeriods.isEmpty()) {
             this.currentReportPeriodId = null;
@@ -487,8 +487,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             return;
         }
         Integer defaultReportPeriodId = periodPickerPopup.getDefaultReportPeriod();
-        ReportPeriod maxPeriod = reportPeriods.get(0);
-        for (ReportPeriod reportPeriod : reportPeriods) {
+        ReportPeriodViewModel maxPeriod = reportPeriods.get(0);
+        for (ReportPeriodViewModel reportPeriod : reportPeriods) {
             if (defaultReportPeriodId != null && reportPeriod.getId().equals(defaultReportPeriodId)) {
                 periodPickerPopup.setValue(Arrays.asList(defaultReportPeriodId), fireEvents);
                 maxPeriod = null;

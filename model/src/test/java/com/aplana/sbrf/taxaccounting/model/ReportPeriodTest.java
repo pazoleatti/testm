@@ -9,7 +9,7 @@ public class ReportPeriodTest {
 	
 	@Test
 	public void getYear2012Success(){
-       for (int i = 1970; i < 3344; i++) {
+       for (Integer i = 1970; i < 3344; i++) {
     	   Assert.assertEquals(i, createReportPeriod(i).getTaxPeriod().getYear());
        }
 	}

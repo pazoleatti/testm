@@ -15,6 +15,8 @@
 
     <properties>
         <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+        <buildUuid>${maven.build.timestamp}</buildUuid>
+        <maven.build.timestamp.format>ddMMyyyyHHmmss</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
@@ -285,6 +287,14 @@
                             <targetPath>WEB-INF</targetPath>
                             <includes>
                                 <include>**/*.xml</include>
+                            </includes>
+                        </resource>
+                        <resource>
+                            <directory>${basedir}/src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <include>**/index.html</include>
+                                <include>**/*.js</include>
                             </includes>
                         </resource>
                     </webResources>
