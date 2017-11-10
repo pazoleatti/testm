@@ -26,6 +26,14 @@ prompt drop tables
 prompt create sequences
 @@create_sequences.sql;
 
+--alter jobs
+prompt alter jobs
+@@alter_jobs.sql;
+
+--alter materialized views
+prompt alter materialized views
+@@alter_mat_views.sql;
+
 -- compile source
 prompt compile DEP_REP_PER_BEFORE_DELETE
 @@DEP_REP_PER_BEFORE_DELETE.sql;
@@ -44,5 +52,4 @@ prompt compile fias_pkg
 
 prompt async_task
 @@async_task.sql;
-
 exit;

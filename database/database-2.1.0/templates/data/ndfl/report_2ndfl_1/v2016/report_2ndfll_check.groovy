@@ -5,8 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.ndfl.*
 import com.aplana.sbrf.taxaccounting.model.refbook.*
 import com.aplana.sbrf.taxaccounting.refbook.*
-import com.aplana.sbrf.taxaccounting.service.script.*
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.*
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 
 
 import groovy.transform.TypeChecked
@@ -27,7 +27,6 @@ class Check extends AbstractScriptClass {
     RefBookService refBookService
     RefBookFactory refBookFactory
     ReportPeriodService reportPeriodService
-    DeclarationService declarationService
 
     int NDFL_2_1_DECLARATION_TYPE = 102
     int NDFL_2_2_DECLARATION_TYPE = 104
@@ -109,9 +108,6 @@ class Check extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 

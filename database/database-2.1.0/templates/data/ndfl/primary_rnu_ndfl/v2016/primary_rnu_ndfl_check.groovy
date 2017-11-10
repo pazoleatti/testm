@@ -7,14 +7,14 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.service.script.CalendarService
-import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
-import com.aplana.sbrf.taxaccounting.service.script.FiasRefBookService
-import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.CalendarService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.FiasRefBookService
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -36,9 +36,6 @@ class Check extends AbstractScriptClass {
     ReportPeriodService reportPeriodService
     DepartmentReportPeriodService departmentReportPeriodService
     RefBookFactory refBookFactory
-    DeclarationService declarationService
-    boolean showTiming;
-    int similarityThreshold;
 
     final String SUCCESS_GET_TABLE = "Получены записи таблицы \"%s\" (%d записей)."
     final String SUCCESS_GET_REF_BOOK = "Получен справочник \"%s\" (%d записей)."
@@ -1669,7 +1666,7 @@ class Check extends AbstractScriptClass {
                             BigDecimal ndflPersonPrepaymentSum = new BigDecimal(0)
                             ndflPersonPrepaymentCurrentList.each { NdflPersonPrepayment ndflPersonPrepaymentCurrent ->
                                 if (ndflPersonPrepaymentCurrent.summ != null) {
-                                    ndflPersonPrepaymentSum.add(ndflPersonPrepaymentCurrent.summ)
+                                    ndflPersonPrepaymentSum = ndflPersonPrepaymentSum.add(ndflPersonPrepaymentCurrent.summ)
                                 }
                             }
                             if (!(ndflPersonIncome.calculatedTax ==
@@ -1911,12 +1908,19 @@ class Check extends AbstractScriptClass {
                             }
                         }
                         if (ndflPersonIncomeFind != null) {
+                            // Графа21(текущей строки) должна быть равна Графа7(следующей строки) + 1 рабочий день
+                            // Берём Графу21 из текущей проверяемой строки
+                            // Берём Графу7 из следующей найденной строки
+                            NdflPersonIncome ndflPersonIncomeCheck = new NdflPersonIncome()
+                            ndflPersonIncomeCheck.taxTransferDate = new LocalDateTime(ndflPersonIncome.taxTransferDate.getLocalMillis())
+                            ndflPersonIncomeCheck.incomePayoutDate = new LocalDateTime(ndflPersonIncomeFind.incomePayoutDate.getLocalMillis())
+
                             Column21EqualsColumn7Plus1WorkingDay column7Plus1WorkingDay = new Column21EqualsColumn7Plus1WorkingDay()
-                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeFind, dateConditionWorkDay)) {
+                            if (!column7Plus1WorkingDay.check(ndflPersonIncomeCheck, dateConditionWorkDay)) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно значению гр. \"%s\" (\"%s\") + 1 рабочий день",
                                         C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ScriptUtils.formatDate(ndflPersonIncome.taxTransferDate) : "",
-                                        C_INCOME_PAYOUT_DATE, ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""
+                                        C_INCOME_PAYOUT_DATE, ndflPersonIncomeFind.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncomeFind.incomePayoutDate) : ""
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                 logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInp, pathError, errMsg)
@@ -3032,21 +3036,5 @@ class Check extends AbstractScriptClass {
             throw new ScriptException("Ошибка при получении записей справочника " + refBookId)
         }
         return refBookMap
-    }
-
-    void initConfiguration(){
-        final ConfigurationParamModel configurationParamModel = declarationService.getAllConfig(userInfo);
-        String showTiming = configurationParamModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
-        String limitIdent = configurationParamModel.get(ConfigurationParam.LIMIT_IDENT).get(0).get(0);
-        if (showTiming.equals("1")) {
-            this.showTiming = true;
-        }
-        similarityThreshold = limitIdent != null ? (int) (Double.valueOf(limitIdent) * 1000) : 0;
-    }
-
-    void logForDebug(String message, Object... args) {
-        if (showTiming) {
-            logger.info(message, args);
-        }
     }
 }
