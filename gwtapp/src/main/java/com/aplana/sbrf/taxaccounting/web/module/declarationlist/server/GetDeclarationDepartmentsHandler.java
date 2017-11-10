@@ -81,24 +81,9 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
     private List<DepartmentReportPeriodViewModel> toModel(List<DepartmentReportPeriod> reportPeriods) {
         List<DepartmentReportPeriodViewModel> periodViewModels = new ArrayList<>();
         for (DepartmentReportPeriod period : reportPeriods){
-            periodViewModels.add(new DepartmentReportPeriodViewModel(period.getId(), toReportPeriodViewModel(period.getReportPeriod()), period.getDepartmentId(), period.isActive(), period.getCorrectionDate().toDate()));
+            periodViewModels.add(new DepartmentReportPeriodViewModel(period.getId(), period.getReportPeriod(), period.getDepartmentId(), period.isActive(), period.getCorrectionDate().toDate()));
         }
         return periodViewModels;
-    }
-
-    public ReportPeriodViewModel toReportPeriodViewModel(ReportPeriod selectedPeriod) {
-        ReportPeriodViewModel reportPeriod = new ReportPeriodViewModel();
-        reportPeriod.setId(selectedPeriod.getId());
-        reportPeriod.setName(selectedPeriod.getName());
-        reportPeriod.setAccName(selectedPeriod.getAccName());
-        reportPeriod.setOrder(selectedPeriod.getOrder());
-        reportPeriod.setTaxPeriod(selectedPeriod.getTaxPeriod());
-        reportPeriod.setStartDate(selectedPeriod.getStartDate().toDate());
-        reportPeriod.setEndDate(selectedPeriod.getEndDate().toDate());
-        reportPeriod.setCalendarStartDate(selectedPeriod.getCalendarStartDate().toDate());
-        reportPeriod.setDictTaxPeriodId(selectedPeriod.getDictTaxPeriodId());
-        reportPeriod.setPermissions(selectedPeriod.getPermissions());
-        return reportPeriod;
     }
 
     @Override

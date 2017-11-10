@@ -3,13 +3,15 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 import java.util.Date;
 
-
+/**
+ * Created by APronin on 23.10.2017.
+ */
 public class DepartmentReportPeriodViewModel implements Serializable {
     private static final long serialVersionUID = 5623552659772659276L;
 
     private Long id;
 
-    private ReportPeriodViewModel reportPeriod;
+    private ReportPeriod reportPeriod;
 
     private Integer departmentId;
 
@@ -17,7 +19,7 @@ public class DepartmentReportPeriodViewModel implements Serializable {
 
     private Date correctionDate;
 
-    public DepartmentReportPeriodViewModel(Long id, ReportPeriodViewModel reportPeriod, Integer departmentId, boolean active, Date correctionDate) {
+    public DepartmentReportPeriodViewModel(Long id, ReportPeriod reportPeriod, Integer departmentId, boolean active, Date correctionDate) {
         this.id = id;
         this.reportPeriod = reportPeriod;
         this.departmentId = departmentId;
@@ -51,11 +53,11 @@ public class DepartmentReportPeriodViewModel implements Serializable {
         this.active = active;
     }
 
-    public ReportPeriodViewModel getReportPeriod() {
+    public ReportPeriod getReportPeriod() {
         return reportPeriod;
     }
 
-    public void setReportPeriod(ReportPeriodViewModel reportPeriod) {
+    public void setReportPeriod(ReportPeriod reportPeriod) {
         this.reportPeriod = reportPeriod;
     }
 
