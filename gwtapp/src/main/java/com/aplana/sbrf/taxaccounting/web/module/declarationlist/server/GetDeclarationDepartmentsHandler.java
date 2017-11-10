@@ -97,6 +97,7 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
         reportPeriod.setEndDate(selectedPeriod.getEndDate().toDate());
         reportPeriod.setCalendarStartDate(selectedPeriod.getCalendarStartDate().toDate());
         reportPeriod.setDictTaxPeriodId(selectedPeriod.getDictTaxPeriodId());
+        reportPeriod.setPermissions(selectedPeriod.getPermissions());
         return reportPeriod;
     }
 

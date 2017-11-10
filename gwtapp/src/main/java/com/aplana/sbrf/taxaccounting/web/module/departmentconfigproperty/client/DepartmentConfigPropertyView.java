@@ -702,13 +702,13 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         }
     }
 
-    private ReportPeriodViewModel getMaxPeriod(List<ReportPeriodViewModel> reportPeriods) {
+    private ReportPeriod getMaxPeriod(List<ReportPeriod> reportPeriods) {
         if (reportPeriods == null || reportPeriods.isEmpty()) {
             return null;
         }
-        ReportPeriodViewModel maxPeriod = reportPeriods.get(0);
-        for (ReportPeriodViewModel per : reportPeriods) {
-            if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
+        ReportPeriod maxPeriod = reportPeriods.get(0);
+        for (ReportPeriod per : reportPeriods) {
+            if (per.getCalendarStartDate().isAfter(maxPeriod.getCalendarStartDate())) {
                 maxPeriod = per;
             }
         }

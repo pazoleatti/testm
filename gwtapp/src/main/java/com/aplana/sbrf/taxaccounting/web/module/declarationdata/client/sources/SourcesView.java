@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources;
 
 import com.aplana.gwt.client.ModalWindow;
-import com.aplana.sbrf.taxaccounting.model.RelationViewModel;
+import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
@@ -39,7 +39,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     public interface Binder extends UiBinder<PopupPanel, SourcesView> {
     }
 
-    private List<RelationViewModel> tableData = null;
+    private List<Relation> tableData = null;
 
     private final PopupPanel widget;
 
@@ -58,7 +58,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @UiField
     ModalWindow modalWindow;
     @UiField
-    DataGrid<RelationViewModel> table;
+    DataGrid<Relation> table;
     @UiField
     Label formDecLabel;
     @UiField
@@ -69,7 +69,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     CheckBox uncreated;
 
     private boolean isForm;
-    private ListDataProvider<RelationViewModel> dataProvider = new ListDataProvider<RelationViewModel>();
+    private ListDataProvider<Relation> dataProvider = new ListDataProvider<Relation>();
 
     @Inject
     public SourcesView(Binder uiBinder, EventBus eventBus) {
@@ -117,43 +117,43 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             table.removeColumn(0);
         }
 
-        Column<RelationViewModel, String> counterColumn = new Column<RelationViewModel, String>(new ClickableTextCell()){
+        Column<Relation, String> counterColumn = new Column<Relation, String>(new ClickableTextCell()){
 
             @Override
-            public void render(Cell.Context context, RelationViewModel object, SafeHtmlBuilder sb) {
+            public void render(Cell.Context context, Relation object, SafeHtmlBuilder sb) {
                 sb.appendHtmlConstant(String.valueOf(context.getIndex() + 1));
             }
 
             @Override
-            public String getValue(RelationViewModel relation) {
+            public String getValue(Relation relation) {
                 return null;
             }
         };
 
-        TextColumn<RelationViewModel> taxTypeColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> taxTypeColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 return object.getTaxType().getName();
             }
         };
 
-        TextColumn<RelationViewModel> sourceColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> sourceColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 return object.isSource() ? "Источник" : "Приемник";
             }
         };
 
-        TextColumn<RelationViewModel> departmentColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> departmentColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 return object.getFullDepartmentName();
             }
         };
 
-        Column<RelationViewModel, String> declarationDataIdColumn = new Column<RelationViewModel, String>(new ClickableTextCell()){
+        Column<Relation, String> declarationDataIdColumn = new Column<Relation, String>(new ClickableTextCell()){
             @Override
-            public void render(Cell.Context context, RelationViewModel object, SafeHtmlBuilder sb) {
+            public void render(Cell.Context context, Relation object, SafeHtmlBuilder sb) {
                 String link = "";
                 if (object.isCreated()) {
                     link = "<a href=\"#"
@@ -166,7 +166,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
 
             @Override
-            public String getValue(RelationViewModel relation) {
+            public String getValue(Relation relation) {
                 if (relation.isCreated()) {
                     return relation.getDeclarationDataId().toString();
                 }
@@ -174,9 +174,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        TextColumn<RelationViewModel> correctionDateColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> correctionDateColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 if (object.getCorrectionDate() == null) {
                     return null;
                 }
@@ -185,9 +185,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         };
         correctionDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        TextColumn<RelationViewModel> stateColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> stateColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 return urlTemplates.getColValue(
                         object.isCreated() ? object.getDeclarationState().getTitle() : "Не создана",
                         !object.isStatus() ? " (версия макета выведена из действия)" : "").
@@ -195,9 +195,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        TextColumn<RelationViewModel> formKindColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> formKindColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 if (object.getDeclarationTemplate()!= null)
                     return object.getDeclarationTemplate().getDeclarationFormKind().getTitle();
                 else
@@ -205,23 +205,23 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        TextColumn<RelationViewModel> yearColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> yearColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 return String.valueOf(object.getYear());
             }
         };
 
-        TextColumn<RelationViewModel> periodColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> periodColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 return object.getPeriodName();
             }
         };
 
-        TextColumn<RelationViewModel> formTypeColumn = new TextColumn<RelationViewModel>() {
+        TextColumn<Relation> formTypeColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(RelationViewModel object) {
+            public String getValue(Relation object) {
                 return object.getDeclarationTypeName();
             }
         };
@@ -265,7 +265,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     }
 
     @Override
-    public void setTableData(List<RelationViewModel> result) {
+    public void setTableData(List<Relation> result) {
         tableData = result;
         if (getUiHandlers() != null) {
             if (result == null)
@@ -277,13 +277,13 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     }
 
     private void updateTableData() {
-        List<RelationViewModel> filteredData = new LinkedList<RelationViewModel>();
+        List<Relation> filteredData = new LinkedList<Relation>();
         if (tableData != null) {
             boolean src = source.getValue();
             boolean dst = destination.getValue();
             boolean uncr = uncreated.getValue();
 
-            for (RelationViewModel relation : tableData) {
+            for (Relation relation : tableData) {
                 boolean fSrc = relation.isSource();
                 boolean fCr = relation.isCreated();
                 if ((src && fSrc || dst && !fSrc) && (uncr || fCr)) {

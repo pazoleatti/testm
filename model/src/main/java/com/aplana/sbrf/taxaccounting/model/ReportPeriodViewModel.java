@@ -26,6 +26,21 @@ public class ReportPeriodViewModel implements Serializable, SecuredEntity {
     private long dictTaxPeriodId;
     private long permissions;
 
+    public ReportPeriodViewModel(ReportPeriod reportPeriod) {
+        this.id = reportPeriod.getId();
+        this.name = reportPeriod.getName();
+        this.accName = reportPeriod.getAccName();
+        this.order = reportPeriod.getOrder();
+        this.taxPeriod = reportPeriod.getTaxPeriod();
+        this.startDate = reportPeriod.getStartDate().toDate();
+        this.endDate = reportPeriod.getEndDate().toDate();
+        this.calendarStartDate = reportPeriod.getCalendarStartDate().toDate();
+        this.dictTaxPeriodId = reportPeriod.getDictTaxPeriodId();
+        this.permissions = reportPeriod.getPermissions();
+    }
+
+    public ReportPeriodViewModel() {}
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }

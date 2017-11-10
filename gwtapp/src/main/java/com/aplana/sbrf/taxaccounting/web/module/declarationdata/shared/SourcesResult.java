@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.RelationViewModel;
+import com.aplana.sbrf.taxaccounting.model.Relation;
 
 import java.util.List;
 
@@ -8,13 +8,13 @@ import java.util.List;
  * @author auldanov
  */
 public class SourcesResult extends DeclarationDataResult {
-    private List<RelationViewModel> data;
+    private List<Relation> data;
 
-    public List<RelationViewModel> getData() {
+    public List<Relation> getData() {
         return data;
     }
 
-    public void setData(List<RelationViewModel> data) {
+    public void setData(List<Relation> data) {
         this.data = data;
     }
 }
