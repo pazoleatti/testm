@@ -171,7 +171,7 @@ class Calculate extends AbstractScriptClass {
 
             if (refBookPersonId == null) {
                 String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                String fioAndInp = String.format(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+                String fioAndInp = String.format(TEMPLATE_PERSON_FL, fio, ndflPerson.inp)
                 deletedPersonMap.get(refBookPersonRecordId).each { def personDeclarationDataId ->
                     logger.errorExp("%s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp,
                             "В налоговой форме № ${personDeclarationDataId} не удалось установить связь со справочником \"$R_PERSON\"")
