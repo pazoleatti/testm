@@ -359,34 +359,5 @@
                 return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
             };
         })
-
-        .filter('nameFormatter', function () {
-            return function (entity) {
-                return entity ? entity.name : "";
-            };
-        })
-
-        .filter('periodFormatter', function () {
-            return function (entity) {
-                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
-            };
-        })
-
-        /**
-         * @description Форматтер для преобразования тега корректировки из enum в boolean
-         * @param correctionTag
-         */
-        .filter('correctionTagFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
-            return function (correctionTag) {
-                switch (correctionTag) {
-                    case APP_CONSTANTS.CORRETION_TAG.ALL:
-                        return undefined;
-                    case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
-                        return false;
-                    case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
-                        return true;
-                }
-                return undefined;
-            };
-        }]);
+    ;
 }());

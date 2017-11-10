@@ -5,7 +5,7 @@
      * @description Модуль, содержащий форматтеры
      */
 
-    angular.module('app.formatters', [])
+    angular.module('app.formatters', ['app.constants'])
     /**
      * @description Фильтр даты
      *
@@ -149,5 +149,25 @@
                 return entity ? entity.name : "";
             };
         })
+
+        /**
+         * @description Форматтер для преобразования тега корректировки из enum в boolean
+         * @param correctionTag
+         */
+        .filter('correctionTagFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
+            return function (correctionTag) {
+                if(correctionTag && correctionTag.id !== undefined) {
+                    switch (correctionTag.id) {
+                        case APP_CONSTANTS.CORRETION_TAG.ALL.id:
+                            return undefined;
+                        case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY.id:
+                            return false;
+                        case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE.id:
+                            return true;
+                    }
+                }
+                return undefined;
+            };
+        }])
     ;
 }());
