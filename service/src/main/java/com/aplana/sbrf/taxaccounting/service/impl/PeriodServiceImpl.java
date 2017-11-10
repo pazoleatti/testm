@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import net.sf.jasperreports.web.actions.ActionException;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,13 +63,6 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    @Autowired
-    private DeclarationDataService declarationDataService;
-
-    @Autowired
-    private DeclarationTemplateService declarationTemplateService;
-
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
@@ -424,103 +416,14 @@ public class PeriodServiceImpl implements PeriodService {
     //http://conf.aplana.com/pages/viewpage.action?pageId=11389882#id-Формаспискапериодов-Удалениепериода
     @Override
     public void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo userg) {
-        removeReportPeriod(taxType, Long.valueOf(drpId), logger, userg, true);
-    }
-
-    @Override
-    public String removeReportPeriod(Long[] ids, TAUserInfo userInfo) {
-        Logger logger = new Logger();
-        for (Long id : ids) {
-            removeReportPeriod(TaxType.NDFL, id, logger, userInfo, true);
-        }
-        return logEntryService.save(logger.getEntries());
-    }
-
-    @Override
-    public String removeReportPeriod(Long id, TAUserInfo userInfo) {
-        Logger logger = new Logger();
-            removeReportPeriod(TaxType.NDFL, id, logger, userInfo, true);
-        return logEntryService.save(logger.getEntries());
-    }
-
-    @Override
-    public String editPeriod(DepartmentReportPeriod departmentReportPeriod, TAUserInfo user) {
-
-        List<Integer> departmentIds = getAvailableDepartments(TaxType.NDFL, userService.getCurrentUser(), PeriodService.Operation.EDIT, departmentReportPeriod.getDepartmentId());
-        List<LogEntry> logs = new ArrayList<>();
-
-        DeclarationDataFilter filter = new DeclarationDataFilter();
-        filter.setDepartmentIds(departmentIds);
-        filter.setReportPeriodIds(Collections.singletonList(departmentReportPeriodService.findOne(departmentReportPeriod.getId()).getReportPeriod().getId()));
-        List<Long> declarations = declarationDataSearchService.getDeclarationIds(filter, DeclarationDataSearchOrdering.ID, true);
-        for (Long id : declarations) {
-            DeclarationData dd = declarationDataService.get(id, user);
-            DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            logs.add(new LogEntry(LogLevel.ERROR, "\""+dt.getType().getName() + "\" в подразделении \"" +
-                    departmentService.getDepartment(dd.getDepartmentId()).getName() + "\" находится в удаляемом периоде!"));
-        }
-
-        if (!declarations.isEmpty()){
-            return logEntryService.save(logs);
-        }else {
-            return edit(departmentReportPeriod, user);
-        }
-
-
-    }
-
-    @Override
-    public ReportPeriodType getPeriodTypeById(Long id) {
-        return reportPeriodDao.getPeriodTypeById(id);
+        removeReportPeriod(taxType, drpId, logger, userg, true);
     }
 
 
-    /**
-     *
-     * @param filter - данные о периоде (deadline; departmentId; drp->reportPeriod->taxPeriod->year)
-     * @param withChild - если ТБ, то устанавливать ли для дочерних
-     * @throws ActionException
-     */
-    @Override
-    public void setDeadline(DepartmentReportPeriodFilter filter, boolean withChild) throws ActionException {
-        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-        TAUser userInfo = userService.getCurrentUser();
-        DepartmentReportPeriod period = departmentReportPeriodService.findOne(filter.getId());
-        String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
-        List<Notification> notifications = new ArrayList<Notification>();
-        if (filter.getDeadline() == null) {
-            throw new ActionException("Дата сдачи отчетности должна быть указана!");
-        }
-        List<Department> departments = new ArrayList<>();
-        if (withChild) {
-            departments.addAll(departmentService.getAllChildren(filter.getDepartmentId()));
-        }else {
-            departments.add(departmentService.getDepartment(filter.getDepartmentId()));
-        }
-        for (Department department : departments) {
-            if (department.getId() == null) {
-                throw new ActionException("Отправитель должен быть указан!");
-            }
-            Notification notification = new Notification();
-            notification.setCreateDate(new LocalDateTime());
-            notification.setDeadline(filter.getDeadline());
-            notification.setReportPeriodId(period.getReportPeriod().getId());
-            notification.setSenderDepartmentId(null);
-            notification.setReceiverDepartmentId(department.getId());
-            notification.setText(String.format(text,
-                    userInfo.getName(), departmentService.getParentsHierarchy(department.getId()), TaxTypeCase.fromCode(TaxType.NDFL.getCode()).getGenitive(),
-                    period.getReportPeriod().getName(), period.getReportPeriod().getTaxPeriod().getYear(), df.format(filter.getDeadline().toDate())));
-
-            notifications.add(notification);
-        }
-        notificationService.saveList(notifications);
-    }
-
-
-    private void removeReportPeriod(TaxType taxType, long drpId, Logger logger, TAUserInfo user, boolean fullLogging) {
+    private void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user, boolean fullLogging) {
         //Проверка форм не относится к этой постановке
         List<Integer> departmentIds = new ArrayList<Integer>();
-        DepartmentReportPeriod drp = departmentReportPeriodService.findOne(drpId);
+        DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
         if (drp == null) {
             throw new ServiceException("Период не найден. Возможно он был уже удалён. Попробуйте обновить страницу.");
         }
@@ -540,12 +443,12 @@ public class PeriodServiceImpl implements PeriodService {
             filter.setCorrectionTag(false);
         }
         List<Long> declarations = declarationDataSearchService.getDeclarationIds(filter, DeclarationDataSearchOrdering.ID, true);
-        for (Long id : declarations) {
+        /*for (Long id : declarations) {
             DeclarationData dd = declarationDataService.get(id, user);
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logger.error("\"%s\" в подразделении \"%s\" находится в удаляемом периоде!", dt.getType().getName(), departmentService.getDepartment(dd.getDepartmentId()).getName());
         }
-
+        */
 
         int reportPeriodId = drp.getReportPeriod().getId();
         //2 Проверка вида периода
@@ -590,7 +493,7 @@ public class PeriodServiceImpl implements PeriodService {
             if (logs != null) {
                 logs.add(new LogEntry(LogLevel.INFO,
                         "Удален период \"" + rp.getName() + "\" " + rp.getTaxPeriod().getYear() +
-                                (correctionDate == null ? "" : " с датой сдачи корректировки " + sdf.get().format(correctionDate.toDate()))
+                                (correctionDate == null ? "" : " с датой сдачи корректировки " + sdf.get().format(correctionDate))
                 ));
             }
         } else {
@@ -850,7 +753,7 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public String edit(DepartmentReportPeriod departmentReportPeriod, TAUserInfo userInfo) {
+    public String edit(DepartmentReportPeriod departmentReportPeriod) {
         List<LogEntry> logs = new ArrayList<LogEntry>();
 
         TaxPeriod taxPeriod = taxPeriodDao.getByTaxTypeAndYear(TaxType.NDFL, departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
@@ -874,15 +777,12 @@ public class PeriodServiceImpl implements PeriodService {
         departmentReportPeriod.setReportPeriod(reportPeriod);
 
         List<Integer> depIds = getAvailableDepartments(TaxType.NDFL, userService.getCurrentUser(), Operation.EDIT, departmentService.getBankDepartment().getId());
-//            removePeriodWithLog(departmentReportPeriod.getReportPeriod().getId(), null, departmentService.getBankDepartment().getId(), depIds, TaxType.NDFL, null, true);
-            removeReportPeriod(departmentReportPeriod.getId(), userInfo);
+            removePeriodWithLog(departmentReportPeriod.getReportPeriod().getId(), null, departmentService.getBankDepartment().getId(), depIds, TaxType.NDFL, null, true);
             open(departmentReportPeriod);
-            for(int i : depIds) {
-                logs.add(new LogEntry(LogLevel.INFO,
-                        String.format("Период изменён на \"%s, %s\" для подразделений \"%s\"",
-                                reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName(),
-                                departmentService.getDepartment(i).getName())));
-            }
+            logs.add(new LogEntry(LogLevel.INFO,
+                    String.format("Период изменён на \"%s, %s\" для подразделений \"%s\"",
+                            reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName(),
+                            departmentService.getBankDepartment().getName())));
 
 
         return logEntryService.save(logs);
@@ -945,8 +845,9 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams) {
-        return reportPeriodDao.getPeriodType(pagingParams);
+    public List<ReportPeriodType> getPeriodTypeByActualDate(LocalDateTime actualDate, String name, boolean equal, PagingParams pagingParams) {
+        List<ReportPeriodType> result =  reportPeriodDao.getPeriodTypeByActualDate(actualDate, name, equal, pagingParams);
+        return result;
     }
 
     @Override

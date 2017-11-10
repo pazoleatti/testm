@@ -33,29 +33,32 @@
                         }}:</label>
                 </td>
                 <td>
+                    <div data-aplana-field>
                         <input data-ng-model="period.reportPeriod.taxPeriod.year"
                                type="number"
                                class="form-control"
                                style="width: 75px"
                                id="period.reportPeriod.taxPeriod.year"/>
+                    </div>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label class="control-label">{{::'reportPeriod.grid.period' |
+                    <label class="control-label" for="period_reportperiod_name">{{::'reportPeriod.grid.period' |
                         translate}}:</label>
                 </td>
                 <td>
                     <div data-aplana-field>
-                        <div style="width: 355px;" data-ng-controller="SelectCorrectPeriodCtrl"
-                             data-ui-select2="periodSelect.options"
-                             data-ng-init="initReportPeriodType()"
-                             data-ng-model="period.reportPeriod.dictPeriod"
-                             data-ng-required="true">
-                        </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
-                            translate}}
-                        </div>
+                        <input type="text"
+                               disabled
+                               class="form-control"
+                               style="width: 150px; float: none;"
+                               data-ng-model="period.reportPeriod.name"
+                               id="period_reportperiod_name"/>
+                        <input type="button"
+                               class="btn btn-default"
+                               data-ng-click="openPeriodType()"
+                               value="{{::'button.select' | translate}}"/>
                     </div>
                 </td>
             </tr>

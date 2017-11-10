@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-//import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -176,14 +176,14 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
         action.setReportPeriodId(getView().getDefaultReportPeriodId());
         action.setDownloadReports(true);
         getView().init();
-//        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-//            @Override
-//            public void onSuccess(GetReportPeriodsResult result) {
-//                getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
-//                onReportPeriodChange();
-//                popupSlot.addToPopupSlot(DeclarationDownloadReportsPresenter.this);
-//            }
-//        }, this));
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
+            @Override
+            public void onSuccess(GetReportPeriodsResult result) {
+                getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
+                onReportPeriodChange();
+                popupSlot.addToPopupSlot(DeclarationDownloadReportsPresenter.this);
+            }
+        }, this));
     }
 
     @Override
@@ -202,14 +202,14 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
         action.setReportPeriodId(getView().getSelectedReportPeriod().get(0));
         action.setReports(true);
         action.setCreate(false);
-//        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationDepartmentsResult>() {
-//            @Override
-//            public void onSuccess(GetDeclarationDepartmentsResult result) {
-//                getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
-//                getView().setCorrectionDate(result.getDepartmentReportPeriods());
-//                getView().updateEnabled();
-//                onDepartmentChange();
-//            }
-//        }, this) );
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationDepartmentsResult>() {
+            @Override
+            public void onSuccess(GetDeclarationDepartmentsResult result) {
+                getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
+                getView().setCorrectionDate(result.getDepartmentReportPeriods());
+                getView().updateEnabled();
+                onDepartmentChange();
+            }
+        }, this) );
     }
 }

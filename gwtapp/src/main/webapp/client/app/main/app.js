@@ -44,8 +44,7 @@
             'app.formatters',
             'app.reportPeriod',
             'app.reportPeriodModal',
-            'app.reportPeriodTypeModal',
-            'app.deadlinePeriodModal'
+            'app.reportPeriodTypeModal'
         ])
         /**
          * @description Отображение модального окна с сообщением "Функционал находится в разработке".

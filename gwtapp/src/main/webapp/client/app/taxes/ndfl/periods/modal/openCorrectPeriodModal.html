@@ -19,7 +19,7 @@
             </tr>
             <tr>
                 <td>
-                    <label class="control-label">{{::'reportPeriod.correctionPeriod' |
+                    <label class="control-label">{{::'reportPeriod.department' |
                         translate}}:</label>
                 </td>
                 <td>
@@ -38,12 +38,13 @@
             </tr>
             <tr>
                 <td>
-                    <label class="control-label" for="correctionDate">{{::'reportPeriod.grid.correctionDate' |
+                    <label class="control-label" for="correctionDate">{{::'reportPeriod.department' |
                         translate}}:</label>
                 </td>
-                <td style="margin-left: 10px">
+                <td>
                     <date-picker
                                  model="correctionDate"
+                                 class="form-control"
                                  id="correctionDate"></date-picker>
                 </td>
             </tr>

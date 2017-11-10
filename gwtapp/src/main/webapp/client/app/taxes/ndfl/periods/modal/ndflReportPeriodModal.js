@@ -9,8 +9,7 @@
 
 
         .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'RefBookValuesResource', 'APP_CONSTANTS', '$uibModalInstance', 'DepartmentResource', 'appModals', 'ReportPeriodResource', '$http', '$logPanel', 'data', 'LogEntryResource',
-            'ReportPeriodTypeResource',
-            function ($scope, $filter, RefBookValuesResource, APP_CONSTANTS, $uibModalInstance, DepartmentResource, appModals, ReportPeriodResource, $http, $logPanel, data, LogEntryResource, ReportPeriodTypeResource) {
+            function ($scope, $filter, RefBookValuesResource, APP_CONSTANTS, $uibModalInstance, DepartmentResource, appModals, ReportPeriodResource, $http, $logPanel, data, LogEntryResource) {
 
                 $scope.isAdd = data.isAdd;
 
@@ -24,11 +23,11 @@
                     isClear: false,
                     filterName: 'filter'
                 };
-
                 $scope.period = {
                     reportPeriod: {
-                        taxPeriod: {},
-                        dictPeriod: null
+                        taxPeriod: {
+                            year: null
+                        }
                     }
                 };
 
@@ -41,16 +40,25 @@
                     $scope.department = data.department;
                     $scope.period.reportPeriod.taxPeriod.year = data.period.year;
                     $scope.period.reportPeriod.name = data.period.name;
-                    ReportPeriodTypeResource.query({
-                        id: data.period.dictTaxPeriodId
-                    }, function (data) {
-                        if(data){
-                            $scope.period.reportPeriod.dictPeriod = data;
-                        }
-                    });
                 }
 
 
+                /**
+                 * @description загрузчик данных для select'a
+                 */
+                $scope.periodSelect = {
+                    options: {
+                        data: {
+                            results: [],
+                            text: $filter('reportPeriodFormatter')
+                        },
+                        formatSelection: $filter('reportPeriodFormatter'),
+                        formatResult: $filter('reportPeriodFormatter'),
+                        multiple: false,
+                        allowClear: true,
+                        placeholder: $filter('translate')('filter.placeholder.select')
+                    }
+                };
 
                 /**
                  * @description Обработчик кнопки "Создать"
@@ -63,7 +71,7 @@
                             params: {
                                 departmentReportPeriod: JSON.stringify({
                                     reportPeriod: {
-                                        dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                        dictTaxPeriodId: $scope.period.reportPeriod.id,
                                         taxPeriod: {
                                             year: $scope.period.reportPeriod.taxPeriod.year
                                         }
@@ -97,7 +105,7 @@
                                                 departmentReportPeriod: JSON.stringify({
                                                     id: $scope.period.id,
                                                     reportPeriod: {
-                                                        dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                                        dictTaxPeriodId: $scope.period.reportPeriod.id,
                                                         taxPeriod: {
                                                             year: $scope.period.reportPeriod.taxPeriod.year
                                                         }

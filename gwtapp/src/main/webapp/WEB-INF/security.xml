@@ -92,7 +92,6 @@
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.TAUser" value-ref="userPermissionFactory"/>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationData" value-ref="declarationDataPermissionFactory"/>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.ReportPeriod" value-ref="reportPeriodPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod" value-ref="departmentReportPeriodPermissionFactory"/>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.Department" value-ref="departmentPermissionFactory"/>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.LockData" value-ref="lockDataPermissionFactory"/>
 				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationDataFile" value-ref="declarationDataFilePermissionFactory"/>
@@ -115,11 +114,6 @@
 				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
 		<beans:constructor-arg
 				value="com.aplana.sbrf.taxaccounting.permissions.ReportPeriodPermission"/>
-	</beans:bean>
-	<beans:bean id="departmentReportPeriodPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission"/>
 	</beans:bean>
 	<beans:bean id="departmentPermissionFactory"
 				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
@@ -153,11 +147,6 @@
 	<beans:bean id="reportPeriodPermissionSetter"
 				class="com.aplana.sbrf.taxaccounting.permissions.ReportPeriodPermissionSetter">
 		<beans:property name="permissionFactory" ref="reportPeriodPermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
-	<beans:bean id="departmentReportPeriodPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter">
-		<beans:property name="permissionFactory" ref="departmentReportPeriodPermissionFactory"/>
 		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
 	</beans:bean>
 	<beans:bean id="departmentPermissionSetter"

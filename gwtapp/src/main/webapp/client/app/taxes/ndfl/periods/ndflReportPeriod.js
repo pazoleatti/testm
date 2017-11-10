@@ -55,33 +55,34 @@
          * @description Контроллер формы "Ведение периодов"
          */
 
-        .controller('reportPeriodCtrl', ['$scope', '$filter', 'ReportPeriodResource', 'DepartmentResource', 'appModals', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS',
-            function ($scope, $filter, ReportPeriodResource, DepartmentResource, appModals, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS) {
+        .controller('reportPeriodCtrl', ['$scope', '$filter', 'ReportPeriodResource', 'DepartmentResource', 'appModals', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http',
+            function ($scope, $filter, ReportPeriodResource, DepartmentResource, appModals, LogEntryResource, $logPanel, PermissionChecker, $http) {
 
                 DepartmentResource.query({}, function (department) {
                     $scope.department = department;
                 });
-                if(!$scope.searchFilter) {
-                    $scope.searchFilter = {
-                        ajaxFilter: [],
-                        params: {
-                            yearStart: new Date().getFullYear(),
-                            yearEnd: new Date().getFullYear(),
-                            department: $scope.department
-                        },
-                        isClear: false,
-                        filterName: 'filter',
-                        hideExtendedFilter: false
-                    };
-                }
+
+                $scope.searchFilter = {
+                    ajaxFilter: [],
+                    params: {
+                        yearStart: new Date().getFullYear(),
+                        yearEnd: new Date().getFullYear(),
+                        department: $scope.department
+                    },
+                    isClear: false,
+                    filterName: 'filter',
+                    hideExtendedFilter: false
+                };
+
+                $scope.$watch('searchFilter.params.department', function () {
+                    $scope.departmentId = $scope.searchFilter.params.department ? $scope.searchFilter.params.department.id : null;
+                });
 
                 $scope.reportPeriodGrid = {
                     ctrl: {},
                     value: [],
                     gridName: 'reportPeriodGrid',
                     options: {
-                        fullscreen: true,
-                        height: '900',
                         datatype: "angularResource",
                         angularResource: ReportPeriodResource,
                         requestParameters: function () {
@@ -94,6 +95,7 @@
                                 })
                             };
                         },
+                        height: 200,
                         colNames: [
                             $filter('translate')('reportPeriod.modal.year'),
                             $filter('translate')('reportPeriod.grid.period'),
@@ -115,8 +117,7 @@
                                 name: 'deadline',
                                 index: 'deadline',
                                 width: 250,
-                                sortable: false,
-                                formatter: $filter('dateFormatter')
+                                sortable: false
                             },
                             {
                                 name: 'correctionDate',
@@ -131,7 +132,7 @@
                         sortname: 'year',
                         sortorder: "asc",
                         hidegrid: false,
-                        multiselect: true
+                        multiselect: false
                     }
                 };
 
@@ -200,28 +201,24 @@
                  * @description Открытие модального окна создания периода
                  */
                 $scope.openPeriod = function () {
-                    var modal = appModals.create('client/app/taxes/ndfl/periods/modal/ndflReportPeriodModal.html',
-                        'reportPeriodCtrlModal',
-                        {isAdd: true,department: $scope.department},
-                        {size: 'md'}
+                    appModals.create('client/app/taxes/ndfl/periods/modal/ndflReportPeriodModal.html', 'reportPeriodCtrlModal',
+                        {
+                            isAdd: true,
+                            department: $scope.department
+                        }
                     );
-                    modal.result.then(function () {
-                        $scope.refreshGrid(1);
-                    });
                 };
 
                 /**
                  * @description Открытие модального окна создания периода
                  */
                 $scope.editPeriod = function () {
-                    var modal = appModals.create('client/app/taxes/ndfl/periods/modal/ndflReportPeriodModal.html',
-                        'reportPeriodCtrlModal',
-                        {isAdd: false, period: $scope.reportPeriodGrid.value[0], department: $scope.department },
-                        {size: 'md'}
-                    );
-                    modal.result.then(function () {
-                        $scope.refreshGrid(1);
-                    });
+                    appModals.create('client/app/taxes/ndfl/periods/modal/ndflReportPeriodModal.html', 'reportPeriodCtrlModal',
+                        {
+                            isAdd: false,
+                            period: $scope.reportPeriodGrid.value[0],
+                            department: $scope.department
+                        });
                 };
 
                 /**
@@ -259,46 +256,42 @@
                     });
                 };
 
-                /** Проверка, может ли текущий пользоватеть выполнить операцию над выделенными налоговыми периодами
+                /**
+                 * @description Проверка доступности действий с открытым периодом
+                 */
+                $scope.isOpen = function () {
+                    if ($scope.reportPeriodGrid.value[0]) {
+                        return $scope.reportPeriodGrid.value[0].isActive === 1;
+                    }else {
+                        return false;
+                    }
+                };
+
+                /**
+                 * @description Проверка доступности действий с закрытым периодом
+                 */
+                $scope.isClose = function () {
+                    if ($scope.reportPeriodGrid.value[0]) {
+                        return $scope.reportPeriodGrid.value[0].isActive === 0;
+                    }else {
+                        return false;
+                    }
+                };
+
+                /** Проверка, может ли текущий пользоватеть выполнить операцию над выделенными налоговыми формами
                 * @param permission
                 */
                 $scope.checkPermissionForGridValue = function (permission) {
-                    if ($scope.reportPeriodGrid.value && $scope.reportPeriodGrid.value.length > 0) {
-                        return $scope.reportPeriodGrid.value.every(function (item) {
-                            if ((permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE ||
-                                permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE) &&
-                                $scope.reportPeriodGrid.value.length !== 1){
-                                return false;
-                            }
-                            return PermissionChecker.check(item, permission);
-                        });
-                    }else {
-                        if (permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN){
-                            return PermissionChecker.check(permission);
-                        }
-                    }
+                        return PermissionChecker.check(permission);
                 };
 
                 /**
                  * @description Удаление выбранного отчетного периода для подразделения
                  */
                 $scope.deletePeriod = function () {
-                    var ids = [];
-                    $scope.reportPeriodGrid.value.forEach(function (item) {
-                        ids.push(item.id);
-                    });
-                    $http({
-                        method: "POST",
-                        url: "controller/rest/reportPeriods/delete",
-                        params: {
-                                ids: ids
-
-                        }
-                    }).then(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
-                            $scope.refreshGrid(1);
-                        }
+                    ReportPeriodResource.delete({id: $scope.reportPeriodGrid.value[0].id},
+                    function () {
+                        $scope.refreshGrid(1);
                     });
                 };
 
@@ -306,29 +299,12 @@
                  * @description Открытие модального окна окрытия корректирующего периода
                  */
                 $scope.openCorrectPeriod = function () {
-                    var modal = appModals.create('client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.html', 'openCorrectCtrlModal',
+                    appModals.create('client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.html', 'openCorrectCtrlModal',
                         {
                             period: $scope.reportPeriodGrid.value[0],
                             department: $scope.department
                         });
-                    modal.result.then(function () {
-                        $scope.refreshGrid(1);
-                    });
                 };
-
-                $scope.deadlinePeriod = function () {
-                    var modal = appModals.create('client/app/taxes/ndfl/periods/modal/deadlinePeriod.html', 'deadlinePeriodController',
-                        {
-                            period: $scope.reportPeriodGrid.value[0]
-                        },
-                        {
-                            size : "md"
-                        });
-                    modal.result.then(function () {
-                        $scope.refreshGrid(1);
-                    });
-                };
-
             }]);
 
 }());

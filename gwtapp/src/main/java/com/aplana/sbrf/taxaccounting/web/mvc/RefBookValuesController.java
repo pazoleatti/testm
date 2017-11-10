@@ -14,6 +14,10 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataServic
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -153,19 +157,9 @@ public class RefBookValuesController {
      * @return Список периодов
      */
     @GetMapping(value = "/rest/refBookValues/reportPeriodType")
-    public JqgridPagedList<ReportPeriodType> fetchReportPeriodsType(@RequestParam PagingParams pagingParams) {
-        PagingResult<ReportPeriodType> result = periodService.getPeriodType(pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
-    }
-
-    /**
-     * Получение типа Отчетных периодов по id
-     *
-     * @return Список периодов
-     */
-    @GetMapping(value = "/rest/refBookValues/reportPeriodTypeById")
-    public ReportPeriodType fetchReportPeriodsTypeById(@RequestParam Long id) {
-        return periodService.getPeriodTypeById(id);
+    public List<ReportPeriodType> fetchReportPeriodsType(@RequestParam String name, @RequestParam boolean equal, @RequestParam PagingParams pagingParams) {
+        TAUser user = securityService.currentUserInfo().getUser();
+        return periodService.getPeriodTypeByActualDate(new LocalDateTime(), name, equal, pagingParams);
     }
 
     /**
@@ -176,6 +170,6 @@ public class RefBookValuesController {
     @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=openPeriods")
     public List<ReportPeriod> fetchOpenReportPeriods() {
         TAUser user = securityService.currentUserInfo().getUser();
-        return new ArrayList<>(periodService.getOpenForUser(user, TaxType.NDFL));
+        return new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
     }
 }

@@ -60,8 +60,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             taxPeriod.year,
             departmentReportPeriod.isActive,
             departmentReportPeriod.correctionDate,
-            notification.deadline,
-            reportPeriod.dictTaxPeriodId);
+            notification.deadline);
 
     private final QBean<DepartmentReportPeriod> departmentReportPeriodQBean = bean(DepartmentReportPeriod.class,
             departmentReportPeriod.id,
@@ -494,12 +493,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     public boolean existLargeCorrection(int departmentId, int reportPeriodId, LocalDateTime correctionDate) {
         try {
-            return sqlQueryFactory.select(departmentReportPeriodQBean)
-                    .from(departmentReportPeriod)
-                    .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                    .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                    .where(departmentReportPeriod.departmentId.eq(departmentId).and(reportPeriod.id.eq(reportPeriodId).and(departmentReportPeriod.correctionDate.gt(correctionDate))))
-                    .fetchCount() > 0;
+            return getJdbcTemplate().
+                    queryForObject(
+                            "select count(*) from department_report_period drp where " +
+                                    "drp.DEPARTMENT_ID = ? and drp.report_period_id = ? and drp.CORRECTION_DATE > ?",
+                            new Object[]{departmentId, reportPeriodId, correctionDate}, Integer.class) > 0;
         } catch (DataAccessException e) {
             LOG.error("", e);
             throw new DaoException("", e);
@@ -602,8 +600,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 taxPeriod.year,
                 departmentReportPeriod.isActive,
                 departmentReportPeriod.correctionDate,
-                notification.deadline,
-                reportPeriod.dictTaxPeriodId)
+                notification.deadline)
                 .from(departmentReportPeriod)
                 .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
                 .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
@@ -614,7 +611,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .limit(pagingParams.getCount())
                 .transform(GroupBy.groupBy(departmentReportPeriod.id).list(qDepartmentReportPeriodJournalItem));
 
-        return new PagingResult<>(result, getTotalCount(where));
+        return new PagingResult<DepartmentReportPeriodJournalItem>(result, getTotalCount(where));
 
     }
 

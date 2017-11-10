@@ -6,10 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import net.sf.jasperreports.web.actions.ActionException;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -36,15 +34,13 @@ public class PeriodController {
     }
 
     @Autowired
-    public PeriodController(DepartmentReportPeriodService departmentReportPeriodService, PeriodService periodService, SecurityService securityService) {
+    public PeriodController(DepartmentReportPeriodService departmentReportPeriodService, PeriodService periodService) {
         this.departmentReportPeriodService = departmentReportPeriodService;
         this.periodService = periodService;
-        this.securityService = securityService;
     }
 
     private DepartmentReportPeriodService departmentReportPeriodService;
     private PeriodService periodService;
-    private SecurityService securityService;
 
     /**
      * Получение отчетных периодов с фильтрацией и пагинацией
@@ -76,7 +72,7 @@ public class PeriodController {
      */
     @PostMapping(value = "/rest/reportPeriods/updatePeriod")
     public String edit(@RequestParam DepartmentReportPeriod departmentReportPeriod){
-        return periodService.editPeriod(departmentReportPeriod, securityService.currentUserInfo());
+        return periodService.edit(departmentReportPeriod);
     }
 
 
@@ -99,8 +95,8 @@ public class PeriodController {
     /**
      * Закрытие периода для подразделения
      */
-    @PostMapping(value = "/rest/reportPeriods/delete")
-    public String delete(@RequestParam Long[] ids){return periodService.removeReportPeriod(ids, securityService.currentUserInfo());}
+    @DeleteMapping(value = "/rest/reportPeriods")
+    public void delete(@RequestParam Long id){departmentReportPeriodService.delete(id);}
 
     /**
      * Получение доступных для выбора отчетных периодов для открытия коррекционного периода
@@ -122,12 +118,6 @@ public class PeriodController {
         period.setId(filter.getId());
         period.setDepartmentId(filter.getDepartmentId());
         return periodService.openCorrectionPeriod(period);
-    }
-
-    @PostMapping(value = "rest/reportPeriods/deadline")
-    public void setDeadline(@RequestParam DepartmentReportPeriodFilter filter, @RequestParam boolean withChild) throws ActionException {
-        filter.setDeadline(new LocalDateTime(filter.getSimpleCorrectionDate()));
-        periodService.setDeadline(filter, withChild);
     }
 
 }

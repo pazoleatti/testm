@@ -9,7 +9,7 @@ import java.io.Serializable;
  * DTO для {@link DepartmentReportPeriod}
  */
 
-public class DepartmentReportPeriodJournalItem implements Serializable, SecuredEntity{
+public class DepartmentReportPeriodJournalItem implements Serializable{
 
     private Long id;
 
@@ -22,10 +22,6 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
     private LocalDateTime correctionDate;
 
     private LocalDateTime deadline;
-
-    private long permissions;
-
-    private long dictTaxPeriodId;
 
     public Long getId() {
         return id;
@@ -73,23 +69,5 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
 
     public void setDeadline(LocalDateTime deadline) {
         this.deadline = deadline;
-    }
-
-    public long getDictTaxPeriodId() {
-        return dictTaxPeriodId;
-    }
-
-    public void setDictTaxPeriodId(long dictTaxPeriodId) {
-        this.dictTaxPeriodId = dictTaxPeriodId;
-    }
-
-    @Override
-    public long getPermissions() {
-        return permissions;
-    }
-
-    @Override
-    public void setPermissions(long permissions) {
-        this.permissions = permissions;
     }
 }

@@ -9,7 +9,7 @@
 
         .filter('correctPeriodFormatter', function () {
             return function (entity) {
-                return entity.id ? entity.taxPeriod.year + ": " + entity.name : "";
+                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
             };
         })
 
@@ -21,7 +21,9 @@
                 $scope.departmentReportPeriod = data.period;
 
                 $scope.correctPeriod = {
-                    reportPeriod : null
+                    reportPeriod: {
+                        taxPeriod: {}
+                    }
                 };
 
                 /**

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import net.sf.jasperreports.web.actions.ActionException;
 import org.joda.time.LocalDateTime;
 
 import java.util.Calendar;
@@ -151,40 +150,7 @@ public interface PeriodService {
 	 */
 	void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user);
 
-	/**
-	 * Удалить отчетный период
-	 * @param id - идентификатор периода
-     * @param userInfo
-	 */
-	String removeReportPeriod(Long[] id, TAUserInfo userInfo);
-
-
-	String removeReportPeriod(Long ids, TAUserInfo userInfo);
-
-	/**
-	 * Редактирует период или выдает причину невозможности редактрования
-	 * @param departmentReportPeriod
-	 * @param user
-	 * @return uuid
-	 */
-    String editPeriod(DepartmentReportPeriod departmentReportPeriod, TAUserInfo user);
-
-	/**
-	 * Получение типа отчетногопериода из спрвочника по идентификатору
-	 * @param id - идентификатор
-	 * @return тип отчетного периода
-	 */
-	ReportPeriodType getPeriodTypeById(Long id);
-
-
-	/**
-	 * Устанавливает дату сдачи отчетности для периода подразделения
-	 * @param filter - данные о периоде
-	 * @param withChild - если ТБ, то устанавливать ли для дочерних
-	 */
-    void setDeadline(DepartmentReportPeriodFilter filter, boolean withChild) throws ActionException;
-
-    enum Operation {
+	enum Operation {
 		FIND, // Поиск периода
 		OPEN, // Открытие периода
 		CLOSE, // Закрытие периода
@@ -323,9 +289,8 @@ public interface PeriodService {
     /**
      * Редактировать отчетный период
 	 * @param departmentReportPeriod
-	 * @param userInfo
 	 */
-    String edit(DepartmentReportPeriod departmentReportPeriod, TAUserInfo userInfo);
+    String edit(DepartmentReportPeriod departmentReportPeriod);
 
     /**
      * Редактировать корректирующий период
@@ -344,9 +309,8 @@ public interface PeriodService {
 
 	/**
 	 * @return список отчетных периодов по дате актуальности
-     * @param pagingParams
-     */
-	PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams);
+	 */
+	List<ReportPeriodType> getPeriodTypeByActualDate(LocalDateTime actualDate, String name, boolean equal, PagingParams pagingParams);
 
 	/**
      * Возвращает все периоды по виду налога, которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
