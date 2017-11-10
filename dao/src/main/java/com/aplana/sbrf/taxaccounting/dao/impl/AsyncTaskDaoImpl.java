@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -23,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +68,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
             result.setUserId(rs.getInt("user_id"));
             result.setState(AsyncTaskState.getById(rs.getInt("state")));
             result.setDescription(rs.getString("description"));
-            result.setCreateDate(new LocalDateTime(rs.getTimestamp("create_date")));
+            result.setCreateDate(rs.getTimestamp("create_date"));
             if (full) {
                 ObjectInputStream ois = null;
                 try {
@@ -101,10 +99,10 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
             AsyncTaskDTO result = new AsyncTaskDTO();
             result.setId(rs.getLong("id"));
             result.setUser(rs.getString("user_name") + " (" + rs.getString("user_login") + ")");
-            result.setCreateDate(new LocalDateTime(rs.getTimestamp("create_date")));
+            result.setCreateDate(rs.getTimestamp("create_date"));
             result.setNode(rs.getString("node"));
             result.setState(AsyncTaskState.getById(rs.getInt("state")).getText());
-            result.setStateDate(new LocalDateTime(rs.getTimestamp("state_date")));
+            result.setStateDate(rs.getTimestamp("state_date"));
             result.setDescription(rs.getString("description"));
             result.setQueue(AsyncQueue.getById(rs.getInt("queue")).getName());
             result.setQueuePosition(rs.getInt("queue_position"));
@@ -150,14 +148,12 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
     @Override
     public int lockTask(String node, String priorityNode, int timeout, AsyncQueue queue, int maxTasksPerNode) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        Date updateDate = LocalDateTime.now().toDate();
-        params.addValue("updateDate",updateDate);
         params.addValue("node", node);
         params.addValue("priorityNode", priorityNode);
         params.addValue("maxTasksPerNode", maxTasksPerNode);
         params.addValue("queue", queue.getId());
-        return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = :updateDate, start_process_date = :updateDate where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = (select id from (" +
-                        "select * from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and queue = :queue and (node is null or :updateDate > start_process_date + interval '" + timeout + "' hour) order by create_date" +
+        return getNamedParameterJdbcTemplate().update("update async_task set node = :node, state_date = current_timestamp, start_process_date = current_timestamp where (select count(*) from async_task where node = :node and queue = :queue) < :maxTasksPerNode and id = (select id from (" +
+                        "select * from async_task where ((:priorityNode is null and priority_node is null) or (:priorityNode is not null and priority_node = :priorityNode)) and queue = :queue and (node is null or current_timestamp > start_process_date + interval '" + timeout + "' hour) order by create_date" +
                         ") where rownum = 1)",
                 params);
     }
@@ -200,8 +196,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
 
     @Override
     public void updateState(long taskId, AsyncTaskState state) {
-        Date stateDate = LocalDateTime.now().toDate();
-        getJdbcTemplate().update("update async_task set state = ?, state_date = ? where id = ?", state.getId(),stateDate, taskId);
+        getJdbcTemplate().update("update async_task set state = ?, state_date = current_timestamp where id = ?", state.getId(), taskId);
     }
 
     @Override

@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.impl.LockDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
-import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,7 +91,7 @@ public class LockDataServiceImplTest {
     private static LockData getLockData(String key) {
         LockData lock = new LockData();
         lock.setKey(key);
-        lock.setDateLock(new LocalDateTime());
+        lock.setDateLock(new Date());
         lock.setDescription("descr");
         return lock;
     }

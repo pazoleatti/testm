@@ -157,7 +157,7 @@ public class LockDataServiceImpl implements LockDataService {
 
     private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, TaskInterruptCause cause) {
         try {
-            String note = cause.getEventDescrition(lockData.getDateLock().toDate(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
+            String note = cause.getEventDescrition(lockData.getDateLock(), userDao.getUser(lockData.getUserId()), lockData.getDescription());
             auditService.add(FormDataEvent.DELETE_LOCK, userInfo, null, null, null, null, null, note, null);
         } catch (Exception e) {
             LOG.error("Ошибка при логировании", e);

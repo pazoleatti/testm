@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
-import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,12 +40,10 @@ public class LockDataDaoTest extends Assert {
 		Calendar cal = Calendar.getInstance();
 		cal.clear();
 		cal.set(2013, 0, 1, 0, 5, 0);
-		LocalDateTime localDateTime = LocalDateTime.fromCalendarFields(cal);
-        data = dao.get("a", localDateTime);
+        data = dao.get("a", cal.getTime());
         Assert.assertNotNull(data);
         cal.set(Calendar.YEAR, 2014);
-		localDateTime = LocalDateTime.fromCalendarFields(cal);
-        data = dao.get("a", localDateTime);
+        data = dao.get("a", cal.getTime());
         Assert.assertNull(data);
 
         data = dao.get("FORM_DATA", true);
@@ -157,7 +154,7 @@ public class LockDataDaoTest extends Assert {
 			assertTrue(e.getMessage().startsWith("Ошибка при поиске блокировки"));
 		}
 		try {
-			dao.get("asd", LocalDateTime.now());
+			dao.get("asd", new Date());
 		} catch (LockException e) {
 			assertTrue(e.getMessage().startsWith("Ошибка при поиске блокировки"));
 		}
@@ -185,7 +182,7 @@ public class LockDataDaoTest extends Assert {
 
 		lock = dao.get("a", false);
 		assertEquals("a", lock.getKey());
-		LocalDateTime dateLock = lock.getDateLock();
+		Date dateLock = lock.getDateLock();
 
 		lock = dao.get("awdfzf zf", true);
 		assertNull(lock);

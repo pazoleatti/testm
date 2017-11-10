@@ -69,7 +69,7 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
         if (lockInformation != null) {
             // Если данная форма уже заблокирована
             result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
-            result.setLockDate(getFormedDate(lockInformation.getDateLock().toDate()));
+            result.setLockDate(getFormedDate(lockInformation.getDateLock()));
             if (lockInformation.getUserId() != userInfo.getUser().getId()) {
                 result.setLockedByAnotherUser(true);
             }
