@@ -15,7 +15,6 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.LocalDateTime;
@@ -95,7 +94,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             reportPeriod.setId(SqlUtils.getLong(rs, "id"));
             reportPeriod.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
             reportPeriod.setReportPeriod(reportPeriodDao.get(SqlUtils.getInteger(rs, "report_period_id")));
-            reportPeriod.setIsActive(SqlUtils.getByte(rs, "is_active"));
+            reportPeriod.setActive(!SqlUtils.getInteger(rs, "is_active").equals(0));
             reportPeriod.setCorrectionDate(new LocalDateTime(rs.getDate("correction_date")));
             return reportPeriod;
         }
@@ -160,7 +159,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     public DepartmentReportPeriod get(int id) {
-        return findOne((long) id);
+        try {
+            return getJdbcTemplate().queryForObject(QUERY_TEMPLATE_SIMPLE + " where id = ?", new Object[]{id}, mapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override

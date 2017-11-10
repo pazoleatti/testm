@@ -10,7 +10,7 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	private static final long serialVersionUID = 1L;
 
 	/** Тип налогового периода {@link TaxType}*/
-	private TaxType taxType = TaxType.NDFL;
+	private TaxType taxType;
 	/** Год налогового периода */
 	private Integer year;
 

@@ -114,7 +114,7 @@ public class RefBookScriptingServiceImplTest {
                 null, null, null, "Обнорвлен скрипт справочника \"test\"", null);
     }
 
-//    @Test(expected = ServiceLoggerException.class)
+    @Test(expected = ServiceLoggerException.class)
     public void saveScript2() throws IOException {
         TAUserInfo userInfo = new TAUserInfo();
         long refBookId = 0L;

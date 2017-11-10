@@ -117,19 +117,15 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
 	@Override
 	public ReportPeriod get(Integer id) {
-			ReportPeriod period =  sqlQueryFactory.select(reportPeriodQBean)
+		try {
+			return sqlQueryFactory.select(reportPeriodQBean)
 					.from(reportPeriod)
 					.leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
 					.where(reportPeriod.id.eq(id))
 					.fetchOne();
-
-			if (period != null) {
-				period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-				return period;
-			}else {
-				throw new DaoException("Не существует периода с id=" + id);
-			}
-
+		} catch (EmptyResultDataAccessException e) {
+			throw new DaoException("Не существует периода с id=" + id);
+		}
 	}
 
 	@Override
@@ -159,8 +155,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		if (id == null) {
 			id = generateId("seq_report_period", Integer.class);
 		}
-		newReportPeriod.setOrder(getReportOrder(newReportPeriod.getCalendarStartDate(), id));
-
 		sqlQueryFactory.insert(reportPeriod)
 				.columns(
 						reportPeriod.id,
@@ -266,16 +260,11 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
     @Override
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId) {
-			ReportPeriod period =  sqlQueryFactory.select(reportPeriodQBean)
-					.from(reportPeriod)
-					.leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-					.where(reportPeriod.dictTaxPeriodId.eq(dictTaxPeriodId).and(taxPeriod.id.eq(taxPeriodId)))
-					.fetchOne();
-			if(period != null){
-				return period;
-			}else {
-				throw new DaoException("Не существует периода с tax_period_id=" + taxPeriodId + " и dict_tax_period_id = " + dictTaxPeriodId);
-			}
+		return sqlQueryFactory.select(reportPeriodQBean)
+				.from(reportPeriod)
+				.leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
+				.where(reportPeriod.dictTaxPeriodId.eq(dictTaxPeriodId).and(taxPeriod.id.eq(taxPeriodId)))
+				.fetchOne();
     }
 
 	@Override
@@ -307,7 +296,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 					"select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
 							"where tp.tax_type = ? and rp.end_date>=? and (rp.calendar_start_date<=? or ? is null)",
-					new Object[]{String.valueOf(taxType.getCode()), startDate.toDate(), endDate.toDate(), endDate.toDate()},
+					new Object[]{String.valueOf(taxType.getCode()), startDate, endDate, endDate},
 					new int[] { Types.VARCHAR, Types.DATE, Types.DATE, Types.DATE },
 					new ReportPeriodMapper()
 			);
@@ -337,7 +326,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     public List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, LocalDateTime startDate, LocalDateTime endDate) {
         return getJdbcTemplate().query(
                 RP_BY_DATE_AND_DEPARTMENT,
-                new Object[]{String.valueOf(taxType.getCode()), startDate.toDate(), endDate.toDate(), endDate.toDate(), depId},
+                new Object[]{String.valueOf(taxType.getCode()), startDate, endDate, endDate, depId},
                 new ReportPeriodMapper()
         );
     }
@@ -416,18 +405,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 				.where(where)
 				.fetchCount();
 
-	}
-
-	private int getReportOrder(LocalDateTime date, Integer id) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date.toDate());
-		int monthNumber = calendar.get(Calendar.MONTH);
-		List<Integer> correctMonths = Arrays.asList(0, 3, 6, 9);
-		// день всегда первое число месяца; месяцы только янв, апр, июл и окт
-		if (calendar.get(Calendar.DAY_OF_MONTH) != 1 || (!correctMonths.contains(monthNumber))) {
-			throw new DaoException("Неверная календарная дата начала отчетного периода с id=" + id);
-		}
-		return (monthNumber + 3) / 3;
 	}
 
 }

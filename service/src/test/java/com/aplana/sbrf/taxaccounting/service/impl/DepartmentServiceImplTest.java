@@ -458,7 +458,7 @@ public class DepartmentServiceImplTest {
         // TODO Дописать тест после реализации getExecutorsDepartments http://jira.aplana.com/browse/SBRFACCTAX-5397
     }
 
-//    @Test
+    @Test
     public void getOpenPeriodDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);

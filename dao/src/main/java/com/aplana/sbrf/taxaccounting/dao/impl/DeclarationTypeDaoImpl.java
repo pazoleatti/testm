@@ -158,7 +158,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
                         " join department_declaration_type ddt on t.id = ddt.declaration_type_id" +
                         " join allTemplates all_t on ddt.declaration_type_id = all_t.declaration_type_id" +
                         " where ddt.department_id=? and all_t.status = 0 and ((all_t.versionFrom <= ? and all_t.versionTo >= ?) or (all_t.versionFrom <= ? and all_t.versionTo is null))",
-                new Object[]{departmentId, reportPeriod.getCalendarStartDate().toDate(), reportPeriod.getEndDate().toDate(), reportPeriod.getCalendarStartDate().toDate()},
+                new Object[]{departmentId, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
                 new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE},
                 new DeclarationTypeRowMapper()
         );

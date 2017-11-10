@@ -260,9 +260,4 @@ public final class SqlUtils {
 		} catch (SQLException sqlex) {}
 		return false;
 	}
-
-	public static byte getByte(ResultSet resultSet, String columnLabel) throws SQLException {
-		Byte ret = resultSet.getByte(columnLabel);
-		return resultSet.wasNull()?null:ret;
-	}
 }

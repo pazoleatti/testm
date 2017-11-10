@@ -13,7 +13,7 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	
 	private Integer departmentId;
 	
-	private boolean isActive;
+	private boolean active;
 
     private LocalDateTime correctionDate;
 
@@ -36,11 +36,11 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	}
 
 	public boolean isActive() {
-		return isActive;
+		return active;
 	}
 
-	public void setIsActive(byte active) {
-		this.isActive = active == 1;
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	public ReportPeriod getReportPeriod() {
@@ -67,9 +67,5 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	@Override
 	public void setPermissions(long permissions) {
 		this.permissions = permissions;
-	}
-
-	public void setActive(boolean active) {
-		this.isActive = active;
 	}
 }

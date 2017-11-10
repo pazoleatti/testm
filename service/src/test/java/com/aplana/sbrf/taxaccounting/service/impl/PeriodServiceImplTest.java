@@ -27,7 +27,7 @@ import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("PeriodServiceImplTest.xml")
 public class PeriodServiceImplTest {
     @Autowired
@@ -90,36 +90,36 @@ public class PeriodServiceImplTest {
         reportPeriod11.setTaxPeriod(taxPeriod1);
         reportPeriod11.setOrder(1);
         reportPeriod11.setName("Первый отчетный период в 1 налоговом периоде");
-		reportPeriod11.setStartDate(new LocalDateTime(2012, Calendar.JANUARY+1, 1,0,0));
-		reportPeriod11.setEndDate(new LocalDateTime(2012, Calendar.MARCH+1, 31,0,0));
-		reportPeriod11.setCalendarStartDate(new LocalDateTime(2012, Calendar.JANUARY+1, 1,0,0));
+		reportPeriod11.setStartDate(new LocalDateTime(2012, Calendar.JANUARY, 1,0,0));
+		reportPeriod11.setEndDate(new LocalDateTime(2012, Calendar.MARCH, 31,0,0));
+		reportPeriod11.setCalendarStartDate(new LocalDateTime(2012, Calendar.JANUARY, 1,0,0));
 
         ReportPeriod reportPeriod12 = new ReportPeriod();
         reportPeriod12.setId(2);
         reportPeriod12.setTaxPeriod(taxPeriod1);
         reportPeriod12.setOrder(2);
         reportPeriod12.setName("Второй отчетный период в 1 налоговом периоде");
-		reportPeriod12.setStartDate(new LocalDateTime(2012, Calendar.APRIL+1, 1,0,0));
-		reportPeriod12.setEndDate(new LocalDateTime(2012, Calendar.JUNE+1, 30,0,0));
-		reportPeriod12.setCalendarStartDate(new LocalDateTime(2012, Calendar.APRIL+1, 1,0,0));
+		reportPeriod12.setStartDate(new LocalDateTime(2012, Calendar.APRIL, 1,0,0));
+		reportPeriod12.setEndDate(new LocalDateTime(2012, Calendar.JUNE, 30,0,0));
+		reportPeriod12.setCalendarStartDate(new LocalDateTime(2012, Calendar.APRIL, 1,0,0));
 
         ReportPeriod reportPeriod13 = new ReportPeriod();
         reportPeriod13.setId(3);
         reportPeriod13.setTaxPeriod(taxPeriod1);
         reportPeriod13.setOrder(3);
         reportPeriod13.setName("Третий отчетный период в 1 налоговом периоде");
-		reportPeriod13.setStartDate(new LocalDateTime(2012, Calendar.JULY+1, 1,0,0));
-		reportPeriod13.setEndDate(new LocalDateTime(2012, Calendar.SEPTEMBER+1, 30,0,0));
-		reportPeriod13.setCalendarStartDate(new LocalDateTime(2012, Calendar.JULY+1, 1,0,0));
+		reportPeriod13.setStartDate(new LocalDateTime(2012, Calendar.JULY, 1,0,0));
+		reportPeriod13.setEndDate(new LocalDateTime(2012, Calendar.SEPTEMBER, 30,0,0));
+		reportPeriod13.setCalendarStartDate(new LocalDateTime(2012, Calendar.JULY, 1,0,0));
 
         ReportPeriod reportPeriod14 = new ReportPeriod();
         reportPeriod14.setId(4);
         reportPeriod14.setTaxPeriod(taxPeriod1);
         reportPeriod14.setOrder(4);
         reportPeriod14.setName("Четвертый отчетный период в 1 налоговом периоде");
-		reportPeriod14.setStartDate(new LocalDateTime(2012, Calendar.OCTOBER+1, 1,0,0));
-		reportPeriod14.setEndDate(new LocalDateTime(2012, Calendar.DECEMBER+1, 31,0,0));
-		reportPeriod14.setCalendarStartDate(new LocalDateTime(2012, Calendar.OCTOBER+1, 1,0,0));
+		reportPeriod14.setStartDate(new LocalDateTime(2012, Calendar.OCTOBER, 1,0,0));
+		reportPeriod14.setEndDate(new LocalDateTime(2012, Calendar.DECEMBER, 31,0,0));
+		reportPeriod14.setCalendarStartDate(new LocalDateTime(2012, Calendar.OCTOBER, 1,0,0));
 
         /**
          * подготовим отчетные периоды для 2 налогового
@@ -129,18 +129,18 @@ public class PeriodServiceImplTest {
         reportPeriod21.setTaxPeriod(taxPeriod2);
         reportPeriod21.setOrder(1);
         reportPeriod21.setName("Первый отчетный период в 2 налоговом периоде");
-		reportPeriod21.setStartDate(new LocalDateTime(2013, Calendar.JANUARY+1, 1,0,0));
-		reportPeriod21.setEndDate(new LocalDateTime(2013, Calendar.MARCH+1, 31,0,0));
-		reportPeriod21.setCalendarStartDate(new LocalDateTime(2013, Calendar.JANUARY+1, 1,0,0));
+		reportPeriod21.setStartDate(new LocalDateTime(2013, Calendar.JANUARY, 1,0,0));
+		reportPeriod21.setEndDate(new LocalDateTime(2013, Calendar.MARCH, 31,0,0));
+		reportPeriod21.setCalendarStartDate(new LocalDateTime(2013, Calendar.JANUARY, 1,0,0));
 
         ReportPeriod reportPeriod22 = new ReportPeriod();
         reportPeriod22.setId(6);
         reportPeriod22.setTaxPeriod(taxPeriod2);
         reportPeriod22.setOrder(2);
         reportPeriod22.setName("Второй отчетный период в 2 налоговом периоде");
-		reportPeriod22.setStartDate(new LocalDateTime(2013, Calendar.APRIL+1, 1,0,0));
-		reportPeriod22.setEndDate(new LocalDateTime(2013, Calendar.JUNE+1, 30,0,0));
-		reportPeriod22.setCalendarStartDate(new LocalDateTime(2013, Calendar.APRIL+1, 1,0,0));
+		reportPeriod22.setStartDate(new LocalDateTime(2013, Calendar.APRIL, 1,0,0));
+		reportPeriod22.setEndDate(new LocalDateTime(2013, Calendar.JUNE, 30,0,0));
+		reportPeriod22.setCalendarStartDate(new LocalDateTime(2013, Calendar.APRIL, 1,0,0));
 
         /**
          * подготовим отчетные периоды для 3 налогового
@@ -150,18 +150,18 @@ public class PeriodServiceImplTest {
         reportPeriod31.setTaxPeriod(taxPeriod3);
         reportPeriod31.setOrder(1);
         reportPeriod31.setName("Первый отчетный период в 3 налоговом периоде");
-		reportPeriod31.setStartDate(new LocalDateTime(2012, Calendar.JANUARY+1, 1,0,0));
-		reportPeriod31.setEndDate(new LocalDateTime(2012, Calendar.MARCH+1, 31,0,0));
-		reportPeriod31.setCalendarStartDate(new LocalDateTime(2012, Calendar.JANUARY+1, 1,0,0));
+		reportPeriod31.setStartDate(new LocalDateTime(2012, Calendar.JANUARY, 1,0,0));
+		reportPeriod31.setEndDate(new LocalDateTime(2012, Calendar.MARCH, 31,0,0));
+		reportPeriod31.setCalendarStartDate(new LocalDateTime(2012, Calendar.JANUARY, 1,0,0));
 
         ReportPeriod reportPeriod32 = new ReportPeriod();
         reportPeriod32.setId(8);
         reportPeriod32.setTaxPeriod(taxPeriod3);
         reportPeriod32.setOrder(2);
         reportPeriod32.setName("Второй отчетный период в 3 налоговом периоде");
-		reportPeriod32.setStartDate(new LocalDateTime(2012, Calendar.JANUARY+1, 1,0,0));
-		reportPeriod32.setEndDate(new LocalDateTime(2012, Calendar.JUNE+1, 30,0,0));
-		reportPeriod32.setCalendarStartDate(new LocalDateTime(2012, Calendar.APRIL+1, 1,0,0));
+		reportPeriod32.setStartDate(new LocalDateTime(2012, Calendar.JANUARY, 1,0,0));
+		reportPeriod32.setEndDate(new LocalDateTime(2012, Calendar.JUNE, 30,0,0));
+		reportPeriod32.setCalendarStartDate(new LocalDateTime(2012, Calendar.APRIL, 1,0,0));
 
         // списки отчетных периодов для налоговых
         List<ReportPeriod> reportPeriodListBy1Period= new ArrayList<ReportPeriod>();
@@ -233,52 +233,52 @@ public class PeriodServiceImplTest {
 		assertEquals("YEAR", cl.get(Calendar.YEAR), cl2.get(Calendar.YEAR));
 	}
 
-//    @Test
+    @Test
     public void getStartDate(){
 		checkDates(2012, Calendar.APRIL, 1, periodService.getReportPeriod(2).getStartDate());
     }
 
-//    @Test
+    @Test
     public void getEndDate(){
 		checkDates(2012, Calendar.JUNE, 30, periodService.getReportPeriod(2).getEndDate());
     }
 
-//    @Test
+    @Test
     public void getReportDate(){
 		checkDates(2012, Calendar.JULY, 1, new LocalDateTime(periodService.getReportDate(2)));
     }
 
-//    @Test
+    @Test
     public void getStartDateIncome(){
 		checkDates(2012, Calendar.JANUARY, 1, periodService.getReportPeriod(8).getStartDate());
     }
 
-//	@Test
+	@Test
 	public void getCalendarStartDateIncome(){
 		checkDates(2012, Calendar.APRIL, 1, periodService.getReportPeriod(8).getCalendarStartDate());
 	}
 
-//    @Test
+    @Test
     public void getEndDateIncome(){
 		checkDates(2012, Calendar.JUNE, 30, periodService.getReportPeriod(8).getEndDate());
     }
 
-//    @Test
+    @Test
     public void getForthTransportPeriod(){
 		checkDates(2012, Calendar.OCTOBER, 1, periodService.getReportPeriod(4).getStartDate());
     }
 
-//    @Test
+    @Test
     public void getMonthStartDate() {
 		checkDates(2012, Calendar.MAY, 1, new LocalDateTime(periodService.getMonthStartDate(8, 5)));
     }
 
-//    @Test
+    @Test
     public void getMonthEndDate() {
 		checkDates(2012, Calendar.MAY, 31, new LocalDateTime(periodService.getMonthEndDate(8, 5).getTime()));
     }
 
-//    @Test
+    @Test
     public void getMonthReportDate() {
 		checkDates(2012, Calendar.JUNE, 1, new LocalDateTime(periodService.getMonthReportDate(8, 5).getTime()));
     }
@@ -286,7 +286,7 @@ public class PeriodServiceImplTest {
     /*
      * Тест получения из текущего налогового периода
      */
-//    @Test
+    @Test
     public void getPrevReportPeriodInSide(){
         assertNotNull(periodService.getPrevReportPeriod(2));
         assertTrue(periodService.getPrevReportPeriod(2).getId() == 1);
@@ -295,7 +295,7 @@ public class PeriodServiceImplTest {
     /*
      * Тест получения из предыдущего налогового периода
      */
-//    @Test
+    @Test
     public void getPrevReportPeriodOutSide(){
         periodService.getPrevReportPeriod(5);
         assertEquals(periodService.getPrevReportPeriod(5).getId().intValue(), 4);
@@ -313,7 +313,7 @@ public class PeriodServiceImplTest {
 //        checkDates(2012, Calendar.FEBRUARY, 1, argument.getAllValues().get(0).getCalendarStartDate());
 //    }
 
-//    @Test
+    @Test
     public void isFirstPeriod() {
         Assert.assertTrue(periodService.isFirstPeriod(7));
         Assert.assertFalse(periodService.isFirstPeriod(8));
@@ -338,7 +338,7 @@ public class PeriodServiceImplTest {
 //        periodService.close(TaxType.TRANSPORT);
 //    }
 
-//    @Test(expected = ServiceException.class)
+    @Test(expected = ServiceException.class)
     public void removeNonExistentPeriod() {
         periodService.removeReportPeriod(TaxType.TRANSPORT, 999, new Logger(), userInfo);
     }
