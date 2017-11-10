@@ -10,8 +10,8 @@
      * @description Контроллер окна "Создание отчетности"
      */
         .controller('createReportCtrl', [
-            '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData',
-            function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData) {
+            '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData', '$webStorage',
+            function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage) {
                 $scope.reportFormKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS;
 
                 //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
@@ -19,7 +19,7 @@
                 $scope.reportData = {};
 
                 $scope.userTBDepartment = {
-                    id : $rootScope.user.department.parentId
+                    id: $rootScope.user.department.parentId
                 };
 
                 if ($shareData.latestSelectedPeriod) {
@@ -38,7 +38,10 @@
                  */
                 $scope.save = function () {
                     // Запоминаем период выбранный пользователем
-                    $rootScope.latestSelectedPeriod = $scope.reportData.period;
+                    $webStorage.set(APP_CONSTANTS.USER_STORAGE.NAME,
+                        APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD,
+                        $scope.reportData.period,
+                        true);
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/createReport",

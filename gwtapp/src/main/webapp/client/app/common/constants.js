@@ -131,6 +131,12 @@
                 LOCKED: "LOCKED", //есть блокировка
                 EXIST_TASK: "EXIST_TASK", //существуют задачи, которые будут удалены при выполнении данной
                 CREATE: "CREATE" //создана новая задача
+            },
+            USER_STORAGE: {
+                NAME: "USER_STORAGE",
+                KEYS: {
+                    LAST_SELECTED_PERIOD: "LAST_SELECTED_PERIOD"
+                }
             }
         });
 }());
