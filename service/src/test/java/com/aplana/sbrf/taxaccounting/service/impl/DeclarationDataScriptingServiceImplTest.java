@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.joda.time.LocalDateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;

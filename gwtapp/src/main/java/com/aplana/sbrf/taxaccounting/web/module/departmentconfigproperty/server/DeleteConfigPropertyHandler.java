@@ -78,7 +78,7 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
                 filterSlave = "REF_BOOK_NDFL_ID = " + recordVersion.getRecordId();
             }
 
-            PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(period.getCalendarStartDate().toDate(), null, filterSlave, null);
+            PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(period.getCalendarStartDate(), null, filterSlave, null);
 
             for (Map<String, RefBookValue> r : paramsSlave) {
                 deleteSlaveList.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
@@ -88,8 +88,8 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
                 providerSlave.deleteRecordVersions(logger, deleteSlaveList, false);
                 provider.deleteRecordVersions(logger, deleteList, false);
             } else {
-                providerSlave.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate().toDate(),-2), deleteSlaveList);
-                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate().toDate(),-2), deleteList);
+                providerSlave.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteSlaveList);
+                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteList);
             }
 
             if (!logger.containsLevel(LogLevel.ERROR)) {

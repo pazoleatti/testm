@@ -16,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -132,7 +131,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<Long, Long>> checkRecordExistence(LocalDateTime version, String filter) {
+    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
         throw new UnsupportedOperationException();
     }
 
@@ -694,7 +693,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             logger.error(String.format("Подразделению %s назначен пользователь с логином %s!", department.getName(), taUser.getName()));
 
         //9 точка запроса Источники-приёмники
-        List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null, (Date) null, (Date) null);
+        List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null, null, null);
 
         for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypesDest){
             logger.warn(String.format("назначение является источником для %s - %s приемника",
@@ -731,7 +730,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         DepartmentReportPeriodFilter drpFilter = new DepartmentReportPeriodFilter();
         drpFilter.setIsCorrection(null);
         drpFilter.setDepartmentIdList(Arrays.asList(depId));
-        List<Long> corrIds = departmentReportPeriodService.getListIdsByFilter(drpFilter);
+        List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(drpFilter);
         departmentReportPeriodService.delete(corrIds);
     }
 

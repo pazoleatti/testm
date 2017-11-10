@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,7 +25,6 @@ public class RequestParamEditor extends PropertyEditorSupport{
     @Override
     public void setAsText(String text) throws IllegalArgumentException {
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JodaModule());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JsonFactory jsonFactory = objectMapper.getFactory();
 

@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -88,15 +87,15 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             "and (:periodStart is null or (dtemp.version >= :periodStart or (:periodEnd is null or dtemp.version <= :periodEnd)))\n" +
             ") order by dt.name\n";
 
-	@Override
-	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd) {
+    @Override
+    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
         QueryParams queryParams = new QueryParams();
         queryParams.setAscending(true);
         return getByTaxType(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
     @Override
-    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd, QueryParams queryParams) {
+    public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd, QueryParams queryParams) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", departmentId);
         params.put("periodEnd", periodEnd);

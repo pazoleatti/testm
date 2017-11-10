@@ -422,7 +422,7 @@ public interface DeclarationDataService {
      * @param departmentReportPeriod Отчетный период подразделения
      * @return
      */
-    DeclarationData find(int declarationTypeId, Long departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate);
 

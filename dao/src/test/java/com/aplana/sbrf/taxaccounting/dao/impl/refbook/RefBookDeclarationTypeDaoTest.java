@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
-import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,40 +43,40 @@ public class RefBookDeclarationTypeDaoTest {
     //Проверка получения значений по виду налоговой формы, подразделению и началу отчетного периода
     @Test
     public void testFetchDeclarationTypes() throws ParseException {
-        List<RefBookDeclarationType> declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 1, new LocalDateTime(dateFormat.parse("2014-01-01")));
+        List<RefBookDeclarationType> declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 1, dateFormat.parse("2014-01-01"));
         assertTrue(declarationTypes.size() == 2);
         assertTrue(declarationTypes.get(0).getName().equals(DECLARATION_TYPE_NAME_2));
         assertTrue(declarationTypes.get(1).getName().equals(DECLARATION_TYPE_NAME_3));
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 1, new LocalDateTime(dateFormat.parse("2013-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 1, dateFormat.parse("2013-01-01"));
         assertTrue(declarationTypes.size() == 1);
         assertTrue(declarationTypes.get(0).getName().equals(DECLARATION_TYPE_NAME_2));
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 1, new LocalDateTime(dateFormat.parse("2012-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 1, dateFormat.parse("2012-01-01"));
         assertTrue(declarationTypes.size() == 0);
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 2, new LocalDateTime(dateFormat.parse("2014-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 2, dateFormat.parse("2014-01-01"));
         assertTrue(declarationTypes.size() == 1);
         assertTrue(declarationTypes.get(0).getName().equals(DECLARATION_TYPE_NAME_2));
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 2, new LocalDateTime(dateFormat.parse("2013-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 2, dateFormat.parse("2013-01-01"));
         assertTrue(declarationTypes.size() == 1);
         assertTrue(declarationTypes.get(0).getName().equals(DECLARATION_TYPE_NAME_2));
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 2, new LocalDateTime(dateFormat.parse("2012-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 2, dateFormat.parse("2012-01-01"));
         assertTrue(declarationTypes.size() == 0);
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 3, new LocalDateTime(dateFormat.parse("2014-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 3, dateFormat.parse("2014-01-01"));
         assertTrue(declarationTypes.size() == 1);
         assertTrue(declarationTypes.get(0).getName().equals(DECLARATION_TYPE_NAME_3));
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 3, new LocalDateTime(dateFormat.parse("2013-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 3, dateFormat.parse("2013-01-01"));
         assertTrue(declarationTypes.size() == 0);
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 3, new LocalDateTime(dateFormat.parse("2012-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 3, dateFormat.parse("2012-01-01"));
         assertTrue(declarationTypes.size() == 0);
 
-        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 4, new LocalDateTime(dateFormat.parse("2014-01-01")));
+        declarationTypes = declarationTypeDao.fetchDeclarationTypes((long) 2, 4, dateFormat.parse("2014-01-01"));
         assertTrue(declarationTypes.size() == 0);
     }
 }

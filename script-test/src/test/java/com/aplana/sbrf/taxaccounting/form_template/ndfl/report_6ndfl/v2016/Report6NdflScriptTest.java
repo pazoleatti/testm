@@ -71,7 +71,7 @@ public class Report6NdflScriptTest extends DeclarationScriptTestBase {
         declarationData.setReportPeriodId(REPORT_PERIOD_ID);
         declarationData.setState(State.ACCEPTED);
         declarationData.setAsnuId(ASNU_ID);
-        declarationData.setDepartmentReportPeriodId((long) DEPARTMENT_PERIOD_ID);
+        declarationData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         declarationData.setKpp(KPP);
         declarationData.setOktmo(OKTMO);
         declarationData.setTaxOrganCode(CODE_ORG);

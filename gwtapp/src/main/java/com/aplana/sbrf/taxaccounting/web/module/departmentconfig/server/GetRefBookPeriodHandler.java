@@ -29,8 +29,8 @@ public class GetRefBookPeriodHandler extends AbstractActionHandler<GetRefBookPer
     public GetRefBookPeriodResult execute(GetRefBookPeriodAction action, ExecutionContext context) throws ActionException {
         GetRefBookPeriodResult result = new GetRefBookPeriodResult();
         ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
-        result.setStartDate(period.getCalendarStartDate().toDate());
-        result.setEndDate(period.getEndDate().toDate());
+        result.setStartDate(period.getCalendarStartDate());
+        result.setEndDate(period.getEndDate());
         return result;
     }
 

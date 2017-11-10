@@ -28,7 +28,7 @@ public class QTaxPeriod extends com.querydsl.sql.RelationalPathBase<QTaxPeriod> 
 
     public final StringPath taxType = createString("taxType");
 
-    public final NumberPath<Integer> year = createNumber("year", Integer.class);
+    public final NumberPath<Short> year = createNumber("year", Short.class);
 
     public final com.querydsl.sql.PrimaryKey<QTaxPeriod> taxPeriodPk = createPrimaryKey(id);
 

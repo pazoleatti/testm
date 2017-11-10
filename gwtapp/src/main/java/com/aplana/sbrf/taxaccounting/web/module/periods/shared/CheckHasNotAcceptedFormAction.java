@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.shared;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.Date;

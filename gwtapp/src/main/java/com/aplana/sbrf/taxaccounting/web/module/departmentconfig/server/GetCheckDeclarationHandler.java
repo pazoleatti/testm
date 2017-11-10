@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheck
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -81,10 +80,10 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartment();
         List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
-        LocalDateTime dateStart = period.getCalendarStartDate(), dateEnd;
+        Date dateStart = period.getCalendarStartDate(), dateEnd;
         if (!recordPairs.isEmpty()) {
             //RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(recordPairs.get(0).getFirst());
-            dateEnd = new LocalDateTime(provider.getRecordVersionInfo(recordPairs.get(0).getFirst()).getVersionEnd());
+            dateEnd = provider.getRecordVersionInfo(recordPairs.get(0).getFirst()).getVersionEnd();
             List<ReportPeriod> reportPeriodList = reportService.getReportPeriodsByDate(action.getTaxType(), dateStart, dateEnd);
             if (reportPeriodList.isEmpty()){
                 return result;

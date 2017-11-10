@@ -4,8 +4,8 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -47,7 +47,7 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
     @UiField
     Panel termPnl;
 
-    List<ReportPeriodViewModel> reportPeriods;
+    List<ReportPeriod> reportPeriods;
 
 	@Inject
 	public OpenCorrectDialogView(Binder uiBinder, EventBus eventBus) {
@@ -63,7 +63,7 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
 	}
 
 	@Override
-    public void setPeriodsList(List<ReportPeriodViewModel> reportPeriods, Integer reportPeriodId) {
+    public void setPeriodsList(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
         this.reportPeriods = reportPeriods;
         periodList.setPeriods(reportPeriods);
         periodList.setValue(Arrays.asList(reportPeriodId), true);
@@ -122,9 +122,9 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
     }
 
     @Override
-    public ReportPeriodViewModel getSelectedPeriod() {
+    public ReportPeriod getSelectedPeriod() {
         if (periodList.getValue().size() == 1) {
-            for(ReportPeriodViewModel reportPeriod : reportPeriods) {
+            for(ReportPeriod reportPeriod : reportPeriods) {
                 if (reportPeriod.getId().equals(periodList.getValue().get(0)))
                     return reportPeriod;
             }

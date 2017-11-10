@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.time.DateUtils;
-import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,7 +74,7 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(1, 2));
         departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            long reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
+            int reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
             Assert.assertTrue(reportPeriodId == 1 || reportPeriodId == 2);
         }
         // Фильтр по виду налога
@@ -101,14 +100,14 @@ public class DepartmentReportPeriodDaoTest {
         }
         // Фильтр по дате корректирющего периода 1
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-        departmentReportPeriodFilter.setCorrectionDate(new LocalDateTime(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
+        departmentReportPeriodFilter.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("02.01.2014"));
         departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
             Assert.assertEquals(SIMPLE_DATE_FORMAT.parse("02.01.2014"), departmentReportPeriod.getCorrectionDate());
         }
         // Фильтр по дате корректирющего периода 2
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-        departmentReportPeriodFilter.setCorrectionDate(new LocalDateTime(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
+        departmentReportPeriodFilter.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("02.01.2014"));
         departmentReportPeriodFilter.setIsCorrection(false);
         departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
         Assert.assertTrue(departmentReportPeriodList.isEmpty());
@@ -127,7 +126,7 @@ public class DepartmentReportPeriodDaoTest {
     public void getListIdsByFilterTest() throws ParseException {
         DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         // Пустой фильтр
-        List<Long> departmentReportPeriodList =
+        List<Integer> departmentReportPeriodList =
                 departmentReportPeriodDao.getListIdsByFilter(departmentReportPeriodFilter);
         Assert.assertEquals(37, departmentReportPeriodList.size());
     }
@@ -135,13 +134,13 @@ public class DepartmentReportPeriodDaoTest {
     @Test
     public void saveTest() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-        LocalDateTime date = new LocalDateTime();
+        Date date = new Date();
         departmentReportPeriod.setActive(true);
         departmentReportPeriod.setCorrectionDate(date);
         departmentReportPeriod.setDepartmentId(1);
         departmentReportPeriod.setReportPeriod(reportPeriodDao.get(1));
-        long id = departmentReportPeriodDao.save(departmentReportPeriod).getId();
-        DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodDao.findOne(id);
+        int id = departmentReportPeriodDao.save(departmentReportPeriod);
+        DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodDao.get(id);
         Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), savedDepartmentReportPeriod.getCorrectionDate());
         Assert.assertEquals(id, savedDepartmentReportPeriod.getId().intValue());
         Assert.assertTrue(savedDepartmentReportPeriod.isActive());
@@ -181,22 +180,22 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void batchUpdateActiveTest1() {
-        departmentReportPeriodDao.updateActive(Arrays.asList(101L, 201L, 401L), 1, true);
+        departmentReportPeriodDao.updateActive(Arrays.asList(101, 201, 401), 1, true);
         Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
     }
 
     @Test
     public void batchUpdateActiveTest2() {
-        departmentReportPeriodDao.updateActive(Arrays.asList(101L, 201L, 401L), 1, true);
+        departmentReportPeriodDao.updateActive(Arrays.asList(101, 201, 401), 1, true);
         Assert.assertTrue(departmentReportPeriodDao.get(101).isActive());
     }
 
     @Test
     public void updateCorrectionDateTest() {
-        departmentReportPeriodDao.updateCorrectionDate(101L, null);
+        departmentReportPeriodDao.updateCorrectionDate(101, null);
         Assert.assertNull(departmentReportPeriodDao.get(101).getCorrectionDate());
-        LocalDateTime date = new LocalDateTime();
-        departmentReportPeriodDao.updateCorrectionDate(101L, date);
+        Date date = new Date();
+        departmentReportPeriodDao.updateCorrectionDate(101, date);
         Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), departmentReportPeriodDao.get(101).getCorrectionDate());
     }
 
@@ -227,7 +226,7 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void existLargeCorrectionTest() throws ParseException {
-        Assert.assertTrue(departmentReportPeriodDao.existLargeCorrection(1, 20, new LocalDateTime(SIMPLE_DATE_FORMAT.parse("01.01.2011"))));
+        Assert.assertTrue(departmentReportPeriodDao.existLargeCorrection(1, 20, SIMPLE_DATE_FORMAT.parse("01.01.2011")));
     }
 
     @Test
@@ -238,7 +237,7 @@ public class DepartmentReportPeriodDaoTest {
 
     @Test
     public void deleteTest2() {
-        departmentReportPeriodDao.delete(Arrays.asList(102L));
+        departmentReportPeriodDao.delete(Arrays.asList(102));
         Assert.assertNull(departmentReportPeriodDao.get(102));
     }
 

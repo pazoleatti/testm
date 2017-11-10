@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.script.service;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.script.service.impl.DeclarationServiceImpl;
@@ -50,7 +49,7 @@ public class DeclarationServiceTest {
         declarationData.setDeclarationTemplateId(1);
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(101);
-        declarationData.setDepartmentReportPeriodId(1L);
+        declarationData.setDepartmentReportPeriodId(1);
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);

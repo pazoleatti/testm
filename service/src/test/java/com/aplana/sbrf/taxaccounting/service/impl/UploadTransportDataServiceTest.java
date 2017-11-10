@@ -88,7 +88,7 @@ public class UploadTransportDataServiceTest {
         final Department formDepartment = new Department();
         formDepartment.setId(TEST_DEPARTMENT_ID);
         formDepartment.setName("TestDepartment");
-        formDepartment.setIsActive(true);
+        formDepartment.setActive(true);
 
         doReturn(formDepartment).when(departmentService).getDepartment(eq(TEST_DEPARTMENT_ID));
         when(departmentService.getTaxFormDepartments(any(TAUser.class), any(TaxType.class), any(Date.class), any(Date.class)))
@@ -119,7 +119,7 @@ public class UploadTransportDataServiceTest {
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         departmentReportPeriod.setId(1);
-        departmentReportPeriod.setIsActive(true);
+        departmentReportPeriod.setActive(true);
         when(departmentReportPeriodService.getLast(eq(TEST_DEPARTMENT_ID), eq(reportPeriod21.getId()))).thenReturn(departmentReportPeriod);
 
         FormTemplate ft = new FormTemplate();
@@ -360,7 +360,7 @@ public class UploadTransportDataServiceTest {
             final Department formDepartment = new Department();
             formDepartment.setId(TEST_DEPARTMENT_ID);
             formDepartment.setName("TestDepartment");
-            formDepartment.setIsActive(false);
+            formDepartment.setActive(false);
 
             when(departmentService.getDepartmentBySbrfCode(eq("147"), false)).thenReturn(formDepartment);
             TAUserInfo userInfo = new TAUserInfo();

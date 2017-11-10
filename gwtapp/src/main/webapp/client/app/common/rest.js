@@ -163,19 +163,5 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
-
-
-        .factory('ReportPeriodResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/reportPeriods?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false},
-                delete: {method: 'DELETE', isArray: false, cache: false}
-            });
-        }])
-
-        .factory('DepartmentResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/getBankDepartment', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
-            });
-        }])
     ;
 }());

@@ -70,7 +70,7 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(DECLARATION_DATA_ID);
         declarationData.setDeclarationTemplateId(DECLARATION_TEMPLATE_ID);
-        declarationData.setDepartmentReportPeriodId(1L);
+        declarationData.setDepartmentReportPeriodId(1);
 
         DeclarationType declarationType = new DeclarationType();
         declarationType.setName("dt");

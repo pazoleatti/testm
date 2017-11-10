@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public class GetDeclarationFilterDataResult implements Result {
 	private static final long serialVersionUID = 1304339398716140386L;
 	
 	private List<Department> departments;
-	private List<ReportPeriodViewModel> periods;
+	private List<ReportPeriod> periods;
 	private DeclarationDataFilterAvailableValues filterValues;
     private DeclarationDataFilter defaultDecFilterData;
     private Integer userDepartmentId;
@@ -37,11 +36,11 @@ public class GetDeclarationFilterDataResult implements Result {
 		this.filterValues = filterValues;
 	}
 
-	public List<ReportPeriodViewModel> getPeriods() {
+	public List<ReportPeriod> getPeriods() {
 		return periods;
 	}
 
-	public void setPeriods(List<ReportPeriodViewModel> periods) {
+	public void setPeriods(List<ReportPeriod> periods) {
 		this.periods = periods;
 	}
 

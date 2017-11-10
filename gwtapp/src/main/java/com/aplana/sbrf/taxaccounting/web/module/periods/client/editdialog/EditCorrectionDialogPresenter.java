@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
@@ -28,7 +27,7 @@ public class EditCorrectionDialogPresenter extends PresenterWidget<EditCorrectio
         void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
         void setCanChangeDepartment(boolean canChange);
-        void setPeriods(List<ReportPeriodViewModel> reportPeriods, Integer reportPeriodId);
+        void setPeriods(List<ReportPeriod> reportPeriods, Integer reportPeriodId);
         void setCorrectionDate(Date date);
     }
 

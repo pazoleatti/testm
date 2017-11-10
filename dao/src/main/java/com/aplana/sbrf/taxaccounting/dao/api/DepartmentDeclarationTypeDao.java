@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import org.joda.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -31,7 +30,7 @@ public interface DepartmentDeclarationTypeDao {
      * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
-    List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd);
+    List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
@@ -43,7 +42,7 @@ public interface DepartmentDeclarationTypeDao {
      * @param queryParams  параметры пейджинга и фильтрации
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
-    List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd,
+    List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
                                                  QueryParams queryParams);
 
 	/**

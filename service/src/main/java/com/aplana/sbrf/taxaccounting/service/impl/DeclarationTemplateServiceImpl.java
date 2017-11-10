@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateEventScriptDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -72,7 +71,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Autowired
 	private ReportService reportService;
     @Autowired
-	private DepartmentReportPeriodDao departmentReportPeriodDao;
+	private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
     @Autowired
@@ -146,7 +145,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         try{
             // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
             DeclarationData declaration = new DeclarationData();
-            declaration.setDepartmentReportPeriodId(1L);
+            declaration.setDepartmentReportPeriodId(1);
             declaration.setReportPeriodId(1);
             declaration.setDepartmentId(1);
             declaration.setState(State.CREATED);
@@ -356,7 +355,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             ReportPeriod rp = periodService.getReportPeriod(data.getReportPeriodId());
-            DepartmentReportPeriod drp = departmentReportPeriodDao.findOne(data.getDepartmentReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(data.getDepartmentReportPeriodId());
             if (
                     reportService.getDec(currUser, dataId, DeclarationDataReportType.PDF_DEC) != null
                             ||

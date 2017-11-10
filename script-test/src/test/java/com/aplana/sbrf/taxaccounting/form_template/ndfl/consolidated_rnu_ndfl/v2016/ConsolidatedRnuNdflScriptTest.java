@@ -16,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.util.DeclarationScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.DeclarationTestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
-import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         declarationData.setReportPeriodId(REPORT_PERIOD_ID);
         declarationData.setState(State.ACCEPTED);
         declarationData.setAsnuId(ASNU_ID);
-        declarationData.setDepartmentReportPeriodId((long) DEPARTMENT_PERIOD_ID);
+        declarationData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         declarationData.setKpp(KPP);
         declarationData.setTaxOrganCode(CODE_ORG);
         return declarationData;
@@ -122,7 +121,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getDepartmentService().getAllChildren(anyInt())).thenReturn(createDepartmentList());
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(createDepartmentList().get(0));
 
-        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(createReportPeriodList());
+        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(1))).thenReturn(createFirstQuarterDeclarationData());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(2))).thenReturn(createHalfYearDeclarationData());
 
@@ -152,7 +151,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getDeclarationService().getTemplate(eq(100))).thenReturn(declarationTemplate);
 
         when(testHelper.getDepartmentService().getAllChildren(anyInt())).thenReturn(createDepartmentList());
-        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(createReportPeriodList());
+        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(1))).thenReturn(createFirstQuarterDeclarationData());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(2))).thenReturn(createHalfYearDeclarationData());
 
@@ -338,8 +337,8 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setName(name);
         reportPeriod.setId(id);
-        reportPeriod.setStartDate(new LocalDateTime(parseDate("01.01.2016")));
-        reportPeriod.setEndDate(new LocalDateTime(parseDate("31.12.2016")));
+        reportPeriod.setStartDate(parseDate("01.01.2016"));
+        reportPeriod.setEndDate(parseDate("31.12.2016"));
 
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setYear(2016);
@@ -377,9 +376,9 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
 
     public DepartmentReportPeriod createDepartmentReportPeriod(Integer id, String date) {
         DepartmentReportPeriod d = new DepartmentReportPeriod();
-        d.setId(Long.valueOf(id));
+        d.setId(id);
         if (date != null) {
-            d.setCorrectionDate(LocalDateTime.fromDateFields(parseDate(date)));
+            d.setCorrectionDate(parseDate(date));
         }
         ReportPeriod rp = new ReportPeriod();
         rp.setId(1111);
@@ -392,7 +391,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(id);
         declarationData.setAsnuId(asnuId);
-        declarationData.setDepartmentReportPeriodId((long) departmentReportPeriodId);
+        declarationData.setDepartmentReportPeriodId(departmentReportPeriodId);
         declarationData.setDeclarationTemplateId(100);
         return declarationData;
     }

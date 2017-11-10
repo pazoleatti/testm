@@ -62,7 +62,7 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
         departmentReportPeriodFilter.setTaxTypeList(Arrays.asList(action.getTaxType()));
         if (action.getCorrectionDate() != null) {
-            //departmentReportPeriodFilter.setCorrectionDate(action.getCorrectionDate());
+            departmentReportPeriodFilter.setCorrectionDate(action.getCorrectionDate());
         } else {
             departmentReportPeriodFilter.setIsCorrection(false);
         }

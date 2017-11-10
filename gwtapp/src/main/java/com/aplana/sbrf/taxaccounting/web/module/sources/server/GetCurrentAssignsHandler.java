@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.shared.GetCurrentAssigns
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -38,8 +37,8 @@ public class GetCurrentAssignsHandler extends
     public GetCurrentAssignsResult execute(GetCurrentAssignsAction action, ExecutionContext context) throws ActionException {
         GetCurrentAssignsResult result = new GetCurrentAssignsResult();
 
-        LocalDateTime periodFrom = new LocalDateTime(PeriodConvertor.getDateFrom(action.getPeriodsInterval()));
-        LocalDateTime periodTo = new LocalDateTime(PeriodConvertor.getDateTo(action.getPeriodsInterval()));
+        Date periodFrom = PeriodConvertor.getDateFrom(action.getPeriodsInterval());
+        Date periodTo = PeriodConvertor.getDateTo(action.getPeriodsInterval());
         QueryParams queryParams = new QueryParams();
         queryParams.setSearchOrdering(action.getOrdering());
         queryParams.setAscending(action.isAscSorting());

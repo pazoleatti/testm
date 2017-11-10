@@ -6,7 +6,6 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.TableCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
@@ -676,7 +675,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     }
 
     @Override
-    public void setReportPeriods(List<ReportPeriodViewModel> reportPeriods, boolean fireEvents) {
+    public void setReportPeriods(List<ReportPeriod> reportPeriods, boolean fireEvents) {
         periodPickerPopup.setPeriods(reportPeriods);
         if (reportPeriods == null || reportPeriods.isEmpty()) {
             this.currentReportPeriodId = null;
@@ -684,8 +683,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             return;
         }
         Integer defaultReportPeriodId = periodPickerPopup.getDefaultReportPeriod();
-        ReportPeriodViewModel maxPeriod = reportPeriods.get(0);
-        for (ReportPeriodViewModel reportPeriod : reportPeriods) {
+        ReportPeriod maxPeriod = reportPeriods.get(0);
+        for (ReportPeriod reportPeriod : reportPeriods) {
             if (defaultReportPeriodId != null && reportPeriod.getId().equals(defaultReportPeriodId)) {
                 periodPickerPopup.setValue(Arrays.asList(defaultReportPeriodId), fireEvents);
                 this.currentReportPeriodId = defaultReportPeriodId;
@@ -708,7 +707,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         }
         ReportPeriod maxPeriod = reportPeriods.get(0);
         for (ReportPeriod per : reportPeriods) {
-            if (per.getCalendarStartDate().isAfter(maxPeriod.getCalendarStartDate())) {
+            if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
                 maxPeriod = per;
             }
         }

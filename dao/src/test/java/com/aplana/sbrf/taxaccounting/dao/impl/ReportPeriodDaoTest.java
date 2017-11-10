@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,29 +43,34 @@ public class ReportPeriodDaoTest {
 	@Before
 	public void init(){
 		taxPeriod = new TaxPeriod();
+		taxPeriod.setTaxType(TaxType.NDFL);
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);
 	}
 
-
+    @Test
+    public void getCorrectPeriods() {
+        reportPeriodDao.getCorrectPeriods(TaxType.NDFL, 1);
+    }
+	
 	@Test
 	public void listByTaxPeriodSuccessfulTest() {
 		ReportPeriod newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName1");
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
-		newReportPeriod.setStartDate(new LocalDateTime());
-		newReportPeriod.setEndDate(new LocalDateTime());
-		newReportPeriod.setCalendarStartDate(new LocalDateTime(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime()));
+		newReportPeriod.setStartDate(new Date());
+		newReportPeriod.setEndDate(new Date());
+		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
 		reportPeriodDao.save(newReportPeriod);
 		
 		newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName2");
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(22);
-		newReportPeriod.setStartDate(new LocalDateTime());
-		newReportPeriod.setEndDate(new LocalDateTime());
-		newReportPeriod.setCalendarStartDate(new LocalDateTime(2014,Calendar.JANUARY,1, 0, 0));
+		newReportPeriod.setStartDate(new Date());
+		newReportPeriod.setEndDate(new Date());
+		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
 		reportPeriodDao.save(newReportPeriod);
 		
 		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
@@ -82,9 +86,9 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setName("MyTestName");
 		newReportPeriod.setTaxPeriod(taxPeriod);
 		newReportPeriod.setDictTaxPeriodId(21);
-		newReportPeriod.setStartDate(new LocalDateTime());
-		newReportPeriod.setEndDate(new LocalDateTime());
-		newReportPeriod.setCalendarStartDate(new LocalDateTime(2014, Calendar.JANUARY, 1,0, 0));
+		newReportPeriod.setStartDate(new Date());
+		newReportPeriod.setEndDate(new Date());
+		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 1).getTime());
 
 		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
 		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
@@ -129,15 +133,15 @@ public class ReportPeriodDaoTest {
         newReportPeriod.setName("MyTestName");
         newReportPeriod.setTaxPeriod(taxPeriod);
         newReportPeriod.setDictTaxPeriodId(21);
-        newReportPeriod.setStartDate(new LocalDateTime());
-        newReportPeriod.setEndDate(new LocalDateTime());
+        newReportPeriod.setStartDate(new Date());
+        newReportPeriod.setEndDate(new Date());
         return newReportPeriod;
     }
 
     @Test(expected = DaoException.class)
     public void calendarStartDateTest1() {
         ReportPeriod newReportPeriod = getReportPeriod();
-        newReportPeriod.setCalendarStartDate(new LocalDateTime(2014, Calendar.JANUARY, 25,0, 0));
+        newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 25).getTime());
         int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
         reportPeriodDao.get(newReportPeriodId);
     }
@@ -145,7 +149,7 @@ public class ReportPeriodDaoTest {
     @Test(expected = DaoException.class)
     public void calendarStartDateTest2() {
         ReportPeriod newReportPeriod = getReportPeriod();
-        newReportPeriod.setCalendarStartDate(new LocalDateTime(2014, Calendar.FEBRUARY, 1, 0, 0));
+        newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.FEBRUARY, 1).getTime());
         int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
         reportPeriodDao.get(newReportPeriodId);
     }
@@ -153,7 +157,7 @@ public class ReportPeriodDaoTest {
     @Test(expected = DaoException.class)
     public void calendarStartDateTest3() {
         ReportPeriod newReportPeriod = getReportPeriod();
-        newReportPeriod.setCalendarStartDate(new LocalDateTime(2014, Calendar.MARCH, 10,0,0));
+        newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.MARCH, 10).getTime());
         int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
         reportPeriodDao.get(newReportPeriodId);
     }
@@ -161,7 +165,7 @@ public class ReportPeriodDaoTest {
     @Test
     public void calendarStartDateTest4() {
         ReportPeriod newReportPeriod = getReportPeriod();
-        LocalDateTime date = new LocalDateTime(2014, Calendar.APRIL, 1,0 ,0);
+        Date date = new GregorianCalendar(2014, Calendar.APRIL, 1).getTime();
         newReportPeriod.setCalendarStartDate(date);
         int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
         ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
@@ -183,8 +187,8 @@ public class ReportPeriodDaoTest {
         List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
         periodList.add(reportPeriodDao.get(1));
         periodList.add(reportPeriodDao.get(2));
-        LocalDateTime startDate = new LocalDateTime(2011, Calendar.JANUARY, 1, 0, 0);
-        LocalDateTime endDate = new LocalDateTime(2014, Calendar.JANUARY, 10, 0,0);
+        Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
+        Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
         List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(TaxType.NDFL, startDate, endDate);
         Assert.assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
         Assert.assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
@@ -192,8 +196,8 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getReportPeriodsByDateAndDepartmentTest() {
-        LocalDateTime startDate = new LocalDateTime(2011, Calendar.JANUARY, 1,0,0);
-        LocalDateTime endDate = new LocalDateTime(2014, Calendar.JANUARY, 10,0,0);
+        Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
+        Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
         assertEquals(2, reportPeriodDao.getReportPeriodsByDateAndDepartment(TaxType.NDFL, 1, startDate, endDate).size());
     }
 }

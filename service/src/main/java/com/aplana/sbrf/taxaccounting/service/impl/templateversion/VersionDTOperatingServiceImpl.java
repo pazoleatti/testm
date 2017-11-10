@@ -60,7 +60,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
         boolean result = false;
         for (long declarationId : ddIds) {
             DeclarationData declarationData = declarationDataDao.get(declarationId);
-            DepartmentReportPeriod drp = departmentReportPeriodService.findOne(declarationData.getDepartmentReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
 
             logger.error(MessageGenerator.getDDMsg(MSG_IS_USED_VERSION,
                     declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),

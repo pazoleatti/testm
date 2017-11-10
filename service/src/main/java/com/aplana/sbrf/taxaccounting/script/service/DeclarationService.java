@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
@@ -45,7 +46,7 @@ public interface DeclarationService {
     /**
      * Поиск декларации в отчетном периоде подразделения + «КПП» и «Налоговый орган»
      */
-    DeclarationData find(int declarationTypeId, Long departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
     /**
      * Поиск деклараций по имени файла
@@ -321,7 +322,7 @@ public interface DeclarationService {
      * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
-    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd);
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
      * Получние id для всех деклараций по фильтру.

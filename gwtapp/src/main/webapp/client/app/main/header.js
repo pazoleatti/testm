@@ -54,9 +54,7 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES_NDFL_SETTINGS)) {
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.maintenanceOfPeriods'),
-                                onClick: function () {
-                                    $state.go('reportPeriod');
-                                }
+                                href: "Main.jsp" + $scope.gwtMode + "#!periods;nType=NDFL"
                             });
                             subtree.push({
                                 name: $filter('translate')('menu.taxes.ndfl.settingsUnits'),

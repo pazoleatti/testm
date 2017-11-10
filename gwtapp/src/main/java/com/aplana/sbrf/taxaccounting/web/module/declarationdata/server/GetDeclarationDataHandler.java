@@ -104,14 +104,14 @@ public class GetDeclarationDataHandler
         result.setSubreports(declarationTemplate.getSubreports());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.findOne(
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
                 declaration.getDepartmentReportPeriodId());
 
         result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
 
         result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
 
-        result.setCorrectionDate(departmentReportPeriod.getCorrectionDate().toDate());
+        result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
         result.setFileName(declaration.getFileName());
 

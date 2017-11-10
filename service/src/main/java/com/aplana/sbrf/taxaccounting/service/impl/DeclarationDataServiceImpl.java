@@ -424,14 +424,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             logger.getEntries().addAll(scriptLogger.getEntries());
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
-            if (departmentReportPeriodService.findOne(dd.getDepartmentReportPeriodId()).isActive()) {
+            if (departmentReportPeriodService.get(dd.getDepartmentReportPeriodId()).isActive()) {
                 if (State.PREPARED.equals(dd.getState())) {
                     declarationDataDao.setStatus(id, State.CREATED);
                     logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_PREPARED_TO_CREATED, null);
                 }
             }
         } else {
-            if (departmentReportPeriodService.findOne(dd.getDepartmentReportPeriodId()).isActive()) {
+            if (departmentReportPeriodService.get(dd.getDepartmentReportPeriodId()).isActive()) {
                 if (State.CREATED.equals(dd.getState())) {
                     // Переводим в состояние подготовлено
                     declarationDataDao.setStatus(id, State.PREPARED);
@@ -604,7 +604,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
         result.setDeclarationType(declarationTemplate.getType().getId());
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.findOne(
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
                 declaration.getDepartmentReportPeriodId());
         result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
         result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
@@ -2125,7 +2125,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, Long departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriod, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
 
@@ -2141,7 +2141,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             for (long declarationId : declarationIds) {
                 DeclarationData declarationData = declarationDataDao.get(declarationId);
                 ReportPeriod period = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
-                DepartmentReportPeriod drp = departmentReportPeriodService.findOne(declarationData.getDepartmentReportPeriodId());
+                DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
 
                 StringBuilder taKPPString = new StringBuilder("");
                 if (declarationData.getTaxOrganCode() != null) {
@@ -2333,7 +2333,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         for (Integer id : ddIds) {
             DeclarationData dd = declarationDataDao.get(id);
             ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
-            DepartmentReportPeriod drp = departmentReportPeriodService.findOne(dd.getDepartmentReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logger.error(DD_NOT_IN_RANGE,
                     rp.getName(),
@@ -2369,7 +2369,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args) {
         DeclarationData declaration = declarationDataDao.get(declarationId);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.findOne(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         if (ddReportType == null)
             return String.format(DescriptionTemplate.DECLARATION.getText(),
@@ -2956,8 +2956,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         for (DeclarationData declarationData : unsuccesfullPreCreateDeclarationDataList) {
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.findOne(declarationData.getDepartmentReportPeriodId());
-            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
+            Department department = departmentService.getDepartment(departmentReportPeriod.getId());
             String strCorrPeriod = "";
             if (departmentReportPeriod.getCorrectionDate() != null) {
                 SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
@@ -2988,7 +2988,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             reportFile = File.createTempFile("reports", ".dat");
             zos = new ZipArchiveOutputStream(new BufferedOutputStream(new FileOutputStream(reportFile)));
             Map<Integer, Department> departmentMap = new HashMap<Integer, Department>();
-            Map<Long, DepartmentReportPeriod> departmentReportPeriodMap = new HashMap<>();
+            Map<Integer, DepartmentReportPeriod> departmentReportPeriodMap = new HashMap<Integer, DepartmentReportPeriod>();
             for (DeclarationData declarationData : declarationDataList) {
                 Department department = departmentMap.get(declarationData.getDepartmentId());
                 DepartmentReportPeriod drp = departmentReportPeriodMap.get(declarationData.getDepartmentReportPeriodId());
@@ -2997,7 +2997,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     departmentMap.put(department.getId(), department);
                 }
                 if (drp == null) {
-                    drp = departmentReportPeriodService.findOne(declarationData.getDepartmentReportPeriodId());
+                    drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
                     departmentReportPeriodMap.put(drp.getId(), drp);
                 }
                 String departmentName = department.getShortName();

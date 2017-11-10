@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -115,8 +114,8 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Pair<Long, Long>> checkRecordExistence(LocalDateTime version, String filter) {
-        return dao.getRecordIdPairs(refBook.getTableName(), refBook.getId(), version.toDate(), true, filter);
+    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
+        return dao.getRecordIdPairs(refBook.getTableName(), refBook.getId(), version, true, filter);
     }
 
     @Override

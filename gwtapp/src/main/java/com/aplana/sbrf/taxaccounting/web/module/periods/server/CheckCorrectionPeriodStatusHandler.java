@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckCorrectionPe
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class CheckCorrectionPeriodStatusHandler extends AbstractActionHandler<Ch
     public CheckCorrectionPeriodStatusResult execute(CheckCorrectionPeriodStatusAction action, ExecutionContext executionContext) throws ActionException {
         ReportPeriod rp = periodService.getReportPeriod(action.getReportPeriodId());
         PeriodStatusBeforeOpen status =
-                periodService.checkPeriodStatusBeforeOpen(rp, action.getSelectedDepartments().get(0), new LocalDateTime(action.getTerm()));
+                periodService.checkPeriodStatusBeforeOpen(rp, action.getSelectedDepartments().get(0), action.getTerm());
         CheckCorrectionPeriodStatusResult result = new CheckCorrectionPeriodStatusResult();
         result.setStatus(status);
         return result;

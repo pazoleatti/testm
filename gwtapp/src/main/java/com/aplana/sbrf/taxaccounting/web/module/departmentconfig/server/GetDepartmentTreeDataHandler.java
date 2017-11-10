@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -74,20 +73,12 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
             }
 
             result.setAvailableDepartments(avSet);
-            result.setReportPeriods(initReportPeriodModelList(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(currUser.getDepartmentId()))));
+            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(currUser.getDepartmentId())));
         } else {
-            result.setReportPeriods(initReportPeriodModelList(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(action.getDepartmentId()))));
+            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(action.getDepartmentId())));
         }
 
         return result;
-    }
-
-    private List<ReportPeriodViewModel> initReportPeriodModelList(List<ReportPeriod> reportPeriods) {
-        List<ReportPeriodViewModel> models = new ArrayList<>();
-        for (ReportPeriod period : reportPeriods){
-            models.add(new ReportPeriodViewModel(period));
-        }
-        return models;
     }
 
     @Override

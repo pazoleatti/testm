@@ -104,7 +104,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, Long departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, oktmo, taxOrganCode, asnuId, fileName);
     }
 
@@ -190,7 +190,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         // фильтр
         declarationFilter.setDeclarationTypeIds(Arrays.asList((long) declarationTypeId));
         declarationFilter.setReportPeriodIds(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
-        declarationFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate().toDate());
+        declarationFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
         declarationFilter.setCorrectionTag(departmentReportPeriod.getCorrectionDate() != null);
         declarationFilter.setTaxType(TaxType.INCOME);
 
@@ -373,7 +373,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd) {
+    public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
         return sourceService.getDDTByDepartment(departmentId, taxType, periodStart, periodEnd);
     }
 

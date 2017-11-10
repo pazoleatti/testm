@@ -3,13 +3,11 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +17,6 @@ import java.util.*;
 @Service
 @Transactional
 public class DepartmentServiceImpl implements DepartmentService {
-
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
 
     @Autowired
     DepartmentDao departmentDao;
@@ -220,7 +215,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd) {
+    public List<Integer> getTaxFormDepartments(TAUser tAUser, TaxType taxType, Date periodStart, Date periodEnd) {
         List<Integer> retList = new ArrayList<Integer>();
         if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
@@ -360,7 +355,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId) {
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
         List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxType, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());

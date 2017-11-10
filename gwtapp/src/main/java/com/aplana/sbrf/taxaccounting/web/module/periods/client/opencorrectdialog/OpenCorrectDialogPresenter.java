@@ -5,11 +5,11 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.mask.parser.DMDateParser;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
@@ -29,7 +29,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 
 	public interface MyView extends PopupView, HasUiHandlers<OpenCorrectDialogUiHandlers> {
 		void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable);
-        void setPeriodsList(List<ReportPeriodViewModel> reportPeriods, Integer reportPeriodId);
+        void setPeriodsList(List<ReportPeriod> reportPeriods, Integer reportPeriodId);
 		void setTaxType(TaxType taxType);
         void setSelectedDepartment(Integer departmentId);
         void resetForm();
@@ -38,7 +38,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
         List<Integer> getSelectedDepartments();
         Date getTerm();
         void setTerm(Date term);
-        ReportPeriodViewModel getSelectedPeriod();
+        ReportPeriod getSelectedPeriod();
         boolean canChangeDepartment();
 	}
 
@@ -91,7 +91,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 		getView().setCanChangeDepartment(canChange);
 	}
 
-	public void setPeriodsList(List<ReportPeriodViewModel> reportPeriods, Integer reportPeriodId) {
+	public void setPeriodsList(List<ReportPeriod> reportPeriods, Integer reportPeriodId) {
         getView().setPeriodsList(reportPeriods, reportPeriodId);
 	}
 

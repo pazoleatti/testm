@@ -11,6 +11,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationTemplate.declarationTemplate;
@@ -61,11 +62,11 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
      * @return Список значений справочника
      */
     @Override
-    public List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, LocalDateTime periodStartDate) {
+    public List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, Date periodStartDate) {
         BooleanBuilder subqueryWhere = new BooleanBuilder();
         subqueryWhere.and(declarationTemplate.status.eq((byte) 0));
         subqueryWhere.and(declarationTemplate.formKind.eq(declarationKind));
-        subqueryWhere.andNot(SQLExpressions.date(declarationTemplate.version).after(periodStartDate));
+        subqueryWhere.andNot(SQLExpressions.date(declarationTemplate.version).after(LocalDateTime.fromCalendarFields(DateUtils.toCalendar(periodStartDate))));
 
         SQLQuery<Long> declarationTypesWithTemplates = sqlQueryFactory.select(declarationTemplate.declarationTypeId)
                 .distinct()

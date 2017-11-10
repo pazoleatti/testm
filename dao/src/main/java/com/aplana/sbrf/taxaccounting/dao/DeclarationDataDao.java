@@ -113,7 +113,7 @@ public interface DeclarationDataDao extends PermissionDao {
     /**
      * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган» + АСНУ + GUID
      */
-    DeclarationData find(int declarationTypeId, Long departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName);
 
     /**
      * Поиск деклараций по имени файла

@@ -2,13 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.GWTLogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -21,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriodViewModel;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.*;
 import com.google.inject.Inject;
@@ -86,7 +79,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         void setDepartment(final Department department, boolean fireEvents);
 
-        void setReportPeriods(List<ReportPeriodViewModel> reportPeriods, boolean fireEvents);
+        void setReportPeriods(List<ReportPeriod> reportPeriods, boolean fireEvents);
 
         Integer getDepartmentId();
 
@@ -517,7 +510,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                             public void onSuccess(GetDepartmentTreeDataResult result) {
                                 // Список отчетных периодов
                                 getView().setReportPeriods(result.getReportPeriods() == null
-                                        ? new ArrayList<ReportPeriodViewModel>(0) : result.getReportPeriods(), true);
+                                        ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
                                 //   createTableColumns();
                                 getView().onFind(false);
                             }
@@ -556,7 +549,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                     getView().setDepartment(userDepartment, false);
                                     // Список отчетных периодов
                                     getView().setReportPeriods(result.getReportPeriods() == null
-                                            ? new ArrayList<ReportPeriodViewModel>(0) : result.getReportPeriods(), true);
+                                            ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods(), true);
                                 }
                                 //   createTableColumns();
                                 getData(null);

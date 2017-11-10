@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
-import org.joda.time.LocalDateTime;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,5 +28,5 @@ public interface RefBookDeclarationTypeDao {
      * @param periodStartDate Начало отчетного периода
      * @return Список значений справочника
      */
-    List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, LocalDateTime periodStartDate);
+    List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, Date periodStartDate);
 }

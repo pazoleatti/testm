@@ -13,9 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +33,7 @@ public class TAUserServiceImpl implements TAUserService {
 	@Autowired
     DepartmentService departmentService;
 
-	private TAUserInfo systemUserInfo;
+	TAUserInfo systemUserInfo;
 
     private static final Log LOG = LogFactory.getLog(TAUserServiceImpl.class);
 
@@ -130,12 +127,6 @@ public class TAUserServiceImpl implements TAUserService {
     @Override
 	public List<Department> getDepartmentHierarchy(int department) {
 		return getHierarchy(departmentService.getDepartment(department));
-	}
-
-	@Override
-	public TAUser getCurrentUser() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		return auth == null ? null : getUser(((User)auth.getPrincipal()).getUsername());
 	}
 
 	List<Department> getHierarchy(Department department) {

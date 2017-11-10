@@ -1,12 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import org.joda.time.LocalDateTime;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Date;
@@ -28,41 +23,39 @@ public interface DepartmentReportPeriodDao {
      */
     List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
-    List<Long> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
+    List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
 	/**
 	 * Сохранение отчетноего периода подразделения
 	 */
-	DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriod);
+	int save(DepartmentReportPeriod departmentReportPeriod);
 
     void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
-    void updateActive(long lo, boolean active);
+    void updateActive(int id, boolean active);
 
     /**
      * Открытие/закрытие отчетного периода подразделения (batch)
      */
-    void updateActive(List<Long> ids, final Integer report_period_id, boolean active);
+    void updateActive(List<Integer> ids, final Integer report_period_id, boolean active);
 
     /**
      * Изменить дату корректировки
      */
-    void updateCorrectionDate(Long id, LocalDateTime correctionDate);
+    void updateCorrectionDate(int id, Date correctionDate);
 
     /**
      * Удаление отчетного периода подразделения
-     * @param id
      */
-    void delete(long id);
+    void delete(int id);
 
     /**
      * Удаление отчетных периода подразделения
-     * @param ids
      */
-    void delete(List<Long> ids);
+    void delete(List<Integer> ids);
 
 	/**
 	 * Проверяет существование периода для подразделения
@@ -90,7 +83,7 @@ public interface DepartmentReportPeriodDao {
      */
     Integer getCorrectionNumber(int id);
 
-    boolean existLargeCorrection(int departmentId, int reportPeriodId, LocalDateTime correctionDate);
+    boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
 
     /**
      * Получение списков дат корректирующих периодов по отчетным периодам
@@ -110,21 +103,4 @@ public interface DepartmentReportPeriodDao {
      * @return
      */
     List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId);
-
-    /**
-     * Возвращает отчетные периоды подразделений с фильтрацией и пагинацией
-     * @param departmentReportPeriodFilter - фильтр отчетных периодов подразделений
-     * @param pagingParams - параметры пагинации
-     * @return отчетные периоды подразделений
-     */
-    PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter departmentReportPeriodFilter, PagingParams pagingParams);
-
-    /**
-     * Поиск отчетного периода подразделения по его ID
-     * @param id
-     */
-    DepartmentReportPeriod findOne(Long id);
-
-    @Transactional(readOnly = false)
-    DepartmentReportPeriod update(DepartmentReportPeriod departmentReportPeriodItem);
 }

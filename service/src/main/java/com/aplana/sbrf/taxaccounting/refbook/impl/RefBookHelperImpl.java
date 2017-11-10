@@ -452,12 +452,12 @@ public class RefBookHelperImpl implements RefBookHelper {
         mainConfig.put(departmentAlias, new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
 
         RefBookRecordVersion recordVersion;
-        Date versionTo = provider.getEndVersion(record.getRecordId(), rp.getCalendarStartDate().toDate());
+        Date versionTo = provider.getEndVersion(record.getRecordId(), rp.getCalendarStartDate());
         if (!needEdit) {
             record.setValues(mainConfig);
-            uniqueRecordId = provider.createRecordVersion(logger, rp.getCalendarStartDate().toDate(), versionTo, Arrays.asList(record)).get(0);
+            uniqueRecordId = provider.createRecordVersion(logger, rp.getCalendarStartDate(), versionTo, Arrays.asList(record)).get(0);
         } else {
-            provider.updateRecordVersion(logger, uniqueRecordId, rp.getCalendarStartDate().toDate(), versionTo, mainConfig);
+            provider.updateRecordVersion(logger, uniqueRecordId, rp.getCalendarStartDate(), versionTo, mainConfig);
         }
         recordVersion = provider.getRecordVersionInfo(uniqueRecordId);
 
@@ -549,11 +549,11 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             if (!recordsToAdd.isEmpty()) {
-                providerSlave.createRecordVersion(logger, rp.getCalendarStartDate().toDate(), recordVersion.getVersionEnd(), recordsToAdd);
+                providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), recordsToAdd);
             }
 
             if (!toUpdate.isEmpty()) {
-                providerSlave.updateRecordVersions(logger, rp.getCalendarStartDate().toDate(), recordVersion.getVersionEnd(), toUpdate);
+                providerSlave.updateRecordVersions(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), toUpdate);
             }
 
             if (!deleteIds.isEmpty()) {

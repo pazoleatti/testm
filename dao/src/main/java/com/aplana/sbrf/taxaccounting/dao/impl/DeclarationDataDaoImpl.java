@@ -99,7 +99,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     final private QBean<DeclarationData> declarationDataQBean = bean(DeclarationData.class, declarationData.id, declarationData.declarationTemplateId,
             declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo, declarationData.state,
-            declarationData.departmentReportPeriodId.as("departmentReportPeriodId"), declarationData.asnuId,
+            declarationData.departmentReportPeriodId.intValue().as("departmentReportPeriodId"), declarationData.asnuId,
             declarationData.note, declarationData.fileName, declarationData.docStateId.as("docState"),
             departmentReportPeriod.reportPeriodId.as("reportPeriodId"), departmentReportPeriod.departmentId.as("departmentId"));
 
@@ -123,7 +123,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setKpp(rs.getString("kpp"));
             d.setOktmo(rs.getString("oktmo"));
             d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
-            d.setDepartmentReportPeriodId(SqlUtils.getLong(rs, "department_report_period_id"));
+            d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
             d.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
             d.setNote(rs.getString("note"));
             d.setFileName(rs.getString("file_name"));
@@ -176,7 +176,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, Long departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String oktmo, String taxOrganCode, Long asnuId, String fileName) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
@@ -953,7 +953,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 .addValue("ndflId", ndflId)
                 .addValue("declarationTypeId", declarationTypeId)
                 .addValue("departmentType", departmentType)
-                .addValue("getIsActive", isActive)
+                .addValue("isActive", isActive)
                 .addValue("declarationState", declarationState);
         try {
             return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);

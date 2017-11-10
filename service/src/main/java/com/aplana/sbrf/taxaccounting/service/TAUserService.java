@@ -78,9 +78,4 @@ public interface TAUserService {
     // TODO перенести в дао подразделений
 	List<Department> getDepartmentHierarchy(int department);
 
-	/**
-	 * Возвращает информацию о текущем пользователе системы
-	 */
-	TAUser getCurrentUser();
-
 }

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import org.joda.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
@@ -25,7 +24,7 @@ public interface SourceService {
      * @param periodEnd    окончание периода, в котором действуют назначения
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
-    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd);
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
@@ -37,7 +36,7 @@ public interface SourceService {
      * @param queryParams  параметры пейджинга и фильтра
      * @return список назначенных подразделению деклараций (с учётом вида и типа) по заданному виду налога
      */
-    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, LocalDateTime periodStart, LocalDateTime periodEnd,
+    List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd,
                                                        QueryParams queryParams);
 
     /**
@@ -52,8 +51,6 @@ public interface SourceService {
      * @return информация о декларациях-потребителях в виде списка
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType}
      */
-    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, LocalDateTime periodStart, LocalDateTime periodEnd);
-
     List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd);
 
     /**
