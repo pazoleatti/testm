@@ -1,23 +1,25 @@
 <div id="ndfl" style="height: 100%;">
     <!--Заголовок-->
     <div class="row">
-        <div class="header-col" style="margin: 14px 0 19px 28px;">
+        <div class="header-col" style="margin: 14px 0 2px 28px;">
             <h1>{{::'uploadTransportData.title' | translate}}</h1>
         </div>
     </div>
+    <div class="container-grid box-shadow-block" style="height: 91%;">
+        <div style="padding-bottom: 15px;margin: 21px 0 0 11px;" data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.UPLOAD_FILE)">
+            <button type="file" class="btn btn-default" ngf-select="uploadButtonClick($file)">
+                <span data-translate-once="uploadTransportData.button.upload"></span>
+            </button>
+            <label class="font-normal">{{::'uploadTransportData.description.upload' | translate}}</label>
 
-    <div style="padding-bottom: 15px;margin: 2px 0 0 11px;" data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.UPLOAD_FILE)">
-        <button type="file" class="btn btn-default" ngf-select="uploadButtonClick($file)">
-            <span data-translate-once="uploadTransportData.button.upload"></span>
-        </button>
-        <label class="font-normal">{{::'uploadTransportData.description.upload' | translate}}</label>
+        </div>
 
+        <div data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.HANDLING_FILE)" style="margin: 2px 0 0 11px;">
+            <button type="button" class="btn btn-default" data-ng-click="loadAllButtonClick()">
+                <span data-translate-once="uploadTransportData.button.loadAll"></span>
+            </button>
+            <label class="font-normal">{{::'uploadTransportData.description.loadAll' | translate}}</label>
+        </div>
     </div>
 
-    <div data-ng-show="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.HANDLING_FILE)" style="margin: 2px 0 0 11px;">
-        <button type="button" class="btn btn-default" data-ng-click="loadAllButtonClick()">
-            <span data-translate-once="uploadTransportData.button.loadAll"></span>
-        </button>
-        <label class="font-normal">{{::'uploadTransportData.description.loadAll' | translate}}</label>
-    </div>
 </div>
