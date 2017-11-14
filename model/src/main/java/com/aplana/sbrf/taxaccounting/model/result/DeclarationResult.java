@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model;
+package com.aplana.sbrf.taxaccounting.model.result;
 
 /**
  * Модель для передачи данных о ПНФ/КНФ
@@ -45,6 +45,26 @@ public class DeclarationResult {
      * Вид НФ
      */
     private int declarationType;
+
+    /**
+     * КПП
+     */
+    private String kpp;
+
+    /**
+     * ОКТМО
+     */
+    private String oktmo;
+
+    /**
+     * Код налогового органа
+     */
+    private String taxOrganCode;
+
+    /**
+     * Состояние ЭД
+     */
+    private String docState;
 
     public String getDepartment() {
         return department;
@@ -124,5 +144,37 @@ public class DeclarationResult {
 
     public void setDeclarationType(int declarationType) {
         this.declarationType = declarationType;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
+    }
+
+    public String getOktmo() {
+        return oktmo;
+    }
+
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getDocState() {
+        return docState;
+    }
+
+    public void setDocState(String docState) {
+        this.docState = docState;
     }
 }
