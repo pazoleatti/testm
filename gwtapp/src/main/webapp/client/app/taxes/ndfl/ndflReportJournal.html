@@ -17,7 +17,7 @@
     </div>
     <div class='container-grid-top'>
         <!--Панель кнопок -->
-        <div class="button_panel">
+        <div class="button_panel" style="margin: -5px 0 -1px 0;">
             <div class="btn-toolbar" role="toolbar">
                 <!--Проверить -->
                 <span>
@@ -53,7 +53,7 @@
                     </span>
                 <!--Выгрузить отчетность-->
                 <span>
-                        <button type="button" class="btn btn-danger"
+                        <button type="button" class="btn btn-default"
                                 data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.DOWNLOAD_REPORTS)"
                                 data-ng-click="downloadReports()">
                             <span data-translate-once="ndflReportJournal.button.downloadReport"></span>
