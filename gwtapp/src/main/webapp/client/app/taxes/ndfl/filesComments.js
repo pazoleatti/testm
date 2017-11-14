@@ -23,6 +23,14 @@
 
                 var attachFileType = $shareData.attachFileTypes;
 
+                var defaultFileType = {};
+                angular.forEach(attachFileType, function (value, key) {
+                    if(value === APP_CONSTANTS.ATTACHE_FILE_TYPE.DEFAULT_TYPE_NAME){
+                        defaultFileType.id = key;
+                        defaultFileType.name = value;
+                    }
+                });
+
                 $scope.fileCommentGrid = {
                     ctrl: {},
                     options: {
@@ -97,8 +105,8 @@
                                 var newFile = [{
                                     uuid: response.data.uuid,
                                     fileName: file.name,
-                                    fileTypeId: 268574799,
-                                    fileTypeName: "",
+                                    fileTypeId: defaultFileType.id,
+                                    fileTypeName: defaultFileType.name,
                                     note: "",
                                     userName: $scope.$parent.security.user.name,
                                     userDepartmentName: $scope.$parent.security.user.department.name,
