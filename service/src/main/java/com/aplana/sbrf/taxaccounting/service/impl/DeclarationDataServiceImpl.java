@@ -2981,7 +2981,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         for (DeclarationData declarationData : unsuccesfullPreCreateDeclarationDataList) {
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
-            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            Department department = departmentService.getDepartment(departmentReportPeriod.getId());
             String strCorrPeriod = "";
             if (departmentReportPeriod.getCorrectionDate() != null) {
                 SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");

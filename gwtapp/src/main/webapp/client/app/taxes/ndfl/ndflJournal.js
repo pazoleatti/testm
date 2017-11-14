@@ -18,8 +18,10 @@
          * @description Контроллер списка форм
          */
         .controller('ndflJournalCtrl', [
-            '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http',
-            function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http) {
+            '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS',
+            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage',
+            function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS,
+                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage) {
                 $scope.declarationCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
 
                 if ($stateParams.uuid) {
@@ -72,11 +74,11 @@
                 var isLoadingPage = true;
                 $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
                     if (selectedPeriods && selectedPeriods.length > 0) {
-                        $rootScope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                        $webStorage.set(APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, selectedPeriods[selectedPeriods.length - 1], true);
                         isLoadingPage = false;
                     } else {
                         if (!isLoadingPage) {
-                            $rootScope.latestSelectedPeriod = null;
+                            $webStorage.remove(APP_CONSTANTS.APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, true);
                         }
                     }
                 });
@@ -191,7 +193,7 @@
                         resolve: {
                             $shareData: function () {
                                 return {
-                                    latestSelectedPeriod: $rootScope.latestSelectedPeriod
+                                    latestSelectedPeriod: $webStorage.get(APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, true)
                                 };
                             }
                         }
@@ -357,34 +359,5 @@
                 return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
             };
         })
-
-        .filter('nameFormatter', function () {
-            return function (entity) {
-                return entity ? entity.name : "";
-            };
-        })
-
-        .filter('periodFormatter', function () {
-            return function (entity) {
-                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
-            };
-        })
-
-        /**
-         * @description Форматтер для преобразования тега корректировки из enum в boolean
-         * @param correctionTag
-         */
-        .filter('correctionTagFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
-            return function (correctionTag) {
-                switch (correctionTag) {
-                    case APP_CONSTANTS.CORRETION_TAG.ALL:
-                        return undefined;
-                    case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
-                        return false;
-                    case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
-                        return true;
-                }
-                return undefined;
-            };
-        }]);
+    ;
 }());

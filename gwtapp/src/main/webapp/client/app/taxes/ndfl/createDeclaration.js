@@ -12,9 +12,9 @@
      */
         .controller('createDeclarationFormCtrl', ["$scope", "$rootScope", "$http", '$state', '$stateParams', "$modalInstance", "$filter",
             "RefBookValuesResource", 'DeclarationTypeForCreateResource', "APP_CONSTANTS",
-            '$shareData', '$dialogs',
+            '$shareData', '$dialogs', '$webStorage',
             function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $filter,
-                      RefBookValuesResource, DeclarationTypeForCreateResource, APP_CONSTANTS, $shareData, $dialogs) {
+                      RefBookValuesResource, DeclarationTypeForCreateResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage) {
                 //По нажатию на кнопку пользователь может создать только консолидированную форму
                 $scope.declarationKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED;
 
@@ -38,7 +38,10 @@
                  */
                 $scope.save = function () {
                     // Запоминаем период выбранный пользователем
-                    $rootScope.latestSelectedPeriod = $scope.declarationData.period;
+                    $webStorage.set(APP_CONSTANTS.USER_STORAGE.NAME,
+                        APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD,
+                        $scope.declarationData.period,
+                        true);
                     if ($scope.declarationData.period && $scope.declarationData.department && $scope.declarationData.declarationType) {
                         $http({
                             method: "POST",

@@ -42,7 +42,8 @@
             'app.asyncTaskList',
             'app.filterUtils',
             'app.rest',
-            'app.formatters'
+            'app.formatters',
+            'app.modals'
         ])
         /**
          * @description Отображение модального окна с сообщением "Функционал находится в разработке".

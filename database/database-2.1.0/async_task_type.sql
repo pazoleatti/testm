@@ -15,3 +15,12 @@ update async_task_type set handler_bean = 'SpecificReportDeclarationDataAsyncTas
 update async_task_type set handler_bean = 'UploadRefBookAsyncTask' where id = 27;
 update async_task_type set handler_bean = 'CreateFormsAsyncTask' where id = 28;
 update async_task_type set handler_bean = 'CreateReportsAsyncTask' where id = 29;
+
+update async_task_type set name = 'Обработка справочника из каталога загрузки' where id=13;
+
+merge into async_task_type a using
+(select 12 as id, 'Обработка ТФ налоговой формы' as name, 'LoadTransportFileAsyncTask' as handler_bean, 10000 as short_queue_limit, 'Размер файла (Кбайт)' as limit_kind from dual) b
+on (a.id=b.id)
+when not matched then
+	insert (id, name, handler_bean, short_queue_limit, limit_kind)
+	values (b.id, b.name, b.handler_bean, b.short_queue_limit, b.limit_kind);

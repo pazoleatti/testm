@@ -78,7 +78,7 @@ begin
 	v_count := 0;
 	select count(1) into v_count from user_tables where table_name = 'DEPARTMENT_FORM_TYPE';
 	if v_count>0 then
-		execute immediate 'alter table declaration_source drop DECL_SOURCE_FK_DEPT_FORMTYPE ';
+		execute immediate 'alter table declaration_source drop constraint DECL_SOURCE_FK_DEPT_FORMTYPE ';
 		execute immediate 'DROP TABLE DEPARTMENT_FORM_TYPE';
 	end if;
 	

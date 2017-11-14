@@ -7,7 +7,7 @@ begin
 		EXECUTE IMMEDIATE 'alter table async_task rename column balancing_variant to queue';
 		EXECUTE IMMEDIATE 'alter table async_task add user_id number(9) not null';
 		EXECUTE IMMEDIATE 'comment on column async_task.user_id is ''Идентификатор пользователя, запустившего задачу''';
-		EXECUTE IMMEDIATE 'alter table async_task add state number(6) not null default 1';
+		EXECUTE IMMEDIATE 'alter table async_task add state number(6) default 1 not null ';
 		EXECUTE IMMEDIATE 'comment on column async_task.state is ''Статус выполнения задачи''';
 		EXECUTE IMMEDIATE 'alter table async_task add state_date timestamp default current_timestamp';
 		EXECUTE IMMEDIATE 'comment on column async_task.state_date is ''Дата последнего изменения статуса''';
@@ -43,9 +43,9 @@ begin
 		EXECUTE IMMEDIATE 'alter table lock_data drop column server_node';
 		EXECUTE IMMEDIATE 'alter table lock_data drop constraint lock_data_pk';
 		EXECUTE IMMEDIATE 'alter table lock_data add task_id number(18) null';
-		EXECUTE IMMEDIATE 'comment on column async_task.task_id is ''Ссылка на асинхронную задачу, связанную с блокировкой''';
+		EXECUTE IMMEDIATE 'comment on column lock_data.task_id is ''Ссылка на асинхронную задачу, связанную с блокировкой''';
 		EXECUTE IMMEDIATE 'alter table lock_data add id number(18) not null';
-		EXECUTE IMMEDIATE 'comment on column async_task.id is ''Идентификатор блокировки''';
+		EXECUTE IMMEDIATE 'comment on column lock_data.id is ''Идентификатор блокировки''';
 		EXECUTE IMMEDIATE 'alter table lock_data add constraint lock_data_pk primary key (id)';
 		EXECUTE IMMEDIATE 'create sequence seq_lock_data start with 1';
 		EXECUTE IMMEDIATE 'alter table lock_data add constraint lock_data_uniq_key unique (key)';
