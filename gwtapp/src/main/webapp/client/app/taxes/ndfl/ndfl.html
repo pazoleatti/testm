@@ -3,7 +3,7 @@
     <div class="row">
         <div class="header-col" style="margin: 14px 0 0 28px;">
             <h1><a href="index.html#/taxes/ndflJournal">{{::'move_back' |
-                translate}}:</a> - {{::'header.ndfl.forms' | translate}}:</h1>
+                translate}}</a> - {{::'header.ndfl.forms' | translate}}:</h1>
         </div>
         <div class="row" style="min-width: 1000px;">
             <div class="header-col w200" style="float: right; margin-top: 14px; margin-right: 32px;">
@@ -82,7 +82,7 @@
                 <div class="header-details">
                     <div class="row">
                         <div class="col-sm-12 info-wrapper">
-                            <div class="header-col w400">
+                            <div class="header-col w450">
                                 <div>
                                     <label class="w100">{{::'title.department' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.department}}</label>
@@ -96,7 +96,7 @@
                                     <label class="font-normal info-text200">{{declarationData.creationUserName}}</label>
                                 </div>
                             </div>
-                            <div class="header-col w400">
+                            <div class="header-col w450">
                                 <div>
                                     <label>{{::'title.formType' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.declarationFormKind}}</label>
@@ -111,7 +111,7 @@
                                     <label class="font-normal info-text200">{{declarationData.state}}</label>
                                 </div>
                             </div>
-                            <div class="header-col w350">
+                            <div class="header-col w450">
                                 <div ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
                                     <label>{{::'title.nameAsnu' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.asnuName}}</label>

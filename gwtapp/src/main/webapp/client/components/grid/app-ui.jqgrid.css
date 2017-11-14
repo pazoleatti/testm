@@ -361,7 +361,7 @@ height: 2000px - for IE because height: 100% not work
 
 .ui-jqgrid .ui-jqgrid-resize-ltr {
     float: none;
-    left: 2px;
+    left: 100%;
     margin: 0 0 0 -5px;
     width: 11px;
 }
