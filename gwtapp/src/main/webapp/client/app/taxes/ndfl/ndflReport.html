@@ -2,8 +2,8 @@
     <!--Заголовок-->
     <div class="row">
         <div class="header-col" style="margin: 14px 0 0 28px;">
-            <h1><a href="index.html#/taxes/ndflJournal">{{::'move_back' |
-                translate}}</a> - {{::'header.ndfl.forms' | translate}}:</h1>
+            <h1><a href="index.html#/taxes/ndflReportJournal">{{::'move_back' |
+                translate}}:</a> - {{declarationTypeName}}:</h1>
         </div>
         <div class="row" style="min-width: 1000px;">
             <div class="header-col w200" style="float: right; margin-top: 14px; margin-right: 32px;">
@@ -15,8 +15,7 @@
                     </button>
                     <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button"
                         style="margin-left: -180px;">
-                        <li role="menuitem"
-                            ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
+                        <li role="menuitem">
                             <div class="row menuitem">
                                 <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
                             </div>
@@ -25,29 +24,6 @@
                             <div class="row menuitem">
                                 <a ng-click="createReportXlsx()">{{::'link.ndfl.reporting.formXLSX' | translate}}</a>
                                 <a ng-click="downloadXlsx()" ng-show="availableXlsxReport">{{::'link.ndfl.reporting.download'
-                                    | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem">
-                            <div class="row menuitem">
-                                <a ng-click="createReport()">{{::'link.ndfl.reporting.formForFL' | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem">
-                            <div class="row menuitem">
-                                <a ng-click="createReportAllRnu()">{{::'link.ndfl.reporting.formForFLs' |
-                                    translate}}</a>
-                                <a ng-click="downloadSpecific()" ng-show="availableRnuNdflPersonAllDb">{{::'link.ndfl.reporting.download'
-                                    | translate}}</a>
-                            </div>
-                        </li>
-                        <li role="menuitem"
-                            ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
-                            <div class="row menuitem">
-                                <a ng-click="createPairKppOktmo(false, true)">{{::'link.ndfl.reporting.formForKppOktmo'
-                                    |
-                                    translate}}</a>
-                                <a ng-click="createPairKppOktmo(false, false)" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
                                     | translate}}</a>
                             </div>
                         </li>
@@ -63,7 +39,7 @@
             <div class="header-col " style="float: right;">
                 <!-- ссылка на модальное окно измениий по налоговой форме -->
                 <button type="button" class="btn btn-default-nonBg" style="float: right;"
-                        data-ng-click="openHistoryOfChange()">
+                        data-ng-click="openHistoryOfChange">
                     <span data-translate-once="link.ndfl.historyOfChange"></span>
                 </button>
                 <button type="button" class="btn btn-default-nonBg" style="margin: 0 13px; float: right;"
@@ -82,7 +58,7 @@
                 <div class="header-details">
                     <div class="row">
                         <div class="col-sm-12 info-wrapper">
-                            <div class="header-col w450">
+                            <div class="header-col w400">
                                 <div>
                                     <label class="w100">{{::'title.department' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.department}}</label>
@@ -96,7 +72,7 @@
                                     <label class="font-normal info-text200">{{declarationData.creationUserName}}</label>
                                 </div>
                             </div>
-                            <div class="header-col w450">
+                            <div class="header-col w400">
                                 <div>
                                     <label>{{::'title.formType' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.declarationFormKind}}</label>
@@ -110,15 +86,23 @@
                                     <label>{{::'title.state' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.state}}</label>
                                 </div>
+                                <div>
+                                    <label>{{::'title.stateDoc' | translate}}:</label>
+                                    <label class="font-normal info-text200">{{declarationData.docState}}</label>
+                                </div>
                             </div>
-                            <div class="header-col w450">
-                                <div ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
-                                    <label>{{::'title.nameAsnu' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.asnuName}}</label>
+                            <div class="header-col w350">
+                                <div>
+                                    <label>{{::'title.kpp' | translate}}</label>
+                                    <label class="font-normal info-text200">{{declarationData.kpp}}</label>
                                 </div>
                                 <div>
-                                    <label style="width: 207px;">{{::'title.dateAndTimeCreate' | translate}}:</label>
-                                    <label class="font-normal info-text200" style="width: 138px;">{{declarationData.creationDate}}</label>
+                                    <label>{{::'title.oktmo' | translate}}</label>
+                                    <label class="font-normal info-text200">{{declarationData.oktmo}}</label>
+                                </div>
+                                <div>
+                                    <label>{{::'title.codeNO' | translate}}</label>
+                                    <label class="font-normal info-text200">{{declarationData.taxOrganCode}}</label>
                                 </div>
                             </div>
                         </div>
@@ -127,14 +111,6 @@
                 <!--Панель кнопок -->
                 <div class="button_panel" style="padding: 10px 12px 0;">
                     <div class="btn-toolbar" role="toolbar">
-                        <!--Рассчитать -->
-                        <span>
-                        <button type="button" class="btn btn-default"
-                                data-ng-click="calculate()"
-                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CALCULATE)">
-                            <span data-translate-once="button.calculate"></span>
-                        </button>
-                    </span>
                         <!--Принять -->
                         <span>
                         <button type="button" class="btn btn-default"
@@ -146,7 +122,7 @@
                         <!--Проверить -->
                         <span>
                         <button type="button" class="btn btn-default"
-                                data-ng-click="check(false)"
+                                data-ng-click="check()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
                             <span data-translate-once="button.check"></span>
                         </button>
@@ -167,92 +143,40 @@
                             <span data-translate-once="button.delete"></span>
                         </button>
                     </span>
+                        <!-- Показать -->
+                        <span>
+                            <button type="button" class="btn btn-default"
+                                    data-ng-click="show(false, false)"
+                                    data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.SHOW) || availablePdf">
+                                <span data-translate-once="button.show"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="!availablePdf">
+                <div style="min-height: 600px;text-align:center">
+                    <h1>{{pdfMessage}}</h1>
+                </div>
+            </div>
+            <div ng-show="availablePdf">
+                <div style="overflow: auto;width: 100%;max-height: 600px;padding: 10px 12px 0;background-color: lightgray;text-align:center">
+                    <img ng-src="{{reportImage}}">
+                </div>
+                <div style="padding: 10px 12px 0;text-align:center">
+                    <div>
+                        <button type="button" class="btn btn-default" data-ng-click="prevPage()">
+                            <span data-translate-once="button.prev"></span>
+                        </button>
+                        <span>{{::'ndflReport.label.page' | translate}} {{currPage}} {{::'ndflReport.label.from'
+                            | translate}} {{pagesTotal}}</span>
+                        <button type="button" class="btn btn-default" data-ng-click="nextPage()">
+                            <span data-translate-once="button.next"></span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <data-uib-tabset active="activeForm" class="form100 tab-wrapper" style="height: 79.3%;padding: 10px 12px 0;">
-
-            <data-uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('ndflFL')">
-                <div data-ng-controller="ndflFLCtrl">
-                    <div style="height: 100%">
-                        <div class='container-grid-top'>
-                            <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
-                        </div>
-                    </div>
-                    <div data-aplana-grid
-                         data-grid-fill-space="true"
-                         data-grid-fill-space-container-selector=".form100"
-                         data-grid-fill-space-container-selector-top=".container-grid-top"
-                         data-grid-options="ndflPersonGrid.options"
-                         data-grid-ctrl="ndflPersonGrid.ctrl"
-                         data-ng-model="ndflPersonGrid.value"
-                         id="ndflPersonTable"
-                         style="float: left; width: 100%;"></div>
-                </div>
-            </data-uib-tab>
-
-            <data-uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
-                          select="selectTab('incomesAndTax')">
-                <div data-ng-controller="incomesAndTaxCtrl">
-                    <div style="height: 100%;">
-                        <div class='container-grid-top'>
-                            <span data-ng-include="'client/app/taxes/ndfl/incomesAndTaxFilter.html'"></span>
-                        </div>
-                    </div>
-                    <div data-aplana-grid
-                         data-grid-fill-space="true"
-                         data-grid-fill-space-container-selector=".form100"
-                         data-grid-fill-space-container-selector-top=".container-grid-top"
-                         data-grid-options="incomesAndTaxGrid.options"
-                         data-grid-ctrl="incomesAndTaxGrid.ctrl"
-                         data-ng-model="incomesAndTaxGrid.value"
-                         id="incomesAndTaxTable"
-                         style="float: left; width: 100%;"></div>
-
-                </div>
-            </data-uib-tab>
-
-            <data-uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
-                          select="selectTab('deductions')">
-                <div data-ng-controller="deductionCtrl">
-                    <div style="height: 100%">
-                        <div class='container-grid-top'>
-                            <span data-ng-include="'client/app/taxes/ndfl/deductionFilter.html'"></span>
-                        </div>
-                        <div data-aplana-grid
-                             data-grid-fill-space="true"
-                             data-grid-fill-space-container-selector=".form100"
-                             data-grid-fill-space-container-selector-top=".container-grid-top"
-                             data-grid-options="deductionGrid.options"
-                             data-grid-ctrl="deductionGrid.ctrl"
-                             data-ng-model="deductionGrid.value"
-                             id="deductionTable"></div>
-                    </div>
-                </div>
-            </data-uib-tab>
-
-            <data-uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
-                          select="selectTab('prepayment')">
-                <div data-ng-controller="prepaymentCtrl">
-                    <div style="height: 100%">
-                        <div class='container-grid-top'>
-                            <span data-ng-include="'client/app/taxes/ndfl/prepaymentFilter.html'"></span>
-                        </div>
-                        <div data-aplana-grid
-                             data-grid-fill-space="true"
-                             data-grid-fill-space-container-selector=".form100"
-                             data-grid-fill-space-container-selector-top=".container-grid-top"
-                             data-grid-options="prepaymentGrid.options"
-                             data-grid-ctrl="prepaymentGrid.ctrl"
-                             data-ng-model="prepaymentGrid.value"
-                             id="prepaymentTable"></div>
-                    </div>
-                </div>
-            </data-uib-tab>
-
-        </data-uib-tabset>
     </div>
 
 </div>

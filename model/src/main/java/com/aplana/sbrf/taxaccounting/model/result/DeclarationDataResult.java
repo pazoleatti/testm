@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model;
+package com.aplana.sbrf.taxaccounting.model.result;
 
 /**
  * Моджельный класс для передачи данных связанных с налоговыми формами

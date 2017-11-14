@@ -5,7 +5,7 @@
      * @description Модуль для для работы со страницей РНУ НДФЛ
      */
 
-    angular.module('app.ndfl',
+    angular.module('app.ndflReport',
         ['ui.router',
             'app.ndflFL',
             'app.incomesAndTax',
@@ -14,28 +14,31 @@
             'app.formSources',
             'app.logBusines',
             'app.logPanel',
+            'app.modals',
             'app.filesComments',
             'app.rest',
             'app.rnuNdflPersonFace',
             'app.returnToCreatedDialog'])
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('ndfl', {
-                url: '/taxes/ndfl/{declarationDataId}?uuid',
-                templateUrl: 'client/app/taxes/ndfl/ndfl.html?v=${buildUuid}',
-                controller: 'ndflCtrl'
+            $stateProvider.state('ndflReport', {
+                url: '/taxes/ndfl/ndflReport/{declarationDataId}?uuid',
+                templateUrl: 'client/app/taxes/ndfl/ndflReport.html?v=${buildUuid}',
+                controller: 'ndflReportCtrl'
             });
         }])
 
         /**
          * @description Контроллер страницы РНУ НДФЛ и вкладки "Реквизиты"
          */
-        .controller('ndflCtrl', [
-            '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
-            '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval', 'acceptDeclarationData',
-            'checkDeclarationData', 'moveToCreatedDeclarationData',
+        .controller('ndflReportCtrl', [
+            '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource',
+            '$filter', '$logPanel', 'appModals', '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state',
+            '$interval', 'acceptDeclarationData', 'createPdfReport', 'getPageImage', 'checkDeclarationData',
+            'moveToCreatedDeclarationData', '$aplanaModal',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
-                      $logPanel, $aplanaModal, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state,
-                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData) {
+                      $logPanel, appModals, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval,
+                      acceptDeclarationData, createPdfReport, getPageImage, checkDeclarationData,
+                      moveToCreatedDeclarationData, $aplanaModal) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -44,7 +47,7 @@
                 /**
                  * @description Инициализация первичных данных на странице
                  */
-                function initPage() {
+                var initPage = function () {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
                             projection: "declarationData"
@@ -53,22 +56,62 @@
                             if (data) {
                                 $scope.declarationData = data;
                                 $scope.declarationDataId = $stateParams.declarationDataId;
+                                switch (data.declarationType) {
+                                    case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id:
+                                        $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.name;
+                                        break;
+                                    case APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id:
+                                        $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.name;
+                                        break;
+                                    case APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.id:
+                                        $scope.declarationTypeName = APP_CONSTANTS.DECLARATION_TYPE.REPORT_6_NDFL.name;
+                                        break;
+                                }
+
+
                             }
                         }
                     );
-                }
+                };
 
                 initPage();
+
+                /**
+                 * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
+                 * @param response
+                 * @param location
+                 * @param create
+                 */
+                function performReportSuccessResponse(response, location, create) {
+                    if (response.uuid && response.uuid !== null) {
+                        $logPanel.open('log-panel-container', response.uuid);
+                    } else {
+                        if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
+                            appModals.message($filter('translate')('title.noCalculationPerformed'));
+                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                            appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
+                                .result.then(
+                                function () {
+                                    $scope.createPairKppOktmo(true, create);
+                                });
+                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
+                            $window.location = location;
+                        }
+                    }
+                }
+
+                $scope.pdfLoading = false;
+                $scope.pdfLoaded = false;
 
                 /**
                  * @description Проверяет готовность отчетов у открытой формы
                  */
                 // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports() {
-                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableRnuNdflPersonAllDb && $scope.availableReportKppOktmo)) {
+                    if (!($scope.availablePdf && $scope.availableReports && $scope.availableXlsxReport)) {
                         DeclarationDataResource.query({
                                 declarationDataId: $stateParams.declarationDataId,
-                                projection: "availableReports",
+                                projection: "availableNdflReports",
                                 nooverlay: true
                             },
                             function (data) {
@@ -76,18 +119,36 @@
                                     if (!data.declarationDataExist) {
                                         $interval.cancel($scope.intervalId);
                                         var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                        $dialogs.errorDialog({
-                                            content: message
-                                        }).result.then(
+                                        appModals.error($filter('translate')('DIALOGS_ERROR'), message).result.then(
                                             function () {
                                                 $state.go("/");
-                                        });
+                                            }
+                                        );
                                         return;
                                     }
+                                    $scope.availablePdf = data.availablePdf;
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
-                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    if (!$scope.pdfLoaded && data.availablePdf) {
+                                        getPageImage.query({
+                                                declarationDataId: $stateParams.declarationDataId,
+                                                pageId: 0
+                                            },
+                                            function (response) {
+                                                $scope.reportImage = response.requestUrl;
+                                                $scope.currPage = 1;
+                                                $http({
+                                                    method: "GET",
+                                                    url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
+                                                }).success(function (response) {
+                                                    $scope.pagesTotal = response;
+                                                });
+                                            });
+                                        $scope.pdfLoaded = true;
+                                    }
+                                    if (!$scope.availablePdf && !$scope.pdfLoading) {
+                                        $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Форма предварительного просмотра не сформирована";
+                                    }
                                     if (!$scope.intervalId) {
                                         $scope.intervalId = $interval(function () {
                                             updateAvailableReports();
@@ -103,6 +164,38 @@
 
                 updateAvailableReports();
 
+                /**
+                 * @description Выбрать следующую страницу отчета
+                 */
+                $scope.nextPage = function () {
+                    if ($scope.currPage !== $scope.pagesTotal) {
+                        getPageImage.query({
+                                declarationDataId: $stateParams.declarationDataId,
+                                pageId: $scope.currPage
+                            },
+                            function (response) {
+                                $scope.reportImage = response.requestUrl;
+                                $scope.currPage++;
+                            });
+                    }
+                };
+
+                /**
+                 * @description Выбрать предыдущую страницу отчета
+                 */
+                $scope.prevPage = function () {
+                    if ($scope.currPage > 1) {
+                        getPageImage.query({
+                                declarationDataId: $stateParams.declarationDataId,
+                                pageId: $scope.currPage - 2
+                            },
+                            function (response) {
+                                $scope.reportImage = response.requestUrl;
+                                $scope.currPage--;
+                            });
+                    }
+                };
+
                 $rootScope.$on("$locationChangeStart", function () {
                     $interval.cancel($scope.intervalId);
                 });
@@ -113,6 +206,9 @@
 
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
 
+                /**
+                 * @description Открытие МО История изменений
+                 */
                 $scope.openHistoryOfChange = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('logBusiness.title'),
@@ -161,122 +257,54 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
                  */
                 $scope.createReport = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('rnuPersonFace.title'),
-                        templateUrl: 'client/app/taxes/ndfl/rnuNdflPersonFace.html',
-                        controller: 'rnuNdflPersonFaceFormCtrl',
-                        windowClass: 'modal1000',
-                        resolve: {
-                            $shareData: function () {
-                                return {
-                                    declarationDataId: $scope.declarationDataId
-                                };
-                            }
-                        }
-                    });
+                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html', 'rnuNdflPersonFaceFormCtrl',
+                        {declarationDataId: $scope.declarationDataId});
+
                 };
 
-                /**
-                 * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
-                 * @param response
-                 * @param location
-                 * @param create
-                 */
-                function performReportSuccessResponse(response, location, create) {
-                    if (response.uuid && response.uuid !== null) {
-                        $logPanel.open('log-panel-container', response.uuid);
-                    } else {
-                        if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                            $dialogs.messageDialog({
-                                content: $filter('translate')('title.noCalculationPerformed')
-                            });
-                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                            $dialogs.confirmDialog({
-                                title: $filter('translate')('title.confirm'),
-                                content: response.restartMsg,
-                                okBtnCaption: $filter('translate')('common.button.yes'),
-                                cancelBtnCaption: $filter('translate')('common.button.no'),
-                                okBtnClick: function () {
-                                    $scope.createPairKppOktmo(true, create);
-                                }
-                            });
-                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
-                            $window.location = location;
-                        }
-                    }
-                }
-
-                /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
-                 */
-                $scope.calculate = function (force, cancelTask) {
+                $scope.createReportXlsx = function (force) {
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/recalculate",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
                         params: {
-                            force: force ? force : false,
-                            cancelTask: cancelTask ? cancelTask : false
+                            force: force ? force : false
                         }
-                    }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        } else {
-                            if (response.data.status === "LOCKED" && !force) {
-                                $dialogs.confirmDialog({
-                                    content: response.data.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.calculate(true, cancelTask);
-                                    }
-                                });
-                            } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
-                                $dialogs.confirmDialog({
-                                    content: $filter('translate')('title.returnExistTask'),
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.calculate(force, true);
-                                    }
-                                });
-                            }
-                        }
+                    }).success(function (response) {
+                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx");
                     });
                 };
+
+
 
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
                 $scope.accept = function (force, cancelTask) {
-                    acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId },{
-                        taxType: 'NDFL',
-                            force: force ,
+                    acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
+                            taxType: 'NDFL',
+                            force: force,
                             cancelTask: cancelTask
                         },
-                    function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                            initPage();
-                        } else {
-                            if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                $dialogs.confirmDialog({
-                                    content: response.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick:function () {
-                                        $scope.accept(true, cancelTask);
-                                    }
-                            });
-                            } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST_TASK && !cancelTask) {
-                                $dialogs.confirmDialog({
-                                    content:$filter('translate')('title.returnExistTask'),
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick:function () {
-                                        $scope.accept(force, true);}
-                                    });
-                            } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                                $window.alert($filter('translate')('title.acceptImpossible'));}
+                        function (response) {
+                            if (response.uuid && response.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.uuid);
+                                initPage();
+                            } else {
+                                if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
+                                    appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
+                                        .result.then(
+                                        function () {
+                                            $scope.accept(true, cancelTask);
+                                        });
+                                } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST_TASK && !cancelTask) {
+                                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnExistTask'))
+                                        .result.then(
+                                        function () {
+                                            $scope.accept(force, true);
+                                        });
+                                } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
+                                    $window.alert($filter('translate')('title.acceptImpossible'));
+                                }
                             }
                         }
                     );
@@ -310,6 +338,7 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
+                    console.log("here");
                     $aplanaModal.open({
                         title: $filter('translate')('title.indicateReasonForReturn'),
                         templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}',
@@ -332,25 +361,46 @@
                             );
                         });
                 };
+
                 /**
                  * @description Событие, которое возникает по нажатию на кнопку "Удалить"
                  */
                 $scope.delete = function () {
-                    $dialogs.confirmDialog({
-                        content: $filter('translate')('title.deleteDeclaration'),
-                        okBtnCaption: $filter('translate')('common.button.yes'),
-                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                        okBtnClick: function () {
+                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.deleteDeclaration'))
+                        .result.then(
+                        function () {
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).success(function () {
-                                $state.go("ndflJournal", {});
+                                $state.go("ndflReportJournal", {});
                             });
-                        }
-                    });
+                        });
                 };
 
+                /**
+                 * @description Событие которое возникает при нажатии на кнопку "Показать"
+                 * @param force
+                 * @param create
+                 */
+                $scope.show = function (force, create) {
+                    $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Идет формирование формы предварительного просмотра";
+                    $scope.pdfLoading = true;
+                    createPdfReport.query({
+                            declarationDataId: $stateParams.declarationDataId,
+                            isForce: force,
+                            taxType: 'NDFL',
+                            type: 'PDF',
+                            create: create
+                        },
+                        function (response) {
+                            if (response.uuid && response.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.uuid);
+                                initPage();
+                            }
+                        }
+                    );
+                };
 
                 /**
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"
@@ -364,65 +414,11 @@
                     });
                 };
 
-                $scope.selectTab = function (tab) {
-                    $rootScope.$broadcast('tabSelected', tab);
-                };
-
                 $scope.downloadXml = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml";
                 };
                 $scope.downloadXlsx = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx";
                 };
-                $scope.downloadSpecific = function () {
-                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
-                };
-
-                $scope.createReportXlsx = function (force) {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/reportXsls",
-                        params: {
-                            force: force ? force : false
-                        }
-                    }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx");
-                    });
-                };
-
-                /**
-                 * формирование спецотчета "РНУ НДФЛ по всем ФЛ"
-                 * @param force
-                 */
-                $scope.createReportAllRnu = function (force) {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/allRnuReport",
-                        params: {
-                            force: force ? force : false
-                        }
-                    }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB);
-                    });
-                };
-
-                /**+
-                 * Создание спецотчета "Реестр сформированной отчетности"
-                 * @param force
-                 * @param create
-                 */
-                $scope.createPairKppOktmo = function (force, create) {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pairKppOktmoReport",
-                        params: {
-                            force: force,
-                            create: create
-                        }
-                    }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO, create);
-                    });
-                };
-
             }]);
 }());

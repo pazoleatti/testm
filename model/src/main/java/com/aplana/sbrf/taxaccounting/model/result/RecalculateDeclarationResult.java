@@ -1,4 +1,7 @@
-package com.aplana.sbrf.taxaccounting.model;
+package com.aplana.sbrf.taxaccounting.model.result;
+
+import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
+import com.aplana.sbrf.taxaccounting.model.result.DeclarationDataResult;
 
 public class RecalculateDeclarationResult extends DeclarationDataResult {
 

@@ -35,6 +35,7 @@
             'app.logPanel',
             'app.ndfl',
             'app.ndflJournal',
+            'app.ndflReport',
             'app.ndflReportJournal',
             'app.schedulerTaskList',
             'app.lockDataList',

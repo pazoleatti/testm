@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import org.joda.time.LocalDateTime;
@@ -298,6 +299,14 @@ public interface DeclarationDataService {
      * @return информация о доступности скачивания отчетов
      */
     ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId);
+
+    /**
+     * Проверка возможности доступности отчетов для отчетной НФ
+     * @param userInfo текущий пользователь
+     * @param declarationDataId идентификатор декларации
+     * @return
+     */
+    ReportAvailableReportDDResult checkAvailabilityReportDD(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * метод запускает скрипты с событием предрасчетные проверки
@@ -677,11 +686,9 @@ public interface DeclarationDataService {
     /**
      * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
      * @param userInfo
-     * @param declarationDataId
-     * @param force если true, то удаляем старую задачу(и оправляем оповещения подписавщимся пользователям), иначе, если задача уже запущена, вызываем диалог
-     * @param cancelTask если true, то удаляем задачи, которые должны удаляться при запуске текущей, иначе, если есть такие задачи, вызываем диалог
+     * @param action
      */
-    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, final long declarationDataId, final boolean force, final boolean cancelTask);
+    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, AcceptDeclarationDataAction action);
 
     /**
      * Выгрузка отчетности
@@ -689,4 +696,12 @@ public interface DeclarationDataService {
      * @return
      */
     ActionResult downloadReports(TAUserInfo userInfo, List<Long> declarationDataIdList);
+
+    /**
+     * Создание отчета для отчетной НФ
+     * @param userInfo
+     * @param action
+     * @return
+     */
+    CreateReportResult createReportForReportDD(TAUserInfo userInfo, CreateReportAction action);
 }

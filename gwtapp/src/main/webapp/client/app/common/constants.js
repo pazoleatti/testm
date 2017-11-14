@@ -61,7 +61,8 @@
                 DELETE: 1 << 5,
                 RETURN_TO_CREATED: 1 << 6,
                 EDIT_ASSIGNMENT: 1 << 7,
-                DOWNLOAD_REPORTS: 1 << 8
+                DOWNLOAD_REPORTS: 1 << 8,
+                SHOW: 1 << 9
             },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},
@@ -108,7 +109,7 @@
                 RNU_NDFL_CONSOLIDATED: {id: 101, name: "РНУ_НДФЛ (консолидированная)"},
                 REPORT_2_NDFL_1: {id: 102, name: "2-НДФЛ (1)"},
                 REPORT_6_NDFL: {id: 103, name: "6-НДФЛ"},
-                REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"},
+                REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"}
             },
             SUBREPORT_ALIAS_CONSTANTS: {
                 RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу

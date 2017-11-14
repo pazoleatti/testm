@@ -1,4 +1,6 @@
-package com.aplana.sbrf.taxaccounting.model;
+package com.aplana.sbrf.taxaccounting.model.result;
+
+import com.aplana.sbrf.taxaccounting.model.CreateAsyncTaskStatus;
 
 public class AcceptDeclarationResult extends DeclarationDataResult {
     private String uuid;

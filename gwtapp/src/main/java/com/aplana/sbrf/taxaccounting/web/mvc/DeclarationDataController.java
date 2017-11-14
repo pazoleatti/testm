@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CheckDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.MoveToCreateAction;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
@@ -15,7 +18,9 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,11 +63,10 @@ public class DeclarationDataController {
     private DeclarationTemplateService declarationTemplateService;
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
-    private DeclarationDataService declarationDataService;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService, DeclarationDataService declarationDataService) {
+                                     TAUserService taUserService) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -70,7 +74,6 @@ public class DeclarationDataController {
         this.declarationTemplateService = declarationTemplateService;
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
-        this.declarationDataService = declarationDataService;
     }
 
     /**
@@ -170,6 +173,20 @@ public class DeclarationDataController {
         IOUtils.closeQuietly(out);
     }
 
+    /**
+     * Получить количество страниц в отчете
+     *
+     * @param declarationDataId идентификатор декларации
+     * @throws IOException IOException
+     */
+    @GetMapping(value = "/actions/declarationData/{declarationDataId}/pageCount")
+    public Integer getPageImage(@PathVariable int declarationDataId) throws IOException {
+        InputStream pdfData = declarationService.getPdfDataAsStream(declarationDataId, securityService.currentUserInfo());
+        Integer result = PDFImageUtils.getPageNumber(pdfData);
+        IOUtils.closeQuietly(pdfData);
+        return result;
+    }
+
 
     /**
      * Формирование отчета для декларации в формате xml
@@ -263,10 +280,11 @@ public class DeclarationDataController {
      *
      * @param declarationDataId идентификатор декларации
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/returnToCreated")
-    public void returnToCreatedDeclaration(@PathVariable int declarationDataId, @RequestParam String reason) {
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}/moveToCreated")
+    public ResponseEntity returnToCreatedDeclaration(@PathVariable int declarationDataId, @RequestBody MoveToCreateAction action) {
         Logger logger = new Logger();
-        declarationService.cancel(logger, declarationDataId, reason, securityService.currentUserInfo());
+        declarationService.cancel(logger, declarationDataId, action.getReason(), securityService.currentUserInfo());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -311,13 +329,13 @@ public class DeclarationDataController {
      * Проверить декларацию
      *
      * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
+     * @param action
      * @return модель {@link CheckDeclarationDataResult}, в которой содержаться данные о результате проверки декларации
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/check")
-    public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force) {
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}/check",  produces = MediaType.APPLICATION_JSON_VALUE)
+    public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestBody CheckDeclarationDataAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.checkDeclaration(userInfo, declarationDataId, force);
+        return declarationService.checkDeclaration(userInfo, declarationDataId, action.isForce());
     }
 
     /**
@@ -333,16 +351,15 @@ public class DeclarationDataController {
     }
 
     /**
-     * Принять декларацию
+     * Принять НФ
      *
-     * @param declarationDataId идентификатор декларации
-     * @param force             признак для перезапуска задачи
-     * @param cancelTask        признак для отмены задачи
-     * @return модель {@link AcceptDeclarationResult}, в которой содержаться данные о результате принятия декларации
+     * @param action
+     * @return
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/accept")
-    public AcceptDeclarationResult acceptDeclaration(@PathVariable final long declarationDataId, @RequestParam final boolean force, @RequestParam final boolean cancelTask) {
-        return declarationDataService.createAcceptDeclarationTask(securityService.currentUserInfo(), declarationDataId, force, cancelTask);
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}/accept", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public AcceptDeclarationResult accept(@PathVariable final long declarationDataId, @RequestBody AcceptDeclarationDataAction action) {
+        action.setDeclarationId(declarationDataId);
+        return declarationService.createAcceptDeclarationTask(securityService.currentUserInfo(), action);
     }
 
     /**
@@ -471,6 +488,7 @@ public class DeclarationDataController {
 
     /**
      * Формирование реестра сформированной отчетности
+     *
      * @param declarationDataId
      * @param force
      * @param create
@@ -496,7 +514,7 @@ public class DeclarationDataController {
     }
 
     /**
-     * Возвращает данные о наличии отчетов
+     * Возвращает данные о наличии отчетов ПНФ и КНФ
      *
      * @param declarationDataId идентификатор декларации
      * @return данные о наличии отчетов
@@ -507,9 +525,22 @@ public class DeclarationDataController {
         return declarationService.checkAvailabilityReports(userInfo, declarationDataId);
     }
 
+    /**
+     * Возвращает данные о наличии отчетов
+     *
+     * @param declarationDataId идентификатор декларации
+     * @return данные о наличии отчетов
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=availableNdflReports")
+    public ReportAvailableReportDDResult checkAvailabilityNdflReports(@PathVariable long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.checkAvailabilityReportDD(userInfo, declarationDataId);
+    }
+
 
     /**
      * Выгрузка отчетности
+     *
      * @param declarationDataIds
      * @return
      */
@@ -517,5 +548,15 @@ public class DeclarationDataController {
     public ActionResult downloadReports(@RequestParam Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.downloadReports(userInfo, Arrays.asList(declarationDataIds));
+    }
+
+    /**
+     * Создание отчета для отчетной НФ
+     * @param action
+     * @return
+     */
+    @PostMapping(value = "/rest/createPdfReport", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public CreateReportResult createPdfReport(@RequestBody CreateReportAction action){
+        return declarationService.createReportForReportDD(securityService.currentUserInfo(), action);
     }
 }

@@ -174,7 +174,7 @@
                                 name: 'declarationType',
                                 index: 'declarationType',
                                 width: 170,
-                                formatter: $filter('linkformatter')
+                                formatter: $filter('linkReportFormatter')
                             },
                             {name: 'department', index: 'department', width: 200},
                             {name: 'reportPeriod', index: 'reportPeriod', width: 175},
@@ -202,7 +202,7 @@
                         multiselect: true,
                         disableAutoLoad: true,
                         ondblClickRow: function (rowId) {
-                            $state.go("ndfl", {
+                            $state.go("ndflReport", {
                                 declarationId: rowId
                             });
                         }
@@ -336,9 +336,9 @@
          * @param cellValue Значение ячейки
          * @param options Данные таблицы
          */
-        .filter('linkformatter', function () {
+        .filter('linkReportFormatter', function () {
             return function (cellValue, options) {
-                return "<a href='index.html#/taxes/ndfl/" + options.rowId + "'>" + cellValue + "</a>";
+                return "<a href='index.html#/taxes/ndfl/ndflReport/" + options.rowId + "'>" + cellValue + "</a>";
             };
         })
         /**
