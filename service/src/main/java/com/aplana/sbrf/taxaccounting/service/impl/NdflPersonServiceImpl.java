@@ -11,6 +11,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,7 +82,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      * @return список NdflPersonIncomeFilter заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_INCOME
      */
     @Override
-    public PagingResult<NdflPersonIncome> findPersonIncomeByFilter(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams) {
+    public PagingResult<NdflPersonIncomeDTO> findPersonIncomeByFilter(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams) {
         return ndflPersonDao.findPersonIncomeByParameters(declarationDataId, ndflPersonIncomeFilter, pagingParams);
     }
 
@@ -102,7 +105,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      * @return список NdflPersonDeduction заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_DEDUCTION
      */
     @Override
-    public PagingResult<NdflPersonDeduction> findPersonDeductionsByFilter(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams) {
+    public PagingResult<NdflPersonDeductionDTO> findPersonDeductionsByFilter(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams) {
         return ndflPersonDao.findPersonDeductionByParameters(declarationDataId, ndflPersonDeductionFilter, pagingParams);
     }
 
@@ -125,7 +128,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      * @return список NdflPersonPrepayment заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_PREPAYMENT
      */
     @Override
-    public PagingResult<NdflPersonPrepayment> findPersonPrepaymentByFilter(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams) {
+    public PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByFilter(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams) {
         return ndflPersonDao.findPersonPrepaymentByParameters(declarationDataId, ndflPersonPrepaymentFilter, pagingParams);
     }
 }

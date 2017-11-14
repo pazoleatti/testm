@@ -10,6 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 
 import java.util.Map;
 
@@ -58,7 +61,7 @@ public interface NdflPersonService {
      * @param ndflPersonIncomeFilter параметры фильтра
      * @return список NdflPersonIncomeFilter заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_INCOME
      */
-    PagingResult<NdflPersonIncome> findPersonIncomeByFilter(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams);
+    PagingResult<NdflPersonIncomeDTO> findPersonIncomeByFilter(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams);
 
 
     /**
@@ -76,7 +79,7 @@ public interface NdflPersonService {
      * @param ndflPersonDeductionFilter параметры фильтра
      * @return список NdflPersonDeduction заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_DEDUCTION
      */
-    PagingResult<NdflPersonDeduction> findPersonDeductionsByFilter(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams);
+    PagingResult<NdflPersonDeductionDTO> findPersonDeductionsByFilter(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams);
 
     /**
      * Найти количество записей данных о доходах в виде авансовых платежей привязанные к декларации
@@ -93,5 +96,5 @@ public interface NdflPersonService {
      * @param ndflPersonPrepaymentFilter параметры фильтра
      * @return список NdflPersonPrepayment заполненый данными из таблиц NDFL_PERSON и NDFL_PERSON_PREPAYMENT
      */
-    PagingResult<NdflPersonPrepayment> findPersonPrepaymentByFilter(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams);
+    PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByFilter(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams);
 }

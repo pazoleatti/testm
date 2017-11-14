@@ -13,12 +13,18 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.*;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.alias.Alias;
 import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.QBean;
+import com.querydsl.core.types.*;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,7 +151,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public PagingResult<NdflPersonIncome> findPersonIncomeByParameters(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams) {
+    public PagingResult<NdflPersonIncomeDTO> findPersonIncomeByParameters(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams) {
         BooleanBuilder where = new BooleanBuilder();
         where.and(ndflPerson.declarationDataId.eq(declarationDataId));
 
@@ -203,17 +209,26 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
                 ndflPersonIncomeBean, orderingProperty, ascDescOrder, ndflPersonIncome.rowNum.asc());
 
-        List<NdflPersonIncome> ndflPersonIncomeList = sqlQueryFactory.from(ndflPersonIncome)
+        List<NdflPersonIncomeDTO> ndflPersonIncomeList = sqlQueryFactory.from(ndflPersonIncome)
                 .innerJoin(ndflPersonIncome.ndflPersonIFkNp, ndflPerson)
                 .where(where)
                 .orderBy(order)
                 .offset(pagingParams.getStartIndex())
-                .limit(pagingParams.getCount())
-                .transform(GroupBy.groupBy(ndflPersonIncome.id).list(ndflPersonIncomeBean));
+                .limit(pagingParams.getCount()).transform(GroupBy.groupBy(ndflPersonIncome.id).
+                list(Projections.constructor(NdflPersonIncomeDTO.class, ndflPersonIncome.incomeCode,
+                        ndflPersonIncome.incomeType, ndflPersonIncome.incomeAccruedDate,
+                        ndflPersonIncome.incomePayoutDate, ndflPersonIncome.kpp, ndflPersonIncome.oktmo,
+                        ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.incomePayoutSumm,
+                        ndflPersonIncome.totalDeductionsSumm, ndflPersonIncome.taxBase, ndflPersonIncome.taxRate,
+                        ndflPersonIncome.taxDate, ndflPersonIncome.calculatedTax, ndflPersonIncome.withholdingTax,
+                        ndflPersonIncome.notHoldingTax, ndflPersonIncome.overholdingTax, ndflPersonIncome.refoundTax,
+                        ndflPersonIncome.taxTransferDate, ndflPersonIncome.paymentDate, ndflPersonIncome.paymentNumber,
+                        ndflPersonIncome.taxSumm, ndflPersonIncome.operationId, ndflPersonIncome.sourceId,
+                        ndflPersonIncome.rowNum, ndflPerson.inp)));
 
         int totalCount = findPersonIncomeCount(declarationDataId);
 
-        return new PagingResult<NdflPersonIncome>(ndflPersonIncomeList, totalCount);
+        return new PagingResult<NdflPersonIncomeDTO>(ndflPersonIncomeList, totalCount);
     }
 
     @Override
@@ -236,7 +251,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public PagingResult<NdflPersonDeduction> findPersonDeductionByParameters(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams) {
+    public PagingResult<NdflPersonDeductionDTO> findPersonDeductionByParameters(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams) {
         BooleanBuilder where = new BooleanBuilder();
         where.and(ndflPerson.declarationDataId.eq(declarationDataId));
 
@@ -275,17 +290,25 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
                 ndflPersonDeductionBean, orderingProperty, ascDescOrder, ndflPersonDeduction.rowNum.asc());
 
-        List<NdflPersonDeduction> ndflPersonDeductionList = sqlQueryFactory.from(ndflPersonDeduction)
+        List<NdflPersonDeductionDTO> ndflPersonDeductionList = sqlQueryFactory.from(ndflPersonDeduction)
                 .innerJoin(ndflPersonDeduction.ndflPdFkNp, ndflPerson)
                 .where(where)
                 .orderBy(order)
                 .offset(pagingParams.getStartIndex())
                 .limit(pagingParams.getCount())
-                .transform(GroupBy.groupBy(ndflPersonDeduction.id).list(ndflPersonDeductionBean));
+                .transform(GroupBy.groupBy(ndflPersonDeduction.id)
+                        .list(Projections.constructor(NdflPersonDeductionDTO.class, ndflPersonDeduction.operationId,
+                                ndflPersonDeduction.sourceId, ndflPersonDeduction.rowNum, ndflPersonDeduction.typeCode,
+                                ndflPersonDeduction.notifType, ndflPersonDeduction.notifDate,
+                                ndflPersonDeduction.notifNum, ndflPersonDeduction.notifSource,
+                                ndflPersonDeduction.notifSumm, ndflPersonDeduction.incomeAccrued,
+                                ndflPersonDeduction.incomeCode, ndflPersonDeduction.incomeSumm,
+                                ndflPersonDeduction.periodCurrDate, ndflPersonDeduction.periodCurrSumm,
+                                ndflPersonDeduction.periodPrevDate, ndflPersonDeduction.periodPrevSumm, ndflPerson.inp)));
 
         int totalCount = findPersonDeductionsCount(declarationDataId);
 
-        return new PagingResult<NdflPersonDeduction>(ndflPersonDeductionList, totalCount);
+        return new PagingResult<NdflPersonDeductionDTO>(ndflPersonDeductionList, totalCount);
     }
 
     @Override
@@ -308,7 +331,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     }
 
     @Override
-    public PagingResult<NdflPersonPrepayment> findPersonPrepaymentByParameters(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams) {
+    public PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByParameters(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams) {
         BooleanBuilder where = new BooleanBuilder();
         where.and(ndflPerson.declarationDataId.eq(declarationDataId));
 
@@ -340,17 +363,21 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
                 ndflPersonPrepaymentBean, orderingProperty, ascDescOrder, ndflPersonPrepayment.rowNum.asc());
 
-        List<NdflPersonPrepayment> ndflPersonPrepaymentList = sqlQueryFactory.from(ndflPersonPrepayment)
+        List<NdflPersonPrepaymentDTO> ndflPersonPrepaymentList = sqlQueryFactory.from(ndflPersonPrepayment)
                 .innerJoin(ndflPersonPrepayment.ndflPpFkNp, ndflPerson)
                 .where(where)
                 .orderBy(order)
                 .offset(pagingParams.getStartIndex())
                 .limit(pagingParams.getCount())
-                .transform(GroupBy.groupBy(ndflPersonPrepayment.id).list(ndflPersonPrepaymentBean));
+                .transform(GroupBy.groupBy(ndflPersonPrepayment.id)
+                        .list(Projections.constructor(NdflPersonPrepaymentDTO.class, ndflPersonPrepayment.operationId,
+                                ndflPersonPrepayment.sourceId, ndflPersonPrepayment.rowNum, ndflPersonPrepayment.summ,
+                                ndflPersonPrepayment.notifNum, ndflPersonPrepayment.notifDate,
+                                ndflPersonPrepayment.notifSource, ndflPerson.inp)));
 
         int totalCount = findPersonPrepaymentCount(declarationDataId);
 
-        return new PagingResult<NdflPersonPrepayment>(ndflPersonPrepaymentList, totalCount);
+        return new PagingResult<NdflPersonPrepaymentDTO>(ndflPersonPrepaymentList, totalCount);
     }
 
     @Override
