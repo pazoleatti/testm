@@ -83,7 +83,7 @@
                             {
                                 name: 'correctionDate',
                                 index: 'correctionDate',
-                                width: 188,
+                                width: 144,
                                 sortable: false,
                                 formatter: $filter('dateFormatter')
                             },
