@@ -1839,4 +1839,33 @@ END;'
             alter table declaration_data add constraint decl_data_chk_man_created check(manually_created in (0, 1));
         </sql>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2545 Убрать хардкод типа файла -->
+    <changeSet id="2.1-vlednev-3" author="vlednev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_2/v2016/report_2ndfl_2.groovy"/>
+            <where>id=104</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-vlednev-4" author="vlednev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=102</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-vlednev-5" author="vlednev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>id=103</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-vlednev-6" author="vlednev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
