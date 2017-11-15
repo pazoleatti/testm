@@ -191,7 +191,7 @@
                         title: $filter('translate')('notifications.title.listNotifications'),
                         templateUrl: 'client/app/main/notifications.html?v=${buildUuid}',
                         controller: 'notificationsCtrl',
-                        windowClass: 'modal1200'
+                        windowClass: 'modal800'
                     });
                 };
 
