@@ -77,17 +77,22 @@
                  * @description Инициализация таблицы
                  **/
                 function initPage() {
-                    DeclarationDataResource.query({
-                            declarationDataId: $shareData.declarationDataId,
-                            projection: "filesComments"
-                        },
-                        function (data) {
-                            if (data) {
-                                $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
-                                $scope.commentForm.comment = data.comment;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
+                    }).then(function (response) {
+                        DeclarationDataResource.query({
+                                declarationDataId: $shareData.declarationDataId,
+                                projection: "filesComments"
+                            },
+                            function (data) {
+                                if (data) {
+                                    $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
+                                    $scope.commentForm.comment = data.comment;
+                                }
                             }
-                        }
-                    );
+                        );
+                    });
                 }
 
 
@@ -184,6 +189,11 @@
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
+                    }).then(function (response) {
+                    });
                     $modalInstance.dismiss('Canceled');
                 };
 

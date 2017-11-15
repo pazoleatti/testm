@@ -2,7 +2,8 @@
 
     <div class="form-horizontal" data-ng-form="commentForm" style="height: 510px;">
 
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table" style="margin: 0; min-height: 100px;">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
+               style="margin: 0; min-height: 100px;">
             <thead>
             <tr>
                 <td>
@@ -30,18 +31,16 @@
             </tbody>
         </table>
 
-        <div>
-            <label class="font-normal" for="fileCommentGrid">{{::'filesComment.files' |translate}}</label>
-            <div data-aplana-grid
-                 data-grid-fill-space="true"
-                 data-grid-fill-space-container-selector=".form-horizontal"
-                 data-grid-fill-space-container-selector-top=".horizontal-input-table"
-                 data-grid-options="fileCommentGrid.options"
-                 data-grid-ctrl="fileCommentGrid.ctrl"
-                 data-ng-model="fileCommentGrid.value"
-                 data-init-grid="initOurGrid(ctrl)"
-                 id="fileCommentGrid">
-            </div>
+        <label class="font-normal" for="fileCommentGrid">{{::'filesComment.files' |translate}}</label>
+        <div data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector=".modal-body"
+             data-grid-fill-space-container-selector-top=".horizontal-input-table"
+             data-grid-options="fileCommentGrid.options"
+             data-grid-ctrl="fileCommentGrid.ctrl"
+             data-ng-model="fileCommentGrid.value"
+             data-init-grid="initOurGrid(ctrl)"
+             id="fileCommentGrid">
         </div>
 
         <div class="button_panel" style="float: left;">

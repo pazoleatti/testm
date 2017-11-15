@@ -332,7 +332,7 @@ public class DeclarationDataController {
      * @param action
      * @return модель {@link CheckDeclarationDataResult}, в которой содержаться данные о результате проверки декларации
      */
-    @PostMapping(value = "/rest/declarationData/{declarationDataId}/check",  produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/rest/declarationData/{declarationDataId}/check", produces = MediaType.APPLICATION_JSON_VALUE)
     public CheckDeclarationResult checkDeclaration(@PathVariable long declarationDataId, @RequestBody CheckDeclarationDataAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.checkDeclaration(userInfo, declarationDataId, action.isForce());
@@ -514,9 +514,34 @@ public class DeclarationDataController {
     }
 
     /**
-     * Возвращает данные о наличии отчетов ПНФ и КНФ
+     * Установить блокировку на форму
+     *
+     * @param declarationDataId Идентификатор формы
+     * @return Удалось ли установить блокировку
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/lock")
+    public Boolean createLock(@PathVariable("declarationDataId") long declarationDataId) {
+        //Метод сервиса, если блокировка установлена успешно, возвращает null, иначе информацию о блокировке
+        //Здесь нужен null
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.lock(declarationDataId, userInfo) == null;
+    }
+
+    /**
+     * Снять блокировку с формы
      *
      * @param declarationDataId идентификатор декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/unlock")
+    public void deleteLock(@PathVariable("declarationDataId") long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        declarationService.unlock(declarationDataId, userInfo);
+    }
+
+    /**
+     * Возвращает данные о наличии отчетов ПНФ и КНФ
+     *
+     * @param declarationDataId Идентификатор формы
      * @return данные о наличии отчетов
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=availableReports")
@@ -552,11 +577,12 @@ public class DeclarationDataController {
 
     /**
      * Создание отчета для отчетной НФ
+     *
      * @param action
      * @return
      */
     @PostMapping(value = "/rest/createPdfReport", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public CreateReportResult createPdfReport(@RequestBody CreateReportAction action){
+    public CreateReportResult createPdfReport(@RequestBody CreateReportAction action) {
         return declarationService.createReportForReportDD(securityService.currentUserInfo(), action);
     }
 }
