@@ -310,6 +310,7 @@ background-position: -40px 0;*/
 }
 
 .ui-icon-refresh {
+    background-image: url("ui-icons_7d7d7d_256x240.png")!important;
     background-position: -64px -80px;
 }
 
