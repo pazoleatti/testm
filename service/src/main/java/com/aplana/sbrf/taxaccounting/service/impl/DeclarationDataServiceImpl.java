@@ -2627,7 +2627,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             TAUser user = userService.getSystemUserInfo().getUser();
             RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId());
-            Long fileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + fileType.getId() + "").get(0);
+            Long fileTypeId = provider.getUniqueRecordIds(new Date(), "code = " + fileType.getCode() + "").get(0);
 
             DeclarationDataFile declarationDataFile = new DeclarationDataFile();
             declarationDataFile.setDeclarationDataId(declarationData.getId());

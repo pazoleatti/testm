@@ -131,7 +131,7 @@
                 }
             },
             ATTACHE_FILE_TYPE : {
-                DEFAULT_TYPE_NAME : "Прочее"
+                DEFAULT_TYPE_ID : 21657700
             }
         });
 }());
