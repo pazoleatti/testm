@@ -36,7 +36,7 @@ public abstract class DeclarationDataFilePermission extends AbstractPermission<D
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationDataFile targetDomainObject) {
             if (DeclarationDataPermission.VIEW.isGranted(currentUser, declarationDataDao.get(targetDomainObject.getDeclarationDataId()))
-                    && !targetDomainObject.getFileTypeName().equals(AttachFileType.TYPE_1.getTitle())
+                    && targetDomainObject.getFileTypeId() != AttachFileType.TYPE_1.getId()
                     && !targetDomainObject.getUserName().equals("Система")) {
                 return true;
             }
