@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.NdflPersonService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -87,10 +90,10 @@ public class NdflPersonController {
      * @return список данных типа {@link NdflPersonIncomeFilter}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsIncome")
-    public JqgridPagedList<NdflPersonIncome> fetchPersonIncomeData(@RequestParam NdflPersonIncomeFilter ndflPersonIncomeFilter,
+    public JqgridPagedList<NdflPersonIncomeDTO> fetchPersonIncomeData(@RequestParam NdflPersonIncomeFilter ndflPersonIncomeFilter,
                                                                    @RequestParam PagingParams pagingParams) {
 
-        PagingResult<NdflPersonIncome> ndflPersonsIncome = ndflPersonService.findPersonIncomeByFilter(ndflPersonIncomeFilter.getDeclarationDataId(), ndflPersonIncomeFilter, pagingParams);
+        PagingResult<NdflPersonIncomeDTO> ndflPersonsIncome = ndflPersonService.findPersonIncomeByFilter(ndflPersonIncomeFilter.getDeclarationDataId(), ndflPersonIncomeFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersonsIncome,
                 ndflPersonService.findPersonIncomeCount(ndflPersonIncomeFilter.getDeclarationDataId()),
@@ -106,10 +109,10 @@ public class NdflPersonController {
      * @return список данных типа {@link NdflPersonDeduction}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsDeduction")
-    public JqgridPagedList<NdflPersonDeduction> fetchPersonDeductionsData(@RequestParam NdflPersonDeductionFilter ndflPersonDeductionFilter,
+    public JqgridPagedList<NdflPersonDeductionDTO> fetchPersonDeductionsData(@RequestParam NdflPersonDeductionFilter ndflPersonDeductionFilter,
                                                                           @RequestParam PagingParams pagingParams) {
 
-        PagingResult<NdflPersonDeduction> ndflPersonsDeduction = ndflPersonService.findPersonDeductionsByFilter(ndflPersonDeductionFilter.getDeclarationDataId(), ndflPersonDeductionFilter, pagingParams);
+        PagingResult<NdflPersonDeductionDTO> ndflPersonsDeduction = ndflPersonService.findPersonDeductionsByFilter(ndflPersonDeductionFilter.getDeclarationDataId(), ndflPersonDeductionFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersonsDeduction,
                 ndflPersonService.findPersonDeductionsCount(ndflPersonDeductionFilter.getDeclarationDataId()),
@@ -125,10 +128,10 @@ public class NdflPersonController {
      * @return список данных типа {@link NdflPersonDeduction}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsPrepayment")
-    public JqgridPagedList<NdflPersonPrepayment> fetchPersonPrepaymentData(@RequestParam NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter,
-                                                                           @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<NdflPersonPrepaymentDTO> fetchPersonPrepaymentData(@RequestParam NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter,
+                                                                              @RequestParam PagingParams pagingParams) {
 
-        PagingResult<NdflPersonPrepayment> ndflPersonsPrepayment = ndflPersonService.findPersonPrepaymentByFilter(ndflPersonPrepaymentFilter.getDeclarationDataId(), ndflPersonPrepaymentFilter, pagingParams);
+        PagingResult<NdflPersonPrepaymentDTO> ndflPersonsPrepayment = ndflPersonService.findPersonPrepaymentByFilter(ndflPersonPrepaymentFilter.getDeclarationDataId(), ndflPersonPrepaymentFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersonsPrepayment,
                 ndflPersonService.findPersonPrepaymentCount(ndflPersonPrepaymentFilter.getDeclarationDataId()),

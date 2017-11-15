@@ -101,7 +101,7 @@
             CORRETION_TAG: {
                 ALL: {id: 0, name: "Все периоды"},
                 ONLY_PRIMARY: {id: 1, name: "Только не корректирующие"},
-                ONLY_CORRECTIVE: {id: 2, name: "Только корректирующие"},
+                ONLY_CORRECTIVE: {id: 2, name: "Только корректирующие"}
             },
             //Временное решение https://jira.aplana.com/browse/SBRFNDFL-2133, убрать в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
             DECLARATION_TYPE: {
@@ -129,6 +129,9 @@
                 KEYS: {
                     LAST_SELECTED_PERIOD: "LAST_SELECTED_PERIOD"
                 }
+            },
+            ATTACHE_FILE_TYPE : {
+                DEFAULT_TYPE_NAME : "Прочее"
             }
         });
 }());

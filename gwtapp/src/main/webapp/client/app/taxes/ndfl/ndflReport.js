@@ -338,7 +338,6 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    console.log("here");
                     $aplanaModal.open({
                         title: $filter('translate')('title.indicateReasonForReturn'),
                         templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}',

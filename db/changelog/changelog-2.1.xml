@@ -1815,4 +1815,28 @@ END;'
             <where>id=5</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2579 Неправильный идентификатор физического лица при создании записи в справочнике-->
+    <changeSet id="2.1-ytrofimov-58" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2634 Добавить поле manually_created в declaration_data-->
+	<changeSet id="2.1-rnurgaleev-146" author="rnurgaleev">
+        <addColumn tableName="declaration_data">
+            <column name="manually_created" type="number(1)" defaultValue="0" remarks="Создана вручную (0-нет, 1-да)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-147" author="rnurgaleev">
+        <sql>
+            alter table declaration_data add constraint decl_data_chk_man_created check(manually_created in (0, 1));
+        </sql>
+    </changeSet>
 </databaseChangeLog>

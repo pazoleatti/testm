@@ -11,6 +11,9 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
+import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -90,7 +93,7 @@ public interface NdflPersonDao {
      * @param pagingParams           параметры вывода результата
      * @return результат запроса
      */
-    public PagingResult<NdflPersonIncome> findPersonIncomeByParameters(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams);
+    public PagingResult<NdflPersonIncomeDTO> findPersonIncomeByParameters(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams);
 
     /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
@@ -115,7 +118,7 @@ public interface NdflPersonDao {
      * @param pagingParams              параметры вывода результата
      * @return результат запроса
      */
-    public PagingResult<NdflPersonDeduction> findPersonDeductionByParameters(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams);
+    public PagingResult<NdflPersonDeductionDTO> findPersonDeductionByParameters(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams);
 
     /**
      * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
@@ -140,7 +143,7 @@ public interface NdflPersonDao {
      * @param pagingParams               параметры вывода результата
      * @return результат запроса
      */
-    public PagingResult<NdflPersonPrepayment> findPersonPrepaymentByParameters(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams);
+    public PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByParameters(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams);
 
     /**
      * Найти данные о доходах ФЛ
