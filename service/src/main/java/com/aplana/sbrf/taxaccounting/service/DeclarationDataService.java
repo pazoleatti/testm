@@ -273,10 +273,11 @@ public interface DeclarationDataService {
 
     /**
      * Формирование Реестра сформированной отчетности
-     * @param userInfo информация о пользователе, выполняющего действие
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
-     * @param force признак для перезапуска задачи
-     * @param create признак существования отчета
+     * @param force             признак для перезапуска задачи
+     * @param create            признак существования отчета
      * @return
      */
     CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force, boolean create);
@@ -302,7 +303,8 @@ public interface DeclarationDataService {
 
     /**
      * Проверка возможности доступности отчетов для отчетной НФ
-     * @param userInfo текущий пользователь
+     *
+     * @param userInfo          текущий пользователь
      * @param declarationDataId идентификатор декларации
      * @return
      */
@@ -470,6 +472,14 @@ public interface DeclarationDataService {
     LockData lock(long declarationDataId, TAUserInfo userInfo);
 
     /**
+     * Заблокировать налоговую форму
+     *
+     * @param declarationDataId Идентификатор формы
+     * @param userInfo          Информация о пользователе
+     */
+    DeclarationLockResult createLock(long declarationDataId, TAUserInfo userInfo);
+
+    /**
      * Снять блокировку с DeclarationData.
      *
      * @param declarationDataId - идентификатор декларации
@@ -508,12 +518,13 @@ public interface DeclarationDataService {
      * @return название
      */
     String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
+
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      *
-     * @param declarationTypeId тип декларации
-     * @param departmentReportPeriodId  идентификатор отчетного периода привязанного к подразделению
-     * @param taskType  тип асинхронной задачи, формирующей имя
+     * @param declarationTypeId        тип декларации
+     * @param departmentReportPeriodId идентификатор отчетного периода привязанного к подразделению
+     * @param taskType                 тип асинхронной задачи, формирующей имя
      * @return название
      */
     String getDeclarationFullName(int declarationTypeId, int departmentReportPeriodId, AsyncTaskType taskType);
@@ -685,6 +696,7 @@ public interface DeclarationDataService {
 
     /**
      * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
+     *
      * @param userInfo
      * @param action
      */
@@ -692,6 +704,7 @@ public interface DeclarationDataService {
 
     /**
      * Выгрузка отчетности
+     *
      * @param userInfo
      * @return
      */
@@ -699,6 +712,7 @@ public interface DeclarationDataService {
 
     /**
      * Создание отчета для отчетной НФ
+     *
      * @param userInfo
      * @param action
      * @return

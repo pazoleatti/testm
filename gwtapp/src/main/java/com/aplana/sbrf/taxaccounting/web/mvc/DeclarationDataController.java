@@ -520,11 +520,9 @@ public class DeclarationDataController {
      * @return Удалось ли установить блокировку
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/lock")
-    public Boolean createLock(@PathVariable("declarationDataId") long declarationDataId) {
-        //Метод сервиса, если блокировка установлена успешно, возвращает null, иначе информацию о блокировке
-        //Здесь нужен null
+    public DeclarationLockResult createLock(@PathVariable("declarationDataId") long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.lock(declarationDataId, userInfo) == null;
+        return declarationService.createLock(declarationDataId, userInfo);
     }
 
     /**

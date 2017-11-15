@@ -29,7 +29,6 @@
                 };
 
 
-
                 $scope.fileCommentGrid = {
                     ctrl: {},
                     options: {
@@ -80,6 +79,10 @@
                         method: "POST",
                         url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
                     }).then(function (response) {
+                        $scope.declarationLockCreated = response.data.declarationDataLocked;
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                         DeclarationDataResource.query({
                                 declarationDataId: $shareData.declarationDataId,
                                 projection: "filesComments"
@@ -188,11 +191,13 @@
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
-                    }).then(function (response) {
-                    });
+                    if ($scope.declarationLockCreated) {
+                        $http({
+                            method: "POST",
+                            url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
+                        }).then(function (response) {
+                        });
+                    }
                     $modalInstance.dismiss('Canceled');
                 };
 
