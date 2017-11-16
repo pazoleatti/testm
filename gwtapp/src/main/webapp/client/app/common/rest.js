@@ -163,5 +163,14 @@
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])
+
+        /**
+         * @description Редактируемая задача планировщика
+         */
+        .factory('updateScheduleTask', ['$resource', function ($resource) {
+            return $resource('controller/rest/updateSchedulerTask?idTaskScheduler=:idTaskScheduler', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
     ;
 }());

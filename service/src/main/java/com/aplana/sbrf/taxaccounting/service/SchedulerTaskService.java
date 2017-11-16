@@ -18,6 +18,15 @@ public interface SchedulerTaskService {
     SchedulerTaskData getSchedulerTask(SchedulerTask task);
 
     /**
+     * Получение параметров задачи планировщика
+     *
+     * @param taskId id задачи
+     * @return объект {@link SchedulerTaskData} задачи
+     */
+    SchedulerTaskData getSchedulerTask(Long taskId);
+
+
+    /**
      * Получение параметров всех задач планировщика
      *
      * @return список задач {@link SchedulerTaskData}
