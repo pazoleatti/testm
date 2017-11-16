@@ -157,12 +157,91 @@
             });
         }])
 
+      /**
+       *  @description Редактируемая задача планировщик
+       * */
+      .factory('updateScheduleTask', ['$resource', function ($resource) {
+        return $resource('controller/rest/updateSchedulerTask?idTaskScheduler=:idTaskScheduler', {}, {
+            query: {method: 'GET', isArray: false, cache: false}
+        });
+      }])
+
         /**
          * @description Асинхронные задачи
          */
         .factory('asyncTaskResource', ['$resource', function ($resource) {
             return $resource('controller/rest/async', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+
+        .factory('ReportPeriodResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/reportPeriods?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false},
+                delete: {method: 'DELETE', isArray: false, cache: false}
+            });
+        }])
+
+        .factory('DepartmentResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/getBankDepartment', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        .factory('DepartmentGridResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/getDepartments', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
+            });
+        }])
+
+        .factory('ReportPeriodTypeResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/refBookValues/reportPeriodTypeById', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Принятие НФ
+         */
+        .factory('acceptDeclarationData', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/accept', {declarationDataId: '@declarationDataId'}, {
+                query: {method: 'POST'}
+            });
+        }])
+
+        .factory('createPdfReport', ['$resource', function ($resource) {
+            return $resource('controller/rest/createPdfReport', {}, {
+                query: {
+                    method: 'POST'
+                }
+            });
+        }])
+
+        .factory('getPageImage', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/pageImage/:pageId/ndfl',
+                {declarationDataId: '@declarationDataId', pageId: '@pageId'}, {
+                    query: {
+                        method: 'GET', isArray: false,
+                        interceptor: {
+                            response: function (response) {
+                                response.requestUrl = response.config.url;
+                                return response;
+                            }
+                        }
+                    }
+                });
+        }])
+
+        .factory('checkDeclarationData', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/check', {declarationDataId: '@declarationDataId'}, {
+                query: {method: 'POST'}
+            });
+        }])
+
+        .factory('moveToCreatedDeclarationData', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/:declarationDataId/moveToCreated', {declarationDataId: '@declarationDataId'}, {
+                query: {method: 'POST'}
             });
         }])
     ;

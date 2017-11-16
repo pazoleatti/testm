@@ -6,7 +6,7 @@
      */
     angular.module('app.schedulerTaskList', ['app.rest', 'app.updateSchedulerTask'])
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('schedulerTaskList', {
+           $stateProvider.state('schedulerTaskList', {
                 url: '/administration/schedulerTaskList',
                 templateUrl: 'client/app/administration/schedulerTaskList.html?v=${buildUuid}',
                 controller: 'schedulerTaskListCtrl'

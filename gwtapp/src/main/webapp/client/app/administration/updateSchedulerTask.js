@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('updateSchedulerTask', {
                 url: '/administration/schedulerTaskList/updateSchedulerTask/{idTaskScheduler}',
-                templateUrl: 'client/app/administration/updateSchedulerTask.html',
+                templateUrl: 'client/app/administration/updateSchedulerTask.html?v=${buildUuid}',
                 controller: 'updateSchedulerTaskCtrl'
             });
         }])
@@ -36,7 +36,7 @@
 
                 //переход обратно к планировщику
                 $scope.cancel = function() {
-                     $state.href('schedulerTaskList');
+                    href: $state.href('schedulerTaskList');
                 }
 
                 //Отправка редактируемого параметра
