@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CheckDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.model.action.MoveToCreateAction;
+import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -264,15 +261,13 @@ public class DeclarationDataController {
     /**
      * Создание налоговой формы
      *
-     * @param declarationTypeId ID вида налоговой формы
-     * @param departmentId      ID подразделения
-     * @param periodId          ID периода
+     * @param action
      * @return Результат создания
      */
     @PostMapping(value = "/actions/declarationData/create")
-    public CreateResult<Long> createDeclaration(Long declarationTypeId, Integer departmentId, Integer periodId) {
+    public CreateResult<Long> createDeclaration(CreateDeclarationDataAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.create(userInfo, declarationTypeId, departmentId, periodId);
+        return declarationService.create(userInfo, action);
     }
 
     /**

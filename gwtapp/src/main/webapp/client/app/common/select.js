@@ -195,8 +195,9 @@
         /**
          * Контроллер для выбора вида формы
          */
-        .controller('SelectDeclarationTypeCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource', 'DeclarationTypeForCreateResource',
-            function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, DeclarationTypeForCreateResource) {
+        .controller('SelectDeclarationTypeCtrl', ['$scope', '$rootScope', 'APP_CONSTANTS', 'GetSelectOption',
+            'RefBookValuesResource', 'DeclarationTypeForCreateResource',
+            function ($scope, $rootScope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource, DeclarationTypeForCreateResource) {
                 $scope.declarationTypeSelect = {};
 
                 //TODO: https://jira.aplana.com/browse/SBRFNDFL-2358 Сделать селекты, общие для отчетных и налоговых форм, убрать лишние функции
@@ -237,12 +238,15 @@
                         var department = newValues[1];
                         if (declarationKind && period && department) {
                             DeclarationTypeForCreateResource.query({
-                                declarationKind: declarationKind.id,
+                                formDataKindIdList: declarationKind,
                                 departmentId: department.id,
                                 periodId: period.id
                             }, function (data) {
                                 data = data.filter(function(declarationType) {
-                                    return isTaxForm(declarationType);
+                                    if (declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id) {
+                                        return isTaxForm(declarationType) && $rootScope.declarationPrimaryCreateAllowed;
+                                    }
+                                    return isTaxForm(declarationType) && $rootScope.declarationConsolidatedCreateAllowed;
                                 });
                                 $scope.declarationTypeSelect.options.data.results = data;
                             });
@@ -279,7 +283,7 @@
                         var department = newValues[1];
                         if (declarationKind && period && department) {
                             DeclarationTypeForCreateResource.query({
-                                declarationKind: declarationKind.id,
+                                formDataKindIdList: declarationKind,
                                 departmentId: department.id,
                                 periodId: period.id
                             }, function (data) {

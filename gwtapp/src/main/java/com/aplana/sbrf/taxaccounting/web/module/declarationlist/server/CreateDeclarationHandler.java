@@ -63,16 +63,18 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                     null, null, null, null, null, true);
         } catch (DaoException e) {
             DeclarationTemplate dt = declarationTemplateService.get(activeDeclarationTemplateId);
-            if (dt.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()) {
+            if (dt.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()
+                    || dt.getDeclarationFormKind().getId() == DeclarationFormKind.PRIMARY.getId()) {
                 Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
                 String strCorrPeriod = "";
                 if (departmentReportPeriod.getCorrectionDate() != null) {
                     SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
                     strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
                 }
-                logger.error("Консолидированная налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\" уже существует",
+                logger.error("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
+                        " Вид налоговой формы: \"%s\" уже существует",
                         departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                        department.getName());
+                        department.getName(), dt.getDeclarationFormKind().getTitle());
             } else throw new ServiceException(e.getMessage());
         }
 
