@@ -110,7 +110,6 @@
          data-grid-options="rnuNdflGrid.options"
          data-grid-ctrl="rnuNdflGrid.ctrl"
          data-ng-model="rnuNdflGrid.value"
-         data-ng-click="chekRow()"
          id="rnuNdflTable"
          style="float: left; width: 100%;"></div>
 </div>
@@ -126,7 +125,7 @@
     <!--Кнопка Сформировать-->
     <button type="button"
             class="btn btn-default"
-            data-ng-show="enabledCreateReport"
+            data-ng-show="rnuNdflGrid.value.length"
             data-ng-click="formationRNU()">
         <span data-translate-once="common.button.formation"></span>
 

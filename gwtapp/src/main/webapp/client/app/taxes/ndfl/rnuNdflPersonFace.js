@@ -14,9 +14,6 @@
             //Доступгость грида
             $scope.enabledGrid = false;
 
-            //Доступность кнопки сформировать
-            $scope.enabledCreateReport = false;
-
             /**
              * @description Создание рну ндфл для физ лица
              */
@@ -125,22 +122,11 @@
                 };
 
             /**
-             * @description Отвечает за доступность недоступность кнопки 'сформировать'
-             */
-            $scope.chekRow = function () {
-                if ($scope.rnuNdflGrid.value.length !== null) {
-                    $scope.enabledCreateReport = true;
-                }
-            };
-
-            /**
              * @description Поиск физ лиц для формирования рну
              */
             $scope.searchPerson = function () {
                 $scope.enabledGrid = true;
                 $scope.rnuNdflGrid.ctrl.refreshGrid();
-                $scope.enabledCreateReport = $scope.rnuNdflGrid;
-                $scope.enabledCreateReport = false;
 
             };
 
