@@ -280,6 +280,10 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
                 $scope.accept = function (force, cancelTask) {
+                    {
+                        force = typeof force !== 'undefined' ? force : false;
+                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
+                    }
                     acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
                             taxType: 'NDFL',
                             force: force,
@@ -314,6 +318,9 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Проверить"
                  */
                 $scope.check = function (force) {
+
+                    force = typeof force !== 'undefined' ? force : false;
+
                     checkDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
                         force: force
                     }, function (response) {
@@ -383,6 +390,10 @@
                  * @param create
                  */
                 $scope.show = function (force, create) {
+                    {
+                        force = typeof force !== 'undefined' ? force : false;
+                        create = typeof create !== 'undefined' ? create : false;
+                    }
                     $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Идет формирование формы предварительного просмотра";
                     $scope.pdfLoading = true;
                     createPdfReport.query({

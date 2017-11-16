@@ -194,6 +194,11 @@
             <artifactId>json</artifactId>
             <version>20090211</version>
         </dependency>
+        <dependency>
+            <groupId>xalan</groupId>
+            <artifactId>xalan</artifactId>
+            <version>${xalan.version}</version>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
