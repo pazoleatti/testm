@@ -44,25 +44,27 @@
             </div>
         </div>
 
-        <div class="button_panel" style="float: left; margin: -13px 0 -2px 0;">
-            <div class="btn-toolbar" role="toolbar" data-ng-show="declarationLockCreated">
+
+    </div>
+</div>
+<div class="modal-footer" style="margin: -48px 0 -13px 0;position: relative; z-index: 1000;">
+    <div class="button_panel" style="float: left; margin: 0 0 -2px 0;">
+        <div class="btn-toolbar" role="toolbar" data-ng-show="declarationLockCreated">
             <span>
                 <button type="file" class="btn btn-default" ngf-select="addFileClick($file)">
                      {{::'filesComment.button.add' |translate}}
                 </button>
             </span>
-                <span>
+            <span>
                 <button type="button" class="btn btn-default" data-ng-click="removeFileClick()">
                      {{::'filesComment.button.remove' |translate}}
                 </button>
             </span>
-            </div>
         </div>
     </div>
-</div>
-<div class="modal-footer" style="margin: -48px 0 -15px 0;">
+
     <button type="button" class="btn btn-default" id="saveButton" data-ng-disabled="commentForm.$invalid"
-            data-ng-click="save()" data-ng-show="declarationLockCreated">>
+            data-ng-click="save()" data-ng-show="declarationLockCreated">
         <span data-translate-once="button.save"></span>
     </button>
 
