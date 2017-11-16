@@ -315,16 +315,16 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         @Override
         public void run() {
             while (!canceled) {
+                try {
+                    Thread.sleep(10 * 1000);
+                } catch (InterruptedException e) {
+                    //Do nothing
+                }
                 if (!asyncTaskDao.isTaskActive(taskId)) {
                     LOG.info(String.format("Async task with id %s was cancelled", taskId));
                     canceled = true;
                     asyncManager.finishTask(taskId);
                     thread.interrupt();
-                }
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    //Do nothing
                 }
             }
         }
