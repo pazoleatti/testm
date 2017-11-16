@@ -110,7 +110,6 @@
     "header.ndflJournal.forms": "НДФЛ - Список налоговых форм",
     "header.ndflReportJournal.forms": "НДФЛ - Отчетность",
     "header.configParams": "Администрирование - Конфигурационные параметры",
-    "header.ndfl.forms": "РНУ НДФЛ",
     "header.ndfl.form.create": "Создание новой записи",
     "header.ndfl.fl.create": "Добавить запись ФЛ",
     "header.ndfl.fl.edit": "Редактировать запись ФЛ",

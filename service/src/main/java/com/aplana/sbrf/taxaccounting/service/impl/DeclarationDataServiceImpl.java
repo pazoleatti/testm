@@ -612,6 +612,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
         result.setDeclarationType(declarationTemplate.getType().getId());
+        result.setDeclarationTypeName(declarationTemplate.getType().getName());
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
                 declaration.getDepartmentReportPeriodId());

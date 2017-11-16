@@ -47,6 +47,11 @@ public class DeclarationResult {
     private int declarationType;
 
     /**
+     * Наименование вида НФ
+     */
+    private String declarationTypeName;
+
+    /**
      * КПП
      */
     private String kpp;
@@ -144,6 +149,14 @@ public class DeclarationResult {
 
     public void setDeclarationType(int declarationType) {
         this.declarationType = declarationType;
+    }
+
+    public String getDeclarationTypeName() {
+        return declarationTypeName;
+    }
+
+    public void setDeclarationTypeName(String declarationTypeName) {
+        this.declarationTypeName = declarationTypeName;
     }
 
     public String getKpp() {
