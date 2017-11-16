@@ -88,6 +88,7 @@
                             $filter('translate')('title.middleName'),
                             $filter('translate')('title.snils'),
                             $filter('translate')('title.innNp'),
+                            $filter('translate')('title.innForeign'),
                             $filter('translate')('title.inp'),
                             $filter('translate')('title.dateOfBirth'),
                             $filter('translate')('title.idDocNumber'),
@@ -95,12 +96,13 @@
 
                         ],
                         colModel: [
-                            {name: 'id', index: 'id', width: 100, hide: false},
+                            {name: 'id', index: 'id', width: 100, key: true, hidden: true},
                             {name: 'lastName', index: 'last_name', width: 140},
                             {name: 'firstName', index: 'first_name', width: 140},
                             {name: 'middleName', index: 'middle_name', width: 140},
                             {name: 'snils', index: 'snils', width: 100, sortable: false},
                             {name: 'innNp', index: 'innNp', width: 100},
+                            {name: 'innForeign', index: 'innForeign', width: 100},
                             {name: 'inp', index: 'inp', width: 100},
                             {
                                 name: 'birthDay',
