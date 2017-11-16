@@ -366,7 +366,8 @@ create table declaration_data (
   note                        varchar2(512  char),
   state                       number(1) default 1 not null,
   file_name                   varchar2(255 char),
-  doc_state_id                number(18)
+  doc_state_id                number(18),
+  manually_created            number(1) default 0 not null
 );
 
 
@@ -382,6 +383,7 @@ comment on column declaration_data.note is 'Комментарий к НФ, вв
 comment on column declaration_data.state is 'Состояние формы (1 - Создана, 2 - Подготовлена, 3 - Принята)';
 comment on column declaration_data.file_name is 'Имя файла';
 comment on column declaration_data.doc_state_id is 'Состояние ЭД';
+comment on column declaration_data.manually_created is 'Создана вручную (0-нет, 1-да)';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------

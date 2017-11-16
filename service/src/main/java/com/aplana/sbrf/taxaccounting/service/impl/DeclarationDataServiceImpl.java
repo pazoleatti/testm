@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
@@ -226,37 +227,22 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Создание декларации в заданном отчетном периоде подразделения
      *
      * @param userInfo          Информация о текущем пользователе
-     * @param declarationTypeId ID вида налоговой формы
-     * @param departmentId      ID подразделения
-     * @param periodId          ID отчетного периода
+     * @param action
      * @return Модель {@link CreateResult}, в которой содержится ID налоговой формы
      */
     @Override
     //TODO:https://jira.aplana.com/browse/SBRFNDFL-2071
-    public CreateResult<Long> create(TAUserInfo userInfo, Long declarationTypeId, Integer departmentId, Integer periodId) {
+    public CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action) {
         CreateResult<Long> result = new CreateResult<Long>();
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(departmentId, periodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(), action.getPeriodId());
         if (departmentReportPeriod != null) {
-            int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId.intValue(), periodId);
+            int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(action.getDeclarationTypeId().intValue(), action.getPeriodId());
             try {
-                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, null, null, null, true);
+                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, null, null, null, true, action.getManuallyCreated());
                 result.setEntityId(declarationId);
             } catch (DaoException e) {
-                DeclarationTemplate dt = declarationTemplateService.get(activeTemplateId);
-                if (dt.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()) {
-                    Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-                    String strCorrPeriod = "";
-                    if (departmentReportPeriod.getCorrectionDate() != null) {
-                        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-                        strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
-                    }
-                    logger.error("Консолидированная налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\" уже существует",
-                            departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                            department.getName());
-                } else {
-                    throw new ServiceException(e.getMessage());
-                }
+                throw new ServiceException(e.getMessage());
             }
             if (!logger.getEntries().isEmpty()) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
@@ -271,7 +257,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Логика создания вынесена в отдельный метод, для решения проблем с транзакциями при вызове из других транзакционных методов
      */
     private Long doCreate(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
-                          DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
+                          DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp,
+                          String oktmo, Long asunId, String fileName, String note, boolean writeAudit, boolean manuallyCreated) {
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + declarationTemplateId + "_" + departmentReportPeriod.getId() + "_" + taxOrganKpp + "_" + taxOrganCode + "_" + fileName;
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
@@ -330,6 +317,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setAsnuId(asunId);
                 newDeclaration.setFileName(fileName);
                 newDeclaration.setNote(note);
+                newDeclaration.setManuallyCreated(manuallyCreated);
+
+                if (declarationDataDao.existDeclarationData(newDeclaration)) {
+                    if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()
+                            || declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.PRIMARY.getId()) {
+                        String strCorrPeriod = "";
+                        if (departmentReportPeriod.getCorrectionDate() != null) {
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+                            strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
+                        }
+                        String message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
+                                        " Вид налоговой формы: \"%s\" уже существует",
+                                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
+                                department.getName(), declarationTemplate.getDeclarationFormKind().getTitle());
+                        logger.error(message);
+                        throw new ServiceException(message);
+                    }
+                }
 
                 // Вызываем событие скрипта CREATE
 
@@ -368,7 +373,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     public Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                        DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo, Long asunId, String fileName, String note, boolean writeAudit) {
-        return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit);
+        return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit, false);
     }
 
     @Override

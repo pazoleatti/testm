@@ -46,6 +46,7 @@ public class QueryDSLGenRunner {
             configuration.register("NOTIFICATION", "IS_READ", new NumericBooleanType());
             configuration.register("NOTIFICATION", "TYPE", new EnumByOrdinalType<>(NotificationType.class));
             configuration.register("DECLARATION_DATA", "STATE", new EnumByOrdinalType<>(State.class));
+            configuration.register("DECLARATION_DATA", "MANUALLY_CREATED", new NumericBooleanType());
             configuration.register("TAX_PERIOD", "YEAR", Integer.class);
 
             exportScheme(dbUrl,
@@ -54,7 +55,7 @@ public class QueryDSLGenRunner {
                     "NDFL_UNSTABLE",
                     packageStr,
                     targetFolder,
-                    new String[]{"TAX_PERIOD"},
+                    new String[]{"DECLARATION_DATA"},
                     configuration);
 
             // УН (удаляются только ранее сгенерированные Q классы по передаваемому перечню таблиц).

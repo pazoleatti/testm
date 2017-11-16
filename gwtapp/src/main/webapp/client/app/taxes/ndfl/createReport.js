@@ -12,7 +12,7 @@
         .controller('createReportCtrl', [
             '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData', '$webStorage',
             function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage) {
-                $scope.reportFormKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS;
+                $scope.reportFormKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id];
 
                 //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
                 $scope.latestReportPeriod = {};

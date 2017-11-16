@@ -105,8 +105,10 @@
          * с действующей на момент начала периода версией шаблона формы указанного типа.
          */
         .factory('DeclarationTypeForCreateResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBook/207/activeAndAssigned?declarationKind=:declarationKind&departmentId=:departmentId&periodId=:periodId', {}, {
-                query: {method: 'GET', isArray: true, cache: false}
+            return $resource('controller/rest/refBook/207/activeAndAssigned', {}, {
+                query: {
+                    method: 'GET', isArray: true, cache: false
+                }
             });
         }])
 

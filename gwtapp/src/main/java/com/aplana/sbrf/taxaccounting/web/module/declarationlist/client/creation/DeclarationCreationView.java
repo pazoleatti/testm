@@ -112,9 +112,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     }
 
     @Override
-    public void setCorrectionDate(String correctionDate, DeclarationFormKind declarationFormKind) {
+    public void setCorrectionDate(String correctionDate, List<DeclarationFormKind> declarationFormKind) {
         correctionPanel.setVisible(correctionDate != null);
-        this.correctionDate.setText((correctionDate != null) ? (((declarationFormKind.equals(DeclarationFormKind.REPORTS)) ? NOTIFICATION_CORRECTION : DECLARATION_CORRECTION) + correctionDate) : "");
+        this.correctionDate.setText((correctionDate != null) ? (((declarationFormKind.get(0).equals(DeclarationFormKind.REPORTS)) ? NOTIFICATION_CORRECTION : DECLARATION_CORRECTION) + correctionDate) : "");
     }
 
     @Override
@@ -209,7 +209,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @Override
     public void setTaxType(TaxType taxType) {
         periodPicker.setType(taxType.name());
-        if (!(getUiHandlers().getDeclarationFormKind().equals(DeclarationFormKind.REPORTS))) {
+        if (!(getUiHandlers().getDeclarationFormKinds().get(0).equals(DeclarationFormKind.REPORTS))) {
             modalWindowTitle.setText(DECLARATION_TITLE);
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE);
         } else {
