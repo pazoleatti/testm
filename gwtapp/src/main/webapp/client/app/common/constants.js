@@ -68,7 +68,8 @@
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},
                 REFUSED: {id: 21123800, knd: 1166006, name: 'Отклонен'},
                 REVISION: {id: 21124000, knd: 1166009, name: 'Требует уточнения'},
-                SUCCESSFUL: {id: 21123900, knd: 1166007, name: 'Успешно отработан'}
+                SUCCESSFUL: {id: 21123900, knd: 1166007, name: 'Успешно отработан'},
+                ERROR: {id: 21124100, name: 'Ошибка'}
             },
             STATE: {
                 CREATED: {id: 1, name: "Создана"},
