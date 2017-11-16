@@ -75,8 +75,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     /*Период формируется как "наименование периода год", или как "наименование периода год коррелирующий период"
       В зависимости от принадлежности формы к открытому корр. периоду*/
     final private Expression<String> caseStringForReportPeriod = new CaseBuilder()
-            .when(departmentReportPeriod.correctionDate.isNotNull()).then(reportPeriod.name.concat(" ").concat(taxPeriod.year.stringValue()).
-                    concat(" с датой сдачи корректировки ").concat(departmentReportPeriod.correctionDate.stringValue()))
+            .when(departmentReportPeriod.correctionDate.isNotNull()).then(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).
+                    concat(", корр. (").concat(departmentReportPeriod.correctionDate.stringValue().concat(")")))
             .otherwise(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name))
             .as("reportPeriod");
 
@@ -215,7 +215,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     public List<DeclarationData> find(String fileName) {
         return getJdbcTemplate().query(
                 "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                        "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
+                        "dd.department_report_periodd, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_cr_ieated, " +
                         "drp.report_period_id, drp.department_id " +
                         "from declaration_data dd, department_report_period drp " +
                         "where drp.id = dd.department_report_period_id and file_name = ?",
