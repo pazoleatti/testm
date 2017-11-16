@@ -50,6 +50,11 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
     private long permissions;
 
     /**
+     * Создана в ручную
+     */
+    private Boolean manuallyCreated = false;
+
+    /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
 	 * @return идентификатор шаблона декларации
 	 */
@@ -183,4 +188,12 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
 
     public long getPermissions() { return permissions; }
     public void setPermissions(long permissions) { this.permissions = permissions; }
+
+    public Boolean getManuallyCreated() {
+        return manuallyCreated;
+    }
+
+    public void setManuallyCreated(Boolean manuallyCreated) {
+        this.manuallyCreated = manuallyCreated;
+    }
 }

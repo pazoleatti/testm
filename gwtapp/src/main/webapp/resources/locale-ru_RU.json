@@ -306,7 +306,7 @@
     "logPanel.title.dateTime": "Время",
     "logPanel.title.message": "Сообщение",
     "logPanel.header.message": "Сообщения (всего: {0}; фатальных ошибок: {1})",
-    "logPanel.header.print": "Печать",
+    "logPanel.header.unload": "Выгрузить",
     "title.link.download": "Скачать",
     "title.link.reportDelete": "Отчет удален",
 

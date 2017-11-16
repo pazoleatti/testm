@@ -85,12 +85,17 @@ public class DeclarationListPresenter extends
     @Override
     public void onCreateClicked() {
         eventBus.fireEvent(new FocusActionEvent(true));
-        creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), DeclarationFormKind.CONSOLIDATED, this);
+        List<DeclarationFormKind> declarationFormKindList = new ArrayList<DeclarationFormKind>();
+        declarationFormKindList.add(DeclarationFormKind.PRIMARY);
+        declarationFormKindList.add(DeclarationFormKind.CONSOLIDATED);
+        creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), declarationFormKindList, this);
     }
 
     @Override
     public void onCreateReportsClicked() {
-        creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), DeclarationFormKind.REPORTS, this);
+        List<DeclarationFormKind> declarationFormKindList = new ArrayList<DeclarationFormKind>();
+        declarationFormKindList.add(DeclarationFormKind.REPORTS);
+        creationPresenter.initAndShowDialog(filterPresenter.getFilterData(), declarationFormKindList, this);
     }
 
     @Override
@@ -173,7 +178,7 @@ public class DeclarationListPresenter extends
                         @Override
                         public void onSuccess(DetectUserRoleResult result) {
                             getView().setVisibleCancelButton(result.isControl());
-                            getView().setVisibleCreateButton(result.isControl() && !isReports);
+                            getView().setVisibleCreateButton((result.isControl() || result.isHasRoleOperator()) && !isReports);
                             getView().showCheck(result.isControl() || result.isHasRoleOperator());
                             getView().showRecalculate(!isReports && (result.isControl() || result.isHasRoleOperator()));
                             getView().showAccept(result.isControl());

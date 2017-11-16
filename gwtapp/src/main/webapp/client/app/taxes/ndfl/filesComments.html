@@ -62,7 +62,7 @@
 </div>
 <div class="modal-footer" style="margin: -48px 0 -15px 0;">
     <button type="button" class="btn btn-default" id="saveButton" data-ng-disabled="commentForm.$invalid"
-            data-ng-click="save()">
+            data-ng-click="save()" data-ng-show="declarationLockCreated">>
         <span data-translate-once="button.save"></span>
     </button>
 

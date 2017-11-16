@@ -266,4 +266,11 @@ public interface DeclarationDataDao extends PermissionDao {
      * @return
      */
     List<Pair<String, String>> findNotPresentedPairKppOktmo(Long declarationDataId);
+
+    /**
+     * Проверяет существование НФ по критериям в зависимости от ее вида
+     * @param declarationData
+     * @return
+     */
+    boolean existDeclarationData(DeclarationData declarationData);
 }

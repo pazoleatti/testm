@@ -16,7 +16,7 @@
             function ($scope, $rootScope, $http, $state, $stateParams, $modalInstance, $filter,
                       RefBookValuesResource, DeclarationTypeForCreateResource, APP_CONSTANTS, $shareData, $dialogs, $webStorage) {
                 //По нажатию на кнопку пользователь может создать только консолидированную форму
-                $scope.declarationKind = APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED;
+                $scope.declarationKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.id, APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.id];
 
                 //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
                 $scope.latestReportPeriod = {};
@@ -43,13 +43,15 @@
                         $scope.declarationData.period,
                         true);
                     if ($scope.declarationData.period && $scope.declarationData.department && $scope.declarationData.declarationType) {
+
                         $http({
                             method: "POST",
                             url: "controller/actions/declarationData/create",
                             params: {
                                 declarationTypeId: $scope.declarationData.declarationType.id,
                                 departmentId: $scope.declarationData.department.id,
-                                periodId: $scope.declarationData.period.id
+                                periodId: $scope.declarationData.period.id,
+                                manuallyCreated: true
                             }
                         }).then(function (response) {
                             $modalInstance.close(response);

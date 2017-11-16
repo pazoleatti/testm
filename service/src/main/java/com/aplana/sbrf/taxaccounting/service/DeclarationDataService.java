@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
@@ -31,12 +32,10 @@ public interface DeclarationDataService {
      * Создание декларации в заданном отчетном периоде подразделения
      *
      * @param userInfo          Информация о текущем пользователе
-     * @param declarationTypeId ID вида налоговой формы
-     * @param departmentId      ID подразделения
-     * @param periodId          ID отчетного периода
+     * @param action
      * @return Модель {@link CreateResult}, в которой содержатся данные о результате операции
      */
-    CreateResult<Long> create(TAUserInfo userInfo, Long declarationTypeId, Integer departmentId, Integer periodId);
+    CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action);
 
     /**
      * Создание декларации в заданном отчетном периоде подразделения

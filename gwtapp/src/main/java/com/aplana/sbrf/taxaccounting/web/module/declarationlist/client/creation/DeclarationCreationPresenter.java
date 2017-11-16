@@ -25,6 +25,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -44,7 +45,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         void setSelectedDeclarationType(Integer id);
         void setSelectedReportPeriod(List<Integer> periodIds);
         void setSelectedDepartment(List<Integer> departmentIds);
-        void setCorrectionDate(String correctionDate, DeclarationFormKind declarationFormKind);
+        void setCorrectionDate(String correctionDate, List<DeclarationFormKind> declarationFormKinds);
 
         Integer getSelectedDeclarationType();
         List<Integer> getSelectedReportPeriod();
@@ -60,7 +61,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     private PlaceManager placeManager;
 
     private TaxType taxType;
-    private DeclarationFormKind declarationFormKind;
+    private List<DeclarationFormKind> declarationFormKind = new ArrayList<DeclarationFormKind>();
 
     private EventBus eventBus;
 
@@ -98,7 +99,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         if(isFilterDataCorrect(filter)){
             LogCleanEvent.fire(this);
             LogShowEvent.fire(this, false);
-            if (declarationFormKind.equals(DeclarationFormKind.REPORTS)) {
+            if (declarationFormKind.get(0).equals(DeclarationFormKind.REPORTS)) {
                 // создание отчетности
                 onCreateForms(filter, false);
             } else {
@@ -166,7 +167,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         }
         GetDeclarationTypeAction action = new GetDeclarationTypeAction();
         action.setTaxType(taxType);
-        action.setDeclarationFormKind(declarationFormKind);
+        action.setDeclarationFormKindList(declarationFormKind);
         action.setDepartmentId(getView().getSelectedDepartment().get(0));
         action.setReportPeriod(getView().getSelectedReportPeriod().get(0));
 
@@ -189,8 +190,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                 || (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty())
                 || (filter.getDeclarationTypeIds() == null)
         ){
-            String title = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
-            String msg = (declarationFormKind.equals(DeclarationFormKind.REPORTS) ? "Заполнены не все параметры отчетности" : "Заполнены не все параметры налоговой формы");
+            String title = (declarationFormKind.get(0).equals(DeclarationFormKind.REPORTS) ? "Создание отчетности" : "Создание налоговой формы");
+            String msg = (declarationFormKind.get(0).equals(DeclarationFormKind.REPORTS) ? "Заполнены не все параметры отчетности" : "Заполнены не все параметры налоговой формы");
             Dialog.errorMessage(title, msg);
             return false;
         }
@@ -203,22 +204,38 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         getView().setSelectedDepartment(null);
     }
 
-    public void initAndShowDialog(final DeclarationDataFilter dataFilter, DeclarationFormKind declarationFormKind, final HasPopupSlot popupSlot){
+    public void initAndShowDialog(final DeclarationDataFilter dataFilter, final List<DeclarationFormKind> declarationFormKindList, final HasPopupSlot popupSlot){
         this.taxType = dataFilter.getTaxType();
-        this.declarationFormKind = declarationFormKind;
-        getView().setTaxType(this.taxType);
-        GetReportPeriodsAction action = new GetReportPeriodsAction();
-        action.setTaxType(dataFilter.getTaxType());
-        action.setReportPeriodId(getView().getDefaultReportPeriodId());
-        getView().init();
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
-            @Override
-            public void onSuccess(GetReportPeriodsResult result) {
-                getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
-                onReportPeriodChange();
-                popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
-            }
-        }, this));
+        DetectUserRoleAction detectUserRoleAction = new DetectUserRoleAction();
+        detectUserRoleAction.setTaxType(taxType);
+        dispatcher.execute(detectUserRoleAction, CallbackUtils
+                .defaultCallback(new AbstractCallback<DetectUserRoleResult>() {
+                    @Override
+                    public void onSuccess(DetectUserRoleResult result) {
+                        List<DeclarationFormKind> formsForRemove = new ArrayList<DeclarationFormKind>();
+                        for (DeclarationFormKind declarationFormKind: declarationFormKindList) {
+                            if (result.isHasRoleOperator() && !result.isControl() && !declarationFormKind.equals(DeclarationFormKind.PRIMARY)) {
+                                formsForRemove.add(declarationFormKind);
+                            }
+                        }
+                        declarationFormKindList.removeAll(formsForRemove);
+                        declarationFormKind = declarationFormKindList;
+                        getView().setTaxType(TaxType.NDFL);
+                        GetReportPeriodsAction action = new GetReportPeriodsAction();
+                        action.setTaxType(dataFilter.getTaxType());
+                        action.setReportPeriodId(getView().getDefaultReportPeriodId());
+                        getView().init();
+                        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
+                            @Override
+                            public void onSuccess(GetReportPeriodsResult result) {
+                                getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
+                                onReportPeriodChange();
+                                popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
+                            }
+                        }, DeclarationCreationPresenter.this));
+                    }
+                }, this));
+
     }
 
     @Override
@@ -247,7 +264,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     }
 
     @Override
-    public DeclarationFormKind getDeclarationFormKind() {
+    public List<DeclarationFormKind> getDeclarationFormKinds() {
         return declarationFormKind;
     }
 }
