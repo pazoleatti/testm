@@ -138,7 +138,7 @@
                         <!--Принять -->
                         <span>
                         <button type="button" class="btn btn-default"
-                                data-ng-click="accept(false, false)"
+                                data-ng-click="accept()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
                             <span data-translate-once="button.accept"></span>
                         </button>
@@ -146,7 +146,7 @@
                         <!--Проверить -->
                         <span>
                         <button type="button" class="btn btn-default"
-                                data-ng-click="check(false)"
+                                data-ng-click="check()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
                             <span data-translate-once="button.check"></span>
                         </button>

@@ -114,7 +114,7 @@
                         <!--Принять -->
                         <span>
                         <button type="button" class="btn btn-default"
-                                data-ng-click="accept(false, false)"
+                                data-ng-click="accept()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
                             <span data-translate-once="button.accept"></span>
                         </button>
@@ -146,7 +146,7 @@
                         <!-- Показать -->
                         <span>
                             <button type="button" class="btn btn-default"
-                                    data-ng-click="show(false, false)"
+                                    data-ng-click="show()"
                                     data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.SHOW) || availablePdf">
                                 <span data-translate-once="button.show"></span>
                             </button>
@@ -160,7 +160,7 @@
                 </div>
             </div>
             <div ng-show="availablePdf">
-                <div style="overflow: auto;width: 100%;max-height: 600px;padding: 10px 12px 0;background-color: lightgray;text-align:center">
+                <div style="overflow: auto;width: 100%;max-height: 500px;padding: 10px 12px 0;background-color: lightgray;text-align:center">
                     <img ng-src="{{reportImage}}">
                 </div>
                 <div style="padding: 10px 12px 0;text-align:center">

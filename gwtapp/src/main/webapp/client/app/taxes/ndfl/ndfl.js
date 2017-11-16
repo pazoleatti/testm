@@ -210,6 +210,10 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
                  */
                 $scope.calculate = function (force, cancelTask) {
+                    {
+                        force = typeof force !== 'undefined' ? force : false;
+                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
+                    }
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/recalculate",
@@ -248,6 +252,10 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
                 $scope.accept = function (force, cancelTask) {
+                    {
+                        force = typeof force !== 'undefined' ? force : false;
+                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
+                    }
                     acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId },{
                         taxType: 'NDFL',
                             force: force ,
@@ -286,6 +294,9 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Проверить"
                  */
                 $scope.check = function (force) {
+
+                    force = typeof force !== 'undefined' ? force : false;
+
                     checkDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
                         force: force
                     }, function (response) {
@@ -395,6 +406,9 @@
                  * @param force
                  */
                 $scope.createReportAllRnu = function (force) {
+
+                    force = typeof force !== 'undefined' ? force : false;
+
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/allRnuReport",

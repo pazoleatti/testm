@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.Declarati
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
+import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
@@ -133,6 +134,11 @@ public class GetMainMenuActionHandler extends
                     TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", "index.html#/administration/locks"));
                 adminMenuItem.getSubMenu().add(new MenuItem("Асинхронные задачи", "index.html#/administration/async"));
+            }
+
+            if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN)) {
+                adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
+                        + MembersTokens.MEMBERS));
             }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 
@@ -8,10 +9,13 @@ import java.util.Date;
 import java.util.List;
 
 public interface PrintingService {
-	String generateExcelLogEntry(List<LogEntry> listLogEntries);
+    String generateExcelLogEntry(List<LogEntry> listLogEntries);
+
+    String generateExcelUsers(List<TAUserView> taUserViewList);
 
     /**
      * Формирует специфический отчет по справочнику
+     *
      * @param refBookId
      * @param version
      * @param filter
@@ -24,6 +28,7 @@ public interface PrintingService {
 
     /**
      * Формирует csv-отчет по справочнику
+     *
      * @param refBookId
      * @param version
      * @param filter
@@ -36,6 +41,7 @@ public interface PrintingService {
 
     /**
      * Формирует excel-отчет по справочнику
+     *
      * @param refBookId
      * @param version
      * @param filter
