@@ -11,17 +11,23 @@
         .controller('filesCommentsCtrl', [
             '$scope',
             '$http',
-            '$uibModalInstance',
+            '$modalInstance',
+            '$shareData',
             '$filter',
             '$logPanel',
-            'appModals',
+            '$dialogs',
             'DeclarationDataResource',
             'Upload',
-            'data',
             'APP_CONSTANTS',
-            function ($scope, $http, $uibModalInstance, $filter, $logPanel, appModals, DeclarationDataResource, Upload, data, APP_CONSTANTS) {
+            function ($scope, $http, $modalInstance, $shareData, $filter, $logPanel, $dialogs, DeclarationDataResource, Upload, APP_CONSTANTS) {
 
-                var attachFileType = data.attachFileTypes;
+                var attachFileType = $shareData.attachFileTypes;
+
+                var defaultFileType = {
+                    id: APP_CONSTANTS.ATTACHE_FILE_TYPE.DEFAULT_TYPE_ID,
+                    name: attachFileType[APP_CONSTANTS.ATTACHE_FILE_TYPE.DEFAULT_TYPE_ID]
+                };
+
 
                 $scope.fileCommentGrid = {
                     ctrl: {},
@@ -69,17 +75,26 @@
                  * @description Инициализация таблицы
                  **/
                 function initPage() {
-                    DeclarationDataResource.query({
-                            declarationDataId: data.declarationDataId,
-                            projection: "filesComments"
-                        },
-                        function (data) {
-                            if (data) {
-                                $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
-                                $scope.commentForm.comment = data.comment;
-                            }
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
+                    }).then(function (response) {
+                        $scope.declarationLockCreated = response.data.declarationDataLocked;
+                        if (response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
                         }
-                    );
+                        DeclarationDataResource.query({
+                                declarationDataId: $shareData.declarationDataId,
+                                projection: "filesComments"
+                            },
+                            function (data) {
+                                if (data) {
+                                    $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
+                                    $scope.commentForm.comment = data.comment;
+                                }
+                            }
+                        );
+                    });
                 }
 
 
@@ -97,8 +112,8 @@
                                 var newFile = [{
                                     uuid: response.data.uuid,
                                     fileName: file.name,
-                                    fileTypeId: 268574799,
-                                    fileTypeName: "",
+                                    fileTypeId: defaultFileType.id,
+                                    fileTypeName: defaultFileType.name,
                                     note: "",
                                     userName: $scope.$parent.security.user.name,
                                     userDepartmentName: $scope.$parent.security.user.department.name,
@@ -124,14 +139,18 @@
                  **/
                 $scope.removeFileClick = function () {
                     if ($scope.fileCommentGrid.value && $scope.fileCommentGrid.value.length !== 0) {
-                        appModals.confirm($filter('translate')('filesComment.delete.header'), $filter('translate')('filesComment.delete.text'))
-                            .result.then(
-                            function () {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('filesComment.delete.header'),
+                            content: $filter('translate')('filesComment.delete.text'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
                                 var grid = $scope.fileCommentGrid.ctrl.getGrid();
                                 _.each($scope.fileCommentGrid.value, function (element) {
                                     grid.delRowData(element.uuid);
                                 });
-                            });
+                            }
+                        });
                     }
                 };
 
@@ -153,7 +172,7 @@
                         {
                             declarationDataFiles: files,
                             comment: $scope.commentForm.comment,
-                            declarationDataId: data.declarationDataId
+                            declarationDataId: $shareData.declarationDataId
                         },
                         function (data) {
                             if (data) {
@@ -172,7 +191,14 @@
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
-                    $uibModalInstance.dismiss('Canceled');
+                    if ($scope.declarationLockCreated) {
+                        $http({
+                            method: "POST",
+                            url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
+                        }).then(function (response) {
+                        });
+                    }
+                    $modalInstance.dismiss('Canceled');
                 };
 
                 initPage();

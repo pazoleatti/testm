@@ -1,0 +1,44 @@
+<form class="modal-form" data-aplana-submit-valid="submitForm()" novalidate>
+    <div class="modal-body">
+        <table class="horizontal-input-table">
+            <tbody>
+            <tr>
+                <td colspan="2">
+                    <p data-ng-bind-html="options.content"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label" for="options_comment">Комментарий:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <textarea id="options_comment" data-required required="required"
+                                  ng-required="options.requiredComment"
+                                  data-ng-model="options.comment"
+                                  data-aplana-input-outer-width="400"
+                                  data-ng-maxlength="512"></textarea>
+
+                        <div data-aplana-validator data-key='required'>Необходимо заполнить поле "Комментарий"</div>
+                        <div data-aplana-validator data-key='maxlength'>
+                            Максимальное число символов равно 512
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal-footer">
+		<span class="modal-hint-text" style="width: 320px;"
+              ng-show="options.requiredComment">Заполните обязательные поля (отмечены желтым)</span>
+
+        <button type="submit" default class="btn btn-default"
+                data-ng-bind="options.okBtnCaption" data-aplana-focus="true">
+        </button>
+
+        <button type="button" class="btn btn-default"
+                data-ng-click="cancelBtnClick()">{{options.cancelBtnCaption}}</button>
+    </div>
+</form>

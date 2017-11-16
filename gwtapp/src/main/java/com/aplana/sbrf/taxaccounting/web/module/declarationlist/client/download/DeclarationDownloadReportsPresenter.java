@@ -21,10 +21,7 @@ import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Диалог создания декларации
@@ -136,7 +133,9 @@ public class DeclarationDownloadReportsPresenter extends PresenterWidget<Declara
         GetDeclarationTypeAction action = new GetDeclarationTypeAction();
         action.setTaxType(taxType);
         action.setDepartmentId(getView().getSelectedDepartment().get(0));
-        action.setDeclarationFormKind(DeclarationFormKind.REPORTS);
+        List<DeclarationFormKind> declarationFormKinds  = new ArrayList<DeclarationFormKind>();
+        declarationFormKinds.add(DeclarationFormKind.REPORTS);
+        action.setDeclarationFormKindList(declarationFormKinds);
         action.setReportPeriod(getView().getSelectedReportPeriod().get(0));
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {

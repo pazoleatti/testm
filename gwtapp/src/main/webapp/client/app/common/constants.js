@@ -61,13 +61,15 @@
                 DELETE: 1 << 5,
                 RETURN_TO_CREATED: 1 << 6,
                 EDIT_ASSIGNMENT: 1 << 7,
-                DOWNLOAD_REPORTS: 1 << 8
+                DOWNLOAD_REPORTS: 1 << 8,
+                SHOW: 1 << 9
             },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},
                 REFUSED: {id: 21123800, knd: 1166006, name: 'Отклонен'},
                 REVISION: {id: 21124000, knd: 1166009, name: 'Требует уточнения'},
-                SUCCESSFUL: {id: 21123900, knd: 1166007, name: 'Успешно отработан'}
+                SUCCESSFUL: {id: 21123900, knd: 1166007, name: 'Успешно отработан'},
+                ERROR: {id: 21124100, name: 'Ошибка'}
             },
             STATE: {
                 CREATED: {id: 1, name: "Создана"},
@@ -100,7 +102,7 @@
             CORRETION_TAG: {
                 ALL: {id: 0, name: "Все периоды"},
                 ONLY_PRIMARY: {id: 1, name: "Только не корректирующие"},
-                ONLY_CORRECTIVE: {id: 2, name: "Только корректирующие"},
+                ONLY_CORRECTIVE: {id: 2, name: "Только корректирующие"}
             },
             //Временное решение https://jira.aplana.com/browse/SBRFNDFL-2133, убрать в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
             DECLARATION_TYPE: {
@@ -108,7 +110,7 @@
                 RNU_NDFL_CONSOLIDATED: {id: 101, name: "РНУ_НДФЛ (консолидированная)"},
                 REPORT_2_NDFL_1: {id: 102, name: "2-НДФЛ (1)"},
                 REPORT_6_NDFL: {id: 103, name: "6-НДФЛ"},
-                REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"},
+                REPORT_2_NDFL_2: {id: 104, name: "2-НДФЛ (2)"}
             },
             SUBREPORT_ALIAS_CONSTANTS: {
                 RNU_NDFL_PERSON_DB: "rnu_ndfl_person_db", // РНУ НДФЛ по физическому лицу
@@ -122,6 +124,15 @@
                 LOCKED: "LOCKED", //есть блокировка
                 EXIST_TASK: "EXIST_TASK", //существуют задачи, которые будут удалены при выполнении данной
                 CREATE: "CREATE" //создана новая задача
+            },
+            USER_STORAGE: {
+                NAME: "USER_STORAGE",
+                KEYS: {
+                    LAST_SELECTED_PERIOD: "LAST_SELECTED_PERIOD"
+                }
+            },
+            ATTACHE_FILE_TYPE : {
+                DEFAULT_TYPE_ID : 21657700
             }
         });
 }());

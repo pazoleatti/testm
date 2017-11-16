@@ -10,8 +10,8 @@
     /**
      * @description Модуль для редактирования общих параметров'
      */
-        .controller('uploadParamsCtrl', ['$scope', '$filter', '$http', '$uibModalInstance',
-            function ($scope, $filter, $http, $uibModalInstance) {
+        .controller('uploadParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'commonParamsGrid',
+            function ($scope, $filter, $http, $modalInstance, commonParamsGrid) {
 
                 /**
                  * @description Редактирование параметра
@@ -25,20 +25,20 @@
                         }
 
                     });
-                    $uibModalInstance.dismiss('Canceled');
-                    $scope.$resolve.data.commonParamsGrid.ctrl.refreshGrid();
+                    $modalInstance.dismiss('Canceled');
+                    commonParamsGrid.ctrl.refreshGrid();
                 };
 
                 /**
                  * @description Переменная содержащая значения редактируемое значение
                  */
-                $scope.parameter = $scope.$resolve.data.commonParamsGrid.value[0];
+                $scope.parameter = commonParamsGrid.value[0];
 
                 /**
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $uibModalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss('Canceled');
                 };
 
             }]);

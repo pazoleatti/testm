@@ -11,20 +11,19 @@
         'app.notifications',
         'app.uploadTransportData',
         'app.commonParams',
-        'app.modals',
         'app.formatters',
         'app.constants',
         'app.permissionUtils'
     ])
         .directive('appHeader', function () {
             return {
-                templateUrl: 'client/app/main/header.html',
+                templateUrl: 'client/app/main/header.html?v=${buildUuid}',
                 controller: 'MainMenuController'
             };
         })
         .controller('MainMenuController', [
-            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', 'appModals', 'amountCasesFormatterFilter',
-            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, appModals, amountCasesFormatterFilter) {
+            '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', '$aplanaModal', 'amountCasesFormatterFilter',
+            function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, $aplanaModal, amountCasesFormatterFilter) {
 
                 $scope.security = {
                     user: $rootScope.user
@@ -188,7 +187,12 @@
                 };
 
                 $scope.openNotifications = function () {
-                    appModals.create('client/app/main/notifications.html', 'notificationsCtrl');
+                    $aplanaModal.open({
+                        title: $filter('translate')('notifications.title.listNotifications'),
+                        templateUrl: 'client/app/main/notifications.html?v=${buildUuid}',
+                        controller: 'notificationsCtrl',
+                        windowClass: 'modal800'
+                    });
                 };
 
                 $scope.updateNotificationCount = function () {

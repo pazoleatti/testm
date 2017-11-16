@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('asyncTaskList', {
                 url: '/administration/async',
-                templateUrl: 'client/app/administration/async.html',
+                templateUrl: 'client/app/administration/async.html?v=${buildUuid}',
                 controller: 'asyncCtrl'
             });
         }])

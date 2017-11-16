@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('schedulerTaskList', {
                 url: '/administration/schedulerTaskList',
-                templateUrl: 'client/app/administration/schedulerTaskList.html',
+                templateUrl: 'client/app/administration/schedulerTaskList.html?v=${buildUuid}',
                 controller: 'schedulerTaskListCtrl'
             });
         }])

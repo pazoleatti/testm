@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.action.FetchDeclarationTypeAction;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDeclarationTypeService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,14 +31,15 @@ public class RefBookDeclarationTypeController {
      * формы с заданным типом формы, "действующим" статусом версии и версией не более поздней, чем заданное начало
      * отчетного периода
      *
-     * @param declarationKind Тип налоговой формы
-     * @param departmentId    ID Подразделения
-     * @param periodId        ID отчетного периода
      * @return Значения справочника
      */
     @GetMapping(value = "/rest/refBook/207/activeAndAssigned")
-    public List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, Integer periodId) {
-        return refBookDeclarationTypeService.fetchDeclarationTypes(declarationKind, departmentId, periodId);
+    public List<RefBookDeclarationType> fetchDeclarationTypes(FetchDeclarationTypeAction action) {
+        List<RefBookDeclarationType> toReturn = new ArrayList<>();
+        for (Long declarationKind: action.getFormDataKindIdList()) {
+            toReturn.addAll(refBookDeclarationTypeService.fetchDeclarationTypes(declarationKind, action.getDepartmentId(), action.getPeriodId()));
+        }
+        return toReturn;
     }
 
 }

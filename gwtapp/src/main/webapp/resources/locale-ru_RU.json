@@ -66,6 +66,9 @@
     "button.updateFLData": "Обновить данные ФЛ",
     "button.fillTransferTerm": "Заполнить \"Срок перечисления в бюджет\"",
     "button.fillIncomeAttr": "Заполнить \"Признак дохода\"",
+    "button.show": "Показать",
+    "button.next": ">",
+    "button.prev": "<",
     "messageDialog.toDo.title": "Информация",
     "messageDialog.toDo.message": "Функционал находится в разработке",
 
@@ -107,7 +110,6 @@
     "header.ndflJournal.forms": "НДФЛ - Список налоговых форм",
     "header.ndflReportJournal.forms": "НДФЛ - Отчетность",
     "header.configParams": "Администрирование - Конфигурационные параметры",
-    "header.ndfl.forms": "РНУ НДФЛ",
     "header.ndfl.form.create": "Создание новой записи",
     "header.ndfl.fl.create": "Добавить запись ФЛ",
     "header.ndfl.fl.edit": "Редактировать запись ФЛ",
@@ -128,6 +130,7 @@
     "link.ndfl.historyOfChange": "История изменений",
     "link.ndfl.filesAndComment": "Файлы и комментарии",
     "link.ndfl.sources": "Источники и приемники",
+    "link.ndflReport.formForFL": "Сформировать \"2-НДФЛ(1) по физическому лицу\"",
 
     "ndflReportJournal.button.createReport": "Создать отчетность",
     "ndflReportJournal.button.downloadReport": "Выгрузить",
@@ -137,6 +140,9 @@
     "ndflReportJournal.filter.kpp": "КПП",
     "ndflReportJournal.filter.oktmo": "ОКТМО",
     "ndflReportJournal.filter.codeNO": "Код НО",
+
+    "ndflReport.label.page": "Стр.",
+    "ndflReport.label.from": "из",
 
     "field.ndfl.tooLongMessage": "Количество символов для комментария превысило допустимое значение",
     "field.ndfl.requiredField": "Обязательно поле",
@@ -153,6 +159,7 @@
     "title.nameAsnu" : "АСНУ",
     "title.dateAndTimeCreate" : "Дата и время создания формы",
     "title.state": "Состояние",
+    "title.stateDoc": "Состояние ЭД",
     "title.file": "Файл",
     "title.creator": "Создал",
     "title.numberpp": "№п/п",
@@ -163,6 +170,7 @@
     "title.oktmo": "ОКТМО",
     "title.snils": "СНИЛС",
     "title.idDocNumber": "№ ДУЛ",
+    "title.refNumber": "№ справки",
     "title.lastName": "Фамилия",
     "title.firstName": "Имя",
     "title.middleName": "Отчество",
@@ -284,6 +292,7 @@
     "logBusiness.title.note": "Текст события",
     "rnuPersonFace.title": "РНУ НДФЛ по физическому лицу",
     "rnuPersonFace.": "РНУ НДФЛ по физическому лицу",
+    "reportPersonFace.title": "2-НДФЛ(1) по физическому лицу",
 
     "notifications.title.listNotifications": "Список оповещений",
     "notifications.title.createDate": "Дата оповещения",
@@ -296,7 +305,7 @@
     "logPanel.title.dateTime": "Время",
     "logPanel.title.message": "Сообщение",
     "logPanel.header.message": "Сообщения (всего: {0}; фатальных ошибок: {1})",
-    "logPanel.header.print": "Печать",
+    "logPanel.header.unload": "Выгрузить",
     "title.link.download": "Скачать",
     "title.link.reportDelete": "Отчет удален",
 

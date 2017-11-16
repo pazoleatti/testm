@@ -3,12 +3,12 @@
     /**
      * @description Модуль модального окна оповещений
      */
-    angular.module('app.notifications', ['app.modals'])
+    angular.module('app.notifications', [])
     /**
      * @description Контроллер модального окна оповещений
      */
-        .controller('notificationsCtrl', ['$scope', '$http', '$uibModalInstance', 'NotificationResource', '$filter', '$logPanel', 'appModals', '$rootScope', 'APP_CONSTANTS',
-            function ($scope, $http, $uibModalInstance, NotificationResource, $filter, $logPanel, appModals, $rootScope, APP_CONSTANTS) {
+        .controller('notificationsCtrl', ['$scope', '$http', '$modalInstance', 'NotificationResource', '$filter', '$logPanel', '$dialogs', '$rootScope', 'APP_CONSTANTS',
+            function ($scope, $http, $modalInstance, NotificationResource, $filter, $logPanel, $dialogs, $rootScope, APP_CONSTANTS) {
                 // Пометим все оповещения как прочтённые
                 $http({
                     method: "POST",
@@ -92,9 +92,12 @@
                  */
                 $scope.delete = function () {
                     if ($scope.notificationsGrid.value && $scope.notificationsGrid.value.length !== 0) {
-                        appModals.confirm($filter('translate')('notifications.title.delete'), $filter('translate')('notifications.title.deleteText'))
-                            .result.then(
-                            function () {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('notifications.title.delete'),
+                            content: $filter('translate')('notifications.title.deleteText'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
                                 $http({
                                     method: "POST",
                                     url: "controller/actions/notification/delete",
@@ -104,7 +107,8 @@
                                 }).success(function () {
                                     $scope.notificationsGrid.ctrl.refreshGrid();
                                 });
-                            });
+                            }
+                        });
                     }
                 };
 
@@ -113,7 +117,7 @@
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $uibModalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss('Canceled');
                 };
 
                 // Открытие панели уведомлений при клике по ссылке в оповещении

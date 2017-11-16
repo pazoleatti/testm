@@ -216,6 +216,7 @@ alter table department_change add constraint dep_change_chk_sunr_use check (sunr
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars_type check (type in ('S','N','D','R'));
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars__attr_r  check ((type<>'R' and attribute_id is null) or (type='R' and attribute_id is not null));
 alter table declaration_subreport_params add constraint chk_decl_subrep_pars_filter_r check ((type<>'R' and filter is null) or (type='R'));
+alter table declaration_data add constraint decl_data_chk_man_created check (manually_created in (0, 1));
 
 --------------------------------------------------------------------------------------------------------------------------
 -- Справочники физических лиц и статусов налогоплательщиков

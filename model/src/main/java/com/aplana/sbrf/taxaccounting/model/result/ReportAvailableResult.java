@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.model;
+package com.aplana.sbrf.taxaccounting.model.result;
 
 public class ReportAvailableResult {
     boolean downloadXmlAvailable;

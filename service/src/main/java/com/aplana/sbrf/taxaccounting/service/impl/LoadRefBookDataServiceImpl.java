@@ -122,6 +122,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         fiasMappingMap, FIAS_NAME, true, loadedFileNameList, taskId, maxFileSize);
             } catch (Exception e) {
                 // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
+                LOG.error(e.getLocalizedMessage(), e);
                 logger.error(IMPORT_REF_BOOK_ERROR, FIAS_NAME, e.getMessage());
                 return importCounter;
             }

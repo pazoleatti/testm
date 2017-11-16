@@ -4,11 +4,13 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.List;
+
 public class GetDeclarationTypeAction extends UnsecuredActionImpl<GetDeclarationTypeResult> {
 	private int departmentId;
     private int reportPeriod;
     private TaxType taxType;
-    private DeclarationFormKind declarationFormKind;
+    private List<DeclarationFormKind> declarationFormKindList;
 
     public int getDepartmentId() {
 		return departmentId;
@@ -34,11 +36,11 @@ public class GetDeclarationTypeAction extends UnsecuredActionImpl<GetDeclaration
 		this.taxType = taxType;
 	}
 
-    public DeclarationFormKind getDeclarationFormKind() {
-        return declarationFormKind;
-    }
+	public List<DeclarationFormKind> getDeclarationFormKindList() {
+		return declarationFormKindList;
+	}
 
-    public void setDeclarationFormKind(DeclarationFormKind declarationFormKind) {
-        this.declarationFormKind = declarationFormKind;
-    }
+	public void setDeclarationFormKindList(List<DeclarationFormKind> declarationFormKindList) {
+		this.declarationFormKindList = declarationFormKindList;
+	}
 }

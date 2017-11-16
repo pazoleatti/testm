@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -30,13 +30,13 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.dao.script.BlobDataService
-import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentService
-import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService
-import com.aplana.sbrf.taxaccounting.service.script.RefBookService
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
@@ -49,7 +49,6 @@ new Report6Ndfl(this).run();
 @TypeChecked
 class Report6Ndfl extends AbstractScriptClass {
 
-    DeclarationService declarationService
     DeclarationData declarationData
     TAUserInfo userInfo
     NdflPersonService ndflPersonService
@@ -85,9 +84,6 @@ class Report6Ndfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("departmentReportPeriodService")) {
             this.departmentReportPeriodService = (DepartmentReportPeriodService) scriptClass.getProperty("departmentReportPeriodService");
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");

@@ -1,11 +1,4 @@
-<div class="modal-header">
-    <button type="button" class="close" data-ng-click="close()">×</button>
-    <h4 class="modal-title">
-        &nbsp;{{::'notifications.title.listNotifications' |
-        translate}}
-    </h4>
-</div>
-<div class="modal-body form100" style="height: 500px;">
+<div class="modal-body form100" style="min-height: 500px;">
     <div class="row container-grid-top" style="margin: 0 0 10px 0; height: 34px;">
 
         <a class="aplanaLink btn btn-default" data-aplana-link-click="delete()"
@@ -15,14 +8,15 @@
     <div data-aplana-grid
          data-grid-fill-space="true"
          data-grid-fill-space-container-selector=".modal-body"
+         data-grid-fill-space-container-selector-top=".container-grid-top"
          data-grid-options="notificationsGrid.options"
          data-grid-ctrl="notificationsGrid.ctrl"
          data-ng-model="notificationsGrid.value"
          id="notificationsTable"
          style="float: left; width: 100%;"></div>
 </div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-default" id="closeButton" data-ng-click="close()">
+<div class="modal-footer" style="margin: -43px 0 -19px 0; position: relative; z-index: 100">
+    <button type="button" class="btn btn-default" id="closeButton" data-ng-click="close()" style="margin: -40px 0 -17px 0;">
         <span data-translate-once="button.close"></span>
     </button>
 </div>

@@ -8,56 +8,55 @@
     /**
      * @description Контроллер формы создания/ Информация по налоговой форме
      */
-        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$uibModalInstance', '$filter', '$http', 'RnuPerson', 'APP_CONSTANTS',
-            function ($scope, $uibModalInstance, $filter, $http, RnuPerson, APP_CONSTANTS) {
+        .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter', '$http', 'RnuPerson', 'APP_CONSTANTS', '$logPanel',
+            function ($scope, $modalInstance, $shareData, $filter, $http, RnuPerson, APP_CONSTANTS, $logPanel) {
 
-            //Доступгость грида
-            $scope.enabledGrid = false;
+                //Доступгость грида
+                $scope.enabledGrid = false;
 
-            //Доступность кнопки сформировать
-            $scope.enabledCreateReport = false;
-
-            /**
-             * @description Создание рну ндфл для физ лица
-             */
-            $scope.formationRNU = function () {
-                $http({
-                    method: "POST",
-                    url: "controller/actions/declarationData/" + $scope.$resolve.data.declarationDataId + "/rnuDoc",
-                    params: {
-                        ndflPersonFilter: JSON.stringify({
-                            declarationDataId: $scope.$resolve.data.declarationDataId,
-                            lastName: $scope.searchFilter.params.lastName,
-                            firstName: $scope.searchFilter.params.firstName,
-                            middleName: $scope.searchFilter.params.middleName,
-                            innNp: $scope.searchFilter.params.innNp,
-                            innForeign: $scope.searchFilter.params.innForeign,
-                            snils: $scope.searchFilter.params.snils,
-                            idDocNumber: $scope.searchFilter.params.idDocNumber,
-                            dateFrom: $scope.searchFilter.params.dateFrom,
-                            dateTo: $scope.searchFilter.params.dateTo
-                        }),
-                        personId: $scope.rnuNdflGrid.value[0].personId
-                    }
+                /**
+                 * @description Создание рну ндфл для физ лица
+                 */
+                $scope.formationRNU = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/rnuDoc",
+                        params: {
+                            ndflPersonFilter: JSON.stringify({
+                                declarationDataId: $shareData.declarationDataId,
+                                lastName: $scope.searchFilter.params.lastName,
+                                firstName: $scope.searchFilter.params.firstName,
+                                middleName: $scope.searchFilter.params.middleName,
+                                innNp: $scope.searchFilter.params.innNp,
+                                innForeign: $scope.searchFilter.params.innForeign,
+                                snils: $scope.searchFilter.params.snils,
+                                idDocNumber: $scope.searchFilter.params.idDocNumber,
+                                dateFrom: $scope.searchFilter.params.dateFrom,
+                                dateTo: $scope.searchFilter.params.dateTo
+                            }),
+                            personId: $scope.rnuNdflGrid.value[0].personId
+                        }
 
 
-                }).then(function (response) {
+                    }).then(function (response) {
+                        if (response && response.data && response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                    $modalInstance.dismiss('Canceled');
+                };
 
-                });
-                $uibModalInstance.dismiss('Canceled');
-            };
+                /**
+                 * @description Закрытие окна
+                 */
+                $scope.close = function () {
+                    $modalInstance.dismiss('Canceled');
+                };
 
-            /**
-             * @description Закрытие окна
-             */
-            $scope.close = function () {
-                $uibModalInstance.dismiss('Canceled');
-            };
-
-            /**
-             * Grid для отображения найденных физ лиц в документе
-             */
-            $scope.rnuNdflGrid =
+                /**
+                 * Grid для отображения найденных физ лиц в документе
+                 */
+                $scope.rnuNdflGrid =
                 {
                     ctrl: {},
                     value: [],
@@ -68,8 +67,8 @@
                             return {
                                 projection: 'rnuPersons',
                                 ndflPersonFilter: JSON.stringify({
-                                    declarationDataId: $scope.$resolve.data.declarationDataId,
-                                    lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' :  $scope.searchFilter.params.lastName ,
+                                    declarationDataId: $shareData.declarationDataId,
+                                    lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
                                     firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
                                     middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
                                     inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
@@ -124,34 +123,23 @@
                     }
                 };
 
-            /**
-             * @description Отвечает за доступность недоступность кнопки 'сформировать'
-             */
-            $scope.chekRow = function () {
-                if ($scope.rnuNdflGrid.value.length !== null) {
-                    $scope.enabledCreateReport = true;
-                }
-            };
+                /**
+                 * @description Поиск физ лиц для формирования рну
+                 */
+                $scope.searchPerson = function () {
+                    $scope.enabledGrid = true;
+                    $scope.rnuNdflGrid.ctrl.refreshGrid();
 
-            /**
-             * @description Поиск физ лиц для формирования рну
-             */
-            $scope.searchPerson = function () {
-                $scope.enabledGrid = true;
-                $scope.rnuNdflGrid.ctrl.refreshGrid();
-                $scope.enabledCreateReport = $scope.rnuNdflGrid;
-                $scope.enabledCreateReport = false;
+                };
 
-            };
-
-            $scope.searchFilter = {
-                ajaxFilter: [],
-                params: {},
-                isClear: false,
-                filterName: 'incomesAndTaxFilter'
-            };
+                $scope.searchFilter = {
+                    ajaxFilter: [],
+                    params: {},
+                    isClear: false,
+                    filterName: 'incomesAndTaxFilter'
+                };
 
 
-        }]);
+            }]);
 }());
 

@@ -4,11 +4,11 @@
     /**
      * @description Модуль для работы со формами ндфл
      */
-    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.modals', 'app.rest', 'app.createDeclaration', 'app.logPanel', 'app.formatters', 'app.select.common'])
+    angular.module('app.ndflJournal', ['ui.router', 'app.constants', 'app.rest', 'app.createDeclaration', 'app.logPanel', 'app.formatters', 'app.select.common'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflJournal', {
                 url: '/taxes/ndflJournal',
-                templateUrl: 'client/app/taxes/ndfl/ndflJournal.html',
+                templateUrl: 'client/app/taxes/ndfl/ndflJournal.html?v=${buildUuid}',
                 controller: 'ndflJournalCtrl',
                 params: {uuid: null}
             });
@@ -18,9 +18,13 @@
          * @description Контроллер списка форм
          */
         .controller('ndflJournalCtrl', [
-            '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS', 'appModals', '$logPanel', 'PermissionChecker', '$http',
-            function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS, appModals, $logPanel, PermissionChecker, $http) {
-                $scope.declarationCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
+            '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS',
+            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage',
+            function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS,
+                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage) {
+                $rootScope.declarationPrimaryCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_PRIMARY);
+                $rootScope.declarationConsolidatedCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
+                $rootScope.declarationCreateAllowed = $rootScope.declarationPrimaryCreateAllowed || $rootScope.declarationConsolidatedCreateAllowed;
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -72,11 +76,11 @@
                 var isLoadingPage = true;
                 $scope.$watch('searchFilter.params.periods', function (selectedPeriods) {
                     if (selectedPeriods && selectedPeriods.length > 0) {
-                        $rootScope.latestSelectedPeriod = selectedPeriods[selectedPeriods.length - 1];
+                        $webStorage.set(APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, selectedPeriods[selectedPeriods.length - 1], true);
                         isLoadingPage = false;
                     } else {
                         if (!isLoadingPage) {
-                            $rootScope.latestSelectedPeriod = null;
+                            $webStorage.remove(APP_CONSTANTS.APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, true);
                         }
                     }
                 });
@@ -183,20 +187,31 @@
                  * Показ МО "Создание налоговой формы"
                  */
                 $scope.showCreateDeclarationModal = function () {
-                    var modal = appModals.create('client/app/taxes/ndfl/createDeclaration.html', 'createDeclarationFormCtrl',
-                        {latestSelectedPeriod: $rootScope.latestSelectedPeriod}, {size: 'md'});
-                    modal.result.then(function (response) {
-                        if (response.data && response.data.entityId && response.data.entityId !== null) {
-                            $state.go('ndfl', {
-                                declarationDataId: response.data.entityId,
-                                uuid: response.data.uuid
-                            });
-                        } else {
-                            if (response.data && response.data.uuid && response.data.uuid !== null) {
-                                $logPanel.open('log-panel-container', response.data.uuid);
+                    $aplanaModal.open({
+                        title: $filter('translate')('createDeclaration.title'),
+                        templateUrl: 'client/app/taxes/ndfl/createDeclaration.html?v=${buildUuid}',
+                        controller: 'createDeclarationFormCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    latestSelectedPeriod: $webStorage.get(APP_CONSTANTS.USER_STORAGE.NAME, APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD, true)
+                                };
                             }
                         }
-                    });
+                    }).result.then(
+                        function (response) {
+                            if (response.data && response.data.entityId && response.data.entityId !== null) {
+                                $state.go('ndfl', {
+                                    declarationDataId: response.data.entityId,
+                                    uuid: response.data.uuid
+                                });
+                            } else {
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
+                            }
+                        });
                 };
 
                 /**
@@ -268,11 +283,19 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Вернуть в создана"
                  */
                 $scope.returnToCreated = function () {
-                    appModals.create('client/app/taxes/ndfl/returnToCreatedDialog.html', 'returnToCreatedCtrl', {
-                        header: $filter('translate')('title.indicateReasonForReturn'),
-                        msg: $filter('translate')('title.reasonForReturn')
-                    }, {size: 'md'})
-                        .result.then(
+                    $aplanaModal.open({
+                        title: $filter('translate')('title.indicateReasonForReturn'),
+                        templateUrl: 'client/app/taxes/ndfl/returnToCreatedDialog.html?v=${buildUuid}',
+                        controller: 'returnToCreatedCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    msg: $filter('translate')('title.reasonForReturn')
+                                };
+                            }
+                        }
+                    }).result.then(
                         function (reason) {
                             $http({
                                 method: "POST",
@@ -293,9 +316,11 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Удалить"
                  */
                 $scope.delete = function () {
-                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.deleteDeclarations'))
-                        .result.then(
-                        function () {
+                    $dialogs.confirmDialog({
+                        content: $filter('translate')('title.deleteDeclarations'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/delete",
@@ -307,7 +332,8 @@
                                 var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
                                 $state.go($state.current, params, {reload: true});
                             });
-                        });
+                        }
+                    });
                 };
             }])
 
@@ -335,34 +361,5 @@
                 return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
             };
         })
-
-        .filter('nameFormatter', function () {
-            return function (entity) {
-                return entity ? entity.name : "";
-            };
-        })
-
-        .filter('periodFormatter', function () {
-            return function (entity) {
-                return entity ? entity.taxPeriod.year + ": " + entity.name : "";
-            };
-        })
-
-        /**
-         * @description Форматтер для преобразования тега корректировки из enum в boolean
-         * @param correctionTag
-         */
-        .filter('correctionTagFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
-            return function (correctionTag) {
-                switch (correctionTag) {
-                    case APP_CONSTANTS.CORRETION_TAG.ALL:
-                        return undefined;
-                    case APP_CONSTANTS.CORRETION_TAG.ONLY_PRIMARY:
-                        return false;
-                    case APP_CONSTANTS.CORRETION_TAG.ONLY_CORRECTIVE:
-                        return true;
-                }
-                return undefined;
-            };
-        }]);
+    ;
 }());

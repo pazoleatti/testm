@@ -105,8 +105,10 @@
          * с действующей на момент начала периода версией шаблона формы указанного типа.
          */
         .factory('DeclarationTypeForCreateResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/refBook/207/activeAndAssigned?declarationKind=:declarationKind&departmentId=:departmentId&periodId=:periodId', {}, {
-                query: {method: 'GET', isArray: true, cache: false}
+            return $resource('controller/rest/refBook/207/activeAndAssigned', {}, {
+                query: {
+                    method: 'GET', isArray: true, cache: false
+                }
             });
         }])
 
@@ -160,15 +162,6 @@
          */
         .factory('asyncTaskResource', ['$resource', function ($resource) {
             return $resource('controller/rest/async', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
-            });
-        }])
-
-        /**
-         * @description Редактируемая задача планировщика
-         */
-        .factory('updateScheduleTask', ['$resource', function ($resource) {
-            return $resource('controller/rest/updateSchedulerTask?idTaskScheduler=:idTaskScheduler', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });
         }])

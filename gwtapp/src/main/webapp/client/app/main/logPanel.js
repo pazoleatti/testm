@@ -11,7 +11,7 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' style='background: #fff; height: 100%; width: 98%; position: absolute;'>" +
+                        "<div id='log-panel' style=' background: #fff;height: 93%; width: 98%; position: absolute; overflow-y: scroll;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -28,8 +28,8 @@
                         "                <button type='button' class='close' data-ng-click='closeLogPanel()'>×</button>" +
                         "            </div>" +
                         "            <div id='log-panel-header-print' style='float: right; margin: -4px 5px 0 0;'>" +
-                        "                <img src='resources/img/printer-black-16.png'>" +
-                        "                <a href='controller/actions/logEntry/" + uuid + "'>{{'logPanel.header.print' | translate}}</a>" +
+                        "                <img src='resources/img/unload-white-16.png'>" +
+                        "                <a href='controller/actions/logEntry/" + uuid + "'>{{'logPanel.header.unload' | translate}}</a>" +
                         "            </div>" +
                         "        </div>" +
                         "        <div data-aplana-grid" +

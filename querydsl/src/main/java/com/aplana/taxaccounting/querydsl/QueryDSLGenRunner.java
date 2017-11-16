@@ -3,7 +3,6 @@ package com.aplana.taxaccounting.querydsl;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.State;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.querydsl.sql.Configuration;
@@ -47,7 +46,8 @@ public class QueryDSLGenRunner {
             configuration.register("NOTIFICATION", "IS_READ", new NumericBooleanType());
             configuration.register("NOTIFICATION", "TYPE", new EnumByOrdinalType<>(NotificationType.class));
             configuration.register("DECLARATION_DATA", "STATE", new EnumByOrdinalType<>(State.class));
-            configuration.register("LOG_ENTRY", "LOG_LEVEL", new EnumByOrdinalType<>(LogLevel.class));
+            configuration.register("DECLARATION_DATA", "MANUALLY_CREATED", new NumericBooleanType());
+            configuration.register("TAX_PERIOD", "YEAR", Integer.class);
 
             exportScheme(dbUrl,
                     "ndfl_unstable",
@@ -55,12 +55,12 @@ public class QueryDSLGenRunner {
                     "NDFL_UNSTABLE",
                     packageStr,
                     targetFolder,
-                    null,
+                    new String[]{"DECLARATION_DATA"},
                     configuration);
 
             // УН (удаляются только ранее сгенерированные Q классы по передаваемому перечню таблиц).
             // Необходимо ручное редактирование Q классов после генерации для удаления ссылок на другие таблицы УН (ошибки компиляции)
-            configuration = createConfiguration();
+            /*configuration = createConfiguration();
 
             configuration.register("DEPARTMENT", "TYPE", new EnumByOrdinalType<>(DepartmentType.class));
 
@@ -71,7 +71,7 @@ public class QueryDSLGenRunner {
                     packageStr,
                     targetFolder,
                     new String[]{"DEPARTMENT", "SEC_ROLE", "SEC_USER", "SEC_USER_ROLE"},
-                    configuration);
+                    configuration);*/
 
             LOG.info("QueryDSLGenRunner finish");
         } catch (Exception e) {

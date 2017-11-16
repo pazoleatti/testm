@@ -8,7 +8,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('lockDataList', {
                 url: '/administration/locks',
-                templateUrl: 'client/app/administration/locks.html',
+                templateUrl: 'client/app/administration/locks.html?v=${buildUuid}',
                 controller: 'locksCtrl'
             });
         }])

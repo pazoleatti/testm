@@ -28,11 +28,14 @@
             'aplana.dropdown',
             'aplana.formLeaveConfirmer',
             'aplana.link',
+            'aplana.modal',
+            'aplana.modal.dialogs',
             // Модули приложения
             'app.header',
             'app.logPanel',
             'app.ndfl',
             'app.ndflJournal',
+            'app.ndflReport',
             'app.ndflReportJournal',
             'app.schedulerTaskList',
             'app.lockDataList',
@@ -45,9 +48,12 @@
         /**
          * @description Отображение модального окна с сообщением "Функционал находится в разработке".
          */
-        .factory('ShowToDoDialog', ['appModals', '$filter', function (appModals, $filter) {
+        .factory('ShowToDoDialog', ['$dialogs', '$filter', function ($dialogs, $filter) {
             return function () {
-                appModals.message($filter('translate')('messageDialog.toDo.title'), $filter('translate')('messageDialog.toDo.message'));
+                $dialogs.messageDialog({
+                    title: $filter('translate')('messageDialog.toDo.title'),
+                    content: $filter('translate')('messageDialog.toDo.message')
+                });
             };
         }])
 
@@ -62,7 +68,7 @@
                 $stateProvider
                     .state('/', {
                         url: '/',
-                        templateUrl: 'client/app/main/app.html'
+                        templateUrl: 'client/app/main/app.html?v=${buildUuid}'
                     });
 
                 // Настройка источника локализованных сообщений

@@ -45,7 +45,7 @@
                         };
 
                         opts = _setOpts(opts);
-                        return dialogs.create('client/lib/templates/confirmDialog.html', 'confirmCtrl', data, opts);
+                        return dialogs.create('client/lib/templates/confirmDialog.html?v=${buildUuid}', 'confirmCtrl', data, opts);
                     },
                     /**
                      * Создает произвольное модальное окно
@@ -105,7 +105,7 @@
                         };
 
                         opts = _setOpts(opts);
-                        return dialogs.create('client/components/modal/stack.html', 'modalStackCtrl', data, opts);
+                        return dialogs.create('client/components/modal/stack.html?v=${buildUuid}', 'modalStackCtrl', data, opts);
                     },
                     /**
                      * Диалог для ввода строки
@@ -126,7 +126,7 @@
                         };
 
                         opts = _setOpts(opts);
-                        return dialogs.create('client/app/common/templateModal/input-message.html', 'inputMessageCtrl', data, opts);
+                        return dialogs.create('client/app/common/templateModal/input-message.html?v=${buildUuid}', 'inputMessageCtrl', data, opts);
                     }
                 };
             };

@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
-import com.aplana.sbrf.taxaccounting.model.result.CreateResult;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import org.joda.time.LocalDateTime;
@@ -30,12 +32,10 @@ public interface DeclarationDataService {
      * Создание декларации в заданном отчетном периоде подразделения
      *
      * @param userInfo          Информация о текущем пользователе
-     * @param declarationTypeId ID вида налоговой формы
-     * @param departmentId      ID подразделения
-     * @param periodId          ID отчетного периода
+     * @param action
      * @return Модель {@link CreateResult}, в которой содержатся данные о результате операции
      */
-    CreateResult<Long> create(TAUserInfo userInfo, Long declarationTypeId, Integer departmentId, Integer periodId);
+    CreateResult<Long> create(TAUserInfo userInfo, CreateDeclarationDataAction action);
 
     /**
      * Создание декларации в заданном отчетном периоде подразделения
@@ -272,10 +272,11 @@ public interface DeclarationDataService {
 
     /**
      * Формирование Реестра сформированной отчетности
-     * @param userInfo информация о пользователе, выполняющего действие
+     *
+     * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
-     * @param force признак для перезапуска задачи
-     * @param create признак существования отчета
+     * @param force             признак для перезапуска задачи
+     * @param create            признак существования отчета
      * @return
      */
     CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force, boolean create);
@@ -298,6 +299,15 @@ public interface DeclarationDataService {
      * @return информация о доступности скачивания отчетов
      */
     ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId);
+
+    /**
+     * Проверка возможности доступности отчетов для отчетной НФ
+     *
+     * @param userInfo          текущий пользователь
+     * @param declarationDataId идентификатор декларации
+     * @return
+     */
+    ReportAvailableReportDDResult checkAvailabilityReportDD(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * метод запускает скрипты с событием предрасчетные проверки
@@ -461,6 +471,14 @@ public interface DeclarationDataService {
     LockData lock(long declarationDataId, TAUserInfo userInfo);
 
     /**
+     * Заблокировать налоговую форму
+     *
+     * @param declarationDataId Идентификатор формы
+     * @param userInfo          Информация о пользователе
+     */
+    DeclarationLockResult createLock(long declarationDataId, TAUserInfo userInfo);
+
+    /**
      * Снять блокировку с DeclarationData.
      *
      * @param declarationDataId - идентификатор декларации
@@ -499,12 +517,13 @@ public interface DeclarationDataService {
      * @return название
      */
     String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
+
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      *
-     * @param declarationTypeId тип декларации
-     * @param departmentReportPeriodId  идентификатор отчетного периода привязанного к подразделению
-     * @param taskType  тип асинхронной задачи, формирующей имя
+     * @param declarationTypeId        тип декларации
+     * @param departmentReportPeriodId идентификатор отчетного периода привязанного к подразделению
+     * @param taskType                 тип асинхронной задачи, формирующей имя
      * @return название
      */
     String getDeclarationFullName(int declarationTypeId, int departmentReportPeriodId, AsyncTaskType taskType);
@@ -676,17 +695,26 @@ public interface DeclarationDataService {
 
     /**
      * Создает задачу на принятии налоговой формы, перед созданием задачи выполняются необходимые проверки
+     *
      * @param userInfo
-     * @param declarationDataId
-     * @param force если true, то удаляем старую задачу(и оправляем оповещения подписавщимся пользователям), иначе, если задача уже запущена, вызываем диалог
-     * @param cancelTask если true, то удаляем задачи, которые должны удаляться при запуске текущей, иначе, если есть такие задачи, вызываем диалог
+     * @param action
      */
-    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, final long declarationDataId, final boolean force, final boolean cancelTask);
+    AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, AcceptDeclarationDataAction action);
 
     /**
      * Выгрузка отчетности
+     *
      * @param userInfo
      * @return
      */
     ActionResult downloadReports(TAUserInfo userInfo, List<Long> declarationDataIdList);
+
+    /**
+     * Создание отчета для отчетной НФ
+     *
+     * @param userInfo
+     * @param action
+     * @return
+     */
+    CreateReportResult createReportForReportDD(TAUserInfo userInfo, CreateReportAction action);
 }

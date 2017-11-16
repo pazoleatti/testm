@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -35,7 +36,7 @@ public abstract class DeclarationDataFilePermission extends AbstractPermission<D
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationDataFile targetDomainObject) {
             if (DeclarationDataPermission.VIEW.isGranted(currentUser, declarationDataDao.get(targetDomainObject.getDeclarationDataId()))
-                    && targetDomainObject.getFileTypeId() != 268574299
+                    && targetDomainObject.getFileTypeId() != AttachFileType.TYPE_1.getId()
                     && !targetDomainObject.getUserName().equals("Система")) {
                 return true;
             }

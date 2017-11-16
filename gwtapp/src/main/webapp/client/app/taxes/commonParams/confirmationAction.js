@@ -10,8 +10,8 @@
     /**
      * @description Контроллер для подтверждения измения общих параметров по умолчанию'
      */
-        .controller('confirmationActionCtrl', ['$scope', '$filter', '$http', '$uibModalInstance',
-            function ($scope, $filter, $http, $uibModalInstance) {
+        .controller('confirmationActionCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'commonParamsGrid',
+            function ($scope, $filter, $http, $modalInstance, commonParamsGrid) {
 
                 /**
                  * @description Редактирование параметра
@@ -22,15 +22,15 @@
                         url: "/controller/actions/changeToDefaultCommonParams"
                     });
 
-                    $scope.$resolve.data.commonParamsGrid.ctrl.refreshGrid();
-                    $uibModalInstance.dismiss('Canceled');
+                    commonParamsGrid.ctrl.refreshGrid();
+                    $modalInstance.dismiss('Canceled');
                 };
 
                 /**
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $uibModalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss('Canceled');
                 };
 
             }]);

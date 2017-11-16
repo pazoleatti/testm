@@ -42,7 +42,7 @@ public class CalendarDaoTest{
 
 	@Test
 	public void testGetWorkDay() {
-		assertEquals(truncate(getDate(2016, 1, 1)), truncate(dao.getWorkDay(getDate(2016, 0, 1), 15)));
+		assertEquals(truncate(getDate(2016, 0, 29)), truncate(dao.getWorkDay(getDate(2016, 0, 1), 15)));
 		assertEquals(truncate(getDate(2016, 1, 2)), truncate(dao.getWorkDay(getDate(2015, 11, 30), 16)));
 		assertEquals(truncate(getDate(2016, 0, 18)), truncate(dao.getWorkDay(getDate(2016, 0, 12), 4)));
 		assertEquals(truncate(getDate(2017, 0, 15)), truncate(dao.getWorkDay(getDate(2016, 11, 30), 16)));

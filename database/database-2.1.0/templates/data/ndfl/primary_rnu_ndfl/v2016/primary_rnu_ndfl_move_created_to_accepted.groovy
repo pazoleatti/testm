@@ -2,8 +2,8 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
-import com.aplana.sbrf.taxaccounting.service.script.DeclarationService
-import com.aplana.sbrf.taxaccounting.service.script.NdflPersonService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 
@@ -14,7 +14,6 @@ class MoveCreatedToAccepted extends AbstractScriptClass {
 
     DeclarationData declarationData
     NdflPersonService ndflPersonService
-    DeclarationService declarationService
 
     private MoveCreatedToAccepted() {
     }
@@ -27,9 +26,6 @@ class MoveCreatedToAccepted extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
             this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
-        }
-        if (scriptClass.getBinding().hasVariable("declarationService")) {
-            this.declarationService = (DeclarationService) scriptClass.getProperty("declarationService");
         }
     }
 
