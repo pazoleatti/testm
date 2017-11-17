@@ -1,0 +1,74 @@
+<div id="ndfl" style="height: 100%;">
+    <!--Заголовок-->
+    <div class="row" style="min-width: 1000px;">
+        <div class="header-col" style="margin-left: 15px;">
+            <h1>{{::'taskList.title.taskManager' | translate}} - {{::'taskList.title.taskChange' | translate}}:</h1>
+        </div>
+    </div>
+    <hr>
+    <div class="form100" style="height:66%;margin-top:-10px">
+        <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
+            <!--Сохранить изменения параметра-->
+            <button type="button" class="btn btn-default"
+                    data-ng-click="actionsUpdateSchedulerfunction()">
+                <span data-translate-once="DIALOGS_SAVE"></span>
+            </button>
+            <!--Отмена изменений-->
+            <button type="button" class="btn btn-default"
+                    data-ng-click="cancel()" >
+                <span data-translate-once="DIALOGS_CANCEL"></span>
+            </button>
+
+            <form class="form-horizontal" role="form" style="width: 600px; margin-right: auto">
+
+
+                <div class="row">
+                    <div class="filter-col w500" style="height: 360px; width: 500px; margin: auto">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <label class="control-label">{{::'taskList.title.name' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input data-ng-model="name"
+                                       placeholder="{{updateSchedulerTask.taskName}}"
+                                       type="text" class="form-control"
+                                       disabled/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <label class="control-label">{{::'taskList.title.schedule' |
+                                    translate}}:</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control"
+                                       value="{{updateSchedulerTask.schedule}}"
+                                       ng-model="updateSchedulerTask.schedule"
+                                       />
+                                <img src="resources/img/question_mark.png" class="floatWindow-href" style="position:absolute; text-align:right; margin-left:376px; margin-top: -22px">
+                                <div class="floatWindow-element" ng-bind-html="taskScheduleHelpUpdateParam"
+                                     style="font-size: 8pt; width: 460px; position:absolute;margin-top:-30px; margin-left:400px"/>
+                            </div>
+                            <div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" data-ng-show="updateSchedulerTask.params.length !== 0">
+                            <div class="col-md-3">
+                                <label class="control-label"> {{updateSchedulerTask.params[0].paramName}} </label>
+                            </div>
+                            <div class="col-md-9">
+                                <input value="updateSchedulerTask.params[0].value"
+                                       ng-model="updateSchedulerTask.params[0].value"
+                                       type="text" class="form-control"
+                                       title="{{lifetimeLock}}"/>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+</div>
+    </div>
+</div>

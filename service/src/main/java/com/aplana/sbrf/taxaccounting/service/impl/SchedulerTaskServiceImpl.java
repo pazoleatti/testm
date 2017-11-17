@@ -35,6 +35,10 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     }
 
     @Override
+    public SchedulerTaskData getSchedulerTask(Long taskId) {
+        return schedulerTaskDao.fetchOneSchedulerTask(taskId );
+    }
+    @Override
     public List<SchedulerTaskData> getAllSchedulerTask() {
         return schedulerTaskDao.fetchAllSchedulerTasks();
     }

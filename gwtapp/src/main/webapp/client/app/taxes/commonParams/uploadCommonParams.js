@@ -41,7 +41,6 @@
                     $modalInstance.dismiss('Canceled');
                 };
 
-
             }]);
 
 }());

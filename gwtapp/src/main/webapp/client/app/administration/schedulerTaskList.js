@@ -4,9 +4,9 @@
     /**
      * @description Модуль для страницы Планировщик задач
      */
-    angular.module('app.schedulerTaskList', ['app.rest'])
+    angular.module('app.schedulerTaskList', ['app.rest', 'app.updateSchedulerTask'])
         .config(['$stateProvider', function ($stateProvider) {
-            $stateProvider.state('schedulerTaskList', {
+           $stateProvider.state('schedulerTaskList', {
                 url: '/administration/schedulerTaskList',
                 templateUrl: 'client/app/administration/schedulerTaskList.html?v=${buildUuid}',
                 controller: 'schedulerTaskListCtrl'
@@ -16,8 +16,8 @@
         /**
          * @description Контроллер страницы "Планировщик задач"
          */
-        .controller('schedulerTaskListCtrl', ['$scope', '$filter', 'schedulerTaskResource', '$http', 'APP_CONSTANTS',
-            function ($scope, $filter, schedulerTaskResource, $http, APP_CONSTANTS) {
+        .controller('schedulerTaskListCtrl', ['$scope', '$filter', 'schedulerTaskResource', '$http', 'APP_CONSTANTS', '$state',
+            function ($scope, $filter, schedulerTaskResource, $http, APP_CONSTANTS, $state) {
 
                 /**
                  * @description Обновление грида
@@ -44,7 +44,7 @@
                             $filter('translate')('taskList.title.nextStartDate')],
                         colModel: [
                             {name: 'id', index: 'id', width: 60, key: true},
-                            {name: 'name', index: 'task_name', width: 260},
+                            {name: 'name', index: 'task_name', width: 260,  formatter: linkFileFormatter},
                             {name: 'state', index: 'active', width: 200},
                             {name: 'schedule', index: 'schedule', width: 175},
                             {
@@ -90,6 +90,21 @@
                         $scope.refreshGrid(1);
                     });
                 };
+
+
+                /**
+                 * @description форматтер для возможности изменения задач в планировщике задаче
+                 * @param row строка таблицы
+                 * @param cellValue значение ячейки
+                 * @param options данные таблицы
+                 * без cellValue и options ссылка формируется некорректно
+                 */
+                function linkFileFormatter(cellValue, options, row) {
+                    return "<a target='_self' href='index.html#/administration/schedulerTaskList/updateSchedulerTask/"+
+                        row.id+"'>" + cellValue + "</a>";
+
+                }
+
 
                 /**
                  * @description Остановка выполнения по расписанию
