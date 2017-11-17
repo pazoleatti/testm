@@ -148,6 +148,7 @@
                             resolve: {
                                 $shareData: function () {
                                     return {
+                                        declarationState: $scope.declarationData.state,
                                         declarationDataId: $scope.declarationDataId,
                                         attachFileTypes: attachFileTypes
                                     };

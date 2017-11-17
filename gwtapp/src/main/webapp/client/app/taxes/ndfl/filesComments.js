@@ -21,6 +21,8 @@
             'APP_CONSTANTS',
             function ($scope, $http, $modalInstance, $shareData, $filter, $logPanel, $dialogs, DeclarationDataResource, Upload, APP_CONSTANTS) {
 
+                $scope.editMode = false;
+
                 var attachFileType = $shareData.attachFileTypes;
 
                 var defaultFileType = {
@@ -72,29 +74,40 @@
                 };
 
                 /**
+                 * Загрузка записей о файлах в таблицу
+                 */
+                function loadFiles() {
+                    DeclarationDataResource.query({
+                            declarationDataId: $shareData.declarationDataId,
+                            projection: "filesComments"
+                        },
+                        function (data) {
+                            if (data) {
+                                $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
+                                $scope.commentForm.comment = data.comment;
+                            }
+                        }
+                    );
+                }
+
+                /**
                  * @description Инициализация таблицы
                  **/
                 function initPage() {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
-                    }).then(function (response) {
-                        $scope.declarationLockCreated = response.data.declarationDataLocked;
-                        if (response.data.uuid) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                        DeclarationDataResource.query({
-                                declarationDataId: $shareData.declarationDataId,
-                                projection: "filesComments"
-                            },
-                            function (data) {
-                                if (data) {
-                                    $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
-                                    $scope.commentForm.comment = data.comment;
-                                }
+                    if($shareData.declarationState !== APP_CONSTANTS.STATE.ACCEPTED.name) {
+                        $http({
+                            method: "POST",
+                            url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
+                        }).then(function (response) {
+                            $scope.editMode = response.data.declarationDataLocked;
+                            if (response.data.uuid) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
                             }
-                        );
-                    });
+                            loadFiles();
+                        });
+                    } else {
+                        loadFiles();
+                    }
                 }
 
 
@@ -191,7 +204,7 @@
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
-                    if ($scope.declarationLockCreated) {
+                    if ($scope.editMode) {
                         $http({
                             method: "POST",
                             url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
