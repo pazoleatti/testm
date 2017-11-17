@@ -18,7 +18,12 @@ import java.util.*;
 
 public class RefBookCSVReportBuilder extends AbstractReportBuilder {
 
-    public static final String FILE_NAME = "Отчет_";
+    public static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
     private static final RefBookAttribute levelAttribute = new RefBookAttribute() {
         {
@@ -53,13 +58,15 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
     private Map<Long, List<Map<String, RefBookValue>>> hierarchicRecords = new HashMap<Long, List<Map<String, RefBookValue>>>();
     private Map<Long, Map<Long, String>> dereferenceValues;
     private RefBook refBook;
+    private Date version;
     private List<RefBookAttribute> refBookAttributeList;
     private RefBookAttribute sortAttribute;
 
-    public RefBookCSVReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Map<Long, String>> dereferenceValues, RefBookAttribute sortAttribute) {
+    public RefBookCSVReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Map<Long, String>> dereferenceValues, Date version, RefBookAttribute sortAttribute) {
         super("acctax", ".csv");
         this.records = records;
         this.refBook = refBook;
+        this.version = version;
         this.dereferenceValues = dereferenceValues;
         this.sortAttribute = sortAttribute;
         refBookAttributeList = new LinkedList<RefBookAttribute>();
@@ -95,7 +102,14 @@ public class RefBookCSVReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected File createTempFile() throws IOException {
-        return File.createTempFile(FILE_NAME, ".csv");
+        String fileName = refBook.getName().replace(' ', '_');
+        if(refBook.isVersioned()) {
+            fileName = fileName + "_" + sdf.get().format(version);
+        }
+        fileName = fileName + ".csv";
+        //Используется такой подход, т.к. File.createTempFile в именах генерирует случайные числа. Здесь запись
+        //выполняется в 1 и тот же файл. Но записываются всегда актуальные данные
+        return new File(TMP_DIR, fileName);
     }
 
     @Override
