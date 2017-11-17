@@ -34,6 +34,8 @@ public class ReaderAndGeneratorXMLFiles {
 
     private static List<String> regionsDictionary;
 
+    private static int nListCounter;
+
     /**
      * Максимальная возможная дата для генераци даты рождения
      */
@@ -41,16 +43,17 @@ public class ReaderAndGeneratorXMLFiles {
 
     public static void main(String[] args) {
         try {
-            if (args.length != 2) {
+            if (args.length < 2) {
                 System.out.print("Вы ввели неверное количество аргументов");
             } else {
+                System.out.println("Время начала: " + new Date());
                 initDictionaries();
                 String path = args[0];
                 Integer numberOfFiles = Integer.parseInt(args[1]);
 
                 File sourceFile = new File(path);
                 File destFile;
-
+                System.out.println("Началось изменение атрибутов " + new Date());
                 for (int i = 0; i < numberOfFiles; i++) {
                     String tmpPath = path.replaceAll(path.substring(path.length() - 36, path.length() - 4),
                             Integer.toString(i + 1).length() == 1 ?
@@ -60,6 +63,8 @@ public class ReaderAndGeneratorXMLFiles {
                     FileUtils.copyFile(sourceFile, destFile);
                     changeXmlFile(destFile, tmpPath.substring(tmpPath.lastIndexOf("/") + 1, tmpPath.length() - 4), args.length == 2 ? 0 : Integer.parseInt(args[2]));
                 }
+                System.out.println("Количество ПолучДох = " + nListCounter);
+                System.out.println("Время окончания: " + new Date());
             }
 
         } catch (Exception e) {
@@ -69,7 +74,7 @@ public class ReaderAndGeneratorXMLFiles {
 
     private static void changeXmlFile(File fXmlFile, String fileName, int countTF) {
         try {
-            System.out.println("Время начала: " + new Date());
+
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -98,14 +103,16 @@ public class ReaderAndGeneratorXMLFiles {
                 }
             }
 
-            System.out.println("Началось изменение атрибутов " + new Date());
+            /*System.out.println("Началось изменение атрибутов " + new Date());*/
 
             NodeList nList = doc.getElementsByTagName("ПолучДох");
 
-            System.out.println("Количество ПолучДох = " + nList.getLength());
+            nListCounter += nList.getLength();
+
+            /*System.out.println("Количество ПолучДох = " + nList.getLength());*/
 
             Random r = new Random(System.currentTimeMillis());
-            String alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+
             for (int temp = 0; temp < nList.getLength(); temp++) {
 
                 Node nNode = nList.item(temp);
@@ -143,7 +150,7 @@ public class ReaderAndGeneratorXMLFiles {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(fXmlFile);
             transformer.transform(source, result);
-            System.out.println("Время окончания: " + new Date());
+            /*System.out.println("Время окончания: " + new Date());*/
         } catch (Exception e) {
             e.printStackTrace();
         }
