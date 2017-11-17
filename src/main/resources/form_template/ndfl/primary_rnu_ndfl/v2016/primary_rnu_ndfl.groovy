@@ -142,7 +142,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     final int CONSOLIDATED_RNU_NDFL_TEMPLATE_ID = 101
     final int PRIMARY_RNU_NDFL_TEMPLATE_ID = 100
 
-    final String TEMPLATE_PERSON_FL = "%s, ИНП: %s"
+    final String TEMPLATE_PERSON_FL_OPER = "%s, ИНП: %s, ID операции: %s"
     final String LOG_TYPE_PERSON_MSG = "Значение гр. \"%s\" (\"%s\") не соответствует справочнику \"%s\""
 
     /**
@@ -893,13 +893,13 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                     personIncome.incomeAccruedDate >= new LocalDateTime(value.record_version_from?.dateValue) &&
                     personIncome.incomeAccruedDate <= new LocalDateTime(value.record_version_to?.dateValue)
         }) {
-            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+            String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [fio, ndflPerson.inp, personIncome.operationId])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
                     C_INCOME_CODE, personIncome.incomeCode ?: "",
                     R_INCOME_CODE
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, personIncome.rowNum ?: "")
-            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInp, pathError,
+            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_INCOME_CODE), fioAndInpAndOperId, pathError,
                     errMsg)
         }
 
@@ -960,13 +960,13 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personDeduction.periodCurrSumm = toBigDecimal((GPathResult) node.getProperty('@СумТекВыч'))
 
         if (!deductionTypeList.contains(personDeduction.typeCode)) {
-            String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+            String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [fio, ndflPerson.inp, personDeduction.operationId])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
                     C_TYPE_CODE, personDeduction.typeCode ?: "",
                     R_TYPE_CODE
             )
             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, personDeduction.rowNum ?: "")
-            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_TYPE_CODE), fioAndInp, pathError,
+            logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_TYPE_CODE), fioAndInpAndOperId, pathError,
                     errMsg)
         }
 

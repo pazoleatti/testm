@@ -49,7 +49,7 @@
 </div>
 <div class="modal-footer" style="margin: -48px 0 -13px 0;position: relative; z-index: 1000;">
     <div class="button_panel" style="float: left; margin: 0 0 -2px 0;">
-        <div class="btn-toolbar" role="toolbar" data-ng-show="declarationLockCreated">
+        <div class="btn-toolbar" role="toolbar" data-ng-show="editMode">
             <span>
                 <button type="file" class="btn btn-default" ngf-select="addFileClick($file)">
                      {{::'filesComment.button.add' |translate}}
@@ -64,7 +64,7 @@
     </div>
 
     <button type="button" class="btn btn-default" id="saveButton" data-ng-disabled="commentForm.$invalid"
-            data-ng-click="save()" data-ng-show="declarationLockCreated">
+            data-ng-click="save()" data-ng-show="editMode">
         <span data-translate-once="button.save"></span>
     </button>
 

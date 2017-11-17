@@ -64,7 +64,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
             result.setRoles(rs.getString("role_names"));
             result.setDepName(rs.getString("path"));
             List<Long> roles = new ArrayList<Long>();
-            for(TARole taRole: getRoles(result.getId())) {
+            for(TARole taRole: getRoles(result.getId(), true)) {
                 roles.add((long)taRole.getId());
             }
             result.setTaRoleIds(roles);
@@ -103,9 +103,10 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-    private List<TARole> getRoles(int userId) {
+	private List<TARole> getRoles(int userId, boolean onlyNDFL) {
+		String tableName = onlyNDFL ? "sec_role_ndfl" : "sec_role";
         return getJdbcTemplate().query(
-                "select id, alias, name from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) order by id",
+                "select id, alias, name from " + tableName + " r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) order by id",
                 new Object[] { userId },
                 new int[] { Types.NUMERIC },
                 TA_ROLE_MAPPER
@@ -141,7 +142,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				LOG.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
 			}
 
-			user.setRoles(getRoles(user.getId()));
+			user.setRoles(getRoles(user.getId(), false));
 			if (user.hasRoles(TARole.N_ROLE_OPER_ALL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
 				user.setAsnuIds(getAllAsnuIds());
 			} else {
@@ -271,7 +272,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                 "cov_rls as (\n" +
                     "select ur.user_id user_id, sr.name\n" +
                     "from sec_user_role ur\n" +
-                    "join sec_role sr on ur.role_id=sr.id \n" +
+                    "join sec_role_ndfl sr on ur.role_id=sr.id \n" +
                     "order by user_id\n" +
                 "),\n" +
                 "arg_rls as (\n" +
@@ -281,7 +282,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                 "),\n" +
                 "cov_asnu as (\n" +
 					"select ur.user_id user_id, r.name \n" +
-					"from sec_role r \n" +
+					"from sec_role_ndfl r \n" +
 					"join sec_user_role ur on ur.role_id = r.id \n" +
 					"join ref_book_asnu rba on rba.role_alias = r.id\n" +
 					"order by ur.user_id" +
@@ -302,7 +303,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                     "where parent_id is null" +
                 ")\n" +
                 "select us.id, us.name, us.login, us.email, us.is_active as active, roless.role_concat as role_names, asnu.asnu_concat as asnu_names, us.department_id as dep_id, deps.path\n" +
-                "from sec_user us \n" +
+                "from sec_user_ndfl us \n" +
                 "left join arg_rls roless on roless.user_id=us.id \n" +
                 "left join arg_asnu asnu on asnu.user_id=us.id \n" +
                 "join deps deps on us.department_id=deps.dep_id";
