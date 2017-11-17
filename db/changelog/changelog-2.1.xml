@@ -1912,4 +1912,11 @@ END;'
             <where>id=2</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.1-dnovikov-1" author="dnovikov">
+        <update tableName="ref_book">
+            <column name="table_name" value="SEC_ROLE_NDFL"/>
+            <where>id=95</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
