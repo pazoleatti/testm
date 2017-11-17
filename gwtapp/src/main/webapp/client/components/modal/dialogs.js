@@ -51,6 +51,7 @@
         .constant('errorDialogDefaultOptions', {
             title: 'Ошибка',
             titleIcon: 'icon-cbr-windows-to_user',
+            modalHeaderClass: 'modal-header-error',
             closeBtnCaption: 'Закрыть',
             content: '',
             controller: 'MessageDlgDefaultCtrl'
