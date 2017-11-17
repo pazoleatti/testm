@@ -1419,6 +1419,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         call.declareParameters(new SqlOutParameter("personCnt", Types.INTEGER), new SqlParameter("p_declaration", Types.NUMERIC));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("p_declaration", declarationDataId);
-        return (Integer) call.execute(params).get("personCnt");
+        Integer personCnt = (Integer) call.execute(params).get("personCnt");
+        return personCnt != null ? personCnt : 0;
     }
 }
