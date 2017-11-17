@@ -293,11 +293,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             //Подразделение декларации
             Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
             //ТБ декларации
-            int declarationTB = departmentService.getParentTB(declarationDepartment.getId()).getId();
+            Department parent = departmentService.getParentTB(declarationDepartment.getId());
+            int declarationTB = parent != null ? parent.getId() : declarationDepartment.getId();
 
             //Подразделение и ТБ пользователя
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
-            int userTB = departmentService.getParentTB(taUser.getDepartmentId()).getId();
+            Department userDepartmentTB = departmentService.getParentTB(taUser.getDepartmentId());
+            int userTB = userDepartmentTB != null ? userDepartmentTB.getId() : taUser.getDepartmentId();
             //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
             DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
             List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
