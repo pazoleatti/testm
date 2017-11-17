@@ -1868,4 +1868,25 @@ END;'
             <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2671 Создать синоним на таблицу subsystem_role из УН и вьюшки на пользователей и роли ФП НДФЛ-->
+	<changeSet id="2.1-rnurgaleev-148" author="rnurgaleev">
+        <sql>
+            CREATE SYNONYM SUBSYSTEM_ROLE FOR TAX_1_5.SUBSYSTEM_ROLE;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-149" author="rnurgaleev">
+        <createView
+                replaceIfExists="true"
+                viewName="SEC_USER_NDFL">select distinct a.* from sec_user a join sec_user_role b on a.id=b.user_id join subsystem_role c on b.role_id=c.role_id where c.subsystem_id=11 order by name, login
+        </createView>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-150" author="rnurgaleev">
+        <createView
+                replaceIfExists="true"
+                viewName="SEC_ROLE_NDFL">select distinct a.* from sec_role a join subsystem_role c on a.id=c.role_id where c.subsystem_id=11 order by id
+        </createView>
+    </changeSet>
 </databaseChangeLog>
