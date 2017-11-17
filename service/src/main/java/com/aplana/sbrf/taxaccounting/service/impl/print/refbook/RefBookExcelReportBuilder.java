@@ -13,6 +13,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -75,7 +77,6 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     };
 
     public RefBookExcelReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues, Date version, String filter, final RefBookAttribute sortAttribute) {
-        super(FILE_NAME, ".xlsx");
         this.workBook = new XSSFWorkbook();
         String sheetName = refBook.getName().replaceAll("[/\\[\\]\\*\\:\\?\\\\]", "_"); //Убираем недостимые символы в названии листа
         this.sheet = workBook.createSheet(sheetName.length()>31?sheetName.substring(0, 31):sheetName);
@@ -318,6 +319,18 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     @Override
     protected void fillFooter() {
 
+    }
+
+    @Override
+    protected File createTempFile() throws IOException {
+        String fileName = refBook.getName().replace(' ', '_');
+        if(refBook.isVersioned()) {
+            fileName = fileName + "_" + sdf.get().format(version);
+        }
+        fileName = fileName + ".xlsx";
+        //Используется такой подход, т.к. File.createTempFile в именах генерирует случайные числа. Здесь запись
+        //выполняется в 1 и тот же файл. Но записываются всегда актуальные данные
+        return new File(TMP_DIR, fileName);
     }
 
     @Override
