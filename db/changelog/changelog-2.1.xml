@@ -1899,14 +1899,14 @@ END;'
         </update>
     </changeSet>
 
-    <changeSet id="2.1-vlednev-7" author="vlednev">
+    <changeSet id="2.1-vlednev-8" author="vlednev">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
             <where>id=100</where>
         </update>
     </changeSet>
 
-    <changeSet id="2.1-vlednev-8" author="vlednev">
+    <changeSet id="2.1-vlednev-9" author="vlednev">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
             <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
             <where>id=2</where>
