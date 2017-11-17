@@ -271,7 +271,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                 "cov_rls as (\n" +
                     "select ur.user_id user_id, sr.name\n" +
                     "from sec_user_role ur\n" +
-                    "join sec_role sr on ur.role_id=sr.id \n" +
+                    "join sec_role_ndfl sr on ur.role_id=sr.id \n" +
                     "order by user_id\n" +
                 "),\n" +
                 "arg_rls as (\n" +
@@ -281,7 +281,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                 "),\n" +
                 "cov_asnu as (\n" +
 					"select ur.user_id user_id, r.name \n" +
-					"from sec_role r \n" +
+					"from sec_role_ndfl r \n" +
 					"join sec_user_role ur on ur.role_id = r.id \n" +
 					"join ref_book_asnu rba on rba.role_alias = r.id\n" +
 					"order by ur.user_id" +
@@ -302,7 +302,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                     "where parent_id is null" +
                 ")\n" +
                 "select us.id, us.name, us.login, us.email, us.is_active as active, roless.role_concat as role_names, asnu.asnu_concat as asnu_names, us.department_id as dep_id, deps.path\n" +
-                "from sec_user us \n" +
+                "from sec_user_ndfl us \n" +
                 "left join arg_rls roless on roless.user_id=us.id \n" +
                 "left join arg_asnu asnu on asnu.user_id=us.id \n" +
                 "join deps deps on us.department_id=deps.dep_id";
