@@ -64,7 +64,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
             result.setRoles(rs.getString("role_names"));
             result.setDepName(rs.getString("path"));
             List<Long> roles = new ArrayList<Long>();
-            for(TARole taRole: getRoles(result.getId())) {
+            for(TARole taRole: getRoles(result.getId(), true)) {
                 roles.add((long)taRole.getId());
             }
             result.setTaRoleIds(roles);
@@ -103,9 +103,10 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-    private List<TARole> getRoles(int userId) {
+	private List<TARole> getRoles(int userId, boolean onlyNDFL) {
+		String tableName = onlyNDFL ? "sec_role_ndfl" : "sec_role";
         return getJdbcTemplate().query(
-                "select id, alias, name from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) order by id",
+                "select id, alias, name from " + tableName + " r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?) order by id",
                 new Object[] { userId },
                 new int[] { Types.NUMERIC },
                 TA_ROLE_MAPPER
@@ -141,7 +142,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				LOG.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
 			}
 
-			user.setRoles(getRoles(user.getId()));
+			user.setRoles(getRoles(user.getId(), false));
 			if (user.hasRoles(TARole.N_ROLE_OPER_ALL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
 				user.setAsnuIds(getAllAsnuIds());
 			} else {
