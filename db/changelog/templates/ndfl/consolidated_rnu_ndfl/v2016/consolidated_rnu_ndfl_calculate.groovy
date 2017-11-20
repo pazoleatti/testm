@@ -249,8 +249,9 @@ class Calculate extends AbstractScriptClass {
         }
 
         logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + ScriptUtils.calcTimeMillis(time));
-        logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") + " (всего " + declarationDataIdList.size() + " форм)")
+        logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") + " (всего " + declarationDataIdList.size() + " " + ScriptUtils.getFirstDeclensionByNumeric("форма", declarationDataIdList.size()) + ")")
     }
+
 
     /**
      * Получаем список идентификаторов деклараций которые попадут в консолидированную форму

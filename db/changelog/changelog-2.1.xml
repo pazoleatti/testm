@@ -1938,4 +1938,14 @@ END;'
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2547 Некорректное сообщение при расчете КНФ по одной ПНФ-->
+    <changeSet id="2.1-ytrofimov-59" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
+            <where>id=5</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
