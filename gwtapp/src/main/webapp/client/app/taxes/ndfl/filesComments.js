@@ -67,10 +67,8 @@
                                             type: 'change',
                                             fn: function () {
                                                 var grid = $scope.fileCommentGrid.ctrl.getGrid();
-                                                var rowId = this.getAttribute("rowid");
-                                                var value = this.value;
-                                                var row = grid.getLocalRow(rowId);
-                                                row.note = value;
+                                                var row = grid.getLocalRow(this.getAttribute("rowid"));
+                                                row.note = this.value;
                                             }
                                         }
                                     ]
