@@ -1919,4 +1919,13 @@ END;'
             <where>id=95</where>
         </update>
     </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-151" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body2.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
