@@ -943,6 +943,40 @@ button.btn.btn-default-nonBg:hover:not([disabled]):hover{
   width: 24px;
   height: 24px;
 }
+button.btn-default-ok,
+button.btn-default-close,
+button.btn-default-ok-green,
+button.btn-default-close-green{
+  padding: 0 12px 0 38px!important;
+  position: relative;
+}
+button.btn-default-ok::before,
+button.btn-default-close::before,
+button.btn-default-ok-green::before,
+button.btn-default-close-green::before{
+  content: "";
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 3px;
+  left: 6px;
+}
+button.btn-default-ok::before{
+  background: url('/client/img/ok.png') no-repeat;
+  background-size: contain;
+}
+button.btn-default-close::before{
+  background: url('/client/img/cancel-white.png') no-repeat;
+  background-size: contain;
+}
+button.btn-default-ok-green::before{
+  background: url('/client/img/ok-green.png') no-repeat;
+  background-size: contain;
+}
+button.btn-default-close-green::before{
+  background: url('/client/img/cancel.png') no-repeat;
+  background-size: contain;
+}
 .btn.btn-sm{
   height: 30px;
   margin: -1px 0 1px -1px;

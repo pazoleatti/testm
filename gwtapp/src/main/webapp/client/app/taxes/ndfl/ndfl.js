@@ -77,10 +77,10 @@
                                         $interval.cancel($scope.intervalId);
                                         var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
                                         $dialogs.errorDialog({
-                                            content: message
-                                        }).result.then(
-                                            function () {
+                                            content: message,
+                                            closeBtnClick: function () {
                                                 $state.go("/");
+                                            }
                                         });
                                         return;
                                     }
@@ -148,6 +148,7 @@
                             resolve: {
                                 $shareData: function () {
                                     return {
+                                        declarationState: $scope.declarationData.state,
                                         declarationDataId: $scope.declarationDataId,
                                         attachFileTypes: attachFileTypes
                                     };

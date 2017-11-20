@@ -1889,4 +1889,53 @@ END;'
                 viewName="SEC_ROLE_NDFL">select distinct a.* from sec_role a join subsystem_role c on a.id=c.role_id where c.subsystem_id=11 order by id
         </createView>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-1900 Добавить ID операции в уведомления с ошибками по проверкам-->
+    <changeSet id="2.1-vlednev-7" author="vlednev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-vlednev-8" author="vlednev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-vlednev-9" author="vlednev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-dnovikov-1" author="dnovikov">
+        <update tableName="ref_book">
+            <column name="table_name" value="SEC_ROLE_NDFL"/>
+            <where>id=95</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2571 Некорректная идентификация ПНФ после назначения дублей в справочнике "ФЛ"-->	
+	<changeSet id="2.1-rnurgaleev-151" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body2.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-152" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body3.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>

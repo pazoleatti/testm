@@ -22,6 +22,8 @@ public abstract class AbstractReportBuilder {
 
     protected static final Log LOG = LogFactory.getLog(AbstractReportBuilder.class);
 
+    protected static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+
     protected Workbook workBook;
     protected Sheet sheet;
 

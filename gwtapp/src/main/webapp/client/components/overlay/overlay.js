@@ -112,7 +112,7 @@
                                         $dialogs.errorWithStack({
                                             message: message,
                                             addMessage: addMessage,
-                                            windowClass: 'modal1200'
+                                            windowClass: 'modal1000'
                                         });
                                     }]);
                                 }
