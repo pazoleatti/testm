@@ -55,7 +55,27 @@
                                 formatter: 'select',
                                 editoptions: {value: attachFileType}
                             },
-                            {name: 'note', index: 'note', width: 200, editable: true, edittype: 'text'},
+                            {
+                                name: 'note',
+                                index: 'note',
+                                width: 200,
+                                editable: true,
+                                edittype: 'text',
+                                editoptions: {
+                                    dataEvents: [
+                                        {
+                                            type: 'change',
+                                            fn: function () {
+                                                var grid = $scope.fileCommentGrid.ctrl.getGrid();
+                                                var rowId = this.getAttribute("rowid");
+                                                var value = this.value;
+                                                var row = grid.getLocalRow(rowId);
+                                                row.note = value;
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
                             {name: 'date', index: 'date', width: 119, formatter: $filter('dateTimeFormatter')},
                             {name: 'userName', index: 'userName', width: 135},
                             {name: 'userDepartmentName', index: 'userDepartmentName', width: 220, sortable: false}
@@ -94,7 +114,7 @@
                  * @description Инициализация таблицы
                  **/
                 function initPage() {
-                    if($shareData.declarationState !== APP_CONSTANTS.STATE.ACCEPTED.name) {
+                    if ($shareData.declarationState !== APP_CONSTANTS.STATE.ACCEPTED.name) {
                         $http({
                             method: "POST",
                             url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"

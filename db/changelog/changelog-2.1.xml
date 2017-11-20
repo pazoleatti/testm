@@ -1939,6 +1939,21 @@ END;'
                  splitStatements="false"/>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2677 Код дохода "2791" указан без даты ограничения актуальности в справочнике-->
+	<changeSet id="2.1-rnurgaleev-153" author="rnurgaleev">
+        <update
+                tableName="ref_book_income_type">
+            <column name="record_id" value="298957"/>
+            <where>code='2791' and status=2</where>
+        </update>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-154" author="rnurgaleev">
+        <sql>
+            update ref_book_income_type set version=version+1 where status=2;
+        </sql>
+    </changeSet>
+
     <!-- https://jira.aplana.com/browse/SBRFNDFL-2547 Некорректное сообщение при расчете КНФ по одной ПНФ-->
     <changeSet id="2.1-ytrofimov-59" author="ytrofimov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
