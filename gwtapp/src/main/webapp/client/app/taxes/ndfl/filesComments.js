@@ -158,7 +158,6 @@
                                         files.push(grid.getLocalRow(element));
                                     });
                                     grid.trigger("reloadGrid");
-                                    $logPanel.open('log-panel-container', response.data.uuid);
                                 }
                             }
                         });
