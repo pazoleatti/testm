@@ -1962,5 +1962,15 @@ END;'
             <where>id=5</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2658 Ошибка: "Город" ("Самара г") отсутствует в справочнике "ФИАС" в случае указания адреса без улицы: -->
+	<changeSet id="2.1-rnurgaleev-155" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg_body7.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
 </databaseChangeLog>
