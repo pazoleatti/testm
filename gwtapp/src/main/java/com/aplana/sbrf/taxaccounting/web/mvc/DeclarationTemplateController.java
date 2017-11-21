@@ -192,16 +192,6 @@ public class DeclarationTemplateController {
                 Logger logger = new Logger();
                 logger.setTaUserInfo(securityService.currentUserInfo());
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-                /*if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)) {
-                    mainOperatingService.isInUsed(
-                            declarationTemplateId,
-                            declarationTemplate.getType().getId(),
-                            declarationTemplate.getStatus(),
-                            declarationTemplate.getVersion(),
-                            endDate,
-                            logger);
-                    checkErrors(logger);
-                }*/
 
                 //Проверка на использоваение jrxml другими декларациями
                 //http://jira.aplana.com/browse/SBRFACCTAX-12066
