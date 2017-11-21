@@ -1,43 +1,72 @@
 <div class="modal-body" style="min-height: 150px">
-    <div class="grid-filter"
-         style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
-        <form class="form-horizontal" role="form" novalidate>
-            <div class="row">
-                <div class="filter-col w500">
-                    <div class="form-group">
-                        <div class="col-md-4">
-                            <label class="control-label">{{::'createDeclaration.period' | translate}}:</label>
-                        </div>
-                        <div data-ng-controller="SelectPeriodCtrl"
+    <div class="form-horizontal" data-ng-form="createDeclarationForm">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
+               style="height: 100px;">
+            <tbody>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'createDeclaration.period' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 355px;"
+                             data-ng-controller="SelectPeriodCtrl"
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
                              data-ng-model="declarationData.period"
-                             class="col-md-8"></div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-4">
-                            <label class="control-label">{{::'createDeclaration.department' | translate}}:</label>
+                             data-ng-required="true">
                         </div>
-                        <div data-ng-controller="SelectDepartmentCtrl"
-                             data-ui-select2="departmentsSelect.options"
-                             data-ng-init="initDepartmentSelectWithOpenPeriod('declarationData.period')"
-                             data-ng-model="declarationData.department"
-                             class="col-md-8"></div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-4">
-                            <label class="control-label">{{::'createDeclaration.declarationType' |
-                                translate}}:</label>
+                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            translate}}
                         </div>
-                        <div data-ng-controller="SelectDeclarationTypeCtrl"
-                             data-ui-select2="declarationTypeSelect.options"
-                             data-ng-init="initSelectWithDeclarationTypesForCreate(declarationKind, 'declarationData.period', 'declarationData.department')"
-                             data-ng-model="declarationData.declarationType"
-                             class="col-md-8"></div>
                     </div>
-                </div>
-            </div>
-        </form>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'createDeclaration.department' | translate}}:</label>
+                </td>
+                <td>
+                    <div data-ng-if="declarationData.period">
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectDepartmentCtrl"
+                                 data-ui-select2="departmentsSelect.options"
+                                 data-ng-init="initDepartmentSelectWithOpenPeriod('declarationData.period')"
+                                 data-ng-model="declarationData.department"
+                                 data-ng-required="true">
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'createDeclaration.declarationType' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-ng-if="declarationData.department && declarationData.period">
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectDeclarationTypeCtrl"
+                                 data-ui-select2="declarationTypeSelect.options"
+                                 data-ng-init="initSelectWithDeclarationTypesForCreate(declarationKind, 'declarationData.period', 'declarationData.department')"
+                                 data-ng-model="declarationData.declarationType"
+                                 data-ng-required="true">
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="modal-footer">
