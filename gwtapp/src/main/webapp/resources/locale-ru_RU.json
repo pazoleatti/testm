@@ -95,6 +95,7 @@
     "menu.taxes.commonParameters": "Общие параметры",
     "menu.nsi.refbooks": "Справочники",
     "menu.administration.blockList": "Список блокировок",
+    "menu.administration.userList": "Список пользователей",
     "menu.administration.asyncTaskList": "Асинхронные задачи",
     "menu.administration.configParams": "Конфигурационные параметры",
     "menu.administration.schedulerTaskList": "Планировщик задач",

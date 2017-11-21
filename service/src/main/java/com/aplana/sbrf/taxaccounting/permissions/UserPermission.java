@@ -108,6 +108,11 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      * Право доступа к пункту меню "Налоги"
      */
     public static final Permission<TAUser> VIEW_TAXES = new ViewTaxesPermission(1 << 20);
+    /**
+     * Право доступа к пунктам меню:
+     * "Администрирование->Список пользователей"
+     */
+    public static final Permission<TAUser> VIEW_ADMINISTRATION_USERS = new ViewAdministrationUsersPermission(1 << 21);
 
 
     public UserPermission(long mask) {
@@ -191,6 +196,22 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.ROLE_ADMIN);
+        }
+    }
+
+    /**
+     * Право доступа к пунктам меню:
+     * "Администрирование->Список пользователей"
+     */
+    public static final class ViewAdministrationUsersPermission extends UserPermission {
+
+        public ViewAdministrationUsersPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.ROLE_ADMIN);
         }
     }
 
