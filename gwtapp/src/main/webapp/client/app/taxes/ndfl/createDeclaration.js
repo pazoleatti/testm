@@ -42,25 +42,19 @@
                         APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD,
                         $scope.declarationData.period,
                         true);
-                    if ($scope.declarationData.period && $scope.declarationData.department && $scope.declarationData.declarationType) {
 
-                        $http({
-                            method: "POST",
-                            url: "controller/actions/declarationData/create",
-                            params: {
-                                declarationTypeId: $scope.declarationData.declarationType.id,
-                                departmentId: $scope.declarationData.department.id,
-                                periodId: $scope.declarationData.period.id,
-                                manuallyCreated: true
-                            }
-                        }).then(function (response) {
-                            $modalInstance.close(response);
-                        });
-                    } else {
-                        $dialogs.errorDialog({
-                            content: $filter('translate')('createDeclaration.errorMessage')
-                        });
-                    }
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/create",
+                        params: {
+                            declarationTypeId: $scope.declarationData.declarationType.id,
+                            departmentId: $scope.declarationData.department.id,
+                            periodId: $scope.declarationData.period.id,
+                            manuallyCreated: true
+                        }
+                    }).then(function (response) {
+                        $modalInstance.close(response);
+                    });
                 };
 
                 /**
