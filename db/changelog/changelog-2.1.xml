@@ -1988,4 +1988,12 @@ END;'
             <where>id=2</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2442 Ошибка исполнения [-1]: startup failed: Script8.groovy: 185: [Static type checking] при создании 2НДФЛ (2)-->
+    <changeSet id="2.1-ytrofimov-62" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=104</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
