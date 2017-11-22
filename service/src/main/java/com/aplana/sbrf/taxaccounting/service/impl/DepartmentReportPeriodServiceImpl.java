@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,8 @@ import java.util.List;
 @Service
 @Transactional
 public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriodService {
+
+	private static final Log LOG = LogFactory.getLog(DepartmentReportPeriodServiceImpl.class);
 
     private final static String ERROR_BATCH_MESSAGE = "Пустой список отчетных периодов";
 	private final static String COMMON_ERROR_MESSAGE = "Ошибка при выполнении операции с отчетными периодами подразделения";
@@ -29,6 +33,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -40,6 +45,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -51,6 +57,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -62,6 +69,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -75,6 +83,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
 	}
@@ -86,6 +95,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -99,6 +109,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -110,6 +121,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -121,6 +133,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -132,6 +145,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -143,6 +157,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -154,6 +169,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -165,6 +181,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
@@ -176,6 +193,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
             throw new ServiceException(COMMON_ERROR_MESSAGE, e);
         }
     }
@@ -187,6 +205,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
+			LOG.error(COMMON_ERROR_MESSAGE, e);
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
