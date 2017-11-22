@@ -55,7 +55,7 @@
     "button.calculate": "Рассчитать",
     "button.delete": "Удалить",
     "button.accept": "Принять",
-    "button.return": "Вернуть в создана",
+    "button.return": "Вернуть в Создана",
     "button.add": "Добавить",
     "button.save": "Сохранить",
     "button.edit": "Редактировать",
@@ -87,7 +87,7 @@
     "menu.taxes.ndfl.details": "НДФЛ детализация",
     "menu.taxes.ndfl.forms": "Формы",
     "menu.taxes.ndfl.maintenanceOfPeriods": "Ведение периодов",
-    "menu.taxes.ndfl.settingsUnits": "Настройка подразделений",
+    "menu.taxes.ndfl.settingsUnits": "Настройки подразделений",
     "menu.taxes.ndfl.formAssignment": "Назначение форм",
     "menu.taxes.ndfl.accountability": "Отчетность",
     "menu.taxes.service": "Сервис",
@@ -305,8 +305,9 @@
 
     "logPanel.title.dateTime": "Время",
     "logPanel.title.message": "Сообщение",
-    "logPanel.header.message": "Сообщения (всего: {0}; фатальных ошибок: {1})",
+    "logPanel.header.message": "Уведомления (всего: {0}; фатальных ошибок: {1})",
     "logPanel.header.unload": "Выгрузить",
+    "logPanel.header.unload.title": "Выгрузить в файл MS Excel",
     "title.link.download": "Скачать",
     "title.link.reportDelete": "Отчет удален",
 

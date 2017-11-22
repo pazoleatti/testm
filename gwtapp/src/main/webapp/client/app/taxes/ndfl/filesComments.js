@@ -190,6 +190,12 @@
                 $scope.save = function () {
 
                     var grid = $scope.fileCommentGrid.ctrl.getGrid();
+
+                    // В jqGrid значение редактируемой ячейки сохраняется только в том случае, если нажать Enter или
+                    // выделить другую ячейку.
+                    // 0, 0 - ячейка, которая не отображается на экране. false - выделить без редактирования
+                    grid.jqGrid("editCell", 0, 0, false);
+
                     var ids = grid.getDataIDs();
                     var files = [];
                     _.each(ids, function (element) {

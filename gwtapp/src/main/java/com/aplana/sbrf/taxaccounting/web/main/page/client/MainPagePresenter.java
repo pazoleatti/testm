@@ -166,7 +166,7 @@ public class MainPagePresenter extends
 	 */
 	private void updateTitle(String title, String desc) {
 		StringBuilder pageTitleBuilder = new StringBuilder(
-				"ФП \"НДФЛ, Фонды и Сборы\"");
+				"ФП \"НДФЛ\"");
 		if (Document.get() != null) {
 			pageTitleBuilder.append(title != null ? " - " + title : "");
 			pageTitleBuilder.append(desc != null ? " : " + desc : "");
