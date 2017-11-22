@@ -305,7 +305,7 @@
 
     "logPanel.title.dateTime": "Время",
     "logPanel.title.message": "Сообщение",
-    "logPanel.header.message": "Сообщения (всего: {0}; фатальных ошибок: {1})",
+    "logPanel.header.message": "Уведомления (всего: {0}; фатальных ошибок: {1})",
     "logPanel.header.unload": "Выгрузить",
     "logPanel.header.unload.title": "Выгрузить в файл MS Excel",
     "title.link.download": "Скачать",
