@@ -206,7 +206,7 @@ background-position: -40px 0;*/
 }
 
 .ui-state-hover .ui-icon, .ui-state-focus .ui-icon {
-    background-image: url("ui-icons_7d7d7d_256x240.png");
+    background-image: url("paginator-sprite.png");
     /* background-image: url("../img/sprites_orange/next-prew-arrow.png");*/
 }
 
