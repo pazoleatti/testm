@@ -1919,4 +1919,81 @@ END;'
             <where>id=95</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2571 Некорректная идентификация ПНФ после назначения дублей в справочнике "ФЛ"-->	
+	<changeSet id="2.1-rnurgaleev-151" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body2.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-152" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body3.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2677 Код дохода "2791" указан без даты ограничения актуальности в справочнике-->
+	<changeSet id="2.1-rnurgaleev-153" author="rnurgaleev">
+        <update
+                tableName="ref_book_income_type">
+            <column name="record_id" value="298957"/>
+            <where>code='2791' and status=2</where>
+        </update>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-154" author="rnurgaleev">
+        <sql>
+            update ref_book_income_type set version=version+1 where status=2;
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2547 Некорректное сообщение при расчете КНФ по одной ПНФ-->
+    <changeSet id="2.1-ytrofimov-59" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
+            <where>id=5</where>
+        </update>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2658 Ошибка: "Город" ("Самара г") отсутствует в справочнике "ФИАС" в случае указания адреса без улицы: -->
+	<changeSet id="2.1-rnurgaleev-155" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg_body7.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2690 При проверке суммы излишне удержанного налога система не учитывает значение атрибута ДолгНА в xml-->
+    <changeSet id="2.1-ytrofimov-60" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-61" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2442 Ошибка исполнения [-1]: startup failed: Script8.groovy: 185: [Static type checking] при создании 2НДФЛ (2)-->
+    <changeSet id="2.1-ytrofimov-62" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=104</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

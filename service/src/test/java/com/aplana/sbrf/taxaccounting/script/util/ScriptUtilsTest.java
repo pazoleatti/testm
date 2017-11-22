@@ -399,4 +399,16 @@ public class ScriptUtilsTest {
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 0000000\") не должно быть нулевым", ScriptUtils.checkDul("07", "АП 0000000", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("24", "АП 1234567", "dulNumber"));
     }
+
+    @Test
+    public void checkGetWordByNumeric() {
+        Assert.assertEquals("Форма", ScriptUtils.getFirstDeclensionByNumeric("Форма", 1));
+        Assert.assertEquals("Формы", ScriptUtils.getFirstDeclensionByNumeric("Форма", 2));
+        Assert.assertEquals("Форм", ScriptUtils.getFirstDeclensionByNumeric("Форма", 5));
+        Assert.assertEquals("Форм", ScriptUtils.getFirstDeclensionByNumeric("Форма", 11));
+        Assert.assertEquals("Форм", ScriptUtils.getFirstDeclensionByNumeric("Форма", 112));
+        Assert.assertEquals("Форма", ScriptUtils.getFirstDeclensionByNumeric("Форма", 121));
+        Assert.assertEquals("Формы", ScriptUtils.getFirstDeclensionByNumeric("Форма", 123));
+        Assert.assertEquals("Форм", ScriptUtils.getFirstDeclensionByNumeric("Форма", 126));
+    }
 }

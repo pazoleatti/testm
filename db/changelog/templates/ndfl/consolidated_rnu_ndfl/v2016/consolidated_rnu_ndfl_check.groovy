@@ -1654,7 +1654,7 @@ class Check extends AbstractScriptClass {
                         BigDecimal S1 = new BigDecimal(0)
                         S1List.each { NdflPersonIncome npiItem ->
                             if (npiItem.taxBase != null) {
-                                S1.add(npiItem.taxBase)
+                                S1 = S1.add(npiItem.taxBase)
                             }
                         }
                         /*
@@ -1677,7 +1677,7 @@ class Check extends AbstractScriptClass {
                         BigDecimal S2 = new BigDecimal(0)
                         S2List.each { NdflPersonIncome npiItem ->
                             if (npiItem.calculatedTax != null) {
-                                S2.add(npiItem.calculatedTax)
+                                S2 = S2.add(npiItem.calculatedTax)
                             }
                         }
                         // Сумма по «Графа 16» текущей операции = S1 x 13% - S2
@@ -1818,27 +1818,27 @@ class Check extends AbstractScriptClass {
                 BigDecimal calculatedTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
                     if (ndflPersonIncomeCurrent.calculatedTax != null) {
-                        calculatedTaxSum.add(ndflPersonIncomeCurrent.calculatedTax)
+                        calculatedTaxSum = calculatedTaxSum.add(ndflPersonIncomeCurrent.calculatedTax)
                     }
                 }
                 // "Сумма Граф 17"
                 BigDecimal withholdingTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
                     if (ndflPersonIncomeCurrent.withholdingTax != null)
-                        withholdingTaxSum.add(ndflPersonIncomeCurrent.withholdingTax)
+                        withholdingTaxSum = withholdingTaxSum.add(ndflPersonIncomeCurrent.withholdingTax)
                 }
                 // "Сумма Граф 18"
                 BigDecimal notHoldingTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
                     if (ndflPersonIncomeCurrent.notHoldingTax != null) {
-                        notHoldingTaxSum.add(ndflPersonIncomeCurrent.notHoldingTax)
+                        notHoldingTaxSum = notHoldingTaxSum.add(ndflPersonIncomeCurrent.notHoldingTax)
                     }
                 }
                 // "Сумма Граф 19"
                 BigDecimal overholdingTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
                     if (ndflPersonIncomeCurrent.overholdingTax != null) {
-                        overholdingTaxSum.add(ndflPersonIncomeCurrent.overholdingTax)
+                        overholdingTaxSum = overholdingTaxSum.add(ndflPersonIncomeCurrent.overholdingTax)
                     }
                 }
                 // "Сумма Граф 20"

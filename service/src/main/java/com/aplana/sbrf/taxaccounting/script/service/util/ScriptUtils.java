@@ -2605,4 +2605,28 @@ public final class ScriptUtils {
             return ScriptUtils.formatDate((Date) date, DATE_FORMAT);
         }
     }
+
+    /**
+     * Получить форму слова первого склонения в зависимости от стоящего рядом со словом числительным.
+     * @param word Слово первого склонения в именительном падеже
+     * @param numeric Числительное
+     * @return Слово в полученное в аргументе в нужном падеже в зависимости от числительного. Работает не со всеми
+     * словами данной категории. А только заканчивающимися в иминительном падеже множественного числа на ы.
+     */
+    public static String getFirstDeclensionByNumeric(String word, int numeric) {
+        int res = numeric % 10;
+        String numberAsString = String.valueOf(numeric);
+        for (String teenNumber: Arrays.asList("11", "12", "13", "14")) {
+            if (numberAsString.endsWith(teenNumber)) {
+                return word.substring(0, word.length()-1);
+            }
+        }
+        if (Arrays.asList(5, 6, 7, 8, 9, 0).contains(res)) {
+            return word.substring(0, word.length()-1);
+        }
+        if (Arrays.asList(2, 3, 4).contains(res)){
+            return word.substring(0, word.length() - 1) + "ы";
+        }
+        return word;
+    }
 }

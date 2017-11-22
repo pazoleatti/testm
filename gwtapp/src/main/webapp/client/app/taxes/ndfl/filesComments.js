@@ -55,7 +55,25 @@
                                 formatter: 'select',
                                 editoptions: {value: attachFileType}
                             },
-                            {name: 'note', index: 'note', width: 200, editable: true, edittype: 'text'},
+                            {
+                                name: 'note',
+                                index: 'note',
+                                width: 200,
+                                editable: true,
+                                edittype: 'text',
+                                editoptions: {
+                                    dataEvents: [
+                                        {
+                                            type: 'change',
+                                            fn: function () {
+                                                var grid = $scope.fileCommentGrid.ctrl.getGrid();
+                                                var row = grid.getLocalRow(this.getAttribute("rowid"));
+                                                row.note = this.value;
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
                             {name: 'date', index: 'date', width: 119, formatter: $filter('dateTimeFormatter')},
                             {name: 'userName', index: 'userName', width: 135},
                             {name: 'userDepartmentName', index: 'userDepartmentName', width: 220, sortable: false}
@@ -94,7 +112,7 @@
                  * @description Инициализация таблицы
                  **/
                 function initPage() {
-                    if($shareData.declarationState !== APP_CONSTANTS.STATE.ACCEPTED.name) {
+                    if ($shareData.declarationState !== APP_CONSTANTS.STATE.ACCEPTED.name) {
                         $http({
                             method: "POST",
                             url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/lock"
@@ -140,7 +158,6 @@
                                         files.push(grid.getLocalRow(element));
                                     });
                                     grid.trigger("reloadGrid");
-                                    $logPanel.open('log-panel-container', response.data.uuid);
                                 }
                             }
                         });
@@ -173,6 +190,12 @@
                 $scope.save = function () {
 
                     var grid = $scope.fileCommentGrid.ctrl.getGrid();
+
+                    // В jqGrid значение редактируемой ячейки сохраняется только в том случае, если нажать Enter или
+                    // выделить другую ячейку.
+                    // 0, 0 - ячейка, которая не отображается на экране. false - выделить без редактирования
+                    grid.jqGrid("editCell", 0, 0, false);
+
                     var ids = grid.getDataIDs();
                     var files = [];
                     _.each(ids, function (element) {

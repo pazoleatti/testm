@@ -173,7 +173,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
 
-        String applicationVersion = "ФП «НДФЛ, Фонды и Сборы»";
+        String applicationVersion = "ФП «НДФЛ»";
         applicationVersion += " " + applicationInfo.getVersion();
         bindings.put("applicationVersion", applicationVersion);
 

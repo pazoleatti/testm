@@ -291,6 +291,7 @@ angular.module('aplana.modal', ['aplana.utils'])
                             modalScope.$dismiss = modalInstance.dismiss;
                             modalScope.title = modalOptions.title;
                             modalScope.titleIcon = modalOptions.titleIcon;
+                            modalScope.modalHeaderClass = modalOptions.modalHeaderClass;
                             modalScope.onTop = modalOptions.onTop;
                             modalScope.modalCloseCallback = function () {
                                 if (angular.isFunction(modalOptions.closeCallback)) {
