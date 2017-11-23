@@ -834,53 +834,58 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public PagingResult<DeclarationDataJournalItem> fetchDeclarations(TAUserInfo userInfo, DeclarationDataFilter filter, PagingParams pagingParams) {
         TAUser currentUser = userInfo.getUser();
 
-        if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
-            //Контролерам доступны все АСНУ, поэтому фильтрации по АСНУ нет, поэтому список для них пустой
-            //Операторам доступны только некоторые АСНУ. Если такие есть, добавить их в список. Если доступных АСНУ нет, то
-            //список будет состоять из 1 элемента (-1), который не может быть id существующего АСНУ, чтобы не нашлась ни одна форма
-            List<Long> asnuIds = new ArrayList<Long>();
-            if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
-                List<RefBookAsnu> avaliableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
-                if (!avaliableAsnuList.isEmpty()) {
-                    for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
-                        asnuIds.add(asnu.getId());
+        PagingResult<DeclarationDataJournalItem> page = new PagingResult<>();
+
+        if(filter != null) {
+            if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
+                //Контролерам доступны все АСНУ, поэтому фильтрации по АСНУ нет, поэтому список для них пустой
+                //Операторам доступны только некоторые АСНУ. Если такие есть, добавить их в список. Если доступных АСНУ нет, то
+                //список будет состоять из 1 элемента (-1), который не может быть id существующего АСНУ, чтобы не нашлась ни одна форма
+                List<Long> asnuIds = new ArrayList<Long>();
+                if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
+                    List<RefBookAsnu> avaliableAsnuList = refBookAsnuService.fetchAvailableAsnu(userInfo);
+                    if (!avaliableAsnuList.isEmpty()) {
+                        for (RefBookAsnu asnu : refBookAsnuService.fetchAvailableAsnu(userInfo)) {
+                            asnuIds.add(asnu.getId());
+                        }
+                    } else {
+                        asnuIds.add(-1L);
                     }
-                } else {
-                    asnuIds.add(-1L);
                 }
+                filter.setAsnuIds(asnuIds);
             }
-            filter.setAsnuIds(asnuIds);
-        }
 
-        if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
-            Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
-            for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
-                receiverDepartmentIds.add(department.getId());
+            if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
+                Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
+                for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
+                    receiverDepartmentIds.add(department.getId());
+                }
+                filter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
             }
-            filter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
-        }
 
-        if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
-            List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
-            if (currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
-                availableDeclarationFormKindIds.addAll(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
-            } else if (currentUser.hasRole(TaxType.NDFL, TARole.N_ROLE_OPER)) {
-                availableDeclarationFormKindIds.add(DeclarationFormKind.PRIMARY.getId());
+            if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
+                List<Long> availableDeclarationFormKindIds = new ArrayList<Long>();
+                if (currentUser.hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                    availableDeclarationFormKindIds.addAll(Arrays.asList(DeclarationFormKind.PRIMARY.getId(), DeclarationFormKind.CONSOLIDATED.getId()));
+                } else if (currentUser.hasRole(TaxType.NDFL, TARole.N_ROLE_OPER)) {
+                    availableDeclarationFormKindIds.add(DeclarationFormKind.PRIMARY.getId());
+                }
+                filter.setFormKindIds(availableDeclarationFormKindIds);
             }
-            filter.setFormKindIds(availableDeclarationFormKindIds);
+
+            filter.setTaxType(TaxType.NDFL);
+
+            if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
+                filter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
+                filter.setControlNs(true);
+            } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
+                filter.setUserDepartmentId(currentUser.getDepartmentId());
+                filter.setControlNs(false);
+            }
+
+            page = declarationDataDao.findPage(filter, pagingParams);
         }
 
-        filter.setTaxType(TaxType.NDFL);
-
-        if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
-            filter.setUserDepartmentId(departmentService.getParentTB(currentUser.getDepartmentId()).getId());
-            filter.setControlNs(true);
-        } else if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRoles(TARole.N_ROLE_OPER)) {
-            filter.setUserDepartmentId(currentUser.getDepartmentId());
-            filter.setControlNs(false);
-        }
-
-        PagingResult<DeclarationDataJournalItem> page = declarationDataDao.findPage(filter, pagingParams);
         setPageItemsPermissions(page);
 
         return page;
@@ -3006,7 +3011,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         for (DeclarationData declarationData : unsuccesfullPreCreateDeclarationDataList) {
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
-            Department department = departmentService.getDepartment(departmentReportPeriod.getId());
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
             String strCorrPeriod = "";
             if (departmentReportPeriod.getCorrectionDate() != null) {
                 SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");

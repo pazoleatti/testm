@@ -161,6 +161,8 @@
             return function (value, row, logEntryObject) {
                 if (logEntryObject.level === 'ERROR') {
                     return '<div class="log-error-message">' + value + '</div>';
+                } else if (logEntryObject.level === 'WARNING') {
+                    return '<div class="log-warning-message">' + value + '</div>';
                 } else {
                     return '<div class="log-normal-message">' + value + '</div>';
                 }

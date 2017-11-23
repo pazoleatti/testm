@@ -1996,4 +1996,14 @@ END;'
             <where>id=104</where>
         </update>
     </changeSet>
+	
+	<!-- https://jira.aplana.com/browse/SBRFNDFL-2712 Добавить в справочник Календарь данные на 2018 год-->
+	<changeSet id="2.1-rnurgaleev-156" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/ref_book_calendar.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
