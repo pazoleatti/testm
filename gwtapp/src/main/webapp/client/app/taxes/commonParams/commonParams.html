@@ -5,13 +5,13 @@
 </div>
 
 <div class="row" style="margin: 14px 0 0 28px;">
-    <button type="button" class="btn btn-danger" data-ng-click="changeToDefault()">{{::'commonParams.default' |
+    <button type="button" class="btn btn-default" data-ng-click="changeToDefault()">{{::'commonParams.default' |
         translate}}
     </button>
-    <button type="button" class="btn btn-danger" data-ng-show="commonParamsGrid.value.length !== 0" data-ng-click="upload()">{{::'button.edit'
+
+    <button type="button" class="btn btn-default" ng-disabled="commonParamsGrid.value.length == 0" data-ng-click="upload()">{{::'button.edit'
         | translate}}
     </button>
-
 </div>
 
 <div class="modal-body" style="height: 350px;">
@@ -23,10 +23,6 @@
          id="commonParamsGrid"
          style="float: left; width: 100%;"></div>
 </div>
-
-
-
-
 
 
 
