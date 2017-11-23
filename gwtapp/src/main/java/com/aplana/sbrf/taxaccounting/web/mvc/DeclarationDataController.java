@@ -49,6 +49,7 @@ public class DeclarationDataController {
         binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
         binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
         binder.registerCustomEditor(DeclarationSubreport.class, new RequestParamEditor(DeclarationSubreport.class));
+        binder.registerCustomEditor(LogBusiness.class, new RequestParamEditor(LogBusiness.class));
         binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
@@ -405,13 +406,14 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=businessLogs")
     public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@PathVariable long declarationDataId, @RequestParam PagingParams pagingParams) {
         ArrayList<LogBusinessModel> logBusinessModelArrayList = new ArrayList<LogBusinessModel>();
-        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, HistoryBusinessSearchOrdering.DATE, false)) {
+
+        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, pagingParams )) {
 
             LogBusinessModel logBusinessModel;
-            if (FormDataEvent.SAVE.getCode() == logBusiness.getEventId()) {
+            if ( FormDataEvent.SAVE.getCode() == logBusiness.getEventId()){
                 logBusinessModel = new LogBusinessModel(logBusiness, FormDataEvent.DECLARATION_SAVE_EVENT_TITLE_2,
                         taUserService.getUser(logBusiness.getUserLogin()).getName());
-            } else {
+            }else{
                 logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
                         taUserService.getUser(logBusiness.getUserLogin()).getName());
             }
@@ -562,7 +564,7 @@ public class DeclarationDataController {
      * @param declarationDataIds
      * @return
      */
-    @PostMapping(value = "/actions/declarationData/downloadReports")
+    @PostMapping(value = "/actions/declarationData/downloadRep rts")
     public ActionResult downloadReports(@RequestParam Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return declarationService.downloadReports(userInfo, Arrays.asList(declarationDataIds));

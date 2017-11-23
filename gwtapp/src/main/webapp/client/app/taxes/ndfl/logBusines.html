@@ -1,13 +1,18 @@
-<div class="modal-body" style="height: 350px;">
+<div class="modal-body form100" style="min-height : 600px;">
     <div data-aplana-grid
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector=".modal-body"
+         data-grid-fill-space-container-selector-top=".container-grid-top"
          data-grid-options="logBusinesGrid.options"
          data-grid-ctrl="logBusinesGrid.ctrl"
          data-ng-model="logBusinesGrid.value"
          id="logBusinesGrid"
          style="float: left; width: 100%;"></div>
 </div>
-<div class="modal-footer">
+
+<div class="modal-footer" style="margin-top: -60px">
     <button type="button" class="btn btn-default" id="closeButton" data-ng-click="close()">
         <span data-translate-once="button.close"></span>
     </button>
 </div>
+
