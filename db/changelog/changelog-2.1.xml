@@ -2006,4 +2006,13 @@ END;'
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-969 НДФЛ: Реализовать вывод сообщения о результатах обработки записей физических лиц при идентификации -->
+    <changeSet id="2.1-vlednev-10" author="vlednev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
