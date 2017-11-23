@@ -401,15 +401,19 @@ public class PeriodServiceImpl implements PeriodService {
                 }
 
                 if (drp != null) {
-                    filter = new DepartmentReportPeriodFilter();
-                    filter.setReportPeriodIdList(Collections.singletonList(reportPeriods.get(0).getId()));
-                    filter.setDepartmentIdList(Collections.singletonList(departmentId));
-                    filter.setIsCorrection(true);
-                    departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-                    if (!departmentReportPeriodList.isEmpty()) {
-                        return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
+                    if (drp.isActive()) {
+                        return PeriodStatusBeforeOpen.OPEN;
+                    } else {
+                        filter = new DepartmentReportPeriodFilter();
+                        filter.setReportPeriodIdList(Collections.singletonList(reportPeriods.get(0).getId()));
+                        filter.setDepartmentIdList(Collections.singletonList(departmentId));
+                        filter.setIsCorrection(true);
+                        departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+                        if (!departmentReportPeriodList.isEmpty()) {
+                            return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
+                        }
+                        return PeriodStatusBeforeOpen.CLOSE;
                     }
-                    return PeriodStatusBeforeOpen.CLOSE;
                 }
             }
             return PeriodStatusBeforeOpen.NOT_EXIST;
