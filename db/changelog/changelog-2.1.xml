@@ -2015,4 +2015,14 @@ END;'
             <where>id=1</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2731 6-НДФЛ. В печатной форме не заполняется дата подписи-->
+	<changeSet id="2.1-rnurgaleev-157" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
+        </update>
+    </changeSet>
+	
 </databaseChangeLog>
