@@ -41,17 +41,9 @@ public interface ConfigurationService {
     ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo);
 
     /**
-     * Получение конф.параметров по коду
-     *
-     * @param code
-     * @return модель
-     */
-    ConfigurationParamModel get(String code);
-
-    /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
-    List<Configuration> getCommonParametr(TAUserInfo userInfo);
+    List<Configuration> getCommonParameter(TAUserInfo userInfo);
 
     /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
