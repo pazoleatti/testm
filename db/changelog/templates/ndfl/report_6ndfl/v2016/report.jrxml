@@ -5,7 +5,7 @@
 	<property name="net.sf.jasperreports.export.xls.remove.empty.space.between.columns" value="false"/>
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="1823"/>
+	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.export.pdf.size.page.to.content" value="true"/>
 	<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 	<property name="net.sf.jasperreports.exports.xls.font.size.fix.enabled" value="false"/>
@@ -1035,7 +1035,7 @@
 				<reportElement uuid="de9e90f7-8936-4332-8615-182f98c3eb9e" x="115" y="10" width="13" height="13" backcolor="#000000"/>
 			</rectangle>
 			<staticText>
-				<reportElement uuid="20cbe342-7f57-48cf-80a8-78d268d772ad" x="409" y="9" width="156" height="32"/>
+				<reportElement uuid="20cbe342-7f57-48cf-80a8-78d268d772ad" x="409" y="10" width="156" height="37"/>
 				<textElement>
 					<font fontName="Arial" size="7"/>
 				</textElement>
@@ -8877,7 +8877,7 @@
 				<text><![CDATA[за №]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="16d69bda-8ed4-4674-870b-9d9b36ca7942" x="409" y="13" width="156" height="32"/>
+				<reportElement uuid="16d69bda-8ed4-4674-870b-9d9b36ca7942" x="409" y="12" width="156" height="37"/>
 				<textElement>
 					<font fontName="Arial" size="7"/>
 				</textElement>
