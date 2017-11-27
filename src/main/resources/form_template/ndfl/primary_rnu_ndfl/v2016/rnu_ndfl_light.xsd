@@ -78,7 +78,7 @@ GUID</xs:documentation>
 						</xs:attribute>
 					</xs:complexType>
 				</xs:element>
-				<xs:element name="ИнфЧасть" maxOccurs="15000">
+				<xs:element name="ИнфЧасть" maxOccurs="100000">
 					<xs:annotation>
 						<xs:documentation>Состав и структура документа (справки) о доходах физического лица по форме 2-НДФЛ</xs:documentation>
 					</xs:annotation>
