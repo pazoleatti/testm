@@ -161,15 +161,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         return " where " + StringUtils.join(causeList, " and ");
     }
 
-    @Override
-    @Cacheable(CacheConstants.DEPARTMENT_REPORT_PERIOD)
-    public DepartmentReportPeriod get(int id) {
-        try {
-            return getJdbcTemplate().queryForObject(QUERY_TEMPLATE_SIMPLE + " where id = ?", new Object[]{id}, mapper);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
 
     @Override
     public List<DepartmentReportPeriod> getListByFilter(final DepartmentReportPeriodFilter filter) {
@@ -626,6 +617,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
+    @Cacheable(CacheConstants.DEPARTMENT_REPORT_PERIOD)
     public DepartmentReportPeriod get(int id) {
         return sqlQueryFactory.select(departmentReportPeriodQBean)
                 .from(departmentReportPeriod)
