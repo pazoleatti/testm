@@ -2,6 +2,9 @@ package com.aplana.sbrf.taxaccounting.service;
 
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 
 import java.util.Date;
@@ -23,7 +26,7 @@ public interface DepartmentReportPeriodService {
     /**
      * Сохранение отчетноего периода подразделения
      */
-    int save(DepartmentReportPeriod departmentReportPeriod);
+    DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriod);
 
     void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
@@ -77,4 +80,20 @@ public interface DepartmentReportPeriodService {
      * @return true - если существует
      */
     boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
+
+
+    /**
+     * Возвращает отчетные периоды подразделений с фильтрацией и пагинацией
+     * @param departmentReportPeriodFilter - фильтр отчетных периодов подразделений
+     * @param pagingParams - параметры пагинации
+     * @return отчетные периоды подразделений
+     */
+    PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter departmentReportPeriodFilter, PagingParams pagingParams);
+
+    /**
+     * Проверка периода на декларации, которые не в статусе "Принят"
+     * @param id - параметры проверяемого периода
+     * @return uuid - идентификатор логгера
+     */
+    String checkHasNotAccepted(Integer id);
 }

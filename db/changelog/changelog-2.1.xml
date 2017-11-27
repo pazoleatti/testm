@@ -2033,4 +2033,12 @@ END;'
         </update>
     </changeSet>
 	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2445 Реализовать изменения в xsd-схеме количества ИнфБлоков-->
+	<changeSet id="2.1-rnurgaleev-159" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd"/>
+            <where>id in ('58adc3c2-66a0-4f11-98a2-defe682a092f')</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

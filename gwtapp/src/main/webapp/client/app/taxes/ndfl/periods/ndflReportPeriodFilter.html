@@ -1,0 +1,66 @@
+<div data-ng-controller="CommonFilterCtrl">
+    <div class="grid-filter"
+         style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
+        <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
+             data-label="'filterPanelLabel' | translate">
+            <form class="form-horizontal" role="form" novalidate>
+                <div class="row">
+                    <div class="filter-col w500">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div style="padding: 5px 0 0 0;">
+                                    <span style="margin: 20px 10px 0 0; font-weight: bold; font-size: 13px">{{::'reportPeriod.department' | translate}}:</span>
+                                    <span>{{department.name}}</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="filter-col" style="width: 170px">
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <label class="control-label" for="searchFilter_params_yearStart">{{::'reportPeriod.filter.periodFrom'
+                                    | translate}}</label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="number"
+                                       class="form-control"
+                                       style="padding-right: 3px"
+                                       id="searchFilter_params_yearStart"
+                                       data-ng-model="searchFilter.params.yearStart"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-col" style="width: 160px">
+                        <div class="col-md-4">
+                            <label class="control-label" for="searchFilter_params_yearEnd">{{::'reportPeriod.filter.periodTo'
+                                | translate}}</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input data-ng-model="searchFilter.params.yearEnd"
+                                   type="number"
+                                   class="form-control"
+                                   id="searchFilter_params_yearEnd"/>
+                        </div>
+                    </div>
+                    <div class="filter-col">
+                        <!--Кнопка Найти-->
+                        <button type="button"
+                                class="btn btn-default"
+                                id="searchButton"
+                                data-ng-click="submitSearch('ndfl')">
+                            <span data-translate-once="common.button.search"></span>
+                        </button>
+                        <!--Кнопка Сбросить-->
+                        <button type="button" data-ng-show="searchFilter.isClear"
+                                class="btn btn-default"
+                                id="clearButton"
+                                data-ng-click="resetFilterCustom()">
+                            <span data-translate-once="common.button.clear"></span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

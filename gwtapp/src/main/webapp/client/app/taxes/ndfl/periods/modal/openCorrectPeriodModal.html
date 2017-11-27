@@ -1,0 +1,55 @@
+<div class="modal-body" style="height: 320px; width: 400px">
+    <div class="form-horizontal">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
+            <tbody>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'reportPeriod.department' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    {{department.name}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'reportPeriod.correctionPeriod' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectCorrectPeriodCtrl"
+                             data-ui-select2="periodSelect.options"
+                             data-ng-init="initCorrectPeriods(department.id)"
+                             data-ng-model="correctPeriod.reportPeriod"
+                             data-ng-required="true">
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            translate}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label" for="correctionDate">{{::'reportPeriod.grid.correctionDate' |
+                        translate}}:</label>
+                </td>
+                <td style="margin-left: 10px">
+                    <date-picker
+                                 model="correctionDate"
+                                 id="correctionDate"></date-picker>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="submit" class="btn btn-danger" id="openButton" ng-click="save()">
+        <span data-translate-once="button.create"></span>
+    </button>
+    <button type="button" class="btn btn-danger" id="closeButton" ng-click="close()">
+        <span data-translate-once="button.close"></span>
+    </button>
+</div>

@@ -77,13 +77,7 @@ public class DepartmentReportPeriodDaoTest {
             int reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
             Assert.assertTrue(reportPeriodId == 1 || reportPeriodId == 2);
         }
-        // Фильтр по виду налога
-        departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-        departmentReportPeriodFilter.setTaxTypeList(Arrays.asList(TaxType.TRANSPORT));
-        departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
-        for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
-            Assert.assertEquals(TaxType.TRANSPORT, departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType());
-        }
+
         // Фильтр по открытости периода
         departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
         departmentReportPeriodFilter.setIsActive(false);
@@ -135,14 +129,14 @@ public class DepartmentReportPeriodDaoTest {
     public void saveTest() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         Date date = new Date();
-        departmentReportPeriod.setActive(true);
+        departmentReportPeriod.setIsActive(true);
         departmentReportPeriod.setCorrectionDate(date);
         departmentReportPeriod.setDepartmentId(1);
         departmentReportPeriod.setReportPeriod(reportPeriodDao.get(1));
-        int id = departmentReportPeriodDao.save(departmentReportPeriod);
-        DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodDao.get(id);
-        Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), savedDepartmentReportPeriod.getCorrectionDate());
-        Assert.assertEquals(id, savedDepartmentReportPeriod.getId().intValue());
+        departmentReportPeriod = departmentReportPeriodDao.save(departmentReportPeriod);
+        DepartmentReportPeriod savedDepartmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriod.getId());
+        Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), DateUtils.truncate(savedDepartmentReportPeriod.getCorrectionDate(), Calendar.DATE));
+        Assert.assertEquals(departmentReportPeriod.getId(), savedDepartmentReportPeriod.getId());
         Assert.assertTrue(savedDepartmentReportPeriod.isActive());
         Assert.assertEquals(1, savedDepartmentReportPeriod.getDepartmentId().intValue());
         Assert.assertEquals(1, savedDepartmentReportPeriod.getReportPeriod().getId().intValue());
@@ -152,7 +146,7 @@ public class DepartmentReportPeriodDaoTest {
     public void saveBatchTest() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = reportPeriodDao.get(11);
-        departmentReportPeriod.setActive(true);
+        departmentReportPeriod.setIsActive(true);
         departmentReportPeriod.setReportPeriod(reportPeriod);
         List<Integer> depIds = new ArrayList<Integer>();
         depIds.add(2);
@@ -196,7 +190,7 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertNull(departmentReportPeriodDao.get(101).getCorrectionDate());
         Date date = new Date();
         departmentReportPeriodDao.updateCorrectionDate(101, date);
-        Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), departmentReportPeriodDao.get(101).getCorrectionDate());
+        Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), DateUtils.truncate(departmentReportPeriodDao.get(101).getCorrectionDate(), Calendar.DATE));
     }
 
     //@Test
