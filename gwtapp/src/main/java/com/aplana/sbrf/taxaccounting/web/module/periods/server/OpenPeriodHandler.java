@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
 public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, OpenPeriodResult> {
@@ -23,23 +20,21 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 	@Autowired
 	private PeriodService reportPeriodService;
 
-	@Autowired
-	private SecurityService securityService;
-
-    @Autowired
-    private LogEntryService logEntryService;
-
 	public OpenPeriodHandler() {
 		super(OpenPeriodAction.class);
 	}
 
 	@Override
 	public OpenPeriodResult execute(OpenPeriodAction action, ExecutionContext executionContext) throws ActionException {
-		List<LogEntry> logs = new ArrayList<LogEntry>();
-		reportPeriodService.open(action.getYear(), (int) action.getDictionaryTaxPeriodId(),
-				action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId(), logs, action.getCorrectPeriod());
+		DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+		departmentReportPeriod.setReportPeriod(new ReportPeriod());
+		departmentReportPeriod.getReportPeriod().setTaxPeriod(new TaxPeriod());
+		departmentReportPeriod.getReportPeriod().getTaxPeriod().setYear(action.getYear());
+		departmentReportPeriod.getReportPeriod().setDictTaxPeriodId(action.getDictionaryTaxPeriodId());
+		departmentReportPeriod.setDepartmentId(action.getDepartmentId());
+		departmentReportPeriod.setCorrectionDate(action.getCorrectPeriod());
 		OpenPeriodResult result = new OpenPeriodResult();
-        result.setUuid(logEntryService.save(logs));
+        result.setUuid(reportPeriodService.open(departmentReportPeriod));
 		return result;
 	}
 

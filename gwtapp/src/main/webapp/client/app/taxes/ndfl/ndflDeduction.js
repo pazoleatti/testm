@@ -73,22 +73,22 @@
                             },
                             height: 250,
                             colNames: [
-                                $filter('translate')('title.numberpp'),
-                                $filter('translate')('title.inp'),
-                                $filter('translate')('title.deductionCode'),
-                                $filter('translate')('title.notifType'),
-                                $filter('translate')('title.notifDate'),
-                                $filter('translate')('title.notifNum'),
-                                $filter('translate')('title.notifSource'),
-                                $filter('translate')('title.notifSumm'),
-                                $filter('translate')('title.incomeIdOperation'),
-                                $filter('translate')('title.incomeAccrued'),
-                                $filter('translate')('title.income.incomeCode'),
-                                $filter('translate')('title.incomeSumm'),
-                                $filter('translate')('title.periodPrevDate'),
-                                $filter('translate')('title.periodPrevSumm'),
-                                $filter('translate')('title.periodCurrDate'),
-                                $filter('translate')('title.periodCurrSumm')],
+                                $filter('translate')('ndflDeduction.title.numberpp'),
+                                $filter('translate')('ndflDeduction.title.inp'),
+                                $filter('translate')('ndflDeduction.title.deductionCode'),
+                                $filter('translate')('ndflDeduction.title.notifType'),
+                                $filter('translate')('ndflDeduction.title.notifDate'),
+                                $filter('translate')('ndflDeduction.title.notifNum'),
+                                $filter('translate')('ndflDeduction.title.notifSource'),
+                                $filter('translate')('ndflDeduction.title.notifSumm'),
+                                $filter('translate')('ndflDeduction.title.incomeIdOperation'),
+                                $filter('translate')('ndflDeduction.title.incomeAccrued'),
+                                $filter('translate')('ndflDeduction.title.income.incomeCode'),
+                                $filter('translate')('ndflDeduction.title.incomeSumm'),
+                                $filter('translate')('ndflDeduction.title.periodPrevDate'),
+                                $filter('translate')('ndflDeduction.title.periodPrevSumm'),
+                                $filter('translate')('ndflDeduction.title.periodCurrDate'),
+                                $filter('translate')('ndflDeduction.title.periodCurrSumm')],
                             colModel: [
                                 {name: 'rowNum', index: 'rowNum', width: 60, key: true},
                                 {name: 'inp', index: 'inp', width: 170},
@@ -215,6 +215,6 @@
                         });
                     }
                 };
-            }])
+            }]);
 
 }());

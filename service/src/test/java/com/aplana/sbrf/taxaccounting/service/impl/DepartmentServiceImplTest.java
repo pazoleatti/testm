@@ -359,11 +359,11 @@ public class DepartmentServiceImplTest {
                     Assert.assertEquals(1, result.size());
                     Assert.assertEquals(true, result.contains(departmentTB2) || result.contains(departmentTB3));
                     break;
-                case 31:
+                /*case 31:
                 case 311:
                     Assert.assertEquals(1, result.size());
                     Assert.assertEquals(true, result.contains(departmentTB3));
-                    break;
+                    break;*/
             }
         }
     }

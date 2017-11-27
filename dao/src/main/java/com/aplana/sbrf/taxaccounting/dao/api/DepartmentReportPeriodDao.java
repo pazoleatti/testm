@@ -1,7 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Date;
@@ -28,7 +32,7 @@ public interface DepartmentReportPeriodDao {
 	/**
 	 * Сохранение отчетноего периода подразделения
 	 */
-	int save(DepartmentReportPeriod departmentReportPeriod);
+	DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriod);
 
     void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
@@ -50,7 +54,7 @@ public interface DepartmentReportPeriodDao {
     /**
      * Удаление отчетного периода подразделения
      */
-    void delete(int id);
+    void delete(Integer id);
 
     /**
      * Удаление отчетных периода подразделения
@@ -103,4 +107,15 @@ public interface DepartmentReportPeriodDao {
      * @return
      */
     List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId);
+
+    /**
+     * Возвращает отчетные периоды подразделений с фильтрацией и пагинацией
+     * @param departmentReportPeriodFilter - фильтр отчетных периодов подразделений
+     * @param pagingParams - параметры пагинации
+     * @return отчетные периоды подразделений
+     */
+    PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter departmentReportPeriodFilter, PagingParams pagingParams);
+
+    @Transactional(readOnly = false)
+    DepartmentReportPeriod update(DepartmentReportPeriod departmentReportPeriodItem);
 }

@@ -25,16 +25,16 @@ import java.util.List;
 public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriodService {
 
 	@Autowired
-	ReportPeriodDao reportPeriodDao;
+    private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
 	TaxPeriodDao taxPeriodDao;
 
     @Autowired
-    DepartmentReportPeriodDao departmentReportPeriodDao;
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Autowired(required = false)
-    com.aplana.sbrf.taxaccounting.service.PeriodService reportPeriodService;
+    private com.aplana.sbrf.taxaccounting.service.PeriodService reportPeriodService;
 	
 	@Override
 	public ReportPeriod get(int reportPeriodId) {

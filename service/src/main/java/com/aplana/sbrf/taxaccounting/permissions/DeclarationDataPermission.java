@@ -116,6 +116,14 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
+            // Выборка для доступа к экземплярам деклараций
+            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+
+            // Контролёр УНП может просматривать все декларации
+            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)) {
+                return true;
+            }
+
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
             DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
@@ -124,18 +132,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             //Подразделение формы
             Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
 
-            TaxType taxType = TaxType.NDFL;
-
-            // Выборка для доступа к экземплярам деклараций
-            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-
-            // Контролёр УНП может просматривать все декларации
-            if (taUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP)) {
-                return true;
-            }
-
             // Контролёр НС
-            if (taUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS)) {
+            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
                 //ТБ формы
                 int declarationTB = departmentService.getParentTB(declarationDepartment.getId()).getId();
                 //Подразделение и ТБ пользователя
@@ -155,8 +153,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 }
             }
 
-            // Оператор (НДФЛ или Сборы)
-            if (taUser.hasRoles(taxType, TARole.N_ROLE_OPER)) {
+            // Оператор
+            if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_OPER)) {
                 if (asnuId != null && !checkUserAsnu(taUser, asnuId)) {
                     return false;
                 }
@@ -290,25 +288,29 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
-            //Подразделение декларации
-            Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-            //ТБ декларации
-            Department parent = departmentService.getParentTB(declarationDepartment.getId());
-            int declarationTB = parent != null ? parent.getId() : declarationDepartment.getId();
-
-            //Подразделение и ТБ пользователя
-            TAUser taUser = taUserService.getUser(currentUser.getUsername());
-            Department userDepartmentTB = departmentService.getParentTB(taUser.getDepartmentId());
-            int userTB = userDepartmentTB != null ? userDepartmentTB.getId() : taUser.getDepartmentId();
-            //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
-            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-            List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
 
             if (departmentReportPeriod.isActive()) {
                 if (VIEW.isGranted(currentUser, targetDomainObject)) {
                     if (targetDomainObject.getState() == State.PREPARED || targetDomainObject.getState() == State.ACCEPTED) {
-                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)
-                                || (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS) && (userTB == declarationTB || tbDepartments.contains(declarationTB)))) {
+                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP) || PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
+                            return true;
+                        }
+
+                        //Подразделение декларации
+                        Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                        //ТБ декларации
+                        Department parent = departmentService.getParentTB(declarationDepartment.getId());
+                        int declarationTB = parent != null ? parent.getId() : declarationDepartment.getId();
+
+                        //Подразделение и ТБ пользователя
+                        TAUser taUser = taUserService.getUser(currentUser.getUsername());
+                        Department userDepartmentTB = departmentService.getParentTB(taUser.getDepartmentId());
+                        int userTB = userDepartmentTB != null ? userDepartmentTB.getId() : taUser.getDepartmentId();
+                        //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
+                        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
+                        List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
+
+                        if (userTB == declarationTB || tbDepartments.contains(declarationTB)) {
                             return true;
                         }
                     }
@@ -337,7 +339,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     /**
      * Право на выгрузку отчетности
      */
-    public static  final class DownloadReportsPermission extends DeclarationDataPermission {
+    public static final class DownloadReportsPermission extends DeclarationDataPermission {
 
         public DownloadReportsPermission(long mask) {
             super(mask);

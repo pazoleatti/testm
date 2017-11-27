@@ -3,20 +3,43 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 import java.util.Date;
 
-public class DepartmentReportPeriod implements Serializable{
+/**
+ * Модель отчетного периода для подразделений
+ */
+public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 	private static final long serialVersionUID = 5623552659772659276L;
 
+	/**
+	 * Идентификатор
+	 */
     private Integer id;
 
+	/**
+	 * Отчетный период
+	 */
 	private ReportPeriod reportPeriod;
-	
-	private Integer departmentId;
-	
-	private boolean active;
 
+	/**
+	 * Подразделение, к которому привязан отчетный период
+	 */
+	private Integer departmentId;
+
+	/**
+	 * Активность периода.
+	 */
+	private boolean isActive;
+
+	/**
+	 * Дата сдачи корректировки
+	 */
     private Date correctionDate;
 
-    public Integer getId() {
+	/**
+	 * Права доступа
+	 */
+	private long permissions;
+
+	public Integer getId() {
         return id;
     }
 
@@ -33,11 +56,7 @@ public class DepartmentReportPeriod implements Serializable{
 	}
 
 	public boolean isActive() {
-		return active;
-	}
-
-	public void setActive(boolean active) {
-		this.active = active;
+		return isActive;
 	}
 
 	public ReportPeriod getReportPeriod() {
@@ -48,11 +67,25 @@ public class DepartmentReportPeriod implements Serializable{
 		this.reportPeriod = reportPeriod;
 	}
 
-    public Date getCorrectionDate() {
-        return correctionDate;
-    }
+	public void setCorrectionDate(Date correctionDate) {
+		this.correctionDate = correctionDate;
+	}
 
-    public void setCorrectionDate(Date correctionDate) {
-        this.correctionDate = correctionDate;
-    }
+	public Date getCorrectionDate() {
+		return correctionDate;
+	}
+
+	@Override
+	public long getPermissions() {
+		return permissions;
+	}
+
+	@Override
+	public void setPermissions(long permissions) {
+		this.permissions = permissions;
+	}
+
+	public void setIsActive(boolean active) {
+		this.isActive = active;
+	}
 }

@@ -351,7 +351,7 @@
                 if (!cellValue) {
                     cellValue = '';
                 }
-                return "<a target='_blank' href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
+                return "<a href='controller/rest/declarationData/" + options.rowId + "/xml'>" + cellValue + "</a>";
             };
         });
 }());

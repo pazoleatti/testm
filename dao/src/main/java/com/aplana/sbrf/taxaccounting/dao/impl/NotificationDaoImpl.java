@@ -98,15 +98,14 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         where.and(notification.reportPeriodId.eq(reportPeriodId));
         BooleanBuilder innerWhere = new BooleanBuilder();
         for (DepartmentPair pair : departments) {
-            if (pair.getDepartmentId() == null) {
-                innerWhere.or(notification.senderDepartmentId.isNull());
-            } else {
-                innerWhere.or(notification.senderDepartmentId.eq(pair.getDepartmentId()));
-            }
-            if (pair.getParentDepartmentId() == null) {
-                innerWhere.and(notification.receiverDepartmentId.isNull());
-            } else {
-                innerWhere.and(notification.receiverDepartmentId.eq(pair.getParentDepartmentId()));
+            if (pair.getDepartmentId() == null && pair.getParentDepartmentId() == null) {
+                innerWhere.or(notification.senderDepartmentId.isNull().and(notification.receiverDepartmentId.isNull()));
+            } else if (pair.getDepartmentId() != null && pair.getParentDepartmentId() == null) {
+                innerWhere.or(notification.senderDepartmentId.eq(pair.getDepartmentId()).and(notification.receiverDepartmentId.isNull()));
+            } else if (pair.getDepartmentId() == null && pair.getParentDepartmentId() != null) {
+                innerWhere.or(notification.senderDepartmentId.isNull().and(notification.receiverDepartmentId.eq(pair.getParentDepartmentId())));
+            } else if (pair.getDepartmentId() != null && pair.getParentDepartmentId() != null) {
+                innerWhere.or(notification.senderDepartmentId.eq(pair.getDepartmentId()).and(notification.receiverDepartmentId.eq(pair.getParentDepartmentId())));
             }
         }
 

@@ -24,6 +24,7 @@ public class QueryDSLConfiguration extends AbstractDao {
         com.querydsl.sql.Configuration configuration = new com.querydsl.sql.Configuration(templates);
         configuration.setExceptionTranslator(new SpringExceptionTranslator());
         configuration.register(new LocalDateTimeType());
+        configuration.register(new UtilDateType());
         configuration.register(new InputStreamType());
         configuration.register(new NumericBooleanType());
         configuration.register(new EnumByOrdinalType<>(DepartmentType.class));

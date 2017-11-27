@@ -24,21 +24,21 @@ public class QDepartmentReportPeriod extends com.querydsl.sql.RelationalPathBase
 
     public static final QDepartmentReportPeriod departmentReportPeriod = new QDepartmentReportPeriod("DEPARTMENT_REPORT_PERIOD");
 
-    public final DateTimePath<org.joda.time.LocalDateTime> correctionDate = createDateTime("correctionDate", org.joda.time.LocalDateTime.class);
+    public final DateTimePath<java.util.Date> correctionDate = createDateTime("correctionDate", java.util.Date.class);
 
     public final NumberPath<Integer> departmentId = createNumber("departmentId", Integer.class);
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
+    public final NumberPath<Integer> id = createNumber("id", Integer.class);
 
-    public final NumberPath<Byte> isActive = createNumber("isActive", Byte.class);
+    public final BooleanPath isActive = createBoolean("isActive");
 
     public final NumberPath<Integer> reportPeriodId = createNumber("reportPeriodId", Integer.class);
 
     public final com.querydsl.sql.PrimaryKey<QDepartmentReportPeriod> departmentReportPeriodPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QDepartment> depRepPerFkDepartmentId = createForeignKey(departmentId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QReportPeriod> depRepPerFkRepPeriodId = createForeignKey(reportPeriodId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QDepartment> depRepPerFkDepartmentId = createForeignKey(departmentId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationData> _declDataFkDepRepPerId = createInvForeignKey(id, "DEPARTMENT_REPORT_PERIOD_ID");
 

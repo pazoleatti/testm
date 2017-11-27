@@ -300,8 +300,8 @@
         /**
          * Контроллер для выбора периода
          */
-        .controller('SelectPeriodCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource',
-            function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource) {
+        .controller('SelectPeriodCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'ReportPeriodResource',
+            function ($scope, APP_CONSTANTS, GetSelectOption, ReportPeriodResource) {
                 $scope.periodSelect = {};
 
                 /**
@@ -310,8 +310,7 @@
                  * @param latestPeriod Последний период
                  */
                 var fillSelectListAndFindLatestPeriod = function (projection, latestPeriod) {
-                    RefBookValuesResource.query({
-                        refBookId: APP_CONSTANTS.REFBOOK.PERIOD,
+                    ReportPeriodResource.query({
                         projection: projection
                     }, function (data) {
                         $scope.periodSelect.options.data.results = data;
@@ -331,7 +330,7 @@
                  */
                 $scope.initSelectWithAllPeriods = function (latestPeriod) {
                     $scope.periodSelect = GetSelectOption.getBasicMultipleSelectOptions(true, 'periodFormatter');
-                    fillSelectListAndFindLatestPeriod("allPeriods", latestPeriod);
+                    fillSelectListAndFindLatestPeriod("all", latestPeriod);
                 };
 
                 /**
@@ -339,7 +338,7 @@
                  */
                 $scope.initSelectWithOpenPeriods = function (latestPeriod) {
                     $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, false, 'periodFormatter');
-                    fillSelectListAndFindLatestPeriod("openPeriods", latestPeriod);
+                    fillSelectListAndFindLatestPeriod("opened", latestPeriod);
                 };
             }])
 
@@ -355,6 +354,16 @@
                  */
                 $scope.initSelectWithAllDepartments = function () {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
+                        property: "fullPath",
+                        direction: "asc"
+                    }, "fullPathFormatter");
+                };
+
+                /**
+                 * Инициализировать список с загрузкой всех подразделений через ajax
+                 */
+                $scope.initSingleSelectWithAllDepartments = function () {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
                         property: "fullPath",
                         direction: "asc"
                     }, "fullPathFormatter");
@@ -400,5 +409,30 @@
                     });
                 };
             }])
-    ;
+
+        /**
+         * Контроллер для выбора периода корректировки
+         */
+        .controller('SelectCorrectPeriodCtrl', ['$scope', 'GetSelectOption',
+            function ($scope, GetSelectOption) {
+                $scope.periodSelect = {};
+
+                /**
+                 * Инициализация списка с загрузкой доступных периодов корректировки
+                 */
+                $scope.initCorrectPeriods = function (departmentId) {
+                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/departmentReportPeriod?projection=closedWithoutCorrection", {departmentId: departmentId}, {
+                        property: "reportPeriod.taxPeriod.year",
+                        direction: "asc"
+                    }, "correctPeriodFormatter");
+                };
+
+                $scope.initReportPeriodType = function () {
+                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/reportPeriodType", {}, {
+                        property: "id",
+                        direction: "asc"
+                    }, 'periodTypeFormatter');
+                };
+            }
+        ]);
 }());
