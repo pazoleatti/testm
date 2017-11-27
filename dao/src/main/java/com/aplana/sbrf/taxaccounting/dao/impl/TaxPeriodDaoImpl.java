@@ -5,7 +5,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,6 +38,7 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	}
 
 	@Override
+	@Cacheable(CacheConstants.TAX_PERIOD)
 	public TaxPeriod get(int taxPeriodId) {
 		try {
 			return getJdbcTemplate().queryForObject(

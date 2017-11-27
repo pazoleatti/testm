@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
@@ -10,6 +11,7 @@ import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -39,6 +41,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
+    @Cacheable(CacheConstants.DEPARTMENT)
     public Department getDepartment(int id) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Fetching department with id = " + id + " from database");
@@ -119,6 +122,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         try {
             return getJdbcTemplate().queryForObject("SELECT id FROM department WHERE parent_id = 0 and type = 2 " +
                     "START WITH id = ? CONNECT BY id = prior parent_id", new Object[]{departmentId}, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        } catch (DataAccessException e) {
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    @Cacheable(value = CacheConstants.DEPARTMENT, key = "'parent_tb_'+#departmentId")
+    public Department getParentTB(int departmentId) {
+        try {
+            return getJdbcTemplate().queryForObject("SELECT * FROM department WHERE parent_id = 0 and type = 2 " +
+                    "START WITH id = ? CONNECT BY id = prior parent_id", new Object[]{departmentId}, new DepartmentJdbcMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         } catch (DataAccessException e) {
