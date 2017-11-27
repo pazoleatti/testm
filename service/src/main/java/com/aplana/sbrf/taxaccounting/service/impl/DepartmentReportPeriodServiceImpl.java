@@ -1,18 +1,20 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -25,18 +27,19 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
 	@Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
+	@Autowired
+	private DepartmentService departmentService;
+	@Autowired
+	private DeclarationDataSearchService declarationDataService;
+	@Autowired
+	private DeclarationTemplateService declarationTemplateService;
+	@Autowired
+	private LogEntryService logEntryService;
+	@Autowired
+	private DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter;
+	@Autowired
+	private NotificationService notificationService;
 
-    @Override
-    public DepartmentReportPeriod get(int id) {
-		try {
-			return departmentReportPeriodDao.get(id);
-		} catch (ServiceException e) {
-			throw e;
-		} catch (Exception e) {
-			LOG.error(COMMON_ERROR_MESSAGE, e);
-			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
-		}
-    }
 
     @Override
     public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
@@ -63,7 +66,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public int save(DepartmentReportPeriod departmentReportPeriod) {
+    public DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriod) {
 		try {
         	return departmentReportPeriodDao.save(departmentReportPeriod);
 		} catch (ServiceException e) {
@@ -141,7 +144,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Override
     public void delete(List<Integer> ids) {
 		try {
-			departmentReportPeriodDao.delete(ids);
+			for(Integer id : ids) {
+				departmentReportPeriodDao.delete(id);
+			}
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -209,4 +214,70 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
 		}
     }
+
+	@Override
+	public PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter, PagingParams pagingParams) {
+		PagingResult<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.findAll(filter, pagingParams);
+		for (DepartmentReportPeriodJournalItem item : page){
+			DepartmentReportPeriod period = new DepartmentReportPeriod();
+			period.setIsActive(item.getIsActive());
+			departmentReportPeriodPermissionSetter.setPermissions(period, DepartmentReportPeriodPermission.EDIT, DepartmentReportPeriodPermission.OPEN,
+					DepartmentReportPeriodPermission.DELETE, DepartmentReportPeriodPermission.CLOSE, DepartmentReportPeriodPermission.OPEN_CORRECT,
+					DepartmentReportPeriodPermission.DEADLINE);
+			item.setPermissions(period.getPermissions());
+			Notification notification = notificationService.get(item.getReportPeriodId(), null, item.getDepartmentId());
+			if (notification != null) {
+				item.setDeadline(notification.getDeadline());
+			}
+		}
+		return page;
+	}
+
+	@Override
+	public String checkHasNotAccepted(Integer id) {
+		Logger logger = new Logger();
+
+		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(id);
+		if (departmentReportPeriod == null){
+			throw new ServiceException(COMMON_ERROR_MESSAGE, "Ошибка загрузки отчтетного периода подразделения с id " + id +
+					". Период не существует или не найден.");
+		}
+
+		List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
+
+		DeclarationDataFilter dataFilter = new DeclarationDataFilter();
+		dataFilter.setDepartmentIds(departments);
+		dataFilter.setReportPeriodIds(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+		dataFilter.setFormState(State.CREATED);
+		if (departmentReportPeriod.getCorrectionDate() != null) {
+			dataFilter.setCorrectionTag(true);
+			dataFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+		} else {
+			dataFilter.setCorrectionTag(false);
+		}
+
+		List<DeclarationData> declarations = declarationDataService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false);
+		dataFilter.setFormState(State.PREPARED);
+		declarations.addAll(declarationDataService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false));
+		for (DeclarationData dd : declarations) {
+			String msg = "Налоговая форма: №: " +
+					dd.getId() + ", Вид: " +
+					"\"" + declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName() + "\"" +
+					", Подразделение: " +
+					"\"" + departmentService.getDepartment(dd.getDepartmentId()).getName() + "\"" +
+					", находится в состоянии отличном от \"Принята\"";
+
+			logger.warn(msg);
+		}
+
+		return logEntryService.save(logger.getEntries());
+
+	}
+
+	@Override
+	public DepartmentReportPeriod get(int id) {
+		return departmentReportPeriodDao.get(id);
+	}
+
+
 }

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import org.joda.time.LocalDateTime;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,6 +12,7 @@ import java.util.List;
  * Фильтр очетных периодов подразделений, null-значения соответствуют отсутствию фильтрации
  */
 public class DepartmentReportPeriodFilter implements Serializable {
+    private Integer id;
     private Boolean isActive;
     private Boolean isCorrection;
     private Date correctionDate;
@@ -18,6 +21,18 @@ public class DepartmentReportPeriodFilter implements Serializable {
     private List<TaxType> taxTypeList;
     private Integer yearStart;
     private Integer yearEnd;
+    private Integer departmentId;
+    private ReportPeriod reportPeriod;
+    private Date utilDeadline;
+    private LocalDateTime deadline;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public Integer getYearStart() {
         return yearStart;
@@ -85,5 +100,37 @@ public class DepartmentReportPeriodFilter implements Serializable {
 
     public void setTaxTypeList(List<TaxType> taxTypeList) {
         this.taxTypeList = taxTypeList;
+    }
+
+    public Integer getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    public ReportPeriod getReportPeriod() {
+        return reportPeriod;
+    }
+
+    public void setReportPeriod(ReportPeriod reportPeriod) {
+        this.reportPeriod = reportPeriod;
+    }
+
+    public LocalDateTime getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
+    }
+
+    public Date getUtilDeadline() {
+        return utilDeadline;
+    }
+
+    public void setUtilDeadline(Date utilDeadline) {
+        this.utilDeadline = utilDeadline;
     }
 }

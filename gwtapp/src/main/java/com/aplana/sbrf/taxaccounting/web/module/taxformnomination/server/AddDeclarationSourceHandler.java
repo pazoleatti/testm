@@ -103,7 +103,7 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
         for (DepartmentReportPeriod drp : drpForSave) {
             DepartmentReportPeriod newDrp = new DepartmentReportPeriod();
             newDrp.setReportPeriod(drp.getReportPeriod());
-            newDrp.setActive(drp.isActive());
+            newDrp.setIsActive(drp.isActive());
             newDrp.setCorrectionDate(drp.getCorrectionDate());
             newDrp.setDepartmentId(depId);
             departmentReportPeriodService.save(newDrp);

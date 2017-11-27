@@ -169,5 +169,13 @@
                 return undefined;
             };
         }])
+
+        .filter('activeStatusPeriodFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                return value === null || value === undefined ? "Не задано" :
+                    (value ? $filter('translate')('reportPeriod.grid.status.open') :
+                        $filter('translate')('reportPeriod.grid.status.close'));
+            };
+        }])
     ;
 }());
