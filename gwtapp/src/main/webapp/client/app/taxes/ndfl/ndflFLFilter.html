@@ -115,20 +115,28 @@
                         </div>
                     </div>
                     <div class="filter-col">
-                        <!--Кнопка Найти-->
-                        <button type="button"
-                                class="btn btn-default"
-                                id="searchButton"
-                                data-ng-click="submitSearch('ndfl')">
-                            <span data-translate-once="common.button.search"></span>
-                        </button>
-                        <!--Кнопка Сбросить-->
-                        <button type="button" data-ng-show="searchFilter.isClear"
-                                class="btn btn-default"
-                                id="clearButton"
-                                data-ng-click="resetFilter('ndfl')">
-                            <span data-translate-once="common.button.clear"></span>
-                        </button>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <!--Кнопка Найти-->
+                                <button type="button"
+                                        class="btn btn-default"
+                                        id="searchButton"
+                                        data-ng-click="submitSearch('ndfl')">
+                                    <span data-translate-once="common.button.search"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <!--Кнопка Сбросить-->
+                                <button type="button" data-ng-show="searchFilter.isClear"
+                                        class="btn btn-default"
+                                        id="clearButton"
+                                        data-ng-click="resetFilter('ndfl')">
+                                    <span data-translate-once="common.button.clear"></span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>

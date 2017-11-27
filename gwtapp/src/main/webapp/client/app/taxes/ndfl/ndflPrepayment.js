@@ -71,13 +71,13 @@
                             },
                             height: 250,
                             colNames: [
-                                $filter('translate')('title.numberpp'),
-                                $filter('translate')('title.inp'),
-                                $filter('translate')('title.idOperation'),
-                                $filter('translate')('title.summ'),
-                                $filter('translate')('title.prepayment.notifNum'),
-                                $filter('translate')('title.prepayment.notifDate'),
-                                $filter('translate')('title.prepayment.notifSource')],
+                                $filter('translate')('ndlfPrepayment.title.numberpp'),
+                                $filter('translate')('ndlfPrepayment.title.inp'),
+                                $filter('translate')('ndlfPrepayment.title.idOperation'),
+                                $filter('translate')('ndlfPrepayment.title.summ'),
+                                $filter('translate')('ndlfPrepayment.title.notifNum'),
+                                $filter('translate')('ndlfPrepayment.title.notifDate'),
+                                $filter('translate')('ndlfPrepayment.title.notifSource')],
                             colModel: [
                                 {name: 'rowNum', index: 'rowNum', width: 90, key: true},
                                 {name: 'inp', index: 'inp', width: 170},
@@ -168,6 +168,6 @@
                         });
                     }
                 };
-            }])
+            }]);
 
 }());
