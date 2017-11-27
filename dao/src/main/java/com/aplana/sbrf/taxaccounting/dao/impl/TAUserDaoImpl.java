@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-//import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,9 +23,9 @@ import java.util.List;
 public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
 	private static final Log LOG = LogFactory.getLog(TAUserDaoImpl.class);
-	
+
 	private static final RowMapper<TARole> TA_ROLE_MAPPER = new RowMapper<TARole>() {
-		
+
 		@Override
 		public TARole mapRow(ResultSet rs, int index) throws SQLException {
 			TARole result = new TARole();
@@ -33,10 +34,10 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			result.setAlias(rs.getString("alias"));
             return result;
 		}
-	}; 
-	
+	};
+
 	private static final RowMapper<TAUser> TA_USER_MAPPER = new RowMapper<TAUser>() {
-		
+
 		@Override
 		public TAUser mapRow(ResultSet rs, int index) throws SQLException {
 			TAUser result = new TAUser();
@@ -75,7 +76,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     };
 
 	@Override
-	//@Cacheable(value = "User", key = "#userId")
+	@Cacheable(value = CacheConstants.USER, key = "#userId")
 	public TAUser getUser(int userId) {
 		TAUser user;
 		try {
@@ -92,9 +93,9 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 
 		return user;
 	}
-	
+
 	@Override
-    //@Cacheable(value = "User", key = "'login_'+#login")
+    @Cacheable(value = CacheConstants.USER, key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForObject("select id from sec_user where lower(login) = lower(?)", new Object[] {login.toLowerCase()}, Integer.class);

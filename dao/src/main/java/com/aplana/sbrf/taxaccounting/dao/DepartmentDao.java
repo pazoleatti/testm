@@ -91,6 +91,14 @@ public interface DepartmentDao extends PermissionDao {
     Integer getParentTBId(int departmentId);
 
     /**
+     * Получение родительского территориального банка
+     *
+     * @param departmentId идентификатор подразделения
+     * @return родительский территориальный банк
+     */
+    Department getParentTB(int departmentId);
+
+    /**
      * Получить список всех подразделений
      *
      * @return список всех подразделений
