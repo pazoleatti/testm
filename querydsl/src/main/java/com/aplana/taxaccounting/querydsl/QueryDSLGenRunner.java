@@ -9,10 +9,7 @@ import com.querydsl.sql.Configuration;
 import com.querydsl.sql.OracleTemplates;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.codegen.MetaDataExporter;
-import com.querydsl.sql.types.EnumByOrdinalType;
-import com.querydsl.sql.types.InputStreamType;
-import com.querydsl.sql.types.LocalDateTimeType;
-import com.querydsl.sql.types.NumericBooleanType;
+import com.querydsl.sql.types.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,6 +45,16 @@ public class QueryDSLGenRunner {
             configuration.register("DECLARATION_DATA", "STATE", new EnumByOrdinalType<>(State.class));
             configuration.register("DECLARATION_DATA", "MANUALLY_CREATED", new NumericBooleanType());
             configuration.register("TAX_PERIOD", "YEAR", Integer.class);
+            configuration.register("DEPARTMENT_REPORT_PERIOD", "ID", Integer.class);
+            configuration.register("DEPARTMENT_REPORT_PERIOD", "IS_ACTIVE", new NumericBooleanType());
+            configuration.register("DEPARTMENT_REPORT_PERIOD", "CORRECTION_DATE", new UtilDateType());
+            configuration.register("REPORT_PERIOD", "START_DATE", new UtilDateType());
+            configuration.register("REPORT_PERIOD", "END_DATE", new UtilDateType());
+            configuration.register("REPORT_PERIOD", "CALENDAR_START_DATE", new UtilDateType());
+            configuration.register("REPORT_PERIOD_TYPE", "START_DATE", new UtilDateType());
+            configuration.register("REPORT_PERIOD_TYPE", "END_DATE", new UtilDateType());
+            configuration.register("REPORT_PERIOD_TYPE", "CALENDAR_START_DATE", new UtilDateType());
+            configuration.register("DECLARATION_DATA", "DEPARTMENT_REPORT_PERIOD_ID", Integer.class);
 
             exportScheme(dbUrl,
                     "ndfl_unstable",
@@ -55,7 +62,7 @@ public class QueryDSLGenRunner {
                     "NDFL_UNSTABLE",
                     packageStr,
                     targetFolder,
-                    new String[]{"DECLARATION_DATA"},
+                    new String[]{"DECLARATION_DATA", "DEPARTMENT_REPORT_PERIOD", "REPORT_PERIOD", "REPORT_PERIOD_TYPE", "TAX_PERIOD"},
                     configuration);
 
             // УН (удаляются только ранее сгенерированные Q классы по передаваемому перечню таблиц).

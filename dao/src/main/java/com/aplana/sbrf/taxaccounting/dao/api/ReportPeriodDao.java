@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +18,7 @@ public interface ReportPeriodDao extends PermissionDao {
 	 * @return объект, задаваемый идентификатором
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
 	 */
-	ReportPeriod get(int reportPeriodId);
+	ReportPeriod get(Integer reportPeriodId);
 
 	/** Получить список отчетных периодов по идентификаторам
 	 * @param reportPeriodIds список идентификаторов
@@ -32,7 +31,7 @@ public interface ReportPeriodDao extends PermissionDao {
      * @param dictTaxPeriodId
      * @return
      */
-    ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId);
+    ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId);
 		
 	/**
 	 * Возвращает список отчётных периодов, входящий в данный налоговый период. 
@@ -47,7 +46,7 @@ public interface ReportPeriodDao extends PermissionDao {
 	 * @param reportPeriod отчётный период
 	 * @return идентификатор нового отчетного периода
 	 */
-	int save(ReportPeriod reportPeriod);
+	Integer save(ReportPeriod reportPeriod);
 
 	/**
 	 * Удалить период
@@ -85,9 +84,9 @@ public interface ReportPeriodDao extends PermissionDao {
 	/**
 	 * Возвращает все периоды которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
 	 * @param taxType
+	 * @param depId
 	 * @param startDate начало диапазона
 	 * @param endDate конец диапазона
-	 * @param depId
 	 * @return
 	 */
 	List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate);
@@ -105,9 +104,10 @@ public interface ReportPeriodDao extends PermissionDao {
      * Получить корректирующие периоды
      * @param taxType тип налога
      * @param departmentId идентификатор подразделения
-     * @return список корректирующих периодов
+     * @param pagingParams
+	 * @return список корректирующих периодов
      */
-    List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
+    PagingResult<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId, PagingParams pagingParams);
 
     /**
      * Получить периоды сравнения - выборка 50
@@ -122,4 +122,23 @@ public interface ReportPeriodDao extends PermissionDao {
      * Отчетный период по коду и году
      */
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
+
+
+	/**
+	 * Получить список типов отчетных периодов с пагинацией
+	 * @param pagingParams - параметры пагинации
+	 */
+	PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams);
+
+	/**
+	 * Получить тип отчетного периода
+	 * @param id - идентификатор
+	 */
+    ReportPeriodType getReportPeriodType(Long id);
+
+	/**
+	 * Возвращает тип отчетного периода по идентификатору
+	 * @param id - идентификатор
+	 */
+	ReportPeriodType getPeriodTypeById(Long id);
 }

@@ -105,7 +105,6 @@ public class DeclarationDataServiceImplTest {
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setId(1);
         taxPeriod.setYear(2014);
-        taxPeriod.setTaxType(TaxType.INCOME);
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setId(1);
         reportPeriod.setTaxPeriod(taxPeriod);
