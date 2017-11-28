@@ -35,6 +35,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.zip.ZipInputStream;
 
@@ -142,7 +143,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                 IOUtils.closeQuietly(zipXmlIn);
             }
         }
-        return new String(byteArrayOutputStream.toByteArray());
+        return new String(byteArrayOutputStream.toByteArray(), Charset.forName("cp1251"));
     }
 
     @Override

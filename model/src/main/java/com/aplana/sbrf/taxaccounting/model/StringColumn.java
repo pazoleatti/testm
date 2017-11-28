@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 
 /**
@@ -59,6 +61,7 @@ public class StringColumn extends FilterColumn  implements Serializable {
     }
 
     @Override
+	@JsonIgnore
 	public ValidationStrategy getValidationStrategy() {
 		return new ValidationStrategy() {
 			@Override

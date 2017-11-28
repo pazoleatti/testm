@@ -210,14 +210,20 @@
             });
         }])
 
-        .factory('createPdfReport', ['$resource', function ($resource) {
-            return $resource('controller/rest/createPdfReport', {}, {
+        /**
+         * @description Запуск асинхронной задачи по созданию отчетности
+         */
+        .factory('createReport', ['$resource', function ($resource) {
+            return $resource('controller/rest/createReport', {}, {
                 query: {
                     method: 'POST'
                 }
             });
         }])
 
+        /**
+         * @description Получить изображение страницы pdf отчета
+         */
         .factory('getPageImage', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/:declarationDataId/pageImage/:pageId/ndfl',
                 {declarationDataId: '@declarationDataId', pageId: '@pageId'}, {
@@ -233,15 +239,30 @@
                 });
         }])
 
+        /**
+         * @description ПРоверить НФ
+         */
         .factory('checkDeclarationData', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/:declarationDataId/check', {declarationDataId: '@declarationDataId'}, {
                 query: {method: 'POST'}
             });
         }])
 
+        /**
+         * @description Вернуть в создана
+         */
         .factory('moveToCreatedDeclarationData', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationData/:declarationDataId/moveToCreated', {declarationDataId: '@declarationDataId'}, {
                 query: {method: 'POST'}
+            });
+        }])
+
+        /**
+         * @description Подготовить данные для спецотчета
+         */
+        .factory('prepareSpecificReport', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationData/prepareSpecificReport', {}, {
+                doOperation: {method: 'POST'}
             });
         }])
     ;

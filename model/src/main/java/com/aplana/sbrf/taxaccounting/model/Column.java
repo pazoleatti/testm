@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
@@ -31,6 +33,7 @@ public abstract class Column implements Ordered, Serializable {
 	private boolean checking;
 	private int order;
 
+	@JsonIgnore
     transient private ColumnFormatter formatter = new ColumnFormatter();
 	/**
 	 * Идентификатор столбца в БД
@@ -91,7 +94,7 @@ public abstract class Column implements Ordered, Serializable {
 	public String getAlias() {
 		return alias;
 	}
-	
+
 	/**
 	 * Задать алиас столбца
 	 * @param alias желаемое значение алиаса
