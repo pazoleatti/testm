@@ -533,6 +533,7 @@ public class DeclarationTemplateMainPresenter extends TabContainerPresenter<Decl
                 public boolean isNeeded(ValueChangeEvent<String> event) {
                     return !(event.getValue().contains(DeclarationTemplateTokens.declarationTemplateInfo) ||
                             event.getValue().contains(DeclarationTemplateTokens.declarationTemplateScript) ||
+                            event.getValue().contains(DeclarationTemplateTokens.declarationTemplateChecks) ||
                             event.getValue().contains(DeclarationTemplateTokens.declarationTemplateSubreports)) &&
                             declarationTemplate.getId() != null && !declarationTemplate.getId().equals(extractDeclarationTemplateId(event.getValue()));
                 }

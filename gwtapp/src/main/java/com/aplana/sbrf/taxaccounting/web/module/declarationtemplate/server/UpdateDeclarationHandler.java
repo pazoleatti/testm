@@ -47,7 +47,7 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
 
         Logger logger = new Logger();
         makeDates(action);
-        if (mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate(),
+        if (mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate(), action.getDeclarationTemplateExt().getChecks(),
                 action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo(), action.getForce())){
             int dtId = action.getDeclarationTemplateExt().getDeclarationTemplate().getId();
             declarationTemplateService.checkLockedByAnotherUser(dtId, userInfo);

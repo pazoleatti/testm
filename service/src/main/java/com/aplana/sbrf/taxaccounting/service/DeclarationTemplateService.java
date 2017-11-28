@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Сервис для работы с шаблонами деклараций 
@@ -278,4 +275,26 @@ public interface DeclarationTemplateService {
 	 * @return
 	 */
 	boolean checkIfEventScriptPresent(int declarationTemplateId, int formDataEventId);
+
+	/**
+	 * Возвращает список проверок формы. Если идентификатор макета не указан, то возвращаются дефолтные проверки для типа формы
+	 * @param declarationTypeId идентификатор типа формы, к которому привязаны проверки по-умолчанию
+	 * @param declarationTemplateId идентификатор шаблона, к которому привязаны проверки
+	 * @return список проверок
+	 */
+	List<DeclarationTemplateCheck> getChecks(int declarationTypeId, Integer declarationTemplateId);
+
+	/**
+	 * Создает новые проверки для макета
+	 * @param checks список проверок
+	 * @param declarationTemplateId идентификатор макета
+     */
+	void createChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId);
+
+	/**
+	 * Изменяет существующие проверки
+	 * @param checks список проверок
+	 * @param declarationTemplateId идентификатор макета
+     */
+	void updateChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId);
 }

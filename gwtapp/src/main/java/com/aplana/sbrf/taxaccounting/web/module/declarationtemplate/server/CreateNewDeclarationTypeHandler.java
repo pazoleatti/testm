@@ -44,6 +44,7 @@ public class CreateNewDeclarationTypeHandler extends AbstractActionHandler<Creat
         Logger logger = new Logger();
         makeDates(action);
         int dtId = mainOperatingService.createNewType(action.getDeclarationTemplateExt().getDeclarationTemplate(),
+                action.getDeclarationTemplateExt().getChecks(),
                 action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo());
         if (!logger.getEntries().isEmpty())
             result.setLogUuid(logEntryService.save(logger.getEntries()));

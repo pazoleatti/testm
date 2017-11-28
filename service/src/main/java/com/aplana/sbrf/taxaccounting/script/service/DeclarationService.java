@@ -514,4 +514,12 @@ public interface DeclarationService {
      * @return название
      */
     String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
+
+    /**
+     * Возвращает признак фатальности проверки внутри формы по ее коду
+     * @param code код проверки
+     * @param templateId идентификатор макета
+     * @return ошибка фатальна?
+     */
+    boolean isCheckFatal(FormCheckCode code, int templateId);
 }

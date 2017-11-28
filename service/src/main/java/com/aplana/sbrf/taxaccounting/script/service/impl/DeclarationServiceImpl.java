@@ -85,8 +85,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Autowired
     private ConfigurationService configurationService;
     @Autowired
-    private ValidateXMLService validateXMLService;
-    @Autowired
     private LockDataService lockDataService;
 
     @Override
@@ -537,5 +535,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args) {
         return declarationDataService.getDeclarationFullName(declarationId, ddReportType);
+    }
+
+    @Override
+    public boolean isCheckFatal(FormCheckCode code, int templateId) {
+        return declarationTemplateDao.isCheckFatal(code, templateId);
     }
 }

@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -535,5 +536,24 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public boolean checkIfEventScriptPresent(int declarationTemplateId, int formDataEventId) {
         return declarationTemplateEventScriptDao.checkIfEventScriptPresent(declarationTemplateId, formDataEventId);
+    }
+
+    @Override
+    public List<DeclarationTemplateCheck> getChecks(int declarationTypeId, Integer declarationTemplateId) {
+        return declarationTemplateDao.getChecks(declarationTypeId, declarationTemplateId);
+    }
+
+    @Override
+    public void createChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId) {
+        if (CollectionUtils.isNotEmpty(checks)) {
+            declarationTemplateDao.createChecks(checks, declarationTemplateId);
+        }
+    }
+
+    @Override
+    public void updateChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId) {
+        if (CollectionUtils.isNotEmpty(checks)) {
+            declarationTemplateDao.updateChecks(checks, declarationTemplateId);
+        }
     }
 }
