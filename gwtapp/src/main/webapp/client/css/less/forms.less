@@ -990,23 +990,38 @@ button.btn-default-close-green::before{
   border-top: 3px solid #6ec151;
   border-bottom: 1px solid #6ec151;
 }
-.btn.btn-datepicker,
-.btn.btn-datepicker:hover,
-.btn.btn-datepicker:focus,
-.btn.btn-datepicker:active,
-.btn.btn-datepicker:visited{
-  border-right: 1px solid #cccccc!important;
-  border-bottom: 1px solid #cccccc!important;
-  border-top: 3px solid #cccccc!important;
-  margin: 0 0 0 -4px;
-  height: 28px;
-  padding: 2px 5px 0 0!important;
-  border-radius: 0;
-  background: #fff!important;
-  color: #ada8a2!important;
-}
-.uib-datepicker-popup .btn-default{
-  background: #efefef;
+.uib-datepicker-popup{
+  background: #ffffff;
+  padding: 10px 4px;
+  .btn.btn-sm{
+    border: 1px solid #ccc;
+    line-height: 1px;
+    text-align: center;
+    border-radius: 2px;
+    background: #fff;
+    color: #464646;
+  }
+  .btn-default{
+    background: #fff;
+  }
+  .btn-info.active {
+    background: #279238;
+    color: #fff;
+
+    .uib-datepicker-current {
+      background: #279238;
+      color: #fff;
+      font-weight: 700;
+    }
+  }
+  .uib-datepicker-popup table {
+    tr td {
+      padding: 0 1px;
+    }
+    &:focus, &:hover, &:active {
+      outline: none !important;
+    }
+  }
 }
 /*-------------------------------------------------input--------------------------------------------------*/
 .form-control{
