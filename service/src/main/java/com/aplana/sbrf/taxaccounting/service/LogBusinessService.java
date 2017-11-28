@@ -50,4 +50,14 @@ public interface LogBusinessService {
      * @param declarationDataId код декларации
 	 */
 	String getFormCreationUserName(long declarationDataId);
+
+	/**
+	 * Получить информацию об истории событий налоговой формы
+	 *
+	 * @param declarationId       идентификатор формы
+	 * @param pagingParams     данные для сортировки
+
+	 * @return  список  истории событий для налоговой формы
+	 */
+	List<LogBusiness> getDeclarationLogsBusiness(long declarationId, PagingParams pagingParams);
 }

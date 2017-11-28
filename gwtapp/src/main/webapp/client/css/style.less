@@ -272,6 +272,7 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 
 p.input-group {
   margin-bottom: 0;
+  z-index: 0;
 }
 
 input[type="number"] {
@@ -1360,3 +1361,8 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   display: block;
 }
 /*------------------------------------------------------------------*/
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  .ui-jqgrid .ui-jqgrid-bdiv{
+    box-shadow: none;
+  }
+}

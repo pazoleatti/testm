@@ -31,6 +31,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final int COMMON_PARAM_DEPARTMENT_ID = 0;
     private static final int MAX_LENGTH = 500;
     private static final int EMAIL_MAX_LENGTH = 200;
+    private static final String SBERBANK_INN_DEFAULT = "7707083893";
+    private static final String NO_CODE_DEFAULT = "9979";
+    private static final String SHOW_TIMING_DEFAULT = "0";
+    private static final String LIMIT_IDENT_DEFAULT = "0.65";
     private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private static final String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
@@ -58,10 +62,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
         List<Configuration> defaultCommonConfig = new ArrayList<Configuration>();
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.SBERBANK_INN.getCaption(), 0, "7707083893"));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.NO_CODE.getCaption(), 0, "9979"));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(), 0, "0"));
-        defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(), 0, "0.65"));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.SBERBANK_INN.getCaption(), COMMON_PARAM_DEPARTMENT_ID, SBERBANK_INN_DEFAULT));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.NO_CODE.getCaption(), COMMON_PARAM_DEPARTMENT_ID, NO_CODE_DEFAULT));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(), COMMON_PARAM_DEPARTMENT_ID, SHOW_TIMING_DEFAULT));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, LIMIT_IDENT_DEFAULT));
         return defaultCommonConfig;
     }
 
@@ -132,12 +136,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return configurationDao.getByDepartment(departmentId);
     }
 
-    @Override
-    public ConfigurationParamModel get(String code) {
-        return null;//configurationDao.get(code);
-    }
 
-    public List<Configuration> getCommonParametr(TAUserInfo userInfo) {
+    public List<Configuration> getCommonParameter(TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
                 TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                 TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {

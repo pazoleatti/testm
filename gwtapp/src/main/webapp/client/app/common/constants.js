@@ -50,8 +50,7 @@
                 DEPARTMENT: 30,
                 DECLARATION_TYPE: 207,
                 ASNU: 900,
-                ATTACH_FILE_TYPE: 934,
-                PERIOD: "reportPeriod"
+                ATTACH_FILE_TYPE: 934
             },
             DECLARATION_PERMISSION: {
                 CREATE: 1 << 0,
@@ -83,6 +82,14 @@
             },
             REPORT_PERIOD_PERMISSION: {
                 EDIT: 1 << 0
+            },
+            DEPARTMENT_REPORT_PERIOD_PERMISSION: {
+                EDIT: 1 << 0,
+                OPEN: 1 << 1,
+                DELETE: 1 << 2,
+                CLOSE: 1 << 3,
+                OPEN_CORRECT: 1 << 4,
+                DEADLINE: 1 << 5
             },
             DEPARTMENT_PERMISSION: {
                 EDIT: 1 << 0
@@ -142,6 +149,15 @@
                 INN : {alias: "inn", length: 50, label: "ИНН"},
                 ID_DOC : {alias: "idDocNumber", length: 25, label: "№ ДУЛ"},
                 REF_NUMBER : {alias: "refNumber", length: 10, label: "Номер справки"}
+            },
+            REPORT_PERIOD_STATUS: {
+                OPEN: "OPEN", // Открыт
+                CLOSE: "CLOSE", // Закрыт
+                NOT_EXIST: "NOT_EXIST", // Не существует
+                CORRECTION_PERIOD_ALREADY_EXIST: "CORRECTION_PERIOD_ALREADY_EXIST", // Существуют корректирующие периоды
+                INVALID: "INVALID",
+                CORRECTION_PERIOD_LAST_OPEN: "CORRECTION_PERIOD_LAST_OPEN",//есть более поздний открытый корректирующий период
+                CORRECTION_PERIOD_NOT_CLOSE: "CORRECTION_PERIOD_NOT_CLOSE"//текущий не закрыт
             }
         });
 }());

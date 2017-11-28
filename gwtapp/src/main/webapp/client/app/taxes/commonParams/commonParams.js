@@ -38,8 +38,8 @@
                         ],
                         colModel: [
                             {name: 'departmentId', index: 'departmentId', hidden: true, key: true},
-                            {name: 'code', index: 'code', width: 400, key: true},
-                            {name: 'value', index: 'value', width: 1600, key: true}
+                            {name: 'code', index: 'code', width: 500, key: true},
+                            {name: 'value', index: 'value', width: 700, key: true}
                         ],
 
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],

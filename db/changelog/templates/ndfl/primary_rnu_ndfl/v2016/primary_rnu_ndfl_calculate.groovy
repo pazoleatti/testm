@@ -185,6 +185,7 @@ class Calculate extends AbstractScriptClass {
                     updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap);
                     logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time));
 
+                    countTotalAndUniquePerson(primaryPersonMap.values())
                     logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull));
             }
         })
@@ -205,6 +206,12 @@ class Calculate extends AbstractScriptClass {
             refBookPersonVersionTo = localCalendar.getTime();
         }
         return refBookPersonVersionTo;
+    }
+
+    // Вывод информации о количестве обработынных физлиц всего и уникальных
+    void countTotalAndUniquePerson(Collection<NaturalPerson> persons) {
+        def personIds = persons.collect { NaturalPerson person -> return person.id }
+        logger.info("Записей физических лиц обработано: ${personIds.size()}, всего уникальных записей физических лиц: ${personIds.toSet().size()}")
     }
 
     NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper(boolean isLog) {

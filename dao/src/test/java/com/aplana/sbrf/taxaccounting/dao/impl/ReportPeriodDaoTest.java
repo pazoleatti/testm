@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -45,12 +46,15 @@ public class ReportPeriodDaoTest {
 		taxPeriod = new TaxPeriod();
 		taxPeriod.setTaxType(TaxType.NDFL);
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
-		taxPeriodDao.add(taxPeriod);
+		taxPeriod.setId(taxPeriodDao.add(taxPeriod));
 	}
 
     @Test
     public void getCorrectPeriods() {
-        reportPeriodDao.getCorrectPeriods(TaxType.NDFL, 1);
+        PagingParams pagingParams = new PagingParams();
+        pagingParams.setProperty("id");
+        pagingParams.setDirection("ASC");
+        reportPeriodDao.getCorrectPeriods(TaxType.NDFL, 1, pagingParams);
     }
 	
 	@Test
@@ -107,9 +111,9 @@ public class ReportPeriodDaoTest {
         Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
     }
 
-    @Test(expected = DaoException.class)
+    @Test
     public void getReportPeriodByTaxPeriodAndDictTest2() {
-        reportPeriodDao.getByTaxPeriodAndDict(-1, -1);
+        Assert.assertNull(reportPeriodDao.getByTaxPeriodAndDict(-1, -1));
     }
 
     private List<Integer> getReportPeriodIds(List<ReportPeriod> reportPeriodList) {

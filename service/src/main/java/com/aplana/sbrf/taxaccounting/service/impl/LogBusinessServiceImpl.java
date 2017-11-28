@@ -65,4 +65,15 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 	public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
 		return logBusinessDao.getDeclarationLogsBusiness(declarationId, ordering, isAscSorting);
 	}
+
+    @Override
+    public List<LogBusiness> getDeclarationLogsBusiness(long declarationId, PagingParams pagingParams) {
+        boolean sortFlg = pagingParams.getDirection().equals("asc");
+        for (HistoryBusinessSearchOrdering histBusOrd : HistoryBusinessSearchOrdering.values()) {
+            if (histBusOrd.name().toUpperCase().equals(pagingParams.getProperty().toUpperCase())){
+               return logBusinessDao.getDeclarationLogsBusiness(declarationId, histBusOrd, sortFlg);
+            }
+        }
+        return logBusinessDao.getDeclarationLogsBusiness(declarationId, HistoryBusinessSearchOrdering.DATE, false);
+    }
 }

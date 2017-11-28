@@ -24,25 +24,25 @@ public class QReportPeriod extends com.querydsl.sql.RelationalPathBase<QReportPe
 
     public static final QReportPeriod reportPeriod = new QReportPeriod("REPORT_PERIOD");
 
-    public final DateTimePath<org.joda.time.LocalDateTime> calendarStartDate = createDateTime("calendarStartDate", org.joda.time.LocalDateTime.class);
+    public final DateTimePath<java.util.Date> calendarStartDate = createDateTime("calendarStartDate", java.util.Date.class);
 
     public final NumberPath<Long> dictTaxPeriodId = createNumber("dictTaxPeriodId", Long.class);
 
-    public final DateTimePath<org.joda.time.LocalDateTime> endDate = createDateTime("endDate", org.joda.time.LocalDateTime.class);
+    public final DateTimePath<java.util.Date> endDate = createDateTime("endDate", java.util.Date.class);
 
     public final NumberPath<Integer> id = createNumber("id", Integer.class);
 
     public final StringPath name = createString("name");
 
-    public final DateTimePath<org.joda.time.LocalDateTime> startDate = createDateTime("startDate", org.joda.time.LocalDateTime.class);
+    public final DateTimePath<java.util.Date> startDate = createDateTime("startDate", java.util.Date.class);
 
     public final NumberPath<Integer> taxPeriodId = createNumber("taxPeriodId", Integer.class);
 
     public final com.querydsl.sql.PrimaryKey<QReportPeriod> reportPeriodPk = createPrimaryKey(id);
 
-    public final com.querydsl.sql.ForeignKey<QReportPeriodType> reportPeriodFkDtpId = createForeignKey(dictTaxPeriodId, "ID");
-
     public final com.querydsl.sql.ForeignKey<QTaxPeriod> reportPeriodFkTaxperiod = createForeignKey(taxPeriodId, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QReportPeriodType> reportPeriodFkDtpId = createForeignKey(dictTaxPeriodId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDepartmentReportPeriod> _depRepPerFkRepPeriodId = createInvForeignKey(id, "REPORT_PERIOD_ID");
 

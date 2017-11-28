@@ -176,22 +176,27 @@
         }])
 
 
+        .factory('DepartmentReportPeriodCheckerResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/departmentReportPeriod/:id?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        .factory('DepartmentReportPeriodResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/departmentReportPeriod?projection=:projection', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
         .factory('ReportPeriodResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/reportPeriods?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false},
-                delete: {method: 'DELETE', isArray: false, cache: false}
+            return $resource('controller/rest/reportPeriod?projection=:projection', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
             });
         }])
 
         .factory('DepartmentResource', ['$resource', function ($resource) {
             return $resource('controller/rest/getBankDepartment', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
-            });
-        }])
-
-        .factory('DepartmentGridResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/getDepartments', {}, {
-                query: {method: 'GET', isArray: true, cache: false}
             });
         }])
 

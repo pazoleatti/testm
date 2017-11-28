@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import net.sf.jasperreports.web.actions.ActionException;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -25,14 +27,9 @@ public interface PeriodService {
 	/**
 	 * Открываем отчетный период для департамента.
 	 * Логика описана в аналитике - Ведение периодов
-	 *
-	 * @param year
-	 * @param dictionaryTaxPeriodId
-	 * @param taxType
+	 * @return uuid логов
 	 */
-    //TODO Слишком много параметров
-	void open(int year, long dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
-	          int departmentId, List<LogEntry> logs, Date correctionDate);
+	String open(DepartmentReportPeriod period);
 
     /**
      * Создание нового отчетного периода подразделения или открытие существующего по комбинации параметров
@@ -52,12 +49,10 @@ public interface PeriodService {
 
 	/**
 	 * Закрыть период
-	 * @param taxType тип налога
-	 * @param departmentReportPeriod идентификатор отчетного периода
-	 * @param logs логер, при необходимости
-	 * @param user пользователь, который выполняет действие
+	 * @param departmentReportPeriodId - идентификатор периода для подразделения "Банк"
+	 * @return uuid логгера
 	 */
-	void close(TaxType taxType, int departmentReportPeriod, List<LogEntry> logs, TAUserInfo user);
+	String close(Integer departmentReportPeriodId);
 
 	/**
 	 * Получает список отчетных периодов по отчетному периоду.
@@ -156,7 +151,41 @@ public interface PeriodService {
 	 * @param logger логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user);
+	void removeReportPeriod(TaxType taxType, Integer drpId, Logger logger, TAUserInfo user);
+
+	/**
+	 * Удалить отчетный период
+	 * @param id - идентификатор периода
+     * @param userInfo
+	 * @return uuid логера
+	 */
+	String removeReportPeriod(Integer[] id, TAUserInfo userInfo);
+
+
+	String removeReportPeriod(Integer ids, TAUserInfo userInfo);
+
+	/**
+	 * Редактирует период или выдает причину невозможности редактрования
+	 * @param departmentReportPeriod
+	 * @param user
+	 * @return uuid логера
+	 */
+    String editPeriod(DepartmentReportPeriod departmentReportPeriod, TAUserInfo user);
+
+	/**
+	 * Получение типа отчетногопериода из спрвочника по идентификатору
+	 * @param id - идентификатор
+	 * @return тип отчетного периода
+	 */
+	ReportPeriodType getPeriodTypeById(Long id);
+
+
+	/**
+	 * Устанавливает дату сдачи отчетности для периода подразделения
+	 * @param filter - данные о периоде
+	 * @param withChild - если ТБ, то устанавливать ли для дочерних
+	 */
+    void setDeadline(DepartmentReportPeriodFilter filter, boolean withChild) throws ActionException;
 
 	enum Operation {
 		FIND, // Поиск периода
@@ -175,7 +204,7 @@ public interface PeriodService {
 	 * @param departmentId
      * @return список ид подразделений
      */
-	List<Integer> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, int departmentId);
+	List<Integer> getAvailableDepartments(TaxType taxType, TAUser user, Operation operation, Integer departmentId);
 
     /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
@@ -253,9 +282,10 @@ public interface PeriodService {
      * Получить корректирующие периоды
      * @param taxType тип налога
      * @param departmentId идентификатор подразделения
+     * @param pagingParams
      * @return список корректирующих периодов
      */
-    List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
+    PagingResult<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId, PagingParams pagingParams);
 
     /**
      * Получить периоды сравнени - выборка 50
@@ -277,6 +307,13 @@ public interface PeriodService {
      */
     void openCorrectionPeriod(TaxType taxType, ReportPeriod reportPeriod, int departmentId, Date term, TAUserInfo user, List<LogEntry> logs);
 
+	/**
+	 * Открыть Корректирующий период
+	 * @param period - отчетный период для подразделения
+	 * @return logs логер, при необходимости
+	 */
+	String openCorrectionPeriod(DepartmentReportPeriod period);
+
     /**
      * проверяет статус периода перед открытием
      * @param reportPeriod отчетный период
@@ -288,31 +325,49 @@ public interface PeriodService {
 
     /**
      * Редактировать отчетный период
-     * @param reportPeriodId идентификатор отчетного период
-     * @param newDictTaxPeriodId новый отчетный период
-     * @param newYear новый год :)
-     * @param taxType тип налога
-     * @param user пользователь, который выполняет действие
-     * @param departmentId идентификатор подразделения
-     * @param logs логер, при необходимости
-     */
-    void edit(int reportPeriodId, int oldDepartmentId, long newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
-                     int departmentId, List<LogEntry> logs);
+	 * @param departmentReportPeriod
+	 * @param userInfo
+	 * @return uuid логгера
+	 */
+    String edit(DepartmentReportPeriod departmentReportPeriod, TAUserInfo userInfo);
 
     /**
      * Редактировать корректирующий период
-     * @param reportPeriodId идентификатор отчетного период
-     * @param newReportPeriodId новый идентификатор отчетного период
-     * @param oldDepartmentId старый идентификатор подразделения
-     * @param newDepartmentId новый идентификатор подразделения
-     * @param taxType тип налога
-     * @param correctionDate дата корректировки
-     * @param newCorrectionDate новая дата корректировки
-     * @param user пользователь, который выполняет действие
-     * @param logs логер, при необходимости
-     */
-    void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, int oldDepartmentId, int newDepartmentId, TaxType taxType,
-                                     Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs);
+	 * @param logs логер, при необходимости
+	 * @param newPeriod
+	 * @param oldPeriod
+	 */
+    void editCorrectionPeriod(List<LogEntry> logs, DepartmentReportPeriod newPeriod, DepartmentReportPeriod oldPeriod);
+
+	/**
+	 * Редактировать отчетный период
+	 * Специальный метод для GWT
+	 * @param reportPeriodId идентификатор отчетного период
+	 * @param newDictTaxPeriodId новый отчетный период
+	 * @param newYear новый год :)
+	 * @param taxType тип налога
+	 * @param user пользователь, который выполняет действие
+	 * @param departmentId идентификатор подразделения
+	 * @param logs логер, при необходимости
+	 */
+	void edit(int reportPeriodId, int oldDepartmentId, long newDictTaxPeriodId, int newYear, TaxType taxType, TAUserInfo user,
+			  int departmentId, List<LogEntry> logs);
+
+	/**
+	 * Редактировать корректирующий период
+	 * Специальный метод для GWT
+	 * @param reportPeriodId идентификатор отчетного период
+	 * @param newReportPeriodId новый идентификатор отчетного период
+	 * @param oldDepartmentId старый идентификатор подразделения
+	 * @param newDepartmentId новый идентификатор подразделения
+	 * @param taxType тип налога
+	 * @param correctionDate дата корректировки
+	 * @param newCorrectionDate новая дата корректировки
+	 * @param user пользователь, который выполняет действие
+	 * @param logs логер, при необходимости
+	 */
+	void editCorrectionPeriod(int reportPeriodId, int newReportPeriodId, int oldDepartmentId, int newDepartmentId, TaxType taxType,
+							  Date correctionDate, Date newCorrectionDate, TAUserInfo user, List<LogEntry> logs);
 
     List<DepartmentReportPeriod> getDRPByDepartmentIds(List<TaxType> taxTypes, List<Integer> departmentIds);
 
@@ -321,15 +376,19 @@ public interface PeriodService {
      */
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
 
-    /**
+	/**
+	 * @return список отчетных периодов по дате актуальности
+     * @param pagingParams
+     */
+	PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams);
+
+	/**
      * Возвращает все периоды по виду налога, которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
      * @param taxType Вид налога
      * @param startDate Начало периода
      * @param endDate Конец периода
      */
     List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
-
-    List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate);
 
     boolean isFirstPeriod(int reportPeriodId);
 }

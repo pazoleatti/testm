@@ -41,7 +41,7 @@ public class ConfigParamsController {
     @GetMapping(value = "/rest/fetchCommonParams")
     public List<Configuration> fetchCommonParams(HttpServletResponse response) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return configurationService.getCommonParametr(userInfo);
+        return configurationService.getCommonParameter(userInfo);
     }
 
     /**

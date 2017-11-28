@@ -38,21 +38,6 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
  */
 @RestController
 public class DeclarationDataController {
-    /**
-     * Привязка данных из параметров запроса
-     *
-     * @param binder спец. DataBinder для привязки
-     */
-    @InitBinder
-    public void init(ServletRequestDataBinder binder) {
-        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
-        binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
-        binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
-        binder.registerCustomEditor(DeclarationSubreport.class, new RequestParamEditor(DeclarationSubreport.class));
-        binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
-        binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
-    }
-
     private DeclarationDataService declarationService;
     private SecurityService securityService;
     private ReportService reportService;
@@ -71,6 +56,22 @@ public class DeclarationDataController {
         this.declarationTemplateService = declarationTemplateService;
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
+    }
+
+    /**
+     * Привязка данных из параметров запроса
+     *
+     * @param binder спец. DataBinder для привязки
+     */
+    @InitBinder
+    public void init(ServletRequestDataBinder binder) {
+        binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(DeclarationDataFilter.class, new RequestParamEditor(DeclarationDataFilter.class));
+        binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
+        binder.registerCustomEditor(DeclarationSubreport.class, new RequestParamEditor(DeclarationSubreport.class));
+        binder.registerCustomEditor(LogBusiness.class, new RequestParamEditor(LogBusiness.class));
+        binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
+        binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
 
     /**
@@ -405,8 +406,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=businessLogs")
     public JqgridPagedList<LogBusinessModel> fetchDeclarationBusinessLogs(@PathVariable long declarationDataId, @RequestParam PagingParams pagingParams) {
         ArrayList<LogBusinessModel> logBusinessModelArrayList = new ArrayList<LogBusinessModel>();
-        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, HistoryBusinessSearchOrdering.DATE, false)) {
-
+        for (LogBusiness logBusiness : logBusinessService.getDeclarationLogsBusiness(declarationDataId, pagingParams)) {
             LogBusinessModel logBusinessModel;
             if (FormDataEvent.SAVE.getCode() == logBusiness.getEventId()) {
                 logBusinessModel = new LogBusinessModel(logBusiness, FormDataEvent.DECLARATION_SAVE_EVENT_TITLE_2,
@@ -415,7 +415,6 @@ public class DeclarationDataController {
                 logBusinessModel = new LogBusinessModel(logBusiness, (FormDataEvent.getByCode(logBusiness.getEventId())).getTitle(),
                         taUserService.getUser(logBusiness.getUserLogin()).getName());
             }
-
             logBusinessModelArrayList.add(logBusinessModel);
         }
         PagingResult<LogBusinessModel> result = new PagingResult<LogBusinessModel>(logBusinessModelArrayList, logBusinessModelArrayList.size());

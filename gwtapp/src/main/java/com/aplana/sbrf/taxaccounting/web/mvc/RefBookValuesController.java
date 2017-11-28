@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttachFileType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAttachFileTypeService;
@@ -41,15 +42,18 @@ public class RefBookValuesController {
 
     final private SecurityService securityService;
 
+    final private DepartmentService departmentService;
+
     public RefBookValuesController(RefBookAttachFileTypeService refBookAttachFileTypeService, RefBookAsnuService refBookAsnuService,
                                    RefBookDeclarationTypeService refBookDeclarationTypeService, RefBookDepartmentDataService refBookDepartmentDataService,
-                                   PeriodService periodService, SecurityService securityService) {
+                                   PeriodService periodService, SecurityService securityService, DepartmentService departmentService) {
         this.refBookAttachFileTypeService = refBookAttachFileTypeService;
         this.refBookAsnuService = refBookAsnuService;
         this.refBookDeclarationTypeService = refBookDeclarationTypeService;
         this.refBookDepartmentDataService = refBookDepartmentDataService;
         this.periodService = periodService;
         this.securityService = securityService;
+        this.departmentService = departmentService;
     }
 
     /**
@@ -137,24 +141,32 @@ public class RefBookValuesController {
     }
 
     /**
-     * Получение всех Отчетных периодов
+     * Получение всех типов Отчетных периодов по имени
      *
      * @return Список периодов
      */
-    @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=allPeriods")
-    public List<ReportPeriod> fetchAllReportPeriods() {
-        TAUser user = securityService.currentUserInfo().getUser();
-        return periodService.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, Collections.singletonList(user.getDepartmentId()));
+    @GetMapping(value = "/rest/refBookValues/reportPeriodType")
+    public JqgridPagedList<ReportPeriodType> fetchReportPeriodsType(@RequestParam PagingParams pagingParams) {
+        PagingResult<ReportPeriodType> result = periodService.getPeriodType(pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
     }
 
     /**
-     * Получение открытых Отчетных периодов
+     * Получение типа Отчетных периодов по id
      *
      * @return Список периодов
      */
-    @GetMapping(value = "/rest/refBookValues/reportPeriod", params = "projection=openPeriods")
-    public List<ReportPeriod> fetchOpenReportPeriods() {
-        TAUser user = securityService.currentUserInfo().getUser();
-        return new ArrayList<ReportPeriod>(periodService.getOpenForUser(user, TaxType.NDFL));
+    @GetMapping(value = "/rest/refBookValues/reportPeriodTypeById")
+    public ReportPeriodType fetchReportPeriodsTypeById(@RequestParam Long id) {
+        return periodService.getPeriodTypeById(id);
+    }
+
+    /**
+     * Получения подразделения с типом {@link DepartmentType}.ROOT_BANK
+     * @return Объект ПАО "Сбербанк России"
+     */
+    @GetMapping(value = "rest/getBankDepartment")
+    public Department getBankDepartment(){
+        return departmentService.getBankDepartment();
     }
 }

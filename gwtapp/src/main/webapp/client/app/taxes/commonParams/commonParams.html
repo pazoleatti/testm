@@ -1,32 +1,39 @@
-<div class="row" style="margin: 14px 0 0 28px;">
-    <div class="header-col">
+
+<div class="row">
+    <div class="header-col" style="margin: 14px 0 0 28px;">
         <h1>{{::'header.CommonParams' | translate}}</h1>
     </div>
 </div>
+<div id="commonParams" class="container-grid box-shadow-block" >
+    <div class="top-wrapper" style="min-height: 50px; margin-bottom: -17px">
 
-<div class="row" style="margin: 14px 0 0 28px;">
-    <button type="button" class="btn btn-danger" data-ng-click="changeToDefault()">{{::'commonParams.default' |
-        translate}}
-    </button>
-    <button type="button" class="btn btn-danger" data-ng-show="commonParamsGrid.value.length !== 0" data-ng-click="upload()">{{::'button.edit'
-        | translate}}
-    </button>
+        <!--Панель кнопок -->
+        <div class="button_panel">
+            <div class="btn-toolbar" role="toolbar">
+                <span>
+                     <button type="button" class="btn btn-default" data-ng-click="changeToDefault()">
+                         {{::'commonParams.default' | translate}}
+                      </button>
+
+                      <button type="button" class="btn btn-default" ng-disabled="commonParamsGrid.value.length == 0" data-ng-click="upload()">
+                          {{::'button.edit' | translate}}
+                      </button>
+
+                </span>
+            </div>
+        </div>
+    </div>
+
+
+        <div data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector=".cbr-page-layout__view"
+             data-grid-fill-space-container-selector-top=".top-wrapper"
+
+             data-grid-options="commonParamsGrid.options"
+             data-grid-ctrl="commonParamsGrid.ctrl"
+             data-ng-model="commonParamsGrid.value"
+             id="commonParamsGrid"
+             style="float: left; width: 100%;"></div>
 
 </div>
-
-<div class="modal-body" style="height: 350px;">
-    <div data-aplana-grid
-         data-grid-options="commonParamsGrid.options"
-         data-grid-ctrl="commonParamsGrid.ctrl"
-         data-ng-model="commonParamsGrid.value"
-         data-ng-click="checkRow()"
-         id="commonParamsGrid"
-         style="float: left; width: 100%;"></div>
-</div>
-
-
-
-
-
-
-

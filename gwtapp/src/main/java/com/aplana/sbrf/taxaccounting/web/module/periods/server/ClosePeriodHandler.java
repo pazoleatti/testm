@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -37,7 +38,7 @@ public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction,
 	@Override
 	public ClosePeriodResult execute(ClosePeriodAction action, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
-		reportPeriodService.close(action.getTaxType(), action.getDepartmentReportPeriodId(), logs, securityService.currentUserInfo());
+		reportPeriodService.close(action.getDepartmentReportPeriodId());
 		ClosePeriodResult result = new ClosePeriodResult();
         if (!logs.isEmpty() && logs.get(0).getLevel().equals(LogLevel.ERROR)) {
             result.setErrorBeforeClose(true);

@@ -21,6 +21,7 @@
              * @description Создание и заполнение грида
              */
             $scope.logBusinesGrid = {
+                ctrl: {},
                 options: {
                     datatype: "angularResource",
                     angularResource: DeclarationDataResource,
@@ -30,7 +31,7 @@
                             declarationDataId: $shareData.declarationDataId
                         };
                     },
-                    height: 250,
+                    value: [],
                     colNames: [
                         '',
                         $filter('translate')('logBusiness.title.event'),
@@ -43,15 +44,18 @@
                     ],
                     colModel: [
                         {name: 'id', index: 'id', width: 176, key: true, hidden: true},
-                        {name: 'eventName', index: 'eventName', width: 216},
-                        {name: 'logDate', index: 'logDate', width: 167, formatter: $filter('dateTimeFormatter')},
-                        {name: 'userFullName', index: 'userFullName', width: 173},
-                        {name: 'roles', index: 'roles', width: 165},
-                        {name: 'departmentName', index: 'departmentName', width: 220},
+                        {name: 'eventName', index: 'event', width: 216},
+                        {name: 'logDate', index: 'date', width: 167, formatter: $filter('dateTimeFormatter')},
+                        {name: 'userFullName', index: 'user', width: 173},
+                        {name: 'roles', index: 'user_role', width: 165},
+                        {name: 'departmentName', index: 'department', width: 220},
                         {name: 'note', index: 'note', width: 273}
                     ],
                     rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                     rowList: APP_CONSTANTS.COMMON.PAGINATION,
+
+                    sortname: 'logDate',
+                    sortorder: "desc",
                     viewrecords: true
                 }
             };

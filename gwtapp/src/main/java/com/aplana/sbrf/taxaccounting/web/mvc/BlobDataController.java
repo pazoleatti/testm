@@ -146,7 +146,7 @@ public class BlobDataController {
      * @throws IOException IOException
      */
     private boolean checkRole(HttpServletResponse response, TAUserInfo userInfo) throws IOException {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF, TARole.N_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF, TARole.N_ROLE_CONTROL_UNP)) {
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
             response.setCharacterEncoding(UTF_8);
             response.getWriter().printf("Ошибка доступа (недостаточно прав)");
