@@ -2160,20 +2160,18 @@ END;'
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-2435 -->
     <changeSet id="2.1-dloshkarev-5" author="dloshkarev">
-        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="2"/>
-            <column name="declaration_template_id" value="100"/>
-            <column name="event_id" value="5"/>
-            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
-        </insert>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
     </changeSet>
-    <changeSet id="2.1-dloshkarev-6" author="dloshkarev">
-        <insert tableName="DECL_TEMPLATE_EVENT_SCRIPT">
-            <column name="id" value="6"/>
-            <column name="declaration_template_id" value="101"/>
-            <column name="event_id" value="5"/>
-            <column name="script" valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
-        </insert>
+    <changeSet id="2.1-dloshkarev-8" author="dloshkarev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
     </changeSet>
 
 </databaseChangeLog>
