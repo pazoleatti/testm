@@ -1,8 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetCheсksAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetCheсksResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetChecksAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetChecksResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -13,24 +13,24 @@ import org.springframework.stereotype.Component;
 
 @Component
 @PreAuthorize("hasAnyRole('N_ROLE_CONF', 'F_ROLE_CONF')")
-public class GetChecksHandler extends AbstractActionHandler<GetCheсksAction, GetCheсksResult> {
+public class GetChecksHandler extends AbstractActionHandler<GetChecksAction, GetChecksResult> {
 
 	@Autowired
 	private DeclarationTemplateService declarationTemplateService;
 
 	public GetChecksHandler() {
-		super(GetCheсksAction.class);
+		super(GetChecksAction.class);
 	}
 
 	@Override
-	public GetCheсksResult execute(GetCheсksAction action, ExecutionContext context) throws ActionException {
-		GetCheсksResult result = new GetCheсksResult();
+	public GetChecksResult execute(GetChecksAction action, ExecutionContext context) throws ActionException {
+		GetChecksResult result = new GetChecksResult();
 		result.setChecks(declarationTemplateService.getChecks(action.getDeclarationTypeId(), action.getDeclarationTemplateId()));
         return result;
     }
 
 	@Override
-	public void undo(GetCheсksAction arg0, GetCheсksResult arg1, ExecutionContext arg2) throws ActionException {
+	public void undo(GetChecksAction arg0, GetChecksResult arg1, ExecutionContext arg2) throws ActionException {
 		// Ничего не делаем
 	}
 }

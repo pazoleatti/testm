@@ -5,7 +5,7 @@ import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
-public class GetCheсksResult implements Result {
+public class GetChecksResult implements Result {
 
     /**
      * Список проверок формы
