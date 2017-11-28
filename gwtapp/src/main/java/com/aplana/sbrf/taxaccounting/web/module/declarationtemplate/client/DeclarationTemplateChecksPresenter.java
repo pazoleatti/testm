@@ -8,8 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DeclarationTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTemplateEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetCheсksAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetCheсksResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetChecksAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetChecksResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -79,14 +79,14 @@ public class DeclarationTemplateChecksPresenter
     }
 
     private void loadGridData() {
-        GetCheсksAction action = new GetCheсksAction();
+        GetChecksAction action = new GetChecksAction();
         action.setDeclarationTypeId(declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getType().getId());
         action.setDeclarationTemplateId(declarationTemplateMainPresenter.getDeclarationTemplateExt().getDeclarationTemplate().getId());
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetCheсksResult>() {
+                        new AbstractCallback<GetChecksResult>() {
                             @Override
-                            public void onSuccess(GetCheсksResult result) {
+                            public void onSuccess(GetChecksResult result) {
                                 LogCleanEvent.fire(DeclarationTemplateChecksPresenter.this);
                                 getView().setTableData(result.getChecks());
                                 dataRows = result.getChecks();
