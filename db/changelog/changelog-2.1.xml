@@ -2355,4 +2355,13 @@ END;'
             <where>id=6</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2787 XSD. Не изменено ограничение "ИнфЧасть" на 100 тыс. maxOccurs="1000000"-->
+	<changeSet id="2.1-rnurgaleev-181" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd"/>
+            <where>id in (select id from blob_data where name='rnu_ndfl_light.xsd')</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
