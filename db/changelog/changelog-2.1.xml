@@ -2361,7 +2361,7 @@ END;'
         <update tableName="BLOB_DATA">
             <column name="data"
                     valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd"/>
-            <where>id in (select id from blob_data where name='rnu_ndfl_light.xsd')</where>
+            <where>id in (SELECT xsd FROM declaration_template WHERE id=100)</where>
         </update>
     </changeSet>
 </databaseChangeLog>
