@@ -2191,5 +2191,42 @@ END;'
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2766 Отслеживание изменений таблиц user и department в БД УН-->
+	<changeSet id="2.1-rnurgaleev-169" author="rnurgaleev">
+        <createTable
+                remarks="Изменения в таблицах department и sec_user в УН"
+                tableName="log_un_changes">
+            <column name="table_name" type="varchar2(30 char)" remarks="Название таблицы">
+                <constraints nullable="false"/>
+            </column>
+            <column name="oper_name" type="varchar2(30 char)" remarks="Название операции">
+                <constraints nullable="false"/>
+            </column>
+			<column name="id" type="number(18)" remarks="Идентификатор строки таблицы">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datetime" type="timestamp" remarks="Дата и время изменения"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+            </column>
+        </createTable>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-170" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/DEP_AFTER_INS_UPD_DEL.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
+	<changeSet id="2.1-rnurgaleev-171" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/SEC_USER_AFTER_INS_UPD_DEL.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
