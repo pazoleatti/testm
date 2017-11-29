@@ -2173,5 +2173,23 @@ END;'
             <where>id=6</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2781 Улица города федерального значения не проходит проверку-->
+	<changeSet id="2.1-rnurgaleev-167" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg_body8.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+	<changeSet id="2.1-rnurgaleev-168" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg_body9.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
 </databaseChangeLog>
