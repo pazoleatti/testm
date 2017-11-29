@@ -243,7 +243,9 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                         true,
                         departmentReportPeriodItem.getCorrectionDate())
                 .execute();
-        departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
+        if (departmentReportPeriodItem.getCorrectionDate() != null) {
+            departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
+        }
         return departmentReportPeriodItem;
 
     }
