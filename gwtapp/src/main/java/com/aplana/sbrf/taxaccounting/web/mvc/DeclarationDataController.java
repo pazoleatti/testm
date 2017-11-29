@@ -568,13 +568,25 @@ public class DeclarationDataController {
     }
 
     /**
-     * Создание отчета для отчетной НФ
+     * Создание отчетов и спецотчетов
      *
      * @param action
      * @return
      */
-    @PostMapping(value = "/rest/createPdfReport", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/rest/createReport", consumes = MediaType.APPLICATION_JSON_VALUE)
     public CreateReportResult createPdfReport(@RequestBody CreateReportAction action) {
         return declarationService.createReportForReportDD(securityService.currentUserInfo(), action);
+    }
+
+    /**
+     * Подготовить данные для спецотчета. Используется для получения списка ФЛ, для выбора одного из них для
+     * создания спецотчета.
+     * @param action
+     * @return
+     */
+    @PostMapping(value = "/rest/declarationData/prepareSpecificReport", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public PrepareSubreportResult prepareSubreport(@RequestBody PrepareSubreportAction action) {
+        PrepareSubreportResult result = declarationService.prepareSubreport(securityService.currentUserInfo(), action);
+        return result;
     }
 }

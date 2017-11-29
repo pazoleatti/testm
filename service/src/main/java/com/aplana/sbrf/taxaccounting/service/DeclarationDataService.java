@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -717,4 +718,13 @@ public interface DeclarationDataService {
      * @return
      */
     CreateReportResult createReportForReportDD(TAUserInfo userInfo, CreateReportAction action);
+
+    /**
+     * Подготовка данных для спецотчета
+     *
+     * @param userInfo
+     * @param action
+     * @return
+     */
+    PrepareSubreportResult prepareSubreport(TAUserInfo userInfo, PrepareSubreportAction action);
 }

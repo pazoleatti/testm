@@ -18,6 +18,8 @@ public class DeclarationTemplateModule extends AbstractPresenterModule {
                 DeclarationTemplateScriptView.class, DeclarationTemplateScriptPresenter.MyProxy.class);
         bindPresenter(DeclarationTemplateSubreportPresenter.class, DeclarationTemplateSubreportPresenter.MyView.class,
                 DeclarationTemplateSubreportView.class, DeclarationTemplateSubreportPresenter.MyProxy.class);
+        bindPresenter(DeclarationTemplateChecksPresenter.class, DeclarationTemplateChecksPresenter.MyView.class,
+                DeclarationTemplateChecksView.class, DeclarationTemplateChecksPresenter.MyProxy.class);
 		bindPresenter(DeclarationTemplateListPresenter.class, DeclarationTemplateListPresenter.MyView.class,
 				DeclarationTemplateListView.class, DeclarationTemplateListPresenter.MyProxy.class);
         bindPresenter(DeclarationTemplateFilesPresenter.class, DeclarationTemplateFilesPresenter.MyView.class,

@@ -85,6 +85,7 @@ public class Logger {
 	public void error(String message, Object...args) {
 		log(LogLevel.ERROR, message, null, null, false, args);
 	}
+
 	/**
 	 * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы)
 	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
@@ -92,6 +93,20 @@ public class Logger {
 	 */
 	public void errorExp(String message, String type, String object, Object... args) {
 		log(LogLevel.ERROR, message, type, object, false, args);
+	}
+
+	/**
+	 * Логирование проверок с настройками фатальности
+	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+	 * @param fatal признак фатальности ошибки
+	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+	public void logCheck(String message, boolean fatal, String type, String object, Object... args) {
+		if (fatal) {
+			errorExp(message, type, object, args);
+		} else {
+			warnExp(message, type, object, args);
+		}
 	}
 
     /**

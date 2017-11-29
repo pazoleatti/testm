@@ -28,6 +28,10 @@ public final class DeclarationTemplateTokens {
     public static final String declarationTemplateFilesLabel = "Файлы";
     public static final int declarationTemplateFilesPriority = 3;
 
+    public static final String declarationTemplateChecks = "!declarationTemplateChecks";
+    public static final String declarationTemplateChecksLabel = "Проверки";
+    public static final int declarationTemplateChecksPriority = 4;
+
     public static final String declarationTemplate = "!declarationTemplate";
     public static final String declarationVersionList = "!declarationVersionList";
 	public static final String declarationTemplateList = "!declarationTemplateList";

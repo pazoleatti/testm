@@ -17,7 +17,7 @@
             'app.modals',
             'app.filesComments',
             'app.rest',
-            'app.rnuNdflPersonFace',
+            'app.reportNdflPersonFace',
             'app.returnToCreatedDialog'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReport', {
@@ -33,11 +33,11 @@
         .controller('ndflReportCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource',
             '$filter', '$logPanel', 'appModals', '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state',
-            '$interval', 'acceptDeclarationData', 'createPdfReport', 'getPageImage', 'checkDeclarationData',
+            '$interval', 'acceptDeclarationData', 'createReport', 'getPageImage', 'checkDeclarationData',
             'moveToCreatedDeclarationData', '$aplanaModal',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, appModals, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval,
-                      acceptDeclarationData, createPdfReport, getPageImage, checkDeclarationData,
+                      acceptDeclarationData, createReport, getPageImage, checkDeclarationData,
                       moveToCreatedDeclarationData, $aplanaModal) {
 
                 if ($stateParams.uuid) {
@@ -258,9 +258,20 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Формирование отчетов"
                  */
                 $scope.createReport = function () {
-                    appModals.create('client/app/taxes/ndfl/rnuNdflPersonFace.html', 'rnuNdflPersonFaceFormCtrl',
-                        {declarationDataId: $scope.declarationDataId});
-
+                    var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id?$filter('translate')('reportPersonFace.title'):$filter('translate')('reportPersonFace.title2');
+                    $aplanaModal.open({
+                        title: title,
+                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html',
+                        controller: 'reportNdflPersonFaceFormCtrl',
+                        windowClass: 'modal1200',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    declarationDataId: $scope.declarationDataId
+                                };
+                            }
+                        }
+                    });
                 };
 
                 $scope.createReportXlsx = function (force) {
@@ -397,7 +408,7 @@
                     }
                     $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Идет формирование формы предварительного просмотра";
                     $scope.pdfLoading = true;
-                    createPdfReport.query({
+                    createReport.query({
                             declarationDataId: $stateParams.declarationDataId,
                             isForce: force,
                             taxType: 'NDFL',

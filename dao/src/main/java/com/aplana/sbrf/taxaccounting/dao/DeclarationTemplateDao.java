@@ -1,14 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.VersionSegment;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Dao для работы с {@link DeclarationTemplate шаблонами деклараций}
@@ -201,4 +195,33 @@ public interface DeclarationTemplateDao {
      * @param blobDataIds идентификатор файла
      */
     void createTemplateFile(Long declarationTemplateId, List<String> blobDataIds);
+    /**
+     * Возвращает признак фатальности проверки внутри формы по ее коду
+     * @param code код проверки
+     * @param templateId идентификатор макета
+     * @return ошибка фатальна?
+     */
+    boolean isCheckFatal(FormCheckCode code, int templateId);
+
+    /**
+     * Возвращает список проверок формы. Если идентификатор макета не указан, то возвращаются дефолтные проверки для типа формы
+     * @param declarationTypeId идентификатор типа формы, к которому привязаны проверки по-умолчанию
+     * @param declarationTemplateId идентификатор шаблона, к которому привязаны проверки
+     * @return список проверок
+     */
+    List<DeclarationTemplateCheck> getChecks(int declarationTypeId, Integer declarationTemplateId);
+
+    /**
+     * Создает новые проверки для макета
+     * @param checks список проверок
+     * @param declarationTemplateId идентификатор макета
+     */
+    void createChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId);
+
+    /**
+     * Изменяет существующие проверки
+     * @param checks список проверок
+     * @param declarationTemplateId идентификатор макета
+     */
+    void updateChecks(List<DeclarationTemplateCheck> checks, Integer declarationTemplateId);
 }

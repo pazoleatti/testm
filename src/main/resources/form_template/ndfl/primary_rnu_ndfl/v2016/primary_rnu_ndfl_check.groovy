@@ -430,7 +430,9 @@ class Check extends AbstractScriptClass {
                         R_CITIZENSHIP
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                logger.warnExp("%s. %s.", String.format(LOG_TYPE_REFERENCES, R_CITIZENSHIP), fioAndInp, pathError, errMsg)
+                logger.logCheck("%s. %s.",
+                        declarationService.isCheckFatal(FormCheckCode.RNU_CITIZENSHIP, declarationData.declarationTemplateId),
+                        String.format(LOG_TYPE_REFERENCES, R_CITIZENSHIP), fioAndInp, pathError, errMsg)
             }
 
             // Спр3 Документ удостоверяющий личность.Код (Обязательное поле)
@@ -1200,7 +1202,9 @@ class Check extends AbstractScriptClass {
             columnFillConditionDataList.each { columnFillConditionData ->
                 if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
                         !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
-                    logger.errorExp("%s. %s.", "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
+                    logger.logCheck("%s. %s.",
+                            declarationService.isCheckFatal(FormCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId),
+                            "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
                             fioAndInpAndOperId, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
                 }
             }
@@ -1492,15 +1496,16 @@ class Check extends AbstractScriptClass {
                 if (ndflPersonIncome.taxDate != null) {
 
                     boolean checkTaxDate = true
-                    List<Pair<String, String>> logTypeMessagePairList = []
+                    List<CheckData> logTypeMessagePairList = []
                     boolean calculatedTaxPresented = isPresentedByTempSolution(ndflPersonIncome.calculatedTax, ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.totalDeductionsSumm)
                     boolean withholdingTaxPresented = isPresentedByTempSolution(ndflPersonIncome.withholdingTax, ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.totalDeductionsSumm)
+                    boolean section_2_15_fatal = declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
                     // СведДох5.1
                     if (calculatedTaxPresented && (ndflPersonIncome.calculatedTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
                         if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomeAccruedDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                             checkTaxDate = false
-                            logTypeMessagePairList.add(new Pair<String, String>(("\"${"Дата исчисленного налога"}\" рассчитана некорректно").toString(), ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate) : ""}\")").toString()))
+                            logTypeMessagePairList.add(new CheckData(("\"${"Дата исчисленного налога"}\" рассчитана некорректно").toString(), ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate) : ""}\")").toString(), section_2_15_fatal))
                         }
                     }
                     // СведДох5.2
@@ -1508,7 +1513,7 @@ class Check extends AbstractScriptClass {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
-                            logTypeMessagePairList.add(new Pair<String, String>(("\"${"Дата удержанного налога"}\" рассчитана некорректно").toString(), ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString()))
+                            logTypeMessagePairList.add(new CheckData(("\"${"Дата удержанного налога"}\" рассчитана некорректно").toString(), ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
                         }
                     }
                     // СведДох5.3
@@ -1519,7 +1524,7 @@ class Check extends AbstractScriptClass {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
-                            logTypeMessagePairList.add(new Pair<String, String>("\"Дата не удержаннного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString()))
+                            logTypeMessagePairList.add(new CheckData("\"Дата не удержаннного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString()))
                         }
                     }
                     // СведДох5.4
@@ -1530,7 +1535,7 @@ class Check extends AbstractScriptClass {
                         // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
                         if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomeAccruedDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomeAccruedDate) {
                             checkTaxDate = false
-                            logTypeMessagePairList.add(new Pair<String, String>("\"Дата не удержаннного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate) : ""}\")").toString()))
+                            logTypeMessagePairList.add(new CheckData("\"Дата не удержаннного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_ACCRUED_DATE}\" (\"${ndflPersonIncome.incomeAccruedDate ? ScriptUtils.formatDate(ndflPersonIncome.incomeAccruedDate) : ""}\")").toString()))
                         }
                     }
                     // СведДох5.5
@@ -1544,7 +1549,7 @@ class Check extends AbstractScriptClass {
                             int month = ndflPersonIncome.taxDate.monthOfYear().get()
                             if (!(dayOfMonth == 31 && month == 12)) {
                                 checkTaxDate = false
-                                logTypeMessagePairList.add(new Pair<String, String>("\"Дата не удержаннного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно \"31.12.20**\"").toString()))
+                                logTypeMessagePairList.add(new CheckData("\"Дата не удержаннного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно \"31.12.20**\"").toString()))
                             }
                         }
                     }
@@ -1555,7 +1560,7 @@ class Check extends AbstractScriptClass {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
-                            logTypeMessagePairList.add(new Pair<String, String>("\"Дата излишне удержанного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString()))
+                            logTypeMessagePairList.add(new CheckData("\"Дата излишне удержанного налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
                         }
                     }
                     // СведДох5.7
@@ -1566,14 +1571,14 @@ class Check extends AbstractScriptClass {
                         // «Графа 15 Раздел 2» = «Графа 7 Раздел 2»
                         if (ndflPersonIncome.taxDate != null && ndflPersonIncome.incomePayoutDate != null && ndflPersonIncome.taxDate != ndflPersonIncome.incomePayoutDate) {
                             checkTaxDate = false
-                            logTypeMessagePairList.add(new Pair<String, String>("\"Дата расчета возвращенного налогоплательщику налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString()))
+                            logTypeMessagePairList.add(new CheckData("\"Дата расчета возвращенного налогоплательщику налога\" рассчитана некорректно", ("Значение гр. \"${C_TAX_DATE}\" (\"${ndflPersonIncome.taxDate ? ScriptUtils.formatDate(ndflPersonIncome.taxDate) : ""}\") должно быть равно значению гр. \"${C_INCOME_PAYOUT_DATE}\" (\"${ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""}\")").toString(), section_2_15_fatal))
                         }
                     }
                     if (!checkTaxDate) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                        for (Pair<String, String> logTypeMessagePair : logTypeMessagePairList) {
-                            logger.warnExp("%s. %s.", logTypeMessagePair.getFirst(), fioAndInpAndOperId, pathError, logTypeMessagePair.getSecond())
+                        for (CheckData checkData : logTypeMessagePairList) {
+                            logger.logCheck("%s. %s.", checkData.fatal, checkData.msgFirst, fioAndInpAndOperId, pathError, checkData.msgLast)
                         }
                     }
                 }
@@ -1590,7 +1595,9 @@ class Check extends AbstractScriptClass {
                                     "Процентная ставка", (ndflPersonIncome.taxRate ?: 0)
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                         }
                     }
                     // СведДох6.2
@@ -1653,7 +1660,9 @@ class Check extends AbstractScriptClass {
                                     C_CALCULATED_TAX
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                         }
                     }
                     // СведДох6.3
@@ -1682,7 +1691,9 @@ class Check extends AbstractScriptClass {
                                         "Сумма фиксированного авансового платежа", ndflPersonPrepaymentSum
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.warnExp("%s. %s.", LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
+                                logger.logCheck("%s. %s.",
+                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                        LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                             }
                         }
                     }
@@ -1706,7 +1717,9 @@ class Check extends AbstractScriptClass {
                                     C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     } else if (((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
                             || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1543", "1544",
@@ -1732,7 +1745,9 @@ class Check extends AbstractScriptClass {
                                     C_CALCULATED_TAX, ndflPersonIncomePreview.calculatedTax ?: 0
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                         if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
@@ -1741,7 +1756,9 @@ class Check extends AbstractScriptClass {
                                     C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                         if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
                             // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
@@ -1751,7 +1768,9 @@ class Check extends AbstractScriptClass {
                                     C_CALCULATED_TAX, ndflPersonIncome.calculatedTax ?: 0
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
                             || (["1530", "1531", "1532", "1533", "1535", "1536", "1537", "1539", "1541", "1542", "1544", "1545",
@@ -1763,7 +1782,9 @@ class Check extends AbstractScriptClass {
                                     C_WITHHOLDING_TAX, ndflPersonIncome.withholdingTax ?: 0
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     } else if (!(ndflPersonIncome.incomeCode != null)) {
                         if (!(ndflPersonIncome.withholdingTax != ndflPersonIncome.taxSumm ?: 0)) {
@@ -1773,7 +1794,9 @@ class Check extends AbstractScriptClass {
                                     C_TAX_SUMM, ndflPersonIncome.taxSumm ?: 0
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                            logger.warnExp("%s. %s.", LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
+                            logger.logCheck("%s. %s.",
+                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     }
                 }
@@ -1870,7 +1893,9 @@ class Check extends AbstractScriptClass {
                                         C_INCOME_PAYOUT_DATE, ndflPersonIncome.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncome.incomePayoutDate) : ""
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
+                                logger.logCheck("%s. %s.",
+                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
+                                        LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
                             }
                         }
                     }
@@ -1926,7 +1951,9 @@ class Check extends AbstractScriptClass {
                                         C_INCOME_PAYOUT_DATE, ndflPersonIncomeFind.incomePayoutDate ? ScriptUtils.formatDate(ndflPersonIncomeFind.incomePayoutDate) : ""
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
+                                logger.logCheck("%s. %s.",
+                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
+                                        LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
                             }
                         } else {
                             // ToDo https://jira.aplana.com/browse/SBRFNDFL-1448
@@ -1935,7 +1962,9 @@ class Check extends AbstractScriptClass {
                                         C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ScriptUtils.formatDate(ndflPersonIncome.taxTransferDate) : ""
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
-                                logger.warnExp("%s. %s.", LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
+                                logger.logCheck("%s. %s.",
+                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
+                                        LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
                             }
                         }
                     }
@@ -2046,7 +2075,9 @@ class Check extends AbstractScriptClass {
                         C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? ScriptUtils.formatDate(ndflPersonDeduction.incomeAccrued) : ""
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                logger.warnExp("%s. %s.", LOG_TYPE_3_10, fioAndInpAndOperId, pathError, errMsg)
+                logger.logCheck("%s. %s.",
+                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
+                        LOG_TYPE_3_10, fioAndInpAndOperId, pathError, errMsg)
             } else {
                 NdflPersonIncome ndflPersonIncome = mapNdflPersonIncomeDate.get(ndflPersonDeduction.incomeAccrued ? ScriptUtils.formatDate(ndflPersonDeduction.incomeAccrued) : "")
                 if (ndflPersonIncome == null) {
@@ -2067,7 +2098,9 @@ class Check extends AbstractScriptClass {
                         )
                     }
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                    logger.warnExp("%s. %s.", LOG_TYPE_3_10, fioAndInpAndOperId, pathError, errMsg)
+                    logger.logCheck("%s. %s.",
+                            declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
+                            LOG_TYPE_3_10, fioAndInpAndOperId, pathError, errMsg)
                 } else {
                     // Выч17 Начисленный доход.Код дохода (Графы 11)
                     if (ndflPersonDeduction.incomeCode != ndflPersonIncome.incomeCode) {
@@ -2101,7 +2134,9 @@ class Check extends AbstractScriptClass {
                         C_INCOME_ACCRUED, ndflPersonDeduction.incomeAccrued ? ScriptUtils.formatDate(ndflPersonDeduction.incomeAccrued) : ""
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                logger.warnExp("%s. %s.", LOG_TYPE_3_10_2, fioAndInpAndOperId, pathError, errMsg)
+                logger.logCheck("%s. %s.",
+                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_10_2, declarationData.declarationTemplateId),
+                        LOG_TYPE_3_10_2, fioAndInpAndOperId, pathError, errMsg)
             }
 
             // Выч21 Документ о праве на налоговый вычет.Сумма (Графы 16) (Графы 8)
@@ -2112,7 +2147,9 @@ class Check extends AbstractScriptClass {
                         C_NOTIF_SUMM, ndflPersonDeduction.notifSumm ?: ""
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
-                logger.warnExp("%s. %s.", LOG_TYPE_3_16, fioAndInpAndOperId, pathError, errMsg)
+                logger.logCheck("%s. %s.",
+                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
+                        LOG_TYPE_3_16, fioAndInpAndOperId, pathError, errMsg)
             }
         }
         logForDebug("Проверки сведений о вычетах (" + (System.currentTimeMillis() - time) + " мс)");
@@ -3040,5 +3077,23 @@ class Check extends AbstractScriptClass {
             throw new ScriptException("Ошибка при получении записей справочника " + refBookId)
         }
         return refBookMap
+    }
+
+    class CheckData {
+        String msgFirst
+        String msgLast
+        boolean fatal;
+
+        CheckData(String msgFirst, String msgLast) {
+            this.msgFirst = msgFirst
+            this.msgLast = msgLast
+            this.fatal = false
+        }
+
+        CheckData(String msgFirst, String msgLast, boolean fatal) {
+            this.msgFirst = msgFirst
+            this.msgLast = msgLast
+            this.fatal = fatal
+        }
     }
 }

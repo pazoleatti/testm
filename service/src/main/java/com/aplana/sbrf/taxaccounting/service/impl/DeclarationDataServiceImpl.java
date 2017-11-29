@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
@@ -70,6 +71,8 @@ import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -3098,39 +3101,106 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setDeclarationDataId(action.getDeclarationDataId());
             return result;
         }
+        if (ddReportType.isSubreport()) {
+            DeclarationData declaration = get(action.getDeclarationDataId(), userInfo);
+            ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
+        } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && isVisiblePDF(get(action.getDeclarationDataId(), userInfo), userInfo)) {
+            throw new ServiceException("Данное действие недоступно");
+        }
         Logger logger = new Logger();
-        final String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ddReportType);
-        if (uuid != null && !action.isCreate()) {
-            result.setStatus(CreateAsyncTaskStatus.EXIST);
-            return result;
-        } else {
-            String keyTask = generateAsyncTaskKey(action.getDeclarationDataId(), ddReportType);
-            Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, action.isForce(), logger);
-            if (restartStatus != null && restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                result.setRestartMsg(restartStatus.getSecond());
-            } else if (restartStatus != null && !restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
+        String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
+        if (uuidXml != null) {
+            final String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ddReportType);
+            if (uuid != null && !action.isCreate()) {
+                result.setStatus(CreateAsyncTaskStatus.EXIST);
+                return result;
             } else {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-                Map<String, Object> params = new HashMap<>();
-                params.put("declarationDataId", action.getDeclarationDataId());
-                asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                    @Override
-                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                        return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                getDeclarationFullName(action.getDeclarationDataId(), ddReportType));
-                    }
-
-                    @Override
-                    public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
-                        if (uuid != null) {
-                            reportService.deleteDec(uuid);
+                String keyTask = generateAsyncTaskKey(action.getDeclarationDataId(), ddReportType);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, action.isForce(), logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                } else {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", action.getDeclarationDataId());
+                    if (ddReportType.isSubreport()) {
+                        params.put("alias", ddReportType.getReportAlias());
+                        params.put("viewParamValues", new LinkedHashMap<String, String>());
+                        if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+                            params.put("subreportParamValues", action.getSubreportParamValues());
+                            if (action.getSelectedRow() != null) {
+                                List<Cell> cellList = new ArrayList<>();
+                                for (Map.Entry<String, Object> cellData : action.getSelectedRow().entrySet()) {
+                                    Column column = new StringColumn();
+                                    column.setAlias(cellData.getKey());
+                                    Cell cell = new Cell(column, new ArrayList<FormStyle>());
+                                    cell.setStringValue(cellData.getValue().toString());
+                                    cellList.add(cell);
+                                }
+                                DataRow<Cell> dataRow = new DataRow<>(cellList);
+                                params.put("selectedRecord", dataRow);
+                            }
                         }
                     }
-                });
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                        @Override
+                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    getDeclarationFullName(action.getDeclarationDataId(), ddReportType));
+                        }
+
+                        @Override
+                        public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
+                            if (uuid != null) {
+                                reportService.deleteDec(uuid);
+                            }
+                        }
+                    });
+                }
             }
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
         }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public PrepareSubreportResult prepareSubreport(TAUserInfo userInfo, PrepareSubreportAction action) {
+        PrepareSubreportResult result = new PrepareSubreportResult();
+        if (!existDeclarationData(action.getDeclarationDataId())) {
+            result.setExistDeclarationData(false);
+            result.setDeclarationDataId(action.getDeclarationDataId());
+            return result;
+        }
+        Logger logger = new Logger();
+        DeclarationData declarationData = get(action.getDeclarationDataId(), userInfo);
+        DeclarationDataReportType ddReportType = DeclarationDataReportType.getDDReportTypeByName(action.getType());
+        ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), action.getType()));
+
+        Map<String, Object> subreportParamValues = null;
+        if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+            for (Map.Entry<String, Object> entrie: action.getSubreportParamValues().entrySet()) {
+                Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.*");
+                Matcher matcher = pattern.matcher(entrie.getValue().toString());
+                if (matcher.find()) {
+                    try {
+                        entrie.setValue(new SimpleDateFormat("yyyy-MM-dd").parse(entrie.getValue().toString().substring(0, 10)));
+                    } catch (ParseException e) {
+                        LOG.error(e);
+                        throw new ServiceException(e.getMessage());
+                    }
+                }
+            }
+            subreportParamValues = action.getSubreportParamValues();
+        }
+
+        result.setPrepareSpecificReportResult(prepareSpecificReport(logger, declarationData, ddReportType, subreportParamValues, userInfo));
+        result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 }

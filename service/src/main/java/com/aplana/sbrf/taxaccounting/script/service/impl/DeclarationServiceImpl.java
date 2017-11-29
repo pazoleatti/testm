@@ -35,6 +35,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.zip.ZipInputStream;
 
@@ -83,8 +84,6 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DeclarationDataFileDao declarationDataFileDao;
     @Autowired
     private ConfigurationService configurationService;
-    @Autowired
-    private ValidateXMLService validateXMLService;
     @Autowired
     private LockDataService lockDataService;
 
@@ -142,7 +141,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                 IOUtils.closeQuietly(zipXmlIn);
             }
         }
-        return new String(byteArrayOutputStream.toByteArray());
+        return new String(byteArrayOutputStream.toByteArray(), Charset.forName("cp1251"));
     }
 
     @Override
@@ -536,5 +535,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args) {
         return declarationDataService.getDeclarationFullName(declarationId, ddReportType);
+    }
+
+    @Override
+    public boolean isCheckFatal(FormCheckCode code, int templateId) {
+        return declarationTemplateDao.isCheckFatal(code, templateId);
     }
 }

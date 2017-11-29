@@ -2015,7 +2015,7 @@ END;'
             <where>id=1</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2731 6-НДФЛ. В печатной форме не заполняется дата подписи-->
 	<changeSet id="2.1-rnurgaleev-157" author="rnurgaleev">
         <update tableName="BLOB_DATA">
@@ -2024,7 +2024,7 @@ END;'
             <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
         </update>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-158" author="rnurgaleev">
         <update tableName="BLOB_DATA">
             <column name="data"
@@ -2032,7 +2032,7 @@ END;'
             <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2445 Реализовать изменения в xsd-схеме количества ИнфБлоков-->
 	<changeSet id="2.1-rnurgaleev-159" author="rnurgaleev">
         <update tableName="BLOB_DATA">
@@ -2041,4 +2041,137 @@ END;'
             <where>id in ('58adc3c2-66a0-4f11-98a2-defe682a092f')</where>
         </update>
     </changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2764 Добавить в патч создание и заполнение таблицы с настройками фатальности проверок-->
+	<changeSet id="2.1-rnurgaleev-160" author="rnurgaleev">
+        <createTable
+                remarks="Настройки фатальности проверок форм"
+                tableName="declaration_template_checks">
+            <column name="id" type="number(9)" remarks="Идентификатор">
+                <constraints nullable="false"/>
+            </column>
+            <column name="declaration_type_id" type="number(9)" remarks="Идентификатор типа формы, к которому привязана проверка по-умолчанию">
+                <constraints nullable="false" foreignKeyName="fk_decl_type_checks"
+                             references="declaration_type(id)"/>
+            </column>
+            <column name="template_id" type="number(9)" remarks="Идентификатор макета, к которому привязана проверка">
+            </column>
+            <column name="check_code" type="varchar2(50)" remarks="Код проверки">
+				<constraints nullable="false"/>
+            </column>
+            <column name="check_type" type="varchar2(400)" remarks="Тип проверки">
+            </column>
+            <column name="description" type="varchar2(300)" remarks="Тип Описание">
+            </column>
+			<column name="is_fatal" type="number(1)" defaultValue="0" remarks="Проверка фатальна?">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-161" author="rnurgaleev">
+        <createSequence
+                incrementBy="1"
+                sequenceName="seq_dt_checks"
+                startValue="1"/>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-162" author="rnurgaleev">
+        <addForeignKeyConstraint baseColumnNames="template_id"
+                                 baseTableName="declaration_template_checks"
+                                 constraintName="fk_decl_template_checks"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="declaration_template"/>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-163" author="rnurgaleev">
+        <createIndex
+                indexName="idx_decl_type_checks"
+                tableName="declaration_template_checks">
+            <column name="declaration_type_id"/>
+        </createIndex>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-164" author="rnurgaleev">
+        <createIndex
+                indexName="idx_decl_template_checks"
+                tableName="declaration_template_checks">
+            <column name="template_id"/>
+        </createIndex>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-165" author="rnurgaleev">
+        <createIndex
+                indexName="unq_dt_checks"
+                tableName="declaration_template_checks"
+				unique="true">
+            <column name="declaration_type_id"/>
+			<column name="template_id"/>
+			<column name="check_code"/>
+        </createIndex>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-166" author="rnurgaleev">
+        <sql splitStatements="false">
+            BEGIN
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '000-0007-00001', 'Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ', 'Проверка наличия или отсутствия значения в графе в зависимости от условий', 1);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '001-0001-00002', 'Значение не соответствует данным справочника', 'Соответствие кода гражданства справочнику', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '003-0001-00002', '"Дата начисленного дохода" указана некорректно', 'Заполнение Раздела 3 Графы 10.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '003-0001-00003', '"Дата применения вычета в текущем периоде" не соответствует "Дате начисления дохода"', 'Заполнение Раздела 3 Графы 10.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '001-0001-00006', '"Сумма применения вычета" указана некорректно', 'Заполнение Раздела 3 Графы 16.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '004-0001-00004', '«Дата исчисленного/удержанного/излишне удержанного/возвращенного налогоплательщику  налога»  рассчитана неверно.', 'Заполнение Раздела 2 Графы 15.', 1);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '004-0001-00005', '"НДФЛ исчисленный" рассчитан некорректно.', 'Заполнение Раздела 2 Графы 16.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '004-0001-00006', '"НДФЛ удержанный" рассчитан некорректно.', 'Заполнение Раздела 2 Графы 17.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 100, '004-0001-00010', '"Срок перечисления в бюджет" рассчитан некорректно.', 'Заполнение Раздела 2 Графы 21.', 0);
+
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '000-0007-00001', 'Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ', 'Проверка наличия или отсутствия значения в графе в зависимости от условий', 1);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '001-0001-00002', 'Значение не соответствует данным справочника', 'Соответствие кода гражданства справочнику', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '003-0001-00002', '"Дата начисленного дохода" указана некорректно', 'Заполнение Раздела 3 Графы 10.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '003-0001-00003', '"Дата применения вычета в текущем периоде" не соответствует "Дате начисления дохода"', 'Заполнение Раздела 3 Графы 10.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '001-0001-00006', '"Сумма применения вычета" указана некорректно', 'Заполнение Раздела 3 Графы 16.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '004-0001-00004', '«Дата исчисленного/удержанного/излишне удержанного/возвращенного налогоплательщику  налога»  рассчитана неверно.', 'Заполнение Раздела 2 Графы 15.', 1);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '004-0001-00005', '"НДФЛ исчисленный" рассчитан некорректно.', 'Заполнение Раздела 2 Графы 16.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '004-0001-00006', '"НДФЛ удержанный" рассчитан некорректно.', 'Заполнение Раздела 2 Графы 17.', 0);
+				insert into declaration_template_checks (id, declaration_type_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, 101, '004-0001-00010', '"Срок перечисления в бюджет" рассчитан некорректно.', 'Заполнение Раздела 2 Графы 21.', 0);
+
+				insert into declaration_template_checks (id, declaration_type_id, template_id, check_code, check_type, description, is_fatal)
+				select seq_dt_checks.nextval, ch.declaration_type_id, dt.id, ch.check_code, ch.check_type, ch.description, ch.is_fatal
+				from declaration_template_checks ch
+				join declaration_template dt on dt.declaration_type_id = ch.declaration_type_id;
+			END;
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2722 -->
+    <changeSet id="2.1-ytrofimov-63" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=104</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-64" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=102</where>
+        </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2435 -->
+    <changeSet id="2.1-dloshkarev-5" author="dloshkarev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+    <changeSet id="2.1-dloshkarev-8" author="dloshkarev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -54,11 +54,16 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     @Override
     public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
-        return edit(template, templateActualEndDate, logger, user, null);
+        return edit(template, null, templateActualEndDate, logger, user, null);
     }
 
     @Override
-    public <T> boolean edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force) {
+    public <T> boolean edit(T template, List<DeclarationTemplateCheck> checks, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+        return edit(template, checks, templateActualEndDate, logger, user, null);
+    }
+
+    @Override
+    public <T> boolean edit(T template, List<DeclarationTemplateCheck> checks, Date templateActualEndDate, Logger logger, TAUserInfo user, Boolean force) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         checkRole(TaxType.NDFL, user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
@@ -114,6 +119,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         }
 
         declarationTemplateService.save(declarationTemplate);
+        declarationTemplateService.updateChecks(checks, declarationTemplate.getId());
         logger.info("Изменения сохранены");
 
         int id = declarationTemplate.getId();
@@ -126,7 +132,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+    public <T> int createNewType(T template, List<DeclarationTemplateCheck> checks, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         checkRole(TaxType.NDFL, user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
@@ -140,6 +146,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         int id = declarationTemplateService.save(declarationTemplate);
+        declarationTemplateService.createChecks(checks, id);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),
                 declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
@@ -148,7 +155,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
+    public <T> int createNewTemplateVersion(T template, List<DeclarationTemplateCheck> checks, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         checkRole(TaxType.NDFL, user.getUser());
         declarationTemplateService.validateDeclarationTemplate(declarationTemplate, logger);
@@ -158,6 +165,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger, SAVE_MESSAGE);
         int id = declarationTemplateService.save(declarationTemplate);
+        declarationTemplateService.createChecks(checks, id);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),
                 declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);

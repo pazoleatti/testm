@@ -148,6 +148,8 @@ a.collapse-link {
   line-height: 1.33;
   text-align: left;
   color: #269238;
+  display: inline-block;
+  vertical-align: top;
 }
 
 .accordion-heading a.accordion-toggle.collapsed,
@@ -272,6 +274,7 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 
 p.input-group {
   margin-bottom: 0;
+  //z-index: 0;
 }
 
 input[type="number"] {
@@ -1191,6 +1194,9 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 }
 
 /*================панель уведомлений============*/
+#log-panel{
+  z-index: 2;
+}
 #log-panel-header {
   position: relative;
   top: -18px;
@@ -1360,3 +1366,18 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   display: block;
 }
 /*------------------------------------------------------------------*/
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  .ui-jqgrid .ui-jqgrid-bdiv{
+    box-shadow: none;
+  }
+  .logo {
+    width: 132px;
+    height: 54px;
+    margin: 13px 9px -17px 24px;
+    background: #fff;
+    padding: 15px 11px;
+    border-radius: 0 0 16px 0;
+    background: url('../img/sberbank_logo_white2.jpg') no-repeat;
+    background-size: contain;
+  }
+}
