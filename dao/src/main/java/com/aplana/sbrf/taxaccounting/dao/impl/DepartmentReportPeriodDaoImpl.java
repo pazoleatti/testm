@@ -61,7 +61,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             departmentReportPeriod.correctionDate,
             departmentReportPeriod.reportPeriodId,
             departmentReportPeriod.departmentId,
-//            notification.deadline,
             reportPeriod.dictTaxPeriodId);
 
     private final QBean<DepartmentReportPeriod> departmentReportPeriodQBean = bean(DepartmentReportPeriod.class,
@@ -144,12 +143,18 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             }
 
 
-            return sqlQueryFactory.select(departmentReportPeriodQBean)
+            List<DepartmentReportPeriod> res =  sqlQueryFactory.select(departmentReportPeriodQBean)
                     .from(departmentReportPeriod)
                     .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
                     .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                     .where(where)
                     .transform(GroupBy.groupBy(departmentReportPeriod.id).list(departmentReportPeriodQBean));
+            for (DepartmentReportPeriod period : res){
+                if (period.getCorrectionDate() != null) {
+                    period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
+                }
+            }
+            return res;
         } catch (DataAccessException e) {
             LOG.error("", e);
             throw new DaoException("", e);
@@ -238,6 +243,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                         true,
                         departmentReportPeriodItem.getCorrectionDate())
                 .execute();
+        departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
         return departmentReportPeriodItem;
 
     }
@@ -301,12 +307,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .where(departmentReportPeriod.id.eq(id))
                 .set(departmentReportPeriod.correctionDate, corrDate)
                 .execute();
-
-        getJdbcTemplate().update(
-                "update department_report_period set correction_date = ? where id = ?",
-                new Object[]{correctionDate, id},
-                new int[]{Types.DATE, Types.NUMERIC}
-        );
     }
 
     @Override
@@ -323,19 +323,9 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
     public void delete(final List<Integer> ids) {
         try {
-            getJdbcTemplate().batchUpdate("delete from department_report_period where id = ?",
-                    new BatchPreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setInt(1, ids.get(i));
-                        }
-
-                        @Override
-                        public int getBatchSize() {
-                            return ids.size();
-                        }
-                    }
-            );
+            sqlQueryFactory.delete(departmentReportPeriod)
+                    .where(departmentReportPeriod.id.in(ids))
+                    .execute();
         } catch (DataAccessException e) {
             LOG.error("", e);
         }
@@ -548,17 +538,22 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 departmentReportPeriod.correctionDate,
                 departmentReportPeriod.reportPeriodId,
                 departmentReportPeriod.departmentId,
-//                notification.deadline,
                 reportPeriod.dictTaxPeriodId)
                 .from(departmentReportPeriod)
                 .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
                 .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-//                .leftJoin(reportPeriod._notificationFkReportPeriod, notification)
                 .where(where)
                 .orderBy(order)
                 .offset(pagingParams.getStartIndex())
                 .limit(pagingParams.getCount())
                 .transform(GroupBy.groupBy(departmentReportPeriod.id).list(qDepartmentReportPeriodJournalItem));
+
+        for (DepartmentReportPeriodJournalItem period : result){
+            if (period.getCorrectionDate() != null) {
+                period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
+            }
+        }
+
 
         return new PagingResult<>(result, getTotalCount(where));
 
@@ -568,12 +563,16 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     @Cacheable(CacheConstants.DEPARTMENT_REPORT_PERIOD)
     public DepartmentReportPeriod get(int id) {
-        return sqlQueryFactory.select(departmentReportPeriodQBean)
+        DepartmentReportPeriod period =  sqlQueryFactory.select(departmentReportPeriodQBean)
                 .from(departmentReportPeriod)
                 .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
                 .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .where(departmentReportPeriod.id.eq(id))
                 .fetchOne();
+        if (period != null && period.getCorrectionDate() != null){
+            period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
+        }
+        return period;
     }
 
     private int getTotalCount(BooleanBuilder where) {
@@ -596,6 +595,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .set(departmentReportPeriod.reportPeriodId, departmentReportPeriodItem.getReportPeriod().getId())
                 .set(taxPeriod.year, departmentReportPeriodItem.getReportPeriod().getTaxPeriod().getYear())
                 .execute();
+        departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
 
         return departmentReportPeriodItem;
 
