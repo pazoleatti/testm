@@ -879,13 +879,13 @@ button.btn.btn-default.ng-binding {
 }
 /*----------------------------------------------------------------------------------------------*/
 .btn-default, .btn-default-nonBg{
-  box-shadow: inset 1px 1px 0 0 rgba(255,255,255,0.5);
   font-size: 12px;
   font-weight: bold;
   line-height: 0;
   text-align: left;
   color: @white;
   box-shadow: none;
+  border: none;
   border-radius: 4px;
   height: 31px;
   padding: 8px 12px!important;
@@ -900,15 +900,17 @@ button.btn.btn-default.ng-binding {
   background-color: @greenDark!important;
   color: @white;
 }
-button.btn.btn-default:hover:not([disabled]):hover{
+button.btn.btn-default:hover:not([disabled]):hover,
+.btn-default:active:hover, .btn-default:active:focus{
   background-color: #6ec151;
   color: #fff;
+  border: none;
 }
 .btn-default:disabled,
 .btn-default:disabled:hover
 .btn-default[disabled]:active,
 .btn-default[disabled]:visited,
-.btn-default[disabled]:focus{
+.btn-default[disabled]:focus,{
   background-color: #ccc!important;
   color: @white;
 }
