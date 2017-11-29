@@ -521,5 +521,5 @@ public interface DeclarationService {
      * @param templateId идентификатор макета
      * @return ошибка фатальна?
      */
-    boolean isCheckFatal(FormCheckCode code, int templateId);
+    boolean isCheckFatal(DeclarationCheckCode code, int templateId);
 }

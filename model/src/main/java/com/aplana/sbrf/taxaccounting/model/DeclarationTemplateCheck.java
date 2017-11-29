@@ -14,17 +14,17 @@ public class DeclarationTemplateCheck implements Serializable {
     /**
      * Идентификатор типа формы, к которому привязана проверка по-умолчанию
      */
-    private int typeId;
+    private int declarationTypeId;
 
     /**
      * Идентификатор макета, к которому привязана проверка
      */
-    private int templateId;
+    private int declarationTemplateId;
 
     /**
      * Код проверки
      */
-    private FormCheckCode code;
+    private DeclarationCheckCode code;
 
     /**
      * Тип проверки
@@ -49,11 +49,11 @@ public class DeclarationTemplateCheck implements Serializable {
         this.id = id;
     }
 
-    public FormCheckCode getCode() {
+    public DeclarationCheckCode getCode() {
         return code;
     }
 
-    public void setCode(FormCheckCode code) {
+    public void setCode(DeclarationCheckCode code) {
         this.code = code;
     }
 
@@ -81,20 +81,20 @@ public class DeclarationTemplateCheck implements Serializable {
         isFatal = fatal;
     }
 
-    public int getTemplateId() {
-        return templateId;
+    public int getDeclarationTemplateId() {
+        return declarationTemplateId;
     }
 
-    public void setTemplateId(int templateId) {
-        this.templateId = templateId;
+    public void setDeclarationTemplateId(int declarationTemplateId) {
+        this.declarationTemplateId = declarationTemplateId;
     }
 
-    public int getTypeId() {
-        return typeId;
+    public int getDeclarationTypeId() {
+        return declarationTypeId;
     }
 
-    public void setTypeId(int typeId) {
-        this.typeId = typeId;
+    public void setDeclarationTypeId(int declarationTypeId) {
+        this.declarationTypeId = declarationTypeId;
     }
 
     @Override

@@ -201,7 +201,7 @@ public interface DeclarationTemplateDao {
      * @param templateId идентификатор макета
      * @return ошибка фатальна?
      */
-    boolean isCheckFatal(FormCheckCode code, int templateId);
+    boolean isCheckFatal(DeclarationCheckCode code, int templateId);
 
     /**
      * Возвращает список проверок формы. Если идентификатор макета не указан, то возвращаются дефолтные проверки для типа формы
