@@ -907,12 +907,13 @@ button.btn.btn-default:hover:not([disabled]):hover,
   border: none;
 }
 .btn-default:disabled,
-.btn-default:disabled:hover
+.btn-default[disabled]:hover,
 .btn-default[disabled]:active,
 .btn-default[disabled]:visited,
-.btn-default[disabled]:focus,{
+.btn-default[disabled]:focus{
   background-color: #ccc!important;
   color: @white;
+  border: none;
 }
 .btn-default {
   background-color: @greenDarker;
