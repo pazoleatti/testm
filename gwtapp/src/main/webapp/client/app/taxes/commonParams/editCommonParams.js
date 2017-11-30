@@ -5,30 +5,32 @@
      * @description Модуль для редактирования общих параметров'
      */
 
-    angular.module('app.uploadParams', ['ui.router', 'app.rest', 'app.logPanel'])
+    angular.module('app.editParams', ['ui.router', 'app.rest', 'app.logPanel'])
 
     /**
      * @description Модуль для редактирования общих параметров'
      */
-        .controller('uploadParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'commonParamsGrid',
+        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'commonParamsGrid',
             function ($scope, $filter, $http, $modalInstance, commonParamsGrid) {
 
                 /**
                  * @description Редактирование параметра
                  */
                 $scope.save = function () {
+
                     $http({
                         method: "POST",
-                        url: "/controller/actions/uploadCommonParams/",
+                        url: "/controller/actions/editCommonParams/",
                         params: {
                             config: $scope.parameter
                         }
-
+                    }).success(function () {
+                        commonParamsGrid.ctrl.refreshGrid();
                     });
-                    $modalInstance.dismiss('Canceled');
-                    commonParamsGrid.ctrl.refreshGrid();
-                };
 
+                    $modalInstance.dismiss('Canceled');
+
+                };
                 /**
                  * @description Переменная содержащая значения редактируемое значение
                  */
@@ -39,6 +41,7 @@
                  */
                 $scope.close = function () {
                     $modalInstance.dismiss('Canceled');
+
                 };
 
             }]);
