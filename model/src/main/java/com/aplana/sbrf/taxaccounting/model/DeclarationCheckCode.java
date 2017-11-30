@@ -4,7 +4,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * Список кодов для проверок форм. Используется для проверки настроек фатальности проверок
  * @author dloshkarev
  */
-public enum FormCheckCode {
+public enum DeclarationCheckCode {
     RNU_VALUE_CONDITION("000-0007-00001"),
     RNU_CITIZENSHIP("001-0001-00002"),
     RNU_SECTION_3_10("003-0001-00002"),
@@ -18,7 +18,7 @@ public enum FormCheckCode {
 
     private String code;
 
-    FormCheckCode(String code) {
+    DeclarationCheckCode(String code) {
         this.code = code;
     }
 
@@ -29,12 +29,12 @@ public enum FormCheckCode {
     /**
      * Получение по коду
      */
-    public static FormCheckCode fromCode(String code) {
-        for(FormCheckCode formCheckCode: values()) {
-            if (formCheckCode.getCode().equals(code)) {
-                return formCheckCode;
+    public static DeclarationCheckCode fromCode(String code) {
+        for(DeclarationCheckCode checkCode: values()) {
+            if (checkCode.getCode().equals(code)) {
+                return checkCode;
             }
         }
-        throw new IllegalArgumentException("Wrong FormCheckCode code: " + code);
+        throw new IllegalArgumentException("Wrong DeclarationCheckCode code: " + code);
     }
 }

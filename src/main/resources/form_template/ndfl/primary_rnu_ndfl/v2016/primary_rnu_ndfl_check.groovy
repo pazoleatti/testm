@@ -431,7 +431,7 @@ class Check extends AbstractScriptClass {
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                 logger.logCheck("%s. %s.",
-                        declarationService.isCheckFatal(FormCheckCode.RNU_CITIZENSHIP, declarationData.declarationTemplateId),
+                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_CITIZENSHIP, declarationData.declarationTemplateId),
                         String.format(LOG_TYPE_REFERENCES, R_CITIZENSHIP), fioAndInp, pathError, errMsg)
             }
 
@@ -1203,7 +1203,7 @@ class Check extends AbstractScriptClass {
                 if (columnFillConditionData.columnConditionCheckerAsIs.check(ndflPersonIncome) &&
                         !columnFillConditionData.columnConditionCheckerToBe.check(ndflPersonIncome)) {
                     logger.logCheck("%s. %s.",
-                            declarationService.isCheckFatal(FormCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId),
+                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_VALUE_CONDITION, declarationData.declarationTemplateId),
                             "Наличие (отсутствие) значения в графе не соответствует алгоритму заполнения РНУ НДФЛ",
                             fioAndInpAndOperId, columnFillConditionData.conditionPath, columnFillConditionData.conditionMessage)
                 }
@@ -1499,7 +1499,7 @@ class Check extends AbstractScriptClass {
                     List<CheckData> logTypeMessagePairList = []
                     boolean calculatedTaxPresented = isPresentedByTempSolution(ndflPersonIncome.calculatedTax, ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.totalDeductionsSumm)
                     boolean withholdingTaxPresented = isPresentedByTempSolution(ndflPersonIncome.withholdingTax, ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.totalDeductionsSumm)
-                    boolean section_2_15_fatal = declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
+                    boolean section_2_15_fatal = declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_15, declarationData.declarationTemplateId)
                     // СведДох5.1
                     if (calculatedTaxPresented && (ndflPersonIncome.calculatedTax ?: 0 > 0) && ndflPersonIncome.incomeCode != "0" && ndflPersonIncome.incomeCode != null) {
                         // «Графа 15 Раздел 2» = «Графа 6 Раздел 2»
@@ -1596,7 +1596,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                         }
                     }
@@ -1661,7 +1661,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                         }
                     }
@@ -1692,7 +1692,7 @@ class Check extends AbstractScriptClass {
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                 logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
+                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_16, declarationData.declarationTemplateId),
                                         LOG_TYPE_2_16, fioAndInpAndOperId, pathError, errMsg)
                             }
                         }
@@ -1718,7 +1718,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     } else if (((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "13")
@@ -1746,7 +1746,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                         if (!(ndflPersonIncome.withholdingTax == ndflPersonIncome.taxSumm ?: 0)) {
@@ -1757,7 +1757,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                         if (!(ndflPersonIncome.withholdingTax <= (ScriptUtils.round(ndflPersonIncome.taxBase ?: 0, 0) - ndflPersonIncome.calculatedTax ?: 0) * 0.50)) {
@@ -1769,7 +1769,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     } else if ((["2520", "2720", "2740", "2750", "2790", "4800"].contains(ndflPersonIncome.incomeCode) && ndflPersonIncome.incomeType == "14")
@@ -1783,7 +1783,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     } else if (!(ndflPersonIncome.incomeCode != null)) {
@@ -1795,7 +1795,7 @@ class Check extends AbstractScriptClass {
                             )
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                             logger.logCheck("%s. %s.",
-                                    declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
+                                    declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_17, declarationData.declarationTemplateId),
                                     LOG_TYPE_2_17, fioAndInpAndOperId, pathError, errMsg)
                         }
                     }
@@ -1894,7 +1894,7 @@ class Check extends AbstractScriptClass {
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                 logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
+                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
                                         LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
                             }
                         }
@@ -1952,7 +1952,7 @@ class Check extends AbstractScriptClass {
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                 logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
+                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
                                         LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
                             }
                         } else {
@@ -1963,7 +1963,7 @@ class Check extends AbstractScriptClass {
                                 )
                                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                                 logger.logCheck("%s. %s.",
-                                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
+                                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_2_21, declarationData.declarationTemplateId),
                                         LOG_TYPE_2_21, fioAndInpAndOperId, pathError, errMsg)
                             }
                         }
@@ -2076,7 +2076,7 @@ class Check extends AbstractScriptClass {
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.logCheck("%s. %s.",
-                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
+                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
                         LOG_TYPE_3_10, fioAndInpAndOperId, pathError, errMsg)
             } else {
                 NdflPersonIncome ndflPersonIncome = mapNdflPersonIncomeDate.get(ndflPersonDeduction.incomeAccrued ? ScriptUtils.formatDate(ndflPersonDeduction.incomeAccrued) : "")
@@ -2099,7 +2099,7 @@ class Check extends AbstractScriptClass {
                     }
                     String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                     logger.logCheck("%s. %s.",
-                            declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
+                            declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_10, declarationData.declarationTemplateId),
                             LOG_TYPE_3_10, fioAndInpAndOperId, pathError, errMsg)
                 } else {
                     // Выч17 Начисленный доход.Код дохода (Графы 11)
@@ -2135,7 +2135,7 @@ class Check extends AbstractScriptClass {
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.logCheck("%s. %s.",
-                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_10_2, declarationData.declarationTemplateId),
+                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_10_2, declarationData.declarationTemplateId),
                         LOG_TYPE_3_10_2, fioAndInpAndOperId, pathError, errMsg)
             }
 
@@ -2148,7 +2148,7 @@ class Check extends AbstractScriptClass {
                 )
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON_DEDUCTION, ndflPersonDeduction.rowNum ?: "")
                 logger.logCheck("%s. %s.",
-                        declarationService.isCheckFatal(FormCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
+                        declarationService.isCheckFatal(DeclarationCheckCode.RNU_SECTION_3_16, declarationData.declarationTemplateId),
                         LOG_TYPE_3_16, fioAndInpAndOperId, pathError, errMsg)
             }
         }

@@ -114,7 +114,8 @@ create table ref_book_asnu (
   name      varchar2(100 char)  not null,
   type      varchar2(255 char)  not null,
   role_alias number(9,0),
-  role_name number(9,0)
+  role_name number(9,0),
+  priority number(3,0) not null
 );
 
 comment on table ref_book_asnu is 'Справочник АСНУ';

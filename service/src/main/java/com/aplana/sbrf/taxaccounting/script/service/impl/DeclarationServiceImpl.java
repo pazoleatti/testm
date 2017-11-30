@@ -538,7 +538,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public boolean isCheckFatal(FormCheckCode code, int templateId) {
+    public boolean isCheckFatal(DeclarationCheckCode code, int templateId) {
         return declarationTemplateDao.isCheckFatal(code, templateId);
     }
 }

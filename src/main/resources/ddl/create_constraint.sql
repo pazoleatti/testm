@@ -240,6 +240,7 @@ alter table ref_book_person add constraint chk_ref_book_person_old_st check (old
 alter table ref_book_address add constraint chk_ref_book_address_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_doc add constraint rb_id_doc_chk_status check (status in (-1, 0, 1, 2));
 alter table ref_book_id_tax_payer add constraint rb_tax_payer_chk_status check (status in (-1, 0, 1, 2));
+alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999);
 
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_attrib_id foreign key (attribute_id) references ref_book_attribute (id);
 alter table declaration_subreport_params add constraint fk_decl_subrep_pars_subrep_id foreign key (declaration_subreport_id) references declaration_subreport (id) on delete cascade;

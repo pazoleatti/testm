@@ -607,14 +607,14 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public boolean isCheckFatal(FormCheckCode code, int templateId) {
+    public boolean isCheckFatal(DeclarationCheckCode code, int templateId) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("code", code.getCode());
             params.addValue("templateId", templateId);
-            return getNamedParameterJdbcTemplate().queryForObject("select is_fatal from declaration_template_checks where check_code = :code and template_id = :templateId", params, Boolean.class);
+            return getNamedParameterJdbcTemplate().queryForObject("select is_fatal from decl_template_checks where check_code = :code and declaration_template_id = :templateId", params, Boolean.class);
         } catch (EmptyResultDataAccessException e) {
-            LOG.error(String.format("Code %s not found in declaration_template_checks!", code.getCode()));
+            LOG.error(String.format("Code %s not found in decl_template_checks!", code.getCode()));
             return false;
         }
     }
@@ -625,15 +625,16 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         params.addValue("declarationTypeId", declarationTypeId);
         params.addValue("declarationTemplateId", declarationTemplateId);
         return getNamedParameterJdbcTemplate().query(
-                "select * from declaration_template_checks where declaration_type_id = :declarationTypeId and ((:declarationTemplateId is null and template_id is null) or (:declarationTemplateId is not null and template_id = :declarationTemplateId))",
+                "select * from decl_template_checks where declaration_type_id = :declarationTypeId and ((:declarationTemplateId is null and declaration_template_id is null) " +
+                        "or (:declarationTemplateId is not null and declaration_template_id = :declarationTemplateId))",
                 params, new RowMapper<DeclarationTemplateCheck>() {
                     @Override
                     public DeclarationTemplateCheck mapRow(ResultSet rs, int i) throws SQLException {
                         DeclarationTemplateCheck entity = new DeclarationTemplateCheck();
                         entity.setId(rs.getInt("id"));
-                        entity.setTypeId(rs.getInt("declaration_type_id"));
-                        entity.setTemplateId(rs.getInt("template_id"));
-                        entity.setCode(FormCheckCode.fromCode(rs.getString("check_code")));
+                        entity.setDeclarationTypeId(rs.getInt("declaration_type_id"));
+                        entity.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
+                        entity.setCode(DeclarationCheckCode.fromCode(rs.getString("check_code")));
                         entity.setCheckType(rs.getString("check_type"));
                         entity.setDescription(rs.getString("description"));
                         entity.setFatal(rs.getBoolean("is_fatal"));
@@ -645,13 +646,13 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Override
     public void createChecks(final List<DeclarationTemplateCheck> checks, final Integer declarationTemplateId) {
         getJdbcTemplate().batchUpdate(
-                "insert into declaration_template_checks (id, declaration_type_id, template_id, check_code, check_type, description, is_fatal) values (seq_dt_checks.nextval, ?, ?, ?, ?, ?, ?)",
+                "insert into decl_template_checks (id, declaration_type_id, declaration_template_id, check_code, check_type, description, is_fatal) values (seq_decl_template_checks.nextval, ?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
 
                     @Override
                     public void setValues(PreparedStatement ps, int index) throws SQLException {
                         DeclarationTemplateCheck check = iterator.next();
-                        ps.setInt(1, check.getTypeId());
+                        ps.setInt(1, check.getDeclarationTypeId());
                         ps.setInt(2, declarationTemplateId);
                         ps.setString(3, check.getCode().getCode());
                         ps.setString(4, check.getCheckType());
@@ -677,7 +678,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                 ids.add(check.getId());
             }
         }
-        String sql = String.format("update declaration_template_checks set is_fatal = case when %s then 1 else 0 end where template_id = ?",
+        String sql = String.format("update decl_template_checks set is_fatal = case when %s then 1 else 0 end where declaration_template_id = ?",
                 SqlUtils.transformToSqlInStatement("id", ids));
         getJdbcTemplate().update(sql, declarationTemplateId);
     }
