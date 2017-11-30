@@ -77,7 +77,6 @@
                                 $filter('translate')('ndflFL.title.firstName'),
                                 $filter('translate')('ndflFL.title.middleName'),
                                 $filter('translate')('ndflFL.title.dateOfBirth'),
-                                $filter('translate')('ndflFL.title.snils'),
                                 $filter('translate')('ndflFL.title.citizenship'),
                                 $filter('translate')('ndflFL.title.innNp'),
                                 $filter('translate')('ndflFL.title.innForeign'),
@@ -92,7 +91,8 @@
                                 $filter('translate')('ndflFL.title.street'),
                                 $filter('translate')('ndflFL.title.house'),
                                 $filter('translate')('ndflFL.title.building'),
-                                $filter('translate')('ndflFL.title.flat')],
+                                $filter('translate')('ndflFL.title.flat'),
+                                $filter('translate')('ndflFL.title.snils')],
                             colModel: [
                                 {name: 'rowNum', index: 'rowNum', width: 80, key: true},
                                 {name: 'inp', index: 'inp', width: 150},
@@ -105,7 +105,6 @@
                                     width: 240,
                                     formatter: $filter('dateFormatter')
                                 },
-                                {name: 'snils', index: 'snils', width: 190, sortable: false},
                                 {name: 'citizenship', index: 'citizenship', width: 185},
                                 {name: 'innNp', index: 'innNp', width: 95},
                                 {name: 'innForeign', index: 'innForeign', width: 195},
@@ -120,7 +119,8 @@
                                 {name: 'street', index: 'street', width: 240},
                                 {name: 'house', index: 'house', width: 145},
                                 {name: 'building', index: 'building', width: 170},
-                                {name: 'flat', index: 'flat', width: 205}
+                                {name: 'flat', index: 'flat', width: 205},
+                                {name: 'snils', index: 'snils', width: 190, sortable: false}
                             ],
                             rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                             rowList: APP_CONSTANTS.COMMON.PAGINATION,
