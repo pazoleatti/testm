@@ -36,8 +36,8 @@
 
                 //переход обратно к планировщику
                 $scope.cancel = function() {
-                    href: $state.href('schedulerTaskList');
-                }
+                    $state.go('schedulerTaskList');
+                };
 
                 //Отправка редактируемого параметра
                 $scope.actionsUpdateSchedulerfunction = function() {
