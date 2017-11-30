@@ -531,6 +531,16 @@ public class DeclarationDataController {
     }
 
     /**
+     * Возвращает признак существования формы
+     *
+     * @param declarationDataId ид формы
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=checkExistence")
+    public DeclarationDataExistenceResult isDeclarationDataExists(@PathVariable long declarationDataId) {
+        return new DeclarationDataExistenceResult(declarationService.existDeclarationData(declarationDataId));
+    }
+
+    /**
      * Возвращает данные о наличии отчетов ПНФ и КНФ
      *
      * @param declarationDataId Идентификатор формы
