@@ -2364,4 +2364,39 @@ END;'
             <where>id in (SELECT xsd FROM declaration_template WHERE id=100)</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2821 Добавить поле приоритет АСНУ в справочник АСНУ-->
+	<changeSet id="2.1-rnurgaleev-182" author="rnurgaleev">
+        <addColumn
+                tableName="ref_book_asnu">
+            <column name="priority" type="number(3)"/>
+        </addColumn>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-183" author="rnurgaleev">
+        <sql>
+            update ref_book_asnu set priority=case when code='1000' then 900
+												   when code='2000' then 800
+												   when code='3000' then 600
+												   when code='4000' then 500
+												   when code='5000' then 700
+												   when code='6000' then 400
+												   when code='6001' then 400
+												   when code='7000' then 300
+												   when code='6002' then 400
+												   when code='6003' then 400
+												   when code='6004' then 400
+												   when code='6005' then 400
+												   when code='1001' then 900
+												   when code='8000' then 200
+												   when code='9000' then 100
+												   else 999 end;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-184" author="rnurgaleev">
+        <sql>
+            alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999);
+        </sql>
+    </changeSet>
 </databaseChangeLog>
