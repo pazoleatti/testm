@@ -5,11 +5,11 @@
      * @description Модуль для работы окном 'Общие параметры'
      */
 
-    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.logPanel', 'app.uploadParams', 'app.confirmationAction'])
+    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.logPanel', 'app.editParams', 'app.confirmationAction'])
 
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('commonParams', {
-                url: '/taxes/commonParams/uploadCommonParams',
+                url: '/taxes/commonParams/editCommonParams',
                 templateUrl: 'client/app/taxes/commonParams/commonParams.html?v=${buildUuid}',
                 controller: 'commonParamsCtrl'
             });
@@ -69,17 +69,16 @@
                     });
                 };
 
-
                 /**
                  * @description Редактирование параметра
                  */
-                $scope.upload = function () {
+                $scope.edit = function () {
                     $scope.valOiu = $scope.commonParamsGrid.value;
-                    $scope.commonParamsGrid.ctrl.refreshGrid();
+
                     $aplanaModal.open({
                         title: $filter('translate')('title.redactParametr'),
-                        templateUrl: 'client/app/taxes/commonParams/uploadCommonParams.html?v=${buildUuid}',
-                        controller: 'uploadParamsCtrl',
+                        templateUrl: 'client/app/taxes/commonParams/editCommonParams.html?v=${buildUuid}',
+                        controller: 'editParamsCtrl',
                         windowClass: 'modal600',
                         resolve: {
                             commonParamsGrid: function () {
@@ -87,6 +86,7 @@
                             }
                         }
                     });
+
                 };
 
             }]);

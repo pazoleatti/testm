@@ -49,8 +49,8 @@ public class ConfigParamsController {
      *
      * @param config редактируемый параметр
      */
-    @PostMapping(value = "/actions/uploadCommonParams")
-    public void uploadCommonParams(@RequestParam Configuration config) {
+    @PostMapping(value = "/actions/editCommonParams")
+    public void editCommonParams(@RequestParam Configuration config) {
         configurationService.update(config);
     }
 
