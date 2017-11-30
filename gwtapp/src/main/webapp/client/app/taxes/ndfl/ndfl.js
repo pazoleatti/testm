@@ -22,7 +22,33 @@
             $stateProvider.state('ndfl', {
                 url: '/taxes/ndfl/{declarationDataId}?uuid',
                 templateUrl: 'client/app/taxes/ndfl/ndfl.html?v=${buildUuid}',
-                controller: 'ndflCtrl'
+                controller: 'ndflCtrl',
+                resolve: {
+                    checkExistence: ['$q', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams',
+                        function ($q, DeclarationDataResource, $dialogs, $state, $filter, $stateParams) {
+                            var d = $q.defer();
+                            DeclarationDataResource.query({
+                                    declarationDataId: $stateParams.declarationDataId,
+                                    projection: "checkExistence"
+                                },
+                                function (data) {
+                                    if (!data.exists) {
+                                        d.reject();
+                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                        $dialogs.errorDialog({
+                                            content: message,
+                                            closeBtnClick: function () {
+                                                $state.go("/");
+                                            }
+                                        });
+                                    } else {
+                                        d.resolve();
+                                    }
+                                }
+                            );
+                            return d.promise;
+                        }]
+                }
             });
         }])
 

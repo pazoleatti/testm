@@ -15,6 +15,8 @@ import com.aplana.sbrf.taxaccounting.script.service.ImportService;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -61,6 +63,7 @@ import java.util.regex.Pattern;
  */
 
 public final class ScriptUtils {
+    private static final Log LOG = LogFactory.getLog(ScriptUtils.class);
 
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
@@ -2523,6 +2526,7 @@ public final class ScriptUtils {
 
     public static void checkInterrupted() {
         if (Thread.currentThread().isInterrupted()) {
+            LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
             throw new TAInterruptedException();
         }
     }

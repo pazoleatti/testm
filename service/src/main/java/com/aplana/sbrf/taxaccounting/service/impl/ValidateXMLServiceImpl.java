@@ -81,6 +81,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
                 try {
                     if (Thread.currentThread().isInterrupted()) {
+                        LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
                         throw new TAInterruptedException();
                     }
                     String s = reader.readLine();
@@ -89,6 +90,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     } else if(s!=null) {
                         while ((s = reader.readLine()) != null) {
                             if (Thread.currentThread().isInterrupted()) {
+                                LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
                                 throw new TAInterruptedException();
                             }
                             if (!s.startsWith("Execution time:")) {
@@ -186,6 +188,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
+                        LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
                         throw new TAInterruptedException();
                     }
                     if (Math.abs(new Date().getTime() - startTime) > timeout) {
@@ -203,6 +206,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     try {
                         threadRunner.join();
                     } catch (InterruptedException e) {
+                        LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
                         throw new TAInterruptedException();
                     }
                 }

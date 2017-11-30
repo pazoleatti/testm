@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ import java.util.Set;
  */
 @Service
 public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessService {
+    private static final Log LOG = LogFactory.getLog(DeclarationDataAccessServiceImpl.class);
 
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
@@ -305,6 +308,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
     private void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent scriptEvent, Set<String> checkedSet) {
         if (Thread.currentThread().isInterrupted()) {
+            LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
             throw new TAInterruptedException();
         }
         switch (scriptEvent) {
@@ -344,6 +348,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
     private void checkEvents(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod, Long asnuID,
                              FormDataEvent scriptEvent, Set<String> checkedSet, Logger logger) {
         if (Thread.currentThread().isInterrupted()) {
+            LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
             throw new TAInterruptedException();
         }
         switch (scriptEvent) {
