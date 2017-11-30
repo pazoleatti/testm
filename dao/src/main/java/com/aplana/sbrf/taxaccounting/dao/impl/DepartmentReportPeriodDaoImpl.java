@@ -153,6 +153,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 if (period.getCorrectionDate() != null) {
                     period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
                 }
+                if (period.getReportPeriod() != null) {
+                    if (period.getReportPeriod().getStartDate() != null) {
+                        period.getReportPeriod().setStartDate(new Date(period.getReportPeriod().getStartDate().getTime()));
+                    }
+                    if (period.getReportPeriod().getEndDate() != null) {
+                        period.getReportPeriod().setEndDate(new Date(period.getReportPeriod().getEndDate().getTime()));
+                    }
+                    if (period.getReportPeriod().getCalendarStartDate() != null) {
+                        period.getReportPeriod().setCalendarStartDate(new Date(period.getReportPeriod().getCalendarStartDate().getTime()));
+                    }
+                }
             }
             return res;
         } catch (DataAccessException e) {
@@ -245,6 +256,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .execute();
         if (departmentReportPeriodItem.getCorrectionDate() != null) {
             departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
+        }
+        if (departmentReportPeriodItem.getReportPeriod() != null) {
+            if (departmentReportPeriodItem.getReportPeriod().getStartDate() != null) {
+                departmentReportPeriodItem.getReportPeriod().setStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getStartDate().getTime()));
+            }
+            if (departmentReportPeriodItem.getReportPeriod().getEndDate() != null) {
+                departmentReportPeriodItem.getReportPeriod().setEndDate(new Date(departmentReportPeriodItem.getReportPeriod().getEndDate().getTime()));
+            }
+            if (departmentReportPeriodItem.getReportPeriod().getCalendarStartDate() != null) {
+                departmentReportPeriodItem.getReportPeriod().setCalendarStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getCalendarStartDate().getTime()));
+            }
         }
         return departmentReportPeriodItem;
 
@@ -571,8 +593,21 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .where(departmentReportPeriod.id.eq(id))
                 .fetchOne();
-        if (period != null && period.getCorrectionDate() != null){
-            period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
+        if (period != null){
+            if (period.getCorrectionDate() != null) {
+                period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
+            }
+            if (period.getReportPeriod() != null) {
+                if (period.getReportPeriod().getStartDate() != null) {
+                    period.getReportPeriod().setStartDate(new Date(period.getReportPeriod().getStartDate().getTime()));
+                }
+                if (period.getReportPeriod().getEndDate() != null) {
+                    period.getReportPeriod().setEndDate(new Date(period.getReportPeriod().getEndDate().getTime()));
+                }
+                if (period.getReportPeriod().getCalendarStartDate() != null) {
+                    period.getReportPeriod().setCalendarStartDate(new Date(period.getReportPeriod().getCalendarStartDate().getTime()));
+                }
+            }
         }
         return period;
     }
@@ -597,7 +632,20 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .set(departmentReportPeriod.reportPeriodId, departmentReportPeriodItem.getReportPeriod().getId())
                 .set(taxPeriod.year, departmentReportPeriodItem.getReportPeriod().getTaxPeriod().getYear())
                 .execute();
-        departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
+        if (departmentReportPeriodItem.getCorrectionDate() != null) {
+            departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
+        }
+        if (departmentReportPeriodItem.getReportPeriod() != null) {
+            if (departmentReportPeriodItem.getReportPeriod().getStartDate() != null) {
+                departmentReportPeriodItem.getReportPeriod().setStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getStartDate().getTime()));
+            }
+            if (departmentReportPeriodItem.getReportPeriod().getEndDate() != null) {
+                departmentReportPeriodItem.getReportPeriod().setEndDate(new Date(departmentReportPeriodItem.getReportPeriod().getEndDate().getTime()));
+            }
+            if (departmentReportPeriodItem.getReportPeriod().getCalendarStartDate() != null) {
+                departmentReportPeriodItem.getReportPeriod().setCalendarStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getCalendarStartDate().getTime()));
+            }
+        }
 
         return departmentReportPeriodItem;
 
