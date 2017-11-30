@@ -308,7 +308,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 
     private void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent scriptEvent, Set<String> checkedSet) {
         if (Thread.currentThread().isInterrupted()) {
-            LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
+            LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
             throw new TAInterruptedException();
         }
         switch (scriptEvent) {
@@ -348,7 +348,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
     private void checkEvents(TAUserInfo userInfo, int declarationTemplateId, DepartmentReportPeriod departmentReportPeriod, Long asnuID,
                              FormDataEvent scriptEvent, Set<String> checkedSet, Logger logger) {
         if (Thread.currentThread().isInterrupted()) {
-            LOG.debug("Thread " + Thread.currentThread().getName() + "interrupted");
+            LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
             throw new TAInterruptedException();
         }
         switch (scriptEvent) {
