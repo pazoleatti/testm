@@ -46,20 +46,21 @@ insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,
 insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9003,900,'Наименование АСНУ','NAME',1,2,null,null,1,null,25,0,0,null,null,0,100);
 insert into ref_book_attribute (id,ref_book_id,name,alias,type,ord,reference_id,attribute_id,visible,precision,width,required,is_unique,sort_order,format,read_only,max_length) values (9004,900,'Тип дохода','TYPE',1,3,null,null,1,null,50,0,0,null,null,0,255);
 
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('1','1000','АС "SAP"','Оплата труда сотрудников, оплата по договорам ГПХ, материальная выгода по кредитам, выданным сотрудникам');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('2','2000','АИС "Дивиденд"','Сведения по доходам в виде дивидендов по акциям Сбербанка');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('3','3000','АС "Diasoft Custody 5NT"','Операции с ценными бумагами, ФИСС по договорам брокерского обслуживания ');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('4','4000','АС "Инфобанк"','Проценты по векселям, сберегательным сертификатам');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('5','5000','АИС "Депозитарий"','Доходы по ценным бумагам, учитываемым на счетах депо депозитария, дивиденды по акциям, купоны по облигациям');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('6','6000','Материальная выгода. Кредиты_АС "ЕКП"','Материальная выгода от экономии за пользование заемными средствами (2610)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('7','6001','Экономическая выгода. Кредиты_АС "ЕКП"','Экономическая выгода при списании с баланса ссудной задолженности по кредитным договорам (4800)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('8','7000','Экономическая выгода. Карты_ АС "ИПС БК"','Экономическая выгода при списании с баланса ссудной задолженности по кредитным картам (4800)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('9','6002','Экономическая выгода. Комиссии_АС "ЕКП"','Экономическая выгода при списании с баланса дебиторской задолженности по комиссионным доходам (4800)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('10','6003','Реструктуризация валютных кредитов_АС "ЕКП"','Реструктуризация валютных кредитов на льготных условиях (4800)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('11','6004','Прощение долга (амнистия). Кредиты_АС "ЕКП"','Прощение (амнистия) задолженности физических лиц (4800)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('12','6005','Выплаты клиентам по решениям суда_АС "ЕКП"','Выплаты клиентам по решениям суда (4800)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('13','1001','Призы, подарки клиентам_АС "SAP"','Призы, подарки клиентам (2740)');
-Insert into REF_BOOK_ASNU (ID,CODE,NAME,TYPE) values ('14','8000','АС "Back Office" ','Проценты по вкладам');
+insert into ref_book_asnu (id,code,name,type, priority) values (1,'1000','АС "SAP"','Оплата труда сотрудников, оплата по договорам ГПХ, материальная выгода по кредитам, выданным сотрудникам', 900);
+insert into ref_book_asnu (id,code,name,type, priority) values (2,'2000','АИС "Дивиденд"','Сведения по доходам в виде дивидендов по акциям Сбербанка', 800);
+insert into ref_book_asnu (id,code,name,type, priority) values (3,'3000','АС "Diasoft Custody 5NT"','Операции с ценными бумагами, ФИСС по договорам брокерского обслуживания ', 600);
+insert into ref_book_asnu (id,code,name,type, priority) values (4,'4000','АС "Инфобанк"','Проценты по векселям, сберегательным сертификатам', 500);
+insert into ref_book_asnu (id,code,name,type, priority) values (5,'5000','АИС "Депозитарий"','Доходы по ценным бумагам, учитываемым на счетах депо депозитария, дивиденды по акциям, купоны по облигациям', 700);
+insert into ref_book_asnu (id,code,name,type, priority) values (6,'6000','Материальная выгода. Кредиты_АС "ЕКП"','Материальная выгода от экономии за пользование заемными средствами (2610)', 400);
+insert into ref_book_asnu (id,code,name,type, priority) values (7,'6001','Экономическая выгода. Кредиты_АС "ЕКП"','Экономическая выгода при списании с баланса ссудной задолженности по кредитным договорам (4800)', 400);
+insert into ref_book_asnu (id,code,name,type, priority) values (8,'7000','Экономическая выгода. Карты_ АС "ИПС БК"','Экономическая выгода при списании с баланса ссудной задолженности по кредитным картам (4800)', 300);
+insert into ref_book_asnu (id,code,name,type, priority) values (9,'6002','Экономическая выгода. Комиссии_АС "ЕКП"','Экономическая выгода при списании с баланса дебиторской задолженности по комиссионным доходам (4800)', 400);
+insert into ref_book_asnu (id,code,name,type, priority) values (10,'6003','Реструктуризация валютных кредитов_АС "ЕКП"','Реструктуризация валютных кредитов на льготных условиях (4800)', 400);
+insert into ref_book_asnu (id,code,name,type, priority) values (11,'6004','Прощение долга (амнистия). Кредиты_АС "ЕКП"','Прощение (амнистия) задолженности физических лиц (4800)', 400);
+insert into ref_book_asnu (id,code,name,type, priority) values (12,'6005','Выплаты клиентам по решениям суда_АС "ЕКП"','Выплаты клиентам по решениям суда (4800)', 400);
+insert into ref_book_asnu (id,code,name,type, priority) values (13,'1001','Призы, подарки клиентам_АС "SAP"','Призы, подарки клиентам (2740)', 900);
+insert into ref_book_asnu (id,code,name,type, priority) values (14,'8000','АС "Back Office" ','Проценты по вкладам', 200);
+
 
 --------------------------------------------------------
 --  Физические лица и статусы налогоплательщиков
