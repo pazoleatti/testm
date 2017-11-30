@@ -34,8 +34,8 @@ public class PagingParams implements Serializable {
     @Deprecated
     // Убрано поле startIndex, поэтому вместо этого конструктора лучше использовать статический метод getInstance
     public PagingParams(int startIndex, int count) {
-        setStartIndex(startIndex);
         setCount(count);
+        setStartIndex(startIndex);
     }
 
     /**
