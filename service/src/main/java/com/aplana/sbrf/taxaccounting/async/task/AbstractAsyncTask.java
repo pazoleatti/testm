@@ -11,11 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.LocalDateTime;
@@ -26,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Абстрактная реализация асинхронной задачи.
@@ -142,11 +136,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         ConfigurationParamModel paramModel = configurationDao.getConfigByGroup(ConfigurationParamGroup.COMMON_PARAM);
         String showTiming = paramModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
         final boolean isShowTiming = showTiming.equals("1");
-
-        //Запускаем мониторинг состояния задачи для ее остановки в случае отмены.
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(new TaskStateMonitor(Thread.currentThread(), taskData.getId()));
-        executorService.shutdown();
         if (isShowTiming) {
             logger.info("Начало выполнения операции %s", sdf_time.get().format(startDate));
         }
@@ -296,37 +285,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
         public boolean isUnexpected() {
             return unexpected;
-        }
-    }
-
-    /**
-     * Класс отвечающий за мониторинг состояния выполнения задачи, если задача была удалена или перешла в состояние CANCELLED, то поток, занимающийся ее выполнением прерывается
-     */
-    private final class TaskStateMonitor implements Runnable {
-        private Thread thread;
-        private long taskId;
-        private boolean canceled = false;
-
-        public TaskStateMonitor(Thread thread, long taskId) {
-            this.thread = thread;
-            this.taskId = taskId;
-        }
-
-        @Override
-        public void run() {
-            while (!canceled) {
-                try {
-                    Thread.sleep(10 * 1000);
-                } catch (InterruptedException e) {
-                    //Do nothing
-                }
-                if (!asyncTaskDao.isTaskActive(taskId)) {
-                    LOG.info(String.format("Async task with id %s was cancelled", taskId));
-                    canceled = true;
-                    asyncManager.finishTask(taskId);
-                    thread.interrupt();
-                }
-            }
         }
     }
 

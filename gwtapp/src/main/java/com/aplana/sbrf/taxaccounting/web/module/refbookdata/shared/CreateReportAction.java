@@ -17,6 +17,8 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private int sortColumnIndex;
     private boolean ascSorting;
     private boolean exactSearch;
+    private String lastNamePattern;
+    private String firstNamePattern;
 
     public long getRefBookId() {
         return refBookId;
@@ -72,6 +74,22 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     public void setExactSearch(boolean exactSearch) {
         this.exactSearch = exactSearch;
+    }
+
+    public String getLastNamePattern() {
+        return lastNamePattern;
+    }
+
+    public void setLastNamePattern(String lastNamePattern) {
+        this.lastNamePattern = lastNamePattern;
+    }
+
+    public String getFirstNamePattern() {
+        return firstNamePattern;
+    }
+
+    public void setFirstNamePattern(String firstNamePattern) {
+        this.firstNamePattern = firstNamePattern;
     }
 
     @Override

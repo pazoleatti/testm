@@ -80,7 +80,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                 process = (new ProcessBuilder(params)).start();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
                 try {
-                    if (Thread.currentThread().isInterrupted()) {
+                    if (Thread.interrupted()) {
                         LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
                         throw new TAInterruptedException();
                     }
@@ -89,7 +89,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                         logger.info("Проверка xml по xsd завершена успешно.");
                     } else if(s!=null) {
                         while ((s = reader.readLine()) != null) {
-                            if (Thread.currentThread().isInterrupted()) {
+                            if (Thread.interrupted()) {
                                 LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
                                 throw new TAInterruptedException();
                             }
