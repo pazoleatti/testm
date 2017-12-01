@@ -513,6 +513,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         action.setRefBookId(refBookId);
         action.setVersion(refBookLinearPresenter.getRelevanceDate());
         action.setSearchPattern(refBookLinearPresenter.getSearchPattern());
+        action.setLastNamePattern(getView().getLastName());
+        action.setFirstNamePattern(getView().getFirstName());
         action.setExactSearch(refBookLinearPresenter.getExactSearch());
         action.setSortColumnIndex(refBookLinearPresenter.getSortColumnIndex());
         action.setAscSorting(refBookLinearPresenter.isAscSorting());

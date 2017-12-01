@@ -87,15 +87,37 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
         LockData lockData = lockDataService.getLock(refBookFactory.generateTaskKey(refBook.getId()));
         if (lockData == null) {
             String filter = null;
+            String lastNamePattern = action.getLastNamePattern();
+            String firstNamePattern = action.getFirstNamePattern();
             String searchPattern = action.getSearchPattern();
-            if (searchPattern != null && !searchPattern.isEmpty()) {
+            boolean isPerson = action.getRefBookId() == RefBook.Id.PERSON.getId();
+            if (searchPattern != null && !searchPattern.isEmpty() && (!isPerson || (firstNamePattern == null && lastNamePattern == null))) {
                 filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId(), action.isExactSearch());
+                searchPattern = "Фильтр: \"" + searchPattern + "\"";
+            } else if (isPerson && (firstNamePattern != null && !firstNamePattern.isEmpty() || lastNamePattern != null && !lastNamePattern.isEmpty())) {
+                Map<String, String> params = new HashMap<String, String>();
+                StringBuilder sb = new StringBuilder();
+                if (lastNamePattern != null && !lastNamePattern.isEmpty()) {
+                    sb.append("Фильтр по фамилии: \"").append(lastNamePattern).append("\"");
+                    params.put("LAST_NAME", lastNamePattern);
+                }
+                if (firstNamePattern != null && !firstNamePattern.isEmpty()) {
+                    sb.append(sb.length() != 0 ? ", " : "");
+                    sb.append("Фильтр по имени: \"").append(firstNamePattern).append("\"");
+                    params.put("FIRST_NAME", firstNamePattern);
+                }
+                if (searchPattern != null && !searchPattern.isEmpty()) {
+                    sb.append(sb.length() != 0 ? ", " : "");
+                    sb.append("Фильтр по всем: \"").append(searchPattern).append("\"");
+                }
+                filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
+                searchPattern = sb.toString();
             }
 
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("refBookId", action.getRefBookId());
             params.put("version", action.getVersion());
-            params.put("searchPattern", action.getSearchPattern());
+            params.put("searchPattern", searchPattern);
             params.put("filter", filter != null ? filter : "");
             RefBookAttribute sortAttribute = null;
             if (refBook.isHierarchic()) {
@@ -122,7 +144,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
                 params.put("specificReportType", reportName);
 
             String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
-                    LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.get().format(action.getVersion()), action.getSearchPattern(),
+                    LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.get().format(action.getVersion()), searchPattern,
                     (sortAttribute != null ? sortAttribute.getAlias() : null), action.isAscSorting(), UUID.randomUUID());
             asyncManager.executeTask(keyTask, reportType, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
                 @Override
