@@ -108,7 +108,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
                 }
                 if (searchPattern != null && !searchPattern.isEmpty()) {
                     sb.append(sb.length() != 0 ? ", " : "");
-                    sb.append("Фильтр по всем: \"").append(searchPattern).append("\"");
+                    sb.append("Фильтр по всем полям: \"").append(searchPattern).append("\"");
                 }
                 filter = refBookFactory.getSearchQueryStatementWithAdditionalStringParameters(params, searchPattern, refBook.getId(), action.isExactSearch());
                 searchPattern = sb.toString();
