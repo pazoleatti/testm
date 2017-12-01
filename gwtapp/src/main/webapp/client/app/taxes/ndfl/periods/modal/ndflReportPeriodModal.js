@@ -5,7 +5,7 @@
      * @description Модуль для создания отчетных периодов
      */
 
-    angular.module('app.reportPeriodModal', ['ui.router', 'app.rest', 'app.modals'])
+    angular.module('app.reportPeriodModal', ['ui.router', 'app.rest'])
 
 
         .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', 'DepartmentResource', '$shareData', 'DepartmentReportPeriodCheckerResource', '$http', '$logPanel', 'LogEntryResource',

@@ -5,7 +5,7 @@
      * @description конфигурация модального окна выбора срока сдачи отчетности
      */
 
-    angular.module('app.deadlinePeriodModal', ['ui.router', 'app.rest', 'app.modals'])
+    angular.module('app.deadlinePeriodModal', ['ui.router', 'app.rest'])
 
         .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs',
             function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs) {
