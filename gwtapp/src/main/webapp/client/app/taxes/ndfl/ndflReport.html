@@ -65,53 +65,61 @@
                 <div class="header-details">
                     <div class="row">
                         <div class="col-sm-12 info-wrapper">
-                            <div class="header-col w400">
-                                <div>
-                                    <label class="w100">{{::'title.department' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.department}}</label>
+                            <div class="header-col group-title-panel">
+                                <div class="col-md-9">
+                                    <label class="label-title-panel w100">{{::'title.department' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.department}}</label>
                                 </div>
-                                <div>
-                                    <label class="w100">{{::'title.formNumber' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationDataId}}</label>
+                                <div  class="col-md-9">
+                                    <label class="label-title-panel w100">{{::'title.formNumber' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationDataId}}</label>
                                 </div>
-                                <div>
-                                    <label class="w100">{{::'title.creator' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.creationUserName}}</label>
+                                <div  class="col-md-9">
+                                    <label class="label-title-panel w100">{{::'title.creator' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.creationUserName}}</label>
                                 </div>
                             </div>
-                            <div class="header-col w400">
-                                <div>
-                                    <label>{{::'title.formType' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.declarationFormKind}}</label>
+                            <div class="header-col group-title-panel">
+                                <div class="col-md-12">
+                                    <label class="label-title-panel w150">{{::'title.formType' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.declarationFormKind}}</label>
                                 </div>
-                                <div>
-                                    <label>{{::'title.period' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.reportPeriodYear}},
+                                <div class="col-md-12">
+                                    <label class="label-title-panel w150">{{::'title.period' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.reportPeriodYear}},
                                         {{declarationData.reportPeriod}}</label>
                                 </div>
-                                <div>
-                                    <label>{{::'title.state' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.state}}</label>
+                                <div class="col-md-12">
+                                    <label class="label-title-panel w150">{{::'title.state' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.state}}</label>
                                 </div>
-                                <div>
-                                    <label>{{::'title.stateDoc' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.docState}}</label>
+
+                            </div>
+                            <div class="header-col group-title-panel">
+                                <div  class="col-md-9">
+                                    <label class="label-title-panel w100">{{::'title.stateDoc' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.docState}}</label>
+                                </div>
+                                <div  class="col-md-9">
+                                    <label class="label-title-panel w100">{{::'title.kpp' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.kpp}}</label>
+                                </div>
+                                <div  class="col-md-9">
+                                    <label class="label-title-panel w100">{{::'title.oktmo' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.oktmo}}</label>
                                 </div>
                             </div>
-                            <div class="header-col w350">
-                                <div>
-                                    <label>{{::'title.kpp' | translate}}</label>
-                                    <label class="font-normal info-text200">{{declarationData.kpp}}</label>
+                            <div class="header-col group-title-panel">
+                                <div  class="col-md-12" style="padding: 0px">
+                                    <label class="label-title-panel " style="width: 200px;">{{::'title.dateAndTimeCreate' | translate}}:</label>
+                                    <label class="font-normal info-text30" >{{declarationData.creationDate}}</label>
                                 </div>
-                                <div>
-                                    <label>{{::'title.oktmo' | translate}}</label>
-                                    <label class="font-normal info-text200">{{declarationData.oktmo}}</label>
-                                </div>
-                                <div>
-                                    <label>{{::'title.codeNO' | translate}}</label>
-                                    <label class="font-normal info-text200">{{declarationData.taxOrganCode}}</label>
+                                <div  class="col-md-12" style="padding: 0px">
+                                    <label class="label-title-panel" style="width: 200px;">{{::'title.codeNO' | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.taxOrganCode}}</label>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
