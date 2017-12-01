@@ -364,6 +364,11 @@ public class AsyncManagerImpl implements AsyncManager {
         }
     }
 
+    @Override
+    public boolean isTaskActive(long taskId) {
+        return asyncTaskDao.isTaskActive(taskId);
+    }
+
     /**
      * Проверка параметров. Все они должны сериализоваться
      */

@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.async;
 
-import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.model.AsyncQueue;
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.ServerInfo;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.logging.Log;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Класс-контейнер для запуска потоков обработки асинхронных задач
@@ -44,7 +44,9 @@ public class AsyncTaskThreadContainer {
     @Autowired
     private ApplicationInfo applicationInfo;
     @Autowired
-    private ExecutorService asyncTaskExecutorService;
+    private ExecutorService asyncTaskPool;
+    @Autowired
+    private ExecutorService asyncTaskMonitorPool;
 
     /**
      * Метод запускает потоки обработки асинхронных задач для каждой очереди
@@ -92,11 +94,10 @@ public class AsyncTaskThreadContainer {
                     //Запускаем выполнение бина-обработчика задачи в новом потоке
                     LOG.info("Task started: " + taskData);
                     final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
-                    asyncTaskExecutorService.submit(new Thread() {
+                    Future<?> taskFuture = asyncTaskPool.submit(new Thread() {
                         @Override
                         public void run() {
                             Thread.currentThread().setName("AsyncTask-" + taskData.getId());
-
                             try {
                                 //Запускаем задачу под нужным пользователем
                                 TAUser user = taUserService.getUser(taskData.getUserId());
@@ -119,10 +120,44 @@ public class AsyncTaskThreadContainer {
                             }
                         }
                     });
+
+                    //Запускаем мониторинг состояния задачи для ее остановки в случае отмены.
+                    asyncTaskMonitorPool.submit(new TaskStateMonitor(taskFuture, taskData.getId()));
                     Thread.sleep(500);
                 } catch (Exception e) {
                     LOG.info("Unexpected error during startup async task execution", e);
                     asyncManager.finishTask(taskData.getId());
+                }
+            }
+        }
+
+        /**
+         * Класс отвечающий за мониторинг состояния выполнения задачи, если задача была удалена или перешла в состояние CANCELLED, то поток, занимающийся ее выполнением прерывается
+         */
+        private final class TaskStateMonitor implements Runnable {
+            private Future<?> taskFuture;
+            private long taskId;
+            private boolean canceled = false;
+
+            TaskStateMonitor(Future<?> taskFuture, long taskId) {
+                this.taskFuture = taskFuture;
+                this.taskId = taskId;
+            }
+
+            @Override
+            public void run() {
+                while (!canceled) {
+                    try {
+                        Thread.sleep(10 * 1000);
+                    } catch (InterruptedException e) {
+                        //Do nothing
+                    }
+                    if (!asyncManager.isTaskActive(taskId)) {
+                        canceled = true;
+                        asyncManager.finishTask(taskId);
+                        taskFuture.cancel(true);
+                        LOG.info(String.format("Async task with id %s was cancelled", taskId));
+                    }
                 }
             }
         }
