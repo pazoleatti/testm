@@ -2399,4 +2399,19 @@ END;'
             alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999);
         </sql>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2821 Добавить поле приоритет АСНУ в справочник АСНУ-->
+	<changeSet id="2.1-rnurgaleev-185" author="rnurgaleev">
+        <sql splitStatements="false">
+			begin
+				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.ROLE_ALIAS IS ''Значение поля "Код роли" справочника "Системные роли" АСУН''';
+				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.ROLE_NAME IS ''Значение поля "Наименование" справочника "Системные роли" АСУН''';
+				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.PRIORITY IS ''Приоритет АСНУ. Определяет, нужно ли обновлять запись справочника "ФЛ" при идентификации''';
+				
+				insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord,visible, width, required, is_unique, read_only, precision, max_length)
+				values (9007, 900, 'Приоритет АСНУ', 'PRIORITY', 2, 5, 1, 20, 1, 0, 0, 0, 4);
+			end;
+		</sql>
+    </changeSet>
+	
 </databaseChangeLog>
