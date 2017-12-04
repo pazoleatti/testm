@@ -2597,6 +2597,48 @@ public final class ScriptUtils {
         return null;
     }
 
+    public static String formatDocNumber(String code, String value) {
+        StringBuilder formattedValue = new StringBuilder(value);
+        switch (code) {
+            case "21": {
+                return formattedValue.insert(2, " ")
+                        .insert(5, " ").toString();
+            } case "07": {
+                return formattedValue.insert(2, " ").toString();
+            } case "18": {
+                return formattedValue.insert(2, "-")
+                        .insert(6, " ").toString();
+            }case "24": {
+                return formattedValue.insert(2, " ").toString();
+            }
+        }
+        return value;
+    };
+
+    /**
+     * Проверяет соответствие ДУЛ формату с удаленными разделителями.
+     * @param code
+     * @param value
+     * @return
+     */
+    public static boolean checkDulSymbols(String code, String value) {
+        boolean pass = true;
+        String format = null;
+        if (code.equals("21")) {
+            format = "[0-9]{10}";
+        } else if (code.equals("07")) {
+            format = "[А-ЯЁ]{2}[0-9]?[0-9]{6}";
+        } else if (code.equals("18")) {
+            format = "[А-ЯЁ]{2}[0-9]{10}";
+        } else if (code.equals("24")) {
+            format = "[А-ЯЁ]{2}[0-9]{7}";
+        }
+        if (!checkFormat(value, format)) {
+            pass = false;
+        }
+        return pass;
+    }
+
     public static String calcTimeMillis(long time) {
         long currTime = System.currentTimeMillis();
         return (currTime - time) + " мс)";
