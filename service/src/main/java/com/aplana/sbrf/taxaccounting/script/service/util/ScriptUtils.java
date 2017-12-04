@@ -2525,7 +2525,7 @@ public final class ScriptUtils {
     }
 
     public static void checkInterrupted() {
-        if (Thread.currentThread().isInterrupted()) {
+        if (Thread.interrupted()) {
             LOG.info("Thread " + Thread.currentThread().getName() + " was interrupted");
             throw new TAInterruptedException();
         }

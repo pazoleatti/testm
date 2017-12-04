@@ -165,4 +165,12 @@ public interface AsyncManager {
      * (считаем что если локальное приложение выключили, значит его задачи не нужны). Удаляются задачи с ASYNC_TASK.PRIORITY_NODE = текущему ПК
      */
     void releaseNodeTasks();
+
+    /**
+     * Проверяет, активна ли задача с указанным идентификатором
+     *
+     * @param taskId идентификатор задачи
+     * @return задача активна?
+     */
+    boolean isTaskActive(long taskId);
 }

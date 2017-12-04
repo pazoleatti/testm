@@ -242,7 +242,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (departmentReportPeriod != null) {
             int activeTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(action.getDeclarationTypeId().intValue(), action.getPeriodId());
             try {
-                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, null, null, null, true, action.getManuallyCreated());
+                Long declarationId = doCreate(logger, activeTemplateId, userInfo, departmentReportPeriod, null, null, null, action.getAsnuId(), null, null, true, action.getManuallyCreated());
                 result.setEntityId(declarationId);
             } catch (DaoException e) {
                 throw new ServiceException(e.getMessage());

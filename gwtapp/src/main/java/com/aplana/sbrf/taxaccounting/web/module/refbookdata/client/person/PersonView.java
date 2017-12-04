@@ -45,12 +45,7 @@ import java.util.List;
 
 import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
-/**
- * Представление попапа модального окна "Файлы и комментарии",
- * данное окно вызывается с формы нф
- *
- * @author Lhaziev
- */
+
 public class PersonView extends PopupViewWithUiHandlers<PersonUiHandlers> implements PersonPresenter.MyView{
 
     public interface Binder extends UiBinder<PopupPanel, PersonView> {

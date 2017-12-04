@@ -50,7 +50,8 @@
                             declarationTypeId: $scope.declarationData.declarationType.id,
                             departmentId: $scope.declarationData.department.id,
                             periodId: $scope.declarationData.period.id,
-                            manuallyCreated: true
+                            manuallyCreated: true,
+                            asnuId: $scope.declarationData.asnu.id
                         }
                     }).then(function (response) {
                         $modalInstance.close(response);
@@ -70,6 +71,14 @@
                             $modalInstance.dismiss('Canceled');
                         }
                     });
+                };
+
+                /**
+                 * Условие выбора АСНУ
+                 */
+                $scope.allowSetAsnu = function () {
+                    return !!($scope.declarationData.declarationType && $scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id);
+
                 };
             }]);
 }());
