@@ -65,6 +65,27 @@
                     </div>
                 </td>
             </tr>
+            <tr data-ng-if="allowSetAsnu()">
+                <td>
+                    <label class="control-label">{{::'createDeclaration.asnu' | translate}}</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectAsnuCtrl"
+                                 data-ui-select2="asnuSelect.options"
+                                 data-ng-init = "initSingleSelectAsnu()"
+                                 data-ng-model="declarationData.asnu"
+                                 data-ng-required="true">
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
