@@ -373,7 +373,7 @@ public class DepartmentServiceImplTest {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
 
-        List<Integer> result = departmentService.getTBDepartmentIds(taUser, TaxType.NDFL);
+        List<Integer> result = departmentService.getTBDepartmentIds(taUser, TaxType.NDFL, true);
         Assert.assertEquals(3, result.size());
         Assert.assertEquals(true, result.contains(root.getId()) && result.contains(departmentTB2.getId())
                 && result.contains(departmentTB3.getId()));
@@ -382,7 +382,7 @@ public class DepartmentServiceImplTest {
 
         for (int aDepartmentID : departmentID) {
             taUser.setDepartmentId(aDepartmentID);
-            result = departmentService.getTBDepartmentIds(taUser, TaxType.NDFL);
+            result = departmentService.getTBDepartmentIds(taUser, TaxType.NDFL, true);
 
             switch (aDepartmentID) {
                 case 0:

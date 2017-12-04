@@ -13,8 +13,8 @@ import java.util.Map;
 @Service("departmentService")
 public class DepartmentServiceImpl implements DepartmentService {
 
-	@Autowired
-	DepartmentDao departmentDao;
+    @Autowired
+    DepartmentDao departmentDao;
 
     @Autowired(required = false)
     com.aplana.sbrf.taxaccounting.service.DepartmentService departmentService;
@@ -22,7 +22,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department get(Integer id) {
         List<Department> departments = departmentDao.listDepartments();
-        for(Department department : departments) {
+        for (Department department : departments) {
             if (department != null && id.equals(department.getId())) {
                 return department;
             }
@@ -63,6 +63,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly) {
         return departmentService.getDepartmentBySbrfCode(sbrfCode, activeOnly);
+    }
+
+    @Override
+    public List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly) {
+        return departmentService.getDepartmentsBySbrfCode(sbrfCode, activeOnly);
     }
 
     @Override

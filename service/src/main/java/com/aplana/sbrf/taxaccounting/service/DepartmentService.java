@@ -77,6 +77,11 @@ public interface DepartmentService {
     Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly);
 
     /**
+     * Получить подразделения
+     */
+    List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly);
+
+    /**
      * 10 - Выборка подразделений для бизнес-администрирования
      * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=11380675">Аналитика</a>
      *
@@ -130,9 +135,10 @@ public interface DepartmentService {
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=11380723">Аналитика</a>
      *
      * @param tAUser пользователь
+     * @param addRoot добавлять ли в список Контролеру УНП подразделение ПАО Сбербанк
      * @return список идентификаторов подразделений
      */
-    List<Integer> getTBDepartmentIds(TAUser tAUser, TaxType taxType);
+    List<Integer> getTBDepartmentIds(TAUser tAUser, TaxType taxType, boolean addRoot);
 
     /**
      * 30 - Получение Банка
