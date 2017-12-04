@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -82,7 +80,7 @@ public class RefBookValuesController {
     }
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
@@ -91,23 +89,23 @@ public class RefBookValuesController {
      * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
-    @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriod")
-    public JqgridPagedList<RefBookDepartment> fetchDepartmentsWithOpenPeriod(@RequestParam String name, @RequestParam Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeDepartmentsWithOpenPeriod")
+    public JqgridPagedList<RefBookDepartment> fetchActiveDepartmentsWithOpenPeriod(@RequestParam String name, @RequestParam Integer reportPeriodId, @RequestParam PagingParams pagingParams) {
         TAUser user = securityService.currentUserInfo().getUser();
-        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchDepartmentsWithOpenPeriod(user, name, reportPeriodId, pagingParams);
+        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchActiveDepartmentsWithOpenPeriod(user, name, reportPeriodId, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
     }
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
+     * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
      *
      * @return Список значений справочника
      */
 
-    @GetMapping(value = "/rest/refBookValues/30", params = "projection=departmentsWithOpenPeriodForReport")
-    public List<RefBookDepartment> fetchDepartmentsWithOpenPeriodForReport() {
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=activeAvailableTB")
+    public List<RefBookDepartment> fetchActiveAvailableTB() {
         TAUser user = securityService.currentUserInfo().getUser();
-        return refBookDepartmentDataService.fetchDepartmentWithOpenPeriodForReport(user);
+        return refBookDepartmentDataService.fetchActiveAvailableTB(user);
     }
 
     /**

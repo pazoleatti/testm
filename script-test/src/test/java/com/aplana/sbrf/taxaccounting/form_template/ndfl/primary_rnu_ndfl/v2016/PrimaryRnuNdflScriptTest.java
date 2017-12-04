@@ -192,7 +192,7 @@ public class PrimaryRnuNdflScriptTest extends DeclarationScriptTestBase {
 
         when(testHelper.getRefBookDataProvider().getRecordData(anyList())).thenReturn(createRefBook());
 
-        when(testHelper.getRefBookPersonService().identificatePerson(any(PersonData.class), anyList(), anyInt(), any(Logger.class))).thenReturn(null).thenReturn(null);
+        //when(testHelper.getRefBookPersonService().identificatePerson(any(PersonData.class), anyList(), anyInt(), any(Logger.class))).thenReturn(null).thenReturn(null);
         //.thenReturn(1L).thenReturn(2L).thenReturn(3L);
 
         doAnswer(new Answer<Void>() {

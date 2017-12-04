@@ -106,7 +106,8 @@
                                         index: 'message',
                                         width: 1658,
                                         sortable: false,
-                                        formatter: $filter('textColorFormatter')
+                                        formatter: $filter('textColorFormatter'),
+                                        classes: 'grid-cell-white-space'
                                     }
                                 ],
                                 rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],

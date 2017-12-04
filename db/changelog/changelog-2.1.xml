@@ -1187,36 +1187,36 @@
         <dropTable cascadeConstraints="true"
                    tableName="COLOR"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-126" author="rnurgaleev">
         <dropTable cascadeConstraints="true"
                    tableName="DEPARTMENT_FORM_TYPE_PERFORMER"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-127" author="rnurgaleev">
         <dropForeignKeyConstraint baseTableName="declaration_source" constraintName="DECL_SOURCE_FK_DEPT_FORMTYPE"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-128" author="rnurgaleev">
         <dropTable cascadeConstraints="true"
                    tableName="DEPARTMENT_FORM_TYPE"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-129" author="rnurgaleev">
         <dropTable cascadeConstraints="true"
                    tableName="LOG_CLOB_QUERY"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-130" author="rnurgaleev">
         <dropTable cascadeConstraints="true"
                    tableName="ROLE_EVENT"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-131" author="rnurgaleev">
         <dropTable cascadeConstraints="true"
                    tableName="STATE_CHANGE"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-132" author="rnurgaleev">
         <dropTable cascadeConstraints="true"
                    tableName="TASK_CONTEXT"/>
@@ -1581,7 +1581,7 @@
             <where>id=2</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2495 Добавить изменения в БД для ASYNC_TASK_TYPE-->
 	 <changeSet id="2.1-rnurgaleev-133" author="rnurgaleev">
         <update
@@ -1590,7 +1590,7 @@
             <where>id = 13</where>
         </update>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-134" author="rnurgaleev">
         <insert tableName="async_task_type">
             <column name="id" value="12"/>
@@ -1600,7 +1600,7 @@
             <column name="limit_kind" value="Размер файла (Кбайт)"/>
         </insert>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2015 НДФЛ: Добавление текстового блока в печатное предстваление формы 2-НДФЛ-->
 	<changeSet id="2.1-rnurgaleev-135" author="rnurgaleev">
         <update tableName="BLOB_DATA">
@@ -1609,7 +1609,7 @@
             <where>id in ('047f207c-113e-488d-8390-9afc248a3bc8','04d9b114-1782-4d09-ad88-729e5605c6ff')</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2414 НДФЛ: Добавление текстового блока в печатное предстваление формы 6-НДФЛ-->
 	<changeSet id="2.1-rnurgaleev-136" author="rnurgaleev">
         <update tableName="BLOB_DATA">
@@ -1618,7 +1618,7 @@
             <where>id in ('41303bf7-9765-463f-a34b-f0a280bfa7bf')</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-1892 Добавить дату подписи в печ форму 6-НДФЛ-->
 	<changeSet id="2.1-rnurgaleev-137" author="rnurgaleev">
         <update tableName="BLOB_DATA">
@@ -1824,7 +1824,7 @@ END;'
             <where>id=1</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2634 Добавить поле manually_created в declaration_data-->
 	<changeSet id="2.1-rnurgaleev-146" author="rnurgaleev">
         <addColumn tableName="declaration_data">
@@ -1833,7 +1833,7 @@ END;'
             </column>
         </addColumn>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-147" author="rnurgaleev">
         <sql>
             alter table declaration_data add constraint decl_data_chk_man_created check(manually_created in (0, 1));
@@ -1868,21 +1868,21 @@ END;'
             <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2671 Создать синоним на таблицу subsystem_role из УН и вьюшки на пользователей и роли ФП НДФЛ-->
 	<changeSet id="2.1-rnurgaleev-148" author="rnurgaleev">
         <sql>
             CREATE SYNONYM SUBSYSTEM_ROLE FOR TAX_1_5.SUBSYSTEM_ROLE;
         </sql>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-149" author="rnurgaleev">
         <createView
                 replaceIfExists="true"
                 viewName="SEC_USER_NDFL">select distinct a.* from sec_user a join sec_user_role b on a.id=b.user_id join subsystem_role c on b.role_id=c.role_id where c.subsystem_id=11 order by name, login
         </createView>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-150" author="rnurgaleev">
         <createView
                 replaceIfExists="true"
@@ -1919,8 +1919,8 @@ END;'
             <where>id=95</where>
         </update>
     </changeSet>
-	
-	<!--https://jira.aplana.com/browse/SBRFNDFL-2571 Некорректная идентификация ПНФ после назначения дублей в справочнике "ФЛ"-->	
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2571 Некорректная идентификация ПНФ после назначения дублей в справочнике "ФЛ"-->
 	<changeSet id="2.1-rnurgaleev-151" author="rnurgaleev">
         <sqlFile dbms="oracle"
                  encoding="utf8"
@@ -1962,7 +1962,7 @@ END;'
             <where>id=5</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2658 Ошибка: "Город" ("Самара г") отсутствует в справочнике "ФИАС" в случае указания адреса без улицы: -->
 	<changeSet id="2.1-rnurgaleev-155" author="rnurgaleev">
         <sqlFile dbms="oracle"
@@ -1996,7 +1996,7 @@ END;'
             <where>id=104</where>
         </update>
     </changeSet>
-	
+
 	<!-- https://jira.aplana.com/browse/SBRFNDFL-2712 Добавить в справочник Календарь данные на 2018 год-->
 	<changeSet id="2.1-rnurgaleev-156" author="rnurgaleev">
         <sqlFile dbms="oracle"
@@ -2173,7 +2173,7 @@ END;'
             <where>id=6</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2781 Улица города федерального значения не проходит проверку-->
 	<changeSet id="2.1-rnurgaleev-167" author="rnurgaleev">
         <sqlFile dbms="oracle"
@@ -2191,7 +2191,7 @@ END;'
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2766 Отслеживание изменений таблиц user и department в БД УН-->
 	<changeSet id="2.1-rnurgaleev-169" author="rnurgaleev">
         <createTable
@@ -2211,7 +2211,7 @@ END;'
             </column>
         </createTable>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-170" author="rnurgaleev">
         <sqlFile dbms="oracle"
                  encoding="utf8"
@@ -2229,24 +2229,24 @@ END;'
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2435 Реализовать настройки фатальности проверок данных ПНФ нужно переименовать сиквенс, таблицу и названия полей-->
 	<changeSet id="2.1-rnurgaleev-172" author="rnurgaleev">
         <dropSequence sequenceName="seq_dt_checks"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-173" author="rnurgaleev">
         <dropTable cascadeConstraints="true"
                    tableName="declaration_template_checks"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-174" author="rnurgaleev">
         <createSequence
                 incrementBy="1"
                 sequenceName="seq_decl_template_checks"
                 startValue="1"/>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-175" author="rnurgaleev">
         <createTable
                 remarks="Настройки фатальности проверок форм"
@@ -2355,7 +2355,7 @@ END;'
             <where>id=6</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2787 XSD. Не изменено ограничение "ИнфЧасть" на 100 тыс. maxOccurs="1000000"-->
 	<changeSet id="2.1-rnurgaleev-181" author="rnurgaleev">
         <update tableName="BLOB_DATA">
@@ -2364,7 +2364,7 @@ END;'
             <where>id in (SELECT xsd FROM declaration_template WHERE id=100)</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2821 Добавить поле приоритет АСНУ в справочник АСНУ-->
 	<changeSet id="2.1-rnurgaleev-182" author="rnurgaleev">
         <addColumn
@@ -2372,7 +2372,7 @@ END;'
             <column name="priority" type="number(3)"/>
         </addColumn>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-183" author="rnurgaleev">
         <sql>
             update ref_book_asnu set priority=case when code='1000' then 900
@@ -2393,13 +2393,13 @@ END;'
 												   else 999 end;
         </sql>
     </changeSet>
-	
+
 	<changeSet id="2.1-rnurgaleev-184" author="rnurgaleev">
         <sql>
             alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999);
         </sql>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2821 Добавить поле приоритет АСНУ в справочник АСНУ-->
 	<changeSet id="2.1-rnurgaleev-185" author="rnurgaleev">
         <sql splitStatements="false">
@@ -2407,11 +2407,42 @@ END;'
 				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.ROLE_ALIAS IS ''Значение поля "Код роли" справочника "Системные роли" АСУН''';
 				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.ROLE_NAME IS ''Значение поля "Наименование" справочника "Системные роли" АСУН''';
 				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.PRIORITY IS ''Приоритет АСНУ. Определяет, нужно ли обновлять запись справочника "ФЛ" при идентификации''';
-				
+
 				insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord,visible, width, required, is_unique, read_only, precision, max_length)
 				values (9007, 900, 'Приоритет АСНУ', 'PRIORITY', 2, 5, 1, 20, 1, 0, 0, 0, 4);
 			end;
 		</sql>
     </changeSet>
-	
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2586 Внести изменения в механизм идентификации ФЛ: учитывать приоритет АСНУ; не учитывать разделители ДУЛ; выбирать записи с максимальным "Идентификатором ФЛ"-->
+    <changeSet id="2.1-ytrofimov-65" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-66" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-67" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2429 -->
+    <changeSet id="2.1-aokunev-2" author="aokunev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

@@ -28,6 +28,14 @@ public interface RefBookDepartmentDataDao {
     List<RefBookDepartment> fetchDepartments(Collection<Integer> ids);
 
     /**
+     * Получение действующих значений справочника по идентификаторам
+     *
+     * @param ids Список идентификаторов
+     * @return Список значений справочника
+     */
+    List<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids);
+
+    /**
      * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param ids          Список идентификаторов
@@ -37,4 +45,15 @@ public interface RefBookDepartmentDataDao {
      * @return Страница списка значений справочника
      */
     PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
+
+    /**
+     * Получение действующих значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     *
+     * @param ids          Список идентификаторов
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    PagingResult<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids, String name, PagingParams pagingParams);
 }

@@ -101,6 +101,20 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
         }
     }
 
+    /**
+     * Удалить все символы кроме букв алфавита и цифр
+     *
+     * @param string
+     * @return
+     */
+    public static String prepareStringDul(String string) {
+        if (string != null) {
+            return string.replaceAll("[^А-Яа-я\\w]", "").toLowerCase();
+        } else {
+            return null;
+        }
+    }
+
     public static <T extends Number> T getIdOrNull(IdentityObject<T> identityObject) {
         if (identityObject != null) {
             return identityObject.getId();
@@ -133,6 +147,10 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
 
     public static boolean isEqualsNullSafeStr(String a, String b) {
         return isValueEquals(prepareString(a), prepareString(b));
+    }
+
+    public static boolean isEqualsNullSafeStrForDul(String a, String b) {
+        return isValueEquals(prepareStringDul(a), prepareStringDul(b));
     }
 
     public static String prepareSnils(String string) {
@@ -169,7 +187,7 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
             DocType docType = personDocument.getDocType();
             if (docType != null) {
                 if (isValueEquals(docTypeId, docType.getId())
-                        && isEqualsNullSafeStr(docNumber, personDocument.getDocumentNumber())) {
+                        && isEqualsNullSafeStrForDul(docNumber, personDocument.getDocumentNumber())) {
                     return personDocument;
                 }
             }

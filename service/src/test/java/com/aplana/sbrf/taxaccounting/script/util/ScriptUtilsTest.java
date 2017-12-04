@@ -411,4 +411,13 @@ public class ScriptUtilsTest {
         Assert.assertEquals("Формы", ScriptUtils.getFirstDeclensionByNumeric("Форма", 123));
         Assert.assertEquals("Форм", ScriptUtils.getFirstDeclensionByNumeric("Форма", 126));
     }
+
+    @Test
+    public void formatDocNumberTest() {
+        Assert.assertEquals("99 99 999999", ScriptUtils.formatDocNumber("21","9999999999"));
+        Assert.assertEquals("ББ 0999999", ScriptUtils.formatDocNumber("07","ББ0999999"));
+        Assert.assertEquals("ББ-999 9999999", ScriptUtils.formatDocNumber("18","ББ9999999999"));
+        Assert.assertEquals("ББ 9999999", ScriptUtils.formatDocNumber("24","ББ9999999"));
+        Assert.assertEquals("SSSSSSSSSSSSSSSSSSSSSSSSS", ScriptUtils.formatDocNumber("00","SSSSSSSSSSSSSSSSSSSSSSSSS"));
+    }
 }

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment
+import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.CalendarService
@@ -566,14 +567,14 @@ class Check extends AbstractScriptClass {
                         def personDocNumberList = []
                         allDocList.each { Long key, Map<String, RefBookValue> dul ->
                             personDocTypeList.add(documentTypeMap.get(dul.get(RF_DOC_ID).value))
-                            personDocNumberList.add(dul.get(RF_DOC_NUMBER).value)
+                            personDocNumberList.add(BaseWeigthCalculator.prepareStringDul(dul.get(RF_DOC_NUMBER).getStringValue()).toUpperCase())
                         }
                         if (ndflPerson.idDocType != null && !personDocTypeList.contains(ndflPerson.idDocType)) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Код", ndflPerson.idDocType ?: "", R_PERSON))
                         }
-                        if (ndflPerson.idDocNumber != null && !personDocNumberList.contains(ndflPerson.idDocNumber)) {
+                        if (ndflPerson.idDocNumber != null && !personDocNumberList.contains(BaseWeigthCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase())) {
                             String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
                             logger.warnExp("%s. %s.", "Код и номер ДУЛ не соответствуют справочнику \"Физические лица\"", fioAndInp, pathError,
                                     String.format(LOG_TYPE_PERSON_MSG, "ДУЛ Номер", ndflPerson.idDocNumber ?: "", R_PERSON))
@@ -584,8 +585,8 @@ class Check extends AbstractScriptClass {
                         Map<String, RefBookValue> dulRecordValues = [:]
                         allDocList.each { Long key, Map<String, RefBookValue> recordValues ->
                             String docTypeCode = documentTypeMap.get(recordValues.get(RF_DOC_ID).getReferenceValue())
-                            String docNumber = recordValues.get(RF_DOC_NUMBER).getStringValue()
-                            if (ndflPerson.idDocType.equals(docTypeCode) && ndflPerson.idDocNumber.equals(docNumber)) {
+                            String docNumber = BaseWeigthCalculator.prepareStringDul(recordValues.get(RF_DOC_NUMBER).getStringValue()).toUpperCase()
+                            if (ndflPerson.idDocType.equals(docTypeCode) && BaseWeigthCalculator.prepareStringDul(ndflPerson.idDocNumber).toUpperCase().equals(docNumber)) {
                                 dulRecordValues.putAll(recordValues)
                             }
                         }
@@ -2181,7 +2182,7 @@ class Check extends AbstractScriptClass {
     class CheckData {
         String msgFirst
         String msgLast
-        boolean fatal;
+        boolean fatal
 
         CheckData(String msgFirst, String msgLast) {
             this.msgFirst = msgFirst
@@ -2905,7 +2906,8 @@ class Check extends AbstractScriptClass {
 
             def declarationDataId = declarationData.id
 
-            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} AND ref_book_id_doc.person_id = np.person_id)"
+            String whereClause = "exists (select 1 from ndfl_person np where np.declaration_data_id = ${declarationData.id} " +
+                    "AND ref_book_id_doc.person_id = np.person_id) AND ref_book_id_doc.inc_rep = 1"
             Map<Long, Map<String, RefBookValue>> refBookMap = getRefBookByRecordWhere(RefBook.Id.ID_DOC.id, whereClause)
 
             refBookMap.each { Long personId, Map<String, RefBookValue> refBookValues ->

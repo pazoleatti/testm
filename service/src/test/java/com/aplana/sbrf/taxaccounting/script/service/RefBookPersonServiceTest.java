@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -37,12 +38,12 @@ public class RefBookPersonServiceTest {
 
     private List<NaturalPerson> getList() {
         List<NaturalPerson> personDataList = new ArrayList<NaturalPerson>();
-        personDataList.add(createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null));
-        personDataList.add(createNaturalPerson(2L, "888", "2", "", "33", null, "2222", "Сидорова", "Наталья", "Викторовна", "12.10.1954"));
-        personDataList.add(createNaturalPerson(3L, "777", "", "5", "45", "", "1111", "Кулькина", "Василина", null, ""));
-        personDataList.add(createNaturalPerson(4L, "888", "2", "", "23", null, "1111", "Иванов", "Иван", "Иванович", "12.10.1954"));
-        personDataList.add(createNaturalPerson(5L, "888", "2", "", "23", "", "1111", "Иванов", "Ивон", "Ивановиеч", "12.10.1954"));
-        personDataList.add(createNaturalPerson(6L, "888", "2", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", "12.10.1954"));
+        personDataList.add(createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null, 1L));
+        personDataList.add(createNaturalPerson(2L, "888", "2", "", "33", null, "2222", "Сидорова", "Наталья", "Викторовна", "12.10.1954", 2L));
+        personDataList.add(createNaturalPerson(3L, "777", "", "5", "45", "", "1111", "Кулькина", "Василина", null, "", 3L));
+        personDataList.add(createNaturalPerson(4L, "888", "2", "", "23", null, "1111", "Иванов", "Иван", "Иванович", "12.10.1954", 4L));
+        personDataList.add(createNaturalPerson(5L, "888", "2", "", "23", "", "1111", "Иванов", "Ивон", "Ивановиеч", "12.10.1954", 5L));
+        personDataList.add(createNaturalPerson(6L, "888", "2", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", "12.10.1954", 6L));
         return personDataList;
     }
 
@@ -56,11 +57,65 @@ public class RefBookPersonServiceTest {
     @Test
     public void identificatePersonTest() {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
-        NaturalPerson result = personService.identificatePerson(primaryPerson, getList(), 900, new Logger());
+        Map<Long, Integer> priorityMap = new HashMap<>();
+        priorityMap.put(1L, 100);
+        priorityMap.put(2L, 100);
+        priorityMap.put(3L, 100);
+        priorityMap.put(4L, 100);
+        priorityMap.put(5L, 100);
+        priorityMap.put(6L, 100);
+        IdentificationData identificationDataFixture = new IdentificationData();
+        identificationDataFixture.setNaturalPerson(primaryPerson);
+        identificationDataFixture.setRefBookPersonList(getList());
+        identificationDataFixture.setTresholdValue(900);
+        identificationDataFixture.setDeclarationDataAsnuId(1);
+        identificationDataFixture.setPriorityMap(priorityMap);
+        NaturalPerson result = personService.identificatePerson(identificationDataFixture, new Logger());
 
         assertEquals(Long.valueOf(6L), result.getId());
     }
 
+    @Test
+    public void identificatePersonAsnuLowPriorityTest() {
+        NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
+        Map<Long, Integer> priorityMap = new HashMap<>();
+        priorityMap.put(1L, 900);
+        priorityMap.put(2L, 100);
+        priorityMap.put(3L, 100);
+        priorityMap.put(4L, 100);
+        priorityMap.put(5L, 100);
+        priorityMap.put(6L, 100);
+        IdentificationData identificationDataFixture = new IdentificationData();
+        identificationDataFixture.setNaturalPerson(primaryPerson);
+        identificationDataFixture.setRefBookPersonList(getList());
+        identificationDataFixture.setTresholdValue(900);
+        identificationDataFixture.setDeclarationDataAsnuId(1);
+        identificationDataFixture.setPriorityMap(priorityMap);
+        NaturalPerson result = personService.identificatePerson(identificationDataFixture, new Logger());
+
+        assertNull(result);
+    }
+
+    @Test
+    public void identificatePersonEqualWeightTest() {
+        NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
+        Map<Long, Integer> priorityMap = new HashMap<>();
+        priorityMap.put(1L, 100);
+        List<NaturalPerson> personDataList = new ArrayList<NaturalPerson>();
+        personDataList.add(createNaturalPerson(1L, "888", "2", "", "12300011156", "", "1112", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
+        personDataList.add(createNaturalPerson(2L, "888", "2", "", "12300011156", "", "1113", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
+        personDataList.add(createNaturalPerson(5L, "888", "2", "", "12300011156", "", "1114", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
+        personDataList.add(createNaturalPerson(4L, "888", "2", "", "12300011156", "", "1115", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
+        personDataList.add(createNaturalPerson(3L, "888", "2", "", "12300011156", "", "1116", "Иванов", "Иван", "Ивановиеч", "12.10.1954", 1L));
+        IdentificationData identificationDataFixture = new IdentificationData();
+        identificationDataFixture.setNaturalPerson(primaryPerson);
+        identificationDataFixture.setRefBookPersonList(personDataList);
+        identificationDataFixture.setTresholdValue(650);
+        identificationDataFixture.setDeclarationDataAsnuId(1);
+        identificationDataFixture.setPriorityMap(priorityMap);
+        NaturalPerson result = personService.identificatePerson(identificationDataFixture, new Logger());
+        assertEquals(Long.valueOf(5L), result.getId());
+    }
 
     public NaturalPerson createPersonData(Long id, String inp, String inn, String innForeign, String snils, String docType,
                                           String docNumber,
@@ -95,7 +150,7 @@ public class RefBookPersonServiceTest {
     public NaturalPerson createNaturalPerson(Long id, String inp, String inn, String innForeign, String snils, String docType,
                                              String docNumber,
                                              String lastName,
-                                             String firstName, String middleName, String birthDate) {
+                                             String firstName, String middleName, String birthDate, Long sourceId) {
         NaturalPerson result = new NaturalPerson();
         result.setId(id);
         result.setRecordId(id);
@@ -111,6 +166,7 @@ public class RefBookPersonServiceTest {
         result.setFirstName(firstName);
         result.setMiddleName(middleName);
         result.setBirthDate(toDate(birthDate));
+        result.setSourceId(sourceId);
         return result;
     }
 
@@ -144,13 +200,13 @@ public class RefBookPersonServiceTest {
     @Test
     public void buildNoticeTest() {
         {
-            NaturalPerson naturalPerson = createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null);
+            NaturalPerson naturalPerson = createNaturalPerson(1L, "999", "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null, 1L);
             String notice = IdentificationUtils.buildNotice(naturalPerson);
             System.out.println(notice);
         }
 
         {
-            NaturalPerson naturalPerson = createNaturalPerson(1L, null, "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null);
+            NaturalPerson naturalPerson = createNaturalPerson(1L, null, "1", "", "123-000-111 56", "", "1111", "Иванов", "Иван", "Иванович", null, 1L);
             String notice = IdentificationUtils.buildNotice(naturalPerson);
             System.out.println(notice);
         }
