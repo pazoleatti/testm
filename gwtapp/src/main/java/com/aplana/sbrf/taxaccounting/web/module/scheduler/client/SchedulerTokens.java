@@ -14,7 +14,7 @@ public final class SchedulerTokens {
 	private SchedulerTokens() {
 	}
 
-	public static final String taskList = "!taskList";
-    public static final String task = "!task";
-    public static final String taskId = "taskId";
+	public static final String taskList = "!deprecated-taskList";
+    public static final String task = "!deprecated-task";
+    public static final String taskId = "deprecated-taskId";
 }
