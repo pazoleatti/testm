@@ -1422,12 +1422,15 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
     background-size: contain;
   }
 }
-
+@media (max-width: 1590px) {
+  .report-wrapper{
+    min-height: 521px!important;
+  }
+}
 @media (max-width: 1450px) {
   .grid-filter {
     min-width: 100% !important;
   }
-
   .info-wrapper {
     margin-bottom: 10px;
     padding-bottom: 10px;
@@ -1481,5 +1484,8 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
       right: -50px;
       top: 10px;
     }
+  }
+  .report-wrapper {
+    min-height: 504px !important;
   }
 }
