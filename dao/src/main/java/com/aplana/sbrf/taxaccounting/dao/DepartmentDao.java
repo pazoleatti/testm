@@ -119,6 +119,12 @@ public interface DepartmentDao extends PermissionDao {
     Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly);
 
     /**
+     * Получение обособленных подразделений по значению
+     * «Код подразделения в нотации Сбербанка»
+     */
+    List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly);
+
+    /**
      * Получение обособленного подразделения по значению
      * «Наименование подразделения»»
      */

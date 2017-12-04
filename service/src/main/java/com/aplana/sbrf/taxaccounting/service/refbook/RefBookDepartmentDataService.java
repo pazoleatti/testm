@@ -39,7 +39,7 @@ public interface RefBookDepartmentDataService {
     PagingResult<RefBookDepartment> fetchAvailableDepartments(TAUser user, String name, PagingParams pagingParams);
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user           Пользователь
@@ -49,13 +49,13 @@ public interface RefBookDepartmentDataService {
      * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
      */
-    PagingResult<RefBookDepartment> fetchDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams);
+    PagingResult<RefBookDepartment> fetchActiveDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams);
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
+     * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
      *
      * @param user           Пользователь
      * @return Список значений справочника
      */
-    List<RefBookDepartment> fetchDepartmentWithOpenPeriodForReport(TAUser user);
+    List<RefBookDepartment> fetchActiveAvailableTB(TAUser user);
 }

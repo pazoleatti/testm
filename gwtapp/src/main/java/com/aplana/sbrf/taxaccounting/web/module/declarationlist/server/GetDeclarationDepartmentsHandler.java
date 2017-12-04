@@ -59,7 +59,7 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
         } else {
             if (action.isReports()) {
                 // Отчеты создаются в только в ТБ
-                Set<Integer> departmentIds = new HashSet<Integer>(departmentService.getTBDepartmentIds(userInfo.getUser(), action.getTaxType()));
+                Set<Integer> departmentIds = new HashSet<Integer>(departmentService.getTBDepartmentIds(userInfo.getUser(), action.getTaxType(), true));
                 result.setDepartments(new ArrayList<Department>(
                         departmentService.getRequiredForTreeDepartments(departmentIds).values()));
                 result.setDepartmentIds(departmentIds);

@@ -60,6 +60,28 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
      */
     @Override
     public List<RefBookDepartment> fetchDepartments(Collection<Integer> ids) {
+        return fetchDepartments(ids, false);
+    }
+
+    /**
+     * Получение действующих значений справочника по идентификаторам
+     *
+     * @param ids Список идентификаторов
+     * @return Список значений справочника
+     */
+    @Override
+    public List<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids) {
+        return fetchDepartments(ids, true);
+    }
+
+    /**
+     * Получение значений справочника по идентификаторам
+     *
+     * @param ids        Список идентификаторов
+     * @param activeOnly Искать только действующие подразделения
+     * @return Список значений справочника
+     */
+    private List<RefBookDepartment> fetchDepartments(Collection<Integer> ids, boolean activeOnly) {
         BooleanBuilder where = new BooleanBuilder();
         where.and(department.isActive.eq((byte) 1).and(department.id.in(ids)));
         return sqlQueryFactory
@@ -81,11 +103,44 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
      */
     @Override
     public PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
+        return fetchDepartments(ids, name, false, pagingParams);
+    }
+
+    /**
+     * Получение действующих значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     *
+     * @param ids          Список идентификаторов
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @Override
+    public PagingResult<RefBookDepartment> fetchActiveDepartments(Collection<Integer> ids, String name, PagingParams pagingParams) {
+        return fetchDepartments(ids, name, true, pagingParams);
+    }
+
+    /**
+     * Получение значений справочника по идентификаторам с фильтрацией по наименованию подразделения и пейджингом
+     * Также можно выбрать все подразделения или только действующие
+     *
+     * @param ids          Список идентификаторов
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param activeOnly   Искать только действующие подразделения
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    private PagingResult<RefBookDepartment> fetchDepartments(Collection<Integer> ids, String name, boolean activeOnly, PagingParams pagingParams) {
         BooleanBuilder where = new BooleanBuilder();
-        where.and(department.isActive.eq((byte) 1).and(department.id.in(ids)));
+        where.and(department.id.in(ids));
 
         if (!StringUtils.isBlank(name)) {
             where = where.and(department.name.containsIgnoreCase(name).or(departmentFullpath.shortname.containsIgnoreCase(name)));
+        }
+
+        if (activeOnly) {
+            where = where.and(department.isActive.eq((byte) 1));
         }
 
         SQLQuery<RefBookDepartment> queryBase = sqlQueryFactory

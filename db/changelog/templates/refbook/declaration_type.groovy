@@ -654,7 +654,7 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (declarationDataList.size() > 1) {
             def result = ""
-            declarationDataList.each {DeclarationData declData ->
+            declarationDataList.each { DeclarationData declData ->
                 result += "\"${AttachFileType.TYPE_2.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
             }
             logger.error(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName);
@@ -909,11 +909,26 @@ class DeclarationType extends AbstractScriptClass {
             declarationTypeId = DECLARATION_TYPE_RNU_NDFL_ID;
             attachFileType = AttachFileType.TYPE_1
             departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
-            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
-            if (formDepartment == null) {
+
+            List<Department> formDepartments = departmentService.getDepartmentsBySbrfCode(departmentCode, true);
+            if (formDepartments.size() == 0) {
                 logger.error("Не удалось определить подразделение \"%s\"", departmentCode)
                 return
             }
+            if (formDepartments.size() > 1) {
+                String departments = "";
+                for(Department department : formDepartments) {
+                    departments = departments + "\"" + department.getName().replaceAll("\"", "") + "\", ";
+                }
+                departments = departments.substring(0, departments.length() - 2);
+
+                logger.error("ТФ с именем \"%s\" не может быть загружен в Систему, в справочнике «Подразделения» АС «Учет налогов» с кодом \"%s\" найдено " +
+                        "несколько подразделений: %s. Обратитесь к пользователю с ролью \"Контролёр УНП\"", UploadFileName, departmentCode, departments);
+
+                return
+            }
+
+            Department formDepartment = formDepartments.get(0);
             departmentId = formDepartment != null ? formDepartment.getId() : null;
 
             reportPeriodCode = UploadFileName.substring(21, 23).replaceAll("_", "").trim();
