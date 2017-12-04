@@ -43,7 +43,6 @@
             'app.filterUtils',
             'app.rest',
             'app.formatters',
-            'app.modals',
             'app.reportPeriod',
             'app.reportPeriodModal',
             'app.deadlinePeriodModal'

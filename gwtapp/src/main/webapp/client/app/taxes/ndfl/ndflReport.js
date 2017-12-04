@@ -14,7 +14,6 @@
             'app.formSources',
             'app.logBusines',
             'app.logPanel',
-            'app.modals',
             'app.filesComments',
             'app.rest',
             'app.reportNdflPersonFace',
@@ -58,11 +57,11 @@
          */
         .controller('ndflReportCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource',
-            '$filter', '$logPanel', 'appModals', '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state',
+            '$filter', '$logPanel', '$dialogs', '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state',
             '$interval', 'acceptDeclarationData', 'createReport', 'getPageImage', 'checkDeclarationData',
             'moveToCreatedDeclarationData', '$aplanaModal',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
-                      $logPanel, appModals, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval,
+                      $logPanel, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state, $interval,
                       acceptDeclarationData, createReport, getPageImage, checkDeclarationData,
                       moveToCreatedDeclarationData, $aplanaModal) {
 
@@ -113,13 +112,18 @@
                         $logPanel.open('log-panel-container', response.uuid);
                     } else {
                         if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                            appModals.message($filter('translate')('title.noCalculationPerformed'));
+                            $dialogs.messageDialog({
+                                content: $filter('translate')('title.noCalculationPerformed')
+                            });
                         } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                            appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                .result.then(
-                                function () {
+                            $dialogs.confirmDialog({
+                                content: response.restartMsg,
+                                okBtnCaption: $filter('translate')('common.button.yes'),
+                                cancelBtnCaption: $filter('translate')('common.button.no'),
+                                okBtnClick:function () {
                                     $scope.createPairKppOktmo(true, create);
-                                });
+                                }
+                            });
                         } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
                             $window.location = location;
                         }
@@ -145,11 +149,12 @@
                                     if (!data.declarationDataExist) {
                                         $interval.cancel($scope.intervalId);
                                         var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                        appModals.error($filter('translate')('DIALOGS_ERROR'), message).result.then(
-                                            function () {
+                                        $dialogs.errorDialog({
+                                            content: message,
+                                            closeBtnClick: function () {
                                                 $state.go("/");
                                             }
-                                        );
+                                        });
                                         return;
                                     }
                                     $scope.availablePdf = data.availablePdf;
@@ -333,17 +338,23 @@
                                 initPage();
                             } else {
                                 if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                    appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                        .result.then(
-                                        function () {
+                                    $dialogs.confirmDialog({
+                                        content: response.restartMsg,
+                                        okBtnCaption: $filter('translate')('common.button.yes'),
+                                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                                        okBtnClick: function () {
                                             $scope.accept(true, cancelTask);
-                                        });
+                                        }
+                                    });
                                 } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST_TASK && !cancelTask) {
-                                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.returnExistTask'))
-                                        .result.then(
-                                        function () {
+                                    $dialogs.confirmDialog({
+                                        content: $filter('translate')('title.returnExistTask'),
+                                        okBtnCaption: $filter('translate')('common.button.yes'),
+                                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                                        okBtnClick: function () {
                                             $scope.accept(force, true);
-                                        });
+                                        }
+                                    });
                                 } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
                                     $window.alert($filter('translate')('title.acceptImpossible'));
                                 }
@@ -367,11 +378,14 @@
                             initPage();
                         } else {
                             if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                    .result.then(
-                                    function () {
+                                $dialogs.confirmDialog({
+                                    content: response.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
                                         $scope.check(true);
-                                    });
+                                    }
+                                });
                             } else if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }
@@ -410,16 +424,19 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Удалить"
                  */
                 $scope.delete = function () {
-                    appModals.confirm($filter('translate')('title.confirm'), $filter('translate')('title.deleteDeclaration'))
-                        .result.then(
-                        function () {
+                    $dialogs.confirmDialog({
+                        content: $filter('translate')('title.deleteDeclaration'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
                             }).success(function () {
                                 $state.go("ndflReportJournal", {});
                             });
-                        });
+                        }
+                    });
                 };
 
                 /**

@@ -48,6 +48,21 @@ public class DocType extends IdentityObject<Long> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DocType docType = (DocType) o;
+
+        return code.equals(docType.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return code.hashCode();
+    }
+
+    @Override
     public String toString() {
         return new StringBuilder().append("[").append(id).append(", ").append(code).append("]").toString();
     }

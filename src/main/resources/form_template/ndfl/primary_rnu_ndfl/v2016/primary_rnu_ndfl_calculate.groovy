@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeListene
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener
 import com.aplana.sbrf.taxaccounting.model.identification.Country
 import com.aplana.sbrf.taxaccounting.model.identification.DocType
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument
 import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier
@@ -22,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
@@ -89,6 +91,8 @@ class Calculate extends AbstractScriptClass {
     Map<Long, String> taxpayerStatusCodeCache = [:]
     //Коды Асну
     Map<Long, String> asnuCache = [:]
+    //Приоритет Асну
+    Map<Long, Integer> asnuPriority = [:];
 
     private Calculate() {
     }
@@ -346,6 +350,7 @@ class Calculate extends AbstractScriptClass {
 
                 PersonDocument personDocument = person.getPersonDocument();
                 if (personDocument != null && personDocument.docType != null) {
+                    personDocument.documentNumber = performDocNumber(personDocument)
                     documentList.add(personDocument);
                 }
 
@@ -458,7 +463,18 @@ class Calculate extends AbstractScriptClass {
             NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
 
             inTime = System.currentTimeMillis();
-            NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, similarityThreshold, logger);
+
+            IdentificationData identificationData = new IdentificationData()
+            identificationData.naturalPerson = primaryPerson
+            identificationData.refBookPersonList = similarityPersonList
+            identificationData.tresholdValue = similarityThreshold
+            identificationData.declarationDataAsnuId = declarationData.asnuId
+            if (asnuPriority.isEmpty()) {
+                getRefAsnu()
+            }
+            identificationData.priorityMap = asnuPriority
+
+            NaturalPerson refBookPerson = refBookPersonService.identificatePerson(identificationData, logger);
 
             conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -546,6 +562,7 @@ class Calculate extends AbstractScriptClass {
 
                     if (personDocument == null) {
                         if (primaryPersonDocument.docType != null) {
+                            primaryPersonDocument.documentNumber = performDocNumber(primaryPersonDocument)
                             insertDocumentList.add(primaryPersonDocument);
                             refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
                         }
@@ -668,6 +685,18 @@ class Calculate extends AbstractScriptClass {
 
         logForDebug("Обновлено записей: " + updCnt);
 
+    }
+
+    String performDocNumber(PersonDocument personDocument) {
+        List<DocType> docTypes = getDocTypeRefBookList()
+        String toReturn = personDocument.documentNumber
+        if (docTypes.contains(personDocument.docType)) {
+            String docNumber = personDocument.documentNumber
+            if (ScriptUtils.checkDulSymbols(personDocument.docType.code, BaseWeigthCalculator.prepareStringDul(personDocument.documentNumber).toUpperCase())){
+                toReturn = ScriptUtils.formatDocNumber(personDocument.docType.code, docNumber.replaceAll("[^А-Яа-я\\w]", "").toUpperCase())
+            }
+        }
+        return toReturn;
     }
 
     def buildRefreshNotice(AttributeCountChangeListener addressAttrCnt, AttributeCountChangeListener personAttrCnt, AttributeCountChangeListener documentAttrCnt, AttributeCountChangeListener taxpayerIdentityAttrCnt) {
@@ -1109,7 +1138,9 @@ class Calculate extends AbstractScriptClass {
         if (asnuCache.size() == 0) {
             PagingResult<Map<String, RefBookValue>> refBookMap = getRefBook(RefBook.Id.ASNU.id)
             refBookMap.each { Map<String, RefBookValue> refBook ->
-                asnuCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+                Long asnuId = (Long) refBook?.id?.numberValue
+                asnuCache.put(asnuId, refBook?.CODE?.stringValue)
+                asnuPriority.put(asnuId, (Integer) refBook?.PRIORITY?.numberValue)
             }
         }
         return asnuCache;

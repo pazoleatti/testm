@@ -2399,4 +2399,43 @@ END;'
             alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999);
         </sql>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2821 Добавить поле приоритет АСНУ в справочник АСНУ-->
+	<changeSet id="2.1-rnurgaleev-185" author="rnurgaleev">
+        <sql splitStatements="false">
+			begin
+				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.ROLE_ALIAS IS ''Значение поля "Код роли" справочника "Системные роли" АСУН''';
+				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.ROLE_NAME IS ''Значение поля "Наименование" справочника "Системные роли" АСУН''';
+				execute immediate 'COMMENT ON COLUMN REF_BOOK_ASNU.PRIORITY IS ''Приоритет АСНУ. Определяет, нужно ли обновлять запись справочника "ФЛ" при идентификации''';
+				
+				insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord,visible, width, required, is_unique, read_only, precision, max_length)
+				values (9007, 900, 'Приоритет АСНУ', 'PRIORITY', 2, 5, 1, 20, 1, 0, 0, 0, 4);
+			end;
+		</sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2586 Внести изменения в механизм идентификации ФЛ: учитывать приоритет АСНУ; не учитывать разделители ДУЛ; выбирать записи с максимальным "Идентификатором ФЛ"-->
+    <changeSet id="2.1-ytrofimov-65" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-66" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-67" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+	
 </databaseChangeLog>

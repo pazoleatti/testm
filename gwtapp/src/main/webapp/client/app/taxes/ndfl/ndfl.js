@@ -332,11 +332,14 @@
                             initPage();
                         } else {
                             if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                appModals.confirm($filter('translate')('title.confirm'), response.restartMsg)
-                                    .result.then(
-                                    function () {
+                                $dialogs.confirmDialog({
+                                    content:response.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick:function () {
                                         $scope.check(true);
-                                    });
+                                    }
+                                });
                             } else if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }

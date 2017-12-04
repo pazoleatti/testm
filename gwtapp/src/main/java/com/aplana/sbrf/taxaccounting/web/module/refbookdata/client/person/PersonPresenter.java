@@ -20,12 +20,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Презентер попап модального окна "Файлы и комментарии",
- * данное окно вызывается с формы нф
- *
- * @author Lhaziev
- */
+
 public class PersonPresenter extends PresenterWidget<PersonPresenter.MyView> implements PersonUiHandlers {
     public interface MyView extends PopupView, HasUiHandlers<PersonUiHandlers> {
         void init(RefBookDataRow row, List<RefBookAttribute> attributes);

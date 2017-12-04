@@ -5,7 +5,7 @@
      * @description конфигурация модального окна выбора типа отчетного периода
      */
 
-    angular.module('app.openCorrectPeriodModal', ['ui.router', 'app.rest', 'app.modals'])
+    angular.module('app.openCorrectPeriodModal', ['ui.router', 'app.rest'])
 
         .filter('correctPeriodFormatter', function () {
             return function (entity) {

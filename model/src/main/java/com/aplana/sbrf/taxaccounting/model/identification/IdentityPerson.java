@@ -9,6 +9,8 @@ import java.util.Date;
  */
 public interface IdentityPerson {
 
+    Long getRecordId();
+
     String getLastName();
 
     String getFirstName();

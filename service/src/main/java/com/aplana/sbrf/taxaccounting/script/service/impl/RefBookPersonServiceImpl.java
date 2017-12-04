@@ -61,22 +61,32 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     // ----------------------------- identification -----------------------------
 
     @Override
-    public NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, Logger logger) {
-        return identificatePerson(personData, refBookPersonList, tresholdValue, new PersonDataWeightCalculator(getBaseCalculateList()), logger);
+    public NaturalPerson identificatePerson(IdentificationData identificationData, Logger logger) {
+        return identificatePerson(identificationData, new PersonDataWeightCalculator(getBaseCalculateList()), logger);
     }
 
     @Override
-    public NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
+    public NaturalPerson identificatePerson(IdentificationData identificationData, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
 
-        double treshold = tresholdValue / 1000D;
-        List<NaturalPerson> personDataList = refBookPersonList;
+        double treshold = identificationData.getTresholdValue() / 1000D;
+        List<NaturalPerson> personDataList = identificationData.getRefBookPersonList();
         if (personDataList != null && !personDataList.isEmpty()) {
 
-            calculateWeigth(personData, personDataList, weigthComporators);
+            List<NaturalPerson> personForRemoveList = new LinkedList<>();
+            for (NaturalPerson person : personDataList) {
+                if (identificationData.getPriorityMap().get(person.getSourceId()) < identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId())) {
+                    personForRemoveList.add(person);
+                }
+            }
+            personDataList.removeAll(personForRemoveList);
+
+            personForRemoveList = new LinkedList<>();
+
+            calculateWeigth(identificationData.getNaturalPerson(), personDataList, weigthComporators);
+
             // Удаляем ФЛ с весом < порога схожести
-            List<IdentityPerson> personForRemoveList = new LinkedList<IdentityPerson>();
-            for (IdentityPerson person : personDataList) {
-                if (person.getWeigth() <= tresholdValue / 1000d) {
+            for (NaturalPerson person : personDataList) {
+                if (person.getWeigth() <= treshold) {
                     personForRemoveList.add(person);
                 }
             }
@@ -84,7 +94,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             if (!personDataList.isEmpty()) {
                 StringBuffer msg = new StringBuffer();
 
-                msg.append("Для ФЛ " + IdentificationUtils.buildNotice((NaturalPerson) personData) + " сходных записей найдено: " + personDataList.size()).append(" ");
+                msg.append("Для ФЛ " + IdentificationUtils.buildNotice(identificationData.getNaturalPerson()) + " сходных записей найдено: " + personDataList.size()).append(" ");
                 DecimalFormat df = new DecimalFormat("0.00");
                 for (IdentityPerson applicablePersonData : personDataList) {
                     msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
@@ -256,6 +266,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 }
             }
 
+
+
+
         });
 
         //Адрес в РФ
@@ -351,7 +364,11 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     private class PersonDataComparator implements Comparator<IdentityPerson> {
         @Override
         public int compare(IdentityPerson a, IdentityPerson b) {
-            return Double.compare(a.getWeigth(), b.getWeigth());
+            int weightComp = Double.compare(a.getWeigth(), b.getWeigth());
+            if (weightComp == 0) {
+                return Long.compare(a.getRecordId(), b.getRecordId());
+            }
+            return weightComp;
         }
     }
 

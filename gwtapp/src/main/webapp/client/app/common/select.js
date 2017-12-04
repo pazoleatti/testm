@@ -186,10 +186,20 @@
          */
         .controller('SelectAsnuCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource',
             function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource) {
+
+            $scope.initMultipleSelectAsnu = function () {
                 $scope.asnuSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
                 RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
                     $scope.asnuSelect.options.data.results = data;
                 });
+            };
+
+                $scope.initSingleSelectAsnu = function () {
+                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptions(true);
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
+                        $scope.asnuSelect.options.data.results = data;
+                    });
+                };
             }])
 
         /**

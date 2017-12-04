@@ -161,7 +161,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         if (filter != null && !filter.isEmpty()) {
             Row filterRow = sheet.createRow(1);
             Cell filterCell = filterRow.createCell(cellNumber);
-            filterCell.setCellValue("Фильтр: " + filter);
+            filterCell.setCellValue(filter);
             filterCell.setCellStyle(cs);
             cellNumber = 0;
         }

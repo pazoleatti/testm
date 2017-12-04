@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler;
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
 import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -27,9 +28,9 @@ public interface RefBookPersonService {
      */
     void clearRnuNdflPerson(Long declarationDataId);
 
-    NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, Logger logger);
+    NaturalPerson identificatePerson(IdentificationData identificationData, Logger logger);
 
-    NaturalPerson identificatePerson(NaturalPerson personData, List<NaturalPerson> refBookPersonList, int tresholdValue, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
+    NaturalPerson identificatePerson(IdentificationData identificationData, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
 
     List<BaseWeigthCalculator> getBaseCalculateList();
 

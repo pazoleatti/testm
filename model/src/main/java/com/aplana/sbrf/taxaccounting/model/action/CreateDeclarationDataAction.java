@@ -10,6 +10,8 @@ public class CreateDeclarationDataAction {
 
     private Boolean manuallyCreated = false;
 
+    private Long asnuId;
+
     public Long getDeclarationTypeId() {
         return declarationTypeId;
     }
@@ -40,5 +42,13 @@ public class CreateDeclarationDataAction {
 
     public void setManuallyCreated(Boolean manuallyCreated) {
         this.manuallyCreated = manuallyCreated;
+    }
+
+    public Long getAsnuId() {
+        return asnuId;
+    }
+
+    public void setAsnuId(Long asnuId) {
+        this.asnuId = asnuId;
     }
 }

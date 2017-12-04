@@ -8,7 +8,6 @@
     angular.module('app.reportPeriod',
         ['ui.router',
             'app.logPanel',
-            'app.modals',
             'app.rest',
             'app.openCorrectPeriodModal'])
         .config(['$stateProvider', function ($stateProvider) {

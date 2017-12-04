@@ -71,8 +71,6 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private AsyncTaskThreadContainer asyncTaskThreadContainer;
     @Autowired
     private AsyncManager asyncManager;
-    @Autowired
-    private ApplicationInfo applicationInfo;
 
     /**
      * Инициализация планировщика
@@ -274,6 +272,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
     public void asyncTasksMonitoring() {
+        LOG.info("ASYNC_TASK_MONITORING started by scheduler");
         asyncTaskThreadContainer.processQueues();
     }
 }
