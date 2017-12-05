@@ -1643,7 +1643,7 @@ public final class ScriptUtils {
      * @param headerRowCount количество строк в шапке таблицы
      * @param paramsMap мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
      */
-    public static void checkAndReadFile(BufferedInputStream inputStream, String uploadFileName,
+    public static void checkAndReadFile(InputStream inputStream, String uploadFileName,
                             List<List<String>> allValues, List<List<String>>headerValues,
                             String tableStartValue, String tableEndValue, int headerRowCount,
                             Map<String, Object> paramsMap) throws IOException, OpenXML4JException, SAXException {
@@ -2301,9 +2301,9 @@ public final class ScriptUtils {
                         prevRowIndex = rowIndex;
                     }
                 } else {
-                    if (headerValues.isEmpty() && rowValues != null && rowValues.contains(tableStartValue)) {
+                    if (headerValues.isEmpty() && rowValues != null && (tableStartValue == null || rowValues.contains(tableStartValue))) {
                         // найдено начало таблицы
-                        int from = rowValues.indexOf(tableStartValue);
+                        int from = tableStartValue != null ? rowValues.indexOf(tableStartValue) : 0;
                         colOffset = from; // отступ слева
                         if (from > 0) {
                             int to = rowValues.size();

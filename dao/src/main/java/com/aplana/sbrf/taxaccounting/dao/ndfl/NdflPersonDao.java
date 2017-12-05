@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -47,12 +48,22 @@ public interface NdflPersonDao {
      */
     Long save(NdflPerson ndflPerson);
 
+    void save(final Collection<NdflPerson> ndflPersons);
+
     /**
      * Удалить данные по указанному ФЛ из декларации, каскадное удаление
      *
      * @param ndflPersonId
      */
     void delete(Long ndflPersonId);
+
+    /**
+     * Удалить все данные формы
+     *
+     * @param declarationDataId ид формы
+     * @return кол-во удаленных строк
+     */
+    long deleteByDeclarationId(Long declarationDataId);
 
     /**
      * Найти все данные НДФЛ физ лица привязанные к декларации

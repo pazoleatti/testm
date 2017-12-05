@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.DataInputStream;
@@ -232,6 +233,23 @@ public class DeclarationDataController {
     public void deleteDeclaration(@PathVariable int declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         declarationService.deleteIfExists(declarationDataId, userInfo);
+    }
+
+    /**
+     * Импорт данных из excel в форму
+     *
+     * @param declarationDataId Идентификатор налоговой формы
+     * @return Результат запуска задачи
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/import")
+    public ImportDeclarationExcelResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
+                                                    @RequestParam boolean force,
+                                                    @PathVariable int declarationDataId)
+            throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        try (InputStream inputStream = file.getInputStream()) {
+            return declarationService.createTaskToImportExcel(declarationDataId, file.getOriginalFilename(), inputStream, userInfo, force);
+        }
     }
 
     /**

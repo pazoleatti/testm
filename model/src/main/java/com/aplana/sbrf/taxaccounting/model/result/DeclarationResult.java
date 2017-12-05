@@ -71,6 +71,11 @@ public class DeclarationResult {
      */
     private String docState;
 
+    /**
+     * Создана в ручную
+     */
+    private Boolean manuallyCreated = false;
+
     public String getDepartment() {
         return department;
     }
@@ -189,5 +194,13 @@ public class DeclarationResult {
 
     public void setDocState(String docState) {
         this.docState = docState;
+    }
+
+    public Boolean getManuallyCreated() {
+        return manuallyCreated;
+    }
+
+    public void setManuallyCreated(Boolean manuallyCreated) {
+        this.manuallyCreated = manuallyCreated;
     }
 }

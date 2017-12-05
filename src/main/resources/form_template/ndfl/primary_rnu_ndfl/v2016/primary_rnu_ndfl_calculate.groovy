@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.dao.identification.IdentificationUtils
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonPrimaryRnuRowMapper
 import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHandler
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.identification.Address
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeEvent
@@ -26,10 +27,12 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.service.BlobDataService
+import com.aplana.sbrf.taxaccounting.service.ReportService
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
 import com.aplana.sbrf.taxaccounting.script.service.*
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
-
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -46,6 +49,8 @@ class Calculate extends AbstractScriptClass {
     RefBookPersonService refBookPersonService
     FiasRefBookService fiasRefBookService
     NdflPersonService ndflPersonService
+    ReportService reportService
+    BlobDataService blobDataService
     ReportPeriodService reportPeriodService
     RefBookFactory refBookFactory
     RefBookService refBookService
@@ -114,6 +119,12 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
             this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
+        }
+        if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
+            this.blobDataService = (BlobDataService) scriptClass.getBinding().getProperty("blobDataServiceImpl");
+        }
+        if (scriptClass.getBinding().hasVariable("reportServiceImpl")) {
+            this.reportService = (ReportService) scriptClass.getBinding().getProperty("reportServiceImpl");
         }
         if (scriptClass.getBinding().hasVariable("reportPeriodService")) {
             this.reportPeriodService = (ReportPeriodService) scriptClass.getProperty("reportPeriodService");
@@ -194,7 +205,12 @@ class Calculate extends AbstractScriptClass {
             }
         })
         // Формирование pdf-отчета формы
-        declarationService.createPdfReport(logger, declarationData, userInfo)
+        // declarationService.createPdfReport(logger, declarationData, userInfo)
+        // TODO workaround, xml не должна использоваться
+        if (reportService.getDec(userInfo, declarationData.id, DeclarationDataReportType.XML_DEC) == null) {
+            String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
+            reportService.createDec(declarationData.id, uuid, DeclarationDataReportType.XML_DEC);
+        }
     }
 
     Date getRefBookPersonVersionTo() {
