@@ -2445,4 +2445,38 @@ END;'
             <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2766 Отслеживание изменений таблиц user и department в БД УН-->
+	<changeSet id="2.1-rnurgaleev-186" author="rnurgaleev">
+        <sql splitStatements="false">
+			begin
+				execute immediate 'drop trigger SEC_USER_AFTER_INS_UPD_DEL';
+				execute immediate 'drop trigger DEP_AFTER_INS_UPD_DEL';
+				execute immediate 'drop table log_un_changes';
+			end;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-187" author="rnurgaleev">
+        <sql>
+			CREATE SYNONYM vw_log_table_change FOR TAX_1_5_1.vw_log_table_change;
+        </sql>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-188" author="rnurgaleev">
+        <createTable
+                remarks="Отслеживание изменений в таблицах УН"
+                tableName="LOG_TABLE_CHANGE_PROCESSED">
+            <column name="id" type="number(18)" remarks="Идентификатор">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+	
+	<changeSet id="2.1-rnurgaleev-189" author="rnurgaleev">
+		<addPrimaryKey 
+				columnNames="id"
+				constraintName="pk_log_table_change_processed"
+				tableName="LOG_TABLE_CHANGE_PROCESSED"/>
+	</changeSet>
 </databaseChangeLog>
