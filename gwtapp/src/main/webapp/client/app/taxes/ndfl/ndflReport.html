@@ -27,11 +27,15 @@
                             </div>
                         </li>
                         <li role="menuitem">
-                            <div class="row menuitem" ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id">
-                                <a ng-click="createReport()">{{::'link.ndflReport.reporting.formForFL22' | translate}}</a>
+                            <div class="row menuitem"
+                                 ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_2.id">
+                                <a ng-click="createReport()">{{::'link.ndflReport.reporting.formForFL22' |
+                                    translate}}</a>
                             </div>
-                            <div class="row menuitem" ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id">
-                                <a ng-click="createReport()">{{::'link.ndflReport.reporting.formForFL21' | translate}}</a>
+                            <div class="row menuitem"
+                                 ng-if="declarationData.declarationType == APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id">
+                                <a ng-click="createReport()">{{::'link.ndflReport.reporting.formForFL21' |
+                                    translate}}</a>
                             </div>
                         </li>
                     </ul>
@@ -70,11 +74,11 @@
                                     <label class="label-title-panel w100">{{::'title.department' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.department}}</label>
                                 </div>
-                                <div  class="col-md-9">
+                                <div class="col-md-9">
                                     <label class="label-title-panel w100">{{::'title.formNumber' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationDataId}}</label>
                                 </div>
-                                <div  class="col-md-9">
+                                <div class="col-md-9">
                                     <label class="label-title-panel w100">{{::'title.creator' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.creationUserName}}</label>
                                 </div>
@@ -96,26 +100,28 @@
 
                             </div>
                             <div class="header-col group-title-panel">
-                                <div  class="col-md-9">
+                                <div class="col-md-9">
                                     <label class="label-title-panel w100">{{::'title.stateDoc' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.docState}}</label>
                                 </div>
-                                <div  class="col-md-9">
+                                <div class="col-md-9">
                                     <label class="label-title-panel w100">{{::'title.kpp' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.kpp}}</label>
                                 </div>
-                                <div  class="col-md-9">
+                                <div class="col-md-9">
                                     <label class="label-title-panel w100">{{::'title.oktmo' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.oktmo}}</label>
                                 </div>
                             </div>
                             <div class="header-col group-title-panel">
-                                <div  class="col-md-12" style="padding: 0px">
-                                    <label class="label-title-panel " style="width: 200px;">{{::'title.dateAndTimeCreate' | translate}}:</label>
-                                    <label class="font-normal info-text30" >{{declarationData.creationDate}}</label>
+                                <div class="col-md-12" style="padding: 0px">
+                                    <label class="label-title-panel " style="width: 200px;">{{::'title.dateAndTimeCreate'
+                                        | translate}}:</label>
+                                    <label class="font-normal info-text30">{{declarationData.creationDate}}</label>
                                 </div>
-                                <div  class="col-md-12" style="padding: 0px">
-                                    <label class="label-title-panel" style="width: 200px;">{{::'title.codeNO' | translate}}:</label>
+                                <div class="col-md-12" style="padding: 0px">
+                                    <label class="label-title-panel" style="width: 200px;">{{::'title.codeNO' |
+                                        translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.taxOrganCode}}</label>
                                 </div>
                             </div>
@@ -123,50 +129,50 @@
                         </div>
                     </div>
                 </div>
-                <!--Панель кнопок -->
-                <div class="button_panel" style="padding: 10px 12px 0;">
-                    <div class="btn-toolbar" role="toolbar">
-                        <!--Принять -->
-                        <span>
+            </div>
+            <!--Панель кнопок -->
+            <div class="button_panel" style="padding: 10px 12px 0;">
+                <div class="btn-toolbar" role="toolbar">
+                    <!--Принять -->
+                    <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-click="accept()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
                             <span data-translate-once="button.accept"></span>
                         </button>
                     </span>
-                        <!--Проверить -->
-                        <span>
+                    <!--Проверить -->
+                    <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-click="check()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
                             <span data-translate-once="button.check"></span>
                         </button>
                     </span>
-                        <!--Вернуть в Создана -->
-                        <span>
+                    <!--Вернуть в Создана -->
+                    <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-click="returnToCreated()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.RETURN_TO_CREATED)">
                             <span data-translate-once="button.return"></span>
                         </button>
                     </span>
-                        <!--Удалить-->
-                        <span>
+                    <!--Удалить-->
+                    <span>
                         <button type="button" class="btn btn-default"
                                 data-ng-click="delete()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.DELETE)">
                             <span data-translate-once="button.delete"></span>
                         </button>
                     </span>
-                        <!-- Показать -->
-                        <span>
+                    <!-- Показать -->
+                    <span>
                             <button type="button" class="btn btn-default"
                                     data-ng-click="show()"
                                     data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.SHOW) || availablePdf">
                                 <span data-translate-once="button.show"></span>
                             </button>
                         </span>
-                    </div>
                 </div>
             </div>
             <div ng-show="!availablePdf">
