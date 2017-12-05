@@ -217,7 +217,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (VIEW.isGranted(currentUser, targetDomainObject)) {
                 if (targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.PREPARED) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                        return true;
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+                        if (departmentReportPeriod.isActive()) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -267,11 +270,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (targetDomainObject.getState() == State.CREATED) {
                 if (VIEW.isGranted(currentUser, targetDomainObject)) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                        return true;
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+                        if (departmentReportPeriod.isActive()) {
+                            return true;
+                        }
                     }
                 }
             }
-
             return false;
         }
     }
