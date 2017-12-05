@@ -2479,4 +2479,23 @@ END;'
 				constraintName="pk_log_table_change_processed"
 				tableName="LOG_TABLE_CHANGE_PROCESSED"/>
 	</changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2851 Изменение разделителей при сравнении ДУЛ-->
+	<changeSet id="2.1-rnurgaleev-190" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg4.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="2.1-rnurgaleev-191" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body4.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
