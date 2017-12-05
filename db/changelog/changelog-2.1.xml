@@ -2479,7 +2479,7 @@ END;'
 				constraintName="pk_log_table_change_processed"
 				tableName="LOG_TABLE_CHANGE_PROCESSED"/>
 	</changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2851 Изменение разделителей при сравнении ДУЛ-->
 	<changeSet id="2.1-rnurgaleev-190" author="rnurgaleev">
         <sqlFile dbms="oracle"
@@ -2497,5 +2497,17 @@ END;'
                  path="/scripts/person_pkg_body4.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-2780-->
+    <changeSet id="2.1-dloshkarev-11" author="dloshkarev">
+        <insert tableName="CONFIGURATION_SCHEDULER">
+            <column name="id" value="5"/>
+            <column name="task_name" value="Мониторинг появление новых событий в УН, которые требуют обработки на стороне НДФЛ"/>
+            <column name="schedule" value="0/30 * * * * ?"/>
+            <column name="active" value="1"/>
+            <column name="modification_date" valueDate="sysdate"/>
+            <column name="last_fire_date" valueDate="sysdate"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>
