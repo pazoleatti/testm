@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl.scheduler;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
+import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
 import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -71,6 +73,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private AsyncTaskThreadContainer asyncTaskThreadContainer;
     @Autowired
     private AsyncManager asyncManager;
+    @Autowired
+    private TaxEventProcessor taxEventProcessor;
 
     /**
      * Инициализация планировщика
@@ -264,6 +268,20 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
             Long seconds = Long.parseLong(secCountParam);
             lockDataService.unlockIfOlderThan(seconds);
             LOG.info("LOCK_DATA cleaning finished");
+        }
+    }
+
+    /**
+     * Задача для мониторинга появление новых событий в УН, которые требуют обработки на стороне НДФЛ
+     */
+    @AplanaScheduled(settingCode = "LOG_TABLE_CHANGE_MONITORING")
+    public void taxEventsMonitoring() {
+        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
+        if (schedulerTask.isActive()) {
+            LOG.info("LOG_TABLE_CHANGE_MONITORING started by scheduler");
+            schedulerTaskService.updateTaskStartDate(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
+            taxEventProcessor.processTaxEvents();
+            LOG.info("LOG_TABLE_CHANGE_MONITORING finished");
         }
     }
 

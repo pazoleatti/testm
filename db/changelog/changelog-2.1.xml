@@ -2446,6 +2446,71 @@ END;'
         </update>
     </changeSet>
 
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2766 Отслеживание изменений таблиц user и department в БД УН-->
+	<changeSet id="2.1-rnurgaleev-186" author="rnurgaleev">
+        <sql splitStatements="false">
+			begin
+				execute immediate 'drop trigger SEC_USER_AFTER_INS_UPD_DEL';
+				execute immediate 'drop trigger DEP_AFTER_INS_UPD_DEL';
+				execute immediate 'drop table log_un_changes';
+			end;
+        </sql>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-187" author="rnurgaleev">
+        <sql>
+			CREATE SYNONYM vw_log_table_change FOR TAX_1_5_1.vw_log_table_change;
+        </sql>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-188" author="rnurgaleev">
+        <createTable
+                remarks="Отслеживание изменений в таблицах УН"
+                tableName="LOG_TABLE_CHANGE_PROCESSED">
+            <column name="id" type="number(18)" remarks="Идентификатор">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+	<changeSet id="2.1-rnurgaleev-189" author="rnurgaleev">
+		<addPrimaryKey
+				columnNames="id"
+				constraintName="pk_log_table_change_processed"
+				tableName="LOG_TABLE_CHANGE_PROCESSED"/>
+	</changeSet>
+
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2851 Изменение разделителей при сравнении ДУЛ-->
+	<changeSet id="2.1-rnurgaleev-190" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg4.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="2.1-rnurgaleev-191" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body4.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-2780-->
+    <changeSet id="2.1-dloshkarev-11" author="dloshkarev">
+        <insert tableName="CONFIGURATION_SCHEDULER">
+            <column name="id" value="5"/>
+            <column name="task_name" value="Мониторинг появление новых событий в УН, которые требуют обработки на стороне НДФЛ"/>
+            <column name="schedule" value="0/30 * * * * ?"/>
+            <column name="active" value="1"/>
+            <column name="modification_date" valueDate="sysdate"/>
+            <column name="last_fire_date" valueDate="sysdate"/>
+        </insert>
+    </changeSet>
+
     <!-- https://jira.aplana.com/browse/SBRFNDFL-2582 2.1 Реализовать выгрузку в Excel с использованием POI-->
     <changeSet id="2.1-ytrofimov-68" author="ytrofimov">
         <update tableName="DECLARATION_TEMPLATE">
