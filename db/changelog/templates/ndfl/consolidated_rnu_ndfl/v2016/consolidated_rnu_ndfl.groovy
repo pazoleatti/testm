@@ -687,7 +687,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
         }
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
-                createSpecificReportPersonDb();
+                loadPersonDataToExcel()
                 break;
             case SubreportAliasConstants.REPORT_KPP_OKTMO:
                 createSpecificReportDb();
@@ -786,6 +786,68 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
                 .append(Character.toTitleCase(str.charAt(0)))
                 .append(str.substring(1).toLowerCase())
                 .toString();
+    }
+
+
+    void loadPersonDataToExcel() {
+        List<NdflPerson> ndflPersonList = []
+        ReportPeriod reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        NdflPerson ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
+        ndflPersonList.add(ndflPerson)
+        if (ndflPerson != null) {
+            List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findIncomes(ndflPerson.id)
+            Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
+                @Override
+                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                    return o1.id.compareTo(o2.id)
+                }
+            })
+
+            List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findDeductions(ndflPerson.id)
+            Collections.sort(ndflPersonDeductionList, new Comparator<NdflPersonDeduction>() {
+                @Override
+                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                    return o1.id.compareTo(o2.id)
+                }
+            })
+            List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findPrepayments(ndflPerson.id)
+            Collections.sort(ndflPersonPrepaymentList, new Comparator<NdflPersonPrepayment>() {
+                @Override
+                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                    return o1.id.compareTo(o2.id)
+                }
+            })
+            String departmentName = departmentService.get(declarationData.departmentId)?.name
+            String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
+            String period = getProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)?.NAME?.value
+            String year = getReportPeriodEndDate().format("yyyy") + " г."
+
+            SheetFillerContext context = new SheetFillerContext(departmentName, reportDate, period, year, ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+            Workbook xssfWorkbook = getSpecialReportTemplate()
+
+            SheetFillerFactory.getSheetFiller(0).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(1).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(2).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(3).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(4).fillSheet(xssfWorkbook, context)
+
+            OutputStream writer = null
+            try {
+                writer = scriptSpecificReportHolder.getFileOutputStream()
+                xssfWorkbook.write(writer)
+            } finally {
+                writer.close()
+            }
+
+            scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
+        } else {
+            throw new ServiceException("Не найдены данные для формирования отчета!");
+        }
     }
 
 /**

@@ -97,6 +97,13 @@ public interface NdflPersonService {
     List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<String> operationId);
 
     /**
+     * Найти сведения о доходах
+     * @param ndflPersonId
+     * @return
+     */
+    List<NdflPersonIncome> findIncomes(long ndflPersonId);
+
+    /**
      * Найти данный о вычетах
      *
      * @param ndflPersonId

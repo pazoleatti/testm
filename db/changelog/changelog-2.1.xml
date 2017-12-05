@@ -2543,4 +2543,20 @@ END;'
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2892 Реализовать выгрузку в Excel спецотчета РНУ НДФЛ по ФизЛицу через Apache POI -->
+    <changeSet id="2.1-ytrofimov-72" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-73" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl.groovy"/>
+            <where>id=101</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

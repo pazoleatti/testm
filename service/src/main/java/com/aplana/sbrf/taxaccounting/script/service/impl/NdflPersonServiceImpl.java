@@ -120,6 +120,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
+    public List<NdflPersonIncome> findIncomes(long ndflPersonId) {
+        return ndflPersonDao.findIncomes(ndflPersonId);
+    }
+
+    @Override
     public List<NdflPersonDeduction> findDeductions(long ndflPersonId) {
         return ndflPersonDao.findDeductions(ndflPersonId);
     }
