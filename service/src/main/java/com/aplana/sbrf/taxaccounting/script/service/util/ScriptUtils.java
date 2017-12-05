@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.script.service.util;
 import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -20,10 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.BuiltinFormats;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
@@ -1590,7 +1588,7 @@ public final class ScriptUtils {
      * @return
      */
     @SuppressWarnings("unused")
-    public static short createXlsDateFormat(XSSFWorkbook workbook) {
+    public static short createXlsDateFormat(Workbook workbook) {
         String excelFormatPattern = DateFormatConverter.convert(Locale.FRANCE, "dd.MM.yyyy");
         DataFormat poiFormat = workbook.createDataFormat();
         return poiFormat.getFormat(excelFormatPattern);
