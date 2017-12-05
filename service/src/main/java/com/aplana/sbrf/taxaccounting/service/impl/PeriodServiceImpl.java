@@ -634,7 +634,7 @@ public class PeriodServiceImpl implements PeriodService {
                 case NDFL:
                     switch (operation) {
                         case FIND:
-                            return departmentService.getTBDepartmentIds(user, taxType);
+                            return departmentService.getTBDepartmentIds(user, taxType, true);
                         case EDIT_DEADLINE:
                             return departmentService.getBADepartmentIds(user);
                     }

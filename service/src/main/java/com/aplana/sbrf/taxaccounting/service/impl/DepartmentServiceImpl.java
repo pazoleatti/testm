@@ -80,6 +80,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly) {
+        return departmentDao.getDepartmentsBySbrfCode(sbrfCode, activeOnly);
+    }
+
+    @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
         return departmentDao.getAllChildren(parentDepartmentId);
     }
@@ -184,12 +189,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Integer> getTBDepartmentIds(TAUser tAUser, TaxType taxType) {
+    public List<Integer> getTBDepartmentIds(TAUser tAUser, TaxType taxType, boolean addRoot) {
         List<Integer> retList = new ArrayList<Integer>();
 
         if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
-            // подразделение с типом 1
-            retList.addAll(departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode()));
+            if (addRoot) {
+                // подразделение с типом 1
+                retList.addAll(departmentDao.getDepartmentIdsByType(DepartmentType.ROOT_BANK.getCode()));
+            }
             // подразделения с типом 2
             retList.addAll(departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode()));
         } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS) || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_NS)) {

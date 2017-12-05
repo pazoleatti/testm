@@ -11,6 +11,6 @@ public final class DeclarationDataTokens {
 	/**
 	 * Имена страниц
 	 */
-	public static final String declarationData = "!declarationData";
-	public static final String declarationId = "declarationId";
+	public static final String declarationData = "!deprecated-declarationData";
+	public static final String declarationId = "deprecated-declarationId";
 }
