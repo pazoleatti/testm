@@ -1211,8 +1211,15 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 /*================панель уведомлений============*/
 #log-panel {
   z-index: 2;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid #d8d8d8;
+  position: fixed;
+  bottom: 33px;
 }
-
+#log-panel .ui-jqgrid-bdiv{
+  max-height: 166px;
+}
 #log-panel-header {
   position: relative;
   top: -18px;
@@ -1430,6 +1437,9 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
 @media (max-width: 1590px) {
   .report-wrapper{
     min-height: 521px!important;
+  }
+  #log-panel{
+    width: 96.5%!important;
   }
 }
 @media (max-width: 1450px) {
