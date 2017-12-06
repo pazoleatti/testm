@@ -221,29 +221,4 @@
                 }
             };
         }]);
-
-    /*
-
-     $('.ng-isolate-scope').on('mousedown', function(e){
-     var $dragable = $(this).parent(),
-     startWidth = $dragable.height(),
-     pY = e.pageY;
-
-     $(document).on('mouseup', function(){
-     $(document).off('mouseup').off('mousemove');
-     });
-     $(document).on('mousemove', function(me){
-     var my = (me.pageY - pY);
-
-     $dragable.css({
-     height: startWidth - my
-     });
-     $('#log-panel').cildren('.ui-jqgrid-bdiv').css({
-     height: startWidth - my - 150
-     });
-     });
-
-     });
-
-     */
 }());
