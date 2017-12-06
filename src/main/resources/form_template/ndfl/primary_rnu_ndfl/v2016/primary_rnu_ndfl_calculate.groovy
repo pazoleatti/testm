@@ -49,6 +49,7 @@ class Calculate extends AbstractScriptClass {
     ReportPeriodService reportPeriodService
     RefBookFactory refBookFactory
     RefBookService refBookService
+    PersonService personService
 
     /**
      * Получить версию используемую для поиска записей в справочнике ФЛ
@@ -123,6 +124,9 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookService")) {
             this.refBookService = (RefBookService) scriptClass.getProperty("refBookService")
+        }
+        if (scriptClass.getBinding().hasVariable("personService")) {
+            this.personService = (PersonService) scriptClass.getProperty("personService")
         }
     }
 
@@ -215,7 +219,14 @@ class Calculate extends AbstractScriptClass {
     // Вывод информации о количестве обработынных физлиц всего и уникальных
     void countTotalAndUniquePerson(Collection<NaturalPerson> persons) {
         def personIds = persons.collect { NaturalPerson person -> return person.id }
-        logger.info("Записей физических лиц обработано: ${personIds.size()}, всего уникальных записей физических лиц: ${personIds.toSet().size()}")
+        def personIdSet = personIds.toSet()
+        Set<Long> duplicateIdSet = personService.getDuplicate(personIdSet).toSet()
+        for (Long duplicateId : duplicateIdSet){
+            if (personIdSet.contains(duplicateId)){
+                personIdSet.remove(duplicateId)
+            }
+        }
+        logger.info("Записей физических лиц обработано: ${personIds.size()}, всего уникальных записей физических лиц: ${personIdSet.size()}")
     }
 
     NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper(boolean isLog) {

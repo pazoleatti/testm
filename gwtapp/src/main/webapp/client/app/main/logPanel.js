@@ -11,7 +11,7 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' style=' background: #fff;height: 93%; width: 98%; position: absolute; overflow-y: scroll;'>" +
+                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; position: absolute;left: 23px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -20,6 +20,7 @@
                         "         data-splitter-max='994' data-splitter-min='12'" +
                         "         data-splitter-start='540'" +
                         "         data-splitter-resizing='true'" +
+                        "         id='resize-button'"+
                         "    ></div>" +
                         "    <div id='log-entry-list'>" +
                         "        <div id='log-panel-header'>" +
@@ -35,7 +36,7 @@
                         "        <div data-aplana-grid" +
                         "             data-grid-fill-space='true' " +
                         "             data-grid-options='logEntryGrid.options' " +
-                        "              data-grid-fill-space-container-selector='.cbr-page-layout__view' " +
+                        "              data-grid-fill-space-container-selector='#log-panel' " +
                         "             data-grid-ctrl='logEntryGrid.ctrl'" +
                         "             data-ng-model='logEntryGrid.value'" +
                         "             style='float: left; width: 100%;'" +
@@ -146,6 +147,28 @@
                             var totalCount = data.ERROR + data.WARNING + data.INFO;
                             var fatalErrors = data.ERROR;
                             updateLogPanelHeaderMessage(totalCount, fatalErrors);
+                        });
+
+
+                        angular.element(document.querySelector('#resize-button')).on('mousedown', function (e) {
+                            var $dragable = angular.element(document.querySelector('#log-panel')),
+                                startWidth = $dragable.height(),
+                                pY = e.pageY;
+
+                            angular.element(document).on('mouseup', function () {
+                                angular.element(document).off('mouseup').off('mousemove');
+                            });
+                            angular.element(document).on('mousemove', function (me) {
+                                var my = (me.pageY - pY);
+
+                                $dragable.css({
+                                    height: startWidth - my
+                                });
+                                angular.element(document.querySelector('#log-panel')).find('.ui-jqgrid-bdiv').css({
+                                    maxHeight: startWidth - my - 150
+                                });
+                            });
+
                         });
                     }
                 };

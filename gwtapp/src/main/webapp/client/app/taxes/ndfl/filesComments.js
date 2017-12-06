@@ -47,7 +47,7 @@
                         ],
                         colModel: [
                             {name: 'uuid', index: 'uuid', width: 176, key: true, hidden: true},
-                            {name: 'fileName', index: 'fileName', width: 415},
+                            {name: 'fileName', index: 'fileName', width: 415, formatter: linkFileFormatter},
                             {
                                 name: 'fileTypeId', index: 'fileTypeId', width: 90,
                                 editable: true,
@@ -90,6 +90,18 @@
 
                     }
                 };
+
+                /**
+                 * @description форматтер для возможности скачивания файла из списка
+                 * @param cellValue значение ячейки
+                 * @param options данные таблицы
+                 * @param row строка таблицы
+                 * без cellValue и options ссылка формируется некорректно
+                 */
+                function linkFileFormatter(cellValue, options, row) {
+                    return "<a target='_self' href='controller/rest/blobData/" + row.uuid + "/conf'>" + row.fileName + " </a>";
+
+                }
 
                 /**
                  * Загрузка записей о файлах в таблицу

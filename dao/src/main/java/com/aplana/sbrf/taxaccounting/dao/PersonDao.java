@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * DAO-Интерфейс для работы со справочником физ. лиц, для специфики по дубликатам.
@@ -30,4 +31,6 @@ public interface PersonDao {
     Long getOriginal(Long recordId);
 
     List<Long> getDuplicate(Long originalRecordId);
+
+    List<Long> getDuplicateIds(Set<Long> originalRecordIds);
 }
