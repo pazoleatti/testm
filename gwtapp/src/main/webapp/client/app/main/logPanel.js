@@ -77,7 +77,9 @@
                                     '',
                                     $filter('translate')('logPanel.title.dateTime'),
                                     '',
-                                    $filter('translate')('logPanel.title.message')],
+                                    $filter('translate')('logPanel.title.message'),
+                                    '',
+                                    ''],
                                 colModel: [
                                     {
                                         name: 'ord',
@@ -104,7 +106,23 @@
                                     {
                                         name: 'message',
                                         index: 'message',
-                                        width: 1658,
+                                        width: 1428,
+                                        sortable: false,
+                                        formatter: $filter('textColorFormatter'),
+                                        classes: 'grid-cell-white-space'
+                                    },
+                                    {
+                                        name: 'type',
+                                        index: 'type',
+                                        width: 100,
+                                        sortable: false,
+                                        formatter: $filter('textColorFormatter'),
+                                        classes: 'grid-cell-white-space'
+                                    },
+                                    {
+                                        name: 'object',
+                                        index: 'object',
+                                        width: 100,
                                         sortable: false,
                                         formatter: $filter('textColorFormatter'),
                                         classes: 'grid-cell-white-space'
@@ -160,6 +178,7 @@
 
         .filter('textColorFormatter', ['$filter', function () {
             return function (value, row, logEntryObject) {
+                value = value ? value : '';
                 if (logEntryObject.level === 'ERROR') {
                     return '<div class="log-error-message">' + value + '</div>';
                 } else if (logEntryObject.level === 'WARNING') {
