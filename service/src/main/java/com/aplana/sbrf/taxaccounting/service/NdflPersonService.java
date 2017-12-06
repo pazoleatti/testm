@@ -22,6 +22,11 @@ import java.util.Map;
 public interface NdflPersonService {
 
     /**
+     * Найти данные НДФЛ ФЛ по ид
+     */
+    NdflPerson findOne(long id);
+
+    /**
      * Найти количество записей данных НДФЛ ФЛ привязанных к декларации
      *
      * @param declarationDataId идентификатор декларации

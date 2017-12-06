@@ -256,11 +256,11 @@ public interface DeclarationDataService {
      * Формирование рну ндфл для отдельного физ лица`
      *
      * @param declarationDataId идентификатор декларации
-     * @param personId          идентификатор физ лица
+     * @param id                идентификатор строки реквизита ФЛ
      * @param ndflPersonFilter  заполненные поля при поиске
      * @return источники и приемники декларации
      */
-    CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+    CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long id, NdflPersonFilter ndflPersonFilter);
 
     /**
      * Формирование рну ндфл по всем физ лицам`
