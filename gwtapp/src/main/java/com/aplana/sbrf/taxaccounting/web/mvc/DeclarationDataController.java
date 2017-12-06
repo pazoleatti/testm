@@ -22,6 +22,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -83,31 +84,17 @@ public class DeclarationDataController {
      * @throws IOException IOException
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/xlsx", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletResponse response)
+    public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        String fileName = null;
-        String xmlDataFileName = declarationService.getXmlDataFileName(declarationDataId, userInfo);
-        if (xmlDataFileName != null) {
-            fileName = URLEncoder.encode(xmlDataFileName.replace("zip", "xlsx"), UTF_8);
-        }
+        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
 
-        response.setHeader("Content-Disposition", "attachment; filename=\""
-                + fileName + "\"");
-        String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
-        if (uuid != null) {
-            BlobData blobData = blobDataService.get(uuid);
-            DataInputStream in = new DataInputStream(blobData.getInputStream());
-            OutputStream out = response.getOutputStream();
-            int count;
-            try {
-                count = IOUtils.copy(in, out);
-            } finally {
-                IOUtils.closeQuietly(in);
-                IOUtils.closeQuietly(out);
-            }
-            response.setContentLength(count);
+        BlobData blobData = blobDataService.get(blobId);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
