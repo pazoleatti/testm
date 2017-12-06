@@ -3287,10 +3287,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 params.put("inputStream", blobData.getInputStream());
                 declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.IMPORT, logger, params);
 
-                String xml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
-                // TODO workaround, xml не должна использоваться
-                if (xml != null) {
-                    reportService.deleteDec(xml);
+                // TODO workaround, создаём пустую xml (но не должна использоваться)
+                if (reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
+                    String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
+                    reportService.createDec(declarationDataId, uuid, DeclarationDataReportType.XML_DEC);
                 }
                 declarationDataFileDao.deleteByDeclarationDataIdAndType(declarationDataId, AttachFileType.TYPE_1);
 
