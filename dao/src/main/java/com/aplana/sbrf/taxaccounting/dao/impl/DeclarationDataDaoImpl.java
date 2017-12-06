@@ -1046,11 +1046,13 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         Integer.class);
                 break;
             case DeclarationType.NDFL_PRIMARY:
-                countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
-                                " AND department_report_period_id = ? AND manually_created = ?",
-                        new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), 1},
-                        new int[]{Types.INTEGER, Types.INTEGER, Types.INTEGER},
-                        Integer.class);
+                if (declarationData.getManuallyCreated()) {
+                    countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +
+                                    " AND department_report_period_id = ? AND manually_created = ? AND asnu_id = ?",
+                            new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(), 1, declarationData.getAsnuId()},
+                            new int[]{Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.NUMERIC},
+                            Integer.class);
+                }
                 break;
             default:
                 countOfExisted = jt.queryForObject("SELECT COUNT(id) FROM declaration_data WHERE declaration_template_id = ?" +

@@ -324,7 +324,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 newDeclaration.setNote(note);
                 newDeclaration.setManuallyCreated(manuallyCreated);
 
-                if (declarationDataDao.existDeclarationData(newDeclaration)) {
+                if (manuallyCreated && declarationDataDao.existDeclarationData(newDeclaration)) {
                     if (declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.CONSOLIDATED.getId()
                             || declarationTemplate.getDeclarationFormKind().getId() == DeclarationFormKind.PRIMARY.getId()) {
                         String strCorrPeriod = "";
@@ -332,10 +332,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
                             strCorrPeriod = ", с датой сдачи корректировки " + formatter.format(departmentReportPeriod.getCorrectionDate());
                         }
+                        String asnu = refBookAsnuService.fetchByIds(Arrays.asList(newDeclaration.getAsnuId())).get(0).getName();
                         String message = String.format("Налоговая форма с заданными параметрами: Период: \"%s\", Подразделение: \"%s\", " +
-                                        " Вид налоговой формы: \"%s\" уже существует",
+                                        " Вид налоговой формы: \"%s\", АСНУ: \"%s\" уже существует",
                                 departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + strCorrPeriod,
-                                department.getName(), declarationTemplate.getDeclarationFormKind().getTitle());
+                                department.getName(), declarationTemplate.getDeclarationFormKind().getTitle(), asnu);
                         logger.error(message);
                         throw new ServiceException(message);
                     }
