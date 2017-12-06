@@ -223,6 +223,19 @@ public class DeclarationDataController {
     }
 
     /**
+     * Формирует шаблон ТФ (Excel) для формы
+     *
+     * @param declarationDataId Идентификатор налоговой формы
+     * @return Результат запуска задачи
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/excelTemplate")
+    public CreateDeclarationExcelTemplateResult createExcelTemplate(@PathVariable int declarationDataId,
+                                                                    @RequestParam boolean force) throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo, force);
+    }
+
+    /**
      * Импорт данных из excel в форму
      *
      * @param declarationDataId Идентификатор налоговой формы

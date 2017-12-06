@@ -208,12 +208,6 @@
                 $scope.canCreateExcelTemplate = function () {
                     return $scope.declarationData && $scope.declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.name;
                 };
-                /**
-                 * Формирует запрос на создание шаблона Excel-файла для загрузки
-                 */
-                $scope.createTemplate = function () {
-                    $showToDoDialog();
-                };
 
                 /**
                  * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
@@ -405,7 +399,35 @@
                 };
 
                 /**
-                 * @description Запрос на подтверждение выполнения опреации
+                 * Формирует запрос на создание шаблона Excel-файла для загрузки
+                 */
+                $scope.createTemplate = function (force) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate",
+                        params: {
+                            force: !!force
+                        }
+                    }).then(function (response) {
+                        if (response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        } else {
+                            if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                                $dialogs.confirmDialog({
+                                    content: response.data.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $scope.createTemplate(true);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Запрос на подтверждение выполнения опрерации
                  */
                 $scope.confirmImport = function () {
                     $dialogs.confirmDialog({
@@ -439,7 +461,7 @@
                                         okBtnCaption: $filter('translate')('common.button.yes'),
                                         cancelBtnCaption: $filter('translate')('common.button.no'),
                                         okBtnClick: function () {
-                                            $scope.doImport(true, create);
+                                            $scope.doImport(file, true);
                                         }
                                     });
                                 }

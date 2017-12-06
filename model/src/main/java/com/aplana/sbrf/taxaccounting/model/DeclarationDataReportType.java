@@ -16,6 +16,7 @@ public class DeclarationDataReportType implements Serializable {
     public static final DeclarationDataReportType PDF_DEC = new DeclarationDataReportType(AsyncTaskType.PDF_DEC, null);
     public static final DeclarationDataReportType ACCEPT_DEC = new DeclarationDataReportType(AsyncTaskType.ACCEPT_DEC, null);
     public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(AsyncTaskType.CHECK_DEC, null);
+    public static final DeclarationDataReportType EXCEL_TEMPLATE_DEC = new DeclarationDataReportType(AsyncTaskType.EXCEL_TEMPLATE_DEC, null);
 
     //Какая то фигня, которая не связана с асинхронными задачами
     public static final DeclarationDataReportType JASPER_DEC = new DeclarationDataReportType(AsyncTaskType.JASPER_DEC, null);
@@ -115,6 +116,8 @@ public class DeclarationDataReportType implements Serializable {
             return IMPORT_TF_DEC;
         } else if (EDIT_FILE_COMMENT_DEC.getReportType().equals(reportType)) {
             return EDIT_FILE_COMMENT_DEC;
+        } else if (EXCEL_TEMPLATE_DEC.getReportType().equals(reportType)) {
+            return EXCEL_TEMPLATE_DEC;
         } else {
             throw new IllegalArgumentException("Некорректный тип отчета: " + reportType.getName());
         }

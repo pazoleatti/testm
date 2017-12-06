@@ -2504,6 +2504,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case EXCEL_DEC:
             case ACCEPT_DEC:
             case CHECK_DEC:
+            case EXCEL_TEMPLATE_DEC:
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
                     if (declarationTemplate.getType().getId() == DeclarationType.NDFL_6) {
                         // для 6НДФЛ
@@ -3210,6 +3211,64 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         result.setPrepareSpecificReportResult(prepareSpecificReport(logger, declarationData, ddReportType, subreportParamValues, userInfo));
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
+    }
+
+    @Override
+    public CreateDeclarationExcelTemplateResult createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo, boolean force) {
+        final CreateDeclarationExcelTemplateResult result = new CreateDeclarationExcelTemplateResult();
+        final TAUser user = userInfo.getUser();
+        Logger logger = new Logger();
+
+        String asyncLockKey = LockData.LockObjects.EXCEL_TEMPLATE_DECLARATION.name() + "_" + declarationDataId;
+        Pair<Boolean, String> restartStatus = asyncManager.restartTask(asyncLockKey, userInfo, force, logger);
+        if (restartStatus != null && restartStatus.getFirst()) {
+            result.setStatus(CreateAsyncTaskStatus.LOCKED);
+            result.setRestartMsg(restartStatus.getSecond());
+        } else if (restartStatus != null && !restartStatus.getFirst()) {
+            result.setStatus(CreateAsyncTaskStatus.CREATE);
+            // в логгере будет что задача запущена и вы добавлены в список получателей оповещения
+        } else {
+            result.setStatus(CreateAsyncTaskStatus.CREATE);
+            Map<String, Object> params = new HashMap<>();
+            params.put("declarationDataId", declarationDataId);
+            asyncManager.executeTask(asyncLockKey, AsyncTaskType.EXCEL_TEMPLATE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                @Override
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lockAsync(keyTask, user.getId());
+                }
+            });
+        }
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
+    }
+
+    @Override
+    public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger) throws IOException {
+        try (InputStream inputStream = this.getClass().getResourceAsStream("/template/Шаблон_ТФ_(Excel).xlsx")) {
+            if (inputStream == null) {
+                throw new ServiceException("Файл не найден");
+            }
+
+            return blobDataService.create(inputStream, getExcelTemplateFileName(declaration));
+        }
+    }
+
+    private String getExcelTemplateFileName(DeclarationData declaration) {
+        Department department = departmentService.getDepartment(declaration.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
+        String asnuName = "";
+        if (declaration.getAsnuId() != null) {
+            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+            asnuName = asnuProvider.getRecordData(declaration.getAsnuId()).get("NAME").getStringValue();
+        }
+        return String.format("ТФ_%s_%s %s%s_%s_%s.xlsx",
+                declaration.getId(),
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getReportPeriod().getName(),
+                getCorrectionDateString(reportPeriod),
+                department.getCode(),
+                asnuName);
     }
 
     @Override

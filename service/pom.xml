@@ -234,6 +234,7 @@
                     <include>**/script-support.xml</include>
                     <include>**/permissions.xml</include>
                     <include>**/acctax.xlsm</include>
+                    <include>**/Шаблон_ТФ_(Excel).xlsx</include>
                     <include>**/VSAX3.exe</include>
                 </includes>
             </resource>

@@ -2609,4 +2609,13 @@ END;'
         </insert>
     </changeSet>
 
+    <changeSet id="2.1-dnovikov-5" author="dnovikov">
+        <insert tableName="async_task_type">
+            <column name="id" value="31"/>
+            <column name="name" value="Выгрузка данных налоговой формы в виде шаблона ТФ (Excel)"/>
+            <column name="handler_bean" value="CreateExcelTemplateAsyncTask"/>
+            <column name="limit_kind" value="Количество ФЛ в НФ"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
