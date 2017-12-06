@@ -69,6 +69,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final Permission<DeclarationData> SHOW = new ShowPermission(1 << 9);
 
+    /**
+     * Право на загрузку Excel-файла в форму
+     */
+    public static final Permission<DeclarationData> IMPORT_EXCEL = new ImportExcelPermission(1 << 10);
+
     public DeclarationDataPermission(long mask) {
         super(mask);
     }
@@ -369,6 +374,25 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS);
+        }
+    }
+
+    /**
+     * Права на загрузку Excel-файла в форму
+     */
+    public static final class ImportExcelPermission extends DeclarationDataPermission {
+
+        public ImportExcelPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject) {
+            return DeclarationDataPermission.VIEW.isGranted(user, targetDomainObject) &&
+                    DeclarationDataPermission.CREATE.isGranted(user, targetDomainObject) &&
+                    declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind() == DeclarationFormKind.PRIMARY &&
+                    targetDomainObject.getState() == State.CREATED &&
+                    targetDomainObject.getManuallyCreated();
         }
     }
 }

@@ -55,6 +55,8 @@ DBUtils {
      */
     List<Long> getNextIds(Sequence sequence, int count);
 
+    List<Long> getNextIds(String sequence, int count);
+
     /**
      * Получение текущего соединения
      * @return

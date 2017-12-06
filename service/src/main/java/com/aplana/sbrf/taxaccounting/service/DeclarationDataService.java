@@ -727,4 +727,23 @@ public interface DeclarationDataService {
      * @return
      */
     PrepareSubreportResult prepareSubreport(TAUserInfo userInfo, PrepareSubreportAction action);
+
+    /**
+     * Создаёт задачу на загрузку данных из Excel-файла в форму
+     * @param declarationDataId ид формы
+     * @param fileName имя загружаемого файла
+     * @param inputStream данные файла
+     * @param userInfo информация о пользователе
+     * @param force будет ли остановлена уже запущенная задача и запущена занова
+     * @return результат создания задачи
+     */
+    ImportDeclarationExcelResult createTaskToImportExcel(long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo, boolean force);
+
+    /**
+     * Выполняет загрузку данных из Excel-файла в форму
+     * @param declarationDataId ид формы
+     * @param blobData загружаемый файл
+     * @param userInfo информация о пользователе
+     */
+    void importExcel(long declarationDataId, BlobData blobData, TAUserInfo userInfo, Logger logger);
 }

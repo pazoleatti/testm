@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +83,11 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     @Override
     public Long save(NdflPerson ndflPerson) {
         return ndflPersonDao.save(ndflPerson);
+    }
+
+    @Override
+    public void save(Collection<NdflPerson> ndflPersons) {
+        ndflPersonDao.save(ndflPersons);
     }
 
     @Override
@@ -168,11 +174,8 @@ public class NdflPersonServiceImpl implements NdflPersonService {
     }
 
     @Override
-    public void deleteAll(long declarationDataId) {
-        List<NdflPerson> ndflPersonList = findNdflPerson(declarationDataId);
-        for (NdflPerson ndflPerson : ndflPersonList) {
-            ndflPersonDao.delete(ndflPerson.getId());
-        }
+    public long deleteAll(long declarationDataId) {
+        return ndflPersonDao.deleteByDeclarationId(declarationDataId);
     }
 
     @Override

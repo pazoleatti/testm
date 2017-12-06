@@ -194,7 +194,7 @@ class Calculate extends AbstractScriptClass {
             }
         })
         // Формирование pdf-отчета формы
-        declarationService.createPdfReport(logger, declarationData, userInfo)
+        // declarationService.createPdfReport(logger, declarationData, userInfo)
     }
 
     Date getRefBookPersonVersionTo() {

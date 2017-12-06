@@ -38,6 +38,10 @@
     "DIALOGS_CONTINUE": "Продолжить",
     "DIALOGS_CREATE": "Создать",
     "DIALOGS_CANCELLATION": "Отмена",
+
+    "yes": "Да",
+    "no": "Нет",
+
     "common.hint": "Заполните обязательные поля (отмечены желтым)",
     "common.error.message.caption.stackTrace": "Ошибка",
     "common.error.message.seemore": "Смотреть подробности",
@@ -126,6 +130,7 @@
     "link.ndfl.reporting": "Формирование отчетов",
     "link.ndfl.reporting.uploadXml": "Выгрузить в XML",
     "link.ndfl.reporting.formXLSX": "Сформировать в XLSX",
+    "link.ndfl.reporting.formTemplateExcel": "Сформировать «Шаблон ТФ (Excel)»",
     "link.ndfl.reporting.formForFL": "Сформировать \"РНУ НДФЛ по физическому лицу\"",
     "link.ndfl.reporting.formForFLs": "Сформировать \"РНУ НДФЛ по всем ФЛ\"",
     "link.ndfl.reporting.formForKppOktmo": "Сформировать \"Реестр сформированной отчетности\"",
@@ -135,6 +140,8 @@
     "link.ndfl.sources": "Источники и приемники",
     "link.ndflReport.reporting.formForFL21": "Сформировать \"2-НДФЛ(1) по физическому лицу\"",
     "link.ndflReport.reporting.formForFL22": "Сформировать \"2-НДФЛ(2) по физическому лицу\"",
+
+    "ndfl.button.importExcel": "Загрузить из ТФ (Excel)",
 
     "ndflReportJournal.button.createReport": "Создать отчетность",
     "ndflReportJournal.button.downloadReport": "Выгрузить",
@@ -166,6 +173,7 @@
     "title.stateDoc": "Состояние ЭД",
     "title.file": "Файл",
     "title.creator": "Создал",
+    "title.manuallyCreated": "Создана вручную",
     "title.numberpp": "№п/п",
     "title.numberDeclaration": "Номер формы",
     "title.inp": "ИНП",
@@ -260,6 +268,7 @@
   "title.confirm": "Подтверждение",
   "title.deleteDeclaration": "Вы уверены, что хотите удалить форму?",
   "title.deleteDeclarations": "Вы уверены, что хотите удалить формы?",
+  "title.importDeclaration.confirm": "Запуск операции приведет к удалению текущих данных формы и замене их новыми. Продолжить?",
   "title.returnToCreatedDeclaration": "Вы действительно хотите вернуть в статус \"Создана\" формы?",
   "title.returnExistTask": "Запуск операции приведет к отмене некоторых ранее запущенных операций. Операции, уже выполняемые Системой, выполнятся до конца, но результат их выполнения не будет сохранен. Продолжить?",
   "title.checkImpossible": "Для текущего экземпляра налоговой формы не выполнен расчет. Проверка данных невозможна",

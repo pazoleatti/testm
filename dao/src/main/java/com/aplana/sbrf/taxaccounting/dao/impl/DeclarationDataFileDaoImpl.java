@@ -1,8 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
+import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationDataFile;
+import com.querydsl.sql.SQLQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,6 +24,9 @@ import java.util.*;
  */
 @Repository
 public class DeclarationDataFileDaoImpl extends AbstractDao implements DeclarationDataFileDao {
+
+    @Autowired
+    SQLQueryFactory sqlQueryFactory;
 
     private final static class DeclarationDataFilesMapper implements RowMapper<DeclarationDataFile> {
 		@Override
@@ -169,6 +176,14 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
                 file.getFileTypeId());
     }
 
+    @Override
+    public long deleteByDeclarationDataIdAndType(long declarationDataId, AttachFileType type) {
+        QDeclarationDataFile qDeclarationDataFile = QDeclarationDataFile.declarationDataFile;
+        return sqlQueryFactory.delete(qDeclarationDataFile)
+                .where(qDeclarationDataFile.declarationDataId.eq(declarationDataId)
+                        .and(qDeclarationDataFile.fileTypeId.eq(type.getId())))
+                .execute();
+    }
 
     @Override
     public DeclarationDataFile findFileWithMaxWeight(Long declarationDataId) {
