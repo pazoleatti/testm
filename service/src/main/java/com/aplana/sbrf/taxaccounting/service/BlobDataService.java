@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * Интерфейс сервиса для работы с {@link BlobData}
  */
-@ScriptExposed
 public interface BlobDataService {
 
     /**

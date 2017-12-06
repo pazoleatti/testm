@@ -21,6 +21,10 @@ public class CalendarDaoImpl extends AbstractDao implements CalendarDao {
 			"select cdate from (select c.*, ROWNUM AS rn from (select cdate from ref_book_calendar where ctype = 1 and cdate = trunc(:startDate) union \n" +
 					"  select cdate from ref_book_calendar where cdate >= trunc(:startDate) AND ctype = 0 ORDER BY cdate\n" +
 					") c) where rn = :offset";
+	private static final String GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL =
+			"select cdate from (select c.*, ROWNUM AS rn from (\n" +
+					"  select cdate from ref_book_calendar where cdate >= trunc(:startDate) AND ctype = 0 ORDER BY cdate\n" +
+					") c) where rn = :offset";
 	private static final String GET_PREV_WORK_DAY_SQL =
 			"select cdate from (select c.*, ROWNUM AS rn from (\n" +
 					"  select cdate from ref_book_calendar where cdate <= trunc(:startDate) AND ctype = 0 ORDER BY cdate desc\n" +
@@ -48,8 +52,10 @@ public class CalendarDaoImpl extends AbstractDao implements CalendarDao {
 		params.addValue("startDate", startDate);
 		params.addValue("offset", Math.abs(offset) + 1);
 		try {
-			if (offset >= 0) {
+			if (offset >= 2) {
 				return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_SQL, params, Date.class);
+			} else if (offset >= 0) {
+				return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL, params, Date.class);
 			} else {
 				return getNamedParameterJdbcTemplate().queryForObject(GET_PREV_WORK_DAY_SQL, params, Date.class);
 			}

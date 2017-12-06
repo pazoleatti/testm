@@ -62,7 +62,8 @@
                 RETURN_TO_CREATED: 1 << 6,
                 EDIT_ASSIGNMENT: 1 << 7,
                 DOWNLOAD_REPORTS: 1 << 8,
-                SHOW: 1 << 9
+                SHOW: 1 << 9,
+                IMPORT_EXCEL: 1 << 10
             },
             DOC_STATE: {
                 ACCEPTED: {id: 21123700, knd: 1166002, name: 'Принят'},

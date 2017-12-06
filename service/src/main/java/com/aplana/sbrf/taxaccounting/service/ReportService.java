@@ -11,7 +11,6 @@ import java.util.List;
  * @author lhaziev
  *
  */
-@ScriptExposed
 public interface ReportService {
     /**
      * Создание записи об отчете декларации
