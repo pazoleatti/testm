@@ -107,6 +107,7 @@
                 };
                 $scope.searchFilter.resetFilterParams = function () {
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
+                    $scope.selectedItems = [];
                 };
 
                 /**
