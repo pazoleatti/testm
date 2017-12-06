@@ -10,8 +10,8 @@ public class ExtendedSimpleCacheManager extends SimpleCacheManager implements Ca
     @Override
     public void clearAll() {
         for (String cacheName : getCacheNames()) {
+            LOG.info("Clear cache: " + cacheName);
             getCache(cacheName).clear();
         }
-        LOG.info("Cache was cleared");
     }
 }
