@@ -2,14 +2,13 @@ package com.aplana.sbrf.taxaccounting.service.impl.scheduler;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTaskThreadContainer;
-import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.annotation.AnnotationUtil;
 import com.aplana.sbrf.taxaccounting.model.annotation.AplanaScheduled;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
@@ -36,7 +35,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -75,6 +73,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     private AsyncManager asyncManager;
     @Autowired
     private TaxEventProcessor taxEventProcessor;
+    @Autowired
+    private ApplicationInfo applicationInfo;
 
     /**
      * Инициализация планировщика
@@ -109,6 +109,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
 
     /**
      * При старте приложения очищает назначение текущему узлу всех асинхронных задач. Чтобы задачи не оставались висеть, в случае если сервер некорректно завершил работу
+     *
      * @throws Exception
      */
     @Override
@@ -119,6 +120,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
 
     /**
      * При завершении работы приложения останавливает выполнение всех задач планировщика
+     *
      * @throws Exception
      */
     @Override
@@ -276,12 +278,14 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "LOG_TABLE_CHANGE_MONITORING")
     public void taxEventsMonitoring() {
-        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
-        if (schedulerTask.isActive()) {
-            LOG.info("LOG_TABLE_CHANGE_MONITORING started by scheduler");
-            schedulerTaskService.updateTaskStartDate(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
-            taxEventProcessor.processTaxEvents();
-            LOG.info("LOG_TABLE_CHANGE_MONITORING finished");
+        if (applicationInfo.isProductionMode()) {
+            SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
+            if (schedulerTask.isActive()) {
+                LOG.info("LOG_TABLE_CHANGE_MONITORING started by scheduler");
+                schedulerTaskService.updateTaskStartDate(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
+                taxEventProcessor.processTaxEvents();
+                LOG.info("LOG_TABLE_CHANGE_MONITORING finished");
+            }
         }
     }
 

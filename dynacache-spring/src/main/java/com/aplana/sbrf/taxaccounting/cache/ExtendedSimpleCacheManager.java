@@ -13,6 +13,5 @@ public class ExtendedSimpleCacheManager extends SimpleCacheManager implements Ca
             LOG.info("Clear cache: " + cacheName);
             getCache(cacheName).clear();
         }
-        LOG.info("Cache was cleared");
     }
 }
