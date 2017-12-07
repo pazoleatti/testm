@@ -3343,7 +3343,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("fileName", blobData.getName());
                 params.put("inputStream", blobData.getInputStream());
-                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.IMPORT, logger, params)) {
+                FormDataEvent formDataEvent = FormDataEvent.IMPORT;
+                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, formDataEvent, logger, params)) {
                     throw new ServiceException();
                 }
 
@@ -3365,6 +3366,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceException();
                 }
+
+                String note = "Загрузка данных из файла \"" + blobData.getName() + "\" в налоговую форму";
+                logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
+                auditService.add(formDataEvent, userInfo, declarationData, note, null);
             }
         } finally {
             unlock(declarationDataId, userInfo);
