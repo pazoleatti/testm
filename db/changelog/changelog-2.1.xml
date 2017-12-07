@@ -2642,4 +2642,12 @@ END;'
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2858 -->
+    <changeSet id="2.1-dloshkarev-13" author="dloshkarev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

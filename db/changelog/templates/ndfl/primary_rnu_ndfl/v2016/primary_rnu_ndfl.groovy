@@ -1068,9 +1068,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(C_INCOME_ACCRUED_DATE, incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
         // Доход.Дата.Выплата
         boolean incomePayoutDateOk = dateRelateToCurrentPeriod(C_INCOME_PAYOUT_DATE, incomePayoutDate, kpp, oktmo, inp, fio, ndflPersonIncome)
-        // НДФЛ.Расчет.Дата
-        boolean taxDateOk = dateRelateToCurrentPeriod(C_TAX_DATE, taxDate, kpp, oktmo, inp, fio, ndflPersonIncome)
-        if (incomeAccruedDateOk && incomePayoutDateOk && taxDateOk) {
+        if (incomeAccruedDateOk || incomePayoutDateOk) {
             return false
         }
         return true
