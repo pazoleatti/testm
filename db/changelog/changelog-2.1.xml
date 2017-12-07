@@ -2618,4 +2618,12 @@ END;'
         </insert>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-2910-->
+    <changeSet id="2.1-dloshkarev-12" author="dloshkarev">
+        <update tableName="DECL_TEMPLATE_CHECKS">
+            <column name="CHECK_CODE" value="003-0001-00006"/>
+            <where>CHECK_CODE='001-0001-00006'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
