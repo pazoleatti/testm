@@ -698,6 +698,10 @@ label.required:after {
     margin-right: 25px!important;
   }
 }
+.w508 {
+  width: 508px;
+  margin: 0 21px 0 28px;
+}
 
 hr {
   border: none; /* Убираем границу */
@@ -1045,10 +1049,18 @@ button.btn.btn-default.ng-binding {
       margin: 0 -20px 0 30px;
     }
   }
+  .control-label{
+    widtH: 100%;
+  }
   div [ui-view] {
     height: 100%;
     .controls {
       margin-top: 21px;
+    }
+  }
+  .modal-body {
+    .control-label {
+      text-align: left;
     }
   }
 }
@@ -1197,14 +1209,6 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 .uib-datepicker-popup {
   .btn {
     padding: 6px 9px;
-  }
-}
-
-.form-horizontal {
-  .modal-body {
-    .control-label {
-      text-align: left;
-    }
   }
 }
 
@@ -1431,7 +1435,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   }
 }
 .date-from-label{
-  padding: 0!important;
+  width: 100%!important;
   line-height: 15px;
 }
 @media (max-width: 1590px) {
