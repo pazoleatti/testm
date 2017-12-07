@@ -149,7 +149,6 @@
                             updateLogPanelHeaderMessage(totalCount, fatalErrors);
                         });
 
-
                         angular.element(document.querySelector('#resize-button')).on('mousedown', function (e) {
                             var $dragable = angular.element(document.querySelector('#log-panel')),
                                 startWidth = $dragable.height(),
@@ -165,7 +164,8 @@
                                     height: startWidth - my
                                 });
                                 angular.element(document.querySelector('#log-panel')).find('.ui-jqgrid-bdiv').css({
-                                    maxHeight: startWidth - my - 150
+                                    height: startWidth - my - 140,
+                                    maxHeight: 694
                                 });
                             });
 
