@@ -51,7 +51,7 @@
                             departmentId: $scope.declarationData.department.id,
                             periodId: $scope.declarationData.period.id,
                             manuallyCreated: true,
-                            asnuId: $scope.declarationData.asnu != null? $scope.declarationData.asnu.id : null
+                            asnuId: $scope.declarationData.asnu.id
                         }
                     }).then(function (response) {
                         $modalInstance.close(response);
