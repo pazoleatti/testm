@@ -3110,8 +3110,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (ddReportType.isSubreport()) {
             DeclarationData declaration = get(action.getDeclarationDataId(), userInfo);
             ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
-        } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && isVisiblePDF(get(action.getDeclarationDataId(), userInfo), userInfo)) {
-            throw new ServiceException("Данное действие недоступно");
         }
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
