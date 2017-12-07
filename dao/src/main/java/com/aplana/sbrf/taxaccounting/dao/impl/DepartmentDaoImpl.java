@@ -199,6 +199,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
+    public List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly) {
+        return getJdbcTemplate().query(
+                "SELECT * FROM department dp WHERE lower(dp.sbrf_code) = lower(?) and (? = 0 or dp.is_active = ?)",
+                new Object[]{sbrfCode, activeOnly ? 1 : 0, activeOnly ? 1 : 0},
+                new DepartmentJdbcMapper()
+        );
+    }
+
+    @Override
     public Department getDepartmentByName(String name) {
         return getJdbcTemplate().queryForObject(
                 "SELECT * FROM department dp WHERE dp.name = ?",

@@ -173,7 +173,6 @@ angular.module('aplana.modal', ['aplana.utils'])
                         modalDomElement.css("top", "52%"); // устанавливаем начало координат в центр
                         // задаем смещение относительно центра
                         modalDomElement.css("margin-top", function () {
-                            console.log(visibleHeight);
                             return -visibleHeight / 2 + verticalModalOffest   ;
                         });
                     }

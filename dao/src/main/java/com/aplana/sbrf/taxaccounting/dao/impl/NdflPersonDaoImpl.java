@@ -65,6 +65,8 @@ import static com.querydsl.core.types.Projections.bean;
 public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     @Autowired
     SQLQueryFactory sqlQueryFactory;
+    @Autowired
+    DBUtilsImpl dbUtils;
 
     private final QBean<NdflPerson> ndflPersonBean = bean(NdflPerson.class, ndflPerson.all());
 
@@ -942,12 +944,126 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     }
 
+    class BeanPropertySqlParameterSourceExt extends BeanPropertySqlParameterSource {
+        public BeanPropertySqlParameterSourceExt(Object object) {
+            super(object);
+        }
+
+        @Override
+        public Object getValue(String paramName) throws IllegalArgumentException {
+            Object value = super.getValue(paramName);
+            if (value instanceof LocalDateTime) {
+                value = ((LocalDateTime) value).toDate();
+            }
+            return value;
+        }
+    }
+
+    @Override
+    public void save(final Collection<NdflPerson> ndflPersons) {
+        saveNewObjects(ndflPersons, NdflPerson.TABLE_NAME, NdflPerson.SEQ, NdflPerson.COLUMNS, NdflPerson.FIELDS);
+
+        saveIncomes(ndflPersons);
+        saveDeductions(ndflPersons);
+        savePrepayments(ndflPersons);
+    }
+
+    private void saveIncomes(Collection<NdflPerson> ndflPersons) {
+        List<NdflPersonIncome> allIncomes = new ArrayList<>();
+        for (NdflPerson ndflPerson : ndflPersons) {
+            List<NdflPersonIncome> incomes = ndflPerson.getIncomes();
+            if (incomes == null || incomes.isEmpty()) {
+                throw new DaoException("Пропущены обязательные данные о доходах!");
+            }
+            for (NdflPersonOperation detail : incomes) {
+                detail.setNdflPersonId(ndflPerson.getId());
+            }
+            allIncomes.addAll(incomes);
+        }
+        if (!allIncomes.isEmpty()) {
+            saveNewObjects(allIncomes, NdflPersonIncome.TABLE_NAME, NdflPersonIncome.SEQ, NdflPersonIncome.COLUMNS, NdflPersonIncome.FIELDS);
+        }
+    }
+
+    private void saveDeductions(Collection<NdflPerson> ndflPersons) {
+        List<NdflPersonDeduction> allDeductions = new ArrayList<>();
+        for (NdflPerson ndflPerson : ndflPersons) {
+            for (NdflPersonOperation detail : ndflPerson.getDeductions()) {
+                detail.setNdflPersonId(ndflPerson.getId());
+            }
+            allDeductions.addAll(ndflPerson.getDeductions());
+        }
+        if (!allDeductions.isEmpty()) {
+            saveNewObjects(allDeductions, NdflPersonDeduction.TABLE_NAME, NdflPersonDeduction.SEQ, NdflPersonDeduction.COLUMNS, NdflPersonDeduction.FIELDS);
+        }
+    }
+
+    private void savePrepayments(Collection<NdflPerson> ndflPersons) {
+        List<NdflPersonPrepayment> allPrepayments = new ArrayList<>();
+        for (NdflPerson ndflPerson : ndflPersons) {
+            for (NdflPersonOperation detail : ndflPerson.getPrepayments()) {
+                detail.setNdflPersonId(ndflPerson.getId());
+            }
+            allPrepayments.addAll(ndflPerson.getPrepayments());
+        }
+        if (!allPrepayments.isEmpty()) {
+            saveNewObjects(allPrepayments, NdflPersonPrepayment.TABLE_NAME, NdflPersonPrepayment.SEQ, NdflPersonPrepayment.COLUMNS, NdflPersonPrepayment.FIELDS);
+        }
+    }
+
+    /**
+     * Метод сохраняет новый объект в БД и возвращает этот же объект с присвоенным id
+     *
+     * @param identityObjects объекты обладающий суррогатным ключом
+     * @param table          наименование таблицы используемой для хранения данных объекта
+     * @param seq            наименование последовательностт используемой для генерации ключей
+     * @param columns        массив содержащий наименование столбцов таблицы для вставки в insert
+     * @param fields         массив содержащий наименования параметров соответствующих столбцам
+     * @param <E>            тип объекта
+     */
+    private <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
+        List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
+        String insert = createInsert(table, columns, fields);
+        BeanPropertySqlParameterSourceExt[] batchArgs = new BeanPropertySqlParameterSourceExt[identityObjects.size()];
+        int i = 0;
+        for (E identityObject : identityObjects) {
+            identityObject.setId(ids.get(i));
+            batchArgs[i] = new BeanPropertySqlParameterSourceExt(identityObject);
+            i++;
+        }
+        getNamedParameterJdbcTemplate().batchUpdate(insert, batchArgs);
+    }
+
+    private static String createInsert(String table, String[] columns, String[] fields) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("insert into ").append(table);
+        sb.append(toSqlString(columns));
+        sb.append(" VALUES ");
+        sb.append(toSqlParameters(fields));
+        return sb.toString();
+    }
+
+    public static String toSqlParameters(String[] fields) {
+        List<String> result = new ArrayList<String>();
+        for (int i = 0; i < fields.length; i++) {
+            result.add(":" + fields[i]);
+        }
+        return toSqlString(result.toArray());
+    }
+
     @Override
     public void delete(Long id) {
         int count = getJdbcTemplate().update("delete from ndfl_person where id = ?", id);
         if (count == 0) {
             throw new DaoException("Не удалось удалить сущность класса NdflPerson с id = %d, так как она не существует", id);
         }
+    }
+
+    @Override
+    public long deleteByDeclarationId(Long declarationDataId) {
+        return sqlQueryFactory.delete(ndflPerson)
+                .where(ndflPerson.declarationDataId.eq(declarationDataId))
+                .execute();
     }
 
     @Override

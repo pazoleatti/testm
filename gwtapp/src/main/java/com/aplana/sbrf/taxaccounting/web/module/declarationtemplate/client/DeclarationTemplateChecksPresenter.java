@@ -100,6 +100,8 @@ public class DeclarationTemplateChecksPresenter
         for (DeclarationTemplateCheck check : dataRows) {
             if (fatalChecks.contains(check)) {
                 check.setFatal(true);
+            } else {
+                check.setFatal(false);
             }
         }
         return dataRows;

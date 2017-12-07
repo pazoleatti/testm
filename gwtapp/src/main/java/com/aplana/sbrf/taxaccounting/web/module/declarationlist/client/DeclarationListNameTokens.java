@@ -8,6 +8,6 @@ public final class DeclarationListNameTokens {
 	private DeclarationListNameTokens() {
 	}
 
-	public static final String DECLARATION_LIST = "!declarationList";
+	public static final String DECLARATION_LIST = "!deprecated-declarationList";
 
 }

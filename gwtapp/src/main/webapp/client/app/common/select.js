@@ -186,10 +186,20 @@
          */
         .controller('SelectAsnuCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource',
             function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource) {
+
+            $scope.initMultipleSelectAsnu = function () {
                 $scope.asnuSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
                 RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
                     $scope.asnuSelect.options.data.results = data;
                 });
+            };
+
+                $scope.initSingleSelectAsnu = function () {
+                    $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptions(true);
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
+                        $scope.asnuSelect.options.data.results = data;
+                    });
+                };
             }])
 
         /**
@@ -373,8 +383,8 @@
                  * Инициализировать список с загрузкой подразделений с открытым периодом через ajax
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
                  */
-                $scope.initDepartmentSelectWithOpenPeriod = function (periodObject) {
-                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=departmentsWithOpenPeriod", {}, {
+                $scope.initActiveDepartmentSelectWithOpenPeriod = function (periodObject) {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=activeDepartmentsWithOpenPeriod", {}, {
                         property: "fullPath",
                         direction: "asc"
                     }, "fullPathFormatter");
@@ -385,15 +395,15 @@
                     });
                 };
                 /**
-                 * Инициализировать список с загрузкой подразделений с открытым периодом для создания отчётности через ajax
+                 * Инициализировать список с загрузкой действующих доступных ТБ для создания отчётности через ajax
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
                  * @param userTBDepartment Объект из scope, по которому проставляется ТБ пользователя
                  */
-                $scope.initDepartmentSelectWithOpenPeriodForReport = function (periodObject, userTBDepartment) {
+                $scope.initActiveAvailableTBSelect = function (periodObject, userTBDepartment) {
                     $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, false, "fullPathFormatter");
                     RefBookValuesResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
-                        projection: "departmentsWithOpenPeriodForReport"
+                        projection: "activeAvailableTB"
                     }, function (data) {
                         $scope.departmentsSelect.options.data.results = data;
                         angular.forEach(data, function (department) {

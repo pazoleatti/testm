@@ -29,6 +29,11 @@
             <artifactId>fonts</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>dynacache-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Logging -->
         <dependency>
@@ -229,6 +234,7 @@
                     <include>**/script-support.xml</include>
                     <include>**/permissions.xml</include>
                     <include>**/acctax.xlsm</include>
+                    <include>**/excel_template_dec.xlsx</include>
                     <include>**/VSAX3.exe</include>
                 </includes>
             </resource>

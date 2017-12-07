@@ -16,4 +16,12 @@ public interface RefBookAsnuService {
      * @return Список доступных значений справочника
      */
     List<RefBookAsnu> fetchAvailableAsnu(TAUserInfo userInfo);
+
+    /**
+     * Получение значений справочника по идентификаторам
+     *
+     * @param ids Идентификаторы
+     * @return Список значений справочника
+     */
+    List<RefBookAsnu> fetchByIds(List<Long> ids);
 }

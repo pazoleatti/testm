@@ -75,9 +75,7 @@ public class GetMainMenuActionHandler extends
                         taxMenu.getSubMenu().add(menu);
 
                         // формы
-                        menu.getSubMenu().add(new MenuItem("Формы", NUMBER_SIGN
-                                + DeclarationListNameTokens.DECLARATION_LIST + ";"
-                                + TYPE + "=" + menu.getMeta()));
+                        menu.getSubMenu().add(new MenuItem("Формы", "index.html#/taxes/ndflJournal"));
 
                         // ведение периодов
                         menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
@@ -95,10 +93,7 @@ public class GetMainMenuActionHandler extends
                         if (currentUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                                 TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
                             if (taxType.equals(TaxType.NDFL)) {
-                                menu.getSubMenu().add(new MenuItem("Отчетность", NUMBER_SIGN
-                                        + DeclarationListNameTokens.DECLARATION_LIST + ";"
-                                        + TYPE + "=" + menu.getMeta() + ";"
-                                        + DeclarationListPresenter.REPORTS + "=" + true));
+                                menu.getSubMenu().add(new MenuItem("Отчетность", "index.html#/taxes/ndflReportJournal"));
                             }
                         }
                     }
@@ -111,7 +106,7 @@ public class GetMainMenuActionHandler extends
 
             if (currentUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER, TARole.N_ROLE_CONTROL_NS,
                     TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-                taxMenu.getSubMenu().add(new MenuItem("Общие параметры", NUMBER_SIGN + CommonParameterPresenter.TOKEN));
+                taxMenu.getSubMenu().add(new MenuItem("Общие параметры", "index.html#/taxes/commonParams/editCommonParams"));
             }
             menuItems.add(taxMenu);
         }
@@ -144,8 +139,7 @@ public class GetMainMenuActionHandler extends
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
                         + ConfigurationPresenter.TOKEN));
-                adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
-                        + SchedulerTokens.taskList));
+                adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", "index.html#/administration/schedulerTaskList"));
             }
 
             if (currentUser.hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF)) {

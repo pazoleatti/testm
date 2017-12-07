@@ -31,7 +31,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 
 public class CommonParameterPresenter extends Presenter<CommonParameterPresenter.MyView, CommonParameterPresenter.MyProxy> implements CommonParameterUiHandlers {
-    public static final String TOKEN = "!commonParameter";
+    public static final String TOKEN = "!deprecated-commonParameter";
 
     private ConfigurationParamModel initData;
     private List<DataRow<Cell>> rowsData = new ArrayList<DataRow<Cell>>();

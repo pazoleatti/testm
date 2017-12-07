@@ -29,6 +29,11 @@ public class NdflPersonServiceImpl implements NdflPersonService{
     @Autowired
     private NdflPersonDao ndflPersonDao;
 
+    @Override
+    public NdflPerson findOne(long id) {
+        return ndflPersonDao.get(id);
+    }
+
     /**
      * Найти количество записей данных НДФЛ ФЛ привязанных к декларации
      *

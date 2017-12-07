@@ -177,5 +177,13 @@
                         $filter('translate')('reportPeriod.grid.status.close'));
             };
         }])
+
+        .filter('yesNoFormatter', ['$filter', function ($filter) {
+            return function (value) {
+                return value ?
+                    $filter('translate')('yes') :
+                    $filter('translate')('no');
+            };
+        }])
     ;
 }());

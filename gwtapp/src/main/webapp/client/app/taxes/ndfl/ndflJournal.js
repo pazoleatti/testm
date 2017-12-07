@@ -69,7 +69,9 @@
 
                 $scope.searchFilter.resetFilterParams = function () {
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
+                    $scope.selectedItems = [];
                 };
+
                 // Запоминаем самый поздний период для создания налоговой формы
                 // Флаг на загрузку страницы, когда страница загружается -
                 // значение последнего выбранного периода не должно сбрасываться

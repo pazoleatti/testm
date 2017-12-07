@@ -377,12 +377,13 @@ input[type="number"] {
   font-weight: bold;
 }
 
-.modal-header h3{
+.modal-header h3 {
   margin: 0;
   font-size: 16px;
   line-height: 1.25;
   font-weight: 400;
 }
+
 .modal-header .close {
   font-weight: normal;
   font-size: 35px;
@@ -417,7 +418,7 @@ input[type="number"] {
   border: solid 1px #e5e5e5;
   padding: 2px 0 0 0;
   border-radius: 0;
-  .modal-header{
+  .modal-header {
     border-radius: 0;
     padding: 11px 16px;
   }
@@ -442,9 +443,11 @@ input[type="number"] {
   z-index: 1040;
   background-color: #000000;
 }
+
 .modal-backdrop.fade {
   opacity: 0;
 }
+
 .modal-backdrop,
 .modal-backdrop.fade.in {
   opacity: 0.3;
@@ -455,27 +458,31 @@ input[type="number"] {
   width: 1220px;
   margin-left: -610px;
 }
+
 .modal1200 {
   width: 1200px;
   margin-left: -600px;
 }
+
 .modal1000 {
   width: 1000px;
   margin-left: -500px;
 }
+
 .modal800 {
   width: 800px;
   margin-left: -400px;
 }
+
 .modal600 {
   width: 600px;
   margin-left: -300px;
 }
+
 .modal400 {
   width: 400px;
   margin-left: -200px;
 }
-
 
 .button_panel {
   margin-bottom: 2px;
@@ -687,6 +694,9 @@ label.required:after {
 
 .w500 {
   width: 500px;
+  .date-to-block{
+    margin-right: 25px!important;
+  }
 }
 
 hr {
@@ -892,11 +902,11 @@ button.btn.btn-default.ng-binding {
     color: hsla(0, 0%, 100%, .85);
     border-color: @greenDark;
   }
- /* &:hover {
-    background: #59bf57;
-    color: hsla(0, 0%, 100%, .85);
-    border-color: @greenDark;
-  }*/
+  /* &:hover {
+     background: #59bf57;
+     color: hsla(0, 0%, 100%, .85);
+     border-color: @greenDark;
+   }*/
   &:active, &.active {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
@@ -1153,6 +1163,7 @@ div [ui-view] {
   box-sizing: border-box;
   padding: 12px;
   overflow: hidden;
+  min-width: 1100px;
 }
 
 /*.cbr-page-layout__view{
@@ -1198,8 +1209,16 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
 }
 
 /*================панель уведомлений============*/
-#log-panel{
+#log-panel {
   z-index: 2;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid #d8d8d8;
+  position: fixed;
+  bottom: 33px;
+}
+#log-panel .ui-jqgrid-bdiv{
+  max-height: 166px;
 }
 #log-panel-header {
   position: relative;
@@ -1349,50 +1368,57 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   border-top: 2px solid rgba(0, 0, 0, 0.3);
   padding: 10px 12px 0;
 }
+
 .modal-lg {
   width: 1245px;
 }
-.box-shadow-block{
+
+.box-shadow-block {
   height: 91%;
   margin-top: 14px;
   box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.1);
   border: solid 1px rgba(0, 0, 0, 0.1);
   background: #fff;
 }
-.ui-jqgrid .ui-jqgrid-bdiv{
+
+.ui-jqgrid .ui-jqgrid-bdiv {
   border: 1px solid #d9d9d9;
   box-shadow: inset 2px 2px 0 2px rgba(0, 0, 0, 0.05);
 }
+
 .ui-jqgrid,
-.ui-jqgrid .ui-jqgrid-pager{
-  border: none!important;
+.ui-jqgrid .ui-jqgrid-pager {
+  border: none !important;
 }
-.ui-jqgrid .ui-jqgrid-htable thead{
+
+.ui-jqgrid .ui-jqgrid-htable thead {
   background: rgba(0, 0, 0, 0.2);
 }
-.btn-default:hover{
+
+.btn-default:hover {
   background-color: #6ec151;
   color: #fff;
   border: 1px solid @white;
 }
 
-.floatWindow-element
-{
+.floatWindow-element {
   display: none;
   background: #eee;;
   border: solid 1px black;
   padding: 5px;
   border-radius: 6px
 }
-.floatWindow-href:hover+div
-{
+
+.floatWindow-href:hover + div {
   display: block;
 }
+
 /*------------------------------------------------------------------*/
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
-  .ui-jqgrid .ui-jqgrid-bdiv{
+  .ui-jqgrid .ui-jqgrid-bdiv {
     box-shadow: none;
   }
+
   .logo {
     width: 132px;
     height: 54px;
@@ -1402,5 +1428,84 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
     border-radius: 0 0 16px 0;
     background: url('../img/sberbank_logo_white2.jpg') no-repeat;
     background-size: contain;
+  }
+}
+.date-from-label{
+  padding: 0!important;
+  line-height: 15px;
+}
+@media (max-width: 1590px) {
+  .report-wrapper{
+    min-height: 521px!important;
+  }
+  #log-panel{
+    width: 96.5%!important;
+  }
+}
+@media (max-width: 1450px) {
+  .grid-filter {
+    min-width: 100% !important;
+  }
+  .info-wrapper {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    position: relative;
+    width: 99.6%;
+
+    .filter-col {
+      width: 27%;
+      div {
+        width: 100%;
+        margin-bottom: 1px;
+      }
+      .control-label {
+        float: left;
+        margin-right: -20px !important;
+        text-align: left;
+      }
+      button:not('.btn-sm') {
+        margin-top: 16px;
+      }
+    }
+    .datepicker-block {
+      margin: 0 !important;
+      width: 319px!important;
+      .date-from-label {
+        margin: 0 0 0 31px;
+      }
+      .date-to-label {
+        margin: -23px 0 0 46px !important;
+      }
+      .date-to-block {
+        margin-right: -11px !important;
+      }
+
+    }
+    .long-label {
+      .date-from-label {
+        margin: 0 0 0 31px;
+        width: 202px;
+      }
+      .date-to-label {
+        margin: -23px 0 0 80px !important;
+      }
+      .date-to-block {
+        margin-right: -49px !important;
+      }
+    }
+    .button-block {
+      width: 113px !important;
+      position: absolute;
+      right: 4px;
+      top: 10px;
+      text-align: right;
+
+      button{
+        margin: 4px 0 0 0;
+      }
+    }
+  }
+  .report-wrapper {
+    min-height: 504px !important;
   }
 }

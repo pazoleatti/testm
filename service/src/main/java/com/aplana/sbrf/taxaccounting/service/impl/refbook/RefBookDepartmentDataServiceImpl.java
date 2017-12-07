@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +75,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     }
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
+     * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом
      *
      * @param user           Пользователь
@@ -87,14 +88,13 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
-    public PagingResult<RefBookDepartment> fetchDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams) {
+    public PagingResult<RefBookDepartment> fetchActiveDepartmentsWithOpenPeriod(TAUser user, String name, Integer reportPeriodId, PagingParams pagingParams) {
         List<Integer> departmentsWithOpenPeriod = departmentService.getOpenPeriodDepartments(user, TaxType.NDFL, reportPeriodId);
-        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(departmentsWithOpenPeriod)).keySet();
-        return refBookDepartmentDataDao.fetchDepartments(departmentIds, name, pagingParams);
+        return refBookDepartmentDataDao.fetchActiveDepartments(departmentsWithOpenPeriod, name, pagingParams);
     }
 
     /**
-     * Получение доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
+     * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
      *
      * @param user           Пользователь
      * @return Список значений справочника
@@ -102,9 +102,8 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'N_ROLE_OPER')")
-    public List<RefBookDepartment> fetchDepartmentWithOpenPeriodForReport(TAUser user) {
-        List<Integer> departmentsWithOpenPeriod = departmentService.getTBDepartmentIds(user, TaxType.NDFL);
-        Set<Integer> departmentIds = departmentService.getRequiredForTreeDepartments(new HashSet<Integer>(departmentsWithOpenPeriod)).keySet();
-        return refBookDepartmentDataDao.fetchDepartments(departmentIds);
+    public List<RefBookDepartment> fetchActiveAvailableTB(TAUser user) {
+        List<Integer> tbDepartmentIds = departmentService.getTBDepartmentIds(user, TaxType.NDFL, false);
+        return refBookDepartmentDataDao.fetchDepartments(tbDepartmentIds);
     }
 }

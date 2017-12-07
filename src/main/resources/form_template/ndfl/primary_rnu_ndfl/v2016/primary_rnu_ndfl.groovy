@@ -1,6 +1,15 @@
 package form_template.ndfl.primary_rnu_ndfl.v2016
 
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+import com.aplana.sbrf.taxaccounting.model.BlobData
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -12,6 +21,7 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.GPathResult
@@ -48,6 +58,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     String UploadFileName
     InputStream ImportInputStream
     File dataFile
+    BlobDataService blobDataService
 
     private PrimaryRnuNdfl() {}
 
@@ -98,6 +109,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("ImportInputStream")) {
             this.ImportInputStream = (InputStream) scriptClass.getProperty("ImportInputStream");
+        }
+        if (scriptClass.getBinding().hasVariable("blobDataServiceDaoImpl")) {
+            this.blobDataService = (BlobDataService) scriptClass.getProperty("blobDataServiceDaoImpl");
         }
     }
 
@@ -266,7 +280,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         PrepareSpecificReportResult result = new PrepareSpecificReportResult();
         List<Column> tableColumns = createTableColumns();
-        List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+        List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows = new ArrayList<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>>();
         List<Column> rowColumns = createRowColumns()
 
         //Проверка, подготовка данных
@@ -310,7 +324,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         pagingResult.getRecords().each() { ndflPerson ->
-            DataRow<Cell> row = new DataRow<Cell>(FormDataUtils.createCells(rowColumns, null));
+            DataRow<com.aplana.sbrf.taxaccounting.model.Cell> row = new DataRow<>(FormDataUtils.createCells(rowColumns, null));
             row.getCell("id").setStringValue(ndflPerson.id.toString())
             row.lastName = ndflPerson.lastName
             row.firstName = ndflPerson.firstName
@@ -516,10 +530,10 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
         switch (scriptSpecificReportHolder?.declarationSubreport?.alias) {
             case SubreportAliasConstants.RNU_NDFL_PERSON_DB:
-                createSpecificReportPersonDb();
+                loadPersonDataToExcel()
                 break;
             case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB:
-                createSpecificReportDb();
+                loadAllDeclarationDataToExcel();
                 scriptSpecificReportHolder.setFileName("РНУ_НДФЛ_${declarationData.id}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}.xlsx")
                 break;
             default:
@@ -530,7 +544,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * Спец. отчет "РНУ НДФЛ по физическому лицу". Данные макет извлекает непосредственно из бд
      */
     def createSpecificReportPersonDb() {
-        DataRow<Cell> row = scriptSpecificReportHolder.getSelectedRecord()
+        DataRow<com.aplana.sbrf.taxaccounting.model.Cell> row = scriptSpecificReportHolder.getSelectedRecord()
         NdflPerson ndflPerson = null
         if (row != null) {
             ndflPerson = ndflPersonService.get(Long.valueOf(row.id))
@@ -550,6 +564,66 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
             JasperPrint jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params);
             exportXLSX(jasperPrint, scriptSpecificReportHolder.getFileOutputStream());
+            scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
+        } else {
+            throw new ServiceException("Не найдены данные для формирования отчета!");
+        }
+    }
+
+    void loadPersonDataToExcel() {
+        List<NdflPerson> ndflPersonList = []
+        NdflPerson ndflPerson = ndflPersonService.get((Long) scriptSpecificReportHolder.subreportParamValues.get("PERSON_ID"));
+        ndflPersonList.add(ndflPerson)
+        if (ndflPerson != null) {
+            List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findIncomes(ndflPerson.id)
+            Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
+                @Override
+                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                    return o1.id.compareTo(o2.id)
+                }
+            })
+
+            List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findDeductions(ndflPerson.id)
+            Collections.sort(ndflPersonDeductionList, new Comparator<NdflPersonDeduction>() {
+                @Override
+                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                    return o1.id.compareTo(o2.id)
+                }
+            })
+            List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findPrepayments(ndflPerson.id)
+            Collections.sort(ndflPersonPrepaymentList, new Comparator<NdflPersonPrepayment>() {
+                @Override
+                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                    return o1.id.compareTo(o2.id)
+                }
+            })
+            String departmentName = departmentService.get(declarationData.departmentId)?.name
+            String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
+            String period = getProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)?.NAME?.value
+            String year = getReportPeriodEndDate().format("yyyy") + " г."
+
+            SheetFillerContext context = new SheetFillerContext(departmentName, reportDate, period, year, ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+            Workbook xssfWorkbook = getSpecialReportTemplate()
+
+            SheetFillerFactory.getSheetFiller(0).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(1).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(2).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(3).fillSheet(xssfWorkbook, context)
+
+            SheetFillerFactory.getSheetFiller(4).fillSheet(xssfWorkbook, context)
+
+            OutputStream writer = null
+            try {
+                writer = scriptSpecificReportHolder.getFileOutputStream()
+                xssfWorkbook.write(writer)
+            } finally {
+                writer.close()
+            }
+
             scriptSpecificReportHolder.setFileName(createFileName(ndflPerson) + ".xlsx")
         } else {
             throw new ServiceException("Не найдены данные для формирования отчета!");
@@ -624,6 +698,87 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 .append(str.substring(1).toLowerCase())
                 .toString();
     }
+
+/**
+ * Выгрузка в Excel РНУ-НДФЛ
+ */
+    public void loadAllDeclarationDataToExcel() {
+
+        ScriptUtils.checkInterrupted();
+        List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+        Collections.sort(ndflPersonList, new Comparator<NdflPerson>() {
+            @Override
+            int compare(NdflPerson o1, NdflPerson o2) {
+                return o1.id.compareTo(o2.id)
+            }
+        })
+
+        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+        Collections.sort(ndflPersonIncomeList, new Comparator<NdflPersonIncome>() {
+            @Override
+            int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                return o1.id.compareTo(o2.id)
+            }
+        })
+
+        List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+        Collections.sort(ndflPersonDeductionList, new Comparator<NdflPersonDeduction>() {
+            @Override
+            int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                return o1.id.compareTo(o2.id)
+            }
+        })
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+        Collections.sort(ndflPersonPrepaymentList, new Comparator<NdflPersonPrepayment>() {
+            @Override
+            int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                return o1.id.compareTo(o2.id)
+            }
+        })
+        String departmentName = departmentService.get(declarationData.departmentId)?.name
+        String reportDate = getReportPeriodEndDate().format("dd.MM.yyyy") + " г."
+        String period = getProvider(RefBook.Id.PERIOD_CODE.getId()).getRecordData(reportPeriod.dictTaxPeriodId)?.NAME?.value
+        String year = getReportPeriodEndDate().format("yyyy") + " г."
+
+        SheetFillerContext context = new SheetFillerContext(departmentName, reportDate, period, year, ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+
+        Workbook xssfWorkbook = getSpecialReportTemplate()
+
+        SheetFillerFactory.getSheetFiller(0).fillSheet(xssfWorkbook, context)
+
+        Workbook sxssfWorkbook = new SXSSFWorkbook(xssfWorkbook, 100, true)
+
+        SheetFillerFactory.getSheetFiller(1).fillSheet(sxssfWorkbook, context)
+
+        SheetFillerFactory.getSheetFiller(2).fillSheet(sxssfWorkbook, context)
+
+        SheetFillerFactory.getSheetFiller(3).fillSheet(sxssfWorkbook, context)
+
+        SheetFillerFactory.getSheetFiller(4).fillSheet(sxssfWorkbook, context)
+
+        OutputStream writer = null
+        try {
+            writer = scriptSpecificReportHolder.getFileOutputStream()
+            sxssfWorkbook.write(writer)
+        } finally {
+            writer.close()
+        }
+    }
+
+// Находит в базе данных шаблон спецотчета
+    XSSFWorkbook getSpecialReportTemplate() {
+        DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
+        String blobDataId = null;
+        for (DeclarationTemplateFile declarationTemplateFile : declarationTemplate.declarationTemplateFiles) {
+            if (declarationTemplateFile.fileName.equals("rnu_ndfl_person_all_db.xlsx")) {
+                blobDataId = declarationTemplateFile.blobDataId
+                break
+            }
+        }
+        BlobData blobData = blobDataService.get(blobDataId)
+        return new XSSFWorkbook(blobData.getInputStream())
+    }
+
     //------------------ Import Data ----------------------
     @TypeChecked(TypeCheckingMode.SKIP)
     void importData() {
@@ -1063,7 +1218,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
 
-    def sourceReportPeriod = null
+    ReportPeriod sourceReportPeriod = null
 
     Map<Integer, DepartmentReportPeriod> departmentReportPeriodMap = [:]
 
@@ -1086,7 +1241,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return declarationTemplateMap.get(id)
     }
 
-    def getReportPeriod() {
+    ReportPeriod getReportPeriod() {
         if (sourceReportPeriod == null) {
             sourceReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         }
@@ -1212,3 +1367,538 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 }
+
+/**
+ * Класс инкапсулирующий данные
+ */
+public class SheetFillerContext {
+
+    private String departmentName;
+
+    private String reportDate;
+
+    private String period;
+
+    private String year;
+
+    private List<NdflPerson> ndflPersonList;
+
+    private List<NdflPersonIncome> ndflPersonIncomeList;
+
+    private List<NdflPersonDeduction> ndflPersonDeductionList;
+
+    private List<NdflPersonPrepayment> ndflPersonPrepaymentList;
+
+    private Map<Long, NdflPerson> idNdflPersonMap;
+
+    SheetFillerContext(String departmentName, String reportDate, String period, String year, List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList, List<NdflPersonPrepayment> ndflPersonPrepaymentList) {
+        this.departmentName = departmentName
+        this.reportDate = reportDate
+        this.period = period
+        this.year = year
+        this.ndflPersonList = ndflPersonList
+        this.ndflPersonIncomeList = ndflPersonIncomeList
+        this.ndflPersonDeductionList = ndflPersonDeductionList
+        this.ndflPersonPrepaymentList = ndflPersonPrepaymentList
+    }
+
+    String getDepartmentName() {
+        return departmentName
+    }
+
+    String getReportDate() {
+        return reportDate
+    }
+
+    String getPeriod() {
+        return period
+    }
+
+    String getYear() {
+        return year
+    }
+
+    List<NdflPerson> getNdflPersonList() {
+        return ndflPersonList
+    }
+
+    List<NdflPersonIncome> getNdflPersonIncomeList() {
+        return ndflPersonIncomeList
+    }
+
+    List<NdflPersonDeduction> getNdflPersonDeductionList() {
+        return ndflPersonDeductionList
+    }
+
+    List<NdflPersonPrepayment> getNdflPersonPrepaymentList() {
+        return ndflPersonPrepaymentList
+    }
+
+    Map<Long, NdflPerson> getIdNdflPersonMap() {
+        if (idNdflPersonMap == null) {
+            idNdflPersonMap = new HashMap<>();
+            for (NdflPerson ndflPerson : ndflPersonList) {
+                idNdflPersonMap.put(ndflPerson.getId(), ndflPerson);
+            }
+        }
+        return idNdflPersonMap;
+    }
+}
+
+/**
+ * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
+ */
+interface SheetFiller {
+
+    void fillSheet(Workbook wb, SheetFillerContext context);
+}
+
+/**
+ * Фабрика для получения экземплярая SheetFiller по индексу листа
+ */
+@TypeChecked
+class SheetFillerFactory {
+    public static SheetFiller getSheetFiller(int sheetIndex) {
+        switch (sheetIndex) {
+            case 0:
+                return new TitleSheetFiller();
+            case 1:
+                return new RequisitesSheetFiller();
+            case 2:
+                return new IncomesSheetFiller();
+            case 3:
+                return new DeductionsSheetFiller();
+            case 4:
+                return new PrepaymentSheetFiller();
+        }
+    }
+}
+
+/**
+ * Заполнитель заголовка
+ */
+@TypeChecked
+class TitleSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, final SheetFillerContext context) {
+        Sheet sheet = wb.getSheetAt(0);
+        Cell cell0 = sheet.getRow(1).createCell(2);
+        cell0.setCellValue(context.getDepartmentName());
+        Cell cell1 = sheet.createRow(2).createCell(1);
+        cell1.setCellValue(context.getReportDate());
+        Cell cell2 = sheet.getRow(4).createCell(2);
+        cell2.setCellValue(context.getPeriod() + " " + context.getYear());
+    }
+}
+
+/**
+ * Заполнитель реквизитов
+ */
+@TypeChecked
+class RequisitesSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        Sheet sheet = wb.getSheetAt(1);
+        int index = 3;
+        Styler styler = new Styler(wb)
+        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        for (NdflPerson np : context.getNdflPersonList()) {
+            ScriptUtils.checkInterrupted();
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellStyle(centeredStyle)
+            cell1.setCellValue(np.getRowNum().intValue());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellStyle(centeredStyle)
+            cell2.setCellValue(np.getInp() != null ? np.getInp() : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellStyle(centeredStyle)
+            cell3.setCellValue(np.getLastName() != null ? np.getLastName() : "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellStyle(centeredStyle)
+            cell4.setCellValue(np.getFirstName() != null ? np.getFirstName() : "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellStyle(centeredStyle)
+            cell5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellStyle(centeredStyleDate)
+            cell6.setCellValue(np.birthDay?.toDate());
+            Cell cell7 = row.createCell(7);
+            cell7.setCellStyle(centeredStyle)
+            cell7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellStyle(centeredStyle)
+            cell8.setCellValue(np.getInnNp() != null ? np.getInnNp() : "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellStyle(centeredStyle)
+            cell9.setCellValue(np.getInnForeign() != null ? np.getInnForeign() : "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellStyle(centeredStyle)
+            cell10.setCellValue(np.getIdDocType() != null ? np.getIdDocType() : "");
+            Cell cell11 = row.createCell(11);
+            cell11.setCellStyle(centeredStyle)
+            cell11.setCellValue(np.getIdDocNumber() != null ? np.getIdDocNumber() : "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellStyle(centeredStyle)
+            cell12.setCellValue(np.getStatus() != null ? np.getStatus() : "");
+            Cell cell13 = row.createCell(13);
+            cell13.setCellStyle(centeredStyle)
+            cell13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "");
+            Cell cell14 = row.createCell(14);
+            cell14.setCellStyle(centeredStyle)
+            cell14.setCellValue(np.getPostIndex() != null ? np.getPostIndex() : "");
+            Cell cell15 = row.createCell(15);
+            cell15.setCellStyle(centeredStyle)
+            cell15.setCellValue(np.getArea() != null ? np.getArea() : "");
+            Cell cell16 = row.createCell(16);
+            cell16.setCellStyle(centeredStyle)
+            cell16.setCellValue(np.getCity() != null ? np.getCity() : "");
+            Cell cell17 = row.createCell(17);
+            cell17.setCellStyle(centeredStyle)
+            cell17.setCellValue(np.getLocality() != null ? np.getLocality() : "");
+            Cell cell18 = row.createCell(18);
+            cell18.setCellStyle(centeredStyle)
+            cell18.setCellValue(np.getStreet() != null ? np.getStreet() : "");
+            Cell cell19 = row.createCell(19);
+            cell19.setCellStyle(centeredStyle)
+            cell19.setCellValue(np.getHouse() != null ? np.getHouse() : "");
+            Cell cell20 = row.createCell(20);
+            cell20.setCellStyle(centeredStyle)
+            cell20.setCellValue(np.getBuilding() != null ? np.getBuilding() : "");
+            Cell cell21 = row.createCell(21);
+            cell21.setCellStyle(centeredStyle)
+            cell21.setCellValue(np.getFlat() != null ? np.getFlat() : "");
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений о доходах
+ */
+@TypeChecked
+class IncomesSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonIncome> ndflPersonIncomeList = context.getNdflPersonIncomeList();
+        Sheet sheet = wb.getSheetAt(2);
+        int index = 3;
+        Styler styler = new Styler(wb)
+        CellStyle borderStyle = styler.getBorderStyle()
+        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        for (NdflPersonIncome npi : ndflPersonIncomeList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellStyle(centeredStyle)
+            cell1.setCellValue(npi.getRowNum().intValue());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellStyle(centeredStyle)
+            String inp = context.getIdNdflPersonMap().get(npi.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null ? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellStyle(centeredStyle)
+            cell3.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellStyle(centeredStyle)
+            cell4.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellStyle(centeredStyle)
+            cell5.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellStyle(centeredStyleDate)
+            if (npi.incomeAccruedDate != null) {
+                cell6.setCellValue(npi.incomeAccruedDate.toDate());
+            }
+            Cell cell7 = row.createCell(7);
+            cell7.setCellStyle(centeredStyleDate)
+            if (npi.incomePayoutDate != null) {
+                cell7.setCellValue(npi.incomePayoutDate.toDate());
+            }
+            Cell cell8 = row.createCell(8);
+            cell8.setCellStyle(centeredStyle)
+            cell8.setCellValue(npi.getKpp() != null ? npi.getKpp() : "");
+            Cell cell9 = row.createCell(9);
+            cell9.setCellStyle(centeredStyle)
+            cell9.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellStyle(borderStyle)
+            if (npi.incomeAccruedSumm != null) {
+                cell10.setCellValue(npi.incomeAccruedSumm.doubleValue());
+            }
+            Cell cell11 = row.createCell(11);
+            cell11.setCellStyle(borderStyle)
+            if (npi.incomePayoutSumm != null) {
+                cell11.setCellValue(npi.incomePayoutSumm.doubleValue());
+            }
+            Cell cell12 = row.createCell(12);
+            cell12.setCellStyle(borderStyle)
+            if (npi.totalDeductionsSumm != null) {
+                cell12.setCellValue(npi.totalDeductionsSumm.doubleValue());
+            }
+            Cell cell13 = row.createCell(13);
+            cell13.setCellStyle(borderStyle)
+            if (npi.taxBase != null) {
+                cell13.setCellValue(npi.taxBase.doubleValue());
+            }
+            Cell cell14 = row.createCell(14);
+            cell14.setCellStyle(borderStyle)
+            if (npi.taxRate != null) {
+                cell14.setCellValue(npi.taxRate);
+            }
+            Cell cell15 = row.createCell(15);
+            cell15.setCellStyle(centeredStyleDate)
+            if (npi.taxDate != null) {
+                cell15.setCellValue(npi.taxDate.toDate());
+            }
+
+            Cell cell16 = row.createCell(16);
+            cell16.setCellStyle(borderStyle)
+            if (npi.calculatedTax != null) {
+                cell16.setCellValue(npi.calculatedTax.doubleValue())
+            }
+            Cell cell17 = row.createCell(17);
+            cell17.setCellStyle(borderStyle)
+            if (npi.withholdingTax != null) {
+                cell17.setCellValue(npi.withholdingTax.doubleValue());
+            }
+            Cell cell18 = row.createCell(18);
+            cell18.setCellStyle(borderStyle)
+            if (npi.notHoldingTax != null) {
+                cell18.setCellValue(npi.notHoldingTax.doubleValue());
+            }
+            Cell cell19 = row.createCell(19);
+            cell19.setCellStyle(borderStyle)
+            if (npi.overholdingTax != null) {
+                cell19.setCellValue(npi.overholdingTax.doubleValue());
+            }
+            Cell cell20 = row.createCell(20);
+            cell20.setCellStyle(borderStyle)
+            if (npi.refoundTax != null) {
+                cell20.setCellValue(npi.refoundTax.doubleValue());
+            }
+            Cell cell21 = row.createCell(21);
+            cell21.setCellStyle(centeredStyleDate)
+            if (npi.taxTransferDate != null) {
+                cell21.setCellValue(npi.taxTransferDate.toDate());
+            }
+            Cell cell22 = row.createCell(22);
+            cell22.setCellStyle(centeredStyleDate)
+            if (npi.paymentDate != null) {
+                cell22.setCellValue(npi.paymentDate.toDate());
+            }
+            Cell cell23 = row.createCell(23);
+            cell23.setCellStyle(centeredStyle)
+            cell23.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "");
+            Cell cell24 = row.createCell(24);
+            cell24.setCellStyle(borderStyle)
+            if (npi.taxSumm != null) {
+                cell24.setCellValue(npi.taxSumm.intValue());
+            }
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений о вычетах
+ */
+@TypeChecked
+class DeductionsSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonDeduction> ndflPersonDeductionList = context.getNdflPersonDeductionList();
+        Sheet sheet = wb.getSheetAt(3);
+        int index = 3;
+        Styler styler = new Styler(wb)
+        CellStyle borderStyle = styler.getBorderStyle()
+        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        for (NdflPersonDeduction npd : ndflPersonDeductionList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellStyle(centeredStyle)
+            cell1.setCellValue(npd.rowNum.intValue());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellStyle(centeredStyle)
+            String inp = context.getIdNdflPersonMap().get(npd.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null ? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellStyle(centeredStyle)
+            cell3.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellStyle(centeredStyle)
+            cell4.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "");
+            Cell cell5 = row.createCell(5);
+            cell5.setCellStyle(centeredStyleDate)
+            if (npd.notifDate != null) {
+                cell5.setCellValue(npd.notifDate.toDate());
+            }
+            Cell cell6 = row.createCell(6);
+            cell6.setCellStyle(centeredStyle)
+            cell6.setCellValue(npd.getNotifNum() != null ? npd.getNotifNum() : "б/н");
+            Cell cell7 = row.createCell(7);
+            cell7.setCellStyle(centeredStyle)
+            cell7.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "");
+            Cell cell8 = row.createCell(8);
+            cell8.setCellStyle(borderStyle)
+            if (npd.notifSumm != null) {
+                cell8.setCellValue(npd.notifSumm.doubleValue());
+            }
+            Cell cell9 = row.createCell(9);
+            cell9.setCellStyle(centeredStyle)
+            cell9.setCellValue(npd.getOperationId() != null ? npd.getOperationId() : "");
+            Cell cell10 = row.createCell(10);
+            cell10.setCellStyle(centeredStyleDate)
+            if (npd.incomeAccrued != null) {
+                cell10.setCellValue(npd.incomeAccrued.toDate());
+            }
+            Cell cell11 = row.createCell(11);
+            cell11.setCellStyle(centeredStyle)
+            cell11.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "");
+            Cell cell12 = row.createCell(12);
+            cell12.setCellStyle(borderStyle)
+            if (npd.incomeSumm != null) {
+                cell12.setCellValue(npd.incomeSumm.doubleValue());
+            }
+            Cell cell13 = row.createCell(13);
+            cell13.setCellStyle(centeredStyleDate)
+            if (npd.periodPrevDate != null) {
+                cell13.setCellValue(npd.periodPrevDate.toDate());
+            }
+            Cell cell14 = row.createCell(14);
+            cell14.setCellStyle(borderStyle)
+            if (npd.periodPrevSumm != null) {
+                cell14.setCellValue(npd.periodPrevSumm.doubleValue());
+            }
+            Cell cell15 = row.createCell(15);
+            cell15.setCellStyle(centeredStyleDate)
+            if (npd.periodCurrDate != null) {
+                cell15.setCellValue(npd.periodCurrDate.toDate());
+            }
+            Cell cell16 = row.createCell(16);
+            cell16.setCellStyle(borderStyle)
+            if (npd.periodCurrSumm != null) {
+                cell16.setCellValue(npd.periodCurrSumm.doubleValue());
+            }
+            index++;
+        }
+    }
+}
+
+/**
+ * Заполнитель сведений об авансах
+ */
+@TypeChecked
+class PrepaymentSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList = context.getNdflPersonPrepaymentList();
+        Sheet sheet = wb.getSheetAt(4);
+        int index = 3;
+        Styler styler = new Styler(wb)
+        CellStyle borderStyle = styler.getBorderStyle()
+        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
+            ScriptUtils.checkInterrupted();
+
+            Row row = sheet.createRow(index);
+            Cell cell1 = row.createCell(1);
+            cell1.setCellStyle(centeredStyle)
+            cell1.setCellValue(npp.rowNum.doubleValue());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellStyle(centeredStyle)
+            String inp = context.getIdNdflPersonMap().get(npp.getNdflPersonId()).getInp();
+            cell2.setCellValue(inp != null ? inp : "");
+            Cell cell3 = row.createCell(3);
+            cell3.setCellStyle(centeredStyle)
+            cell3.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "");
+            Cell cell4 = row.createCell(4);
+            cell4.setCellStyle(borderStyle)
+            if (npp.summ != null) {
+                cell4.setCellValue(npp.summ.doubleValue());
+            }
+            Cell cell5 = row.createCell(5);
+            cell5.setCellStyle(centeredStyle)
+            cell5.setCellValue(npp.getNotifNum() != null ? npp.getNotifNum() : "");
+            Cell cell6 = row.createCell(6);
+            cell6.setCellStyle(centeredStyleDate)
+            if (npp.notifDate != null) {
+                cell6.setCellValue(npp.notifDate.toDate());
+            }
+            Cell cell7 = row.createCell(7);
+            cell7.setCellStyle(centeredStyle)
+            cell7.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "");
+            index++;
+        }
+    }
+}
+
+class Styler {
+
+    Workbook workbook
+
+    Styler(Workbook workbook) {
+        this.workbook = workbook
+    }
+
+    /**
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
+     * @return
+     */
+    CellStyle getBorderStyleCenterAligned() {
+        CellStyle style = workbook.createCellStyle()
+        style.setAlignment(CellStyle.ALIGN_CENTER)
+        thinBorderStyle(style)
+        return style
+    }
+
+    /**
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами
+     * @return
+     */
+    CellStyle getBorderStyle() {
+        CellStyle style = workbook.createCellStyle()
+        thinBorderStyle(style)
+        return style
+    }
+
+    /**
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру для дат
+     * @return
+     */
+    CellStyle getBorderStyleCenterAlignedDate() {
+        CellStyle style = getBorderStyleCenterAligned()
+        return addDateFormat(style)
+    }
+
+    /**
+     * Добавляет к стилю формат даты в ДД.ММ.ГГГГ
+     * @param style
+     * @return
+     */
+    CellStyle addDateFormat(CellStyle style) {
+        style.setDataFormat(ScriptUtils.createXlsDateFormat(workbook))
+        return style
+    }
+
+    /**
+     * Добавляет к стилю ячейки тонкие границы
+     * @param style
+     * @return
+     */
+    CellStyle thinBorderStyle(CellStyle style) {
+        style.setBorderTop(CellStyle.BORDER_THIN)
+        style.setBorderBottom(CellStyle.BORDER_THIN)
+        style.setBorderLeft(CellStyle.BORDER_THIN)
+        style.setBorderRight(CellStyle.BORDER_THIN)
+        return style
+    }
+}
+

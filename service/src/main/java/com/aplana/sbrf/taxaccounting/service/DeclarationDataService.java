@@ -15,6 +15,7 @@ import net.sf.jasperreports.engine.util.JRSwapFile;
 import org.joda.time.LocalDateTime;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -32,7 +33,7 @@ public interface DeclarationDataService {
     /**
      * Создание декларации в заданном отчетном периоде подразделения
      *
-     * @param userInfo          Информация о текущем пользователе
+     * @param userInfo Информация о текущем пользователе
      * @param action
      * @return Модель {@link CreateResult}, в которой содержатся данные о результате операции
      */
@@ -255,11 +256,11 @@ public interface DeclarationDataService {
      * Формирование рну ндфл для отдельного физ лица`
      *
      * @param declarationDataId идентификатор декларации
-     * @param personId          идентификатор физ лица
+     * @param id                идентификатор строки реквизита ФЛ
      * @param ndflPersonFilter  заполненные поля при поиске
      * @return источники и приемники декларации
      */
-    CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long personId, NdflPersonFilter ndflPersonFilter);
+    CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long id, NdflPersonFilter ndflPersonFilter);
 
     /**
      * Формирование рну ндфл по всем физ лицам`
@@ -727,4 +728,44 @@ public interface DeclarationDataService {
      * @return
      */
     PrepareSubreportResult prepareSubreport(TAUserInfo userInfo, PrepareSubreportAction action);
+
+    /**
+     * Создаёт задачу на формирование шаблона Excel-файла для формы
+     *
+     * @param declarationDataId ид формы
+     * @param userInfo          информация о пользователе
+     * @param force             будет ли остановлена уже запущенная задача и запущена занова
+     * @return результат создания задачи
+     */
+    CreateDeclarationExcelTemplateResult createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo, boolean force);
+
+    /**
+     * Выполняет формирование шаблона Excel-файла для формы
+     *
+     * @param declarationData форма
+     * @param userInfo        информация о пользователе
+     * @return uuid сформированного файла
+     */
+    String createExcelTemplate(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) throws IOException;
+
+    /**
+     * Создаёт задачу на загрузку данных из Excel-файла в форму
+     *
+     * @param declarationDataId ид формы
+     * @param fileName          имя загружаемого файла
+     * @param inputStream       данные файла
+     * @param userInfo          информация о пользователе
+     * @param force             будет ли остановлена уже запущенная задача и запущена занова
+     * @return результат создания задачи
+     */
+    ImportDeclarationExcelResult createTaskToImportExcel(long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo, boolean force);
+
+    /**
+     * Выполняет загрузку данных из Excel-файла в форму
+     *
+     * @param declarationDataId ид формы
+     * @param blobData          загружаемый файл
+     * @param userInfo          информация о пользователе
+     */
+    void importExcel(long declarationDataId, BlobData blobData, TAUserInfo userInfo, Logger logger);
 }

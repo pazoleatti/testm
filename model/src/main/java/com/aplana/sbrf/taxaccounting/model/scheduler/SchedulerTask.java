@@ -4,10 +4,11 @@ package com.aplana.sbrf.taxaccounting.model.scheduler;
  * @author lhaziev
  */
 public enum SchedulerTask {
-    CLEAR_BLOB_DATA(1), // Задача очистки файлового хранилища
-    CLEAR_LOCK_DATA(2), // Задача удаления истекших блокировок
-    CLEAR_TEMP_DIR(3), // Задача очистки каталога временных файлов
-    ASYNC_TASK_MONITORING(4); // Задача мониторинга появления новых асинхронных задач в очередях
+    CLEAR_BLOB_DATA(1),                 // Задача очистки файлового хранилища
+    CLEAR_LOCK_DATA(2),                 // Задача удаления истекших блокировок
+    CLEAR_TEMP_DIR(3),                  // Задача очистки каталога временных файлов
+    ASYNC_TASK_MONITORING(4),           // Задача мониторинга появления новых асинхронных задач в очередях
+    LOG_TABLE_CHANGE_MONITORING(5);     // Задача мониторинга появления новых событий в УН, которые требуют обработки на стороне НДФЛ
 
     private long schedulerTaskId;
 

@@ -27,12 +27,17 @@ class DBUtilsImpl extends AbstractDao implements DBUtils {
 
     @Override
     public List<Long> getNextIds(Sequence sequence, int count) {
+        return getNextIds(sequence.getName(), count);
+    }
+
+    @Override
+    public List<Long> getNextIds(String sequence, int count) {
         if (isSupportOver())
-            return getJdbcTemplate().queryForList("SELECT " + sequence.getName() + ".NEXTVAL FROM DUAL CONNECT BY LEVEL<= ?", new Object[]{count}, java.lang.Long.class);
+            return getJdbcTemplate().queryForList("SELECT " + sequence + ".NEXTVAL FROM DUAL CONNECT BY LEVEL<= ?", new Object[]{count}, java.lang.Long.class);
         else {
             ArrayList<Long> listIds = new ArrayList<Long>(count);
             for (Integer i = 0; i < count; i++)
-                listIds.add(getJdbcTemplate().queryForObject("SELECT " + sequence.getName() + ".NEXTVAL FROM DUAL", Long.class));
+                listIds.add(getJdbcTemplate().queryForObject("SELECT " + sequence + ".NEXTVAL FROM DUAL", Long.class));
             return listIds;
         }
     }

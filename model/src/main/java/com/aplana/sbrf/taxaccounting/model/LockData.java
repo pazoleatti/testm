@@ -36,7 +36,9 @@ public final class LockData implements SecuredEntity {
         DECLARATION_TEMPLATE,
         FILE,
         CONFIGURATION_PARAMS,
-        LOAD_TRANSPORT_DATA
+        LOAD_TRANSPORT_DATA,
+        EXCEL_TEMPLATE_DECLARATION,
+        IMPORT_DECLARATION_EXCEL
     }
 
     public LockData() {

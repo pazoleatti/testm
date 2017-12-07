@@ -94,7 +94,7 @@
 
                     $scope.onClick = function () {
                         var el = angular.element('#' + $scope.splitterLeftTop);
-                        el.toggle();
+                        //el.toggle();
 
                         if ($scope.splitter === 'vertical') {
                             updateCssElementVertical(el.is(':visible') ? el.outerWidth() : 0);

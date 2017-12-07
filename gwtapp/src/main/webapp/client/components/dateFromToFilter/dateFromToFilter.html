@@ -1,6 +1,6 @@
-<div class="form-group">
+<div class="form-group datepicker-block">
     <div class="{{labelGridClass}} {{paragraph}}">
-        <label class="control-label">{{ngLabel | translate}}:</label>
+        <label class="control-label date-from-label">{{ngLabel | translate}}:</label>
     </div>
     <div class="{{pickerGridClass}}">
         <div style="width: 130px; float: left;">
@@ -24,11 +24,11 @@
             </span>
             </p>
         </div>
-        <div style="float: left;margin-left: -6px;width: 39px;">
+        <div class="date-to-label" style="float: left;margin-left: -26px;width: 39px;">
             <label class="control-label">{{'title.dateToFilterLabel' | translate}}:</label>
         </div>
 
-        <div style="width: 130px; float: right; margin-right: -17px">
+        <div style="width: 130px; float: right; margin-right: -17px" class="date-to-block">
             <p class="input-group">
                 <input type="text"
                        class="form-control"

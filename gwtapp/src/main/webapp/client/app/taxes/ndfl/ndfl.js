@@ -58,10 +58,10 @@
         .controller('ndflCtrl', [
             '$scope', '$timeout', '$window', '$stateParams', 'ShowToDoDialog', '$http', 'DeclarationDataResource', '$filter', '$logPanel', '$aplanaModal', '$dialogs',
             '$rootScope', 'RefBookValuesResource', 'APP_CONSTANTS', '$state', '$interval', 'acceptDeclarationData',
-            'checkDeclarationData', 'moveToCreatedDeclarationData',
+            'checkDeclarationData', 'moveToCreatedDeclarationData', 'Upload',
             function ($scope, $timeout, $window, $stateParams, $showToDoDialog, $http, DeclarationDataResource, $filter,
                       $logPanel, $aplanaModal, $dialogs, $rootScope, RefBookValuesResource, APP_CONSTANTS, $state,
-                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData) {
+                      $interval, acceptDeclarationData, checkDeclarationData, moveToCreatedDeclarationData, Upload) {
 
                 if ($stateParams.uuid) {
                     $logPanel.open('log-panel-container', $stateParams.uuid);
@@ -201,6 +201,12 @@
                             }
                         }
                     });
+                };
+                /**
+                 * Возможность выгружать шаблон Excel-файла для загрузки
+                 */
+                $scope.canCreateExcelTemplate = function () {
+                    return $scope.declarationData && $scope.declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.name;
                 };
 
                 /**
@@ -392,6 +398,77 @@
                     });
                 };
 
+                /**
+                 * Формирует запрос на создание шаблона Excel-файла для загрузки
+                 */
+                $scope.createTemplate = function (force) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate",
+                        params: {
+                            force: !!force
+                        }
+                    }).then(function (response) {
+                        if (response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        } else {
+                            if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                                $dialogs.confirmDialog({
+                                    content: response.data.restartMsg,
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $scope.createTemplate(true);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * @description Запрос на подтверждение выполнения опрерации
+                 */
+                $scope.confirmImport = function () {
+                    $dialogs.confirmDialog({
+                        content: $filter('translate')('title.importDeclaration.confirm'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            angular.element('#upload').trigger('click');
+                        }
+                    });
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Загрузить из ТФ (Excel)"
+                 */
+                $scope.doImport = function (file, force) {
+                    if (file) {
+                        Upload.upload({
+                            url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/import",
+                            data: {uploader: file},
+                            params: {force: !!force}
+                        }).progress(function (e) {
+                        }).then(function (response) {
+                            if (response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            } else {
+                                if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
+                                    $dialogs.confirmDialog({
+                                        title: $filter('translate')('title.confirm'),
+                                        content: response.data.restartMsg,
+                                        okBtnCaption: $filter('translate')('common.button.yes'),
+                                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                                        okBtnClick: function () {
+                                            $scope.doImport(file, true);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                };
 
                 /**
                  * @description Обработка события, которое возникает при нажании на ссылку "Источники"

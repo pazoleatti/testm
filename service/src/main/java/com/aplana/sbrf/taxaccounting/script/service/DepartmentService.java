@@ -56,6 +56,11 @@ public interface DepartmentService {
     Department getDepartmentBySbrfCode(String sbrfCode, boolean activeOnly);
 
     /**
+     * Получить подразделения
+     */
+    List<Department> getDepartmentsBySbrfCode(String sbrfCode, boolean activeOnly);
+
+    /**
      * Получить подразделения по списку идентификаторов
      *
      * @param departmentIds список идентификаторов

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
 
 import java.util.List;
@@ -26,6 +27,14 @@ public interface DeclarationDataFileDao extends PermissionDao {
      * Сохраняет отдельный файл
      */
     void saveFile(DeclarationDataFile file);
+
+    /**
+     * Удаляет у формы все файлы с указанным типом
+     * @param declarationDataId ид формы
+     * @param type тип файла
+     * @return кол-во удаленных файлов
+     */
+    long deleteByDeclarationDataIdAndType(long declarationDataId, AttachFileType type);
 
     /**
      * Находит файл с максимальным "весом"

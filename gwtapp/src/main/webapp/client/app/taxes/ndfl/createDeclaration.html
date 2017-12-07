@@ -32,7 +32,7 @@
                             <div style="width: 355px;"
                                  data-ng-controller="SelectDepartmentCtrl"
                                  data-ui-select2="departmentsSelect.options"
-                                 data-ng-init="initDepartmentSelectWithOpenPeriod('declarationData.period')"
+                                 data-ng-init="initActiveDepartmentSelectWithOpenPeriod('declarationData.period')"
                                  data-ng-model="declarationData.department"
                                  data-ng-required="true">
                             </div>
@@ -56,6 +56,27 @@
                                  data-ui-select2="declarationTypeSelect.options"
                                  data-ng-init="initSelectWithDeclarationTypesForCreate(declarationKind, 'declarationData.period', 'declarationData.department')"
                                  data-ng-model="declarationData.declarationType"
+                                 data-ng-required="true">
+                            </div>
+                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                translate}}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr data-ng-if="allowSetAsnu()">
+                <td>
+                    <label class="control-label">{{::'createDeclaration.asnu' | translate}}</label>
+                </td>
+                <td>
+                    <div>
+                        <div data-aplana-field>
+                            <div style="width: 355px;"
+                                 data-ng-controller="SelectAsnuCtrl"
+                                 data-ui-select2="asnuSelect.options"
+                                 data-ng-init = "initSingleSelectAsnu()"
+                                 data-ng-model="declarationData.asnu"
                                  data-ng-required="true">
                             </div>
                             <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |

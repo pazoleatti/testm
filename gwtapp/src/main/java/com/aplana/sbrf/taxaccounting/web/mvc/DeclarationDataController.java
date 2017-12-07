@@ -20,7 +20,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -82,31 +84,17 @@ public class DeclarationDataController {
      * @throws IOException IOException
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/xlsx", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletResponse response)
+    public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        String fileName = null;
-        String xmlDataFileName = declarationService.getXmlDataFileName(declarationDataId, userInfo);
-        if (xmlDataFileName != null) {
-            fileName = URLEncoder.encode(xmlDataFileName.replace("zip", "xlsx"), UTF_8);
-        }
+        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
 
-        response.setHeader("Content-Disposition", "attachment; filename=\""
-                + fileName + "\"");
-        String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
-        if (uuid != null) {
-            BlobData blobData = blobDataService.get(uuid);
-            DataInputStream in = new DataInputStream(blobData.getInputStream());
-            OutputStream out = response.getOutputStream();
-            int count;
-            try {
-                count = IOUtils.copy(in, out);
-            } finally {
-                IOUtils.closeQuietly(in);
-                IOUtils.closeQuietly(out);
-            }
-            response.setContentLength(count);
+        BlobData blobData = blobDataService.get(blobId);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
@@ -232,6 +220,36 @@ public class DeclarationDataController {
     public void deleteDeclaration(@PathVariable int declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         declarationService.deleteIfExists(declarationDataId, userInfo);
+    }
+
+    /**
+     * Формирует шаблон ТФ (Excel) для формы
+     *
+     * @param declarationDataId Идентификатор налоговой формы
+     * @return Результат запуска задачи
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/excelTemplate")
+    public CreateDeclarationExcelTemplateResult createExcelTemplate(@PathVariable int declarationDataId,
+                                                                    @RequestParam boolean force) throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.createTaskToCreateExcelTemplate(declarationDataId, userInfo, force);
+    }
+
+    /**
+     * Импорт данных из excel в форму
+     *
+     * @param declarationDataId Идентификатор налоговой формы
+     * @return Результат запуска задачи
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/import")
+    public ImportDeclarationExcelResult importExcel(@RequestParam(value = "uploader") MultipartFile file,
+                                                    @RequestParam boolean force,
+                                                    @PathVariable int declarationDataId)
+            throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        try (InputStream inputStream = file.getInputStream()) {
+            return declarationService.createTaskToImportExcel(declarationDataId, file.getOriginalFilename(), inputStream, userInfo, force);
+        }
     }
 
     /**
@@ -459,14 +477,14 @@ public class DeclarationDataController {
      * Формирование рну ндфл для отдельного физ лица`
      *
      * @param declarationDataId идентификатор декларации
-     * @param personId          идентификатор физ лица
+     * @param id                идентификатор строки реквизита ФЛ
      * @param ndflPersonFilter  заполненные поля при поиске
      * @return источники и приемники декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
-    public CreateDeclarationReportResult createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long personId, @RequestParam NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long id, @RequestParam NdflPersonFilter ndflPersonFilter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createReportRnu(userInfo, declarationDataId, personId, ndflPersonFilter);
+        return declarationService.createReportRnu(userInfo, declarationDataId, id, ndflPersonFilter);
     }
 
     /**

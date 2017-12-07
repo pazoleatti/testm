@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,8 @@ public interface NdflPersonService {
      * @return
      */
     Long save(NdflPerson ndflPerson);
+
+    void save(Collection<NdflPerson> ndflPersons);
 
     /**
      * Получить запись с данными о доходах
@@ -97,6 +100,13 @@ public interface NdflPersonService {
     List<NdflPersonPrepayment> findPrepaymentsByOperationList(List<String> operationId);
 
     /**
+     * Найти сведения о доходах
+     * @param ndflPersonId
+     * @return
+     */
+    List<NdflPersonIncome> findIncomes(long ndflPersonId);
+
+    /**
      * Найти данный о вычетах
      *
      * @param ndflPersonId
@@ -143,9 +153,10 @@ public interface NdflPersonService {
     /**
      * Удаляет все данные о физлицах из декларации
      *
-     * @param declarationDataId
+     * @param declarationDataId ид формы
+     * @return кол-во удаленных строк
      */
-    void deleteAll(long declarationDataId);
+    long deleteAll(long declarationDataId);
 
     /**
      * Найти данные о доходах ФЛ по идентификатору интервалу. Отбор происходит по дате начиления дохода

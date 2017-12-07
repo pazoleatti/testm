@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Интерфейс для работы со справочником физ. лиц, для специфики по дубликатам.
@@ -70,6 +71,23 @@ public class PersonDaoImpl extends AbstractDao implements PersonDao {
                 return rs.getLong("id");
             }
         });
+    }
+
+    @Override
+    public List<Long> getDuplicateIds(Set<Long> originalRecordIds) {
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        return getNamedParameterJdbcTemplate().query(
+                String.format("with version as (select old_id, max(version) version from ref_book_person \n" +
+                        "where %s and old_id is not null and old_status = 0 \n" +
+                        "group by old_id) \n" +
+                        "select id \n" +
+                        "from ref_book_person rbp \n" +
+                        "join version on version.version = rbp.version and version.old_id = rbp.old_id and old_status = 0", SqlUtils.transformToSqlInStatement("id", originalRecordIds)), new RowMapper<Long>() {
+                    @Override
+                    public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getLong("id");
+                    }
+                });
     }
 
 }
