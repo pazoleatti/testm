@@ -34,7 +34,7 @@
                                 dateFrom: $scope.searchFilter.params.dateFrom,
                                 dateTo: $scope.searchFilter.params.dateTo
                             }),
-                            id: $scope.rnuNdflGrid.value[0].id
+                            ndflPersonId: $scope.rnuNdflGrid.value[0].id
                         }
 
 

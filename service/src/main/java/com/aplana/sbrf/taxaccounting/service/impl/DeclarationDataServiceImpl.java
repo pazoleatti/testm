@@ -933,7 +933,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     //Формирование рну ндфл для физ лица
     @Override
-    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId, long id, final NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId, long ndflPersonId, final NdflPersonFilter ndflPersonFilter) {
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
@@ -949,7 +949,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         Map<String, Object> filterParams = new HashMap<String, Object>();
-        NdflPerson ndflPerson = ndflPersonService.findOne(id);
+        NdflPerson ndflPerson = ndflPersonService.findOne(ndflPersonId);
 
         filterParams.put("PERSON_ID", ndflPerson.getId());
 
