@@ -104,12 +104,14 @@ public class DeclarationTemplateCheck implements Serializable {
 
         DeclarationTemplateCheck that = (DeclarationTemplateCheck) o;
 
+        if (isFatal != that.isFatal) return false;
         return id != null ? id.equals(that.id) : that.id == null;
-
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (isFatal ? 1 : 0);
+        return result;
     }
 }
