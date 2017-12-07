@@ -2642,4 +2642,61 @@ END;'
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2582 2.1 Реализовать выгрузку в Excel с использованием POI-->
+    <changeSet id="2.1-ytrofimov-77" author="ytrofimov">
+        <delete tableName="declaration_template_file">
+            <where>BLOB_DATA_ID='4b84692c-7f70-4d11-844d-e61e81655336'</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-78" author="ytrofimov">
+        <delete tableName="declaration_template_file">
+            <where>BLOB_DATA_ID='64536272-05bc-42e8-82c5-347faf22da20'</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-79" author="ytrofimov">
+        <delete tableName="blob_data">
+            <where>ID='4b84692c-7f70-4d11-844d-e61e81655336'</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-80" author="ytrofimov">
+        <delete tableName="blob_data">
+            <where>ID='64536272-05bc-42e8-82c5-347faf22da20'</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-81" author="ytrofimov">
+        <insert tableName="blob_data">
+            <column name="id" value="4b84692c-7f70-4d11-844d-e61e81655336"/>
+            <column name="name" value="rnu_ndfl_person_all_db.xlsx"/>
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+            <column name="creation_date" valueDate="2017-12-04"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-82" author="ytrofimov">
+        <insert tableName="blob_data">
+            <column name="id" value="64536272-05bc-42e8-82c5-347faf22da20"/>
+            <column name="name" value="rnu_ndfl_person_all_db.xlsx"/>
+            <column name="data" valueBlobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/rnu_ndfl_person_all_db.xlsx"/>
+            <column name="creation_date" valueDate="2017-12-05"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-83" author="ytrofimov">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="100"/>
+            <column name="BLOB_DATA_ID" value="4b84692c-7f70-4d11-844d-e61e81655336"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-84" author="ytrofimov">
+        <insert tableName="declaration_template_file">
+            <column name="DECLARATION_TEMPLATE_ID" value="101"/>
+            <column name="BLOB_DATA_ID" value="64536272-05bc-42e8-82c5-347faf22da20"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
