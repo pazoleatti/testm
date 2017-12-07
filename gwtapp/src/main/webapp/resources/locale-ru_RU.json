@@ -374,6 +374,7 @@
     "filesComment.button.remove": "Удалить",
     "filesComment.system": "Система",
     "filesComment.tooLongNoteMessage": "Количество символов для комментария превысило допустимое значение 512.",
+    "filesComment.close.saveChange": "Первоначальные данные изменились, применить изменения?",
 
     "ndfl.removedDeclarationDataBegin": "Налоговая форма с номером = ",
     "ndfl.removedDeclarationDataEnd": " не существует либо была удалена. Вы будете перенаправлены на главную страницу",
