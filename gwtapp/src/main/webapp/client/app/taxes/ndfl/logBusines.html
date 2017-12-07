@@ -1,16 +1,24 @@
-<div class="modal-body form100" style="min-height : 500px;">
-    <div data-aplana-grid
-         data-grid-fill-space="true"
-         data-grid-fill-space-container-selector=".modal-body"
-         data-grid-fill-space-container-selector-top=".container-grid-top"
-         data-grid-options="logBusinesGrid.options"
-         data-grid-ctrl="logBusinesGrid.ctrl"
-         data-ng-model="logBusinesGrid.value"
-         id="logBusinesGrid"
-         style="float: left; width: 100%; margin-bottom: -20px"></div>
-</div>
 
-<div class="modal-footer" style="margin-top: -80px; margin-bottom: 0">
+<div class="modal-body" style="height: 600px">
+
+    <div class="form-horizontal"  style="height: 510px;">
+
+        <div class="horizontal-input-table " style="margin: 0; height: 0px; "/>
+
+            <div data-aplana-grid
+                 data-grid-fill-space="true"
+                 data-grid-fill-space-container-selector=".modal-body"
+                 data-grid-fill-space-container-selector-top=".horizontal-input-table"
+                 data-grid-options="logBusinesGrid.options"
+                 data-grid-ctrl="logBusinesGrid.ctrl"
+                 data-ng-model="logBusinesGrid.value"
+                 data-init-grid="initOurGrid(ctrl)"
+                 id="logBusinesGrid">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer" style="margin: -62px 0 2px 0;position: relative; z-index: 1000;">
     <button type="button" class="btn btn-default" id="closeButton" data-ng-click="close()">
         <span data-translate-once="button.close"></span>
     </button>
