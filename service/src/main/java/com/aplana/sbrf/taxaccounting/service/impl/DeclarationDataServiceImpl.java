@@ -3238,7 +3238,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger) throws IOException {
-        try (InputStream inputStream = this.getClass().getResourceAsStream("/template/Шаблон_ТФ_(Excel).xlsx")) {
+        try (InputStream inputStream = this.getClass().getResourceAsStream("/template/excel_template_dec.xlsx")) {
             if (inputStream == null) {
                 throw new ServiceException("Файл не найден");
             }

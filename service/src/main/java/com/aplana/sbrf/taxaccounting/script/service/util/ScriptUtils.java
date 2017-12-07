@@ -2,8 +2,11 @@ package com.aplana.sbrf.taxaccounting.script.service.util;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAInterruptedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -21,21 +24,28 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.DateFormatConverter;
+import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.LocalDateTime;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
@@ -53,6 +63,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString;
+
 /**
  * Библиотека скриптовых функций
  *
@@ -2154,7 +2167,11 @@ public final class ScriptUtils {
     }
 
     static final class SheetHandler extends DefaultHandler {
-        private final DataFormatter formatter;
+        enum XssfDataType {
+            BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, NUMBER
+        }
+
+        private XssfDataType dataType;
         private SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
         private StylesTable stylesTable;    // таблица со стилями ячеек
         private List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
@@ -2209,9 +2226,9 @@ public final class ScriptUtils {
             this.colOffset = Integer.parseInt(String.valueOf(paramsMap.get("colOffset")));
 
             this.lastValue = new StringBuffer();
-            this.formatter = new DataFormatter();
         }
 
+        @Override
         public void startElement(String uri, String localName, String name, Attributes attributes) {
             // attributes.getValue("r") - позиция ячейки: A1, B1, ... AC15
             // attributes.getValue("t") - тип ячейки: "s" строка, "str" формула, "n" число
@@ -2228,15 +2245,29 @@ public final class ScriptUtils {
                 this.formatString = null;
 
                 position = attributes.getValue("r");
-                String cellType = attributes.getValue("t");
-                if (cellType != null && cellType.equals("s")) {
-                    // строковое значение
-                    nextIsString = true;
-                } else if (cellType == null || "".equals(cellType) || cellType.equals("n")) {
-                    // число или дата
-                    String cellStyleStr = attributes.getValue("s");
-                    if (cellStyleStr != null) {
-                        XSSFCellStyle style = getStyle(cellStyleStr);
+
+                dataType = XssfDataType.NUMBER;
+                formatIndex = -1;
+                formatString = null;
+
+                final String cellType = attributes.getValue("t");
+                if ("b".equals(cellType)) {
+                    dataType = XssfDataType.BOOL;
+                } else if ("e".equals(cellType)) {
+                    dataType = XssfDataType.ERROR;
+                } else if ("inlineStr".equals(cellType)) {
+                    dataType = XssfDataType.INLINESTR;
+                } else if ("s".equals(cellType)) {
+                    dataType = XssfDataType.SSTINDEX;
+                } else if ("str".equals(cellType)) {
+                    dataType = XssfDataType.FORMULA;
+                }
+
+                String cellStyleStr = attributes.getValue("s");
+                if (cellStyleStr != null) {
+                    XSSFCellStyle style = getStyle(cellStyleStr);
+
+                    if (dataType == XssfDataType.NUMBER) {
                         this.formatIndex = style.getDataFormat();
                         this.formatString = style.getDataFormatString();
                         if (this.formatString == null) {
@@ -2252,6 +2283,7 @@ public final class ScriptUtils {
             lastValue.setLength(0);
         }
 
+        @Override
         public void endElement(String uri, String localName, String name) {
             if (endRead) {
                 return;
@@ -2332,6 +2364,7 @@ public final class ScriptUtils {
             }
         }
 
+        @Override
         public void characters(char[] ch, int start, int length) {
             lastValue.append(ch, start, length);
         }
@@ -2365,18 +2398,55 @@ public final class ScriptUtils {
 
         /** Получить значение в виде строки. */
         private String getValue() {
-            // строка
-            String value = lastValue.toString();
-            if (this.formatString != null) {
-                // дата/число
-                if (DateUtil.isADateFormat(this.formatIndex, this.formatString)) {
-                    Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
-                    value = simpleDateFormat.format(date);
-                } else {
-                    value = (new BigDecimal(value)).toPlainString();
-                }
+            String value;
+
+            switch (dataType) {
+                case BOOL:
+                    char first = lastValue.charAt(0);
+                    value = (first == '0') ? "false" : "true";
+                    break;
+                case ERROR:
+                    System.out.println("Error-cell occurred: " + lastValue);
+                    value = lastValue.toString();
+                    break;
+                case FORMULA:
+                    value = lastValue.toString();
+                    break;
+                case INLINESTR:
+                    XSSFRichTextString rtsi = new XSSFRichTextString(lastValue.toString());
+                    value = rtsi.toString();
+                    break;
+                case SSTINDEX:
+                    String sstIndex = lastValue.toString();
+                    int idx = Integer.parseInt(sstIndex);
+                    XSSFRichTextString rtss = new XSSFRichTextString(sst.getEntryAt(idx));
+                    value = rtss.toString();
+                    break;
+                case NUMBER:
+                    final String numberString = lastValue.toString();
+                    if (formatString != null) {
+                        if (DateUtil.isADateFormat(formatIndex, formatString)) {
+                            Date date = DateUtil.getJavaDate(Double.parseDouble(numberString));
+                            value = simpleDateFormat.format(date);
+                        } else {
+                            value = (new BigDecimal(NumberToTextConverter.toText(Double.parseDouble(numberString)))).toPlainString();
+                        }
+                    } else {
+                        if (numberString.endsWith(".0")) {
+                            // xlsx only stores doubles, so integers get ".0" appended
+                            // to them
+                            value = numberString.substring(0, numberString.length() - 2);
+                        } else {
+                            value = (new BigDecimal(NumberToTextConverter.toText(Double.parseDouble(numberString)))).toPlainString();
+                        }
+                    }
+                    break;
+                default:
+                    System.out.println("Unsupported data type: " + dataType);
+                    value = "";
             }
-            return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
+
+            return cleanString(value);
         }
     }
 
