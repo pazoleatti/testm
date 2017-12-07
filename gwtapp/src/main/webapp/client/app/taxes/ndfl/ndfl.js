@@ -340,7 +340,7 @@
                                         $scope.check(true);
                                     }
                                 });
-                            } else if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
+                            } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }
                         }
