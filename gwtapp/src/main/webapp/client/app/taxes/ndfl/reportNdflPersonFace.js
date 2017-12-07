@@ -174,7 +174,16 @@
                             if (resultSize === 0) {
                                 var messageParts = [];
                                 for (var param in $scope.searchFilter.params) {
-                                    messageParts.push($scope.searchFilter.params[param]);
+                                    switch (param) {
+                                        case 'dateTo':
+                                            messageParts.push($scope.searchFilter.params[param].format("dd.mm.yyyy"));
+                                            break;
+                                        case 'dateFrom':
+                                            messageParts.push($scope.searchFilter.params[param].format("dd.mm.yyyy"));
+                                            break;
+                                        default:
+                                            messageParts.push($scope.searchFilter.params[param]);
+                                    }
                                 }
                                 var messageData = messageParts.join("; ");
                                 var message = $filter('translate')('reportPersonFace.error.person') + messageData + $filter('translate')('reportPersonFace.error.notFound');

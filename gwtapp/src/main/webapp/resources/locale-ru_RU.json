@@ -130,7 +130,7 @@
     "link.ndfl.reporting": "Формирование отчетов",
     "link.ndfl.reporting.uploadXml": "Выгрузить в XML",
     "link.ndfl.reporting.formXLSX": "Сформировать в XLSX",
-    "link.ndfl.reporting.formTemplateExcel": "Сформировать «Шаблон ТФ (Excel)»",
+    "link.ndfl.reporting.formTemplateExcel": "Сформировать \"Шаблон ТФ (Excel)\"",
     "link.ndfl.reporting.formForFL": "Сформировать \"РНУ НДФЛ по физическому лицу\"",
     "link.ndfl.reporting.formForFLs": "Сформировать \"РНУ НДФЛ по всем ФЛ\"",
     "link.ndfl.reporting.formForKppOktmo": "Сформировать \"Реестр сформированной отчетности\"",

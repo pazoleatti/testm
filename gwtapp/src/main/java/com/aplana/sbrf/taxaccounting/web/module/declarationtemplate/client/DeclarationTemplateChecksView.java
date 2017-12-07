@@ -24,6 +24,7 @@ public class DeclarationTemplateChecksView extends ViewWithUiHandlers<Declaratio
 
     public interface Binder extends UiBinder<Widget, DeclarationTemplateChecksView> { }
 
+    public static final String FATALITY_TITLE = "Фатальность";
     public static final String CODE_TITLE = "Код";
     public static final String TYPE_TITLE = "Тип";
     public static final String DESCRIPTION_TITLE = "Описание";
@@ -80,7 +81,7 @@ public class DeclarationTemplateChecksView extends ViewWithUiHandlers<Declaratio
             }
         };
 
-        checksGrid.addColumn(fatalityColumn);
+        checksGrid.addColumn(fatalityColumn, FATALITY_TITLE);
         checksGrid.setColumnWidth(fatalityColumn, 10, Style.Unit.PX);
 
         checksGrid.addResizableColumn(codeColumn, CODE_TITLE);
