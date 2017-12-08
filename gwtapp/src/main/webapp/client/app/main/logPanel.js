@@ -11,7 +11,7 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; position: absolute;left: 23px;min-height: 280px;'>" +
+                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; left: 23px;min-height: 280px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -149,15 +149,15 @@
                             updateLogPanelHeaderMessage(totalCount, fatalErrors);
                         });
 
-                        angular.element(document.querySelector('#resize-button')).on('mousedown', function (e) {
+                       angular.element(document.querySelector('#resize-button')).on('mousedown', function (e) {
                             var $dragable = angular.element(document.querySelector('#log-panel')),
                                 startWidth = $dragable.height(),
                                 pY = e.pageY;
 
-                            angular.element(document).on('mouseup', function () {
-                                angular.element(document).off('mouseup').off('mousemove');
+                           angular.element(document.querySelector('.cbr-page-layout__view')).on('mouseup', function () {
+                                angular.element('.cbr-page-layout__view').off('mouseup').off('mousemove');
                             });
-                            angular.element(document).on('mousemove', function (me) {
+                           angular.element(document.querySelector('.cbr-page-layout__view')).on('mousemove', function (me) {
                                 var my = (me.pageY - pY);
 
                                 $dragable.css({
