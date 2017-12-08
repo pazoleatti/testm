@@ -281,10 +281,8 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         if (applicationInfo.isProductionMode()) {
             SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
             if (schedulerTask.isActive()) {
-                LOG.info("LOG_TABLE_CHANGE_MONITORING started by scheduler");
                 schedulerTaskService.updateTaskStartDate(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
                 taxEventProcessor.processTaxEvents();
-                LOG.info("LOG_TABLE_CHANGE_MONITORING finished");
             }
         }
     }
@@ -294,7 +292,6 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "ASYNC_TASK_MONITORING")
     public void asyncTasksMonitoring() {
-        LOG.info("ASYNC_TASK_MONITORING started by scheduler");
         asyncTaskThreadContainer.processQueues();
     }
 }
