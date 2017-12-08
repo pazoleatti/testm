@@ -323,7 +323,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     public void delete(long declarationDataId, TAUserInfo userInfo) {
         if (declarationDataDao.existDeclarationData(declarationDataId)) {
             declarationDataDao.setStatus(declarationDataId, State.CREATED);
-            declarationDataService.delete(declarationDataId, userInfo, false);
+            declarationDataService.delete(declarationDataId, userInfo);
         }
     }
 

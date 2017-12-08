@@ -195,15 +195,13 @@
             </div>
         </div>
 
-        <data-uib-tabset active="activeForm" class="form100 tab-wrapper" style="height: 79.3%;padding: 10px 12px 0;">
+        <data-uib-tabset active="activeForm" class="form100 tab-wrapper" style="height: 79%; padding: 10px 12px 14px;">
 
             <data-uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('ndflFL')">
                 <div data-ng-controller="ndflFLCtrl">
-                    <div style="height: 100%">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
                         </div>
-                    </div>
                     <div data-aplana-grid
                          data-grid-fill-space="true"
                          data-grid-fill-space-container-selector=".form100"

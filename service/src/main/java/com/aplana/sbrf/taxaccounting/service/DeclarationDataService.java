@@ -127,7 +127,7 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе, выполняющего действие
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
-    void delete(long declarationDataId, TAUserInfo userInfo);
+    ActionResult delete(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Удалить налоговую форму, если она существует, при этом создается блокировка
@@ -136,17 +136,7 @@ public interface DeclarationDataService {
      * @param userInfo          Информация о пользователе, выполняющем действие
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
-    void deleteIfExists(long declarationDataId, TAUserInfo userInfo);
-
-    /**
-     * Удалить декларацию
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param userInfo          информация о пользователе, выполняющего действие
-     * @param createLock        если true, то создается блокировка, иначе блокировка не создается
-     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
-     */
-    void delete(long declarationDataId, TAUserInfo userInfo, boolean createLock);
+    ActionResult deleteIfExists(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Удалить все налоговые формы из списка
@@ -495,15 +485,6 @@ public interface DeclarationDataService {
      * @param userInfo          - информация о пользователе
      */
     void checkLockedMe(Long declarationDataId, TAUserInfo userInfo);
-
-    /**
-     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
-     *
-     * @param declarationDataId идентификатор декларации
-     * @param userInfo          информация пользователя
-     * @param cause             причина остановки задачи
-     */
-    void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 

@@ -1,4 +1,4 @@
-<div class="row" style="min-width: 1400px;">
+<div class="row">
     <div class="header-col" style="margin: 14px 0 0 28px;">
         <h1>{{::'header.ndflReportJournal.forms' | translate}}</h1>
     </div>
@@ -10,14 +10,13 @@
         </button>
     </div>
 </div>
-<div id="ndflReportJournal" class="container-grid box-shadow-block" style="height: 92%">
+<div id="ndflReportJournal" class="container-grid box-shadow-block">
     <!-- Фильтр -->
     <div class='container-grid-top'>
         <span data-ng-include="'client/app/taxes/ndfl/ndflReportJournalFilter.html'"></span>
-    </div>
-    <div class='container-grid-top'>
+
         <!--Панель кнопок -->
-        <div class="button_panel" style="margin: -5px 0 -1px 0;">
+        <div class="button_panel" style="min-height: 52px;  margin: -5px 0 -17px 0;">
             <div class="btn-toolbar" role="toolbar">
                 <!--Проверить -->
                 <span>
@@ -64,11 +63,11 @@
     </div>
     <div data-aplana-grid
          data-grid-fill-space="true"
-         data-grid-fill-space-container-selector=".container-grid"
+         data-grid-fill-space-container-selector=".cbr-page-layout__view"
          data-grid-fill-space-container-selector-top=".container-grid-top"
          data-grid-options="ndflReportJournalGrid.options"
          data-grid-ctrl="ndflReportJournalGrid.ctrl"
          data-init-grid="ndflReportJournalGrid.init(ctrl)"
          id="ndflReportJournalTable"
-         style="float: left; width: 100%; margin-top: 5px;"></div>
+         style="float: left; width: 100%;"></div>
 </div>

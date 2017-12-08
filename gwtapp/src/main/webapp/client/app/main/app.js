@@ -359,7 +359,7 @@
         "uploadTransportData.button.upload": "Загрузить файл",
         "uploadTransportData.button.loadAll": "Обработать файлы из каталога загрузки",
         "uploadTransportData.description.upload": "Загружаются только те файлы, которые пользователь предоставляет системе по нажатию этой кнопки.",
-        "uploadTransportData.description.loadAll": "Загружаются файлы из каталогов загруки.",
+        "uploadTransportData.description.loadAll": "Загружаются файлы из каталогов загрузки.",
 
         "filesComment.header": "Файлы и комментарии",
         "filesComment.title.fileName": "Имя файла",
