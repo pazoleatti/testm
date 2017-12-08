@@ -2863,6 +2863,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return declarationDataDao.existDeclarationData(declarationDataId);
     }
 
+    @Override
+    public DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId) {
+        if(!declarationDataDao.existDeclarationData(declarationDataId)) {
+            return new DeclarationDataExistenceAndKindResult(false);
+        } else {
+            DeclarationData declarationData = get(declarationDataId, userInfo);
+            long kind = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getDeclarationFormKind().getId();
+            return new DeclarationDataExistenceAndKindResult(true, kind);
+        }
+    }
+
     private boolean preCreateReports(Logger logger, TAUserInfo userInfo, DeclarationData declarationData) {
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
