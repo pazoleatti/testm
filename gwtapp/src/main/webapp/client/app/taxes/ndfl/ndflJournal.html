@@ -11,11 +11,11 @@
     </div>
 </div>
 <div id="production-planning" class="container-grid box-shadow-block" >
-    <div class="top-wrapper">
+
         <!-- Фильтр -->
         <div class='container-grid-top'>
             <span data-ng-include="'client/app/taxes/ndfl/ndflJournalFilter.html'"></span>
-        </div>
+
 
         <!--Панель кнопок -->
         <div class="button_panel"  style="min-height: 52px;margin: -5px 0 -17px 0;">
@@ -57,13 +57,13 @@
             </span>
             </div>
         </div>
-    </div>
+        </div>
 
     <!-- Таблица -->
     <div data-aplana-grid
          data-grid-fill-space="true"
          data-grid-fill-space-container-selector=".cbr-page-layout__view"
-         data-grid-fill-space-container-selector-top=".top-wrapper"
+         data-grid-fill-space-container-selector-top=".container-grid-top"
          data-grid-options="ndflJournalGrid.options"
          data-grid-ctrl="ndflJournalGrid.ctrl"
          data-init-grid="ndflJournalGrid.init(ctrl)"
