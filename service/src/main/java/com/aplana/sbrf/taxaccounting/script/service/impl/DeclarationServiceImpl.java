@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -318,6 +319,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    @Transactional
     public void delete(long declarationDataId, TAUserInfo userInfo) {
         if (declarationDataDao.existDeclarationData(declarationDataId)) {
             declarationDataDao.setStatus(declarationDataId, State.CREATED);
@@ -472,17 +474,22 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
+    @Transactional
     public LockData createDeleteLock(long declarationDataId, TAUserInfo userInfo) {
         String deleteLockKey = generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.DELETE_DEC);
-        LockData lockData = lockDataService.lock(deleteLockKey, userInfo.getUser().getId(),
-                declarationDataService.getDeclarationFullName(declarationDataId, DeclarationDataReportType.DELETE_DEC));
-        if (lockData != null) {
-            return null;
+        if (declarationDataDao.existDeclarationData(declarationDataId)) {
+            LockData lockData = lockDataService.lock(deleteLockKey, userInfo.getUser().getId(),
+                    declarationDataService.getDeclarationFullName(declarationDataId, DeclarationDataReportType.DELETE_DEC));
+            if (lockData != null) {
+                return null;
+            }
+            return lockDataService.getLock(deleteLockKey);
         }
-        return lockDataService.getLock(deleteLockKey);
+        return null;
     }
 
     @Override
+    @Transactional
     public List<Pair<Long, DeclarationDataReportType>> deleteForms(int declarationTypeId, int departmentReportPeriodId, Logger logger, TAUserInfo userInfo) {
         List<Pair<Long, DeclarationDataReportType>> result = new ArrayList<Pair<Long, DeclarationDataReportType>>();
 
