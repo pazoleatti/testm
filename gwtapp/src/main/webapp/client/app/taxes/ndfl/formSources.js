@@ -140,8 +140,13 @@
                 $(document).undelegate('#sourcesTable .sources-link', 'click');
                 $(document).delegate('#sourcesTable .sources-link', 'click', function () {
                     var declarationDataId = $(this).attr('data-declaration-data-id');
+                    var declarationKind = $(this).attr('data-declaration-kind');
                     $scope.close();
-                    $state.go('ndfl', {declarationDataId: declarationDataId});
+                    if(declarationKind === 'REPORTS') {
+                        $state.go('ndflReport', {declarationDataId: declarationDataId});
+                    } else {
+                        $state.go('ndfl', {declarationDataId: declarationDataId});
+                    }
                 });
             }])
 
@@ -215,8 +220,9 @@
         })
 
         .filter('declarationDataIdFormatter', function () {
-            return function (value) {
-                return '<a class="sources-link" data-declaration-data-id="' + value + '">' + value + '</a>';
+            return function (declarationDataId, row, declarationData) {
+                return '<a class="sources-link" data-declaration-data-id="' + declarationDataId + '" ' +
+                    'data-declaration-kind="' + declarationData.declarationTemplate.declarationFormKind + '">' + declarationDataId + '</a>';
             };
         });
 }());

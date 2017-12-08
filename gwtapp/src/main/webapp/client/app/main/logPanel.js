@@ -11,7 +11,7 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; position: absolute;left: 23px;'>" +
+                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; position: absolute;left: 23px;min-height: 280px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +

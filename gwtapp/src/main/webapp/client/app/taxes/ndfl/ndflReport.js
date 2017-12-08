@@ -24,25 +24,30 @@
                 templateUrl: 'client/app/taxes/ndfl/ndflReport.html?v=${buildUuid}',
                 controller: 'ndflReportCtrl',
                 resolve: {
-                    checkExistence: ['$q', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams',
-                        function ($q, DeclarationDataResource, $dialogs, $state, $filter, $stateParams) {
+                    checkExistenceAndKind: ['$q', 'DeclarationDataResource', '$dialogs', '$state', '$filter', '$stateParams', 'APP_CONSTANTS',
+                        function ($q, DeclarationDataResource, $dialogs, $state, $filter, $stateParams, APP_CONSTANTS) {
                             var d = $q.defer();
                             DeclarationDataResource.query({
                                     declarationDataId: $stateParams.declarationDataId,
-                                    projection: "checkExistence"
+                                    projection: "existenceAndKind"
                                 },
                                 function (data) {
-                                    if (!data.exists) {
+                                    if(data.exists && data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id) {
+                                        d.resolve();
+                                    } else {
                                         d.reject();
-                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                        var message;
+                                        if(data.exists) {
+                                            message = $filter('translate')('ndfl.notReportDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.notReportDeclarationDataEnd');
+                                        } else {
+                                            message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                        }
                                         $dialogs.errorDialog({
                                             content: message,
                                             closeBtnClick: function () {
                                                 $state.go("/");
                                             }
                                         });
-                                    } else {
-                                        d.resolve();
                                     }
                                 }
                             );

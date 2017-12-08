@@ -378,6 +378,10 @@
 
     "ndfl.removedDeclarationDataBegin": "Налоговая форма с номером = ",
     "ndfl.removedDeclarationDataEnd": " не существует либо была удалена. Вы будете перенаправлены на главную страницу",
+    "ndfl.notPersonalOrConsolidatedDeclarationDataBegin": "Налоговая форма с номером = ",
+    "ndfl.notPersonalOrConsolidatedDeclarationDataEnd": " не является ПНФ или КНФ. Вы будете перенаправлены на главную страницу",
+    "ndfl.notReportDeclarationDataBegin": "Налоговая форма с номером = ",
+    "ndfl.notReportDeclarationDataEnd": " не является отчетной. Вы будете перенаправлены на главную страницу",
 
     "ndflJournal.filter.periodType": "Тип периода",
     "ndflJournal.filter.period": "Период",
