@@ -549,13 +549,14 @@ public class DeclarationDataController {
     }
 
     /**
-     * Возвращает признак существования формы
+     * Возвращает признак существования формы и, если она существует,
      *
      * @param declarationDataId ид формы
      */
-    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=checkExistence")
-    public DeclarationDataExistenceResult isDeclarationDataExists(@PathVariable long declarationDataId) {
-        return new DeclarationDataExistenceResult(declarationService.existDeclarationData(declarationDataId));
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=existenceAndKind")
+    public DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(@PathVariable long declarationDataId) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.fetchDeclarationDataExistenceAndKind(userInfo, declarationDataId);
     }
 
     /**

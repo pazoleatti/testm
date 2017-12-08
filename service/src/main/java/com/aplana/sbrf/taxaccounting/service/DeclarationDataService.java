@@ -677,6 +677,15 @@ public interface DeclarationDataService {
     boolean existDeclarationData(long declarationDataId);
 
     /**
+     * Проверка существования формы и ее типа
+     *
+     * @param userInfo Пользователь
+     * @param declarationDataId ID формы
+     * @return
+     */
+    DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId);
+
+    /**
      * Получает мапу созданных блокировок по основным операциям формы
      *
      * @param declarationDataId

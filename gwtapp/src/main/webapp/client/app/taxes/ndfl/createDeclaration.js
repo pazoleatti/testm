@@ -34,6 +34,20 @@
                 }
 
                 /**
+                 * Выполняет запрос на сохранение
+                 * @param params
+                 */
+                function performSave(params) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/create",
+                        params: params
+                    }).then(function (response) {
+                        $modalInstance.close(response);
+                    });
+                }
+
+                /**
                  * Сохранение
                  */
                 $scope.save = function () {
@@ -42,20 +56,20 @@
                         APP_CONSTANTS.USER_STORAGE.KEYS.LAST_SELECTED_PERIOD,
                         $scope.declarationData.period,
                         true);
-
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/create",
-                        params: {
-                            declarationTypeId: $scope.declarationData.declarationType.id,
-                            departmentId: $scope.declarationData.department.id,
-                            periodId: $scope.declarationData.period.id,
-                            manuallyCreated: true,
-                            asnuId: $scope.declarationData.asnu.id
-                        }
-                    }).then(function (response) {
-                        $modalInstance.close(response);
-                    });
+                    var asnuId = $scope.declarationData.asnu != null ? $scope.declarationData.asnu.id : null;
+                    var params = {
+                        declarationTypeId: $scope.declarationData.declarationType.id,
+                        departmentId: $scope.declarationData.department.id,
+                        periodId: $scope.declarationData.period.id,
+                        manuallyCreated: true,
+                        asnuId: $scope.declarationData.asnu != null ? $scope.declarationData.asnu.id : null
+                    };
+                    if ($scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id && asnuId != null) {
+                        params.asnuId = asnuId;
+                        performSave(params);
+                    } else if ($scope.declarationData.declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id) {
+                        performSave(params);
+                    }
                 };
 
                 /**
