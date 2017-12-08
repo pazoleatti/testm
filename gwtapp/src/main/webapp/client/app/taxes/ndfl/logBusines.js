@@ -57,7 +57,6 @@
                     sortname: 'logDate',
                     sortorder: "desc",
                     viewrecords: true,
-                    cellEdit: true,
                     hidegrid: false
                 }
             };
