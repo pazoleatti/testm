@@ -17,13 +17,13 @@ public class DeclarationDataReportType implements Serializable {
     public static final DeclarationDataReportType ACCEPT_DEC = new DeclarationDataReportType(AsyncTaskType.ACCEPT_DEC, null);
     public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(AsyncTaskType.CHECK_DEC, null);
     public static final DeclarationDataReportType EXCEL_TEMPLATE_DEC = new DeclarationDataReportType(AsyncTaskType.EXCEL_TEMPLATE_DEC, null);
+    public static final DeclarationDataReportType DELETE_DEC = new DeclarationDataReportType(AsyncTaskType.DELETE_DEC, null);
 
     //Какая то фигня, которая не связана с асинхронными задачами
     public static final DeclarationDataReportType JASPER_DEC = new DeclarationDataReportType(AsyncTaskType.JASPER_DEC, null);
     //TODO: (dloshkarev) судя по всему это уже не используется, т.к для импорта ставится блокировка с LockData.LockObjects.LOAD_TRANSPORT_DATA
     public static final DeclarationDataReportType IMPORT_TF_DEC = new DeclarationDataReportType(AsyncTaskType.IMPORT_TF_DEC, null);
     public static final DeclarationDataReportType EDIT_FILE_COMMENT_DEC = new DeclarationDataReportType(AsyncTaskType.EDIT_FILE_COMMENT_DEC, null);
-    public static final DeclarationDataReportType DELETE_DEC = new DeclarationDataReportType(AsyncTaskType.DELETE_DEC, null);
     public static final DeclarationDataReportType TO_CREATE_DEC = new DeclarationDataReportType(AsyncTaskType.TO_CREATE_DEC, null);
 
     /**
@@ -90,6 +90,8 @@ public class DeclarationDataReportType implements Serializable {
             return ACCEPT_DEC;
         } else if (CHECK_DEC.getReportType().getName().equals(name)) {
             return CHECK_DEC;
+        } else if (DELETE_DEC.getReportType().getName().equals(name)) {
+            return DELETE_DEC;
         } else if (IMPORT_TF_DEC.getReportType().getName().equals(name)) {
             return IMPORT_TF_DEC;
         } else if (EDIT_FILE_COMMENT_DEC.getReportType().getName().equals(name)) {
@@ -112,6 +114,8 @@ public class DeclarationDataReportType implements Serializable {
             return ACCEPT_DEC;
         } else if (CHECK_DEC.getReportType().equals(reportType)) {
             return CHECK_DEC;
+        } else if (DELETE_DEC.getReportType().equals(reportType)) {
+            return DELETE_DEC;
         } else if (IMPORT_TF_DEC.getReportType().equals(reportType)) {
             return IMPORT_TF_DEC;
         } else if (EDIT_FILE_COMMENT_DEC.getReportType().equals(reportType)) {

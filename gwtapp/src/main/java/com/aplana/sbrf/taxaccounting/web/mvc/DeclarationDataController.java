@@ -217,9 +217,9 @@ public class DeclarationDataController {
      * @param declarationDataId Идентификатор налоговой формы
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/delete")
-    public void deleteDeclaration(@PathVariable int declarationDataId) {
+    public ActionResult deleteDeclaration(@PathVariable int declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        declarationService.deleteIfExists(declarationDataId, userInfo);
+        return declarationService.deleteIfExists(declarationDataId, userInfo);
     }
 
     /**

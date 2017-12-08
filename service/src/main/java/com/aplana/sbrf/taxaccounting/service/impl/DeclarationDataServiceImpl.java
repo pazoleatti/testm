@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
@@ -112,8 +113,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private final static List<DeclarationDataReportType> reportTypes = Collections.unmodifiableList(Arrays.asList(DeclarationDataReportType.ACCEPT_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.XML_DEC, DeclarationDataReportType.IMPORT_TF_DEC, DeclarationDataReportType.DELETE_DEC));
 
-    private static final String LOCK_MSG = "Форма \"%s\" из \"%s\" заблокирована";
-
     @Autowired
     private DeclarationDataDao declarationDataDao;
     @Autowired
@@ -166,8 +165,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private RefBookFactory refBookFactory;
     @Autowired
     private DBUtils bdUtils;
-    @Autowired
-    private DeclarationTypeService declarationTypeService;
     @Autowired
     private NdflPersonDao ndflPersonDao;
     @Autowired
@@ -1258,56 +1255,33 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
-    public void delete(long id, TAUserInfo userInfo) {
-        delete(id, userInfo, true);
-    }
-
-    @Override
-    @Transactional
-    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
-    public void deleteIfExists(long id, TAUserInfo userInfo) {
+    public ActionResult deleteIfExists(long id, TAUserInfo userInfo) {
         if (existDeclarationData(id)) {
-            delete(id, userInfo);
+            return delete(id, userInfo);
         }
+        return null;
     }
 
     @Override
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
-    public void delete(long id, TAUserInfo userInfo, boolean createLock) {
+    public ActionResult delete(final long id, TAUserInfo userInfo) {
+        ActionResult result = new ActionResult();
+        Logger logger = new Logger();
         LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
         LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
         LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
-        LockData lockDataDelete = null;
-        if (lockData == null && lockDataAccept == null && lockDataCheck == null && createLock) {
-            lockDataDelete = lockDataService.lock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId(),
-                    getDeclarationFullName(id, DeclarationDataReportType.DELETE_DEC));
-        }
-        if (lockData == null && lockDataAccept == null && lockDataCheck == null && lockDataDelete == null) {
-            try {
-                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
-                DeclarationData declarationData = declarationDataDao.get(id);
-
-                Logger logger = new Logger();
-                declarationDataScriptingService.executeScript(userInfo,
-                        declarationData, FormDataEvent.DELETE, new Logger(), null);
-
-                // Проверяем ошибки
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceLoggerException(
-                            "Найдены ошибки при выполнении удаления налоговой формы",
-                            logEntryService.save(logger.getEntries()));
+        if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
+            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
+            final String lockKey = generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC);
+            Map<String, Object> params = new HashMap<>();
+            params.put("declarationDataId", id);
+            asyncManager.executeTask(lockKey, AsyncTaskType.DELETE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                @Override
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lock(lockKey, userInfo.getUser().getId(), getDeclarationFullName(id, DeclarationDataReportType.DELETE_DEC));
                 }
-
-                deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
-                declarationDataDao.delete(id);
-
-                auditService.add(FormDataEvent.DELETE, userInfo, declarationData, "Налоговая форма удалена", null);
-            } finally {
-                if (createLock) {
-                    lockDataService.unlock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId());
-                }
-            }
+            });
         } else {
             if (lockData == null) {
                 lockData = lockDataAccept;
@@ -1315,10 +1289,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (lockData == null) {
                 lockData = lockDataCheck;
             }
-            if (lockData == null) {
-                lockData = lockDataDelete;
-            }
-            Logger logger = new Logger();
             TAUser blocker = taUserService.getUser(lockData.getUserId());
             String description = lockData.getDescription();
             if (lockData.getTaskId() != null) {
@@ -1330,6 +1300,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), description);
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     @Override
@@ -1340,12 +1312,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         for (Long declarationId : declarationDataIds) {
             if (existDeclarationData(declarationId)) {
-                String declarationFullName = getDeclarationFullName(declarationId, null);
                 try {
-                    delete(declarationId, userInfo);
-                    logger.info("Успешно удалён объект: %s.", declarationFullName);
-                    sendNotification("Успешно удалён объект: " + declarationFullName, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
-                    logger.clear();
+                    ActionResult preResult = delete(declarationId, userInfo);
+                    logger.getEntries().addAll(logEntryService.getAll(preResult.getUuid()));
                 } catch (ServiceLoggerException e) {
                     logger.getEntries().addAll(logEntryService.getAll(e.getUuid()));
                 } catch (Exception e) {
@@ -2275,33 +2244,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     /**
-     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
-     */
-    @Override
-    public void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause) {
-        DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
-        for (DeclarationDataReportType ddReportType : ddReportTypes) {
-            if (ddReportType.isSubreport()) {
-                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
-                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
-                for (DeclarationSubreport subreport : subreports) {
-                    ddReportType.setSubreport(subreport);
-                    LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
-                    if (lock != null) {
-                        asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
-                    }
-                }
-            } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
-                LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
-                if (lock != null) {
-                    asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
-                }
-            }
-        }
-        reportService.deleteDec(declarationDataId);
-    }
-
-    /**
      * Список операции, по которым требуется удалить блокировку
      *
      * @param reportType
@@ -2507,6 +2449,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case EXCEL_DEC:
             case ACCEPT_DEC:
             case CHECK_DEC:
+            case DELETE_DEC:
             case EXCEL_TEMPLATE_DEC:
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
                     if (declarationTemplate.getType().getId() == DeclarationType.NDFL_6) {

@@ -12,6 +12,7 @@ public enum AsyncTaskType {
     CREATE_FORMS_DEC(3, "CREATE_FORMS_DEC", "Создание отчетных форм: Вид отчетности: \"%s\", Период: \"%s%s\", Подразделение: \"%s\"", 28L),
     CHECK_DEC(0, "CHECK_DECLARATION", "Проверка налоговой формы. %s", 14L),
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие налоговой формы. %s", 15L),
+    DELETE_DEC(5, "DELETE_DECLARATION", "Удаление налоговой формы. %s", 32L),
     EXCEL_DEC(0, "XLSX", "Формирование XLSX-отчета для НФ. ", 5L),
     PDF_DEC(2, "PDF", "Создание формы предварительного просмотра. %s", 7L),
     SPECIFIC_REPORT_DEC(4, "SPECIFIC", "Формирование отчета \"%s\" %s", 26L),
@@ -31,7 +32,6 @@ public enum AsyncTaskType {
     UPDATE_TEMPLATE_DEC(5, "UPDATE_TEMPLATE_DEC", "Обновление макета"), //формально является задачей
     EDIT_FILE_COMMENT_DEC(6, "EDIT_FILE_COMMENT", "Добавление файлов и комментариев"), //формально является задачей, нужна для работы с модальным окном "Файлы и комментарии"
     IMPORT_TF_DEC(2, "IMPORT_TF_DECLARATION", "Импорт ТФ из каталога загрузки"), //формально является задачей, блокирует форму при импорт из каталога загрузки
-    DELETE_DEC(5, "DELETE_DECLARATION", "Удаление налоговой формы"), //формально является задачей,
     TO_CREATE_DEC(6, "MOVE_TO_CREATE", "Возврат в Создана");
 
     private int id;

@@ -390,8 +390,10 @@
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/delete"
-                            }).success(function () {
-                                $state.go("ndflJournal", {});
+                            }).then(function (response) {
+                                //Обновить страницу и, если есть сообщения, показать их
+                                var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
+                                $state.go("ndflJournal", params, {reload: true});
                             });
                         }
                     });

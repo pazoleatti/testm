@@ -2707,4 +2707,15 @@ END;'
         </insert>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2848 -->
+    <changeSet id="2.1-dloshkarev-15" author="dloshkarev">
+        <insert tableName="async_task_type">
+            <column name="id" value="32"/>
+            <column name="name" value="Удаление налоговой формы"/>
+            <column name="handler_bean" value="DeleteDeclarationAsyncTask"/>
+            <column name="short_queue_limit" value="10000"/>
+            <column name="limit_kind" value="Размер файла (Кбайт)"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
