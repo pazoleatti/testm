@@ -35,9 +35,9 @@
                     <g:HorizontalPanel ui:field="loadPanel">
                         <g:Button ui:field="loadButton" width="300px"
                                   text="Обработать файлы из каталога загрузки"
-                                  title="Загружаются файлы из каталогов загруки"/>
+                                  title="Загружаются файлы из каталогов загрузки"/>
                         <g:cell verticalAlignment="middle">
-                            <g:Label addStyleNames="{style.marginLeft15}" text="Загружаются файлы из каталогов загруки."/>
+                            <g:Label addStyleNames="{style.marginLeft15}" text="Загружаются файлы из каталогов загрузки."/>
                         </g:cell>
                     </g:HorizontalPanel>
 
