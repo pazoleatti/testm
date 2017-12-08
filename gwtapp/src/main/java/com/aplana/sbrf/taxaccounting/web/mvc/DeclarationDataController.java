@@ -477,14 +477,14 @@ public class DeclarationDataController {
      * Формирование рну ндфл для отдельного физ лица`
      *
      * @param declarationDataId идентификатор декларации
-     * @param id                идентификатор строки реквизита ФЛ
+     * @param ndflPersonId      идентификатор данных о физическом лице {@link com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}
      * @param ndflPersonFilter  заполненные поля при поиске
      * @return источники и приемники декларации
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/rnuDoc")
-    public CreateDeclarationReportResult createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long id, @RequestParam NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(@PathVariable("declarationDataId") long declarationDataId, @RequestParam long ndflPersonId, @RequestParam NdflPersonFilter ndflPersonFilter) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createReportRnu(userInfo, declarationDataId, id, ndflPersonFilter);
+        return declarationService.createReportRnu(userInfo, declarationDataId, ndflPersonId, ndflPersonFilter);
     }
 
     /**

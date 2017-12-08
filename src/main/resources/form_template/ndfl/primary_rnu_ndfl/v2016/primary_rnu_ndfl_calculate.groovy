@@ -219,14 +219,18 @@ class Calculate extends AbstractScriptClass {
     // Вывод информации о количестве обработынных физлиц всего и уникальных
     void countTotalAndUniquePerson(Collection<NaturalPerson> persons) {
         def personIds = persons.collect { NaturalPerson person -> return person.id }
+        int countOfNulls = personIds.count{Long id -> return id == null}.intValue()
+        personIds.removeAll([null])
         def personIdSet = personIds.toSet()
-        Set<Long> duplicateIdSet = personService.getDuplicate(personIdSet).toSet()
-        for (Long duplicateId : duplicateIdSet){
-            if (personIdSet.contains(duplicateId)){
-                personIdSet.remove(duplicateId)
+        if (!personIdSet.isEmpty()) {
+            Set<Long> duplicateIdSet = personService.getDuplicate(personIdSet).toSet()
+            for (Long duplicateId : duplicateIdSet){
+                if (personIdSet.contains(duplicateId)){
+                    personIdSet.remove(duplicateId)
+                }
             }
         }
-        logger.info("Записей физических лиц обработано: ${personIds.size()}, всего уникальных записей физических лиц: ${personIdSet.size()}")
+        logger.info("Записей физических лиц обработано: ${personIds.size() + countOfNulls}, всего уникальных записей физических лиц: ${personIdSet.size() + countOfNulls}")
     }
 
     NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper(boolean isLog) {

@@ -202,12 +202,6 @@
                         }
                     });
                 };
-                /**
-                 * Возможность выгружать шаблон Excel-файла для загрузки
-                 */
-                $scope.canCreateExcelTemplate = function () {
-                    return $scope.declarationData && $scope.declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.name;
-                };
 
                 /**
                  * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
@@ -346,7 +340,7 @@
                                         $scope.check(true);
                                     }
                                 });
-                            } else if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
+                            } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }
                         }
@@ -399,9 +393,16 @@
                 };
 
                 /**
+                 * Возможность выгружать шаблон Excel-файла для загрузки
+                 */
+                $scope.canCreateExcelTemplate = function () {
+                    return $scope.declarationData && $scope.declarationData.declarationFormKind === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.name;
+                };
+
+                /**
                  * Формирует запрос на создание шаблона Excel-файла для загрузки
                  */
-                $scope.createTemplate = function (force) {
+                $scope.createExcelTemplate = function (force) {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate",

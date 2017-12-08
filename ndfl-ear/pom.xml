@@ -64,7 +64,7 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>gwtapp</artifactId>
                                     <bundleFileName>gwtapp.war</bundleFileName>
-                                    <contextRoot>/${releaseName}/gwtapp/index.html</contextRoot>
+                                    <contextRoot>/${releaseName}/gwtapp</contextRoot>
                                 </webModule>
                             </modules>
                         </configuration>

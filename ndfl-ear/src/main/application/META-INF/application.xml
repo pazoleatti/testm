@@ -6,7 +6,7 @@
     <module>
         <web>
             <web-uri>gwtapp.war</web-uri>
-            <context-root>/${releaseName}/gwtapp/index.html</context-root>
+            <context-root>/${releaseName}/gwtapp</context-root>
         </web>
     </module>
     <security-role>

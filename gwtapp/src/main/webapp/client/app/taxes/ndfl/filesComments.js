@@ -19,7 +19,9 @@
             'DeclarationDataResource',
             'Upload',
             'APP_CONSTANTS',
-            function ($scope, $http, $modalInstance, $shareData, $filter, $logPanel, $dialogs, DeclarationDataResource, Upload, APP_CONSTANTS) {
+            '$q',
+            '$modalStack',
+            function ($scope, $http, $modalInstance, $shareData, $filter, $logPanel, $dialogs, DeclarationDataResource, Upload, APP_CONSTANTS, $q, $modalStack) {
 
                 $scope.editMode = false;
 
@@ -200,19 +202,10 @@
                  * @description Обработчик кнопки "Сохранить"
                  **/
                 $scope.save = function () {
-
+                    $scope.dSave = $q.defer();
                     var grid = $scope.fileCommentGrid.ctrl.getGrid();
+                    var files = getFilesInGrid(grid);
 
-                    // В jqGrid значение редактируемой ячейки сохраняется только в том случае, если нажать Enter или
-                    // выделить другую ячейку.
-                    // 0, 0 - ячейка, которая не отображается на экране. false - выделить без редактирования
-                    grid.jqGrid("editCell", 0, 0, false);
-
-                    var ids = grid.getDataIDs();
-                    var files = [];
-                    _.each(ids, function (element) {
-                        files.push(grid.getLocalRow(element));
-                    });
                     DeclarationDataResource.save(
                         {
                             projection: "filesComments"
@@ -224,6 +217,7 @@
                         },
                         function (data) {
                             if (data) {
+                                $scope.dSave.resolve(true);
                                 if (data.uuid && data.uuid !== null) {
                                     $logPanel.open('log-panel-container', data.uuid);
                                 }
@@ -231,8 +225,11 @@
                                     $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
                                     $scope.commentForm.comment = data.comment;
                                 }
+                            }else {
+                                $scope.dSave.reject("Fail");
                             }
                         });
+                    return $scope.dSave.promise;
                 };
 
                 /**
@@ -240,13 +237,116 @@
                  **/
                 $scope.close = function () {
                     if ($scope.editMode) {
-                        $http({
-                            method: "POST",
-                            url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
-                        }).then(function (response) {
+                        $scope.getData().then(function (data) {
+
+                            if ($scope.commentForm.comment !== data.comment || !equals(data.declarationDataFiles, getFilesInGrid($scope.fileCommentGrid.ctrl.getGrid()))) {
+                                $dialogs.confirmDialog({
+                                    content: $filter('translate')('filesComment.close.saveChange'),
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $scope.save().then(function(res) {
+                                            $scope.unlock();
+                                        });
+                                        $modalInstance.close('Saved');
+                                    },
+                                    cancelBtnClick: function () {
+                                        $scope.unlock();
+                                        $modalInstance.dismiss("Canceled");
+                                    }
+                                });
+                            }else {
+                                $scope.unlock();
+                                $modalInstance.dismiss("Canceled");
+                            }
                         });
+                    }else {
+                        $modalInstance.dismiss('Canceled');
                     }
-                    $modalInstance.dismiss('Canceled');
+                };
+
+                /**
+                 * @description Проверяет наличие изменений в файлах
+                 */
+                var equals = function (dbFiles, formFiles) {
+
+                    if(dbFiles.length !== formFiles.length){
+                        return false;
+                    }
+                    var contains = true;
+                    dbFiles.forEach(function (dbFile) {
+                        contains = false;
+                        formFiles.forEach(function (formFile) {
+                            if (dbFile.uuid === formFile.uuid && dbFile.fileTypeId === dbFile.fileTypeId && formFile.note === dbFile.note){
+                                contains = true;
+                            }
+                            if (!contains){
+                                contains = false;
+                                return;
+                            }
+                        });
+                        if (!contains){
+                            return;
+                        }
+                    });
+                    return contains;
+                };
+
+                /**
+                 * @description Получает список записей, которые находятся в гриде
+                 */
+                var getFilesInGrid = function (grid) {
+
+                    // В jqGrid значение редактируемой ячейки сохраняется только в том случае, если нажать Enter или
+                    // выделить другую ячейку.
+                    // 0, 0 - ячейка, которая не отображается на экране. false - выделить без редактирования
+                    grid.jqGrid("editCell", 0, 0, false);
+
+                    var ids = grid.getDataIDs();
+                    var files = [];
+                    _.each(ids, function (element) {
+                        files.push(grid.getLocalRow(element));
+                    });
+                    return files;
+                };
+
+                /**
+                 * @description Снимает блокировку с декларации
+                 */
+                $scope.unlock = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/unlock"
+                    }).then(function (response) {
+                    });
+                };
+
+                /**
+                 * Получение данных формы с БД
+                 */
+                $scope.getData = function () {
+                    $scope.d = $q.defer();
+                    DeclarationDataResource.query({
+                            declarationDataId: $shareData.declarationDataId,
+                            projection: "filesComments"
+                        },
+                        function (data) {
+                            if (data) {
+                                $scope.d.resolve(data);
+                            }else {
+                                $scope.d.reject();
+                            }
+                        }
+                    );
+                    return $scope.d.promise;
+                };
+
+                /**
+                 * Переопределенный метод модуля {aplana.modal}, чтобы по нажатию на крестик
+                 * выполнялась логика кнопки "Закрыть"
+                 */
+                $scope.modalCloseCallback = function () {
+                    $scope.close();
                 };
 
                 initPage();

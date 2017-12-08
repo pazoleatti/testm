@@ -933,7 +933,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     //Формирование рну ндфл для физ лица
     @Override
-    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId, long id, final NdflPersonFilter ndflPersonFilter) {
+    public CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, final long declarationDataId, long ndflPersonId, final NdflPersonFilter ndflPersonFilter) {
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
@@ -949,7 +949,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         Map<String, Object> filterParams = new HashMap<String, Object>();
-        NdflPerson ndflPerson = ndflPersonService.findOne(id);
+        NdflPerson ndflPerson = ndflPersonService.findOne(ndflPersonId);
 
         filterParams.put("PERSON_ID", ndflPerson.getId());
 
@@ -2226,6 +2226,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 getDeclarationFullName(declarationDataId, null));
     }
 
+    private LockData getLock(long declarationDataId) {
+        return lockDataService.getLock(generateAsyncTaskKey(declarationDataId, null));
+    }
+
     @Override
     public DeclarationLockResult createLock(long declarationDataId, TAUserInfo userInfo) {
         DeclarationLockResult lockResult = new DeclarationLockResult();
@@ -3106,8 +3110,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (ddReportType.isSubreport()) {
             DeclarationData declaration = get(action.getDeclarationDataId(), userInfo);
             ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
-        } else if (ddReportType.equals(DeclarationDataReportType.PDF_DEC) && isVisiblePDF(get(action.getDeclarationDataId(), userInfo), userInfo)) {
-            throw new ServiceException("Данное действие недоступно");
         }
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
@@ -3328,8 +3330,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void importExcel(long declarationDataId, BlobData blobData, TAUserInfo userInfo, Logger logger) {
         TAUser user = userInfo.getUser();
         try {
-            LockData lockData = doLock(declarationDataId, userInfo);
-            if (lockData != null && lockData.getUserId() != userInfo.getUser().getId()) {
+            LockData existentlockData = doLock(declarationDataId, userInfo);
+            if (existentlockData != null && existentlockData.getUserId() != userInfo.getUser().getId() ||
+                    getLock(declarationDataId) == null) {
                 logger.error(String.format("Налоговая форма %s заблокирована.", getDeclarationDescription(declarationDataId)));
                 logger.error(String.format("Загрузка файла \"%s\" не может быть выполнена.", blobData.getName()));
             } else {
@@ -3338,7 +3341,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("fileName", blobData.getName());
                 params.put("inputStream", blobData.getInputStream());
-                declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.IMPORT, logger, params);
+                FormDataEvent formDataEvent = FormDataEvent.IMPORT;
+                if (!declarationDataScriptingService.executeScript(userInfo, declarationData, formDataEvent, logger, params)) {
+                    throw new ServiceException();
+                }
 
                 // TODO workaround, создаём пустую xml (но не должна использоваться)
                 if (reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
@@ -3358,6 +3364,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceException();
                 }
+
+                String note = "Загрузка данных из файла \"" + blobData.getName() + "\" в налоговую форму";
+                logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
+                auditService.add(formDataEvent, userInfo, declarationData, note, null);
             }
         } finally {
             unlock(declarationDataId, userInfo);

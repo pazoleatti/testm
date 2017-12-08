@@ -562,7 +562,7 @@ class Import extends AbstractScriptClass {
         }
 
         void logIncorrectTypeError(def type) {
-            logger.error("Ошибка при проверке ячейки файла \"$fileName\". Тип данных ячейки столбца \"${header[index - 1]}\" № $index" +
+            logger.error("Ошибка при определении значения ячейки файла \"$fileName\". Тип данных ячейки столбца \"${header[index - 1]}\" № $index" +
                     " строки ${row.index} не соответствует ожидаемому \"$type\".")
         }
     }
