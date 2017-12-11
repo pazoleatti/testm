@@ -2741,6 +2741,14 @@ END;'
         </update>
     </changeSet>
 
+    <changeSet id="2.1-dnovikov-8" author="dnovikov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
     <!-- https://jira.aplana.com/browse/SBRFNDFL-2953 -->
     <changeSet id="2.1-ytrofimov-87" author="ytrofimov">
         <update tableName="DECLARATION_TEMPLATE">

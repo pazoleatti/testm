@@ -106,6 +106,10 @@
 
                 initPage();
 
+                $scope.$on("UPDATE_DECLARATION_DATA", function () {
+                    initPage();
+                });
+
                 /**
                  * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
                  * @param response
