@@ -1,6 +1,7 @@
 package com.aplana.generatorTF;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.File;
@@ -27,8 +28,14 @@ public class Main {
                 File destFile;
                 printStream.println("Началось изменение атрибутов " + new Date());
                 if (args[1].equalsIgnoreCase("xlsx")) {
+                    if (!"xlsx".equals(FilenameUtils.getExtension(sourceFile.getAbsolutePath()))) {
+                        printStream.println("расширение файла не верное, должен быть xlsx");
+                    }
                     new GeneratorXlsx().generateXlsx(sourceFile, Integer.parseInt(args[2]));
                 } else if (args[1].equalsIgnoreCase("xml")) {
+                    if (!"xml".equals(FilenameUtils.getExtension(sourceFile.getAbsolutePath()))) {
+                        printStream.println("расширение файла не верное, должен быть xml");
+                    }
                     Integer numberOfFiles = args.length == 4 ? Integer.parseInt(args[3]) : 1;
                     for (int i = 0; i < numberOfFiles; i++) {
                         String tmpPath = path.replaceAll(path.substring(path.length() - 36, path.length() - 4),
