@@ -4,11 +4,13 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.script.service.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,9 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private DepartmentService departmentService;
+
+    @Autowired
+    private RefBookAsnuService refBookAsnuService;
 
     @Override
     public String getDescription(TAUserInfo userInfo, Map<String, Object> params) {
@@ -68,10 +73,11 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
         ReportPeriod reportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getReportPeriod();
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.getDeclarationTemplateId());
+        RefBookAsnu asnu = refBookAsnuService.fetchById(declarationData.getAsnuId());
         return String.format("Загрузка файла \"%s\" завершена: Выполнена загрузка новых данных в налоговую форму: " +
-                "№: \"%s\", Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\", ",
+                "№: \"%s\", Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\", АСНУ: \"%s\".",
                 fileName, declarationDataId, reportPeriod.getTaxPeriod().getYear(),
-                reportPeriod.getName(), department.getName(), declarationTemplate.getName());
+                reportPeriod.getName(), department.getName(), declarationTemplate.getName(), asnu.getName());
     }
 
     @Override

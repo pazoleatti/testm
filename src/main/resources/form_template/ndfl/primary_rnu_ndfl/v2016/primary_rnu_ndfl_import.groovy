@@ -213,7 +213,7 @@ class Import extends AbstractScriptClass {
         ndflPerson.innForeign = row.cell(9).toString(50)
         ndflPerson.idDocType = row.cell(10).toString(2)
         ndflPerson.idDocNumber = row.cell(11).toString(25)
-        ndflPerson.status = row.cell(12).toInteger(1).toString()
+        ndflPerson.status = row.cell(12).toInteger(1)?.toString()
         ndflPerson.regionCode = row.cell(13).toString(2)
         ndflPerson.postIndex = row.cell(14).toString(6)
         ndflPerson.area = row.cell(15).toString(50)
@@ -386,7 +386,7 @@ class Import extends AbstractScriptClass {
 
     boolean checkIncomeDate(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {
         if (!date) {
-            return false
+            return true
         }
         if (!(reportPeriod.startDate <= date && date <= reportPeriod.endDate)) {
             logger.error("Дата: \"${date?.format(DATE_FORMAT)}\", указанная в столбце \"${header[colIndex - 1]}\" № ${colIndex}" +
@@ -409,7 +409,7 @@ class Import extends AbstractScriptClass {
             if (person.deductions) {
                 String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [(person as NdflPersonExt).fio, person.inp])
                 for (def deduction : person.deductions) {
-                    if (deduction.typeCode != null && !deductionCodes.contains(deduction.typeCode)) {
+                    if (deduction.typeCode && !deductionCodes.contains(deduction.typeCode)) {
                         String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
                                 C_TYPE_CODE, deduction.typeCode ?: "",
                                 R_TYPE_CODE
@@ -423,7 +423,7 @@ class Import extends AbstractScriptClass {
     }
 
     void checkIncomeCode(NdflPersonIncome income, NdflPerson person) {
-        if (income.incomeCode != null && !incomeCodes.find { key, value ->
+        if (income.incomeCode && !incomeCodes.find { key, value ->
             value.CODE?.stringValue == income.incomeCode &&
                     (income.incomeAccruedDate == null ||
                             income.incomeAccruedDate.toDate() >= value.record_version_from?.dateValue &&
@@ -456,33 +456,33 @@ class Import extends AbstractScriptClass {
         }
     }
 
+    int incomeLastRowNum = 0
     class NdflPersonIncomeExt extends NdflPersonIncome {
         int rowIndex
-        static int lastRowNum = 0
 
         NdflPersonIncomeExt(int rowIndex) {
             this.rowIndex = rowIndex
-            rowNum = ++lastRowNum
+            rowNum = ++incomeLastRowNum
         }
     }
 
+    int deductionLastRowNum = 0
     class NdflPersonDeductionExt extends NdflPersonDeduction {
         int rowIndex
-        static int lastRowNum = 0
 
         NdflPersonDeductionExt(int rowIndex) {
             this.rowIndex = rowIndex
-            rowNum = ++lastRowNum
+            rowNum = ++deductionLastRowNum
         }
     }
 
+    int prepaymentLastRowNum = 0
     class NdflPersonPrepaymentExt extends NdflPersonPrepayment {
         int rowIndex
-        static int lastRowNum = 0
 
         NdflPersonPrepaymentExt(int rowIndex) {
             this.rowIndex = rowIndex
-            rowNum = ++lastRowNum
+            rowNum = ++prepaymentLastRowNum
         }
     }
 
@@ -531,11 +531,11 @@ class Import extends AbstractScriptClass {
         }
 
         private Integer toInteger(Integer precision = null) {
-            return toBigDecimal(precision).intValue()
+            return toBigDecimal(precision)?.intValue()
         }
 
         Long toLong(Integer precision = null) {
-            return toBigDecimal(precision).longValue()
+            return toBigDecimal(precision)?.longValue()
         }
 
         BigDecimal toBigDecimal(Integer precision = null, Integer scale = null) {

@@ -42,4 +42,11 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
     public List<RefBookAsnu> fetchByIds(List<Long> ids) {
         return refBookAsnuDao.fetchByIds(ids);
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public RefBookAsnu fetchById(Long id) {
+        return refBookAsnuDao.fetchById(id);
+    }
 }

@@ -251,7 +251,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .values(departmentReportPeriodItem.getId(),
                         departmentReportPeriodItem.getDepartmentId(),
                         departmentReportPeriodItem.getReportPeriod().getId(),
-                        true,
+                        departmentReportPeriodItem.isActive(),
                         departmentReportPeriodItem.getCorrectionDate())
                 .execute();
         if (departmentReportPeriodItem.getCorrectionDate() != null) {
