@@ -10,6 +10,11 @@
     <version>1.1</version>
     <packaging>jar</packaging>
 
+    <properties>
+        <poi.version>3.8</poi.version>
+        <poi.schemas.version>1.1</poi.schemas.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
@@ -20,6 +25,27 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>ooxml-schemas</artifactId>
+            <version>${poi.schemas.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+            <classifier>cdi1.0</classifier>
         </dependency>
     </dependencies>
 
@@ -52,7 +78,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>com.aplana.generatorTF.ReaderAndGeneratorXMLFiles</mainClass>
+                            <mainClass>com.aplana.generatorTF.Main</mainClass>
                         </manifest>
                     </archive>
 
