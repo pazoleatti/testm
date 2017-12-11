@@ -54,4 +54,12 @@ public class RefBookAsnuDaoImpl implements RefBookAsnuDao {
                 .where(refBookAsnu.id.gt(0).and(refBookAsnu.id.in(ids)))
                 .fetch();
     }
+
+    @Override
+    public RefBookAsnu fetchById(Long id) {
+        return sqlQueryFactory.select(refBookAsnuBean)
+                .from(refBookAsnu)
+                .where(refBookAsnu.id.eq(id))
+                .fetchOne();
+    }
 }

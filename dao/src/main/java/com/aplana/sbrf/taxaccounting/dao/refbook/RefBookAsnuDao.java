@@ -22,4 +22,12 @@ public interface RefBookAsnuDao {
      * @return Список значений справочника
      */
     List<RefBookAsnu> fetchByIds(List<Long> ids);
+
+    /**
+     * Получение записи справочника по идентификатору
+     *
+     * @param id идентификатор
+     * @return значение справочника или null
+     */
+    RefBookAsnu fetchById(Long id);
 }
