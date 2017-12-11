@@ -608,7 +608,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                                 sumDohod = ScriptUtils.round(sumDohod, 2)
                                                 sumDohodAll += sumDohod
 
-                                                СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
+                                                СвСумДох(Месяц: sprintf('%02d', monthKey),
                                                         КодДоход: incomeKey,
                                                         СумДоход: sumDohod,
                                                         Страница: isForSpecificReport ? (index <= ((countIncome + 1) / 2) ? 1 : 2) : null
