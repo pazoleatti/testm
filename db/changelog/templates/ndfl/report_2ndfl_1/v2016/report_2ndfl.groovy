@@ -378,7 +378,7 @@ class Report2Ndfl extends AbstractScriptClass {
         def endDate = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
 
         // Данные для Файл.Документ.Подписант
-        String prPodp = getProvider(REF_BOOK_SIGNATORY_MARK_ID).getRecordData(departmentParamRow?.SIGNATORY_ID?.value).CODE.stringValue
+        String prPodp = getProvider(REF_BOOK_SIGNATORY_MARK_ID).getRecordData(departmentParamRow?.SIGNATORY_ID?.value).CODE.value
         String signatoryFirstname = departmentParamRow?.SIGNATORY_FIRSTNAME?.stringValue
         String signatorySurname = departmentParamRow?.SIGNATORY_SURNAME?.stringValue
         String signatoryLastname = departmentParamRow?.SIGNATORY_LASTNAME?.stringValue
