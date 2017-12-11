@@ -342,7 +342,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 department.getName(), declarationTemplate.getDeclarationFormKind().getTitle());
                     }
                     logger.error(message);
-                    throw new ServiceException(message);
                 }
 
                 // Вызываем событие скрипта CREATE
