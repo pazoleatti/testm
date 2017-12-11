@@ -861,7 +861,7 @@ class Calculate extends AbstractScriptClass {
         putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
-        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId);
+        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, person.getPersonIdentityList().get(0).getAsnuId());
         putValue(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
         return values;
     }
