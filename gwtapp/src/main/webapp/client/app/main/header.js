@@ -220,6 +220,7 @@
                             $scope.notificationsCountClass = "new-message empty-message";
                         }
                     });
+                    $scope.$broadcast("UPDATE_DECLARATION_DATA");
                 };
 
                 $scope.$on("UPDATE_NOTIFICATION_COUNT", function () {

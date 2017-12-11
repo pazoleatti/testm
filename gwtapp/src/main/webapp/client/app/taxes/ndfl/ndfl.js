@@ -91,6 +91,10 @@
 
                 initPage();
 
+                $scope.$on("UPDATE_DECLARATION_DATA", function () {
+                    initPage();
+                });
+
                 /**
                  * @description Проверяет готовность отчетов у открытой формы
                  */
