@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -25,6 +26,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     protected DepartmentService departmentService;
     @Autowired
     protected TAUserService taUserService;
+    @Autowired
+    protected NdflPersonDao ndflPersonDao;
 
     /**
      * Право на создание декларации вручную
@@ -203,8 +206,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
-
-            return departmentReportPeriod.isActive() && CHECK.isGranted(currentUser, targetDomainObject);
+            return isDataFilled(targetDomainObject) && departmentReportPeriod.isActive() && CHECK.isGranted(currentUser, targetDomainObject);
         }
     }
 
@@ -223,7 +225,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                 if (targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.PREPARED) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
                         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
-                        if (departmentReportPeriod.isActive()) {
+                        if (departmentReportPeriod.isActive() && isDataFilled(targetDomainObject)) {
                             return true;
                         }
                     }
@@ -394,5 +396,18 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     targetDomainObject.getState() == State.CREATED &&
                     targetDomainObject.getManuallyCreated();
         }
+    }
+
+    /**
+     * Проверяет наличие данных в НФ. Необходимо для определения отображения кнопок для ПНФ созданной в ручную.
+     * @return
+     */
+    protected boolean isDataFilled(DeclarationData declarationData) {
+        boolean toReturn = true;
+        DeclarationTemplate dt = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+        if (declarationData.getManuallyCreated() && DeclarationType.NDFL_PRIMARY == dt.getType().getId()) {
+            toReturn = ndflPersonDao.getNdflPersonCount(declarationData.getId()) != 0;
+        }
+        return toReturn;
     }
 }
