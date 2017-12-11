@@ -91,7 +91,7 @@ public class GeneratorXlsx {
 
             printStream.println("Идет сохранение...");
             workBook.write(out);
-            printStream.println(String.format("Данные сохранена в файл %s", outFile.getAbsolutePath()));
+            printStream.println(String.format("Данные сохранены в файл %s", outFile.getAbsolutePath()));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
