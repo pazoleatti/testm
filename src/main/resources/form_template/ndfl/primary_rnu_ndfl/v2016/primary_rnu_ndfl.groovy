@@ -999,7 +999,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         // Доход.Дата.Выплата
         boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
         if (incomeAccruedDateOk || incomePayoutDateOk) {
-            return false
+            return true
         } else {
             String pathError = String.format(SECTION_LINE_RANGE_MSG, T_PERSON_INCOME, "тут должен быть номер строк")
             DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
@@ -1009,8 +1009,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             if (!incomePayoutDateOk) {
                 logPeriodError(C_INCOME_PAYOUT_DATE, pathError, departmentReportPeriod, incomePayoutDate, inp, fio, operationId)
             }
+            return false
         }
-        return true
     }
 
     void logPeriodError(String paramName, String pathError, DepartmentReportPeriod departmentReportPeriod, LocalDateTime date, String inp, String fio, String operationId) {

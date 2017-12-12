@@ -345,7 +345,7 @@ class Import extends AbstractScriptClass {
             boolean atLeastOneRecordFailed = false
             for (int i = 0; i < person.incomes.size(); i++) {
                 def income = person.incomes[i]
-                boolean checkPassed = checkIncomeDates(income)
+                boolean checkPassed = isIncomeDatesInPeriod(income)
                 allRecordsFailed &= !checkPassed
                 atLeastOneRecordFailed |= !checkPassed
             }
@@ -361,12 +361,14 @@ class Import extends AbstractScriptClass {
         return true
     }
 
-    boolean checkIncomeDates(NdflPersonIncome income) {
+    boolean isIncomeDatesInPeriod(NdflPersonIncome income) {
         def incomeAccruedDate = income.incomeAccruedDate?.toDate()
         def incomePayoutDate = income.incomePayoutDate?.toDate()
         boolean incomeAccruedDateCorrect = checkIncomeDate(incomeAccruedDate)
         boolean incomePayoutDateCorrect = checkIncomeDate(incomePayoutDate)
-        if (!incomeAccruedDate && !incomePayoutDateCorrect) {
+        if (incomeAccruedDate || incomePayoutDateCorrect) {
+            return true
+        } else {
             if (!incomeAccruedDate) {
                 logIncomeDatesError(incomeAccruedDate, income, (income as NdflPersonIncomeExt).rowIndex, 26)
             }
@@ -375,7 +377,6 @@ class Import extends AbstractScriptClass {
             }
             return false
         }
-        return true
     }
 
     void logIncomeDatesError(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {

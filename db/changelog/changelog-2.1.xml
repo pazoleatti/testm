@@ -2822,4 +2822,17 @@ END;'
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2956 -->
+    <changeSet id="2.1-dloshkarev-118" author="dloshkarev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_import.groovy"/>
+            <where>id=14</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
