@@ -362,20 +362,36 @@ class Import extends AbstractScriptClass {
     }
 
     boolean checkIncomeDates(NdflPersonIncome income) {
-        return checkIncomeDate(income.incomeAccruedDate?.toDate(), income, (income as NdflPersonIncomeExt).rowIndex, 26) &
-                checkIncomeDate(income.incomePayoutDate?.toDate(), income, (income as NdflPersonIncomeExt).rowIndex, 27)
+        def incomeAccruedDate = income.incomeAccruedDate?.toDate()
+        def incomePayoutDate = income.incomePayoutDate?.toDate()
+        boolean incomeAccruedDateCorrect = checkIncomeDate(incomeAccruedDate)
+        boolean incomePayoutDateCorrect = checkIncomeDate(incomePayoutDate)
+        if (!incomeAccruedDate && !incomePayoutDateCorrect) {
+            if (!incomeAccruedDate) {
+                logIncomeDatesError(incomeAccruedDate, income, (income as NdflPersonIncomeExt).rowIndex, 26)
+            }
+            if (!incomePayoutDateCorrect) {
+                logIncomeDatesError(incomePayoutDate, income, (income as NdflPersonIncomeExt).rowIndex, 27)
+            }
+            return false
+        }
+        return true
     }
 
-    boolean checkIncomeDate(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {
+    void logIncomeDatesError(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {
+        logger.error("Дата: \"${date?.format(DATE_FORMAT)}\", указанная в столбце \"${header[colIndex - 1]}\" № ${colIndex}" +
+                " для строки ${rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
+                " Операция \"${income.operationId}\" не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
+                "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
+                "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
+
+    }
+
+    boolean checkIncomeDate(Date date) {
         if (!date) {
             return true
         }
         if (!(reportPeriod.startDate <= date && date <= reportPeriod.endDate)) {
-            logger.error("Дата: \"${date?.format(DATE_FORMAT)}\", указанная в столбце \"${header[colIndex - 1]}\" № ${colIndex}" +
-                    " для строки ${rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
-                    " Операция \"${income.operationId}\" не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
-                    "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
-                    "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
             return false
         }
         return true
