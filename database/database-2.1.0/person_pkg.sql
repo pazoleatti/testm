@@ -402,7 +402,7 @@ package person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t left join ref_book_doc_type dt on (dt.code=t.id_doc_type)
-                           left join ref_book_id_doc doc on (doc.doc_id=dt.id and replace(lower(doc.doc_number),' ','') = replace(lower(t.id_doc_number),' ',''))
+                           left join ref_book_id_doc doc on (doc.doc_id=dt.id and regexp_replace(lower(doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') = regexp_replace(lower(t.id_doc_number),'[^0-9A-Za-zА-Яа-я]',''))
                            left join ref_book_person person on (person.id = doc.person_id)
                            left join ref_book_id_tax_payer tax on (tax.person_id = person.id)
                            left join ref_book_address addr on (addr.id=person.address)
@@ -709,6 +709,7 @@ package body person_pkg as
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and person.status=0
       union
        /*по СНИЛСУ*/
       select t.id as person_id,
@@ -766,6 +767,7 @@ package body person_pkg as
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and person.status=0
       union
       /*По ИННу*/
       select t.id as person_id,
@@ -823,6 +825,7 @@ package body person_pkg as
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and person.status=0
       union
       /*По ИННу иностранного государства*/
       select t.id as person_id,
@@ -880,6 +883,7 @@ package body person_pkg as
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and person.status=0
       union
       /*По ДУЛ*/
       select t.id as person_id,
@@ -931,13 +935,14 @@ package body person_pkg as
              addr.address_type,
              addr.address
         from ndfl_person t left join ref_book_doc_type dt on (dt.code=t.id_doc_type)
-                           left join ref_book_id_doc doc on (doc.doc_id=dt.id and replace(lower(doc.doc_number),' ','') = replace(lower(t.id_doc_number),' ','') and doc.status=0)
+                           left join ref_book_id_doc doc on (doc.doc_id=dt.id and regexp_replace(lower(doc.doc_number),'[^0-9A-Za-zА-Яа-я]','') = regexp_replace(lower(t.id_doc_number),'[^0-9A-Za-zА-Яа-я]','') and doc.status=0)
                            left join ref_book_person person on (person.id = doc.person_id)
                            left join ref_book_id_tax_payer tax on (tax.person_id = person.id and tax.status=0)
                            left join ref_book_address addr on (addr.id=person.address and addr.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
          and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and person.status=0
       union
       /*По ИНП*/
       select t.id as person_id,
@@ -994,11 +999,11 @@ package body person_pkg as
                            left join ref_book_id_doc doc on (doc.person_id=person.id and doc.status=0)
        where t.declaration_data_id=p_declaration
          and t.person_id is null
-         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id);
-
+         and exists(select 1 from tmp_version t where t.calc_date = v_date and t.version = person.version and t.record_id = person.record_id)
+         and person.status=0;
     return v_ref;
   end;
 
-end person_pkg;
+end;
 /
 show errors;

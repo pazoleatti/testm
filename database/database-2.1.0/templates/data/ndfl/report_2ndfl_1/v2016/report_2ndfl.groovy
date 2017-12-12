@@ -325,11 +325,11 @@ class Report2Ndfl extends AbstractScriptClass {
 
     PagingResult<Map<String, RefBookValue>> ndflReferencesWithError = []
 
-    def buildXml(FileWriter writer) {
+    def buildXml(Writer writer) {
         buildXml(writer, false, null, null)
     }
 
-    def buildXmlForSpecificReport(FileWriter writer, Long xmlPartNumber, Long pNumSpravka) {
+    def buildXmlForSpecificReport(Writer writer, Long xmlPartNumber, Long pNumSpravka) {
         buildXml(writer, true, xmlPartNumber, pNumSpravka)
     }
 
@@ -340,7 +340,7 @@ class Report2Ndfl extends AbstractScriptClass {
  * @return
  */
     @TypeChecked(TypeCheckingMode.SKIP)
-    def buildXml(FileWriter writer, boolean isForSpecificReport, Long xmlPartNumber, Long pNumSpravka) {
+    def buildXml(Writer writer, boolean isForSpecificReport, Long xmlPartNumber, Long pNumSpravka) {
         boolean presentNotHoldingTax = false
         def refPersonIds = []
         ScriptUtils.checkInterrupted();
@@ -378,7 +378,7 @@ class Report2Ndfl extends AbstractScriptClass {
         def endDate = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
 
         // Данные для Файл.Документ.Подписант
-        String prPodp = getProvider(REF_BOOK_SIGNATORY_MARK_ID).getRecordData(departmentParamRow?.SIGNATORY_ID?.value).CODE.stringValue
+        String prPodp = getProvider(REF_BOOK_SIGNATORY_MARK_ID).getRecordData(departmentParamRow?.SIGNATORY_ID?.value).CODE.value
         String signatoryFirstname = departmentParamRow?.SIGNATORY_FIRSTNAME?.stringValue
         String signatorySurname = departmentParamRow?.SIGNATORY_SURNAME?.stringValue
         String signatoryLastname = departmentParamRow?.SIGNATORY_LASTNAME?.stringValue
@@ -608,7 +608,7 @@ class Report2Ndfl extends AbstractScriptClass {
                                                 sumDohod = ScriptUtils.round(sumDohod, 2)
                                                 sumDohodAll += sumDohod
 
-                                                СвСумДох(Месяц: sprintf('%02d', monthKey + 1),
+                                                СвСумДох(Месяц: sprintf('%02d', monthKey),
                                                         КодДоход: incomeKey,
                                                         СумДоход: sumDohod,
                                                         Страница: isForSpecificReport ? (index <= ((countIncome + 1) / 2) ? 1 : 2) : null
@@ -833,7 +833,7 @@ class Report2Ndfl extends AbstractScriptClass {
         TAUser createUser = declarationService.getSystemUserInfo().getUser()
 
         RefBookDataProvider fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-        Long fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
+        Long fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.code}").get(0)
 
         DeclarationDataFile declarationDataFile = new DeclarationDataFile()
         declarationDataFile.setDeclarationDataId(declarationData.id)
@@ -2325,7 +2325,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         // Поиск данных по фильтру
         List docs = searchData(resultReportParameters, pageSize, result)
 
-        dataRows.addAll(addRows(docs));
+        dataRows.addAll(addRows(docs, rowColumns));
 
         result.setTableColumns(tableColumns);
         result.setDataRows(dataRows);
@@ -2334,7 +2334,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
     }
 
     @TypeChecked(TypeCheckingMode.SKIP)
-    List<DataRow<Cell>> addRows(List docs) {
+    List<DataRow<Cell>> addRows(List docs, List<Column> rowColumns) {
         // Формирование списка данных для вывода в таблицу
         List<DataRow<Cell>> toReturn = []
         docs.each() { doc ->
@@ -2365,7 +2365,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         Column pNumSpravka = new StringColumn()
         pNumSpravka.setAlias("pNumSpravka")
         pNumSpravka.setName("№ справки 2НДФЛ")
-        pNumSpravka.setWidth(5)
+        pNumSpravka.setWidth(13)
         tableColumns.add(pNumSpravka)
 
         Column column1 = new StringColumn()
@@ -2395,7 +2395,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         Column column5 = new StringColumn()
         column5.setAlias("birthDay")
         column5.setName("Дата рождения")
-        column5.setWidth(10)
+        column5.setWidth(11)
         tableColumns.add(column5)
 
         Column column6 = new StringColumn()
@@ -2407,13 +2407,13 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         Column column7 = new StringColumn()
         column7.setAlias("statusNp")
         column7.setName("Статус налогоплательщика")
-        column7.setWidth(30)
+        column7.setWidth(25)
         tableColumns.add(column7)
 
         Column column8 = new StringColumn()
         column8.setAlias("innForeign")
         column8.setName("ИНН Страны гражданства")
-        column8.setWidth(10)
+        column8.setWidth(20)
         tableColumns.add(column8)
 
         return tableColumns;
@@ -2425,7 +2425,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         Column pNumSpravka = new StringColumn()
         pNumSpravka.setAlias("pNumSpravka")
         pNumSpravka.setName("pNumSpravka")
-        pNumSpravka.setWidth(10)
+        pNumSpravka.setWidth(15)
         tableColumns.add(pNumSpravka)
 
         Column column1 = new StringColumn()
@@ -2473,7 +2473,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         Column column8 = new StringColumn()
         column8.setAlias("innForeign")
         column8.setName("ИНН Страны гражданства")
-        column8.setWidth(10)
+        column8.setWidth(15)
         tableColumns.add(column8)
 
         return tableColumns;
@@ -2540,6 +2540,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
  * Создать спецотчет
  * @return
  */
+    @TypeChecked(TypeCheckingMode.SKIP)
     def createSpecificReport() {
         def alias = scriptSpecificReportHolder.getDeclarationSubreport().getAlias()
         if (alias == ALIAS_PRIMARY_RNU_W_ERRORS) {
@@ -2559,12 +2560,12 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         subReportViewParams.put('№ ДУЛ', row.idDocNumber.toString())
 
         def xmlStr = declarationService.getXmlData(declarationData.id)
-        GPathResult Файл = new XmlSlurper().parseText(xmlStr)
-        long xmlPartNumber = getXmlPartNumber(Файл)
+        def Файл = new XmlSlurper().parseText(xmlStr)
+        long xmlPartNumber = 1 + (long) ((new Long(Файл.Документ.find { doc -> true }.@НомСпр.text())) / NUMBER_OF_PERSONS)
 
-        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, { FileWriter writer ->
-            buildXmlForSpecificReport(writer, xmlPartNumber, Long.valueOf(row.pNumSpravka.toString()))
-            writer.flush()
+        def jasperPrint = declarationService.createJasperReport(scriptSpecificReportHolder.getFileInputStream(), params, {
+            buildXmlForSpecificReport(it, xmlPartNumber, Long.valueOf(row.pNumSpravka))
+            it.flush()
         });
 
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.declarationTemplateId)
@@ -2573,10 +2574,6 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         scriptSpecificReportHolder.setFileName(fileName.toString())
     }
 
-    @TypeChecked(TypeCheckingMode.SKIP)
-    long getXmlPartNumber(GPathResult Файл) {
-        return 1 + (long) ((new Long(Файл.Документ.find { doc -> true }.@НомСпр.text())) / NUMBER_OF_PERSONS)
-    }
 /**
  * Создать XLSX отчет
  * @return

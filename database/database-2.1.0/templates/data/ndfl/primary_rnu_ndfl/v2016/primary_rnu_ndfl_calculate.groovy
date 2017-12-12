@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.AttributeChangeListene
 import com.aplana.sbrf.taxaccounting.model.identification.AttributeCountChangeListener
 import com.aplana.sbrf.taxaccounting.model.identification.Country
 import com.aplana.sbrf.taxaccounting.model.identification.DocType
+import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument
 import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier
@@ -20,7 +21,9 @@ import com.aplana.sbrf.taxaccounting.model.identification.TaxpayerStatus
 import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
+import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
@@ -45,6 +48,8 @@ class Calculate extends AbstractScriptClass {
     NdflPersonService ndflPersonService
     ReportPeriodService reportPeriodService
     RefBookFactory refBookFactory
+    RefBookService refBookService
+    PersonService personService
 
     /**
      * Получить версию используемую для поиска записей в справочнике ФЛ
@@ -87,6 +92,8 @@ class Calculate extends AbstractScriptClass {
     Map<Long, String> taxpayerStatusCodeCache = [:]
     //Коды Асну
     Map<Long, String> asnuCache = [:]
+    //Приоритет Асну
+    Map<Long, Integer> asnuPriority = [:];
 
     private Calculate() {
     }
@@ -114,6 +121,12 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookFactory")) {
             this.refBookFactory = (RefBookFactory) scriptClass.getProperty("refBookFactory");
+        }
+        if (scriptClass.getBinding().hasVariable("refBookService")) {
+            this.refBookService = (RefBookService) scriptClass.getProperty("refBookService")
+        }
+        if (scriptClass.getBinding().hasVariable("personService")) {
+            this.personService = (PersonService) scriptClass.getProperty("personService")
         }
     }
 
@@ -180,11 +193,12 @@ class Calculate extends AbstractScriptClass {
                     updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap);
                     logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time));
 
+                    countTotalAndUniquePerson(primaryPersonMap.values())
                     logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull));
             }
         })
         // Формирование pdf-отчета формы
-        declarationService.createPdfReport(logger, declarationData, userInfo)
+        // declarationService.createPdfReport(logger, declarationData, userInfo)
     }
 
     Date getRefBookPersonVersionTo() {
@@ -200,6 +214,23 @@ class Calculate extends AbstractScriptClass {
             refBookPersonVersionTo = localCalendar.getTime();
         }
         return refBookPersonVersionTo;
+    }
+
+    // Вывод информации о количестве обработынных физлиц всего и уникальных
+    void countTotalAndUniquePerson(Collection<NaturalPerson> persons) {
+        def personIds = persons.collect { NaturalPerson person -> return person.id }
+        int countOfNulls = personIds.count{Long id -> return id == null}.intValue()
+        personIds.removeAll([null])
+        def personIdSet = personIds.toSet()
+        if (!personIdSet.isEmpty()) {
+            Set<Long> duplicateIdSet = personService.getDuplicate(personIdSet).toSet()
+            for (Long duplicateId : duplicateIdSet){
+                if (personIdSet.contains(duplicateId)){
+                    personIdSet.remove(duplicateId)
+                }
+            }
+        }
+        logger.info("Записей физических лиц обработано: ${personIds.size() + countOfNulls}, всего уникальных записей физических лиц: ${personIdSet.size() + countOfNulls}")
     }
 
     NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper(boolean isLog) {
@@ -334,6 +365,7 @@ class Calculate extends AbstractScriptClass {
 
                 PersonDocument personDocument = person.getPersonDocument();
                 if (personDocument != null && personDocument.docType != null) {
+                    personDocument.documentNumber = performDocNumber(personDocument)
                     documentList.add(personDocument);
                 }
 
@@ -370,7 +402,8 @@ class Calculate extends AbstractScriptClass {
 
             //Выводим информацию о созданных записях
             for (NaturalPerson person : insertRecords) {
-                String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", person.getId(), person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
+                Long recordId = refBookService.getNumberValue(RefBook.Id.PERSON.id, person.getId(), "record_id").longValue()
+                String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", recordId, person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
                 logger.info(noticeMsg);
                 createCnt++;
             }
@@ -445,7 +478,18 @@ class Calculate extends AbstractScriptClass {
             NaturalPerson primaryPerson = primaryPersonMap.get(primaryPersonId);
 
             inTime = System.currentTimeMillis();
-            NaturalPerson refBookPerson = refBookPersonService.identificatePerson(primaryPerson, similarityPersonList, similarityThreshold, logger);
+
+            IdentificationData identificationData = new IdentificationData()
+            identificationData.naturalPerson = primaryPerson
+            identificationData.refBookPersonList = similarityPersonList
+            identificationData.tresholdValue = similarityThreshold
+            identificationData.declarationDataAsnuId = declarationData.asnuId
+            if (asnuPriority.isEmpty()) {
+                getRefAsnu()
+            }
+            identificationData.priorityMap = asnuPriority
+
+            NaturalPerson refBookPerson = refBookPersonService.identificatePerson(identificationData, logger);
 
             conformityMap.put(primaryPersonId, refBookPerson);
 
@@ -533,6 +577,7 @@ class Calculate extends AbstractScriptClass {
 
                     if (personDocument == null) {
                         if (primaryPersonDocument.docType != null) {
+                            primaryPersonDocument.documentNumber = performDocNumber(primaryPersonDocument)
                             insertDocumentList.add(primaryPersonDocument);
                             refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
                         }
@@ -655,6 +700,18 @@ class Calculate extends AbstractScriptClass {
 
         logForDebug("Обновлено записей: " + updCnt);
 
+    }
+
+    String performDocNumber(PersonDocument personDocument) {
+        List<DocType> docTypes = getDocTypeRefBookList()
+        String toReturn = personDocument.documentNumber
+        if (docTypes.contains(personDocument.docType)) {
+            String docNumber = personDocument.documentNumber
+            if (ScriptUtils.checkDulSymbols(personDocument.docType.code, BaseWeigthCalculator.prepareStringDul(personDocument.documentNumber).toUpperCase())){
+                toReturn = ScriptUtils.formatDocNumber(personDocument.docType.code, docNumber.replaceAll("[^А-Яа-я\\w]", "").toUpperCase())
+            }
+        }
+        return toReturn;
     }
 
     def buildRefreshNotice(AttributeCountChangeListener addressAttrCnt, AttributeCountChangeListener personAttrCnt, AttributeCountChangeListener documentAttrCnt, AttributeCountChangeListener taxpayerIdentityAttrCnt) {
@@ -804,7 +861,7 @@ class Calculate extends AbstractScriptClass {
         putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
-        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId);
+        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, person.getPersonIdentityList().get(0).getAsnuId());
         putValue(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
         return values;
     }
@@ -1096,7 +1153,9 @@ class Calculate extends AbstractScriptClass {
         if (asnuCache.size() == 0) {
             PagingResult<Map<String, RefBookValue>> refBookMap = getRefBook(RefBook.Id.ASNU.id)
             refBookMap.each { Map<String, RefBookValue> refBook ->
-                asnuCache.put((Long) refBook?.id?.numberValue, refBook?.CODE?.stringValue)
+                Long asnuId = (Long) refBook?.id?.numberValue
+                asnuCache.put(asnuId, refBook?.CODE?.stringValue)
+                asnuPriority.put(asnuId, (Integer) refBook?.PRIORITY?.numberValue)
             }
         }
         return asnuCache;

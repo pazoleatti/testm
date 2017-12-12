@@ -943,33 +943,94 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                                     Map<Long, Map<String, RefBookValue>> incomeCodeMap, List<String> deductionTypeList) {
 
         List<NdflPersonIncome> incomes = new ArrayList<NdflPersonIncome>();
-        // При создание объекто операций доходов выполняется проверка на соответствие дат отчетному периоду
-        incomes.addAll(ndflPersonOperationsNode.'СведДохНал'.collect {
-            transformNdflPersonIncome(it, ndflPerson, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio, incomeCodeMap)
-        });
-        // Если проверка на даты не прошла, то операция не добавляется.
-        // https://jira.aplana.com/browse/SBRFNDFL-1350 - если дата не прошла то ничего не загружаем и выводим сообщение
-        if (incomes.contains(null)) {
-            return
-        }
+        // Проверка операции (не строк)
+        if (isDatesInPeriod(ndflPersonOperationsNode, ndflPerson, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio)) {
+            // При создание объекто операций доходов выполняется проверка на соответствие дат отчетному периоду
+            incomes.addAll(ndflPersonOperationsNode.'СведДохНал'.collect {
+                transformNdflPersonIncome(it, ndflPerson, toString(ndflPersonOperationsNode.'@КПП'), toString(ndflPersonOperationsNode.'@ОКТМО'), ndflPerson.inp, fio, incomeCodeMap)
+            });
+            // Если проверка на даты не прошла, то операция не добавляется.
+            // https://jira.aplana.com/browse/SBRFNDFL-1350 - если дата не прошла то ничего не загружаем и выводим сообщение
+            if (incomes.contains(null)) {
+                return
+            }
 
-        incomes.each {
-            if (it != null) {
-                ndflPerson.incomes.add(it);
+            incomes.each {
+                if (it != null) {
+                    ndflPerson.incomes.add(it);
+                }
+            }
+
+            List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>();
+            deductions.addAll(ndflPersonOperationsNode.'СведВыч'.collect {
+                transformNdflPersonDeduction(it, ndflPerson, fio, deductionTypeList)
+            });
+            ndflPerson.deductions.addAll(deductions)
+
+            List<NdflPersonPrepayment> prepayments = new ArrayList<NdflPersonPrepayment>();
+            prepayments.addAll(ndflPersonOperationsNode.'СведАванс'.collect {
+                transformNdflPersonPrepayment(it)
+            });
+            ndflPerson.prepayments.addAll(prepayments);
+        }
+    }
+
+    /**
+     * Проверка на принадлежность операций периоду при загрузке ТФ
+     */
+    @TypeChecked(TypeCheckingMode.SKIP)
+    boolean isDatesInPeriod(NodeChild ndflPersonOperationsNode, NdflPerson ndflPerson, String kpp, String oktmo, String inp, String fio) {
+
+        def operationId = toString((GPathResult) ndflPersonOperationsNode.getProperty('@ИдОпер'))
+        LocalDateTime incomeAccruedDate = null
+        LocalDateTime incomePayoutDate = null
+
+        ndflPersonOperationsNode.childNodes().each { node ->
+            if (node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
+                incomeAccruedDate = LocalDateTime.parse(node.attributes['ДатаДохНач'], DateTimeFormat.forPattern(DATE_FORMAT));
+            }
+            if (node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
+                incomePayoutDate = LocalDateTime.parse(node.attributes['ДатаДохВыпл'], DateTimeFormat.forPattern(DATE_FORMAT));
             }
         }
 
-        List<NdflPersonDeduction> deductions = new ArrayList<NdflPersonDeduction>();
-        deductions.addAll(ndflPersonOperationsNode.'СведВыч'.collect {
-            transformNdflPersonDeduction(it, ndflPerson, fio, deductionTypeList)
-        });
-        ndflPerson.deductions.addAll(deductions)
+        // Доход.Дата.Начисление
+        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+        // Доход.Дата.Выплата
+        boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
+        if (incomeAccruedDateOk || incomePayoutDateOk) {
+            return false
+        } else {
+            String pathError = String.format(SECTION_LINE_RANGE_MSG, T_PERSON_INCOME, "тут должен быть номер строк")
+            DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+            if (!incomeAccruedDateOk) {
+                logPeriodError(C_INCOME_ACCRUED_DATE, pathError, departmentReportPeriod, incomeAccruedDate, inp, fio, operationId)
+            }
+            if (!incomePayoutDateOk) {
+                logPeriodError(C_INCOME_PAYOUT_DATE, pathError, departmentReportPeriod, incomePayoutDate, inp, fio, operationId)
+            }
+        }
+        return true
+    }
 
-        List<NdflPersonPrepayment> prepayments = new ArrayList<NdflPersonPrepayment>();
-        prepayments.addAll(ndflPersonOperationsNode.'СведАванс'.collect {
-            transformNdflPersonPrepayment(it)
-        });
-        ndflPerson.prepayments.addAll(prepayments);
+    void logPeriodError(String paramName, String pathError, DepartmentReportPeriod departmentReportPeriod, LocalDateTime date, String inp, String fio, String operationId) {
+        String errMsg = String.format("Значение гр. %s (\"%s\") не входит в отчетный период налоговой формы (%s), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s",
+                paramName, ScriptUtils.formatDate(date),
+                departmentReportPeriod.reportPeriod.taxPeriod.year + ", " + departmentReportPeriod.reportPeriod.name,
+                operationId,
+                fio, inp
+        )
+        logger.warnExp("%s. %s.", "Проверка соответствия дат операций РНУ НДФЛ отчетному периоду", "", pathError,
+                errMsg)
+    }
+
+    // Проверка принадлежности даты к периоду формы
+    boolean dateRelateToCurrentPeriod(LocalDateTime date) {
+        //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
+        if (date == null || (date.toDate() >= getReportPeriodStartDate() && date.toDate() <= getReportPeriodEndDate())) {
+            return true
+        }
+        return false
     }
 
 
@@ -1019,11 +1080,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         personIncome.oktmo = toString((GPathResult) operationNode.getProperty('@ОКТМО'))
         personIncome.kpp = toString((GPathResult) operationNode.getProperty('@КПП'))
 
-        if (operationNotRelateToCurrentPeriod(incomeAccruedDate, incomePayoutDate, taxDate,
-                kpp, oktmo, inp, fio, personIncome)) {
-            return null
-        }
-
         personIncome.incomeAccruedDate = toDate((GPathResult) node.getProperty('@ДатаДохНач'))
         personIncome.incomePayoutDate = toDate((GPathResult) node.getProperty('@ДатаДохВыпл'))
         personIncome.incomeAccruedSumm = toBigDecimal((GPathResult) node.getProperty('@СуммДохНач'))
@@ -1059,37 +1115,6 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         return personIncome
-    }
-
-    // Проверка на принадлежность операций периоду при загрузке ТФ
-    boolean operationNotRelateToCurrentPeriod(LocalDateTime incomeAccruedDate, LocalDateTime incomePayoutDate, LocalDateTime taxDate,
-                                              String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
-        // Доход.Дата.Начисление
-        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(C_INCOME_ACCRUED_DATE, incomeAccruedDate, kpp, oktmo, inp, fio, ndflPersonIncome)
-        // Доход.Дата.Выплата
-        boolean incomePayoutDateOk = dateRelateToCurrentPeriod(C_INCOME_PAYOUT_DATE, incomePayoutDate, kpp, oktmo, inp, fio, ndflPersonIncome)
-        if (incomeAccruedDateOk || incomePayoutDateOk) {
-            return false
-        }
-        return true
-    }
-
-    boolean dateRelateToCurrentPeriod(String paramName, LocalDateTime date, String kpp, String oktmo, String inp, String fio, NdflPersonIncome ndflPersonIncome) {
-        //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-        if (date == null || (date.toDate() >= getReportPeriodStartDate() && date.toDate() <= getReportPeriodEndDate())) {
-            return true
-        }
-        String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, (ndflPersonIncome.rowNum ? ndflPersonIncome.rowNum.longValue() : ""))
-        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
-        String errMsg = String.format("Значение гр. %s (\"%s\") не входит в отчетный период налоговой формы (%s), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s",
-                paramName, ScriptUtils.formatDate(date),
-                departmentReportPeriod.reportPeriod.taxPeriod.year + ", " + departmentReportPeriod.reportPeriod.name,
-                ndflPersonIncome.operationId,
-                fio, inp
-        )
-        logger.warnExp("%s. %s.", "Проверка соответствия дат операций РНУ НДФЛ отчетному периоду", "", pathError,
-                errMsg)
-        return false
     }
 
     NdflPersonDeduction transformNdflPersonDeduction(NodeChild node, NdflPerson ndflPerson, String fio,
@@ -1225,6 +1250,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     Map<Integer, String> departmentFullNameMap = [:]
 
     final String SECTION_LINE_MSG = "Раздел %s. Строка %s"
+    final String SECTION_LINE_RANGE_MSG = "Раздел %s. Строки %s"
 
     // Коды видов вычетов
     List<String> deductionTypeCache = []
@@ -1521,7 +1547,9 @@ class RequisitesSheetFiller implements SheetFiller {
             cell5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "");
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
-            cell6.setCellValue(np.birthDay?.toDate());
+            if (np.birthDay != null) {
+                cell6.setCellValue(np.birthDay.toDate());
+            }
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyle)
             cell7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "");

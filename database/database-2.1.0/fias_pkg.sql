@@ -482,7 +482,8 @@ begin
          and c.fname=nvl(replace(lower(p_check_element),' ',''),'-')
          and c.ftype=nvl(lower(p_check_ftype),'г')
          and (p_parent_id is null /*and c.parentguid is null*/ or p_parent_id is not null and a.id=p_parent_id)
-         and c.has_child=decode(p_leaf,1,0,1);
+         --and c.has_child=decode(p_leaf,1,0,1)
+		 ;
     elsif (p_check_type='LOCALITY') then
       select min(id) into v_result
         from (
@@ -654,7 +655,7 @@ begin
                        fias_pkg.CheckAddrElementRetID(t3.region_code,t3.loc_fname,t3.loc_type,nvl(t3.city_id,t3.area_id),'LOCALITY',-1/*t3.loc_leaf*/) loc_id
                   from (
                         select t2.*,
-                               case when t2.region_code in ('77','78','92','99') and t2.city is null then 1
+                               case when t2.region_code in ('77','78','92','99') and t2.city is null then fias_pkg.CheckAddrElementRetID(t2.region_code,t2.city_fname,t2.city_type,null,'AREA',0)
                                     else fias_pkg.CheckAddrElementRetID(t2.region_code,t2.city_fname,t2.city_type,t2.area_id,'CITY',t2.city_leaf) end city_id
                           from (
                                 select t1.*,

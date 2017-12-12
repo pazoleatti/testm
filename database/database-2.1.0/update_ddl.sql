@@ -2,6 +2,10 @@
 prompt alter table notification.id
 alter table notification modify id number(18);
 
+--create synonym
+prompt create synonyms
+@@create_synonyms.sql;
+
 --create tables
 prompt create tables
 @@create_tables.sql;
@@ -10,13 +14,13 @@ prompt create tables
 prompt create views
 @@create_views.sql;
 
---create constraints
-prompt create constraints
-@@create_constraints.sql;
-
 --alter tables
 prompt alter tables
 @@alter_tables.sql;
+
+--create constraints
+prompt create constraints
+@@create_constraints.sql;
 
 --drop tables
 prompt drop tables
@@ -25,6 +29,10 @@ prompt drop tables
 --create sequences
 prompt create sequences
 @@create_sequences.sql;
+
+--create indexes
+prompt create indexes
+@@create_indexes.sql;
 
 --alter jobs
 prompt alter jobs
