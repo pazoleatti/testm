@@ -15,11 +15,9 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.*
 import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormat
-import org.springframework.util.StopWatch
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
-import static java.util.Objects.toString
 
 new Import(this).run()
 
@@ -65,8 +63,6 @@ class Import extends AbstractScriptClass {
     Map<String, List<Long>> incomeTypeMap
     // Коды справочника "Коды видов вычетов"
     List<String> deductionCodes
-    // Для замеров времени выполнения
-    StopWatch stopWatch = new StopWatch()
 
     final String DATE_FORMAT = "dd.MM.yyyy"
 
@@ -101,17 +97,11 @@ class Import extends AbstractScriptClass {
         initConfiguration()
         switch (formDataEvent) {
             case FormDataEvent.IMPORT:
-                try {
-                    importData()
-                } finally {
-                    def summary = stopWatch.prettyPrint() + "\n" + stopWatch.shortSummary()
-                    logForDebug(summary.replaceAll("%", "%%"))
-                }
+                importData()
         }
     }
 
     void importData() {
-        stopWatch.start("Чтение данных из файла")
         checkInterrupted()
 
         if (!fileName.endsWith(".xlsx")) {
@@ -126,13 +116,11 @@ class Import extends AbstractScriptClass {
 
         checkAndReadFile(inputStream, fileName, allValues, headerValues, null, null, 2, paramsMap)
         checkHeaders(headerValues)
-        stopWatch.stop()
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
 
-        stopWatch.start("Создание ФЛ")
         int TABLE_DATA_START_INDEX = 3
         int rowIndex = TABLE_DATA_START_INDEX
         List<NdflPerson> ndflPersons = []
@@ -152,22 +140,15 @@ class Import extends AbstractScriptClass {
             def ndflPerson = createNdflPerson(row)
             merge(ndflPersons, ndflPerson)
         }
-        stopWatch.stop()
 
-        stopWatch.start("Проверки ФЛ")
         checkPersons(ndflPersons)
         updatePersonsRowNum(ndflPersons)
-        stopWatch.stop()
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             checkInterrupted()
-            stopWatch.start("Очистка формы")
             ndflPersonService.deleteAll(declarationData.id)
-            stopWatch.stop()
 
-            stopWatch.start("Сохранение ФЛ")
             ndflPersonService.save(ndflPersons)
-            stopWatch.stop()
         } else {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
         }
@@ -368,7 +349,7 @@ class Import extends AbstractScriptClass {
                 atLeastOneRecordFailed |= !checkPassed
             }
             if (allRecordsFailed) {
-                logger.error("Для ФЛ (${person.lastName} ${person.firstName}${toString(person.middleName, "")}, " +
+                logger.error("Для ФЛ (${person.lastName} ${person.firstName}${person.middleName ? " " + person.middleName : ""}, " +
                         "ИНП ${person.inp} отсутствуют операции, принадлежащие периоду формы: Операции по ФЛ не загружено в Налоговую форму " +
                         "№: \"${declarationData.id}\", Период: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"," +
                         " Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
@@ -619,8 +600,8 @@ class Import extends AbstractScriptClass {
      * @return
      */
     List<String> getRefDeductionCodes() {
-        deductionCodes = []
-        if (deductionCodes) {
+        if (!deductionCodes) {
+            deductionCodes = []
             PagingResult<Map<String, RefBookValue>> refBookList = getRefBook(RefBook.Id.DEDUCTION_TYPE.id)
             refBookList.each { Map<String, RefBookValue> refBook ->
                 deductionCodes.add(refBook?.CODE?.stringValue)
