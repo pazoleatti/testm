@@ -7,7 +7,7 @@ SET ORA_BIN=D:\app\client\RNurgaleev\product\12.1.0\client_1\BIN
 SET LOG_DIR=_logs
 REM SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
-SET UN_SCHEMA=TAX_1_5_1
+SET TAX_SCHEME=TAX_1_5_1
 
 ECHO ## DB: %AUTH%
 
@@ -19,7 +19,7 @@ DEL /s /q /f %LOG_DIR%\*.txt
 REM DEL /s /q /f %BAD_DIR%\*.*
 
 ECHO ## ddl
-"%ORA_BIN%\sqlplus" %AUTH% @"update_ddl.sql" > "%LOG_DIR%/update_ddl.txt" %UN_SCHEMA%
+"%ORA_BIN%\sqlplus" %AUTH% @"update_ddl.sql" > "%LOG_DIR%/update_ddl.txt" %TAX_SCHEME%
 
 ECHO ## dml
 "%ORA_BIN%\sqlplus" %AUTH% @"update_dml.sql" > "%LOG_DIR%/update_dml.txt"

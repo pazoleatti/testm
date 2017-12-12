@@ -7,7 +7,7 @@ SET ORA_BIN=D:\dev\instantclient_12_2
 SET LOG_DIR=_logs
 SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
-SET UN_SCHEMA=TAX
+SET TAX_SCHEME=TAX
 
 ECHO ## DB: %AUTH%
 
@@ -23,7 +23,7 @@ ECHO ## ddl
 "%ORA_BIN%\sqlplus" %AUTH% @"update_ddl.sql" > "%LOG_DIR%/update_ddl.txt"
 
 ECHO ## dml
-"%ORA_BIN%\sqlplus" %AUTH% @"update_dml.sql" > "%LOG_DIR%/update_dml.txt" %UN_SCHEMA%
+"%ORA_BIN%\sqlplus" %AUTH% @"update_dml.sql" > "%LOG_DIR%/update_dml.txt" %TAX_SCHEME%
 
 ECHO ## dml: templates
 CD templates/script
