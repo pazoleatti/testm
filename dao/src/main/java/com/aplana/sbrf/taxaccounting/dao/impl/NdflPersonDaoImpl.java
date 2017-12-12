@@ -219,7 +219,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 .limit(pagingParams.getCount()).transform(GroupBy.groupBy(ndflPersonIncome.id).
                 list(Projections.constructor(NdflPersonIncomeDTO.class, ndflPersonIncome.incomeCode,
                         ndflPersonIncome.incomeType, ndflPersonIncome.incomeAccruedDate,
-                        ndflPersonIncome.incomePayoutDate, ndflPersonIncome.kpp, ndflPersonIncome.oktmo,
+                        ndflPersonIncome.incomePayoutDate, ndflPersonIncome.oktmo, ndflPersonIncome.kpp,
                         ndflPersonIncome.incomeAccruedSumm, ndflPersonIncome.incomePayoutSumm,
                         ndflPersonIncome.totalDeductionsSumm, ndflPersonIncome.taxBase, ndflPersonIncome.taxRate,
                         ndflPersonIncome.taxDate, ndflPersonIncome.calculatedTax, ndflPersonIncome.withholdingTax,
