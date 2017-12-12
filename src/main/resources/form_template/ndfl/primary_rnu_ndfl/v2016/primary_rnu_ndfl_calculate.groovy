@@ -535,6 +535,12 @@ class Calculate extends AbstractScriptClass {
 
             if (refBookPerson != null) {
 
+                /*Если АСНУ равно null, то это установленное значение в identificatePerson говорит что запись не надо
+                обновлять из-за низкого приоритета АСНУ*/
+                if (refBookPerson.sourceId == null) {
+                    continue;
+                }
+
                 primaryPerson.setId(refBookPerson.getId());
                 /*
                Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
