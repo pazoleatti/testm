@@ -5,7 +5,10 @@ select 2 as id, 'Удаление истекших блокировок' as task
 union all
 select 3 as id, 'Очистка хранилища временных файлов' as task_name, '0 5 22 * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
 union all
-select 4 as id, 'Мониторинг асинхронных задач' as task_name, '0/5 * * * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual) b
+select 4 as id, 'Мониторинг асинхронных задач' as task_name, '0/5 * * * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
+union all
+select 5 as id, 'Мониторинг появление новых событий в УН, которые требуют обработки на стороне НДФЛ' as task_name, '0/30 * * * * ?' as schedule, 1 as active, sysdate as modification_date, sysdate as last_fire_date from dual
+) b
 on (a.id=b.id)
 when matched then 
     update set a.task_name = b.task_name, a.schedule=b.schedule, a.active=b.active, a.modification_date=b.modification_date, a.last_fire_date=b.last_fire_date

@@ -13,3 +13,5 @@ ECHO -- template
 ECHO -- template_script
 "%ORA_BIN%\sqlldr" userid=%AUTH% control="%BASE_DIR%/template_script.ldr" log="%LOG_DIR_REL%/%PREFIX%_4_template_script.txt" bad="%BAD_DIR_REL%/%PREFIX%_template_script.txt"
 CD %BASE_DIR%
+ECHO -- template_file
+"%ORA_BIN%\sqlplus" %AUTH% @"template_file.sql" > "%LOG_DIR_REL%/%PREFIX%_5_template_file.txt"

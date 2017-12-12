@@ -171,7 +171,7 @@ class Calculate extends AbstractScriptClass {
 
             if (refBookPersonId == null) {
                 String fio = ndflPerson.lastName + " " + ndflPerson.firstName + " " + (ndflPerson.middleName ?: "")
-                String fioAndInp = String.format(TEMPLATE_PERSON_FL, [fio, ndflPerson.inp])
+                String fioAndInp = String.format(TEMPLATE_PERSON_FL, fio, ndflPerson.inp)
                 deletedPersonMap.get(refBookPersonRecordId).each { def personDeclarationDataId ->
                     logger.errorExp("%s.", "Отсутствует связь со справочником \"Физические лица\"", fioAndInp,
                             "В налоговой форме № ${personDeclarationDataId} не удалось установить связь со справочником \"$R_PERSON\"")
@@ -249,8 +249,9 @@ class Calculate extends AbstractScriptClass {
         }
 
         logForDebug("Консолидация завершена, новых записей создано: " + (ndflPersonNum - 1) + ", " + ScriptUtils.calcTimeMillis(time));
-        logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") + " (всего " + declarationDataIdList.size() + " форм)")
+        logger.info("Номера первичных НФ, включенных в консолидацию: " + declarationDataIdList.join(", ") + " (всего " + declarationDataIdList.size() + " " + ScriptUtils.getFirstDeclensionByNumeric("форма", declarationDataIdList.size()) + ")")
     }
+
 
     /**
      * Получаем список идентификаторов деклараций которые попадут в консолидированную форму

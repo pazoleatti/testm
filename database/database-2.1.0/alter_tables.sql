@@ -26,5 +26,19 @@ begin
 	IF v_count>0 THEN
 		EXECUTE IMMEDIATE 'alter table department_report_period drop column is_balance_period';
 	END IF; 
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='declaration_data' and lower(column_name)='manually_created';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'alter table declaration_data add manually_created number(1) default 0 not null';
+		EXECUTE IMMEDIATE 'comment on column declaration_data.manually_created is ''Создана вручную (0-нет, 1-да)''';
+	END IF; 
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='ref_book_asnu' and lower(column_name)='priority';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'alter table ref_book_asnu add priority number(3)';
+		EXECUTE IMMEDIATE 'comment on column ref_book_asnu.priority is ''Приоритет АСНУ. Определяет, нужно ли обновлять запись справочника "ФЛ" при идентификации''';
+		EXECUTE IMMEDIATE 'comment on column ref_book_asnu.ROLE_ALIAS is ''Значение поля "Код роли" справочника "Системные роли" АСУН''';
+		EXECUTE IMMEDIATE 'comment on column ref_book_asnu.ROLE_NAME is ''Значение поля "Наименование" справочника "Системные роли" АСУН''';
+	END IF; 
 end;
 /
