@@ -190,7 +190,10 @@ public class Logger {
     }
 
     private void log(LogLevel level, String message, String type, String object, boolean excludeIfNotExist, Object...args) {
-        String extMessage = String.format(message, args);
+        String extMessage = message;
+        if (args != null && args.length > 0) {
+			extMessage = String.format(message, args);
+		}
 
         LogEntry entry = new LogEntry(level, extMessage, type, object);
         if (!excludeIfNotExist || !entries.contains(entry)) {

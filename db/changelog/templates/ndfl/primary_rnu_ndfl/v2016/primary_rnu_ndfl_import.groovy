@@ -176,6 +176,7 @@ class Import extends AbstractScriptClass {
                 logger.error("Ошибка при загрузке файла \"$fileName\". Заголовок таблицы не соответствует требуемой структуре.")
                 logger.error("Столбец заголовка таблицы \"${i >= headersActual[0].size() ? "Не задан или отсутствует" : headersActual[0][i]}\" № ${i + 1} " +
                         "не соответствует ожидаемому \"${header[i]}\" № ${i + 1}")
+                break;
             }
         }
     }
