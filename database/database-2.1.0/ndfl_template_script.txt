@@ -1,2 +1,0 @@
- 5|100|106|primary_rnu_ndfl/v2016/move_created_to_accepted/script.groovy|
- 7|101|105|consolidated_rnu_ndfl/v2016/move_created_to_accepted/script.groovy|
