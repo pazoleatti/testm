@@ -1521,7 +1521,9 @@ class RequisitesSheetFiller implements SheetFiller {
             cell5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "");
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
-            cell6.setCellValue(np.birthDay?.toDate());
+            if (np.birthDay != null) {
+                cell6.setCellValue(np.birthDay.toDate());
+            }
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyle)
             cell7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "");

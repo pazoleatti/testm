@@ -2773,4 +2773,11 @@ END;'
         </update>
     </changeSet>
 
+    <changeSet id="2.1-dnovikov-9" author="dnovikov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
