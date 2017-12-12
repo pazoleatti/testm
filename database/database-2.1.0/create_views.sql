@@ -22,3 +22,9 @@ WITH dep_with (id, parent_id, shortname) AS
   )
 select id, shortname from dep_with
 order by id;
+
+CREATE OR REPLACE VIEW SEC_USER_NDFL AS 
+select distinct a.* from sec_user a join sec_user_role b on a.id=b.user_id join subsystem_role c on b.role_id=c.role_id where c.subsystem_id=11 order by name, login;
+
+CREATE OR REPLACE VIEW SEC_ROLE_NDFL AS 
+select distinct a.* from sec_role a join subsystem_role c on a.id=c.role_id where c.subsystem_id=11 order by id;

@@ -35,5 +35,15 @@ begin
 	IF v_count=0 THEN
 		EXECUTE IMMEDIATE 'alter table async_task add constraint async_task_fk_type foreign key (type_id) references async_task_type(id)';
 	END IF; 
+	
+	select count(1) into v_count from user_constraints where lower(constraint_name)='decl_data_chk_man_created' AND lower(table_name)='declaration_data';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'alter table declaration_data add constraint decl_data_chk_man_created check(manually_created in (0, 1))';
+	END IF; 
+	
+	select count(1) into v_count from user_constraints where lower(constraint_name)='ref_book_asnu_chk_priority' AND lower(table_name)='ref_book_asnu';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999)';
+	END IF; 
 end;
 /

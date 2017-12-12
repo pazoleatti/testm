@@ -10,5 +10,10 @@ begin
 	IF v_count=0 THEN
 		EXECUTE IMMEDIATE 'create sequence seq_decl_template_event_script start with 1 increment by 1';
 	END IF; 
+	
+	select count(1) into v_count from user_sequences where lower(sequence_name)='seq_decl_template_checks';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'create sequence seq_decl_template_checks start with 1 increment by 1';
+	END IF; 
 end;
 /

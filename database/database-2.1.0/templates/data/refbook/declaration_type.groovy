@@ -645,7 +645,7 @@ class DeclarationType extends AbstractScriptClass {
 
         // Выполнить поиск ОНФ, для которой пришел файл ответа по условию
         def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
-        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.id}").get(0)
+        def fileTypeId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_2.code}").get(0)
         List<DeclarationData> declarationDataList = declarationService.findDeclarationDataByFileNameAndFileType(reportFileName, fileTypeId)
 
         if (declarationDataList.isEmpty()) {
@@ -654,7 +654,7 @@ class DeclarationType extends AbstractScriptClass {
         }
         if (declarationDataList.size() > 1) {
             def result = ""
-            declarationDataList.each {DeclarationData declData ->
+            declarationDataList.each { DeclarationData declData ->
                 result += "\"${AttachFileType.TYPE_2.title}\", \"${declData.kpp}\", \"${declData.oktmo}\"; "
             }
             logger.error(ERROR_NOT_FOUND_FORM + ": " + result, reportFileName, UploadFileName);
@@ -810,7 +810,7 @@ class DeclarationType extends AbstractScriptClass {
         // Сохранение файла ответа в форме
         def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new LocalDateTime())
         def createUser = declarationService.getSystemUserInfo().getUser()
-        def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.id}").get(0)
+        def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.code}").get(0)
 
         def declarationDataFile = new DeclarationDataFile()
         declarationDataFile.setDeclarationDataId(declarationData.id)
@@ -909,11 +909,26 @@ class DeclarationType extends AbstractScriptClass {
             declarationTypeId = DECLARATION_TYPE_RNU_NDFL_ID;
             attachFileType = AttachFileType.TYPE_1
             departmentCode = UploadFileName.substring(0, 17).replaceFirst("_*", "").trim();
-            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode, false);
-            if (formDepartment == null) {
+
+            List<Department> formDepartments = departmentService.getDepartmentsBySbrfCode(departmentCode, true);
+            if (formDepartments.size() == 0) {
                 logger.error("Не удалось определить подразделение \"%s\"", departmentCode)
                 return
             }
+            if (formDepartments.size() > 1) {
+                String departments = "";
+                for(Department department : formDepartments) {
+                    departments = departments + "\"" + department.getName().replaceAll("\"", "") + "\", ";
+                }
+                departments = departments.substring(0, departments.length() - 2);
+
+                logger.error("ТФ с именем \"%s\" не может быть загружен в Систему, в справочнике «Подразделения» АС «Учет налогов» с кодом \"%s\" найдено " +
+                        "несколько подразделений: %s. Обратитесь к пользователю с ролью \"Контролёр УНП\"", UploadFileName, departmentCode, departments);
+
+                return
+            }
+
+            Department formDepartment = formDepartments.get(0);
             departmentId = formDepartment != null ? formDepartment.getId() : null;
 
             reportPeriodCode = UploadFileName.substring(21, 23).replaceAll("_", "").trim();
