@@ -206,13 +206,14 @@ as
 
   -- Очистить таблицу FIAS_ADDROBJ
   procedure ClearFiasAddrObj;
-  
+
   -- Удаление и создание индекса IDX_FIAS_ADDR_CURRST_AOLEV
   procedure BeforeImport;
   procedure AfterImport;
-  
+
   procedure DropIndex;
   procedure CreateIndex;
+  procedure CheckPackage;
 
 end fias_pkg;
 /
@@ -221,6 +222,15 @@ create or replace
 package body fias_pkg as
 
     v_check_path boolean:=true;
+    
+  procedure CheckPackage
+  IS
+  BEGIN
+    NULL;
+    EXCEPTION
+      WHEN OTHERS
+        THEN NULL;
+  END CheckPackage;
   --------------------------------------------------------------------------------------------------------------
   -- внутренние функции
   --------------------------------------------------------------------------------------------------------------
@@ -237,6 +247,7 @@ package body fias_pkg as
     p number:=1;
     pp number:=1;
 begin
+  CheckPackage;
   if v_name_src is not null then
       -- делим строку по пробелам
       p:=instr(v_name_src||v_char,v_char);
@@ -277,6 +288,7 @@ begin
     v_name varchar2(200 char);
     v_type varchar2(10 char);
   begin
+    CheckPackage;
     ParseElement(p_lev,p_name_src,p_add_lev,v_type,v_name);
     return nvl(v_name,p_name_src);
   end;
@@ -288,6 +300,7 @@ begin
     v_name varchar2(200 char);
     v_type varchar2(10 char);
   begin
+    CheckPackage;    
     ParseElement(p_lev,p_name_src,p_add_lev,v_type,v_name);
     return v_type;
   end;
@@ -302,6 +315,7 @@ begin
   is
     tbl TTblFiasAddr:=TTblFiasAddr();
   begin
+    CheckPackage;
     if fias_addrs%isopen then
       close fias_addrs;
     end if;
@@ -328,6 +342,7 @@ begin
   is
     tbl TTblFiasAddrFS:=TTblFiasAddrFS();
   begin
+    CheckPackage;
     if fs_fias_addrs%isopen then
       close fs_fias_addrs;
     end if;
@@ -354,6 +369,7 @@ begin
   is
     v_result number:=0;
   begin
+    CheckPackage;
     if v_check_path then
       select decode(count(*),0,0,1) into v_result
         from (
@@ -451,6 +467,7 @@ begin
   is
     v_result number:=0;
   begin
+    CheckPackage;
     if (p_check_type='AREA') then
       select min(a.id) into v_result
         from mv_fias_area_act a
@@ -525,6 +542,7 @@ begin
   is
     v_ref ref_cursor;
   begin
+    CheckPackage;
     v_check_path:=(p_check_type=1);
     open v_ref for
       select n.id,n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
@@ -611,6 +629,7 @@ begin
   is
     v_ref ref_cursor;
   begin
+    CheckPackage;
     v_check_path:=false;
     open v_ref for
     select n.id,n.post_index,n.region_code,n.area,n.city,n.locality,n.street,
@@ -695,6 +714,7 @@ begin
   is
     v_ref ref_cursor;
   begin
+    CheckPackage;
     v_check_path:=(p_check_type=1);
     open v_ref for
       select tab.id,tab.post_index,tab.region_code,tab.area,tab.city,tab.locality,tab.street,
@@ -753,6 +773,7 @@ begin
   is
     PRAGMA AUTONOMOUS_TRANSACTION;
   begin
+    CheckPackage;
     dbms_mview.REFRESH('MV_FIAS_AREA_ACT', 'C');
     dbms_mview.REFRESH('MV_FIAS_CITY_ACT', 'C');
     dbms_mview.REFRESH('MV_FIAS_LOCALITY_ACT', 'C');
@@ -772,6 +793,7 @@ begin
          and pk.constraint_type='P';
     v_mode varchar2(8 char):=lower(p_mode);
   begin
+    CheckPackage;
     if v_mode not in ('disable','enable') then
       return;
     end if;
@@ -788,6 +810,7 @@ begin
   procedure ClearFiasAddrObj
   is
   begin
+    CheckPackage;
     TurnForeignKeys('disable');
 
     delete from fias_addrobj;
@@ -795,7 +818,7 @@ begin
     TurnForeignKeys('enable');
 
   end;
-  
+
   ------------------------------------------------------------------------------
   -- Очистка таблицы перед загрузкой
   ------------------------------------------------------------------------------
@@ -804,28 +827,30 @@ begin
     PRAGMA AUTONOMOUS_TRANSACTION;
     v_count number;
   begin
+    CheckPackage;
     /*select count(1) into v_count from user_indexes where index_name='IDX_FIAS_ADDR_CURRST_AOLEV';
     if v_count>0 then
       execute immediate 'drop index IDX_FIAS_ADDR_CURRST_AOLEV';
     end if;*/
 
-    for c in (select fk.table_name,fk.constraint_name
+    /*for c in (select fk.table_name,fk.constraint_name
         from user_constraints pk left join user_constraints fk on fk.r_constraint_name=pk.constraint_name
        where pk.table_name='FIAS_ADDROBJ'
          and pk.constraint_type='P')
     loop
       execute immediate 'alter table '||lower(c.table_name)||' disable constraint '||lower(c.constraint_name);
-    end loop;
+    end loop;*/
 
     delete from fias_addrobj;
 
-    for c in (select fk.table_name,fk.constraint_name
+    /*for c in (select fk.table_name,fk.constraint_name
         from user_constraints pk left join user_constraints fk on fk.r_constraint_name=pk.constraint_name
        where pk.table_name='FIAS_ADDROBJ'
          and pk.constraint_type='P')
     loop
       execute immediate 'alter table '||lower(c.table_name)||' enable constraint '||lower(c.constraint_name);
-    end loop;
+    end loop;*/
+	commit;
   end BeforeImport;
 
   ------------------------------------------------------------------------------
@@ -836,12 +861,13 @@ begin
     PRAGMA AUTONOMOUS_TRANSACTION;
     v_count number;
   begin
+    CheckPackage;
     select count(1) into v_count from user_indexes where index_name='IDX_FIAS_ADDR_CURRST_AOLEV';
    /* if v_count=0 then
       execute immediate 'CREATE INDEX IDX_FIAS_ADDR_CURRST_AOLEV ON FIAS_ADDROBJ (CURRSTATUS ASC, AOLEVEL ASC, REPLACE(LOWER(FORMALNAME), '' '', '''') ASC) ';
     end if;*/
   end AfterImport;
-  
+
   ------------------------------------------------------------------------------
   -- Удаление индекса
   ------------------------------------------------------------------------------
@@ -849,12 +875,13 @@ begin
   is
     v_count number;
   begin
+    CheckPackage;
     select count(1) into v_count from user_indexes where index_name='IDX_FIAS_ADDR_CURRST_AOLEV';
     if v_count>0 then
       execute immediate 'drop index IDX_FIAS_ADDR_CURRST_AOLEV';
     end if;
   end DropIndex;
-  
+
   ------------------------------------------------------------------------------
   -- Пересоздание индекса
   ------------------------------------------------------------------------------
@@ -862,12 +889,13 @@ begin
   is
     v_count number;
   begin
+    CheckPackage;
     select count(1) into v_count from user_indexes where index_name='IDX_FIAS_ADDR_CURRST_AOLEV';
     if v_count=0 then
       execute immediate 'CREATE INDEX IDX_FIAS_ADDR_CURRST_AOLEV ON FIAS_ADDROBJ (CURRSTATUS ASC, AOLEVEL ASC, REPLACE(LOWER(FORMALNAME), '' '', '''') ASC) ';
     end if;
   end CreateIndex;
-    
+
 end fias_pkg;
 /
 show errors;

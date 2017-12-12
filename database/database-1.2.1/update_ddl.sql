@@ -6,9 +6,9 @@ prompt create DropAndCreateFiasViews
 prompt drop index
 @@drop_index.sql;
 
--- disable constraints
-prompt disable constraints
-@@disable_constraints.sql;
+-- drop constraints
+prompt drop constraints
+@@drop_constraints.sql;
 
 -- create job
 prompt create job

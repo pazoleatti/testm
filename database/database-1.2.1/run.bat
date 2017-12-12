@@ -9,6 +9,7 @@ SET ORA_BIN=D:\dev\instantclient_12_2
 SET LOG_DIR=_logs
 SET BAD_DIR=_bad
 SET nls_lang=AMERICAN_AMERICA.AL32UTF8
+SET UN_SCHEMA=TAX_1_5
 SET NDFL_SCHEMA=NDFL_PSI
 
 ECHO ## DB: %AUTH%
@@ -21,7 +22,7 @@ DEL /s /q /f %LOG_DIR%\*.txt
 DEL /s /q /f %BAD_DIR%\*.*
 
 ECHO ## grants
-"%ORA_BIN%\sqlplus" %DBA_AUTH% @"grants.sql" > "%LOG_DIR%/grants.txt" %NDFL_SCHEMA%
+"%ORA_BIN%\sqlplus" %DBA_AUTH% @"grants.sql" > "%LOG_DIR%/grants.txt" %NDFL_SCHEMA% %UN_SCHEMA%
 
 ECHO ## ddl
 "%ORA_BIN%\sqlplus" %AUTH% @"update_ddl.sql" > "%LOG_DIR%/update_ddl.txt"
