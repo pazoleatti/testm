@@ -366,10 +366,10 @@ class Import extends AbstractScriptClass {
         def incomePayoutDate = income.incomePayoutDate?.toDate()
         boolean incomeAccruedDateCorrect = checkIncomeDate(incomeAccruedDate)
         boolean incomePayoutDateCorrect = checkIncomeDate(incomePayoutDate)
-        if (incomeAccruedDate || incomePayoutDateCorrect) {
+        if (incomeAccruedDateCorrect || incomePayoutDateCorrect) {
             return true
         } else {
-            if (!incomeAccruedDate) {
+            if (!incomeAccruedDateCorrect) {
                 logIncomeDatesError(incomeAccruedDate, income, (income as NdflPersonIncomeExt).rowIndex, 26)
             }
             if (!incomePayoutDateCorrect) {
