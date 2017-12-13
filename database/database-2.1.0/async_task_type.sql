@@ -19,7 +19,13 @@ update async_task_type set handler_bean = 'CreateReportsAsyncTask' where id = 29
 update async_task_type set name = 'Обработка справочника из каталога загрузки' where id=13;
 
 merge into async_task_type a using
-(select 12 as id, 'Обработка ТФ налоговой формы' as name, 'LoadTransportFileAsyncTask' as handler_bean, 10000 as short_queue_limit, 'Размер файла (Кбайт)' as limit_kind from dual) b
+(select 12 as id, 'Обработка ТФ налоговой формы' as name, 'LoadTransportFileAsyncTask' as handler_bean, 10000 as short_queue_limit, 'Размер файла (Кбайт)' as limit_kind from dual
+union all
+select 30 as id, 'Загрузка данных РНУ НДФЛ из Excel-файла в ПНФ' as name, 'ImportExcelFileAsyncTask' as handler_bean, 10000 as short_queue_limit, 'Размер файла (Кбайт)' as limit_kind from dual
+union all
+select 31 as id, 'Выгрузка данных налоговой формы в виде шаблона ТФ (Excel)' as name, 'CreateExcelTemplateAsyncTask' as handler_bean, null as short_queue_limit, 'Количество ФЛ в НФ' as limit_kind from dual
+union all
+select 32 as id, 'Удаление налоговой формы' as name, 'DeleteDeclarationAsyncTask' as handler_bean, 10000 as short_queue_limit, 'Размер файла (Кбайт)' as limit_kind from dual) b
 on (a.id=b.id)
 when not matched then
 	insert (id, name, handler_bean, short_queue_limit, limit_kind)

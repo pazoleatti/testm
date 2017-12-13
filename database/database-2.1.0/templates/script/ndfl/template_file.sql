@@ -1,8 +1,6 @@
 INSERT INTO declaration_template_file (blob_data_id,declaration_template_id) (
-    SELECT 'b92395ea-62b1-4ce1-b06e-c9ee0270fb91' blob_data_id, 103 declaration_template_id FROM DUAL UNION ALL
-    SELECT 'b92395ea-62b1-4ce1-b06e-c9ee0270fb92' blob_data_id, 103 declaration_template_id FROM DUAL UNION ALL
-    SELECT 'b92395ea-62b1-4ce1-b06e-c9ee0270fb93' blob_data_id, 103 declaration_template_id FROM DUAL UNION ALL
-    SELECT 'b92395ea-62b1-4ce1-b06e-c9ee0270fb94' blob_data_id, 103 declaration_template_id FROM DUAL);
+    SELECT '4b84692c-7f70-4d11-844d-e61e81655336' blob_data_id, 100 declaration_template_id FROM DUAL UNION ALL
+    SELECT '64536272-05bc-42e8-82c5-347faf22da20' blob_data_id, 101 declaration_template_id FROM DUAL );
 
 COMMIT;
 EXIT;
