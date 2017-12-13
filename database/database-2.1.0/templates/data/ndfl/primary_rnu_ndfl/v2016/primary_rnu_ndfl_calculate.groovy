@@ -535,6 +535,12 @@ class Calculate extends AbstractScriptClass {
 
             if (refBookPerson != null) {
 
+                /*Если АСНУ равно null, то это установленное значение в identificatePerson говорит что запись не надо
+                обновлять из-за низкого приоритета АСНУ*/
+                if (refBookPerson.sourceId == null) {
+                    continue;
+                }
+
                 primaryPerson.setId(refBookPerson.getId());
                 /*
                Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
@@ -557,6 +563,7 @@ class Calculate extends AbstractScriptClass {
 
                         if (addressAttrCnt.isUpdate()) {
                             updateAddressList.add(refBookAddressValues);
+                            updatePersonList.add(refBookPersonValues);
                         }
                     }
                 }
@@ -580,6 +587,7 @@ class Calculate extends AbstractScriptClass {
                             primaryPersonDocument.documentNumber = performDocNumber(primaryPersonDocument)
                             insertDocumentList.add(primaryPersonDocument);
                             refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
+                            updatePersonList.add(refBookPersonValues);
                         }
                     }
                 }
@@ -608,6 +616,7 @@ class Calculate extends AbstractScriptClass {
                             Map<String, RefBookValue> refBookPersonIdentifierValues = mapPersonIdentifierAttr(primaryPersonIdentifier);
                             fillSystemAliases(refBookPersonIdentifierValues, refBookPersonIdentifier);
                             updateIdentifierList.add(refBookPersonIdentifierValues);
+                            updatePersonList.add(refBookPersonValues);
                         }
 
                     } else {
@@ -861,7 +870,7 @@ class Calculate extends AbstractScriptClass {
         putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2);
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
-        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, person.getPersonIdentityList().get(0).getAsnuId());
+        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId);
         putValue(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
         return values;
     }

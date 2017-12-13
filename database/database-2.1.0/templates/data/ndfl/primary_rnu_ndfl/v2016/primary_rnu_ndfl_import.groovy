@@ -15,11 +15,9 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.*
 import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormat
-import org.springframework.util.StopWatch
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
-import static java.util.Objects.toString
 
 new Import(this).run()
 
@@ -65,8 +63,6 @@ class Import extends AbstractScriptClass {
     Map<String, List<Long>> incomeTypeMap
     // Коды справочника "Коды видов вычетов"
     List<String> deductionCodes
-    // Для замеров времени выполнения
-    StopWatch stopWatch = new StopWatch()
 
     final String DATE_FORMAT = "dd.MM.yyyy"
 
@@ -101,17 +97,11 @@ class Import extends AbstractScriptClass {
         initConfiguration()
         switch (formDataEvent) {
             case FormDataEvent.IMPORT:
-                try {
-                    importData()
-                } finally {
-                    def summary = stopWatch.prettyPrint() + "\n" + stopWatch.shortSummary()
-                    logForDebug(summary.replaceAll("%", "%%"))
-                }
+                importData()
         }
     }
 
     void importData() {
-        stopWatch.start("Чтение данных из файла")
         checkInterrupted()
 
         if (!fileName.endsWith(".xlsx")) {
@@ -126,13 +116,11 @@ class Import extends AbstractScriptClass {
 
         checkAndReadFile(inputStream, fileName, allValues, headerValues, null, null, 2, paramsMap)
         checkHeaders(headerValues)
-        stopWatch.stop()
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
             return
         }
 
-        stopWatch.start("Создание ФЛ")
         int TABLE_DATA_START_INDEX = 3
         int rowIndex = TABLE_DATA_START_INDEX
         List<NdflPerson> ndflPersons = []
@@ -152,22 +140,15 @@ class Import extends AbstractScriptClass {
             def ndflPerson = createNdflPerson(row)
             merge(ndflPersons, ndflPerson)
         }
-        stopWatch.stop()
 
-        stopWatch.start("Проверки ФЛ")
         checkPersons(ndflPersons)
         updatePersonsRowNum(ndflPersons)
-        stopWatch.stop()
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             checkInterrupted()
-            stopWatch.start("Очистка формы")
             ndflPersonService.deleteAll(declarationData.id)
-            stopWatch.stop()
 
-            stopWatch.start("Сохранение ФЛ")
             ndflPersonService.save(ndflPersons)
-            stopWatch.stop()
         } else {
             logger.error("Загрузка файла \"$fileName\" не может быть выполнена")
         }
@@ -195,6 +176,7 @@ class Import extends AbstractScriptClass {
                 logger.error("Ошибка при загрузке файла \"$fileName\". Заголовок таблицы не соответствует требуемой структуре.")
                 logger.error("Столбец заголовка таблицы \"${i >= headersActual[0].size() ? "Не задан или отсутствует" : headersActual[0][i]}\" № ${i + 1} " +
                         "не соответствует ожидаемому \"${header[i]}\" № ${i + 1}")
+                break;
             }
         }
     }
@@ -363,12 +345,12 @@ class Import extends AbstractScriptClass {
             boolean atLeastOneRecordFailed = false
             for (int i = 0; i < person.incomes.size(); i++) {
                 def income = person.incomes[i]
-                boolean checkPassed = checkIncomeDates(income)
+                boolean checkPassed = isIncomeDatesInPeriod(income)
                 allRecordsFailed &= !checkPassed
                 atLeastOneRecordFailed |= !checkPassed
             }
             if (allRecordsFailed) {
-                logger.error("Для ФЛ (${person.lastName} ${person.firstName}${toString(person.middleName, "")}, " +
+                logger.error("Для ФЛ (${person.lastName} ${person.firstName}${person.middleName ? " " + person.middleName : ""}, " +
                         "ИНП ${person.inp} отсутствуют операции, принадлежащие периоду формы: Операции по ФЛ не загружено в Налоговую форму " +
                         "№: \"${declarationData.id}\", Период: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"," +
                         " Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
@@ -379,21 +361,38 @@ class Import extends AbstractScriptClass {
         return true
     }
 
-    boolean checkIncomeDates(NdflPersonIncome income) {
-        return checkIncomeDate(income.incomeAccruedDate?.toDate(), income, (income as NdflPersonIncomeExt).rowIndex, 26) &
-                checkIncomeDate(income.incomePayoutDate?.toDate(), income, (income as NdflPersonIncomeExt).rowIndex, 27)
+    boolean isIncomeDatesInPeriod(NdflPersonIncome income) {
+        def incomeAccruedDate = income.incomeAccruedDate?.toDate()
+        def incomePayoutDate = income.incomePayoutDate?.toDate()
+        boolean incomeAccruedDateCorrect = checkIncomeDate(incomeAccruedDate)
+        boolean incomePayoutDateCorrect = checkIncomeDate(incomePayoutDate)
+        if (incomeAccruedDateCorrect || incomePayoutDateCorrect) {
+            return true
+        } else {
+            if (!incomeAccruedDateCorrect) {
+                logIncomeDatesError(incomeAccruedDate, income, (income as NdflPersonIncomeExt).rowIndex, 26)
+            }
+            if (!incomePayoutDateCorrect) {
+                logIncomeDatesError(incomePayoutDate, income, (income as NdflPersonIncomeExt).rowIndex, 27)
+            }
+            return false
+        }
     }
 
-    boolean checkIncomeDate(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {
+    void logIncomeDatesError(Date date, NdflPersonIncome income, int rowIndex, int colIndex) {
+        logger.error("Дата: \"${date?.format(DATE_FORMAT)}\", указанная в столбце \"${header[colIndex - 1]}\" № ${colIndex}" +
+                " для строки ${rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
+                " Операция \"${income.operationId}\" не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
+                "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
+                "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
+
+    }
+
+    boolean checkIncomeDate(Date date) {
         if (!date) {
             return true
         }
         if (!(reportPeriod.startDate <= date && date <= reportPeriod.endDate)) {
-            logger.error("Дата: \"${date?.format(DATE_FORMAT)}\", указанная в столбце \"${header[colIndex - 1]}\" № ${colIndex}" +
-                    " для строки ${rowIndex} не соответствует периоду формы: \"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\"." +
-                    " Операция \"${income.operationId}\" не загружена в Налоговую форму №: \"${declarationData.id}\", Период: " +
-                    "\"${reportPeriod.taxPeriod.year}, ${reportPeriod.name}\", Подразделение: \"${department.name}\", Вид: \"${declarationTemplate.name}\"" +
-                    "${asnuName ? ", АСНУ: \"${asnuName}\"" : ""}.")
             return false
         }
         return true
@@ -619,8 +618,8 @@ class Import extends AbstractScriptClass {
      * @return
      */
     List<String> getRefDeductionCodes() {
-        deductionCodes = []
-        if (deductionCodes) {
+        if (!deductionCodes) {
+            deductionCodes = []
             PagingResult<Map<String, RefBookValue>> refBookList = getRefBook(RefBook.Id.DEDUCTION_TYPE.id)
             refBookList.each { Map<String, RefBookValue> refBook ->
                 deductionCodes.add(refBook?.CODE?.stringValue)
