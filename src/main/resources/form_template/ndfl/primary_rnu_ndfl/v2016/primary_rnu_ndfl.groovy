@@ -814,7 +814,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         String reportDate = Файл.СлЧасть.'@ДатаОтч'
 
         if (reportPeriodEndDate != reportDate) {
-            logger.error("В ТФ неверно указана «Отчетная дата»: «${reportDate}». Должна быть указана дата окончания периода ТФ, равная «${reportPeriodEndDate}»")
+            logger.warn("В ТФ неверно указана «Отчетная дата»: «${reportDate}». Должна быть указана дата окончания периода ТФ, равная «${reportPeriodEndDate}»")
         }
 
         //Каждый элемент ИнфЧасть содержит данные об одном физ лице, максимальное число элементов в документе 15000
