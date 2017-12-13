@@ -13,6 +13,7 @@
 
                 //Доступгость грида
                 $scope.enabledGrid = false;
+                $scope.isEmptySearchParams = true;
 
                 /**
                  * @description Создание рну ндфл для физ лица
@@ -80,7 +81,7 @@
                                 })
                             };
                         },
-                        height: 200,
+                        height: 220,
                         colNames: [
                             '',
                             $filter('translate')('title.lastName'),
@@ -115,8 +116,7 @@
                             {name: 'status', index: 'status', width: 160}
 
                         ],
-                        rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
-                        rowList: APP_CONSTANTS.COMMON.PAGINATION,
+                        rowNum: 10,
                         viewrecords: true,
                         sortname: 'createDate',
                         sortorder: "desc",
@@ -129,8 +129,14 @@
                  * @description Поиск физ лиц для формирования рну
                  */
                 $scope.searchPerson = function () {
-                    $scope.enabledGrid = true;
-                    $scope.rnuNdflGrid.ctrl.refreshGrid();
+                    totalCountResult();
+                    isEmptySearchPararms();
+                    if(!$scope.isEmptySearchParams) {
+                        $scope.enabledGrid = true;
+                        $scope.rnuNdflGrid.ctrl.refreshGrid();
+                    }else {
+                        $scope.enabledGrid = false;
+                    }
 
                 };
 
@@ -141,6 +147,37 @@
                     filterName: 'incomesAndTaxFilter'
                 };
 
+                var isEmptySearchPararms =  function () {
+                    $scope.isEmptySearchParams = !($scope.searchFilter.params.lastName || $scope.searchFilter.params.firstName || $scope.searchFilter.params.middleName ||
+                        $scope.searchFilter.params.inp || $scope.searchFilter.params.snils || $scope.searchFilter.params.inn ||
+                        $scope.searchFilter.params.idDocNumber || $scope.searchFilter.params.dateFrom || $scope.searchFilter.params.dateTo);
+                };
+
+                var totalCountResult = function () {
+                    RnuPerson.query({
+                        projection: 'rnuPersons',
+                        ndflPersonFilter: JSON.stringify({
+                            declarationDataId: $shareData.declarationDataId,
+                            lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
+                            firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
+                            middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
+                            inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
+                            snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
+                            innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
+                            idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
+                            dateFrom: $scope.searchFilter.params.dateFrom,
+                            dateTo: $scope.searchFilter.params.dateTo
+                        }),
+                        pagingParams:{}
+
+                    }, function (data) {
+                        if(data.records > 10 ){
+                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.manyRecords', {count : data.records});
+                        }else {
+                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.countRecords', {count : data.records});
+                        }
+                    });
+                };
 
             }]);
 }());

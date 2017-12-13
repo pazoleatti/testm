@@ -385,6 +385,10 @@
         "ndfl.notReportDeclarationDataBegin": "Налоговая форма с номером = ",
         "ndfl.notReportDeclarationDataEnd": " не является отчетной. Вы будете перенаправлены на главную страницу",
 
+        "ndfl.rnuNdflPersonFace.manyRecords": "Найдено записей: {{count}}. Отображено записей: 10. Уточните критерии поиска",
+        "ndfl.rnuNdflPersonFace.countRecords": "Найдено записей: {{count}}.",
+        "ndfl.rnuNdflPersonFace.emptySearchFilter": "Для выбора физического лица необходимо задать один из критериев.",
+
         "ndflJournal.filter.periodType": "Тип периода",
         "ndflJournal.filter.period": "Период",
         "ndflJournal.filter.department": "Подразделение",
