@@ -20,7 +20,7 @@
 
                     $http({
                         method: "POST",
-                        url: "/controller/actions/editCommonParams",
+                        url: "controller/actions/editCommonParams",
                         params: {
                             config: $scope.parameter
                         }
