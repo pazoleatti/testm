@@ -678,7 +678,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                 ids.add(check.getId());
             }
         }
-        String sql = String.format("update decl_template_checks set is_fatal = case when %s then 1 else 0 end where declaration_template_id = ?",
+        String sql = ids.isEmpty() ? "update decl_template_checks set is_fatal = 0 where declaration_template_id = ?" :
+                String.format("update decl_template_checks set is_fatal = case when %s then 1 else 0 end where declaration_template_id = ?",
                 SqlUtils.transformToSqlInStatement("id", ids));
         getJdbcTemplate().update(sql, declarationTemplateId);
     }
