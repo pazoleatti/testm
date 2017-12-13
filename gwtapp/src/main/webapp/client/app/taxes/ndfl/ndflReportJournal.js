@@ -35,9 +35,6 @@
                     filterName: 'ndflReportsFilter',
                     onCreateComplete: function () {
                         $scope.refreshGrid();
-                    },
-                    onSearchSubmit: function () {
-                        $scope.selectedItems = [];
                     }
                 };
                 /**
@@ -83,8 +80,9 @@
                  * @param permission
                  */
                 $scope.checkPermissionForSelectedItems = function (permission) {
-                    if ($scope.selectedItems && $scope.selectedItems.length > 0) {
-                        return $scope.selectedItems.every(function (item) {
+                    var selectedItems = $scope.ndflReportJournalGrid.value;
+                    if (selectedItems && selectedItems.length > 0) {
+                        return selectedItems.every(function (item) {
                             return PermissionChecker.check(item, permission);
                         });
                     } else {
@@ -110,30 +108,10 @@
                 };
                 $scope.searchFilter.resetFilterParams = function () {
                     $scope.searchFilter.params.correctionTag = defaultCorrectionTag;
-                    $scope.selectedItems = [];
-                };
-
-                /**
-                 * @description Инициализация грида
-                 * @param ctrl Контроллер грида
-                 */
-                var init = function (ctrl) {
-                    //Установить обработчик выбора строки
-                    ctrl.onSelectRow = function () {
-                        $scope.selectedItems = ctrl.getAllSelectedRows();
-                        $scope.$apply();
-                    };
-
-                    //Установить обрабочик выбора всех строк
-                    ctrl.onSelectAll = function () {
-                        $scope.selectedItems = ctrl.getAllSelectedRows();
-                        $scope.$apply();
-                    };
                 };
 
                 $scope.ndflReportJournalGrid = {
                     ctrl: {},
-                    init: init,
                     options: {
                         datatype: "angularResource",
                         angularResource: DeclarationDataResource,
@@ -231,11 +209,12 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Принять"
                  */
                 $scope.accept = function () {
+                    var selectedItems = $scope.ndflReportJournalGrid.value;
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/accept",
                         params: {
-                            declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
+                            declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
                         }
                     }).then(function (response) {
                         //Обновить страницу и, если есть сообщения, показать их
@@ -248,11 +227,12 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Проверить"
                  */
                 $scope.check = function () {
+                    var selectedItems = $scope.ndflReportJournalGrid.value;
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/check",
                         params: {
-                            declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
+                            declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
                         }
                     }).then(function (response) {
                         //Обновить страницу и, если есть сообщения, показать их
@@ -278,11 +258,12 @@
                             }
                         }
                     }).result.then(function (reason) {
+                        var selectedItems = $scope.ndflReportJournalGrid.value;
                         $http({
                             method: "POST",
                             url: "controller/actions/declarationData/returnToCreated",
                             params: {
-                                declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId'),
+                                declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId'),
                                 reason: reason
                             }
                         }).then(function (response) {
@@ -297,11 +278,12 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Выгрузить отчетность"
                  */
                 $scope.downloadReports = function () {
+                    var selectedItems = $scope.ndflReportJournalGrid.value;
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/downloadReports",
                         params: {
-                            declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
+                            declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
                         }
                     }).then(function (response) {
                         //Обновить страницу и, если есть сообщения, показать их
@@ -314,6 +296,7 @@
                  * @description Событие, которое возникает по нажатию на кнопку "Удалить"
                  */
                 $scope.delete = function () {
+                    var selectedItems = $scope.ndflReportJournalGrid.value;
                     $dialogs.confirmDialog({
                         content: $filter('translate')('title.deleteDeclarations'),
                         okBtnCaption: $filter('translate')('common.button.yes'),
@@ -323,7 +306,7 @@
                                 method: "POST",
                                 url: "controller/actions/declarationData/delete",
                                 params: {
-                                    declarationDataIds: $filter('idExtractor')($scope.selectedItems, 'declarationDataId')
+                                    declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
                                 }
                             }).then(function (response) {
                                 //Обновить страницу и, если есть сообщения, показать их
