@@ -129,8 +129,8 @@
                  * @description Поиск физ лиц для формирования рну
                  */
                 $scope.searchPerson = function () {
-                    toManyResult();
-                    isEmptyResult();
+                    totalCountResult();
+                    isEmptySearchPararms();
                     if(!$scope.isEmptySearchParams) {
                         $scope.enabledGrid = true;
                         $scope.rnuNdflGrid.ctrl.refreshGrid();
@@ -147,13 +147,13 @@
                     filterName: 'incomesAndTaxFilter'
                 };
 
-                var isEmptyResult =  function () {
+                var isEmptySearchPararms =  function () {
                     $scope.isEmptySearchParams = !($scope.searchFilter.params.lastName || $scope.searchFilter.params.firstName || $scope.searchFilter.params.middleName ||
                         $scope.searchFilter.params.inp || $scope.searchFilter.params.snils || $scope.searchFilter.params.inn ||
                         $scope.searchFilter.params.idDocNumber || $scope.searchFilter.params.dateFrom || $scope.searchFilter.params.dateTo);
                 };
 
-                var toManyResult = function () {
+                var totalCountResult = function () {
                     RnuPerson.query({
                         projection: 'rnuPersons',
                         ndflPersonFilter: JSON.stringify({
@@ -171,8 +171,11 @@
                         pagingParams:{}
 
                     }, function (data) {
-                        $scope.records = data.records;
-                        $scope.isManyResult = data.records > 10;
+                        if(data.records > 10 ){
+                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.manyRecords', {count : data.records});
+                        }else {
+                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.countRecords', {count : data.records});
+                        }
                     });
                 };
 

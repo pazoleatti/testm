@@ -104,16 +104,16 @@
                 <div class="col-md-12"
                      style="height: 40px;border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px;  background-color: #d8f8b7">
                     <div style="margin: auto;">
-                        <span>Для выбора физического лица необходимо задать один из критериев. </span>
+                        <span>{{::'ndfl.rnuNdflPersonFace.emptySearchFilter' | translate}} </span>
                     </div>
                 </div>
             </div>
             <div data-ng-show="!isEmptySearchParams">
                 <div class="col-md-12"
                      style="height: 40px; border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px;  background-color: #95f8f5">
-                    <span style="padding: 5px 0 5px 0;" data-ng-show="records > 10">Найдено записей: {{records}}. Отображено записей: 10. Уточните критерии поиска</span>
-                    <span style="padding: 5px 0 5px 0;"
-                          data-ng-show="records <= 10">Найдено записей: {{records}}.</span>
+                    <span style="padding: 5px 0 5px 0;">
+                        {{infoMessage}}
+                    </span>
                 </div>
             </div>
         </div>
