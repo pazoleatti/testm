@@ -75,7 +75,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             /* Если приоритет Асну в справочнике > приоритета Асну в РНУ, то устанавливаем ИД АСНУ == null, чтобы указать
             что запись не нужно ни обновлять ни создавать*/
             for (NaturalPerson person : personDataList) {
-                if (identificationData.getPriorityMap().get(person.getSourceId()) > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId())) {
+                if (person.getSourceId() != null && identificationData.getPriorityMap().get(person.getSourceId()) > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId())) {
                     person.setSourceId(null);
                 }
             }

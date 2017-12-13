@@ -471,6 +471,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     public void initView() {
         //enableButtons(false);
         changeToCommon();
+        showTab(ConfigurationParamGroup.COMMON);
         setConfigData(getUiHandlers().getRowsData(ConfigurationParamGroup.COMMON));
     }
 
