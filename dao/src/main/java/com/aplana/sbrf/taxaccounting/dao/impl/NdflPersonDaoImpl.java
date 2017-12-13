@@ -611,6 +611,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
+        int totalCount = findNdflPersonCountByParameters(declarationDataId, parameters);
         parameters.put("declarationDataId", declarationDataId);
         String query = buildQuery(parameters, pagingParams);
         String totalQuery = query;
@@ -624,8 +625,9 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                     pagingParams.getStartIndex();
         }
         List<NdflPerson> result = getNamedParameterJdbcTemplate().query(totalQuery, parameters, new NdflPersonDaoImpl.NdflPersonRowMapper());
-        return new PagingResult<NdflPerson>(result, getCount(totalQuery, parameters));
+        return new PagingResult<NdflPerson>(result, totalCount);
     }
+
 
     @Override
     public PagingResult<NdflPerson> findNdflPersonByParameters(NdflPersonFilter ndflPersonFilter, PagingParams pagingParams) {
