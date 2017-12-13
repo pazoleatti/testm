@@ -35,7 +35,7 @@ class Import extends AbstractScriptClass {
     final String T_PERSON_INCOME = "2" // "Сведения о доходах и НДФЛ"
     final String T_PERSON_DEDUCTION = "3" // "Сведения о вычетах"
 
-    Logger logger;
+    Logger logger
     NdflPersonService ndflPersonService
     DeclarationData declarationData
     DepartmentService departmentService
@@ -63,13 +63,15 @@ class Import extends AbstractScriptClass {
     Map<String, List<Long>> incomeTypeMap
     // Коды справочника "Коды видов вычетов"
     List<String> deductionCodes
+    // Кэш загруженных ФЛ
+    Map<Integer, List<NdflPerson>> ndflPersonCache = [:]
 
     final String DATE_FORMAT = "dd.MM.yyyy"
 
     Import(scriptClass) {
         //noinspection GroovyAssignabilityCheck
         super(scriptClass)
-        this.logger = (Logger) scriptClass.getProperty("logger");
+        this.logger = (Logger) scriptClass.getProperty("logger")
         this.fileName = (String) scriptClass.getProperty("fileName")
         this.inputStream = (InputStream) scriptClass.getProperty("inputStream")
         this.departmentService = (DepartmentService) scriptClass.getProperty("departmentService")
@@ -176,7 +178,7 @@ class Import extends AbstractScriptClass {
                 logger.error("Ошибка при загрузке файла \"$fileName\". Заголовок таблицы не соответствует требуемой структуре.")
                 logger.error("Столбец заголовка таблицы \"${i >= headersActual[0].size() ? "Не задан или отсутствует" : headersActual[0][i]}\" № ${i + 1} " +
                         "не соответствует ожидаемому \"${header[i]}\" № ${i + 1}")
-                break;
+                break
             }
         }
     }
@@ -275,7 +277,7 @@ class Import extends AbstractScriptClass {
     }
 
     boolean merge(List<NdflPerson> persons, NdflPerson person) {
-        NdflPerson foundPerson = findPerson(persons, person)
+        NdflPerson foundPerson = getOrPutToCache(person)
         if (foundPerson) {
             foundPerson.incomes.addAll(person.incomes)
             foundPerson.deductions.addAll(person.deductions)
@@ -287,12 +289,25 @@ class Import extends AbstractScriptClass {
         }
     }
 
-    NdflPerson findPerson(List<NdflPerson> persons, NdflPerson personToFind) {
-        for (def person : persons) {
-            if (personsEquals(person, personToFind)) {
-                return person
+    NdflPerson getOrPutToCache(NdflPerson personToFind) {
+        int hash = Objects.hash(personToFind.inp, personToFind.lastName, personToFind.firstName, personToFind.middleName,
+                personToFind.birthDay, personToFind.snils, personToFind.citizenship, personToFind.innNp,
+                personToFind.innForeign, personToFind.idDocType, personToFind.idDocNumber, personToFind.status,
+                personToFind.regionCode, personToFind.postIndex, personToFind.area, personToFind.city,
+                personToFind.locality, personToFind.street, personToFind.house, personToFind.building, personToFind.flat)
+        def foundPersons = ndflPersonCache.get(hash)
+        if (foundPersons != null && !foundPersons.isEmpty()) {
+            for (def person : foundPersons) {
+                if (personsEquals(person, personToFind)) {
+                    return person
+                }
             }
         }
+        if (foundPersons == null) {
+            foundPersons = []
+            ndflPersonCache.put(hash, foundPersons)
+        }
+        foundPersons.add(personToFind)
         return null
     }
 

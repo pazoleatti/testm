@@ -148,7 +148,11 @@ public class NdflPersonController {
      */
 
     @GetMapping(value = "/rest/getListPerson/rnuPerson", params = "projection=rnuPersons")
-    public JqgridPagedList<NdflPerson> getPersonList(@RequestParam NdflPersonFilter ndflPersonFilter) {
+    public JqgridPagedList<NdflPerson> getPersonList(@RequestParam NdflPersonFilter ndflPersonFilter, @RequestParam PagingParams pagingParams) {
+
+        if (pagingParams == null){
+            pagingParams = new PagingParams();
+        }
 
         Map<String, Object> filterParams = new HashMap<String, Object>();
 
@@ -182,18 +186,22 @@ public class NdflPersonController {
             filterParams.put(SubreportAliasConstants.TO_BIRTHDAY, ndflPersonFilter.getDateTo());
         }
 
-        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter.getDeclarationDataId(), filterParams, new PagingParams());
+        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter.getDeclarationDataId(), filterParams, PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount() + 1));
         JqgridPagedList<NdflPerson> resultPerson = JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersons,
-                ndflPersonService.findPersonCount(ndflPersonFilter.getDeclarationDataId()),
-                new PagingParams()
+                ndflPersons.getTotalCount(),
+                PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount())
         );
         for (NdflPerson ndflPerson : resultPerson.getRows()) {
-            if (refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                    getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0) != null) {
-                ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
-                        getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
-                        get("NAME").getStringValue());
+            if (ndflPerson.getStatus() != null) {
+                if (refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                        getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0) != null) {
+                    ndflPerson.setStatus(refBookFactory.getDataProvider(RefBook.Id.TAXPAYER_STATUS.getId()).
+                            getRecords(null, null, "CODE = '" + ndflPerson.getStatus() + "'", null).get(0).
+                            get("NAME").getStringValue());
+                } else {
+                    ndflPerson.setStatus("");
+                }
             } else {
                 ndflPerson.setStatus("");
             }
