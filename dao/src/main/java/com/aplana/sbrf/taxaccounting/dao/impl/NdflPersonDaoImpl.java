@@ -305,8 +305,8 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                                 ndflPersonDeduction.notifNum, ndflPersonDeduction.notifSource,
                                 ndflPersonDeduction.notifSumm, ndflPersonDeduction.incomeAccrued,
                                 ndflPersonDeduction.incomeCode, ndflPersonDeduction.incomeSumm,
-                                ndflPersonDeduction.periodCurrDate, ndflPersonDeduction.periodPrevSumm,
-                                ndflPersonDeduction.periodPrevDate, ndflPersonDeduction.periodCurrSumm, ndflPerson.inp)));
+                                ndflPersonDeduction.periodPrevDate, ndflPersonDeduction.periodPrevSumm,
+                                ndflPersonDeduction.periodCurrDate, ndflPersonDeduction.periodCurrSumm, ndflPerson.inp)));
 
         int totalCount = findPersonDeductionsCount(declarationDataId);
 
