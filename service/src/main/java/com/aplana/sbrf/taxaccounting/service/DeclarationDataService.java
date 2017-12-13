@@ -130,6 +130,14 @@ public interface DeclarationDataService {
     ActionResult delete(long declarationDataId, TAUserInfo userInfo);
 
     /**
+     *
+     * @param declarationDataId идентификатор НФ
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @param createLock флаг указывающий создавать ли блокировку
+     */
+    void deleteSync(long declarationDataId, TAUserInfo userInfo, boolean createLock);
+
+    /**
      * Удалить налоговую форму, если она существует, при этом создается блокировка
      *
      * @param declarationDataId Идентификатор налоговой формы

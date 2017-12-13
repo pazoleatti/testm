@@ -1305,6 +1305,67 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).DELETE)")
+    public void deleteSync(long id, TAUserInfo userInfo, boolean createLock) {
+        LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.XML_DEC));
+        LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.ACCEPT_DEC));
+        LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, DeclarationDataReportType.CHECK_DEC));
+        LockData lockDataDelete = null;
+        if (lockData == null && lockDataAccept == null && lockDataCheck == null && createLock) {
+            lockDataDelete = lockDataService.lock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId(),
+                    getDeclarationFullName(id, DeclarationDataReportType.DELETE_DEC));
+        }
+        if (lockData == null && lockDataAccept == null && lockDataCheck == null && lockDataDelete == null) {
+            try {
+                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
+                DeclarationData declarationData = declarationDataDao.get(id);
+
+                Logger logger = new Logger();
+                declarationDataScriptingService.executeScript(userInfo,
+                        declarationData, FormDataEvent.DELETE, new Logger(), null);
+
+                // Проверяем ошибки
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException(
+                            "Найдены ошибки при выполнении удаления налоговой формы",
+                            logEntryService.save(logger.getEntries()));
+                }
+
+                deleteReport(id, userInfo, false, TaskInterruptCause.DECLARATION_DELETE);
+                declarationDataDao.delete(id);
+
+                auditService.add(FormDataEvent.DELETE, userInfo, declarationData, "Налоговая форма удалена", null);
+            } finally {
+                if (createLock) {
+                    lockDataService.unlock(generateAsyncTaskKey(id, DeclarationDataReportType.DELETE_DEC), userInfo.getUser().getId());
+                }
+            }
+        } else {
+            if (lockData == null) {
+                lockData = lockDataAccept;
+            }
+            if (lockData == null) {
+                lockData = lockDataCheck;
+            }
+            if (lockData == null) {
+                lockData = lockDataDelete;
+            }
+            Logger logger = new Logger();
+            TAUser blocker = taUserService.getUser(lockData.getUserId());
+            String description = lockData.getDescription();
+            if (lockData.getTaskId() != null) {
+                AsyncTaskData taskData = asyncManager.getLightTaskData(lockData.getTaskId());
+                if (taskData != null) {
+                    description = taskData.getDescription();
+                }
+            }
+            logger.error("Текущая налоговая форма не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.get().format(lockData.getDateLock()), description);
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+        }
+    }
+
+    @Override
+    @Transactional
     public ActionResult deleteDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds) {
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
@@ -3363,5 +3424,31 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
            return String.format(", АСНУ: \"%s\"", asnuName);
         }
         return "";
+    }
+
+    /**
+     * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
+     */
+    private void deleteReport(long declarationDataId, TAUserInfo userInfo, boolean isCalc, TaskInterruptCause cause) {
+        DeclarationDataReportType[] ddReportTypes = {DeclarationDataReportType.XML_DEC, DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.EXCEL_DEC, DeclarationDataReportType.CHECK_DEC, DeclarationDataReportType.ACCEPT_DEC};
+        for (DeclarationDataReportType ddReportType : ddReportTypes) {
+            if (ddReportType.isSubreport()) {
+                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+                List<DeclarationSubreport> subreports = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getSubreports();
+                for (DeclarationSubreport subreport : subreports) {
+                    ddReportType.setSubreport(subreport);
+                    LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+                    if (lock != null) {
+                        asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
+                    }
+                }
+            } else if (!isCalc || !DeclarationDataReportType.XML_DEC.equals(ddReportType)) {
+                LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
+                if (lock != null) {
+                    asyncManager.interruptTask(lock.getTaskId(), userInfo, cause);
+                }
+            }
+        }
+        reportService.deleteDec(declarationDataId);
     }
 }
