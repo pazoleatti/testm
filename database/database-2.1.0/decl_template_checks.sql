@@ -27,6 +27,8 @@ BEGIN
 		select seq_decl_template_checks.nextval, ch.declaration_type_id, dt.id, ch.check_code, ch.check_type, ch.description, ch.is_fatal
 		from decl_template_checks ch
 		join declaration_template dt on dt.declaration_type_id = ch.declaration_type_id;
+		
+		update decl_template_checks set CHECK_CODE='003-0001-00006' where CHECK_CODE='001-0001-00006';
 	end if;
 END;
 /
