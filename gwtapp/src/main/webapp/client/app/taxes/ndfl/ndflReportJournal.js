@@ -35,6 +35,9 @@
                     filterName: 'ndflReportsFilter',
                     onCreateComplete: function () {
                         $scope.refreshGrid();
+                    },
+                    onSearchSubmit: function () {
+                        $scope.selectedItems = [];
                     }
                 };
                 /**

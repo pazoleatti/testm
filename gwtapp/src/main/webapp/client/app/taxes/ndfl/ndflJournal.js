@@ -43,6 +43,9 @@
                     filterName: 'ndflJournalFilter',
                     onCreateComplete: function () {
                         $scope.refreshGrid();
+                    },
+                    onSearchSubmit: function () {
+                        $scope.selectedItems = [];
                     }
                 };
 
