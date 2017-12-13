@@ -120,6 +120,10 @@
                             $rootScope.$broadcast('OPERATION_ID_CHANGED', $scope.searchFilter.params.operationId);
                         }
                         $scope.fillSearchFilter();
+
+                        if($scope.searchFilter.onSearchSubmit) {
+                            $scope.searchFilter.onSearchSubmit();
+                        }
                     };
 
                     // Сброс фильтра

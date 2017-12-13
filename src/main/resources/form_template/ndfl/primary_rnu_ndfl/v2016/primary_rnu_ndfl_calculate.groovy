@@ -552,6 +552,14 @@ class Calculate extends AbstractScriptClass {
                     downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
                 }
 
+                //person
+                Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(refBookPerson);
+                fillSystemAliases(refBookPersonValues, refBookPerson);
+                updatePersonAttr(refBookPersonValues, primaryPerson, personAttrCnt);
+                if (personAttrCnt.isUpdate()) {
+                    updatePersonList.add(refBookPersonValues);
+                }
+
                 //address
                 if (primaryPerson.getAddress() != null) {
                     if (refBookPerson.getAddress() != null) {
@@ -566,14 +574,6 @@ class Calculate extends AbstractScriptClass {
                             updatePersonList.add(refBookPersonValues);
                         }
                     }
-                }
-
-                //person
-                Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(refBookPerson);
-                fillSystemAliases(refBookPersonValues, refBookPerson);
-                updatePersonAttr(refBookPersonValues, primaryPerson, personAttrCnt);
-                if (personAttrCnt.isUpdate()) {
-                    updatePersonList.add(refBookPersonValues);
                 }
 
                 //documents
