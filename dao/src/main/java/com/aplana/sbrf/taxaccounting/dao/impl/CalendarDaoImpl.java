@@ -52,9 +52,9 @@ public class CalendarDaoImpl extends AbstractDao implements CalendarDao {
 		params.addValue("startDate", startDate);
 		params.addValue("offset", Math.abs(offset) + 1);
 		try {
-			if (offset >= 2) {
+			if (offset >= 1) {
 				return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_SQL, params, Date.class);
-			} else if (offset >= 0) {
+			} else if (offset == 0) {
 				return getNamedParameterJdbcTemplate().queryForObject(GET_NEXT_WORK_DAY_ZERO_OFFSET_SQL, params, Date.class);
 			} else {
 				return getNamedParameterJdbcTemplate().queryForObject(GET_PREV_WORK_DAY_SQL, params, Date.class);
