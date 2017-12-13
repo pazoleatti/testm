@@ -2853,4 +2853,13 @@ END;'
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3004 Ошибка исполнения [-1]: startup failed: Script16.groovy: 566 при расчете первичной формы -->
+    <changeSet id="2.1-ytrofimov-91" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
