@@ -85,7 +85,9 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
             }
 
             if (period.getCalendarStartDate().equals(recordVersion.getVersionStart())) {
-                providerSlave.deleteRecordVersions(logger, deleteSlaveList, false);
+                if (!deleteSlaveList.isEmpty()) {
+                    providerSlave.deleteRecordVersions(logger, deleteSlaveList, false);
+                }
                 provider.deleteRecordVersions(logger, deleteList, false);
             } else {
                 providerSlave.updateRecordsVersionEnd(logger, addDayToDate(period.getCalendarStartDate(),-2), deleteSlaveList);
