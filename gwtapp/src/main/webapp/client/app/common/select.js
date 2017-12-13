@@ -400,7 +400,7 @@
                  * @param userTBDepartment Объект из scope, по которому проставляется ТБ пользователя
                  */
                 $scope.initActiveAvailableTBSelect = function (periodObject, userTBDepartment) {
-                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, false, "fullPathFormatter");
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "fullPathFormatter");
                     RefBookValuesResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
                         projection: "activeAvailableTB"
