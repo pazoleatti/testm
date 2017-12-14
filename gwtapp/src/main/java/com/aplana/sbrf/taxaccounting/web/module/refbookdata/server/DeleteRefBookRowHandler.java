@@ -83,8 +83,12 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
                         for (Map<Long, Map<String, RefBookValue>> idTaxPayerItem : idTaxPayers) {
                             idTaxPayersForDelete.addAll(idTaxPayerItem.keySet());
                         }
-                        idDocDataProvider.deleteAllRecords(logger, idDocsForDelete);
-                        idTaxPayerDataProvider.deleteAllRecords(logger, idTaxPayersForDelete);
+                        if (!idDocsForDelete.isEmpty()) {
+                            idDocDataProvider.deleteAllRecords(logger, idDocsForDelete);
+                        }
+                        if (!idTaxPayersForDelete.isEmpty()) {
+                            idTaxPayerDataProvider.deleteAllRecords(logger, idTaxPayersForDelete);
+                        }
                         refBookDataProvider.deleteAllRecords(logger, action.getRecordsId());
                     } else {
                         refBookDataProvider.deleteAllRecords(logger, action.getRecordsId());
