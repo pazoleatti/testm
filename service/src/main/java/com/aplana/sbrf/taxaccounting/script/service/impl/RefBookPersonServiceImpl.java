@@ -72,71 +72,50 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         List<NaturalPerson> personDataList = identificationData.getRefBookPersonList();
         if (personDataList != null && !personDataList.isEmpty()) {
 
-            /* Если приоритет Асну в справочнике > приоритета Асну в РНУ, то устанавливаем ИД АСНУ == null, чтобы указать
-            что запись не нужно ни обновлять ни создавать*/
+            List<NaturalPerson> personForRemoveList = new LinkedList<>();
+            /* Если приоритет Асну в справочнике > приоритета Асну в РНУ, то не обновляем запись*/
             for (NaturalPerson person : personDataList) {
                 if (person.getSourceId() != null && identificationData.getPriorityMap().get(person.getSourceId()) > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId())) {
-                    person.setSourceId(null);
+                    personForRemoveList.add(person);
                 }
             }
+            personDataList.removeAll(personForRemoveList);
+
+            personForRemoveList = new LinkedList<>();
 
             calculateWeigth(identificationData.getNaturalPerson(), personDataList, weigthComporators);
 
             // Удаляем ФЛ с весом < порога схожести
-            List<NaturalPerson> personForRemoveList = new LinkedList<>();
             for (NaturalPerson person : personDataList) {
                 if (person.getWeigth() <= treshold) {
                     personForRemoveList.add(person);
                 }
             }
             personDataList.removeAll(personForRemoveList);
+            if (!personDataList.isEmpty()) {
+                StringBuffer msg = new StringBuffer();
 
-            boolean needUpdate = false;
-
-            for (NaturalPerson person : personDataList) {
-                if (person.getSourceId() != null) {
-                    needUpdate = true;
-                    break;
+                msg.append("Для ФЛ " + IdentificationUtils.buildNotice(identificationData.getNaturalPerson()) + " сходных записей найдено: " + personDataList.size()).append(" ");
+                DecimalFormat df = new DecimalFormat("0.00");
+                for (IdentityPerson applicablePersonData : personDataList) {
+                    msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
                 }
-            }
-
-            if (needUpdate) {
 
                 //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
-                Collections.sort(personDataList, new PersonDataComparator());
-                IdentityPerson identificatedPerson = null;
-
-                for (NaturalPerson person : personDataList) {
-                    if (person.getSourceId() != null) {
-                        identificatedPerson = person;
-                        break;
+                IdentityPerson identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
+                if (identificatedPerson.getWeigth() > treshold) {
+                    //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
+                    if (personDataList.size() > 1) {
+                        msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
+                        logger.info(msg.toString());
                     }
+
+                    return (NaturalPerson) identificatedPerson;
+                } else {
+                    //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
+                    return null;
                 }
 
-                if (identificatedPerson != null) {
-                    StringBuffer msg = new StringBuffer();
-
-                    msg.append("Для ФЛ " + IdentificationUtils.buildNotice(identificationData.getNaturalPerson()) + " сходных записей найдено: " + personDataList.size()).append(" ");
-                    DecimalFormat df = new DecimalFormat("0.00");
-                    for (IdentityPerson applicablePersonData : personDataList) {
-                        msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
-                    }
-                    if (identificatedPerson.getWeigth() > treshold) {
-                        //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
-                        if (personDataList.size() > 1) {
-                            msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
-                            logger.info(msg.toString());
-                        }
-
-                        return (NaturalPerson) identificatedPerson;
-                    } else {
-                        //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
-                        return null;
-                    }
-                } else return personDataList.get(0);
-
-            } else if (!personDataList.isEmpty()){
-                return personDataList.get(0);
             } else {
                 return null;
             }
@@ -388,7 +367,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         public int compare(IdentityPerson a, IdentityPerson b) {
             int weightComp = Double.compare(a.getWeigth(), b.getWeigth());
             if (weightComp == 0) {
-                return Long.compare(b.getRecordId(), a.getRecordId());
+                return Long.compare(a.getRecordId(), b.getRecordId());
             }
             return weightComp;
         }
