@@ -20,9 +20,10 @@
                     $http({
                         method: "POST",
                         url: "/controller/actions/changeToDefaultCommonParams"
+                    }).then(function () {
+                        commonParamsGrid.ctrl.refreshGrid();
                     });
 
-                    commonParamsGrid.ctrl.refreshGrid();
                     $modalInstance.dismiss('Canceled');
                 };
 
