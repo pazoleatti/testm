@@ -207,13 +207,8 @@
                         projection: 'count',
                         nooverlay: true
                     }, function (data) {
-                        var count = parseInt(data.notifications_count);
-                        if (count !== 0) {
-                            if ($scope.notificationsCount !== count) {
-                                // обновляем форму, если пришло новое уведомление
-                                $scope.$broadcast("UPDATE_DECLARATION_DATA");
-                            }
-                            $scope.notificationsCount = count;
+                        if (parseInt(data.notifications_count) !== 0) {
+                            $scope.notificationsCount = parseInt(data.notifications_count);
                         } else {
                             $scope.notificationsCount = 0;
                         }
@@ -225,6 +220,7 @@
                             $scope.notificationsCountClass = "new-message empty-message";
                         }
                     });
+                    $scope.$broadcast("UPDATE_DECLARATION_DATA");
                 };
 
                 $scope.$on("UPDATE_NOTIFICATION_COUNT", function () {
