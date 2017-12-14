@@ -150,6 +150,10 @@ public class NdflPersonController {
     @GetMapping(value = "/rest/getListPerson/rnuPerson", params = "projection=rnuPersons")
     public JqgridPagedList<NdflPerson> getPersonList(@RequestParam NdflPersonFilter ndflPersonFilter, @RequestParam PagingParams pagingParams) {
 
+        if (ndflPersonFilter.getDeclarationDataId() == 0){
+            return null;
+        }
+
         if (pagingParams == null){
             pagingParams = new PagingParams();
         }

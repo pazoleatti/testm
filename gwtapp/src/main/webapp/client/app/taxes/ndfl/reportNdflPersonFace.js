@@ -139,7 +139,7 @@
                     }
 
                     checkDateField($scope.searchFilter.params.dateFrom, $filter('translate')('title.dateOfBirthFrom'));
-                    checkDateField($scope.searchFilter.params.dateTo, $filter('translate')('title.dateOfBirthFrom'));
+                    checkDateField($scope.searchFilter.params.dateTo, $filter('translate')('title.dateOfBirthTo'));
 
                     if (errorList.length > 0) {
                         $scope.infoText = errorList.join("\n");

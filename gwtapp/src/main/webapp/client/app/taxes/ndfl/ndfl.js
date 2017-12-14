@@ -203,7 +203,7 @@
                         title: $filter('translate')('rnuPersonFace.title'),
                         templateUrl: 'client/app/taxes/ndfl/rnuNdflPersonFace.html',
                         controller: 'rnuNdflPersonFaceFormCtrl',
-                        windowClass: 'modal1000',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {

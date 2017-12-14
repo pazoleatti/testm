@@ -11,8 +11,6 @@
         .controller('rnuNdflPersonFaceFormCtrl', ['$scope', '$modalInstance', '$shareData', '$filter', '$http', 'RnuPerson', 'APP_CONSTANTS', '$logPanel',
             function ($scope, $modalInstance, $shareData, $filter, $http, RnuPerson, APP_CONSTANTS, $logPanel) {
 
-                //Доступгость грида
-                $scope.enabledGrid = false;
                 $scope.isEmptySearchParams = true;
 
                 /**
@@ -65,21 +63,28 @@
                         datatype: "angularResource",
                         angularResource: RnuPerson,
                         requestParameters: function () {
-                            return {
-                                projection: 'rnuPersons',
-                                ndflPersonFilter: JSON.stringify({
-                                    declarationDataId: $shareData.declarationDataId,
-                                    lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
-                                    firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
-                                    middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
-                                    inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
-                                    snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
-                                    innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
-                                    idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
-                                    dateFrom: $scope.searchFilter.params.dateFrom,
-                                    dateTo: $scope.searchFilter.params.dateTo
-                                })
-                            };
+                            if (!$scope.isEmptySearchParams) {
+                                return {
+                                    projection: 'rnuPersons',
+                                    ndflPersonFilter: JSON.stringify({
+                                        declarationDataId: $shareData.declarationDataId,
+                                        lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
+                                        firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
+                                        middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
+                                        inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
+                                        snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
+                                        innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
+                                        idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
+                                        dateFrom: $scope.searchFilter.params.dateFrom,
+                                        dateTo: $scope.searchFilter.params.dateTo
+                                    })
+                                };
+                            }else {
+                                return {
+                                    projection: 'rnuPersons',
+                                    ndflPersonFilter: {}
+                                };
+                            }
                         },
                         height: 220,
                         colNames: [
@@ -129,13 +134,10 @@
                  * @description Поиск физ лиц для формирования рну
                  */
                 $scope.searchPerson = function () {
-                    totalCountResult();
-                    isEmptySearchPararms();
-                    if(!$scope.isEmptySearchParams) {
-                        $scope.enabledGrid = true;
+                    if (validate()) {
+                        $scope.infoMessage = "";
+                        totalCountResult();
                         $scope.rnuNdflGrid.ctrl.refreshGrid();
-                    }else {
-                        $scope.enabledGrid = false;
                     }
 
                 };
@@ -146,6 +148,23 @@
                     isClear: false,
                     filterName: 'incomesAndTaxFilter'
                 };
+
+                var validate = function () {
+                    isEmptySearchPararms();
+                    if ($scope.isEmptySearchParams) {
+                        return false;
+                    }
+                    if (!checkDateInterval()) {
+                        $scope.infoMessage = $filter('translate')('rnuPersonFace.error.dateInterval');
+                        return false;
+                    }
+                    if (!checkDateField()) {
+                        $scope.infoMessage = $filter('translate')('rnuPersonFace.error.dateIntervalOutOfBounds');
+                        return false;
+                    }
+                    return true;
+                };
+
 
                 var isEmptySearchPararms =  function () {
                     $scope.isEmptySearchParams = !($scope.searchFilter.params.lastName || $scope.searchFilter.params.firstName || $scope.searchFilter.params.middleName ||
@@ -177,6 +196,43 @@
                             $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.countRecords', {count : data.records});
                         }
                     });
+                };
+
+                /**
+                 * Валидатор диапазона дат. Проверяет, что стартовая дата не превышает конечную
+                 * @returns {boolean} признак корректности диапазона дат
+                 */
+                var checkDateInterval = function () {
+                    return ($scope.searchFilter.params.dateFrom === undefined || $scope.searchFilter.params.dateFrom === null || $scope.searchFilter.params.dateFrom === "") ||
+                        ($scope.searchFilter.params.dateTo === undefined || $scope.searchFilter.params.dateTo === null || $scope.searchFilter.params.dateTo === "") ||
+                        (truncHMS(new Date($scope.searchFilter.params.dateFrom)) <= truncHMS(new Date($scope.searchFilter.params.dateTo)));
+                };
+
+                // Отбрасывает часы, минуты, секунды, миллисекунды
+                var truncHMS = function (date) {
+                    if (!_.isUndefined(date) && !_.isNull(date) && date !== "") {
+                        date.setHours(0);
+                        date.setMinutes(0);
+                        date.setSeconds(0);
+                        date.setMilliseconds(0);
+                        return date.getTime();
+                    }
+                    return date;
+                };
+
+                /**
+                 * @description Проверяет на наличие ошибок поля формы Дата рождения.
+                 */
+                var checkDateField = function() {
+                    var mindate = new Date();
+                    var maxdate = new Date();
+                    mindate.setFullYear(1900, 0, 1);
+                    maxdate.setFullYear(2100, 11, 31);
+
+                    return ($scope.searchFilter.params.dateFrom === undefined || $scope.searchFilter.params.dateFrom === null || $scope.searchFilter.params.dateFrom === "" ||
+                        mindate < $scope.searchFilter.params.dateFrom && $scope.searchFilter.params.dateFrom < maxdate) &&
+                        ($scope.searchFilter.params.dateTo === undefined || $scope.searchFilter.params.dateTo === null || $scope.searchFilter.params.dateTo === "" ||
+                        mindate < $scope.searchFilter.params.dateTo && $scope.searchFilter.params.dateTo < maxdate);
                 };
 
             }]);
