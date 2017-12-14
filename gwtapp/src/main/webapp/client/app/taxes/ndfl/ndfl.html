@@ -58,6 +58,8 @@
                             <div class="row menuitem">
                                 <a ng-click="createExcelTemplate()">{{::'link.ndfl.reporting.formTemplateExcel' |
                                     translate}}</a>
+                                <a ng-click="downloadExcelTemplate()" ng-show="availableExcelTemplate">{{::'link.ndfl.reporting.download'
+                                    | translate}}</a>
                             </div>
                         </li>
                     </ul>

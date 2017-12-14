@@ -2927,4 +2927,21 @@ END;'
         </update>
     </changeSet>
 
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2954 -->
+    <changeSet id="2.1-aokunev-4" author="aokunev">
+        <modifyDataType
+                tableName="declaration_report"
+                columnName="type"
+                newDataType="number(2)"
+        />
+        <sql splitStatements="false">
+            begin
+                execute immediate 'alter table declaration_report drop constraint decl_report_chk_type';
+                execute immediate 'alter table declaration_report drop constraint decl_report_chk_subreport_id';
+                execute immediate 'alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3, 4, 13))';
+                execute immediate 'alter table declaration_report add constraint decl_report_chk_subreport_id check ((type = 4 and subreport_id is not null) or (type in (0, 1, 2, 3, 13) and subreport_id is null))';
+            end;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

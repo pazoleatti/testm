@@ -123,6 +123,7 @@
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
                                     $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
                                     if (!$scope.intervalId) {
                                         $scope.intervalId = $interval(function () {
                                             updateAvailableReports();
@@ -506,6 +507,9 @@
                 };
                 $scope.downloadSpecific = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
+                };
+                $scope.downloadExcelTemplate = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/excelTemplate";
                 };
 
                 $scope.createReportXlsx = function (force) {
