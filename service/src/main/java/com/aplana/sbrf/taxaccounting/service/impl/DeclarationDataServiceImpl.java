@@ -3213,7 +3213,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
             for (Map.Entry<String, Object> entrie: action.getSubreportParamValues().entrySet()) {
                 Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.*");
-                Matcher matcher = pattern.matcher(entrie.getValue().toString());
+                Matcher matcher = pattern.matcher(entrie.getValue() != null ? entrie.getValue().toString() : "");
                 if (matcher.find()) {
                     try {
                         entrie.setValue(new SimpleDateFormat("yyyy-MM-dd").parse(entrie.getValue().toString().substring(0, 10)));
