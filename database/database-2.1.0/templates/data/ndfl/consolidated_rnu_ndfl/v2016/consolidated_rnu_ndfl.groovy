@@ -1212,6 +1212,9 @@ class RequisitesSheetFiller implements SheetFiller {
             Cell cell21 = row.createCell(21);
             cell21.setCellStyle(centeredStyle)
             cell21.setCellValue(np.getFlat() != null ? np.getFlat() : "");
+            Cell cell22 = row.createCell(22)
+            cell22.setCellStyle(centeredStyle)
+            cell22.setCellValue(np.snils != null ? np.snils : "")
             index++;
         }
     }

@@ -22,7 +22,7 @@ import java.util.Map;
 public class XmlGeneratorAsyncTask extends AbstractDeclarationAsyncTask {
 
     private static final String SUCCESS = "Выполнен расчет налоговой формы: %s";
-    private static final String FAIL = "Произошла непредвиденная ошибка при расчете налоговой формы: %s";
+    private static final String FAIL = "Не удалось выполнить расчет налоговой формы: %s";
 
     @Autowired
     private TAUserService userService;
