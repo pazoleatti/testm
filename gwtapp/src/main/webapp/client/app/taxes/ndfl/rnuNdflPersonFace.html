@@ -1,142 +1,155 @@
-<form class="form-horizontal" role="form" style="width: 600px; margin: auto">
+<div class="modal-body">
 
+    <form class="form-horizontal" role="form" style="width:1250px; margin: auto">
+        <div class="row">
+            <div class="filter-col w450">
 
-    <div class="row">
-        <div class="filter-col w500" style="height: 440px; width: 500px; margin: auto">
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label">{{::'title.lastName' |
-                        translate}}:</label>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label class="control-label">{{::'title.lastName' | translate}}:</label>
+                    </div>
+                    <div class="col-md-9" style="width: 335px;">
+                        <input data-ng-model="searchFilter.params.lastName"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.lastName}}"/>
+                    </div>
                 </div>
-                <div class="col-md-9">
-                    <input data-ng-model="searchFilter.params.lastName"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.lastName}}"/>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label class="control-label">{{::'title.snils' | translate}}: </label>
+                    </div>
+                    <div class="col-md-9" style="width: 335px;">
+                        <input data-ng-model="searchFilter.params.snils"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.snils}}"/>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label">{{::'title.firstName' |
-                        translate}}:</label>
-                </div>
-                <div class="col-md-9">
-                    <input data-ng-model="searchFilter.params.firstName"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.firstName}}"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label">{{::'title.middleName' |
-                        translate}}:</label>
-                </div>
-                <div class="col-md-9">
-                    <input data-ng-model="searchFilter.params.middleName"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.middleName}}"/>
-                </div>
+
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-from-model="searchFilter.params.dateFrom"
+                        ng-to-model="searchFilter.params.dateTo"
+                        ng-label="title.dateOfBirthFrom"
+                        paragraph="personRnuParagraphForDate">
+                </date-from-to-filter>
+
             </div>
 
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label">{{::'title.inn' |
-                        translate}}: </label>
+            <div class="filter-col w250">
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label class="control-label">{{::'title.firstName' |
+                            translate}}:</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input data-ng-model="searchFilter.params.firstName"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.firstName}}"/>
+                    </div>
                 </div>
-                <div class="col-md-9">
-                    <input data-ng-model="searchFilter.params.inn"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.inn}}"/>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label class="control-label">{{::'title.inn' |
+                            translate}}: </label>
+                    </div>
+                    <div class="col-md-9">
+                        <input data-ng-model="searchFilter.params.inn"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.inn}}"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label class="control-label">{{::'title.inp' |
+                            translate}}:</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input data-ng-model="searchFilter.params.inp"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.inp}}"/>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="filter-col w350">
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label class="control-label">{{::'title.middleName' |
+                            translate}}:</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input data-ng-model="searchFilter.params.middleName"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.middleName}}"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label class="control-label">{{::'title.idDocNumber' |
+                            translate}}: </label>
+                    </div>
+                    <div class="col-md-9">
+                        <input data-ng-model="searchFilter.params.idDocNumber"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.idDocNumber}}"/>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label">{{::'title.snils' |
-                        translate}}: </label>
-                </div>
-                <div class="col-md-9">
-                    <input data-ng-model="searchFilter.params.snils"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.snils}}"/>
-                </div>
+            <div class="filter-col">
+                <!--Кнопка Найти-->
+                <button type="button"
+                        class="btn btn-default"
+                        data-ng-click="searchPerson()">
+                    <span data-translate-once="common.button.search"></span>
+                </button>
             </div>
+        </div>
 
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label">{{::'title.inp' |
-                        translate}}:</label>
-                </div>
-                <div class="col-md-9">
-                    <input data-ng-model="searchFilter.params.inp"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.inp}}"/>
-                </div>
-            </div>
-
-            <date-from-to-filter
-                    data-label-width="4"
-                    ng-from-model="searchFilter.params.dateFrom"
-                    ng-to-model="searchFilter.params.dateTo"
-                    ng-label="title.dateOfBirthFrom"
-                    paragraph="personRnuParagraphForDate">
-            </date-from-to-filter>
-
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label">{{::'title.idDocNumber' |
-                        translate}}: </label>
-                </div>
-                <div class="col-md-9">
-                    <input data-ng-model="searchFilter.params.idDocNumber"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.idDocNumber}}"/>
-                </div>
-            </div>
-
+        <!-- Блок информации -->
+        <div class="w500" style="margin: auto;">
             <div data-ng-show="isEmptySearchParams">
-                <div class="col-md-12"
-                     style="height: 40px;border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px;  background-color: #d8f8b7">
-                    <div style="margin: auto;">
+                <div style="height: 40px;border: 1px solid #aeaeac; border-radius: 6px; background-color: #d8f8b7">
+                    <div style="margin: 10px 0 0 20px;">
                         <span>{{::'ndfl.rnuNdflPersonFace.emptySearchFilter' | translate}} </span>
                     </div>
                 </div>
             </div>
             <div data-ng-show="!isEmptySearchParams">
-                <div class="col-md-12"
-                     style="height: 40px; border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px;  background-color: #95f8f5">
-                    <span style="padding: 5px 0 5px 0;">
-                        {{infoMessage}}
-                    </span>
+                <div style="min-height: 40px; border: 1px solid #aeaeac; border-radius: 6px;  background-color: #95f8f5">
+                    <div style="margin: 10px 0 10px 20px;">
+                        <span> {{infoMessage}}</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
 
 
-<div class="modal-body" id="FindGrid" style="height: 300px;" data-ng-show="enabledGrid">
     <div data-aplana-grid
          data-grid-options="rnuNdflGrid.options"
          data-grid-ctrl="rnuNdflGrid.ctrl"
          data-ng-model="rnuNdflGrid.value"
          id="rnuNdflTable"
-         style="float: left; width: 100%;"></div>
+         style="margin-top: 15px; float: left; width: 100%;"></div>
 </div>
 
 <div class="modal-footer" style="margin-right: 20px;">
-    <!--Кнопка Найти-->
-    <button type="button"
-            class="btn btn-default"
-            data-ng-click="searchPerson()">
-        <span data-translate-once="common.button.search"></span>
-    </button>
 
     <!--Кнопка Сформировать-->
     <button type="button"

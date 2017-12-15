@@ -27,9 +27,24 @@
                     }
                 });
 
+                var isTabActive = false;
+
                 $scope.$on('tabSelected', function(event, data) {
                     if (_.isEqual(data, 'prepayment')){
                         $scope.submitSearch();
+                        isTabActive = true;
+                    }
+                });
+
+                $scope.$on('tabDeselected', function(event, data) {
+                    if (_.isEqual(data, 'prepayment')){
+                        isTabActive = false;
+                    }
+                });
+
+                $scope.$on('refreshDeclarationGrid', function(event, data) {
+                    if (isTabActive) {
+                        $scope.refreshGrid();
                     }
                 });
 
@@ -48,8 +63,15 @@
                     filterName: 'prepaymentFilter'
                 };
 
+                var init = function (ctrl) {
+                    ctrl.loadComplete = function (data) {
+                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
+                    };
+                };
+
                 $scope.prepaymentGrid =
                     {
+                        init: init,
                         ctrl: {},
                         value: [],
                         options: {

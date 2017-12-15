@@ -80,6 +80,9 @@
         "messageDialog.toDo.title": "Информация",
         "messageDialog.toDo.message": "Функционал находится в разработке",
 
+        "common.validation.snils": "Значение поля должно соответствовать формату \"ХХХ-ХХХ-ХХХ ХХ\"",
+
+
         "filter.placeholder.all": "-Все-",
         "filterPanelLabel": "Фильтр",
         "infoPanelLabel": "Информация",
@@ -309,6 +312,8 @@
         "logBusiness.title.note": "Текст события",
         "rnuPersonFace.title": "РНУ НДФЛ по физическому лицу",
         "rnuPersonFace.": "РНУ НДФЛ по физическому лицу",
+        "rnuPersonFace.error.dateInterval":"Дата начала интервала должна быть меньше даты конца",
+        "rnuPersonFace.error.dateIntervalOutOfBounds":"Значение поля \"Дата рождения\" должно входить в интервал дат \"от 01.01.1900 до 31.12.2099\".",
         "reportPersonFace.title": "2-НДФЛ(1) по физическому лицу",
         "reportPersonFace.title2": "2-НДФЛ(2) по физическому лицу",
         "reportPersonFace.error.fieldsAreEmpty": "Для поиска физического лица необходимо выбрать хотя бы один критерий поиска",

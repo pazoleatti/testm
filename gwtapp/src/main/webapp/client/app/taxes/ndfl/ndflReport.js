@@ -80,7 +80,8 @@
                 var initPage = function () {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
-                            projection: "declarationData"
+                            projection: "declarationData",
+                            nooverlay: true
                         },
                         function (data) {
                             if (data) {

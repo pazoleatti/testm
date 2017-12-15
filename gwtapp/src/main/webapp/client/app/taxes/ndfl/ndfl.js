@@ -78,12 +78,21 @@
                 function initPage() {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
-                            projection: "declarationData"
+                            projection: "declarationData",
+                            nooverlay: true
                         },
                         function (data) {
                             if (data) {
+                                var isRefreshGridNeeded = false;
+                                if ($scope.declarationData && $scope.declarationData.actualDataDate &&
+                                        $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
+                                    isRefreshGridNeeded = true;
+                                }
                                 $scope.declarationData = data;
                                 $scope.declarationDataId = $stateParams.declarationDataId;
+                                if (isRefreshGridNeeded) {
+                                    $rootScope.$broadcast('refreshDeclarationGrid');
+                                }
                             }
                         }
                     );
@@ -202,7 +211,7 @@
                         title: $filter('translate')('rnuPersonFace.title'),
                         templateUrl: 'client/app/taxes/ndfl/rnuNdflPersonFace.html',
                         controller: 'rnuNdflPersonFaceFormCtrl',
-                        windowClass: 'modal1000',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -497,6 +506,10 @@
 
                 $scope.selectTab = function (tab) {
                     $rootScope.$broadcast('tabSelected', tab);
+                };
+
+                $scope.deselectTab = function (tab) {
+                    $rootScope.$broadcast('tabDeselected', tab);
                 };
 
                 $scope.downloadXml = function () {
