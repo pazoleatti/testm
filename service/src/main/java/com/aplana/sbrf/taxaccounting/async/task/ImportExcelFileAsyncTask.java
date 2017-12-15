@@ -85,7 +85,7 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
         final String blobDataId = (String) taskData.getParams().get("blobDataId");
         BlobData blobData = blobDataService.get(blobDataId);
         String fileName = blobData.getName();
-        return "Произошла непредвиденная ошибка при загрузке файла \"" + fileName + "\"";
+        return "Не удалось выполнить загрузку файла \"" + fileName + "\"";
     }
 
     @Override
