@@ -995,28 +995,27 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
 
         // Доход.Дата.Начисление
-        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
+        boolean incomeAccruedDateOk = incomeAccruedDate != null && dateRelateToCurrentPeriod(incomeAccruedDate)
         // Доход.Дата.Выплата
         boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
         if (incomeAccruedDateOk || incomePayoutDateOk) {
             return true
         } else {
             String pathError = String.format(SECTION_LINE_RANGE_MSG, T_PERSON_INCOME, "тут должен быть номер строк")
-            DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
-            if (!incomeAccruedDateOk) {
-                logPeriodError(C_INCOME_ACCRUED_DATE, pathError, departmentReportPeriod, incomeAccruedDate, inp, fio, operationId)
-            }
-            if (!incomePayoutDateOk) {
-                logPeriodError(C_INCOME_PAYOUT_DATE, pathError, departmentReportPeriod, incomePayoutDate, inp, fio, operationId)
-            }
+            logPeriodError(pathError, incomeAccruedDate, incomePayoutDate, inp, fio, operationId)
             return false
         }
     }
 
-    void logPeriodError(String paramName, String pathError, DepartmentReportPeriod departmentReportPeriod, LocalDateTime date, String inp, String fio, String operationId) {
-        String errMsg = String.format("Значение гр. %s (\"%s\") не входит в отчетный период налоговой формы (%s), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s",
-                paramName, ScriptUtils.formatDate(date),
-                departmentReportPeriod.reportPeriod.taxPeriod.year + ", " + departmentReportPeriod.reportPeriod.name,
+    void logPeriodError(String pathError, LocalDateTime incomeAccruedDate, LocalDateTime incomePayoutDate, String inp, String fio, String operationId) {
+        DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
+
+        String errMsg = String.format("Значения гр. %s (\"%s\") и гр. %s (\"%s\") не входят в отчетный период налоговой формы (%s), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s",
+                C_INCOME_ACCRUED_DATE,
+                incomeAccruedDate != null ? ScriptUtils.formatDate(incomeAccruedDate) : "Не определено",
+                C_INCOME_PAYOUT_DATE,
+                incomePayoutDate != null ? ScriptUtils.formatDate(incomePayoutDate) : "Не определено",
+                departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName(),
                 operationId,
                 fio, inp
         )
