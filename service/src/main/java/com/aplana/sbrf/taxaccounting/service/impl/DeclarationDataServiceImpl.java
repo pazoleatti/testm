@@ -603,6 +603,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         result.setState(declaration.getState().getTitle());
         result.setManuallyCreated(declaration.getManuallyCreated());
+        result.setLastDataModifiedDate(declaration.getLastDataModifiedDate());
+        result.setActualDataDate(new Date());
 
         String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {
@@ -3389,6 +3391,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String note = "Загрузка данных из файла \"" + blobData.getName() + "\" в налоговую форму";
                 logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
                 auditService.add(formDataEvent, userInfo, declarationData, note, null);
+                declarationDataDao.updateLastDataModified(declarationDataId);
             }
         } finally {
             unlock(declarationDataId, userInfo);

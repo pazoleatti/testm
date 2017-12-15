@@ -2953,4 +2953,20 @@ END;'
         </update>
     </changeSet>
 
+    <changeSet id="2.1-dnovikov-13" author="dnovikov">
+        <addColumn tableName="DECLARATION_DATA">
+            <column name="last_data_modified" type="DATE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2.1-dnovikov-14" author="dnovikov">
+        <sql>
+            COMMENT ON COLUMN DECLARATION_DATA.last_data_modified IS 'Дата последних изменений данных формы';
+        </sql>
+    </changeSet>
+    <changeSet id="2.1-dnovikov-15" author="dnovikov">
+        <sql>
+            update DECLARATION_DATA set last_data_modified=sysdate;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

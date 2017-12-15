@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
+import java.util.Date;
+
 /**
  * Модель для передачи данных о ПНФ/КНФ
  */
@@ -70,6 +72,16 @@ public class DeclarationResult {
      * Состояние ЭД
      */
     private String docState;
+
+    /**
+     * Дата последних изменений данных формы
+     */
+    private Date lastDataModifiedDate;
+
+    /**
+     * Дата актуальности запрошенных данных (время запроса данных)
+     */
+    private Date actualDataDate;
 
     /**
      * Создана в ручную
@@ -202,5 +214,21 @@ public class DeclarationResult {
 
     public void setManuallyCreated(Boolean manuallyCreated) {
         this.manuallyCreated = manuallyCreated;
+    }
+
+    public Date getLastDataModifiedDate() {
+        return lastDataModifiedDate;
+    }
+
+    public void setLastDataModifiedDate(Date lastDataModifiedDate) {
+        this.lastDataModifiedDate = lastDataModifiedDate;
+    }
+
+    public Date getActualDataDate() {
+        return actualDataDate;
+    }
+
+    public void setActualDataDate(Date actualDataDate) {
+        this.actualDataDate = actualDataDate;
     }
 }

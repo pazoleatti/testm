@@ -183,6 +183,13 @@ public interface DeclarationDataDao extends PermissionDao {
     String getNote(long declarationDataId);
 
     /**
+     * Обновляет дату последнего изменения данных формы
+     *
+     * @param declarationDataId Идентификатор вида налоговой формы
+     */
+    void updateLastDataModified(long declarationDataId);
+
+    /**
      * Найти все формы созданные в отчетном периоде
      */
     List<DeclarationData> findAllDeclarationData(int declarationTypeId, int departmentId, int reportPeriodId);

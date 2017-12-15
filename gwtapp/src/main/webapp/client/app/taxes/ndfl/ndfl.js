@@ -83,8 +83,16 @@
                         },
                         function (data) {
                             if (data) {
+                                var isRefreshGridNeeded = false;
+                                if ($scope.declarationData && $scope.declarationData.actualDataDate &&
+                                        $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
+                                    isRefreshGridNeeded = true;
+                                }
                                 $scope.declarationData = data;
                                 $scope.declarationDataId = $stateParams.declarationDataId;
+                                if (isRefreshGridNeeded) {
+                                    $rootScope.$broadcast('refreshDeclarationGrid');
+                                }
                             }
                         }
                     );
@@ -498,6 +506,10 @@
 
                 $scope.selectTab = function (tab) {
                     $rootScope.$broadcast('tabSelected', tab);
+                };
+
+                $scope.deselectTab = function (tab) {
+                    $rootScope.$broadcast('tabDeselected', tab);
                 };
 
                 $scope.downloadXml = function () {

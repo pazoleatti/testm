@@ -132,6 +132,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setState(State.fromId(SqlUtils.getInteger(rs, "state")));
             d.setDocState(SqlUtils.getLong(rs, "doc_state_id"));
             d.setManuallyCreated(SqlUtils.getInteger(rs, "manually_created") == 1);
+            if (SqlUtils.isExistColumn(rs, "last_data_modified") && rs.getTimestamp("last_data_modified") != null) {
+                d.setLastDataModifiedDate(new Date(rs.getTimestamp("last_data_modified").getTime()));
+            }
             return d;
         }
     }
@@ -141,7 +144,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
+                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.last_data_modified, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and dd.id = ?",
@@ -428,7 +431,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         id = generateId("seq_declaration_data", Long.class);
         jt.update(
-                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, oktmo, asnu_id, note, file_name, doc_state_id, manually_created) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "insert into declaration_data (id, declaration_template_id, department_report_period_id, state, tax_organ_code, kpp, oktmo, asnu_id, note, file_name, doc_state_id, manually_created, last_data_modified) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 declarationData.getDeclarationTemplateId(),
                 declarationData.getDepartmentReportPeriodId(),
@@ -440,7 +443,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 declarationData.getNote(),
                 declarationData.getFileName(),
                 declarationData.getDocState(),
-                declarationData.getManuallyCreated()
+                declarationData.getManuallyCreated(),
+                new Date()
         );
         declarationData.setId(id);
         return id.longValue();
@@ -824,6 +828,14 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("declarationDataId", declarationDataId);
         return getNamedParameterJdbcTemplate().queryForObject("SELECT note FROM declaration_data WHERE id = :declarationDataId", values, String.class);
+    }
+
+    @Override
+    public void updateLastDataModified(long declarationDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("declarationDataId", declarationDataId);
+        values.put("last_data_modified", new Date());
+        getNamedParameterJdbcTemplate().update("UPDATE declaration_data SET last_data_modified = :last_data_modified WHERE id = :declarationDataId", values);
     }
 
     @Override

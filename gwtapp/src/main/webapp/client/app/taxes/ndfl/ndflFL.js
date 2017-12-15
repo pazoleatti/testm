@@ -20,9 +20,24 @@
                     }
                 });
 
+                var isTabActive = true;
+
                 $scope.$on('tabSelected', function(event, data) {
                     if (_.isEqual(data, 'ndflFL')){
                         $scope.submitSearch();
+                        isTabActive = true;
+                    }
+                });
+
+                $scope.$on('tabDeselected', function(event, data) {
+                    if (_.isEqual(data, 'ndflFL')){
+                        isTabActive = false;
+                    }
+                });
+
+                $scope.$on('refreshDeclarationGrid', function(event, data) {
+                    if (isTabActive) {
+                        $scope.refreshGrid();
                     }
                 });
 
@@ -44,8 +59,15 @@
                     filterName: 'ndflFilter'
                 };
 
+                var init = function (ctrl) {
+                    ctrl.loadComplete = function (data) {
+                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
+                    };
+                };
+
                 $scope.ndflPersonGrid =
                     {
+                        init: init,
                         ctrl: {},
                         value: [],
                         options: {

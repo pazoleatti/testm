@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.util.Date;
+
 /**
  * Налоговая декларация.
  * 
@@ -53,6 +55,11 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
      * Создана в ручную
      */
     private Boolean manuallyCreated = false;
+
+    /**
+     * Дата последних изменений данных формы
+     */
+    private Date lastDataModifiedDate;
 
     /**
 	 * Получить идентификатор {@link DeclarationTemplate шаблона декларации}, по которому создана данная декларация
@@ -195,5 +202,13 @@ public class DeclarationData extends IdentityObject<Long> implements SecuredEnti
 
     public void setManuallyCreated(Boolean manuallyCreated) {
         this.manuallyCreated = manuallyCreated;
+    }
+
+    public Date getLastDataModifiedDate() {
+        return lastDataModifiedDate;
+    }
+
+    public void setLastDataModifiedDate(Date lastDataModifiedDate) {
+        this.lastDataModifiedDate = lastDataModifiedDate;
     }
 }

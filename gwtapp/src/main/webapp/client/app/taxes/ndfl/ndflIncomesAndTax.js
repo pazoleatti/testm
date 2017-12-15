@@ -25,9 +25,24 @@
                     }
                 });
 
+                var isTabActive = false;
+
                 $scope.$on('tabSelected', function(event, data) {
                     if (_.isEqual(data, 'incomesAndTax')){
                         $scope.submitSearch();
+                        isTabActive = true;
+                    }
+                });
+
+                $scope.$on('tabDeselected', function(event, data) {
+                    if (_.isEqual(data, 'incomesAndTax')){
+                        isTabActive = false;
+                    }
+                });
+
+                $scope.$on('refreshDeclarationGrid', function(event, data) {
+                    if (isTabActive) {
+                        $scope.refreshGrid();
                     }
                 });
 
@@ -50,8 +65,15 @@
                     filterName: 'incomesAndTaxFilter'
                 };
 
+                var init = function (ctrl) {
+                    ctrl.loadComplete = function (data) {
+                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
+                    };
+                };
+
                 $scope.incomesAndTaxGrid =
                     {
+                        init: init,
                         ctrl: {},
                         value: [],
                         options: {

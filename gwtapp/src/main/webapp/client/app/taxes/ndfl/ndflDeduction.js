@@ -27,9 +27,24 @@
                     }
                 });
 
+                var isTabActive = false;
+
                 $scope.$on('tabSelected', function(event, data) {
                     if (_.isEqual(data, 'deductions')){
                         $scope.submitSearch();
+                        isTabActive = true;
+                    }
+                });
+
+                $scope.$on('tabDeselected', function(event, data) {
+                    if (_.isEqual(data, 'deductions')){
+                        isTabActive = false;
+                    }
+                });
+
+                $scope.$on('refreshDeclarationGrid', function(event, data) {
+                    if (isTabActive) {
+                        $scope.refreshGrid();
                     }
                 });
 
@@ -48,14 +63,22 @@
                     filterName: 'deductionFilter'
                 };
 
+                var init = function (ctrl) {
+                    ctrl.loadComplete = function (data) {
+                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
+                    };
+                };
+
                 $scope.deductionGrid =
                     {
+                        init: init,
                         ctrl: {},
                         value: [],
                         options: {
                             datatype: "angularResource",
                             angularResource: NdflPersonResource,
                             requestParameters: function () {
+                                $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
                                 return {
                                     projection: "personsDeduction",
                                     ndflPersonDeductionFilter: JSON.stringify({
