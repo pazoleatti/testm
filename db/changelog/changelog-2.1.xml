@@ -2970,7 +2970,7 @@ END;'
     </changeSet>
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-2956 -->
-    <changeSet id="2.1-ytrofimov-97" author="ytrofimov">
+    <changeSet id="2.1-ytrofimov-100" author="ytrofimov">
         <update tableName="DECLARATION_TEMPLATE">
             <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
             <where>id=100</where>
