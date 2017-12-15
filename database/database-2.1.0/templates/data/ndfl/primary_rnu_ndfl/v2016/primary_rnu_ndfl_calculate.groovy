@@ -535,12 +535,6 @@ class Calculate extends AbstractScriptClass {
 
             if (refBookPerson != null) {
 
-                /*Если АСНУ равно null, то это установленное значение в identificatePerson говорит что запись не надо
-                обновлять из-за низкого приоритета АСНУ*/
-                if (refBookPerson.sourceId == null) {
-                    continue;
-                }
-
                 primaryPerson.setId(refBookPerson.getId());
                 /*
                Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
@@ -551,6 +545,11 @@ class Calculate extends AbstractScriptClass {
                     Map<String, RefBookValue> downgradePerson = mapPersonAttr(refBookPerson)
                     downGradeRefBookVersion(downgradePerson, refBookPerson.getId(), RefBook.Id.PERSON.getId())
                 }
+
+                //person
+                Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(refBookPerson);
+                fillSystemAliases(refBookPersonValues, refBookPerson);
+                updatePersonAttr(refBookPersonValues, primaryPerson, personAttrCnt);
 
                 //address
                 if (primaryPerson.getAddress() != null) {
@@ -563,17 +562,8 @@ class Calculate extends AbstractScriptClass {
 
                         if (addressAttrCnt.isUpdate()) {
                             updateAddressList.add(refBookAddressValues);
-                            updatePersonList.add(refBookPersonValues);
                         }
                     }
-                }
-
-                //person
-                Map<String, RefBookValue> refBookPersonValues = mapPersonAttr(refBookPerson);
-                fillSystemAliases(refBookPersonValues, refBookPerson);
-                updatePersonAttr(refBookPersonValues, primaryPerson, personAttrCnt);
-                if (personAttrCnt.isUpdate()) {
-                    updatePersonList.add(refBookPersonValues);
                 }
 
                 //documents
@@ -587,7 +577,6 @@ class Calculate extends AbstractScriptClass {
                             primaryPersonDocument.documentNumber = performDocNumber(primaryPersonDocument)
                             insertDocumentList.add(primaryPersonDocument);
                             refBookPerson.getPersonDocumentList().add(primaryPersonDocument);
-                            updatePersonList.add(refBookPersonValues);
                         }
                     }
                 }
@@ -616,13 +605,14 @@ class Calculate extends AbstractScriptClass {
                             Map<String, RefBookValue> refBookPersonIdentifierValues = mapPersonIdentifierAttr(primaryPersonIdentifier);
                             fillSystemAliases(refBookPersonIdentifierValues, refBookPersonIdentifier);
                             updateIdentifierList.add(refBookPersonIdentifierValues);
-                            updatePersonList.add(refBookPersonValues);
                         }
 
                     } else {
                         insertIdentifierList.add(primaryPersonIdentifier);
                     }
                 }
+
+                updatePersonList.add(refBookPersonValues);
 
                 updatePersonReferenceList.add(primaryPerson);
 

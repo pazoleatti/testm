@@ -34,7 +34,7 @@ begin
 
 		EXECUTE IMMEDIATE 'comment on table configuration_scheduler_param is ''Параметры задач планировщика''';
 		EXECUTE IMMEDIATE 'comment on column configuration_scheduler_param.id is ''Идентификатор параметра''';
-		EXECUTE IMMEDIATE 'comment on column configuration_scheduler_param.task_id is ''Ссылка на задачу планирощика''';
+		EXECUTE IMMEDIATE 'comment on column configuration_scheduler_param.task_id is ''Ссылка на задачу планировщика''';
 		EXECUTE IMMEDIATE 'comment on column configuration_scheduler_param.ord is ''Порядок следования''';
 		EXECUTE IMMEDIATE 'comment on column configuration_scheduler_param.type is ''Тип параметра(1 - Строка, 2 - Целое число, 3 - Число с плавающей запятой)''';
 		EXECUTE IMMEDIATE 'comment on column configuration_scheduler_param.value is ''Значение''';
