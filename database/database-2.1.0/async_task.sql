@@ -3,7 +3,7 @@ declare
 begin
 	select count(1) into v_count from user_tab_columns where lower(table_name)='async_task' and lower(column_name)='balancing_variant';
 	IF v_count>0 THEN
-		delete from async_task;
+		EXECUTE IMMEDIATE 'delete from async_task';
 		EXECUTE IMMEDIATE 'alter table async_task rename column balancing_variant to queue';
 		EXECUTE IMMEDIATE 'alter table async_task add user_id number(9) not null';
 		EXECUTE IMMEDIATE 'comment on column async_task.user_id is ''Идентификатор пользователя, запустившего задачу''';
@@ -19,7 +19,7 @@ begin
 	
 	select count(1) into v_count from user_tables where lower(table_name)='lock_data_subscribers';
 	IF v_count>0 THEN
-		delete from lock_data_subscribers;
+		EXECUTE IMMEDIATE 'delete from lock_data_subscribers';
 		EXECUTE IMMEDIATE 'alter table lock_data_subscribers rename to async_task_subscribers';
 		EXECUTE IMMEDIATE 'alter table async_task_subscribers drop constraint lock_data_subscr_fk_lock_data';
 		EXECUTE IMMEDIATE 'alter table async_task_subscribers drop constraint lock_data_subscribers_pk';
@@ -36,7 +36,7 @@ begin
 	
 	select count(1) into v_count from user_tab_columns where lower(table_name)='lock_data' and lower(column_name)='state';
 	IF v_count>0 THEN
-		delete from lock_data;
+		EXECUTE IMMEDIATE 'delete from lock_data';
 		EXECUTE IMMEDIATE 'alter table lock_data drop column state';
 		EXECUTE IMMEDIATE 'alter table lock_data drop column state_date';
 		EXECUTE IMMEDIATE 'alter table lock_data drop column queue';
