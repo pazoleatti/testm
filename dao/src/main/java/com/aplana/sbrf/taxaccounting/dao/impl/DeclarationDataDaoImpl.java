@@ -444,7 +444,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 declarationData.getFileName(),
                 declarationData.getDocState(),
                 declarationData.getManuallyCreated(),
-                new Date()
+                declarationData.getManuallyCreated() ? null : new Date()
         );
         declarationData.setId(id);
         return id.longValue();
