@@ -46,30 +46,33 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Object object, Object permission) {
-        Class objectClass = object.getClass();
+        if (object != null) {
+            Class objectClass = object.getClass();
 
-        if (Iterable.class.isAssignableFrom(objectClass)) {
-            Iterable iterable = (Iterable) object;
+            if (Iterable.class.isAssignableFrom(objectClass)) {
+                Iterable iterable = (Iterable) object;
 
-            boolean result = true;
-            for (Object targetDomainObject : iterable) {
-                result &= hasPermissionSingle(authentication, targetDomainObject, permission);
+                boolean result = true;
+                for (Object targetDomainObject : iterable) {
+                    result &= hasPermissionSingle(authentication, targetDomainObject, permission);
+                }
+
+                return result;
             }
+            if (objectClass.isArray()) {
+                Object[] array = (Object[]) object;
 
-            return result;
-        }
-        if (objectClass.isArray()) {
-            Object[] array = (Object[]) object;
+                boolean result = true;
+                for (Object targetDomainObject : array) {
+                    result &= hasPermissionSingle(authentication, targetDomainObject, permission);
+                }
 
-            boolean result = true;
-            for (Object targetDomainObject : array) {
-                result &= hasPermissionSingle(authentication, targetDomainObject, permission);
+                return result;
+            } else {
+                return hasPermissionSingle(authentication, object, permission);
             }
-
-            return result;
-        } else {
-            return hasPermissionSingle(authentication, object, permission);
         }
+        return false;
     }
 
     public boolean hasPermissionSingle(Authentication authentication, Object targetDomainObject, Object permission) {
