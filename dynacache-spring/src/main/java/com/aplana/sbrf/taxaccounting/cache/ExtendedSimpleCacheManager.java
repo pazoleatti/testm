@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleCacheManager;
 
 public class ExtendedSimpleCacheManager extends SimpleCacheManager implements CacheManagerDecorator {
@@ -13,5 +14,15 @@ public class ExtendedSimpleCacheManager extends SimpleCacheManager implements Ca
             LOG.info("Clear cache: " + cacheName);
             getCache(cacheName).clear();
         }
+    }
+
+    @Override
+    public void evict(String cacheName, Object key) {
+        getCache(cacheName).evict(key);
+    }
+
+    @Override
+    public void evictAll(String cacheName) {
+        getCache(cacheName).clear();
     }
 }

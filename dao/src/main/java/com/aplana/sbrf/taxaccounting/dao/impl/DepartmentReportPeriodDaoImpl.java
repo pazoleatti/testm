@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -238,7 +238,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriodItem.id")
     public DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriodItem) {
         departmentReportPeriodItem.setId(generateId("seq_department_report_period", Integer.class));
 
@@ -274,7 +274,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriod.id")
     public void save(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
         for (Integer id : departmentIds) {
             departmentReportPeriod.setDepartmentId(id);
@@ -284,7 +284,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public void updateActive(int id, boolean active) {
         getJdbcTemplate().update(
                 "update department_report_period set is_active = ? where id = ?",
@@ -295,7 +295,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void updateActive(final List<Integer> ids, final Integer report_period_id, final boolean active) {
         try {
             getJdbcTemplate().batchUpdate("update department_report_period set is_active = ? where report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
@@ -319,7 +319,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public void updateCorrectionDate(int id, Date correctionDate) {
         Date corrDate;
         if (correctionDate == null) {
@@ -335,7 +335,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public void delete(Integer id) {
         sqlQueryFactory.delete(departmentReportPeriod)
                 .where(departmentReportPeriod.id.eq(id))
@@ -344,7 +344,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void delete(final List<Integer> ids) {
         try {
             sqlQueryFactory.delete(departmentReportPeriod)
@@ -585,7 +585,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @Cacheable(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public DepartmentReportPeriod get(int id) {
         DepartmentReportPeriod period =  sqlQueryFactory.select(departmentReportPeriodQBean)
                 .from(departmentReportPeriod)
@@ -624,7 +624,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(CacheConstants.DEPARTMENT_REPORT_PERIOD)
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriodItem.id")
     public DepartmentReportPeriod update(DepartmentReportPeriod departmentReportPeriodItem) {
 
         sqlQueryFactory.update(departmentReportPeriod)

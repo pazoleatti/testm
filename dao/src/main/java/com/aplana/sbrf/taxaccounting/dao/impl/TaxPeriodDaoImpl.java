@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import org.springframework.cache.annotation.Cacheable;
 import com.querydsl.sql.SQLQueryFactory;

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao.impl.cache;
+package com.aplana.sbrf.taxaccounting.model;
 
 /**
  * Класс содержит перечень констант использующихся при кэшировании dao-запросов

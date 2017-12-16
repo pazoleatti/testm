@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.cache.CacheManagerDecorator;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
@@ -71,6 +72,9 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
+
+    @Autowired
+    private CacheManagerDecorator cacheManagerDecorator;
 
 
     private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
@@ -182,7 +186,11 @@ public class PeriodServiceImpl implements PeriodService {
                         "\""));
             }
         }
-        return logEntryService.save(logs);
+        String uuid = logEntryService.save(logs);
+        for (DepartmentReportPeriod item : drpList) {
+            cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, item.getId());
+        }
+        return uuid;
     }
 
     @Override
