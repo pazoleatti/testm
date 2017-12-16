@@ -334,7 +334,9 @@ public class AsyncManagerImpl implements AsyncManager {
     @Override
     public void addUserWaitingForTask(long taskId, int userId) {
         if (asyncTaskDao.isTaskExists(taskId)) {
-            asyncTaskDao.addUserWaitingForTask(taskId, userId);
+            if (!asyncTaskDao.getUsersWaitingForTask(taskId).contains(userId)) {
+                asyncTaskDao.addUserWaitingForTask(taskId, userId);
+            }
         } else {
             LOG.warn(String.format("Cannot add subscriber with id = %s to task with id = %s. Cause: task doesn't exists", taskId, userId));
         }
