@@ -603,6 +603,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         result.setState(declaration.getState().getTitle());
         result.setManuallyCreated(declaration.getManuallyCreated());
+        result.setLastDataModifiedDate(declaration.getLastDataModifiedDate());
+        result.setActualDataDate(new Date());
 
         String userLogin = logBusinessService.getFormCreationUserName(declaration.getId());
         if (userLogin != null && !userLogin.isEmpty()) {
@@ -1204,6 +1206,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         reportAvailableResult.setDownloadXlsxAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
         reportAvailableResult.setDownloadXmlAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) != null);
+        reportAvailableResult.setDownloadExcelTemplateAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC) != null);
 
         DeclarationData declaration = get(declarationDataId, userInfo);
         List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
@@ -3210,7 +3213,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
             for (Map.Entry<String, Object> entrie: action.getSubreportParamValues().entrySet()) {
                 Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.*");
-                Matcher matcher = pattern.matcher(entrie.getValue().toString());
+                Matcher matcher = pattern.matcher(entrie.getValue() != null ? entrie.getValue().toString() : "");
                 if (matcher.find()) {
                     try {
                         entrie.setValue(new SimpleDateFormat("yyyy-MM-dd").parse(entrie.getValue().toString().substring(0, 10)));
@@ -3388,6 +3391,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String note = "Загрузка данных из файла \"" + blobData.getName() + "\" в налоговую форму";
                 logBusinessService.add(null, declarationDataId, userInfo, formDataEvent, note);
                 auditService.add(formDataEvent, userInfo, declarationData, note, null);
+                declarationDataDao.updateLastDataModified(declarationDataId);
             }
         } finally {
             unlock(declarationDataId, userInfo);

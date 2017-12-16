@@ -45,5 +45,18 @@ begin
 	IF v_count=0 THEN
 		EXECUTE IMMEDIATE 'alter table ref_book_asnu add constraint ref_book_asnu_chk_priority check(priority between 1 and 999)';
 	END IF; 
+	
+	select count(1) into v_count from user_constraints where lower(constraint_name)='decl_report_chk_type' AND lower(table_name)='declaration_report';
+	IF v_count>0 THEN
+		execute immediate 'alter table declaration_report drop constraint decl_report_chk_type';
+	END IF; 
+	
+	select count(1) into v_count from user_constraints where lower(constraint_name)='decl_report_chk_subreport_id' AND lower(table_name)='declaration_report';
+	IF v_count>0 THEN
+		execute immediate 'alter table declaration_report drop constraint decl_report_chk_subreport_id';
+	END IF;
+	
+	execute immediate 'alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3, 4, 13))';	
+	execute immediate 'alter table declaration_report add constraint decl_report_chk_subreport_id check ((type = 4 and subreport_id is not null) or (type in (0, 1, 2, 3, 13) and subreport_id is null))';
 end;
 /

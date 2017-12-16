@@ -80,21 +80,20 @@ public class RefBookPersonServiceTest {
         NaturalPerson primaryPerson = createPersonData("888", "2", "", "12300011156", "", "1111", "Иванов", "Иван", "Ивановиеч", "12.10.1954");
         Map<Long, Integer> priorityMap = new HashMap<>();
         priorityMap.put(1L, 100);
-        priorityMap.put(2L, 100);
-        priorityMap.put(3L, 100);
-        priorityMap.put(4L, 100);
-        priorityMap.put(5L, 100);
-        priorityMap.put(6L, 100);
-        priorityMap.put(7L, 90);
+        priorityMap.put(2L, 200);
+        priorityMap.put(3L, 200);
+        priorityMap.put(4L, 200);
+        priorityMap.put(5L, 200);
+        priorityMap.put(6L, 200);
         IdentificationData identificationDataFixture = new IdentificationData();
         identificationDataFixture.setNaturalPerson(primaryPerson);
         identificationDataFixture.setRefBookPersonList(getList());
         identificationDataFixture.setTresholdValue(900);
-        identificationDataFixture.setDeclarationDataAsnuId(7);
+        identificationDataFixture.setDeclarationDataAsnuId(1);
         identificationDataFixture.setPriorityMap(priorityMap);
         NaturalPerson result = personService.identificatePerson(identificationDataFixture, new Logger());
 
-        assertNull(result.getSourceId());
+        assertNull(result);
     }
 
     @Test

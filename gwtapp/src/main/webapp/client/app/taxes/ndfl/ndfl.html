@@ -58,6 +58,8 @@
                             <div class="row menuitem">
                                 <a ng-click="createExcelTemplate()">{{::'link.ndfl.reporting.formTemplateExcel' |
                                     translate}}</a>
+                                <a ng-click="downloadExcelTemplate()" ng-show="availableExcelTemplate">{{::'link.ndfl.reporting.download'
+                                    | translate}}</a>
                             </div>
                         </li>
                     </ul>
@@ -197,7 +199,8 @@
 
         <data-uib-tabset active="activeForm" class="form100 tab-wrapper" style="height: 79%; padding: 10px 12px 14px;">
 
-            <data-uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}" select="selectTab('ndflFL')">
+            <data-uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}"
+                          select="selectTab('ndflFL')" deselect="deselectTab('ndflFL')">
                 <div data-ng-controller="ndflFLCtrl">
                         <div class='container-grid-top'>
                             <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
@@ -207,6 +210,7 @@
                          data-grid-fill-space-container-selector=".form100"
                          data-grid-fill-space-container-selector-top=".container-grid-top"
                          data-grid-options="ndflPersonGrid.options"
+                         data-init-grid="ndflPersonGrid.init(ctrl)"
                          data-grid-ctrl="ndflPersonGrid.ctrl"
                          data-ng-model="ndflPersonGrid.value"
                          id="ndflPersonTable"
@@ -215,7 +219,7 @@
             </data-uib-tab>
 
             <data-uib-tab index="1" heading="2. {{::'tab.ndfl.informationOnIncomesAndNdfl' | translate}}"
-                          select="selectTab('incomesAndTax')">
+                          select="selectTab('incomesAndTax')" deselect="deselectTab('incomesAndTax')">
                 <div data-ng-controller="incomesAndTaxCtrl">
                     <div style="height: 100%;">
                         <div class='container-grid-top'>
@@ -227,6 +231,7 @@
                          data-grid-fill-space-container-selector=".form100"
                          data-grid-fill-space-container-selector-top=".container-grid-top"
                          data-grid-options="incomesAndTaxGrid.options"
+                         data-init-grid="incomesAndTaxGrid.init(ctrl)"
                          data-grid-ctrl="incomesAndTaxGrid.ctrl"
                          data-ng-model="incomesAndTaxGrid.value"
                          id="incomesAndTaxTable"
@@ -236,7 +241,7 @@
             </data-uib-tab>
 
             <data-uib-tab index="2" heading="3. {{::'tab.ndfl.informationOnDeductions' | translate}}"
-                          select="selectTab('deductions')">
+                          select="selectTab('deductions')" deselect="deselectTab('deductions')">
                 <div data-ng-controller="deductionCtrl">
                     <div style="height: 100%">
                         <div class='container-grid-top'>
@@ -247,6 +252,7 @@
                              data-grid-fill-space-container-selector=".form100"
                              data-grid-fill-space-container-selector-top=".container-grid-top"
                              data-grid-options="deductionGrid.options"
+                             data-init-grid="deductionGrid.init(ctrl)"
                              data-grid-ctrl="deductionGrid.ctrl"
                              data-ng-model="deductionGrid.value"
                              id="deductionTable"></div>
@@ -255,7 +261,7 @@
             </data-uib-tab>
 
             <data-uib-tab index="3" heading="4. {{::'tab.ndfl.informationOnAdvancePayments' | translate}}"
-                          select="selectTab('prepayment')">
+                          select="selectTab('prepayment')" deselect="deselectTab('prepayment')">
                 <div data-ng-controller="prepaymentCtrl">
                     <div style="height: 100%">
                         <div class='container-grid-top'>
@@ -266,6 +272,7 @@
                              data-grid-fill-space-container-selector=".form100"
                              data-grid-fill-space-container-selector-top=".container-grid-top"
                              data-grid-options="prepaymentGrid.options"
+                             data-init-grid="prepaymentGrid.init(ctrl)"
                              data-grid-ctrl="prepaymentGrid.ctrl"
                              data-ng-model="prepaymentGrid.value"
                              id="prepaymentTable"></div>

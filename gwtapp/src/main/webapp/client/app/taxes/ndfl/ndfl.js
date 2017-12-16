@@ -78,12 +78,21 @@
                 function initPage() {
                     DeclarationDataResource.query({
                             declarationDataId: $stateParams.declarationDataId,
-                            projection: "declarationData"
+                            projection: "declarationData",
+                            nooverlay: true
                         },
                         function (data) {
                             if (data) {
+                                var isRefreshGridNeeded = false;
+                                if ($scope.declarationData && $scope.declarationData.actualDataDate &&
+                                        $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
+                                    isRefreshGridNeeded = true;
+                                }
                                 $scope.declarationData = data;
                                 $scope.declarationDataId = $stateParams.declarationDataId;
+                                if (isRefreshGridNeeded) {
+                                    $rootScope.$broadcast('refreshDeclarationGrid');
+                                }
                             }
                         }
                     );
@@ -123,6 +132,7 @@
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
                                     $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
                                     if (!$scope.intervalId) {
                                         $scope.intervalId = $interval(function () {
                                             updateAvailableReports();
@@ -201,7 +211,7 @@
                         title: $filter('translate')('rnuPersonFace.title'),
                         templateUrl: 'client/app/taxes/ndfl/rnuNdflPersonFace.html',
                         controller: 'rnuNdflPersonFaceFormCtrl',
-                        windowClass: 'modal1000',
+                        windowClass: 'modal1200',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -498,6 +508,10 @@
                     $rootScope.$broadcast('tabSelected', tab);
                 };
 
+                $scope.deselectTab = function (tab) {
+                    $rootScope.$broadcast('tabDeselected', tab);
+                };
+
                 $scope.downloadXml = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xml";
                 };
@@ -506,6 +520,9 @@
                 };
                 $scope.downloadSpecific = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
+                };
+                $scope.downloadExcelTemplate = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/excelTemplate";
                 };
 
                 $scope.createReportXlsx = function (force) {

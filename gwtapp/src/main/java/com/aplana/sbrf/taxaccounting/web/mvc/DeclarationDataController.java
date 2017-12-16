@@ -99,6 +99,28 @@ public class DeclarationDataController {
     }
 
     /**
+     * Сохранить шаблон ТФ (Excel) для формы
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param response          ответ
+     * @throws IOException IOException
+     */
+    @GetMapping(value = "/rest/declarationData/{declarationDataId}/excelTemplate", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public void downloadDeclarationExcelTemplate(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
+            throws IOException {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+
+        BlobData blobData = blobDataService.get(blobId);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    /**
      * Формирование специфичного отчета для декларации
      *
      * @param alias             тип специфичного отчета

@@ -40,5 +40,14 @@ begin
 		EXECUTE IMMEDIATE 'comment on column ref_book_asnu.ROLE_ALIAS is ''Значение поля "Код роли" справочника "Системные роли" АСУН''';
 		EXECUTE IMMEDIATE 'comment on column ref_book_asnu.ROLE_NAME is ''Значение поля "Наименование" справочника "Системные роли" АСУН''';
 	END IF; 
+	
+	EXECUTE IMMEDIATE 'alter table declaration_report modify TYPE number(2,0)';
+	
+	select count(1) into v_count from user_tab_columns where lower(table_name)='declaration_data' and lower(column_name)='last_data_modified';
+	IF v_count=0 THEN
+		EXECUTE IMMEDIATE 'alter table declaration_data add last_data_modified date';
+		EXECUTE IMMEDIATE 'COMMENT ON COLUMN DECLARATION_DATA.last_data_modified IS ''Дата последних изменений данных формы''';
+		EXECUTE IMMEDIATE 'update DECLARATION_DATA set last_data_modified=sysdate';
+	END IF;
 end;
 /

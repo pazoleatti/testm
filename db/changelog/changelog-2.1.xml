@@ -2917,4 +2917,64 @@ END;'
             <where>id=100</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2990 -->
+    <changeSet id="2.1-ytrofimov-98" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
+
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2954 -->
+    <changeSet id="2.1-aokunev-4" author="aokunev">
+        <modifyDataType
+                tableName="declaration_report"
+                columnName="type"
+                newDataType="number(2)"
+        />
+        <sql splitStatements="false">
+            begin
+                execute immediate 'alter table declaration_report drop constraint decl_report_chk_type';
+                execute immediate 'alter table declaration_report drop constraint decl_report_chk_subreport_id';
+                execute immediate 'alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3, 4, 13))';
+                execute immediate 'alter table declaration_report add constraint decl_report_chk_subreport_id check ((type = 4 and subreport_id is not null) or (type in (0, 1, 2, 3, 13) and subreport_id is null))';
+            end;
+        </sql>
+    </changeSet>
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3017 -->
+    <changeSet id="2.1-ytrofimov-99" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-dnovikov-13" author="dnovikov">
+        <addColumn tableName="DECLARATION_DATA">
+            <column name="last_data_modified" type="DATE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2.1-dnovikov-14" author="dnovikov">
+        <sql>
+            COMMENT ON COLUMN DECLARATION_DATA.last_data_modified IS 'Дата последних изменений данных формы';
+        </sql>
+    </changeSet>
+    <changeSet id="2.1-dnovikov-15" author="dnovikov">
+        <sql>
+            update DECLARATION_DATA set last_data_modified=sysdate;
+        </sql>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2956 -->
+    <changeSet id="2.1-ytrofimov-100" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
