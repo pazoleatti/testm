@@ -45,9 +45,9 @@ public class CreateExcelTemplateAsyncTask extends AbstractDeclarationAsyncTask {
                 uuid = declarationDataService.createExcelTemplate(declarationData, userInfo, logger);
                 reportService.createDec(declarationDataId, uuid, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
             } catch (Exception e) {
-                throw new ServiceException("Выгрузка шаблона ТФ (Excel) для Налоговой формы %s не может быть выполнена: %s",
+                throw new ServiceException(String.format("Выгрузка шаблона ТФ (Excel) для Налоговой формы %s не может быть выполнена: %s",
                         getDeclarationDescription(taskData.getUserId(), params),
-                        e.getMessage() != null && !e.getMessage().isEmpty() ? e.getMessage() : e.getClass().getSimpleName());
+                        e.getMessage() != null && !e.getMessage().isEmpty() ? e.getMessage() : e.getClass().getSimpleName()), e);
             }
             return new BusinessLogicResult(true, NotificationType.REF_BOOK_REPORT, uuid);
         }

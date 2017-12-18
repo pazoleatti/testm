@@ -3237,24 +3237,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final TAUser user = userInfo.getUser();
         Logger logger = new Logger();
 
-        String asyncLockKey = LockData.LockObjects.EXCEL_TEMPLATE_DECLARATION.name() + "_" + declarationDataId;
-        Pair<Boolean, String> restartStatus = asyncManager.restartTask(asyncLockKey, userInfo, force, logger);
-        if (restartStatus != null && restartStatus.getFirst()) {
-            result.setStatus(CreateAsyncTaskStatus.LOCKED);
-            result.setRestartMsg(restartStatus.getSecond());
-        } else if (restartStatus != null && !restartStatus.getFirst()) {
-            result.setStatus(CreateAsyncTaskStatus.CREATE);
-            // в логгере будет что задача запущена и вы добавлены в список получателей оповещения
+        final String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+        if (uuid != null) {
+            result.setStatus(CreateAsyncTaskStatus.EXIST);
+            return result;
         } else {
-            result.setStatus(CreateAsyncTaskStatus.CREATE);
-            Map<String, Object> params = new HashMap<>();
-            params.put("declarationDataId", declarationDataId);
-            asyncManager.executeTask(asyncLockKey, AsyncTaskType.EXCEL_TEMPLATE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                @Override
-                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                    return lockDataService.lockAsync(keyTask, user.getId());
-                }
-            });
+            String asyncLockKey = LockData.LockObjects.EXCEL_TEMPLATE_DECLARATION.name() + "_" + declarationDataId;
+            Pair<Boolean, String> restartStatus = asyncManager.restartTask(asyncLockKey, userInfo, force, logger);
+            if (restartStatus != null && restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                result.setRestartMsg(restartStatus.getSecond());
+            } else if (restartStatus != null && !restartStatus.getFirst()) {
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
+                // в логгере будет что задача запущена и вы добавлены в список получателей оповещения
+            } else {
+                result.setStatus(CreateAsyncTaskStatus.CREATE);
+                Map<String, Object> params = new HashMap<>();
+                params.put("declarationDataId", declarationDataId);
+                asyncManager.executeTask(asyncLockKey, AsyncTaskType.EXCEL_TEMPLATE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                    @Override
+                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                        return lockDataService.lockAsync(keyTask, user.getId());
+                    }
+                });
+            }
         }
 
         result.setUuid(logEntryService.save(logger.getEntries()));
@@ -3369,6 +3375,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException();
                 }
 
+                reportService.deleteDec(declarationDataId);
                 // TODO workaround, создаём пустую xml (но не должна использоваться)
                 if (reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
                     String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
