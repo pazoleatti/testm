@@ -15,7 +15,7 @@
                     </button>
                     <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button">
                         <li role="menuitem"
-                            ng-show="availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
+                            ng-show="!declarationData.manuallyCreated && availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
                             <div class="row menuitem">
                                 <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
                             </div>
