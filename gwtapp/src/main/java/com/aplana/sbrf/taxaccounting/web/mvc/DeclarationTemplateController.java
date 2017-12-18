@@ -330,4 +330,27 @@ public class DeclarationTemplateController {
             IOUtils.closeQuietly(response.getOutputStream());
         }
     }
+
+    @ExceptionHandler(ServiceLoggerException.class)
+    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException, JSONException {
+        JSONObject errors = new JSONObject();
+        response.setCharacterEncoding("UTF-8");
+        errors.put(UuidEnum.ERROR_UUID.toString(), e.getUuid());
+        response.getWriter().printf(errors.toString());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public void exceptionHandler(Exception e, final HttpServletResponse response) throws JSONException {
+        response.setCharacterEncoding("UTF-8");
+        LOG.error(e.getLocalizedMessage(), e);
+        JSONObject errors = new JSONObject();
+        try {
+            Logger log = new Logger();
+            log.error(e.getMessage());
+            errors.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(log.getEntries()));
+            response.getWriter().printf(errors.toString());
+        } catch (IOException ioException) {
+            LOG.error(ioException.getMessage(), ioException);
+        }
+    }
 }
