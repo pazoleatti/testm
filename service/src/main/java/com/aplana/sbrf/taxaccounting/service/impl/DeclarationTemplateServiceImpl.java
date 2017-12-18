@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationSubreportDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
@@ -68,9 +70,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Autowired
 	private DeclarationDataService declarationDataService;
     @Autowired
+    private DeclarationDataDao declarationDataDao;
+    @Autowired
 	private PeriodService periodService;
     @Autowired
 	private ReportService reportService;
+    @Autowired
+    private ReportDao reportDao;
     @Autowired
 	private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
@@ -352,15 +358,15 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         ArrayList<String> existInLockDec = new ArrayList<String>();
 
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
-            DeclarationData data = declarationDataService.get(dataId, currUser);
+            DeclarationData data = declarationDataDao.get(dataId);
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             ReportPeriod rp = periodService.getReportPeriod(data.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(data.getDepartmentReportPeriodId());
             if (
-                    reportService.getDec(currUser, dataId, DeclarationDataReportType.PDF_DEC) != null
+                    reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
                             ||
-                            reportService.getDec(currUser, dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
+                            reportDao.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null) {
                 existDec.add(String.format(
                         DEC_DATA_EXIST_IN_TASK,
                         template.getName(),
