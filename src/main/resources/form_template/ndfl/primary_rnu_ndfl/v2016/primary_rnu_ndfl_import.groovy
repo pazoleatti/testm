@@ -651,9 +651,6 @@ class Import extends AbstractScriptClass {
     PagingResult<Map<String, RefBookValue>> getRefBook(long refBookId) {
         // Передаем как аргумент только срок действия версии справочника
         PagingResult<Map<String, RefBookValue>> refBookList = getProvider(refBookId).getRecordsVersion(reportPeriod.startDate, reportPeriod.endDate, null, null)
-        if (!refBookList) {
-            throw new Exception("Ошибка при получении записей справочника " + refBookId)
-        }
         return refBookList
     }
 
