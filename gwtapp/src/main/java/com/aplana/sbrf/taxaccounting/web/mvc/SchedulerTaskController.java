@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.result.MessageResult;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
@@ -111,7 +112,7 @@ public class SchedulerTaskController {
      * @param schedulerTaskModel измененная задача планировщика
      */
     @PostMapping(value = "/actions/updateSchedulerTask")
-    public void updateSchedulerTask(@RequestParam(value = "schedulerTaskModel") SchedulerTaskModel schedulerTaskModel) {
-        schedulerTaskService.updateTask(schedulerTaskModel.getShedulerTaskData() );
+    public MessageResult updateSchedulerTask(@RequestParam(value = "schedulerTaskModel") SchedulerTaskModel schedulerTaskModel) {
+       return schedulerTaskService.updateTask(schedulerTaskModel.getShedulerTaskData() );
     }
 }

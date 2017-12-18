@@ -16,8 +16,9 @@
         /**
          * @description Контроллер страницы "Планировщик задач"
          */
-        .controller('updateSchedulerTaskCtrl', ['$scope','$state', '$filter', 'schedulerTaskResource', '$http', 'APP_CONSTANTS', '$stateParams','updateScheduleTask',
-            function ($scope, $state, $filter, schedulerTaskResource, $http, APP_CONSTANTS, $stateParams, updateScheduleTask) {
+        .controller('updateSchedulerTaskCtrl', ['$scope','$state', '$filter', 'schedulerTaskResource', '$http',
+            '$dialogs', 'APP_CONSTANTS', '$stateParams','updateScheduleTask',
+            function ($scope, $state, $filter, schedulerTaskResource, $http, $dialogs, APP_CONSTANTS, $stateParams, updateScheduleTask) {
                 /**
                  * @description Инициализация первичных данных на странице
                  */
@@ -46,6 +47,12 @@
                         url: "controller/actions/updateSchedulerTask/",
                         params: {
                              schedulerTaskModel: $scope.updateSchedulerTask
+                        }
+                    }).then(function (response) {
+                        if (response.data.message !== null) {
+                            $dialogs.errorDialog({
+                                content: response.data.message
+                            });
                         }
                     });
                 };
