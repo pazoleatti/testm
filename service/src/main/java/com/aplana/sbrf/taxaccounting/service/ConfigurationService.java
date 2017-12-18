@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public interface ConfigurationService {
     /**
      * Обновление общего параметра в табл. CONFIGURATION
      */
-    void update(Configuration config);
+    ActionResult update(Configuration config);
 
     /**
      * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)

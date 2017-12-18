@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -50,8 +51,8 @@ public class ConfigParamsController {
      * @param config редактируемый параметр
      */
     @PostMapping(value = "/actions/editCommonParams")
-    public void editCommonParams(@RequestParam Configuration config) {
-        configurationService.update(config);
+    public ActionResult editCommonParams(@RequestParam Configuration config) {
+        return configurationService.update(config);
     }
 
     /**

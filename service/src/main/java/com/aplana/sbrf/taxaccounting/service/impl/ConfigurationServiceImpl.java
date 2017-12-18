@@ -10,10 +10,12 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
     private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
     private static final String NO_CODE_ERROR = "«%s» не найден в справочнике";
-    private static final String INN_JUR_ERROR = "Введен некорректные номер ИНН «%s»";
+    private static final String INN_JUR_ERROR = "Введен некорректный номер ИНН «%s»";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -58,6 +60,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private RefBookFactory refBookFactory;
     @Autowired
     private AuditService auditService;
+    @Autowired
+    private LogEntryService logEntryService;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -532,7 +536,21 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public void update(Configuration config) {
-        configurationDao.update(config);
+    public ActionResult update(Configuration config) {
+        ActionResult result = new ActionResult();
+        Logger logger = new Logger();
+
+        if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.getCaption())) {
+            String inn = config.getValue();
+            if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
+                logger.error(INN_JUR_ERROR, inn);
+            }
+        }
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            configurationDao.update(config);
+        }
+        return result;
     }
 }

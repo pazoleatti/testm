@@ -10,8 +10,8 @@
     /**
      * @description Модуль для редактирования общих параметров'
      */
-        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'commonParamsGrid',
-            function ($scope, $filter, $http, $modalInstance, commonParamsGrid) {
+        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'commonParamsGrid', '$logPanel',
+            function ($scope, $filter, $http, $modalInstance, commonParamsGrid, $logPanel) {
 
                 /**
                  * @description Редактирование параметра
@@ -24,7 +24,10 @@
                         params: {
                             config: $scope.parameter
                         }
-                    }).success(function () {
+                    }).then(function(response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                         commonParamsGrid.ctrl.refreshGrid();
                     });
 
