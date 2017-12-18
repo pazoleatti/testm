@@ -53,6 +53,8 @@
                             $dialogs.errorDialog({
                                 content: response.data.message
                             });
+                        } else {
+                            $state.go('schedulerTaskList');
                         }
                     });
                 };
