@@ -185,12 +185,6 @@
                                             messageParts.push($scope.searchFilter.params[param]);
                                     }
                                 }
-                                var messageData = messageParts.join("; ");
-                                var message = $filter('translate')('reportPersonFace.error.person') + messageData + $filter('translate')('reportPersonFace.error.notFound');
-                                $dialogs.messageDialog({
-                                    title: $filter('translate')('reportPersonFace.title.notCreated'),
-                                    content: message
-                                });
                                 return;
                             }
                             if (resultSize < availableDataRows) {
