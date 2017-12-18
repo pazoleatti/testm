@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
@@ -93,7 +94,7 @@ public class RefBookPersonServiceTest {
         identificationDataFixture.setPriorityMap(priorityMap);
         NaturalPerson result = personService.identificatePerson(identificationDataFixture, new Logger());
 
-        assertNull(result);
+        assertFalse(result.isNeedUpdate());
     }
 
     @Test

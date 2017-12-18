@@ -72,27 +72,32 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         List<NaturalPerson> personDataList = identificationData.getRefBookPersonList();
         if (personDataList != null && !personDataList.isEmpty()) {
 
-            List<NaturalPerson> personForRemoveList = new LinkedList<>();
-            /* Если приоритет Асну в справочнике > приоритета Асну в РНУ, то не обновляем запись*/
+            /* Если приоритет Асну в справочнике > приоритета Асну в РНУ, то устанавливаем ИД АСНУ == null, чтобы указать
+            что запись не нужно ни обновлять ни создавать*/
             for (NaturalPerson person : personDataList) {
                 if (person.getSourceId() != null && identificationData.getPriorityMap().get(person.getSourceId()) > identificationData.getPriorityMap().get(identificationData.getDeclarationDataAsnuId())) {
-                    personForRemoveList.add(person);
+                    person.setNeedUpdate(false);
                 }
             }
-            personDataList.removeAll(personForRemoveList);
-
-            personForRemoveList = new LinkedList<>();
 
             calculateWeigth(identificationData.getNaturalPerson(), personDataList, weigthComporators);
 
             // Удаляем ФЛ с весом < порога схожести
+            List<NaturalPerson> personForRemoveList = new LinkedList<>();
             for (NaturalPerson person : personDataList) {
                 if (person.getWeigth() <= treshold) {
                     personForRemoveList.add(person);
                 }
             }
             personDataList.removeAll(personForRemoveList);
-            if (!personDataList.isEmpty()) {
+
+            //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
+
+            Collections.sort(personDataList, new PersonDataComparator());
+
+            IdentityPerson identificatedPerson = personDataList.get(0);
+
+            if (identificatedPerson != null) {
                 StringBuffer msg = new StringBuffer();
 
                 msg.append("Для ФЛ " + IdentificationUtils.buildNotice(identificationData.getNaturalPerson()) + " сходных записей найдено: " + personDataList.size()).append(" ");
@@ -100,9 +105,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 for (IdentityPerson applicablePersonData : personDataList) {
                     msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
                 }
-
-                //Выбор из найденных записей одной записи с максимальной Степенью соответствия критериям
-                IdentityPerson identificatedPerson = Collections.max(personDataList, new PersonDataComparator());
                 if (identificatedPerson.getWeigth() > treshold) {
                     //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
                     if (personDataList.size() > 1) {
@@ -115,7 +117,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                     //msg.append(". Записей превышающих установленный порог схожести " + treshold + " не найдено");
                     return null;
                 }
-
             } else {
                 return null;
             }
@@ -123,7 +124,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             //logger.info("Для ФЛ " + buildNotice(personData) + " сходных записей не найдено");
             return null;
         }
-
     }
 
     private static void calculateWeigth(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators) {
@@ -268,8 +268,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             }
 
 
-
-
         });
 
         //Адрес в РФ
@@ -367,7 +365,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         public int compare(IdentityPerson a, IdentityPerson b) {
             int weightComp = Double.compare(a.getWeigth(), b.getWeigth());
             if (weightComp == 0) {
-                return Long.compare(a.getRecordId(), b.getRecordId());
+                return Long.compare(b.getRecordId(), a.getRecordId());
             }
             return weightComp;
         }
