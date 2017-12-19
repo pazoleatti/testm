@@ -1495,22 +1495,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).RETURN_TO_CREATED)")
     public void cancel(Logger logger, long id, String note, TAUserInfo userInfo) {
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
-        DeclarationData declarationData = declarationDataDao.get(id);
-
-        Map<String, Object> exchangeParams = new HashMap<String, Object>();
-        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-        }
-
-        declarationData.setState(State.CREATED);
-        sourceService.updateDDConsolidation(declarationData.getId());
-
-        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
-        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
-
-        declarationDataDao.setStatus(id, declarationData.getState());
+        cancelDeclarationList(Arrays.asList(id), note, userInfo);
     }
 
     @Override
