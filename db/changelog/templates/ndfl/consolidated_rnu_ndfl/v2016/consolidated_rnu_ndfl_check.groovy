@@ -1391,7 +1391,6 @@ class Check extends AbstractScriptClass {
 
             for (NdflPersonIncome ndflPersonIncome : item.value) {
                 NdflPerson ndflPerson = personsCache.get(ndflPersonIncome.ndflPersonId)
-
                 NdflPersonFL ndflPersonFL = ndflPersonFLMap.get(ndflPersonIncome.ndflPersonId)
                 def operationId = ndflPersonIncome.operationId ?: ""
                 String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [ndflPersonFL.fio, ndflPersonFL.inp, operationId])
@@ -1487,8 +1486,8 @@ class Check extends AbstractScriptClass {
                     CHECK_NDFL_PERSON_INCOMING_TAX_RATE_30:
                     {
                         if (presentIncomeCode && presentStatus && presentTaxRate) {
-                            def conditionA = ndflPerson.status ? Integer.parseInt(ndflPerson.status.toString()) : 0 >= 2 && ndflPersonIncome.incomeCode != "1010"
-                            def conditionB = ndflPerson.status ? Integer.parseInt(ndflPerson.status.toString()) : 0 > 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
+                            def conditionA = Integer.parseInt(ndflPerson.status) >= 2 && ndflPersonIncome.incomeCode != "1010"
+                            def conditionB = Integer.parseInt(ndflPerson.status) > 2 && !["2000", "2001", "2010"].contains(ndflPersonIncome.incomeCode)
                             if (conditionA || conditionB) {
                                 if (ndflPersonIncome.taxRate == 30) {
                                     checkNdflPersonIncomingTaxRateTotal = true
