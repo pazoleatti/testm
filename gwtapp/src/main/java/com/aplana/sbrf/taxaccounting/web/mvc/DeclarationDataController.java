@@ -112,12 +112,14 @@ public class DeclarationDataController {
 
         String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
 
-        BlobData blobData = blobDataService.get(blobId);
-        if (blobData != null) {
-            ResponseUtils.createBlobResponse(req, response, blobData);
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        if (blobId != null) {
+            BlobData blobData = blobDataService.get(blobId);
+            if (blobData != null) {
+                ResponseUtils.createBlobResponse(req, response, blobData);
+                return;
+            }
         }
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     }
 
     /**

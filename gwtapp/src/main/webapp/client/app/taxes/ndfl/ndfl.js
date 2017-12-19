@@ -443,6 +443,8 @@
                                         $scope.createTemplate(true);
                                     }
                                 });
+                            } else if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
+                                $scope.downloadExcelTemplate();
                             }
                         }
                     });
