@@ -91,7 +91,6 @@
                                 $scope.declarationData = data;
                                 $scope.declarationDataId = $stateParams.declarationDataId;
                                 if (isRefreshGridNeeded) {
-                                    updateAvailableReports();
                                     $rootScope.$broadcast('refreshDeclarationGrid');
                                 }
                             }
@@ -110,37 +109,41 @@
                  */
                 // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports() {
-                    DeclarationDataResource.query({
-                            declarationDataId: $stateParams.declarationDataId,
-                            projection: "availableReports",
-                            nooverlay: true
-                        },
-                        function (data) {
-                            if (data) {
-                                if (!data.declarationDataExist) {
-                                    $interval.cancel($scope.intervalId);
-                                    var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                    $dialogs.errorDialog({
-                                        content: message,
-                                        closeBtnClick: function () {
-                                            $state.go("/");
-                                        }
-                                    });
-                                    return;
-                                }
-                                $scope.availableReports = data.downloadXmlAvailable;
-                                $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
-                                $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
-                                $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
-                                if (!$scope.intervalId) {
-                                    $scope.intervalId = $interval(function () {
-                                        updateAvailableReports();
-                                    }, 10000);
+                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableRnuNdflPersonAllDb && $scope.availableReportKppOktmo)) {
+                        DeclarationDataResource.query({
+                                declarationDataId: $stateParams.declarationDataId,
+                                projection: "availableReports",
+                                nooverlay: true
+                            },
+                            function (data) {
+                                if (data) {
+                                    if (!data.declarationDataExist) {
+                                        $interval.cancel($scope.intervalId);
+                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                        $dialogs.errorDialog({
+                                            content: message,
+                                            closeBtnClick: function () {
+                                                $state.go("/");
+                                            }
+                                        });
+                                        return;
+                                    }
+                                    $scope.availableReports = data.downloadXmlAvailable;
+                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
+                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
+                                    if (!$scope.intervalId) {
+                                        $scope.intervalId = $interval(function () {
+                                            updateAvailableReports();
+                                        }, 10000);
+                                    }
                                 }
                             }
-                        }
-                    );
+                        );
+                    } else {
+                        $interval.cancel($scope.intervalId);
+                    }
                 }
 
                 updateAvailableReports();

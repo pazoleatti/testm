@@ -3381,7 +3381,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException();
                 }
 
-                reportService.deleteDec(declarationDataId);
                 // TODO workaround, создаём пустую xml (но не должна использоваться)
                 if (reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
                     String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
