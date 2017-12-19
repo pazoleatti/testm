@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
@@ -169,6 +171,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private NdflPersonDao ndflPersonDao;
     @Autowired
     private DeclarationDataPermissionSetter declarationDataPermissionSetter;
+    @Autowired
+    private DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter;
     @Autowired
     private NotificationService notificationService;
 
@@ -2714,7 +2718,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public List<DeclarationDataFile> getFiles(long formDataId) {
-        return declarationDataFileDao.getFiles(formDataId);
+        List<DeclarationDataFile> files = declarationDataFileDao.getFiles(formDataId);
+        declarationDataFilePermissionSetter.setPermissions(files, DeclarationDataFilePermission.DELETE);
+        return files;
     }
 
     @Override

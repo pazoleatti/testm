@@ -56,7 +56,9 @@
                 </button>
             </span>
             <span>
-                <button type="button" class="btn btn-default" data-ng-click="removeFileClick()">
+                <button type="button" class="btn btn-default"
+                        data-ng-click="removeFileClick()"
+                        data-ng-disabled="!filesDeleteAvailable()">
                      {{::'filesComment.button.remove' |translate}}
                 </button>
             </span>

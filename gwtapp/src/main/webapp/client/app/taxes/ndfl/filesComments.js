@@ -9,19 +9,9 @@
      * @description Контроллер МО "Файлы и комментарии"
      */
         .controller('filesCommentsCtrl', [
-            '$scope',
-            '$http',
-            '$modalInstance',
-            '$shareData',
-            '$filter',
-            '$logPanel',
-            '$dialogs',
-            'DeclarationDataResource',
-            'Upload',
-            'APP_CONSTANTS',
-            '$q',
-            '$modalStack',
-            function ($scope, $http, $modalInstance, $shareData, $filter, $logPanel, $dialogs, DeclarationDataResource, Upload, APP_CONSTANTS, $q, $modalStack) {
+            '$scope', '$http', '$modalInstance', '$shareData', '$filter', '$logPanel', '$dialogs', 'DeclarationDataResource', 'Upload', 'APP_CONSTANTS', '$q', '$modalStack',
+            'PermissionChecker',
+            function ($scope, $http, $modalInstance, $shareData, $filter, $logPanel, $dialogs, DeclarationDataResource, Upload, APP_CONSTANTS, $q, $modalStack, PermissionChecker) {
 
                 $scope.editMode = false;
 
@@ -176,6 +166,16 @@
                             }
                         });
                     }
+                };
+
+                $scope.filesDeleteAvailable = function () {
+                    var files = $scope.fileCommentGrid.value;
+                    if (files && files.length > 0) {
+                        return files.every(function (item) {
+                            return PermissionChecker.check(item, APP_CONSTANTS.DECLARATION_FILE_PERMISSION.DELETE);
+                        });
+                    }
+                    return false;
                 };
 
                 /**
