@@ -224,7 +224,10 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
                         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
                         if (departmentReportPeriod.isActive()) {
-                            if (targetDomainObject.getManuallyCreated() && targetDomainObject.getLastDataModifiedDate() == null) {
+                            DeclarationFormKind kind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
+                            if (kind == DeclarationFormKind.PRIMARY &&
+                                    targetDomainObject.getManuallyCreated() &&
+                                    targetDomainObject.getLastDataModifiedDate() == null) {
                                 return false;
                             }
                             return true;
