@@ -42,6 +42,10 @@ begin
 		EXECUTE IMMEDIATE 'alter table lock_data drop column queue';
 		EXECUTE IMMEDIATE 'alter table lock_data drop column server_node';
 		EXECUTE IMMEDIATE 'alter table lock_data drop constraint lock_data_pk';
+		select count(1) into v_count from user_indexes where lower(index_name)='lock_data_pk';
+		IF v_count>0 THEN
+			EXECUTE IMMEDIATE 'drop index lock_data_pk';
+		end if;
 		EXECUTE IMMEDIATE 'alter table lock_data add task_id number(18) null';
 		EXECUTE IMMEDIATE 'comment on column lock_data.task_id is ''Ссылка на асинхронную задачу, связанную с блокировкой''';
 		EXECUTE IMMEDIATE 'alter table lock_data add id number(18) not null';
