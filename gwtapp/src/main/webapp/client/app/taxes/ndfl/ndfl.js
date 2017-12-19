@@ -576,5 +576,22 @@
                     });
                 };
 
-            }]);
+            }]
+        )
+
+        .filter('ndflPeriodFormatter', ['$filter', function ($filter) {
+            return function (declarationData) {
+                if (declarationData) {
+                    return $filter('translate')('title.period.value', {
+                        year: declarationData.reportPeriodYear,
+                        periodName: declarationData.reportPeriod,
+                        correctionString:
+                            declarationData.correctionDate ?
+                                $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yy')}) :
+                                ''
+                    });
+                }
+                return '';
+            };
+        }]);
 }());

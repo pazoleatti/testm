@@ -167,6 +167,8 @@
         "title.comParams.paramValue": "Значение параметра",
 
         "title.period": "Период",
+        "title.period.value": "{{year}}, {{periodName}}{{correctionString}}",
+        "title.period.value.correctionString": ", кор. ({{correctionDate}})",
         "title.department": "Подразделение",
         "title.formNumber": "Номер формы",
         "title.formType": "Тип налоговой формы",

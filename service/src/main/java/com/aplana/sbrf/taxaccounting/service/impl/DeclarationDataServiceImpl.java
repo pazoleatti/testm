@@ -633,6 +633,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declaration.getDepartmentReportPeriodId());
         result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());
         result.setReportPeriodYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+        result.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
         if (declaration.getAsnuId() != null) {
             RefBookDataProvider asnuProvider = rbFactory.getDataProvider(RefBook.Id.ASNU.getId());

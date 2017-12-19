@@ -84,6 +84,11 @@ public class DeclarationResult {
     private Date actualDataDate;
 
     /**
+     * Дата сдачи корректировки
+     */
+    private Date correctionDate;
+
+    /**
      * Создана в ручную
      */
     private Boolean manuallyCreated = false;
@@ -230,5 +235,13 @@ public class DeclarationResult {
 
     public void setActualDataDate(Date actualDataDate) {
         this.actualDataDate = actualDataDate;
+    }
+
+    public Date getCorrectionDate() {
+        return correctionDate;
+    }
+
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
     }
 }
