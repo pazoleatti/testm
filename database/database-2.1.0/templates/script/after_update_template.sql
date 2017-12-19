@@ -27,6 +27,8 @@ ALTER TABLE declaration_template_file ENABLE CONSTRAINT fk_decl_templ_file_blob;
 
 ALTER TABLE decl_template_event_script ENABLE CONSTRAINT FK_DEC_TEMP_EVENT_SCR_DEC_TEMP;
 
+ALTER TABLE decl_template_checks ENABLE CONSTRAINT FK_DECL_TEMPLATE_CHECKS;
+
 COMMIT;
 EXIT;
 
