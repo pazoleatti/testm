@@ -114,8 +114,7 @@
                                 </div>
                                 <div>
                                     <label>{{::'title.period' | translate}}:</label>
-                                    <label class="font-normal info-text200">{{declarationData.reportPeriodYear}},
-                                        {{declarationData.reportPeriod}}</label>
+                                    <label class="font-normal info-text200" data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                 </div>
                                 <div>
                                     <label>{{::'title.state' | translate}}:</label>
