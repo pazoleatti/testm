@@ -335,8 +335,11 @@
         "notifications.title.deleteText": "Вы действительно хотите удалить выбранные оповещения?",
         "notifications.title.deleteLink": "Удалить оповещение",
 
-        "logPanel.title.dateTime": "Время",
+        "logPanel.title.dateTime": "Дата-время",
+        "logPanel.title.messageType": "Тип сообщения",
         "logPanel.title.message": "Сообщение",
+        "logPanel.title.type": "Тип",
+        "logPanel.title.object": "Объект",
         "logPanel.header.message": "Уведомления (всего: {0}; фатальных ошибок: {1})",
         "logPanel.header.unload": "Выгрузить",
         "logPanel.header.unload.title": "Выгрузить в файл MS Excel",

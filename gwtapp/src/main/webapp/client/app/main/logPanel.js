@@ -77,10 +77,10 @@
                                 colNames: [
                                     '',
                                     $filter('translate')('logPanel.title.dateTime'),
-                                    '',
+                                    $filter('translate')('logPanel.title.messageType'),
                                     $filter('translate')('logPanel.title.message'),
-                                    '',
-                                    ''],
+                                    $filter('translate')('logPanel.title.type'),
+                                    $filter('translate')('logPanel.title.object')],
                                 colModel: [
                                     {
                                         name: 'ord',
@@ -100,9 +100,10 @@
                                     {
                                         name: 'icon',
                                         index: 'icon',
-                                        width: 30,
+                                        width: 110,
                                         sortable: false,
-                                        formatter: $filter('iconFormatter')
+                                        formatter: $filter('iconFormatter'),
+                                        classes: 'image-column'
                                     },
                                     {
                                         name: 'message',
