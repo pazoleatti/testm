@@ -825,7 +825,6 @@ class Calculate extends AbstractScriptClass {
         putOrUpdate(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId(), { Long val -> findCountryRecordId(val) }, attributeChangeListener);
         putOrUpdate(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId(), { Long val -> findTaxpayerStatusById(val) }, attributeChangeListener);
         putOrUpdate(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId, { Long val -> findAsnuCodeById(val) }, attributeChangeListener);
-        putOrUpdate(values, "OLD_ID", RefBookAttributeType.REFERENCE, null, null, attributeChangeListener);
     }
 
     Map<String, RefBookValue> mapAddressAttr(Address address) {
@@ -861,7 +860,6 @@ class Calculate extends AbstractScriptClass {
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId());
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId());
         putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, declarationData.asnuId);
-        putValue(values, "OLD_ID", RefBookAttributeType.REFERENCE, null);
         return values;
     }
 
