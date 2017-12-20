@@ -4,4 +4,28 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <changeSet id="2.1-ytrofimov-102" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-103" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.1-ytrofimov-104" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
+
 </databaseChangeLog>

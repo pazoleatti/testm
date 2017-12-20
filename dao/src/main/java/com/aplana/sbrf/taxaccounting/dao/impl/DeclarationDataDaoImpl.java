@@ -161,7 +161,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().query(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
+                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, dd.last_data_modified, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and (" +

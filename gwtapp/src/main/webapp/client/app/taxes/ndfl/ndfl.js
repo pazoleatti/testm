@@ -91,7 +91,6 @@
                                 $scope.declarationData = data;
                                 $scope.declarationDataId = $stateParams.declarationDataId;
                                 if (isRefreshGridNeeded) {
-                                    updateAvailableReports();
                                     $rootScope.$broadcast('refreshDeclarationGrid');
                                 }
                             }
@@ -110,37 +109,41 @@
                  */
                 // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports() {
-                    DeclarationDataResource.query({
-                            declarationDataId: $stateParams.declarationDataId,
-                            projection: "availableReports",
-                            nooverlay: true
-                        },
-                        function (data) {
-                            if (data) {
-                                if (!data.declarationDataExist) {
-                                    $interval.cancel($scope.intervalId);
-                                    var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                    $dialogs.errorDialog({
-                                        content: message,
-                                        closeBtnClick: function () {
-                                            $state.go("/");
-                                        }
-                                    });
-                                    return;
-                                }
-                                $scope.availableReports = data.downloadXmlAvailable;
-                                $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
-                                $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
-                                $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
-                                if (!$scope.intervalId) {
-                                    $scope.intervalId = $interval(function () {
-                                        updateAvailableReports();
-                                    }, 10000);
+                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableRnuNdflPersonAllDb && $scope.availableReportKppOktmo)) {
+                        DeclarationDataResource.query({
+                                declarationDataId: $stateParams.declarationDataId,
+                                projection: "availableReports",
+                                nooverlay: true
+                            },
+                            function (data) {
+                                if (data) {
+                                    if (!data.declarationDataExist) {
+                                        $interval.cancel($scope.intervalId);
+                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                        $dialogs.errorDialog({
+                                            content: message,
+                                            closeBtnClick: function () {
+                                                $state.go("/");
+                                            }
+                                        });
+                                        return;
+                                    }
+                                    $scope.availableReports = data.downloadXmlAvailable;
+                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
+                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                    $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
+                                    if (!$scope.intervalId) {
+                                        $scope.intervalId = $interval(function () {
+                                            updateAvailableReports();
+                                        }, 10000);
+                                    }
                                 }
                             }
-                        }
-                    );
+                        );
+                    } else {
+                        $interval.cancel($scope.intervalId);
+                    }
                 }
 
                 updateAvailableReports();
@@ -451,14 +454,19 @@
                  * @description Запрос на подтверждение выполнения опрерации
                  */
                 $scope.confirmImport = function () {
-                    $dialogs.confirmDialog({
-                        content: $filter('translate')('title.importDeclaration.confirm'),
-                        okBtnCaption: $filter('translate')('common.button.yes'),
-                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                        okBtnClick: function () {
-                            angular.element('#upload').trigger('click');
-                        }
-                    });
+                    // если данные уже загружались, то просим подтвердить
+                    if ($scope.declarationData.lastDataModifiedDate) {
+                        $dialogs.confirmDialog({
+                            content: $filter('translate')('title.importDeclaration.confirm'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                angular.element('#upload').trigger('click');
+                            }
+                        });
+                    } else {
+                        angular.element('#upload').trigger('click');
+                    }
                 };
 
                 /**
@@ -573,5 +581,22 @@
                     });
                 };
 
-            }]);
+            }]
+        )
+
+        .filter('ndflPeriodFormatter', ['$filter', function ($filter) {
+            return function (declarationData) {
+                if (declarationData) {
+                    return $filter('translate')('title.period.value', {
+                        year: declarationData.reportPeriodYear,
+                        periodName: declarationData.reportPeriod,
+                        correctionString:
+                            declarationData.correctionDate ?
+                                $filter('translate')('title.period.value.correctionString', {correctionDate: $filter('date')(declarationData.correctionDate, 'dd.MM.yy')}) :
+                                ''
+                    });
+                }
+                return '';
+            };
+        }]);
 }());

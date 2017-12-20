@@ -141,25 +141,29 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
 
     @Override
     public void deleteRowButtonClicked() {
-        Dialog.confirmMessage("Удаление элемента справочника", "Вы подтверждаете удаление всех версий элемента?", new DialogHandler() {
-            @Override
-            public void yes() {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onDeleteRowClicked();
-                }
-                Dialog.hideMessage();
-            }
+        Dialog.confirmMessage("Удаление элемента справочника",
+                getUiHandlers().isVersioned() ?
+                        "Вы подтверждаете удаление всех версий элемента?" :
+                        "Вы подтверждаете удаление элемента?",
+                new DialogHandler() {
+                    @Override
+                    public void yes() {
+                        if (getUiHandlers() != null) {
+                            getUiHandlers().onDeleteRowClicked();
+                        }
+                        Dialog.hideMessage();
+                    }
 
-            @Override
-            public void no() {
-                Dialog.hideMessage();
-            }
+                    @Override
+                    public void no() {
+                        Dialog.hideMessage();
+                    }
 
-            @Override
-            public void close() {
-                no();
-            }
-        });
+                    @Override
+                    public void close() {
+                        no();
+                    }
+                });
     }
 
     @Override

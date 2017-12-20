@@ -49,7 +49,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
     private static final String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
     private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
-    private static final String NO_CODE_ERROR = "«%s» не найден в справочнике";
+    private static final String NO_CODE_ERROR = "Код НО (пром.) (\"%s\") не найден в справочнике \"СОНО\"";
     private static final String INN_JUR_ERROR = "Введен некорректный номер ИНН «%s»";
 
     @Autowired
@@ -540,17 +540,39 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
 
-        if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.getCaption())) {
-            String inn = config.getValue();
-            if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
-                logger.error(INN_JUR_ERROR, inn);
-            }
-        }
+        checkConfig(config, logger);
 
         result.setUuid(logEntryService.save(logger.getEntries()));
         if (!logger.containsLevel(LogLevel.ERROR)) {
             configurationDao.update(config);
         }
         return result;
+    }
+
+    private void checkConfig(Configuration config, Logger logger) {
+        if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.getCaption())) {
+            checkSberbankInn(config.getValue(), logger);
+        } else if (config.getCode().equals(ConfigurationParam.NO_CODE.getCaption())) {
+            checkNoCode(config.getValue(), logger);
+        }
+    }
+
+    /**
+     * Проверка значения параметра {@link ConfigurationParam#NO_CODE}
+     */
+    private void checkNoCode(String noCode, Logger logger) {
+        RefBookDataProvider taxInspectionDataProvider = refBookFactory.getDataProvider(RefBook.Id.TAX_INSPECTION.getId());
+        if (taxInspectionDataProvider.getRecordsCount(new Date(), "code = '" + noCode + "'") == 0) {
+            logger.error(NO_CODE_ERROR, noCode);
+        }
+    }
+
+    /**
+     * Проверка значения параметра {@link ConfigurationParam#SBERBANK_INN}
+     */
+    private void checkSberbankInn(String inn, Logger logger) {
+        if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
+            logger.error(INN_JUR_ERROR, inn);
+        }
     }
 }
