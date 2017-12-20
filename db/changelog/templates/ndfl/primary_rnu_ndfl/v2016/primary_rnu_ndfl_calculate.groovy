@@ -536,6 +536,11 @@ class Calculate extends AbstractScriptClass {
             if (refBookPerson != null) {
 
                 primaryPerson.setId(refBookPerson.getId());
+
+                if (!refBookPerson.needUpdate) {
+                    updatePersonReferenceList.add(primaryPerson);
+                    continue;
+                }
                 /*
                Если загружаемая НФ находится в периоде который заканчивается раньше чем версия записи в справочнике,
                тогда версия записи в справочнике меняется на более раннюю дату, без изменения атрибутов. Такая ситуация

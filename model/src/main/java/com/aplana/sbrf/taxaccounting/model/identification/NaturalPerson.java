@@ -96,6 +96,11 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
      */
     private Double weigth;
 
+    /**
+     * Флаг указывающий на то что запись в справочнике не надо обновлять
+     */
+    private boolean needUpdate = true;
+
     public NaturalPerson() {
         this.personIdentityList = new ArrayList<PersonIdentifier>();
         this.personDocumentList = new ArrayList<PersonDocument>();
@@ -275,6 +280,13 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
         this.weigth = weigth;
     }
 
+    public boolean isNeedUpdate() {
+        return needUpdate;
+    }
+
+    public void setNeedUpdate(boolean needUpdate) {
+        this.needUpdate = needUpdate;
+    }
 
     @Override
     public String toString() {

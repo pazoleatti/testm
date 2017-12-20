@@ -454,14 +454,19 @@
                  * @description Запрос на подтверждение выполнения опрерации
                  */
                 $scope.confirmImport = function () {
-                    $dialogs.confirmDialog({
-                        content: $filter('translate')('title.importDeclaration.confirm'),
-                        okBtnCaption: $filter('translate')('common.button.yes'),
-                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                        okBtnClick: function () {
-                            angular.element('#upload').trigger('click');
-                        }
-                    });
+                    // если данные уже загружались, то просим подтвердить
+                    if ($scope.declarationData.lastDataModifiedDate) {
+                        $dialogs.confirmDialog({
+                            content: $filter('translate')('title.importDeclaration.confirm'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                angular.element('#upload').trigger('click');
+                            }
+                        });
+                    } else {
+                        angular.element('#upload').trigger('click');
+                    }
                 };
 
                 /**
