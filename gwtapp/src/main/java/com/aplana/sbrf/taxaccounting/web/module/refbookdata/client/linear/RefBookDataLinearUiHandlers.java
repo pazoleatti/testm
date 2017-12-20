@@ -8,4 +8,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface RefBookDataLinearUiHandlers extends UiHandlers {
     void onSelectionChanged();
     void onDeleteRowClicked();
+    boolean isVersioned();
 }
