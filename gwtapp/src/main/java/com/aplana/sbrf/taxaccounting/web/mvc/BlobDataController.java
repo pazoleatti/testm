@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.aplana.sbrf.taxaccounting.permissions.PermissionUtils;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -57,12 +58,21 @@ public class BlobDataController {
     public void processDownloadConf(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (checkRole(resp, securityService.currentUserInfo())) {
-            BlobData blobData = blobDataService.get(uuid);
-            if (blobData != null) {
-                ResponseUtils.createBlobResponse(req, resp, blobData);
-            } else {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            }
+            performDownload(uuid, req, resp);
+        }
+    }
+
+    /**
+     * Выгрузка файла по uuid из окна оповещения
+     * @param uuid уникальный идентификатор файла
+     * @param req запрос
+     * @param resp ответ
+     * @throws IOException
+     */
+    @GetMapping(value = "/rest/blobData/{uuid}/notif")
+    public void processDownloadNotif (@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (PermissionUtils.isAuthentificated()) {
+            performDownload(uuid, req, resp);
         }
     }
 
@@ -146,7 +156,7 @@ public class BlobDataController {
      * @throws IOException IOException
      */
     private boolean checkRole(HttpServletResponse response, TAUserInfo userInfo) throws IOException {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_OPER, TARole.N_ROLE_CONF, TARole.F_ROLE_CONF, TARole.N_ROLE_CONTROL_UNP)) {
+        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONF, TARole.F_ROLE_CONF, TARole.N_ROLE_CONTROL_UNP)) {
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
             response.setCharacterEncoding(UTF_8);
             response.getWriter().printf("Ошибка доступа (недостаточно прав)");
@@ -154,5 +164,21 @@ public class BlobDataController {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Получает blob и формирует ответ для скачивания
+     * @param uuid
+     * @param req
+     * @param resp
+     * @throws IOException
+     */
+    private void performDownload(String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        BlobData blobData = blobDataService.get(uuid);
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, resp, blobData);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 }

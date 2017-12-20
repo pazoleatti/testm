@@ -158,7 +158,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
                             return;
                         }
                         if (notificationTableRow.getReportId() != null) {
-                            sb.appendHtmlConstant( "<a target='_self' href='controller/rest/blobData/" + notificationTableRow.getReportId() + "/conf'>" + "скачать" + " </a>");
+                            sb.appendHtmlConstant( "<a target='_self' href='controller/rest/blobData/" + notificationTableRow.getReportId() + "/notif'>" + "скачать" + " </a>");
                         } else {
                             sb.appendHtmlConstant("");
                         }
