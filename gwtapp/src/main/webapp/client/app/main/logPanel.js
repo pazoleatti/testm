@@ -75,7 +75,7 @@
                                 },
                                 height: 200,
                                 colNames: [
-                                    '',
+                                    $filter('translate')('logPanel.title.num'),
                                     $filter('translate')('logPanel.title.dateTime'),
                                     $filter('translate')('logPanel.title.messageType'),
                                     $filter('translate')('logPanel.title.message'),
@@ -85,7 +85,7 @@
                                     {
                                         name: 'ord',
                                         index: 'ord',
-                                        width: 30,
+                                        width: 50,
                                         key: true,
                                         sortable: false,
                                         formatter: $filter('incrementFormatter')
