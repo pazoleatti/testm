@@ -40,6 +40,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     DispatchAsync dispatchAsync;
 
     private final TableDataProvider dataProvider = new TableDataProvider();
+    private boolean isVersioned;
     private Long refBookDataId;
     private Long recordId;
     private final EditFormPresenter editFormPresenter;
@@ -263,6 +264,15 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     @Override
     public void setRefBookId(Long refBookDataId) {
         this.refBookDataId = refBookDataId;
+    }
+
+    @Override
+    public boolean isVersioned() {
+        return isVersioned;
+    }
+
+    public void setVersioned(boolean versioned) {
+        isVersioned = versioned;
     }
 
     @Override

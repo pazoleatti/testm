@@ -257,6 +257,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                             @Override
                             public void onSuccess(CheckRefBookResult result) {
                                 editFormPresenter.init(refBookId, result.isVersioned());
+                                refBookLinearPresenter.setVersioned(result.isVersioned());
                                 isVersioned = result.isVersioned();
                                 getView().setIsVersion(result.isVersioned());
                                 getView().setUploadAvailable(result.isUploadAvailable());

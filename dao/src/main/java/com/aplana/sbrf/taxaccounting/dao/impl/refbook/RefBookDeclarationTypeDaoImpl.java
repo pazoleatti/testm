@@ -46,6 +46,7 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
                 .select(refBookDeclarationTypeBean)
                 .from(declarationType)
                 .where(where)
+                .orderBy(declarationType.name.asc())
                 .fetch();
     }
 
@@ -83,6 +84,7 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
                 .from(declarationType)
                 .join(departmentDeclarationType).on(declarationType.id.eq(departmentDeclarationType.declarationTypeId))
                 .where(where)
+                .orderBy(declarationType.name.asc())
                 .fetch();
     }
 }
