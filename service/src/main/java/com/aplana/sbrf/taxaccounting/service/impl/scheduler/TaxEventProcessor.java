@@ -29,7 +29,6 @@ public class TaxEventProcessor {
      */
     public void processTaxEvents() {
         List<TaxChangesEvent> newEvents = taxEventDao.getNewTaxEvents();
-        LOG.info("Found new tax events: " + newEvents.size());
         if (!newEvents.isEmpty()) {
             boolean needToClearCache = false;
             for (TaxChangesEvent event : newEvents) {
