@@ -1421,7 +1421,7 @@ class Check extends AbstractScriptClass {
                 if (ndflPersonIncome.totalDeductionsSumm != null && ndflPersonIncome.totalDeductionsSumm != 0
                         && ndflPersonIncome.incomeAccruedSumm != null && ndflPersonIncome.incomeAccruedSumm != 0) {
                     BigDecimal sumNdflDeduction = getDeductionSumForIncome(ndflPersonIncome, ndflPersonDeductionList)
-                    if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: 0, sumNdflDeduction)) {
+                    if (!comparNumbEquals(ndflPersonIncome.totalDeductionsSumm ?: new BigDecimal(0), sumNdflDeduction)) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть равно сумме гр. \"%s\" (\"%s\") раздела 3",
                                 C_TOTAL_DEDUCTIONS_SUMM, ndflPersonIncome.totalDeductionsSumm ?: 0,
@@ -1429,7 +1429,7 @@ class Check extends AbstractScriptClass {
                         String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, ndflPersonIncome.rowNum ?: "")
                         logger.warnExp("%s. %s.", LOG_TYPE_2_12, fioAndInpAndOperId, pathError, errMsg)
                     }
-                    if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: 0)) {
+                    if (comparNumbGreater(sumNdflDeduction, ndflPersonIncome.incomeAccruedSumm ?: new BigDecimal(0))) {
                         // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                         String errMsg = String.format("Значение гр. \"%s\" (\"%s\") должно быть не меньше значение гр. \"%s\" (\"%s\")",
                                 C_INCOME_ACCRUED_SUMM, ndflPersonIncome.incomeAccruedSumm ?: 0,
@@ -2164,7 +2164,7 @@ class Check extends AbstractScriptClass {
             }
 
             // Выч21 Документ о праве на налоговый вычет.Сумма (Графы 16) (Графы 8)
-            if (comparNumbGreater(ndflPersonDeduction.periodCurrSumm ?: 0, ndflPersonDeduction.notifSumm ?: 0)) {
+            if (comparNumbGreater(ndflPersonDeduction.periodCurrSumm ?: new BigDecimal(0), ndflPersonDeduction.notifSumm ?: new BigDecimal(0))) {
                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                 String errMsg = String.format("Значение гр. \"%s\" (%s) не должно превышать значение гр. \"%s\" (%s) согласно подтверждающему документу",
                         C_PERIOD_CURR_SUMM, ndflPersonDeduction.periodCurrSumm ?: "",
@@ -3003,12 +3003,12 @@ class Check extends AbstractScriptClass {
     /**
      * Сравнение чисел с плавающей точкой через эпсилон-окрестности
      */
-    boolean comparNumbEquals(double d1, double d2) {
+    boolean comparNumbEquals(BigDecimal d1, BigDecimal d2) {
         if (d1 == null || d2 == null) return false
-        return (Math.abs(d1 - d2) < 0.001)
+        return ((d1 - d2).abs() < 0.001)
     }
 
-    boolean comparNumbGreater(double d1, double d2) {
+    boolean comparNumbGreater(BigDecimal d1, BigDecimal d2) {
         if (d1 == null || d2 == null) return false
         return (d1 - d2 > 0.001)
     }
