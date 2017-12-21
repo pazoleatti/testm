@@ -458,6 +458,7 @@
         "reportPeriod.error.deletePeriod.hasCorPeriod.text": "Удаление периода невозможно, т.к. для него существует корректирующий период!",
         "reportPeriod.error.openPeriod.alreadyOpen": "Период уже открыт!",
         "reportPeriod.error.openPeriod.hasCorrectionPeriod": "Для указанного периода существуют корректирующие периоды, его переоткрытие невозможно!",
+        "reportPeriod.error.openCorrectionPeriod.smallCorrectionYear": "Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!",
 
 
 
