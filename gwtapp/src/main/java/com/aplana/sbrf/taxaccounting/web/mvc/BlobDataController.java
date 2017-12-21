@@ -29,6 +29,7 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
  * Контроллер для работы с файловым хранилищем
  */
 @RestController
+// TODO необходим рефакторинг контроллера см. https://jira.aplana.com/browse/SBRFNDFL-3100
 public class BlobDataController {
     /**
      * Максимальный размер файла (5 Мб)
