@@ -403,7 +403,7 @@ public class PeriodServiceImpl implements PeriodService {
                     if (!departmentReportPeriodList.isEmpty()) {
                         return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
                     }
-                    return PeriodStatusBeforeOpen.CLOSE;
+                    return drp.isActive() ? PeriodStatusBeforeOpen.OPEN : PeriodStatusBeforeOpen.CLOSE;
                 }
             }
             return PeriodStatusBeforeOpen.NOT_EXIST;
