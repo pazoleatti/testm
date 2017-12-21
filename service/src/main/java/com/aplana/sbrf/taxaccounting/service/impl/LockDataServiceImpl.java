@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -198,6 +200,21 @@ public class LockDataServiceImpl implements LockDataService {
                 return null;
             }
         });
+    }
+
+    @Override
+    public List<LockDataItem> getLocksByKeySet(Set<String> keysBlocker) {
+        List<LockData> lockDataList = dao.getLocksByKeySet(keysBlocker);
+        List<LockDataItem> lockDataItems = new ArrayList<>(lockDataList.size());
+        for(LockData lockData: lockDataList){
+            LockDataItem lockDataItem = new LockDataItem();
+            lockDataItem.setId(lockData.getId());
+            lockDataItem.setKey(lockData.getKey());
+            lockDataItem.setDateLock(lockData.getDateLock());
+            lockDataItem.setUser(userDao.getUser(lockData.getUserId()).getName());
+            lockDataItems.add(lockDataItem);
+        }
+        return lockDataItems;
     }
 
     /**

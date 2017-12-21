@@ -44,13 +44,15 @@
          * @description Контроллер формы "Ведение периодов"
          */
 
-        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'DepartmentResource','LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
-            function ($scope, $filter, DepartmentReportPeriodResource, DepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource) {
+        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'DepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
+            'ValidationUtils', '$dialogs', '$q',
+            function ($scope, $filter, DepartmentReportPeriodResource, DepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource,
+                      ValidationUtils, $dialogs, $q) {
 
                 DepartmentResource.query({}, function (department) {
                     $scope.department = department;
                 });
-                if(!$scope.searchFilter) {
+                if (!$scope.searchFilter) {
                     $scope.searchFilter = {
                         ajaxFilter: [],
                         params: {
@@ -133,7 +135,13 @@
                 /**
                  * @description Поиск по фильтру
                  */
-                $scope.submitSearch = function () {
+                $scope.submit = function () {
+                    if (!ValidationUtils.checkYearInterval($scope.searchFilter.params.yearStart, $scope.searchFilter.params.yearEnd)) {
+                        $dialogs.errorDialog({
+                            content: $filter('translate')('common.validation.interval.year')
+                        });
+                        return;
+                    }
                     $scope.searchFilter.ajaxFilter = [];
                     $scope.searchFilter.fillFilterParams();
                     $scope.refreshGrid(1);
@@ -154,7 +162,7 @@
                     /* убираем надпись "Сброс" */
                     $scope.isClear = false;
 
-                    $scope.submitSearch();
+                    $scope.submit();
                 };
 
                 /**
@@ -230,47 +238,56 @@
                  * @description Закрыть период
                  */
                 $scope.closePeriod = function () {
-                    DepartmentReportPeriodCheckerResource.query({
-                        projection: 'checkHasNotAccepted',
-                        id: $scope.reportPeriodGrid.value[0].id
-                    }, function (logger) {
-                        LogEntryResource.query({
-                                uuid: logger,
-                                projection: 'count'
-                            },
-                            function (data) {
-                                if ((data.ERROR + data.WARNING) !== 0) {
-                                    $logPanel.open('log-panel-container', logger);
-                                } else {
-                                    $http({
-                                        method: "POST",
-                                        url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
-                                    }).then(function (response) {
-                                        if (response.data) {
-                                            $logPanel.open('log-panel-container', response.data);
-                                            $scope.refreshGrid(1);
+                    $scope.checkHasBlocked().then(function (response) {
+                        $scope.createLogPanel(response).then(function (response) {
+                            if (response) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('reportPeriod.error.closePeriod.hasBlocked.text')
+                                });
+                            } else {
+                                $scope.checkHasNotAccepted().then(function (response) {
+                                    $scope.createLogPanel(response).then(function (response) {
+                                        if (response) {
+                                            $dialogs.confirmDialog({
+                                                title: $filter('translate')('reportPeriod.confirm.closePeriod.hasNotAccepted.title'),
+                                                content: $filter('translate')('reportPeriod.confirm.closePeriod.hasNotAccepted.text'),
+                                                okBtnCaption: $filter('translate')('common.button.yes'),
+                                                cancelBtnCaption: $filter('translate')('common.button.no'),
+                                                okBtnClick: function () {
+                                                    $http({
+                                                        method: "POST",
+                                                        url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
+                                                    }).then(function (response) {
+                                                        if (response.data) {
+                                                            $logPanel.open('log-panel-container', response.data);
+                                                            $scope.refreshGrid(1);
+                                                        }
+                                                    });
+                                                }
+                                            });
                                         }
                                     });
-                                }
-                            });
+                                });
+                            }
+                        });
                     });
                 };
 
                 /** Проверка, может ли текущий пользоватеть выполнить операцию над выделенными налоговыми периодами
-                * @param permission
-                */
+                 * @param permission
+                 */
                 $scope.checkPermissionForGridValue = function (permission) {
                     if ($scope.reportPeriodGrid.value && $scope.reportPeriodGrid.value.length > 0) {
                         return $scope.reportPeriodGrid.value.every(function (item) {
                             if ((permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE ||
                                 permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE) &&
-                                $scope.reportPeriodGrid.value.length !== 1){
+                                $scope.reportPeriodGrid.value.length !== 1) {
                                 return false;
                             }
                             return PermissionChecker.check(item, permission);
                         });
-                    }else {
-                        if (permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN){
+                    } else {
+                        if (permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN) {
                             return PermissionChecker.check(permission);
                         }
                     }
@@ -280,23 +297,68 @@
                  * @description Удаление выбранного отчетного периода для подразделения
                  */
                 $scope.deletePeriod = function () {
-                    var ids = [];
-                    $scope.reportPeriodGrid.value.forEach(function (item) {
-                        ids.push(item.id);
-                    });
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/departmentReportPeriod/delete",
-                        params: {
-                                ids: ids
 
-                        }
-                    }).then(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
-                            $scope.refreshGrid(1);
-                        }
-                    });
+                    if (!$scope.reportPeriodGrid.value[0].correctionDate) {
+                        $scope.hasCorrectionPeriod().then(function (response) {
+                            if (response) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('reportPeriod.error.deletePeriod.hasCorPeriod.text')
+                                });
+                            } else {
+                                $dialogs.confirmDialog({
+                                    title: $filter('translate')('reportPeriod.confirm.deletePeriod.title'),
+                                    content: $filter('translate')('reportPeriod.confirm.deletePeriod.text'),
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $http({
+                                            method: "POST",
+                                            url: "controller/actions/departmentReportPeriod/delete",
+                                            params: {
+                                                id: $scope.reportPeriodGrid.value[0].id
+
+                                            }
+                                        }).then(function (response) {
+                                            if (response.data) {
+                                                $logPanel.open('log-panel-container', response.data);
+                                                $scope.refreshGrid(1);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        $scope.hasLaterCorrectionPeriod().then(function (response) {
+                            if (response) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('reportPeriod.error.deletePeriod.hasLaterCorPeriod.text')
+                                });
+                            } else {
+                                $dialogs.confirmDialog({
+                                    title: $filter('translate')('reportPeriod.confirm.deletePeriod.title'),
+                                    content: $filter('translate')('reportPeriod.confirm.deletePeriod.text'),
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        $http({
+                                            method: "POST",
+                                            url: "controller/actions/departmentReportPeriod/delete",
+                                            params: {
+                                                id: $scope.reportPeriodGrid.value[0].id
+
+                                            }
+                                        }).then(function (response) {
+                                            if (response.data) {
+                                                $logPanel.open('log-panel-container', response.data);
+                                                $scope.refreshGrid(1);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
                 };
 
                 /**
@@ -339,6 +401,126 @@
                     }).result.then(function () {
                         $scope.refreshGrid(1);
                     });
+                };
+
+                /**
+                 * @description Проверяет на наличие деклараций в статусе отличном от "Принята"
+                 */
+                $scope.checkHasNotAccepted = function () {
+                    $scope.checkHasNotAcceptedDefer = $q.defer();
+                    $http({
+                        method: "POST",
+                        url: "controller/rest/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "?projection=checkHasNotAccepted"
+                    }).then(function (logger) {
+                        if (logger.data) {
+                            $scope.checkHasNotAcceptedDefer.resolve(logger.data);
+                        } else {
+                            $scope.checkHasNotAcceptedDefer.reject("Fail connect");
+                        }
+                    });
+                    return $scope.checkHasNotAcceptedDefer.promise;
+                };
+
+                /**
+                 * Формирует окно оповещений
+                 * @param uuid - идентификатор логов
+                 */
+                $scope.createLogPanel = function (uuid) {
+                    $scope.createLogPanelDefer = $q.defer();
+                    if (uuid) {
+                        LogEntryResource.query({
+                                uuid: uuid,
+                                projection: 'count'
+                            },
+                            function (data) {
+                                if ((data.ERROR + data.WARNING) !== 0) {
+                                    $logPanel.open('log-panel-container', uuid);
+                                    $scope.createLogPanelDefer.resolve(true);
+                                } else {
+                                    $scope.createLogPanelDefer.resolve(false);
+                                }
+                            });
+                    } else {
+                        $scope.createLogPanelDefer.resolve(false);
+                    }
+                    return $scope.createLogPanelDefer.promise;
+                };
+
+                /**
+                 * @description Проверяет на наличие деклараций на редактировании
+                 */
+                $scope.checkHasBlocked = function () {
+                    $scope.checkHasBlockedDefer = $q.defer();
+                    $http({
+                        method: "POST",
+                        url: "controller/rest/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "?projection=checkHasBlockedDeclaration"
+                    }).then(function (logger) {
+                        if (logger.status === 200) {
+                            $scope.checkHasBlockedDefer.resolve(logger.data);
+                        } else {
+                            $scope.checkHasBlockedDefer.reject("Fail connect");
+                        }
+                    });
+                    return $scope.checkHasBlockedDefer.promise;
+                };
+
+                /**
+                 * @description Проверяет на наличие коректирующих периодов с более поздней датой сдачи корректировки
+                 */
+                $scope.hasLaterCorrectionPeriod = function () {
+                    $scope.hasLaterCorrectionPeriodDefer = $q.defer();
+                    DepartmentReportPeriodResource.query({
+                        filter: JSON.stringify({
+                            yearStart: $scope.reportPeriodGrid.value[0].year,
+                            yearEnd: $scope.reportPeriodGrid.value[0].year,
+                            departmentId: $scope.departmentId
+                        }),
+                        pagingParams: JSON.stringify({
+                            "page":1,
+                            "count":100,
+                            "startIndex":0,
+                            "property":"year",
+                            "direction":"asc"
+                        })
+                    }, function (response) {
+                        response.rows.forEach(function (item) {
+                            if ($scope.reportPeriodGrid.value[0].year === item.year && $scope.reportPeriodGrid.value[0].dictTaxPeriodId === item.dictTaxPeriodId &&
+                                $scope.reportPeriodGrid.value[0].correctionDate < item.correctionDate) {
+                                $scope.hasLaterCorrectionPeriodDefer.resolve(true);
+                            }
+                        });
+                        $scope.hasLaterCorrectionPeriodDefer.resolve(false);
+                    });
+                    return $scope.hasLaterCorrectionPeriodDefer.promise;
+                };
+
+                /**
+                 * @description Проверяет на наличие корректирующего периода
+                 */
+                $scope.hasCorrectionPeriod = function () {
+                    $scope.hasCorrectionPeriodDefer = $q.defer();
+                    DepartmentReportPeriodResource.query({
+                        filter: JSON.stringify({
+                            yearStart: $scope.reportPeriodGrid.value[0].year,
+                            yearEnd: $scope.reportPeriodGrid.value[0].year,
+                            departmentId: $scope.departmentId
+                        }),
+                            pagingParams: JSON.stringify({
+                                "page":1,
+                                "count":100,
+                                "startIndex":0,
+                                "property":"year",
+                                "direction":"asc"
+                            })
+                    }, function (response) {
+                        response.rows.forEach(function (item) {
+                            if ($scope.reportPeriodGrid.value[0].year === item.year && $scope.reportPeriodGrid.value[0].dictTaxPeriodId === item.dictTaxPeriodId && item.correctionDate) {
+                                $scope.hasCorrectionPeriodDefer.resolve(true);
+                            }
+                        });
+                        $scope.hasCorrectionPeriodDefer.resolve(false);
+                    });
+                    return $scope.hasCorrectionPeriodDefer.promise;
                 };
 
             }]);
