@@ -7,31 +7,36 @@
 
     angular.module('app.deadlinePeriodModal', ['ui.router', 'app.rest'])
 
-        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs',
-            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs) {
+        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils',
+            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils) {
 
                 $scope.filter = {
                     departmentReportPeriod: $shareData.period,
-                    department: null,
-                    deadline: null,
+                    department: undefined,
+                    deadline: undefined,
                     withChild: false
                 };
 
                 $scope.save = function () {
-                    $dialogs.confirmDialog({
-                        title: $filter('translate')('title.confirm'),
-                        content: $filter('translate')('reportPeriod.confirm.text'),
-                        okBtnCaption: $filter('translate')('common.button.yes'),
-                        cancelBtnCaption: $filter('translate')('common.button.no'),
-                        okBtnClick: function () {
-                            createQuery(true);
-                        },
-                        cancelBtnClick: function () {
-                            createQuery(false);
-                        }
+                    if (ValidationUtils.checkDateValidateInterval($scope.deadline)) {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('title.confirm'),
+                            content: $filter('translate')('reportPeriod.confirm.text'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                createQuery(true);
+                            },
+                            cancelBtnClick: function () {
+                                createQuery(false);
+                            }
 
-                    });
-
+                        });
+                    }else {
+                        $dialogs.errorDialog({
+                            content: $filter('translate')('common.validation.dateInterval')
+                        });
+                    }
                 };
                 $scope.close = function () {
                     $modalInstance.dismiss();

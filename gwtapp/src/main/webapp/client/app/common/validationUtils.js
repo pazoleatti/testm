@@ -278,6 +278,20 @@
                     return (startYear === undefined || startYear === null || startYear === "") ||
                         (endYear === undefined || endYear === null || endYear === "") ||
                         (startYear <= endYear);
+                },
+
+                /**
+                 * Проверяет, что дата входит в валидный интервал [01.01.1990; 31.12.2099]
+                 * @param date - проверяемая дата
+                 */
+                checkDateValidateInterval: function (date) {
+                    var minDate = new Date();
+                    minDate.setMonth(1,1);
+                    minDate.setYear(1990);
+                    var maxDate = new Date();
+                    maxDate.setMonth(1,1);
+                    maxDate.setYear(2100);
+                    return minDate <= date && date < maxDate;
                 }
             };
         }])

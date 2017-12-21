@@ -85,6 +85,8 @@
         "common.validation.min.value": "Число должно быть не меньше {{minValue}}",
         "common.validation.max.value": "Число должно быть не больше {{maxValue}}",
         "common.validation.interval.year" : "Интервал периода поиска указан неверно!",
+        "common.validation.year": "Значение поля \"Год\" должно соответствовать формату \"ХХХХ\"",
+        "common.validation.dateInterval": "Значение поля должно входить в интервал дат от 01.01.1900 до 31.12.2099.",
 
         "filter.placeholder.all": "-Все-",
         "filterPanelLabel": "Фильтр",

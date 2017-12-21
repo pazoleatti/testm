@@ -118,7 +118,7 @@
                         sortname: 'year',
                         sortorder: "asc",
                         hidegrid: false,
-                        multiselect: true
+                        multiselect: false
                     }
                 };
 

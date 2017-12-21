@@ -13,38 +13,44 @@
             };
         })
 
-        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel',
-            function ($scope, $shareData, $http, $modalInstance, $logPanel) {
+        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter',
+            function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter) {
 
                 $scope.department = $shareData.department;
-                $scope.correctionDate = $shareData.period.correctionDate;
+                $scope.correctionDate = undefined;
                 $scope.departmentReportPeriod = $shareData.period;
 
                 $scope.correctPeriod = {
-                    reportPeriod : null
+                    reportPeriod : undefined
                 };
 
                 /**
                  * @description Обработчик кнопки "Открыть"
                  **/
                 $scope.save = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
-                        params: {
-                            filter: JSON.stringify({
-                                id: $scope.departmentReportPeriod.id,
-                                reportPeriod: $scope.correctPeriod.reportPeriod,
-                                correctionDate: $scope.correctionDate,
-                                departmentId: $scope.department.id
-                            })
-                        }
-                    }).then(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
-                            $modalInstance.close();
-                        }
-                    });
+                    if (ValidationUtils.checkDateValidateInterval($scope.correctionDate)) {
+                        $http({
+                            method: "POST",
+                            url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
+                            params: {
+                                filter: JSON.stringify({
+                                    id: $scope.departmentReportPeriod.id,
+                                    reportPeriod: $scope.correctPeriod.reportPeriod,
+                                    correctionDate: $scope.correctionDate,
+                                    departmentId: $scope.department.id
+                                })
+                            }
+                        }).then(function (response) {
+                            if (response.data) {
+                                $logPanel.open('log-panel-container', response.data);
+                                $modalInstance.close();
+                            }
+                        });
+                    }else {
+                        $dialogs.errorDialog({
+                            content: $filter('translate')('common.validation.dateInterval')
+                        });
+                    }
                 };
 
                 /**
