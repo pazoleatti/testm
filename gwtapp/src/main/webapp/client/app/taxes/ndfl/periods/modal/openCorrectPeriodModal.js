@@ -17,11 +17,17 @@
             function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter) {
 
                 $scope.department = $shareData.department;
-                $scope.correctionDate = undefined;
+                $scope.correctionDate = new Date();
                 $scope.departmentReportPeriod = $shareData.period;
 
                 $scope.correctPeriod = {
-                    reportPeriod : undefined
+                    reportPeriod : {
+                        id: $shareData.period.reportPeriodId,
+                        taxPeriod: {
+                            year : $shareData.period.year
+                        },
+                        name: $shareData.period.name
+                    }
                 };
 
                 /**

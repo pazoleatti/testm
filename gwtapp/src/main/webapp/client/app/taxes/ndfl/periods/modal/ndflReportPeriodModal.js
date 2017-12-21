@@ -15,21 +15,10 @@
 
                 $scope.isAdd = $shareData.isAdd;
 
-                $scope.searchFilter = {
-                    ajaxFilter: [],
-                    params: {
-                        yearStart: new Date().getFullYear(),
-                        yearEnd: new Date().getFullYear(),
-                        department: null
-                    },
-                    isClear: false,
-                    filterName: 'filter'
-                };
-
                 $scope.period = {
                     reportPeriod: {
                         taxPeriod: {
-                            year: undefined
+                            year: new Date().getFullYear()
                         },
                         dictPeriod: undefined
                     }

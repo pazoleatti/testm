@@ -285,12 +285,8 @@
                  * @param date - проверяемая дата
                  */
                 checkDateValidateInterval: function (date) {
-                    var minDate = new Date();
-                    minDate.setMonth(1,1);
-                    minDate.setYear(1990);
-                    var maxDate = new Date();
-                    maxDate.setMonth(1,1);
-                    maxDate.setYear(2100);
+                    var minDate = new Date(1900, 0, 1);
+                    var maxDate = new Date(2100, 0, 1);
                     return minDate <= date && date < maxDate;
                 }
             };

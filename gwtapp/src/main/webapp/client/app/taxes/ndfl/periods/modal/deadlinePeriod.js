@@ -7,18 +7,21 @@
 
     angular.module('app.deadlinePeriodModal', ['ui.router', 'app.rest'])
 
+
         .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils',
             function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils) {
+
+                var deadline = new Date($shareData.period.deadline + "Z");
 
                 $scope.filter = {
                     departmentReportPeriod: $shareData.period,
                     department: undefined,
-                    deadline: undefined,
+                    deadline: deadline,
                     withChild: false
                 };
 
                 $scope.save = function () {
-                    if (ValidationUtils.checkDateValidateInterval($scope.deadline)) {
+                    if (ValidationUtils.checkDateValidateInterval($scope.filter.deadline)) {
                         $dialogs.confirmDialog({
                             title: $filter('translate')('title.confirm'),
                             content: $filter('translate')('reportPeriod.confirm.text'),
@@ -58,6 +61,20 @@
                         $modalInstance.close();
                     });
                 };
+
+                /**
+                 * Форматирует дату для ее представления в <date-picker>
+                 * @param date -
+                 * @return {string}
+                 */
+                var dateFormate = function (date) {
+                    var month = date.getMonth()+1;
+                    var newdate = date.getDate() + '.' + (month < 10 ? '0' : '') + month + '.' + date.getFullYear();
+                    return newdate;
+                };
+
             }])
+
+
     ;
 }());
