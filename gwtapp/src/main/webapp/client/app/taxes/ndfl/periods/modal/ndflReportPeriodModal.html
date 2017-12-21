@@ -1,5 +1,5 @@
 <div class="modal-body" style="height: 320px; width: 400px">
-    <div class="form-horizontal">
+    <form class="form-horizontal" data-aplana-submit-valid="save()">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
             <tbody>
             <tr>
@@ -18,11 +18,30 @@
                         }}:</label>
                 </td>
                 <td>
+                    <div data-aplana-field>
                         <input data-ng-model="period.reportPeriod.taxPeriod.year"
                                type="number"
                                class="form-control"
                                style="width: 75px"
-                               id="period.reportPeriod.taxPeriod.year"/>
+                               id="period.reportPeriod.taxPeriod.year"
+                               data-ng-required="true"
+                               max="2099"
+                               min="1900"
+                        />
+                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            translate}}
+                        </div>
+                        <div data-aplana-validator data-key="pattern">{{::'common.validation.year' |
+                            translate}}</div>
+                        <div data-aplana-validator data-key='min'>
+                            {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
+                            1900 + ' }'}}
+                        </div>
+                        <div data-aplana-validator data-key='max'>
+                            {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
+                            2099 + ' }'}}
+                        </div>
+                    </div>
                 </td>
             </tr>
             <tr>
@@ -46,14 +65,14 @@
             </tr>
             </tbody>
         </table>
-    </div>
+    </form>
 </div>
 </div>
 <div class="modal-footer">
-    <button type="submit" class="btn btn-danger" id="openButton" ng-click="save()" data-ng-if="isAdd">
+    <button type="submit" class="btn btn-danger" id="openButton" data-ng-if="isAdd">
         <span data-translate-once="button.create"></span>
     </button>
-    <button type="submit" class="btn btn-danger" id="editButton" ng-click="save()" data-ng-if="!isAdd">
+    <button type="submit" class="btn btn-danger" id="editButton" data-ng-if="!isAdd">
         <span data-translate-once="button.edit"></span>
     </button>
     <button type="button" class="btn btn-danger" id="closeButton" ng-click="close()">

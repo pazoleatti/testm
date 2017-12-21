@@ -81,7 +81,12 @@
         "messageDialog.toDo.message": "Функционал находится в разработке",
 
         "common.validation.snils": "Значение поля должно соответствовать формату \"ХХХ-ХХХ-ХХХ ХХ\"",
-
+        "common.validation.number": "В поле могут вводиться только цифры",
+        "common.validation.min.value": "Число должно быть не меньше {{minValue}}",
+        "common.validation.max.value": "Число должно быть не больше {{maxValue}}",
+        "common.validation.interval.year" : "Интервал периода поиска указан неверно!",
+        "common.validation.year": "Значение поля \"Год\" должно соответствовать формату \"ХХХХ\"",
+        "common.validation.dateInterval": "Значение поля должно входить в интервал дат от 01.01.1900 до 31.12.2099.",
 
         "filter.placeholder.all": "-Все-",
         "filterPanelLabel": "Фильтр",
@@ -446,6 +451,13 @@
         "reportPeriod.modal.grid.endDate": "Дата окончания периода",
         "reportPeriod.modal.grid.calendarDate": "Календарная дата начала периода",
         "reportPeriod.confirm.text": "Назначить нижестоящим подразделениям?",
+        "reportPeriod.confirm.closePeriod.hasNotAccepted.title": "Подтверждение закрытия периода",
+        "reportPeriod.confirm.closePeriod.hasNotAccepted.text": "Вы действительно хотите закрыть период?",
+        "reportPeriod.error.closePeriod.hasBlocked.text": "Период не может быть закрыт, пока выполняется редактирование форм, относящихся к этому периоду!",
+        "reportPeriod.error.deletePeriod.hasLaterCorPeriod.text":"Удаление периода невозможно, т.к. существует более поздний корректирующий период!",
+        "reportPeriod.error.deletePeriod.hasCorPeriod.text":"Удаление периода невозможно, т.к. для него существует корректирующий период!",
+        "reportPeriod.confirm.deletePeriod.title":"Удаление периода",
+        "reportPeriod.confirm.deletePeriod.text":"Вы уверены, что хотите удалить период?",
 
         "ndflFL.title.numberpp": "Гр. 1 №п/п",
         "ndflFL.title.inp": "Гр. 2 ИНП",
@@ -605,6 +617,7 @@
             // Модули приложения
             'app.header',
             'app.logPanel',
+            'app.validationUtils',
             'app.ndfl',
             'app.ndflJournal',
             'app.ndflReport',
@@ -675,6 +688,7 @@
                     }
                 };
                 $rootScope.permissionChecker = angular.injector(['app.permissionUtils']).get('PermissionChecker');
+                $rootScope.validationUtils = angular.injector(['app.validationUtils']).get('ValidationUtils');
                 $rootScope.APP_CONSTANTS = angular.injector(['app.constants']).get('APP_CONSTANTS');
             });
         });

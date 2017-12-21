@@ -38,6 +38,8 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
 
     public final StringPath kpp = createString("kpp");
 
+    public final DateTimePath<org.joda.time.LocalDateTime> lastDataModified = createDateTime("lastDataModified", org.joda.time.LocalDateTime.class);
+
     public final BooleanPath manuallyCreated = createBoolean("manuallyCreated");
 
     public final StringPath note = createString("note");
@@ -50,15 +52,15 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
 
     public final com.querydsl.sql.PrimaryKey<QDeclarationData> declarationDataPk = createPrimaryKey(id);
 
+    public final com.querydsl.sql.ForeignKey<QState> declarationDataStateFk = createForeignKey(state, "ID");
+
+    public final com.querydsl.sql.ForeignKey<QRefBookDocState> declDataDocStateFk = createForeignKey(docStateId, "ID");
+
     public final com.querydsl.sql.ForeignKey<QRefBookAsnu> declarationDataFkAsnuId = createForeignKey(asnuId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDepartmentReportPeriod> declDataFkDepRepPerId = createForeignKey(departmentReportPeriodId, "ID");
 
     public final com.querydsl.sql.ForeignKey<QDeclarationTemplate> declarationDataFkDeclTId = createForeignKey(declarationTemplateId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QRefBookDocState> declDataDocStateFk = createForeignKey(docStateId, "ID");
-
-    public final com.querydsl.sql.ForeignKey<QState> declarationDataStateFk = createForeignKey(state, "ID");
 
     public final com.querydsl.sql.ForeignKey<QLogBusiness> _logBusinessFkDeclarationId = createInvForeignKey(id, "DECLARATION_DATA_ID");
 
@@ -107,6 +109,7 @@ public class QDeclarationData extends com.querydsl.sql.RelationalPathBase<QDecla
         addMetadata(fileName, ColumnMetadata.named("FILE_NAME").withIndex(10).ofType(Types.VARCHAR).withSize(255));
         addMetadata(id, ColumnMetadata.named("ID").withIndex(1).ofType(Types.DECIMAL).withSize(18).notNull());
         addMetadata(kpp, ColumnMetadata.named("KPP").withIndex(4).ofType(Types.VARCHAR).withSize(9));
+        addMetadata(lastDataModified, ColumnMetadata.named("LAST_DATA_MODIFIED").withIndex(13).ofType(Types.TIMESTAMP).withSize(7));
         addMetadata(manuallyCreated, ColumnMetadata.named("MANUALLY_CREATED").withIndex(12).ofType(Types.DECIMAL).withSize(1).notNull());
         addMetadata(note, ColumnMetadata.named("NOTE").withIndex(8).ofType(Types.VARCHAR).withSize(512));
         addMetadata(oktmo, ColumnMetadata.named("OKTMO").withIndex(5).ofType(Types.VARCHAR).withSize(11));

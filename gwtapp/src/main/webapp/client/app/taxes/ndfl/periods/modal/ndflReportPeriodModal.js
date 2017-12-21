@@ -28,8 +28,10 @@
 
                 $scope.period = {
                     reportPeriod: {
-                        taxPeriod: {},
-                        dictPeriod: null
+                        taxPeriod: {
+                            year: undefined
+                        },
+                        dictPeriod: undefined
                     }
                 };
 

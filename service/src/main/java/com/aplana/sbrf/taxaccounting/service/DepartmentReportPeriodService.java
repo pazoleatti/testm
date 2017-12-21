@@ -96,4 +96,11 @@ public interface DepartmentReportPeriodService {
      * @return uuid - идентификатор логгера
      */
     String checkHasNotAccepted(Integer id);
+
+    /**
+     * Проверяет период на наличие деклараций, которые находятся на редактировании
+     * @param id - идентификатор проверяемого периода
+     * @return uuid - идентификатор логера
+     */
+    String checkHasBlockedDeclaration(Integer id);
 }

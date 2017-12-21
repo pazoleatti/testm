@@ -39,6 +39,8 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	private DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter;
 	@Autowired
 	private NotificationService notificationService;
+	@Autowired
+	private LockDataService lockDataService;
 
 
     @Override
@@ -279,5 +281,49 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		return departmentReportPeriodDao.get(id);
 	}
 
+	@Override
+	public String checkHasBlockedDeclaration(Integer id){
+		Logger logger = new Logger();
+
+		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(id);
+		if (departmentReportPeriod == null){
+			throw new ServiceException(COMMON_ERROR_MESSAGE, "Ошибка загрузки отчтетного периода подразделения с id " + id +
+					". Период не существует или не найден.");
+		}
+
+		List<Integer> departments = departmentService.getAllChildrenIds(departmentReportPeriod.getDepartmentId());
+
+		DeclarationDataFilter dataFilter = new DeclarationDataFilter();
+		dataFilter.setDepartmentIds(departments);
+		dataFilter.setReportPeriodIds(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+
+		if (departmentReportPeriod.getCorrectionDate() != null) {
+			dataFilter.setCorrectionTag(true);
+			dataFilter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+		} else {
+			dataFilter.setCorrectionTag(false);
+		}
+
+		List<DeclarationData> declarations = declarationDataService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false);
+
+		Map<String, DeclarationData> keysBlocker = new HashMap<>(declarations.size());
+		for (DeclarationData declarationData: declarations){
+			keysBlocker.put("DECLARATION_DATA_" + declarationData.getId(), declarationData);
+		}
+		List<LockDataItem> lockDataItems =  lockDataService.getLocksByKeySet(keysBlocker.keySet());
+
+		for (LockDataItem lockDataItem : lockDataItems){
+			DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
+			String msg = "Налоговая форма: №: " +
+					dd.getId() + ", Вид: " +
+					"\"" + declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName() + "\"" +
+					", Подразделение: " +
+					"\"" + departmentService.getDepartment(dd.getDepartmentId()).getName() + "\"" +
+					", редактируется пользователем " + lockDataItem.getUser();
+
+			logger.error(msg);
+		}
+		return logEntryService.save(logger.getEntries());
+	}
 
 }

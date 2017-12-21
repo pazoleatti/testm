@@ -2,14 +2,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
+import com.querydsl.core.types.QBean;
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,6 +20,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.model.querydsl.QLockData.lockData;
+import static com.querydsl.core.types.Projections.bean;
+
 /**
  * Реализация дао блокировок
  *
@@ -29,9 +32,19 @@ import java.util.*;
 @Repository
 public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
+    @Autowired
+    private SQLQueryFactory sqlQueryFactory;
+
+    private final QBean<LockData> lockDataQBean = bean(LockData.class,
+            lockData.id,
+            lockData.key,
+            lockData.dateLock,
+            lockData.userId);
+
     private static final Log LOG = LogFactory.getLog(LockDataDaoImpl.class);
     private static final String LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок. %s";
     private static final String USER_LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок для пользователя с id = %d. %s";
+
 
     @Override
     public LockData get(String key, boolean like) {
@@ -202,6 +215,14 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void bindTask(String lockKey, long taskId) {
         getJdbcTemplate().update("update lock_data set task_id = ? where key = ?", taskId, lockKey);
+    }
+
+    @Override
+    public List<LockData> getLocksByKeySet(Set<String> keysBlocker) {
+        return sqlQueryFactory.select(lockDataQBean)
+                .from(lockData)
+                .where(lockData.key.in(keysBlocker))
+                .fetch();
     }
 
 }

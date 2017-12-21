@@ -88,7 +88,7 @@ public class DepartmentReportPeriodController {
     /**
      * Проверка преиода подразделения на наличие непринятых деклараций
      */
-    @GetMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}", params = "projection=checkHasNotAccepted")
+    @PostMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}", params = "projection=checkHasNotAccepted")
     public String checkHasNotAccepted(@PathVariable Integer departmentReportPeriodId){
         return departmentReportPeriodService.checkHasNotAccepted(departmentReportPeriodId);
     }
@@ -105,7 +105,7 @@ public class DepartmentReportPeriodController {
      * Удаление периода для подразделения
      */
     @PostMapping(value = "/actions/departmentReportPeriod/delete")
-    public String delete(@RequestParam Integer[] ids){return periodService.removeReportPeriod(ids, securityService.currentUserInfo());}
+    public String delete(@RequestParam Integer id){return periodService.removeReportPeriod(id, securityService.currentUserInfo());}
 
     /**
      * Получение доступных для выбора отчетных периодов для открытия коррекционного периода
@@ -150,5 +150,11 @@ public class DepartmentReportPeriodController {
         periodService.setDeadline(filter, withChild);
     }
 
-
+    /**
+     * Проверка периода на наличие деклараций, находящихся на редактировании
+     */
+    @PostMapping(value = "rest/departmentReportPeriod/{departmentReportPeriodId}", params = "projection=checkHasBlockedDeclaration")
+    public String checkHasBlockedDeclaration(@PathVariable Integer departmentReportPeriodId){
+        return departmentReportPeriodService.checkHasBlockedDeclaration(departmentReportPeriodId);
+    }
 }

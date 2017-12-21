@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -94,4 +95,11 @@ public interface LockDataDao extends PermissionDao {
      * @param taskId идентификатор задачи
      */
     void bindTask(String lockKey, long taskId);
+
+    /**
+     * Получает список всех блокировок по ключам
+     * @param keysBlocker - множество ключей
+     * @return список существующих блокировок
+     */
+    List<LockData> getLocksByKeySet(Set<String> keysBlocker);
 }

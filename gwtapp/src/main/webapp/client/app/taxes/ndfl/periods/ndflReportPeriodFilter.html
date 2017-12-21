@@ -1,65 +1,110 @@
 <div data-ng-controller="CommonFilterCtrl">
     <div class="grid-filter"
-         style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
+         style="min-width: 1900px; margin: 0 0 20px -19px; padding: 0 0 0 21px;">
         <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
              data-label="'filterPanelLabel' | translate">
-            <form class="form-horizontal" role="form" novalidate>
-                <div class="row">
-                    <div class="filter-col w500">
-                        <div class="form-group">
-                            <div class="col-md-12">
-                                <div style="padding: 5px 0 0 0;">
-                                    <span style="margin: 20px 10px 0 0; font-weight: bold; font-size: 13px">{{::'reportPeriod.department' | translate}}:</span>
-                                    <span>{{department.name}}</span>
+
+            <form class="form-horizontal" data-aplana-submit-valid="submit()" novalidate>
+                <table class="horizontal-input-table">
+                    <tbody>
+                    <tr>
+                        <!--Подразделение-->
+                        <td>
+                            <label class="control-label" style="font-weight: bold">{{::'reportPeriod.department' |
+                                translate}}:</label>
+                        </td>
+                        <td style="padding: 1px 0 0 5px;">
+                            <label style="font-size: 13px">{{department.name}}</label>
+                        </td>
+
+                        <td class="col-separator"></td>
+
+                        <!--Период, с-->
+                        <td>
+                            <label class="control-label" for="searchfilter_params_yearstart">{{::'reportPeriod.filter.periodFrom'
+                                | translate}}</label>
+                        </td>
+                        <td>
+                            <div data-aplana-field>
+                                <input type="number"
+                                       style="padding-left: 5px; width: 55px;"
+                                       data-ng-model="searchFilter.params.yearStart"
+                                       id="searchfilter_params_yearstart"
+                                       name="searchfilter_params_yearstart"
+                                       data-ng-required="true"
+                                       max="2099"
+                                       min="1900"
+                                />
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.number' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='min'>
+                                    {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
+                                    1900 + ' }'}}
+                                </div>
+                                <div data-aplana-validator data-key='max'>
+                                    {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
+                                    2099 + ' }'}}
                                 </div>
                             </div>
+                        </td>
 
-                        </div>
-                    </div>
-                    <div class="filter-col" style="width: 170px">
-                        <div class="form-group">
-                            <div class="col-md-6">
-                                <label class="control-label" for="searchFilter_params_yearStart">{{::'reportPeriod.filter.periodFrom'
-                                    | translate}}</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="number"
-                                       class="form-control"
-                                       style="padding-right: 3px"
-                                       id="searchFilter_params_yearStart"
-                                       data-ng-model="searchFilter.params.yearStart"/>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="filter-col" style="width: 160px">
-                        <div class="col-md-4">
-                            <label class="control-label" for="searchFilter_params_yearEnd">{{::'reportPeriod.filter.periodTo'
+                        <!--Период, по-->
+                        <td style="padding-left: 5px;">
+                            <label class="control-label" for="searchfilter_params_yearend">{{::'reportPeriod.filter.periodTo'
                                 | translate}}</label>
-                        </div>
-                        <div class="col-md-8">
-                            <input data-ng-model="searchFilter.params.yearEnd"
-                                   type="number"
-                                   class="form-control"
-                                   id="searchFilter_params_yearEnd"/>
-                        </div>
-                    </div>
-                    <div class="filter-col button-block">
+                        </td>
+                        <td>
+                            <div data-aplana-field>
+                                <input type="number"
+                                       style="padding-left: 5px; width: 55px;"
+                                       data-ng-model="searchFilter.params.yearEnd"
+                                       id="searchfilter_params_yearend"
+                                       name="searchfilter_params_yearend"
+                                       data-ng-required="true"
+                                       max="2099"
+                                       min="1900"
+                                />
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.number' |
+                                    translate}}
+                                </div>
+                                <div data-aplana-validator data-key='min'>
+                                    {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
+                                    1900 + ' }'}}
+                                </div>
+                                <div data-aplana-validator data-key='max'>
+                                    {{:: 'common.validation.max.value' | translate:'{ maxValue: ' +
+                                    2099 + ' }'}}
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="col-separator"></td>
+
                         <!--Кнопка Найти-->
-                        <button type="button"
-                                class="btn btn-default"
-                                id="searchButton"
-                                data-ng-click="submitSearch('ndfl')">
-                            <span data-translate-once="common.button.search"></span>
-                        </button>
+                        <td>
+                            <button type="submit"
+                                    class="btn btn-default"
+                                    id="searchButton">
+                                <span data-translate-once="common.button.search"></span>
+                            </button>
+                        </td>
+
+                        <td class="col-separator"></td>
+
                         <!--Кнопка Сбросить-->
-                        <button type="button" data-ng-show="searchFilter.isClear"
-                                class="btn btn-default"
-                                id="clearButton"
-                                data-ng-click="resetFilterCustom()">
-                            <span data-translate-once="common.button.clear"></span>
-                        </button>
-                    </div>
-                </div>
+                        <td>
+                            <button type="button" data-ng-show="searchFilter.isClear"
+                                    class="btn btn-default"
+                                    id="clearButton"
+                                    data-ng-click="resetFilterCustom()">
+                                <span data-translate-once="common.button.clear"></span>
+                            </button>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
             </form>
         </div>
     </div>

@@ -55,6 +55,7 @@ public class QueryDSLGenRunner {
             configuration.register("REPORT_PERIOD_TYPE", "END_DATE", new UtilDateType());
             configuration.register("REPORT_PERIOD_TYPE", "CALENDAR_START_DATE", new UtilDateType());
             configuration.register("DECLARATION_DATA", "DEPARTMENT_REPORT_PERIOD_ID", Integer.class);
+            configuration.register("LOCK_DATA", "DATE_LOCK", new UtilDateType());
 
             exportScheme(dbUrl,
                     "ndfl_unstable",
@@ -62,7 +63,7 @@ public class QueryDSLGenRunner {
                     "NDFL_UNSTABLE",
                     packageStr,
                     targetFolder,
-                    new String[]{"DECLARATION_DATA", "DEPARTMENT_REPORT_PERIOD", "REPORT_PERIOD", "REPORT_PERIOD_TYPE", "TAX_PERIOD"},
+                    new String[]{"DECLARATION_DATA", "DEPARTMENT_REPORT_PERIOD", "REPORT_PERIOD", "REPORT_PERIOD_TYPE", "TAX_PERIOD", "LOCK_DATA"},
                     configuration);
 
             // УН (удаляются только ранее сгенерированные Q классы по передаваемому перечню таблиц).

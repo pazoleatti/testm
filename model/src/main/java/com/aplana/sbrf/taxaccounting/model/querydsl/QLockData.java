@@ -24,7 +24,7 @@ public class QLockData extends com.querydsl.sql.RelationalPathBase<QLockData> {
 
     public static final QLockData lockData = new QLockData("LOCK_DATA");
 
-    public final DateTimePath<org.joda.time.LocalDateTime> dateLock = createDateTime("dateLock", org.joda.time.LocalDateTime.class);
+    public final DateTimePath<java.util.Date> dateLock = createDateTime("dateLock", java.util.Date.class);
 
     public final StringPath description = createString("description");
 

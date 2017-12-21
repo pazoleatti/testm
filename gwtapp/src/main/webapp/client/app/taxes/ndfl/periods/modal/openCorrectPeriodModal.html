@@ -1,5 +1,5 @@
-<div class="modal-body" style="height: 320px; width: 400px">
-    <div class="form-horizontal">
+<form class="form-horizontal" data-aplana-submit-valid="save()">
+    <div class="modal-body" style="height: 320px; width: 400px">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
             <tbody>
             <tr>
@@ -37,19 +37,22 @@
                 </td>
                 <td style="margin-left: 10px">
                     <date-picker
-                                 model="correctionDate"
-                                 id="correctionDate"></date-picker>
+                            model="correctionDate"
+                            id="correctionDate"
+                            required="true">
+                    </date-picker>
                 </td>
             </tr>
             </tbody>
         </table>
+
     </div>
-</div>
-<div class="modal-footer">
-    <button type="submit" class="btn btn-danger" id="openButton" ng-click="save()">
-        <span data-translate-once="button.create"></span>
-    </button>
-    <button type="button" class="btn btn-danger" id="closeButton" ng-click="close()">
-        <span data-translate-once="button.close"></span>
-    </button>
-</div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-danger" id="openButton">
+            <span data-translate-once="button.create"></span>
+        </button>
+        <button type="button" class="btn btn-danger" id="closeButton" ng-click="close()">
+            <span data-translate-once="button.close"></span>
+        </button>
+    </div>
+</form>

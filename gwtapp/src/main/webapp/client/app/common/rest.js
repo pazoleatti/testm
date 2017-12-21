@@ -178,7 +178,7 @@
 
         .factory('DepartmentReportPeriodCheckerResource', ['$resource', function ($resource) {
             return $resource('controller/rest/departmentReportPeriod/:id?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
+                query: {method: 'POST', isArray: false, cache: false}
             });
         }])
 
