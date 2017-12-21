@@ -33,7 +33,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
         this.sqlQueryFactory = sqlQueryFactory;
     }
 
-    final private QBean<RefBookDepartment> refBookDepartmentBean = bean(RefBookDepartment.class, department.id, department.name, department.shortname, department.parentId,
+    final private QBean<RefBookDepartment> refBookDepartmentBean = bean(RefBookDepartment.class, department.id, department.name, department.shortname.as("shortName"), department.parentId,
             department.type, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code, departmentFullpath.shortname.as("fullPath"));
 
     /**
