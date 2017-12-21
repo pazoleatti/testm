@@ -72,10 +72,10 @@
                             }
                         });
                     } else {
-                        DepartmentReportPeriodCheckerResource.query({
-                            projection: 'checkHasNotAccepted',
-                            id: $shareData.period.id
-                        }, function (logger) {
+                        $http({
+                            method: "POST",
+                            url: "controller/rest/departmentReportPeriod/" + $shareData.period.id + "?projection=checkHasNotAccepted"
+                        }).then(function (logger) {
                             LogEntryResource.query({
                                     uuid: logger,
                                     projection: 'count'
@@ -101,7 +101,9 @@
                                         }).then(function (response) {
                                             if (response.data) {
                                                 $logPanel.open('log-panel-container', response.data);
-                                                $modalInstance.close();
+                                                $dialogs.errorDialog({
+                                                    content: $filter('translate')('reportPeriod.error.editPeriod.text')
+                                                });
                                             }
                                         });
                                     }

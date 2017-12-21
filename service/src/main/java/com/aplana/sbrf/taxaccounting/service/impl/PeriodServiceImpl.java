@@ -458,7 +458,7 @@ public class PeriodServiceImpl implements PeriodService {
         for (DeclarationData dd : declarations) {
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logs.add(new LogEntry(LogLevel.ERROR, "\"" + dt.getType().getName() + "\" в подразделении \"" +
-                    departmentService.getDepartment(dd.getDepartmentId()).getName() + "\" находится в удаляемом периоде!"));
+                    departmentService.getDepartment(dd.getDepartmentId()).getName() + "\" находится в редактируемом периоде!"));
         }
 
         if (!declarations.isEmpty()) {

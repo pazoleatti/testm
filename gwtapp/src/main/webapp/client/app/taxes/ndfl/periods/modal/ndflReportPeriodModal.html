@@ -1,5 +1,5 @@
-<div class="modal-body" style="height: 320px; width: 400px">
-    <form class="form-horizontal" data-aplana-submit-valid="save()">
+<form class="form-horizontal" data-aplana-submit-valid="save()">
+    <div class="modal-body" style="height: 320px; width: 400px">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
             <tbody>
             <tr>
@@ -32,7 +32,8 @@
                             translate}}
                         </div>
                         <div data-aplana-validator data-key="pattern">{{::'common.validation.year' |
-                            translate}}</div>
+                            translate}}
+                        </div>
                         <div data-aplana-validator data-key='min'>
                             {{:: 'common.validation.min.value' | translate:'{ minValue: ' +
                             1900 + ' }'}}
@@ -65,17 +66,18 @@
             </tr>
             </tbody>
         </table>
-    </form>
-</div>
-</div>
-<div class="modal-footer">
-    <button type="submit" class="btn btn-danger" id="openButton" data-ng-if="isAdd">
-        <span data-translate-once="button.create"></span>
-    </button>
-    <button type="submit" class="btn btn-danger" id="editButton" data-ng-if="!isAdd">
-        <span data-translate-once="button.edit"></span>
-    </button>
-    <button type="button" class="btn btn-danger" id="closeButton" ng-click="close()">
-        <span data-translate-once="button.close"></span>
-    </button>
-</div>
+
+    </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-danger" id="openButton" data-ng-if="isAdd">
+            <span data-translate-once="button.create"></span>
+        </button>
+        <button type="submit" class="btn btn-danger" id="editButton" data-ng-if="!isAdd">
+            <span data-translate-once="button.edit"></span>
+        </button>
+        <button type="button" class="btn btn-danger" id="closeButton" ng-click="close()">
+            <span data-translate-once="button.close"></span>
+        </button>
+    </div>
+</form>

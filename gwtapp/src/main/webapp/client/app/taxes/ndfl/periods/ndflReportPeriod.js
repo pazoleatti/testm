@@ -387,7 +387,7 @@
                 $scope.deadlinePeriod = function () {
 
                     $aplanaModal.open({
-                        title: $filter('translate')('reportPeriod.pils.correctPeriod'),
+                        title: $filter('translate')('reportPeriod.modal.deadline.tittle'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/deadlinePeriod.html?v=${buildUuid}',
                         controller: 'deadlinePeriodController',
                         windowClass: 'modal600',
