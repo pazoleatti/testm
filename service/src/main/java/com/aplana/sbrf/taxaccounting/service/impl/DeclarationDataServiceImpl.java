@@ -1500,7 +1500,39 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).RETURN_TO_CREATED)")
     public void cancel(Logger logger, long id, String note, TAUserInfo userInfo) {
-        cancelDeclarationList(Arrays.asList(id), note, userInfo);
+        try {
+            List<Long> receiversIdList = getReceiversAcceptedPrepared(id, logger, userInfo);
+            if (receiversIdList.isEmpty()) {
+                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+                DeclarationData declarationData = declarationDataDao.get(id);
+
+                Map<String, Object> exchangeParams = new HashMap<>();
+                declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
+                }
+
+                declarationData.setState(State.CREATED);
+                sourceService.updateDDConsolidation(declarationData.getId());
+
+                logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
+                auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
+
+                declarationDataDao.setStatus(id, declarationData.getState());
+                String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", id, State.CREATED.getTitle()).toString();
+                logger.info(message);
+                sendNotification("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+            } else {
+                String message = getCheckReceiversErrorMessage(receiversIdList);
+                logger.error(message);
+                sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
+            }
+            logger.clear();
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            lockDataService.unlock(generateAsyncTaskKey(id, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
+        }
     }
 
     @Override
@@ -1514,24 +1546,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 String declarationFullName = getDeclarationFullName(declarationId, DeclarationDataReportType.TO_CREATE_DEC);
                 LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId(), declarationFullName);
                 if (lockData == null) {
-                    try {
-                        List<Long> receiversIdList = getReceiversAcceptedPrepared(declarationId, logger, userInfo);
-                        if (receiversIdList.isEmpty()) {
-                            cancel(logger, declarationId, note, userInfo);
-                            String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", declarationId, State.CREATED.getTitle()).toString();
-                            logger.info(message);
-                            sendNotification("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
-                        } else {
-                            String message = getCheckReceiversErrorMessage(receiversIdList);
-                            logger.error(message);
-                            sendNotification(message, logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
-                        }
-                        logger.clear();
-                    } catch (Exception e) {
-                        logger.error(e);
-                    } finally {
-                        lockDataService.unlock(generateAsyncTaskKey(declarationId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
-                    }
+                    cancel(logger, declarationId, note, userInfo);
+
                 } else {
                     DeclarationData declaration = get(declarationId, userInfo);
                     Department department = departmentService.getDepartment(declaration.getDepartmentId());
