@@ -11,7 +11,7 @@
      *     This change is so that you do not have to do an additional query yourself on top of Select2's own query
      * @params [options] {object} The configuration options passed to $.fn.select2(). Refer to the documentation
      */
-    angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelect2', ['uiSelect2Config', '$timeout', 'AplanaUtils', function (uiSelect2Config, $timeout, AplanaUtils) {
+    angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelect2', ['uiSelect2Config', '$timeout', 'AplanaUtils', '$rootScope', function (uiSelect2Config, $timeout, AplanaUtils, $rootScope) {
         var options = {};
         if (uiSelect2Config) {
             angular.extend(options, uiSelect2Config);
@@ -38,7 +38,6 @@
 
                 return function (scope, elm, attrs, controller) {
                     // instance-specific options
-                    //noinspection JSUnresolvedVariable
                     var opts = angular.extend({}, options, scope.$eval(attrs.uiSelect2));
 
                     if (angular.isDefined(opts.data)) {
@@ -75,10 +74,9 @@
                      */
                     var convertToAngularModel = function (select2_data) {
                         var model;
-                        //noinspection JSUnresolvedVariable
                         if (opts.simple_tags) {
                             model = [];
-                            angular.forEach(select2_data, function (value) {
+                            angular.forEach(select2_data, function (value, index) {
                                 model.push(value.id);
                             });
                         } else {
@@ -96,12 +94,11 @@
                             return model;
                         }
 
-                        //noinspection JSUnresolvedVariable
                         if (opts.simple_tags) {
                             model = [];
                             angular.forEach(
                                 angular_data,
-                                function (value) {
+                                function (value, index) {
                                     model.push({'id': value, 'text': value});
                                 });
                         } else {
@@ -154,7 +151,7 @@
 
                         // Watch the options dataset for changes
                         if (watch) {
-                            scope.$watch(watch, function (newVal, oldVal) {
+                            scope.$watch(watch, function (newVal, oldVal, scope) {
                                 if (angular.equals(newVal, oldVal)) {
                                     return;
                                 }
@@ -191,6 +188,8 @@
                                 if (scope.$$phase || scope.$root.$$phase) {
                                     return;
                                 }
+                                //отправка сообщения, что в селекте что-то выбрано. без выбранного значения
+                                $rootScope.$broadcast('SELECT2_CHANGE');
                                 scope.$apply(function () {
                                     controller.$setViewValue(
                                         convertToAngularModel(elm.select2('data')));
@@ -242,9 +241,7 @@
                     });
 
 
-                    //noinspection JSUnresolvedVariable
                     if (attrs.ngMultiple) {
-                        //noinspection JSUnresolvedVariable
                         scope.$watch(attrs.ngMultiple, function (newVal) {
                             attrs.$set('multiple', !!newVal);
                             elm.select2(opts);
@@ -284,24 +281,27 @@
                         }
 
                         // Прокидываем событие фокуса с select2 на элемент
-                        elm.on("select2-focus", function () {
+                        elm.on("select2-focus", function (e) {
                             elm.trigger('click');
                         });
 
                         elm.on("select2-selecting", function (e) {
-                            //noinspection JSUnresolvedVariable
                             if (opts.selectAction) {
-                                //noinspection JSUnresolvedFunction
                                 opts.selectAction(e);
                             }
                         });
 
                         elm.on("select2-close", function (e) {
-                            //noinspection JSUnresolvedVariable
                             if (opts.closeAction) {
-                                //noinspection JSUnresolvedFunction
                                 opts.closeAction(e);
                             }
+                            // отправка сообщения, что dropdown закрылся
+                            $rootScope.$broadcast('SELECT2_CLOSE');
+                        });
+
+                        elm.on("select2-open", function (e) {
+                            // отправка сообщения, что dropdown открылся
+                            $rootScope.$broadcast('SELECT2_OPEN');
                         });
                     });
                 };
