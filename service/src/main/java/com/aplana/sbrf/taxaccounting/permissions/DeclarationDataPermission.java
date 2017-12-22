@@ -120,6 +120,9 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             super(mask);
         }
 
+        /**
+         * Дубликат в {@link com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataAccessServiceImpl#checkRolesForReading}
+         */
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
             // Выборка для доступа к экземплярам деклараций
