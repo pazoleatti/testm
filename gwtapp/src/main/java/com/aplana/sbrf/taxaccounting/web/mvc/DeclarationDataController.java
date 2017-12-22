@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
@@ -15,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +50,9 @@ public class DeclarationDataController {
     private DeclarationTemplateService declarationTemplateService;
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
+
+    @Autowired
+    private DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
@@ -416,7 +422,11 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=filesComments")
     public DeclarationDataFileComment fetchFilesComments(@PathVariable long declarationDataId) {
-        return declarationService.fetchFilesComments(declarationDataId);
+        DeclarationDataFileComment result = declarationService.fetchFilesComments(declarationDataId);
+        if (!result.getDeclarationDataFiles().isEmpty()) {
+            declarationDataFilePermissionSetter.setPermissions(result.getDeclarationDataFiles(), DeclarationDataFilePermission.DELETE);
+        }
+        return result;
     }
 
     /**
