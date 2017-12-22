@@ -87,13 +87,7 @@ public class DeclarationDataController {
     public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
         String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
-
-        BlobData blobData = blobDataService.get(blobId);
-        if (blobData != null) {
-            ResponseUtils.createBlobResponse(req, response, blobData);
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
+        createBlobResponse(blobId, req, response);
     }
 
     /**
@@ -107,15 +101,20 @@ public class DeclarationDataController {
     public void downloadDeclarationExcelTemplate(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
         String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+        createBlobResponse(blobId, req, response);
+    }
 
+    private void createBlobResponse(String blobId, HttpServletRequest req, HttpServletResponse response) throws IOException {
+        BlobData blobData = null;
         if (blobId != null) {
-            BlobData blobData = blobDataService.get(blobId);
-            if (blobData != null) {
-                ResponseUtils.createBlobResponse(req, response, blobData);
-                return;
-            }
+            blobData = blobDataService.get(blobId);
         }
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 
     /**
