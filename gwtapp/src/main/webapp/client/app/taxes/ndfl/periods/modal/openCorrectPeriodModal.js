@@ -34,7 +34,7 @@
                  * @description Обработчик кнопки "Открыть"
                  **/
                 $scope.save = function () {
-                    if (ValidationUtils.checkDateValidateInterval($scope.correctionDate)) {
+                    if (ValidationUtils.checkYearInterval($scope.correctPeriod.reportPeriod.taxPeriod.year , $scope.correctionDate.getFullYear())) {
                         $http({
                             method: "POST",
                             url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
@@ -54,7 +54,7 @@
                         });
                     }else {
                         $dialogs.errorDialog({
-                            content: $filter('translate')('common.validation.dateInterval')
+                            content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.smallCorrectionYear')
                         });
                     }
                 };
@@ -68,3 +68,4 @@
 
             }]);
 }());
+

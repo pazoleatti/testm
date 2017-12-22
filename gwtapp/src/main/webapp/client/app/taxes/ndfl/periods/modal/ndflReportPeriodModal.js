@@ -60,15 +60,27 @@
                             if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE){
                                 $dialogs.confirmDialog({
                                     title: $filter('translate')('title.confirm'),
-                                    content: $filter('translate')('title.reopenPeriod'),
+                                    content: $filter('translate')('reportPeriod.confirm.openPeriod.reopenPeriod.text'),
                                     okBtnCaption: $filter('translate')('common.button.yes'),
                                     cancelBtnCaption: $filter('translate')('common.button.no'),
                                     okBtnClick: function () {
-                                        createQuery();
+                                                createQuery();
                                     }
                                 });
                             }else {
-                                createQuery();
+                                if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.OPEN){
+                                    $dialogs.errorDialog({
+                                        content: $filter('translate')('reportPeriod.error.openPeriod.alreadyOpen')
+                                    });
+                                }else {
+                                    if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_ALREADY_EXIST){
+                                        $dialogs.errorDialog({
+                                            content: $filter('translate')('reportPeriod.error.openPeriod.hasCorrectionPeriod')
+                                        });
+                                    }else {
+                                        createQuery();
+                                    }
+                                }
                             }
                         });
                     } else {

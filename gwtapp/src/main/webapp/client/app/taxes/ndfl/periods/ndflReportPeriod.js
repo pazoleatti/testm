@@ -265,6 +265,16 @@
                                                     });
                                                 }
                                             });
+                                        }else {
+                                            $http({
+                                                method: "POST",
+                                                url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
+                                            }).then(function (response) {
+                                                if (response.data) {
+                                                    $logPanel.open('log-panel-container', response.data);
+                                                    $scope.refreshGrid(1);
+                                                }
+                                            });
                                         }
                                     });
                                 });
@@ -412,7 +422,7 @@
                         method: "POST",
                         url: "controller/rest/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "?projection=checkHasNotAccepted"
                     }).then(function (logger) {
-                        if (logger.data) {
+                        if (logger.status === 200) {
                             $scope.checkHasNotAcceptedDefer.resolve(logger.data);
                         } else {
                             $scope.checkHasNotAcceptedDefer.reject("Fail connect");
