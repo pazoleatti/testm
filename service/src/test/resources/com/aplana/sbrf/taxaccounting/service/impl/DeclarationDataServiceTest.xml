@@ -85,27 +85,17 @@
         <constructor-arg
                 value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission"/>
     </bean>
-    <bean id="declarationDataFilePermissionFactory" class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-        <constructor-arg
-                value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission"/>
-    </bean>
     <bean id="permissionEvaluator" class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator">
         <constructor-arg ref="permissionDaoFactory"/>
         <property name="permissionFactoryRegistry">
             <map>
                 <entry key="com.aplana.sbrf.taxaccounting.model.DeclarationData" value-ref="declarationDataPermissionFactory"/>
-                <entry key="com.aplana.sbrf.taxaccounting.model.DeclarationDataFile" value-ref="declarationDataFilePermissionFactory"/>
             </map>
         </property>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter"/>
         <property name="permissionFactory" ref="declarationDataPermissionFactory"/>
-        <property name="permissionEvaluator" ref="permissionEvaluator"/>
-    </bean>
-    <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter"/>
-        <property name="permissionFactory" ref="declarationDataFilePermissionFactory"/>
         <property name="permissionEvaluator" ref="permissionEvaluator"/>
     </bean>
 
