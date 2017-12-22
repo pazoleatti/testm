@@ -75,7 +75,7 @@ public class AcceptDeclarationListHandler extends AbstractActionHandler<AcceptDe
                 if (action.isAccepted()) {
                     final String prefix = String.format("Постановка операции \"Принятие налоговой формы\" для формы № %d в очередь на исполнение: ", declarationId);
                     try {
-                        String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
+                        String uuidXml = reportService.getDec(declarationId, DeclarationDataReportType.XML_DEC);
                         if (uuidXml != null) {
                             DeclarationData declarationData = declarationDataService.get(declarationId, userInfo);
                             if (!declarationData.getState().equals(State.ACCEPTED)) {

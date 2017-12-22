@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
@@ -666,7 +665,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Logger logger = new Logger();
         LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
         if (lockDataAccept == null) {
-            String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+            String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
             if (uuidXml != null) {
                 String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                 Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
@@ -724,7 +723,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 try {
                     LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.ACCEPT_DEC));
                     if (lockDataAccept == null) {
-                        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+                        String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
                         if (uuidXml != null) {
                             final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
                             Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
@@ -974,9 +973,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
-            final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            final String uuid = reportService.getDec(declarationDataId, ddReportType);
             if (uuid != null) {
                 result.setStatus(CreateAsyncTaskStatus.EXIST);
                 return result;
@@ -1041,13 +1040,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
             for (DeclarationSubreport subreport : declarationTemplate.getSubreports()) {
                 final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
 
                 ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), "rnu_ndfl_person_all_db"));
-                final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+                final String uuid = reportService.getDec(declarationDataId, ddReportType);
                 if (uuid != null) {
                     result.setStatus(CreateAsyncTaskStatus.EXIST);
                     return result;
@@ -1106,9 +1105,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationSubreport subreport = declarationTemplateService.getSubreportByAlias(declarationData.getDeclarationTemplateId(), SubreportAliasConstants.REPORT_KPP_OKTMO);
         final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
-            final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            final String uuid = reportService.getDec(declarationDataId, ddReportType);
             if (uuid != null && !create) {
                 result.setStatus(CreateAsyncTaskStatus.EXIST);
                 return result;
@@ -1161,9 +1160,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+        String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
-            final String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            final String uuid = reportService.getDec(declarationDataId, ddReportType);
             if (uuid != null) {
                 result.setStatus(CreateAsyncTaskStatus.EXIST);
                 return result;
@@ -1209,19 +1208,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             reportAvailableResult.setDeclarationDataExist(false);
             return reportAvailableResult;
         }
-        reportAvailableResult.setDownloadXlsxAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
-        reportAvailableResult.setDownloadXmlAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) != null);
-        reportAvailableResult.setDownloadExcelTemplateAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC) != null);
+        reportAvailableResult.setDownloadXlsxAvailable(reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
+        reportAvailableResult.setDownloadXmlAvailable(reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC) != null);
+        reportAvailableResult.setDownloadExcelTemplateAvailable(reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC) != null);
 
         DeclarationData declaration = get(declarationDataId, userInfo);
         List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
         for (DeclarationSubreport subreport : subreports) {
             switch (subreport.getAlias()) {
                 case SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB: {
-                    reportAvailableResult.setDownloadRnuNdflPersonAllDb((reportService.getDec(userInfo, declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+                    reportAvailableResult.setDownloadRnuNdflPersonAllDb((reportService.getDec(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
                 }
                 case SubreportAliasConstants.REPORT_KPP_OKTMO: {
-                    reportAvailableResult.setDownloadReportKppOktmo((reportService.getDec(userInfo, declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
+                    reportAvailableResult.setDownloadReportKppOktmo((reportService.getDec(declarationDataId, new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport))) != null);
                 }
             }
         }
@@ -1235,9 +1234,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setDeclarationDataExist(false);
             return result;
         }
-        result.setAvailablePdf(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.PDF_DEC) != null);
-        result.setDownloadXlsxAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
-        result.setDownloadXmlAvailable(reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) != null);
+        result.setAvailablePdf(reportService.getDec(declarationDataId, DeclarationDataReportType.PDF_DEC) != null);
+        result.setDownloadXlsxAvailable(reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_DEC) != null);
+        result.setDownloadXmlAvailable(reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC) != null);
         return result;
     }
 
@@ -1443,7 +1442,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (existDeclarationData(declarationId)) {
                 final String prefix = String.format("Постановка операции \"Принятие налоговой формы\" для формы № %d в очередь на исполнение: ", declarationId);
                 try {
-                    String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
+                    String uuidXml = reportService.getDec(declarationId, DeclarationDataReportType.XML_DEC);
                     if (uuidXml != null) {
                         DeclarationData declarationData = get(declarationId, userInfo);
                         if (!declarationData.getState().equals(State.ACCEPTED)) {
@@ -1595,7 +1594,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
-        String xmlUuid = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getDec(declarationId, DeclarationDataReportType.XML_DEC);
         if (xmlUuid == null) {
             return null;
         }
@@ -1606,7 +1605,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
         try {
-            String xmlUuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+            String xmlUuid = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
             if (xmlUuid == null) return null;
             BlobData blobData = blobDataService.get(xmlUuid);
             return blobData.getName();
@@ -1620,7 +1619,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public LocalDateTime getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
         try {
-            String xmlUuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC);
+            String xmlUuid = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
             if (xmlUuid == null) return null;
             BlobData blobData = blobDataService.get(xmlUuid);
             return blobData.getCreationDate();
@@ -1633,7 +1632,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void getXlsxData(long id, File xlsxFile, TAUserInfo userInfo, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         DeclarationData declarationData = declarationDataDao.get(id);
-        String uuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.JASPER_DEC);
+        String uuid = reportService.getDec(declarationData.getId(), DeclarationDataReportType.JASPER_DEC);
         JasperPrint jasperPrint;
         JRSwapFile jrSwapFile = null;
         try {
@@ -1685,7 +1684,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL0);
-        String pdfUuid = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.PDF_DEC);
+        String pdfUuid = reportService.getDec(declarationId, DeclarationDataReportType.PDF_DEC);
         if (pdfUuid == null) {
             return null;
         }
@@ -1731,7 +1730,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
-        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getDec(declarationData.getId(), DeclarationDataReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
         try {
             if (zipXml != null) {
@@ -1762,7 +1761,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.PDF_DEC, DeclarationDataReportType.JASPER_DEC));
         LOG.info(String.format("Получение данных налоговой формы %s", declarationData.getId()));
         stateLogger.updateState(AsyncTaskState.GET_FORM_DATA);
-        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getDec(declarationData.getId(), DeclarationDataReportType.XML_DEC);
         if (xmlUuid != null) {
             File pdfFile = null;
             JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
@@ -1788,7 +1787,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 reportService.createDec(declarationData.getId(), blobDataService.create(pdfFile.getPath(), ""), DeclarationDataReportType.PDF_DEC);
 
                 // не сохраняем jasper-отчет, если есть XLSX-отчет
-                if (reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.EXCEL_DEC) == null) {
+                if (reportService.getDec(declarationData.getId(), DeclarationDataReportType.EXCEL_DEC) == null) {
                     LOG.info(String.format("Сохранение Jasper-макета в базе данных для налоговой формы %s", declarationData.getId()));
                     stateLogger.updateState(AsyncTaskState.SAVING_JASPER);
                     reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), DeclarationDataReportType.JASPER_DEC);
@@ -2047,7 +2046,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation, LockStateLogger lockStateLogger) {
-        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC);
+        String xmlUuid = reportService.getDec(declarationData.getId(), DeclarationDataReportType.XML_DEC);
         if (xmlUuid == null) {
             TaxType taxType = TaxType.NDFL;
             String declarationName = "налоговой формы";
@@ -2964,7 +2963,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             return result;
         }
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
+        String uuidXml = reportService.getDec(action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
             DeclarationData declarationData = get(action.getDeclarationId(), userInfo);
             if (!declarationData.getState().equals(State.ACCEPTED)) {
@@ -3143,9 +3142,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), action.getType()));
         }
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
+        String uuidXml = reportService.getDec(action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
-            final String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ddReportType);
+            final String uuid = reportService.getDec(action.getDeclarationDataId(), ddReportType);
             if (uuid != null && !action.isCreate()) {
                 result.setStatus(CreateAsyncTaskStatus.EXIST);
                 return result;
@@ -3245,7 +3244,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final TAUser user = userInfo.getUser();
         Logger logger = new Logger();
 
-        final String uuid = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+        final String uuid = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
         if (uuid != null) {
             result.setStatus(CreateAsyncTaskStatus.EXIST);
             return result;
@@ -3384,7 +3383,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
 
                 // TODO workaround, создаём пустую xml (но не должна использоваться)
-                if (reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
+                if (reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC) == null) {
                     String uuid = blobDataService.create(IOUtils.toInputStream("-"), "xml.xml");
                     reportService.createDec(declarationDataId, uuid, DeclarationDataReportType.XML_DEC);
                 }

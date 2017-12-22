@@ -86,9 +86,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/xlsx", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-
-        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
+        String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
 
         BlobData blobData = blobDataService.get(blobId);
         if (blobData != null) {
@@ -108,9 +106,7 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/excelTemplate", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationExcelTemplate(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-
-        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+        String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
 
         if (blobId != null) {
             BlobData blobData = blobDataService.get(blobId);
@@ -138,7 +134,7 @@ public class DeclarationDataController {
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
 
-        String uuid = reportService.getDec(securityService.currentUserInfo(), declarationDataId, ddReportType);
+        String uuid = reportService.getDec(declarationDataId, ddReportType);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
 

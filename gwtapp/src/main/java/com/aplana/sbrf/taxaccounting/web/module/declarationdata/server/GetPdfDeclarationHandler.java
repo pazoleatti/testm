@@ -58,7 +58,7 @@ public class GetPdfDeclarationHandler extends AbstractActionHandler<GetPdfAction
             return result;
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
-        if (reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.PDF_DEC) != null) {
+        if (reportService.getDec(action.getDeclarationDataId(), DeclarationDataReportType.PDF_DEC) != null) {
             result.setPdf(generatePdfViewerModel(action.getDeclarationDataId(), userInfo));
         }
         return result;

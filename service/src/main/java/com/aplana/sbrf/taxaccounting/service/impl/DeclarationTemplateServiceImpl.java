@@ -417,9 +417,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         HashSet<Long> dataIds = new HashSet<Long>();
         DeclarationTemplate template = declarationTemplateDao.get(dtId);
         for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
-            if(reportService.getDec(userInfo, dataId, DeclarationDataReportType.PDF_DEC) != null
+            if(reportService.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
                     ||
-                    reportService.getDec(userInfo, dataId, DeclarationDataReportType.EXCEL_DEC) != null){
+                    reportService.getDec(dataId, DeclarationDataReportType.EXCEL_DEC) != null){
                 dataIds.add(dataId);
             }
         }
