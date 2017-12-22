@@ -1,7 +1,20 @@
-package refbook // declaration_type_ref комментарий для локального поиска скрипта
+package refbook
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+
+// declaration_type_ref комментарий для локального поиска скрипта
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
+import org.apache.commons.io.IOUtils
+import org.joda.time.LocalDateTime
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
@@ -11,18 +24,6 @@ import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
-import org.joda.time.LocalDateTime
-import org.apache.commons.io.IOUtils
-import com.aplana.sbrf.taxaccounting.model.DeclarationType
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
-import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 
 /**
  * Created by lhaziev on 09.02.2017.
@@ -372,6 +373,8 @@ class DeclarationType extends AbstractScriptClass {
     final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
     final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
     final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(NONDFL.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
+    final int sizeLastEntry = 4
+
 
 /**
  * Чтение содержание файла 2 НДФЛ - протокол
@@ -414,7 +417,8 @@ class DeclarationType extends AbstractScriptClass {
                     while (!isEndNotCorrect) {
                         line = bufferedReader.readLine()
 
-                        if (line.startsWith(NDFL2_NOT_CORRECT_SKIP)) {
+                        //Необходимо условие если две ошибки идут подряд и не разделены между собой спец строкой
+                        if ((lastEntry != null) && (lastEntry.size()==sizeLastEntry)){
                             notCorrectList.add(lastEntry)
                             lastEntry = [:]
                             continue
