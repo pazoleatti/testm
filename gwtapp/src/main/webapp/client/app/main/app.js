@@ -342,7 +342,7 @@
         "logPanel.title.num": "№ п/п",
         "logPanel.title.dateTime": "Дата-время",
         "logPanel.title.messageType": "Тип сообщения",
-        "logPanel.title.message": "Сообщение",
+        "logPanel.title.message": "Текст сообщения",
         "logPanel.title.type": "Тип",
         "logPanel.title.object": "Объект",
         "logPanel.header.message": "Уведомления (всего: {0}; фатальных ошибок: {1})",
