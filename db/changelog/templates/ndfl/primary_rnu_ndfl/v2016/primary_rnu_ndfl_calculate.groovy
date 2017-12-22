@@ -287,9 +287,6 @@ class Calculate extends AbstractScriptClass {
             [it.code, it]
         });
 
-        Map<Long, FiasCheckInfo> fiasAddressIdsMap = getFiasAddressIdsMap();
-        naturalPersonRowMapper.setFiasAddressIdsMap(fiasAddressIdsMap);
-
         return naturalPersonRowMapper;
     }
 

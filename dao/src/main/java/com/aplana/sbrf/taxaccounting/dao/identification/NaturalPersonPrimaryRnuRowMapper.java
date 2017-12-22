@@ -18,8 +18,6 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
 
     private Long asnuId;
 
-    private Map<Long, FiasCheckInfo> fiasAddressIdsMap;
-
     public Long getAsnuId() {
         return asnuId;
     }
@@ -28,13 +26,6 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         this.asnuId = asnuId;
     }
 
-    public Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
-        return fiasAddressIdsMap;
-    }
-
-    public void setFiasAddressIdsMap(Map<Long, FiasCheckInfo> fiasAddressIdsMap) {
-        this.fiasAddressIdsMap = fiasAddressIdsMap;
-    }
 
     @Override
     public NaturalPerson mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -105,17 +96,4 @@ public class NaturalPersonPrimaryRnuRowMapper extends NaturalPersonPrimaryRowMap
         return address;
     }
 
-    public FiasCheckInfo getFiasAddressId(NaturalPerson person, Long ndflPersonId) {
-
-        if (fiasAddressIdsMap != null) {
-            FiasCheckInfo result = fiasAddressIdsMap.get(ndflPersonId);
-            if (result == null) {
-                logger.warn("Не найден адрес физического лица " + IdentificationUtils.buildNotice(person));
-            }
-            return result;
-        } else {
-            logger.warn("Не проинициализирован кэш справочника для проверки адресов физических лиц!");
-        }
-        return null;
-    }
 }
