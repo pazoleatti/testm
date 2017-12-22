@@ -2,11 +2,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,17 +19,14 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private ReportDao reportDao;
 
-    @Autowired
-    private DeclarationDataAccessService declarationDataAccessService;
-
     @Override
     public void createDec(long declarationDataId, String blobDataId, DeclarationDataReportType type) {
         reportDao.createDec(declarationDataId, blobDataId, type);
     }
 
     @Override
+    @PreAuthorize("hasPermission(#declarationDataId, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).VIEW)")
     public String getDec(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType type) {
-        declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL1);
         return reportDao.getDec(declarationDataId, type);
     }
 
