@@ -255,6 +255,7 @@
                             if (response.uuid && response.uuid !== null) {
                                 $logPanel.open('log-panel-container', response.uuid);
                             }
+                            $modalInstance.close();
                         }
                     );
                 };
