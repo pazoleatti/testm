@@ -86,16 +86,8 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/xlsx", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-
-        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
-
-        BlobData blobData = blobDataService.get(blobId);
-        if (blobData != null) {
-            ResponseUtils.createBlobResponse(req, response, blobData);
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
+        String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
+        createBlobResponse(blobId, req, response);
     }
 
     /**
@@ -108,18 +100,21 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/excelTemplate", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationExcelTemplate(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        TAUserInfo userInfo = securityService.currentUserInfo();
+        String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+        createBlobResponse(blobId, req, response);
+    }
 
-        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
-
+    private void createBlobResponse(String blobId, HttpServletRequest req, HttpServletResponse response) throws IOException {
+        BlobData blobData = null;
         if (blobId != null) {
-            BlobData blobData = blobDataService.get(blobId);
-            if (blobData != null) {
-                ResponseUtils.createBlobResponse(req, response, blobData);
-                return;
-            }
+            blobData = blobDataService.get(blobId);
         }
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 
     /**
@@ -138,7 +133,7 @@ public class DeclarationDataController {
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
 
-        String uuid = reportService.getDec(securityService.currentUserInfo(), declarationDataId, ddReportType);
+        String uuid = reportService.getDec(declarationDataId, ddReportType);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
 

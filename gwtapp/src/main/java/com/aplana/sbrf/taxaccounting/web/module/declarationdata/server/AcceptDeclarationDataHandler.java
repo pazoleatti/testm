@@ -68,7 +68,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
         if (action.isAccepted()) {
-            String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
+            String uuidXml = reportService.getDec(action.getDeclarationId(), DeclarationDataReportType.XML_DEC);
             if (uuidXml != null) {
                 DeclarationData declarationData = declarationDataService.get(action.getDeclarationId(), userInfo);
                 if (!declarationData.getState().equals(State.ACCEPTED)) {

@@ -74,9 +74,9 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
             throw new ActionException("Данное действие недоступно");
         }
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
+        String uuidXml = reportService.getDec(action.getDeclarationDataId(), DeclarationDataReportType.XML_DEC);
         if (uuidXml != null) {
-            final String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ddReportType);
+            final String uuid = reportService.getDec(action.getDeclarationDataId(), ddReportType);
             if (uuid != null && !action.isCreate()) {
                 result.setStatus(CreateAsyncTaskStatus.EXIST);
                 return result;

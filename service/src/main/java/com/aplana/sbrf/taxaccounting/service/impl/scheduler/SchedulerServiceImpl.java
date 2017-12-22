@@ -89,7 +89,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         this.taskRegistrar = scheduledTaskRegistrar;
         taskRegistrar.setScheduler(taskExecutor());
 
-        IntervalTask intervalTask = new IntervalTask(new Runnable() {
+        IntervalTask intervalTask = new IntervalTask(new Thread("SchedulerUpdateTask") {
             @Override
             public void run() {
                 updateAllTask();
@@ -97,7 +97,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         }, 60000);
         tasks.put("updateAllTask", taskRegistrar.scheduleFixedDelayTask(intervalTask));
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        Runtime.getRuntime().addShutdownHook(new Thread("SchedulerShutdownHook") {
             @Override
             public void run() {
                 for (ScheduledTask scheduledTask : tasks.values()) {
@@ -188,7 +188,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         if (cron != null) {
             //Добавляем задачу в список, для того, чтобы потом ее можно было при необходимости удалить из планировщика
             CronTask cronTask = new CronTask(
-                    new Runnable() {
+                    new Thread("SchedulerTask-" + settingCode) {
                         @Override
                         public void run() {
                             try {

@@ -76,7 +76,7 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
     private TimerSubreportResult.Status getStatus(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType ddReportType) {
         String key = declarationDataService.generateAsyncTaskKey(declarationDataId, ddReportType);
         if (!lockDataService.isLockExists(key, false)) {
-            String uuid = reportService.getDec(userInfo, declarationDataId, ddReportType);
+            String uuid = reportService.getDec(declarationDataId, ddReportType);
             if (uuid == null) {
                 return TimerSubreportResult.STATUS_NOT_EXIST;
             } else {
