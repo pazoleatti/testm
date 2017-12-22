@@ -97,7 +97,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         }, 60000);
         tasks.put("updateAllTask", taskRegistrar.scheduleFixedDelayTask(intervalTask));
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        Runtime.getRuntime().addShutdownHook(new Thread("SchedulerShutdownHook") {
             @Override
             public void run() {
                 for (ScheduledTask scheduledTask : tasks.values()) {

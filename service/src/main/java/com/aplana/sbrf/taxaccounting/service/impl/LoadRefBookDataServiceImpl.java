@@ -95,7 +95,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             } catch (SevenZipNativeInitializationException e) {
                 LOG.error("", e);
             }
-            Runtime.getRuntime().addShutdownHook(new Thread() {
+            Runtime.getRuntime().addShutdownHook(new Thread("Fias cleanup") {
                 @Override
                 public void run() {
                     try {

@@ -94,10 +94,9 @@ public class AsyncTaskThreadContainer {
                     //Запускаем выполнение бина-обработчика задачи в новом потоке
                     LOG.info("Task started: " + taskData);
                     final AsyncTask task = asyncManager.getAsyncTaskBean(taskData.getType().getAsyncTaskTypeId());
-                    Future<?> taskFuture = asyncTaskPool.submit(new Thread() {
+                    Future<?> taskFuture = asyncTaskPool.submit(new Thread("AsyncTask-" + taskData.getId()) {
                         @Override
                         public void run() {
-                            Thread.currentThread().setName("AsyncTask-" + taskData.getId());
                             try {
                                 //Запускаем задачу под нужным пользователем
                                 TAUser user = taUserService.getUser(taskData.getUserId());
