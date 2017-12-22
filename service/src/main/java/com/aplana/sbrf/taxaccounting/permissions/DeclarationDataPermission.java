@@ -305,29 +305,36 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
 
+            // Период формы открыт
             if (departmentReportPeriod.isActive()) {
+
+                // Пользователь имеет права на просмотр формы
                 if (VIEW.isGranted(currentUser, targetDomainObject)) {
+
+                    // Форма.Состояние = "Принята", "Подготовлена"
                     if (targetDomainObject.getState() == State.PREPARED || targetDomainObject.getState() == State.ACCEPTED) {
-                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP) || PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
+
+                        // Пользователю назначена роль "Контролёр УНП (НДФЛ)" либо "Контролёр УНП (Сборы)"
+                        if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP)) {
                             return true;
-                        }
+                        } else if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_NS)) {
+                            //Подразделение декларации
+                            Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+                            //ТБ декларации
+                            Department parent = departmentService.getParentTB(declarationDepartment.getId());
+                            int declarationTB = parent != null ? parent.getId() : declarationDepartment.getId();
 
-                        //Подразделение декларации
-                        Department declarationDepartment = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-                        //ТБ декларации
-                        Department parent = departmentService.getParentTB(declarationDepartment.getId());
-                        int declarationTB = parent != null ? parent.getId() : declarationDepartment.getId();
+                            //Подразделение и ТБ пользователя
+                            TAUser taUser = taUserService.getUser(currentUser.getUsername());
+                            Department userDepartmentTB = departmentService.getParentTB(taUser.getDepartmentId());
+                            int userTB = userDepartmentTB != null ? userDepartmentTB.getId() : taUser.getDepartmentId();
+                            //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
+                            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
+                            List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
 
-                        //Подразделение и ТБ пользователя
-                        TAUser taUser = taUserService.getUser(currentUser.getUsername());
-                        Department userDepartmentTB = departmentService.getParentTB(taUser.getDepartmentId());
-                        int userTB = userDepartmentTB != null ? userDepartmentTB.getId() : taUser.getDepartmentId();
-                        //ТБ подразделений, для которых подразделение пользователя является исполнителем макетов
-                        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
-                        List<Integer> tbDepartments = departmentService.getAllTBPerformers(userTB, declarationTemplate.getType());
-
-                        if (userTB == declarationTB || tbDepartments.contains(declarationTB)) {
-                            return true;
+                            if (userTB == declarationTB || tbDepartments.contains(declarationTB)) {
+                                return true;
+                            }
                         }
                     }
                 }
