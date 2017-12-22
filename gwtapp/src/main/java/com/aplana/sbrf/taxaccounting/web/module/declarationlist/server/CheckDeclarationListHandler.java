@@ -77,7 +77,7 @@ public class CheckDeclarationListHandler extends AbstractActionHandler<CheckDecl
                 try {
                     LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(declarationId, DeclarationDataReportType.ACCEPT_DEC));
                     if (lockDataAccept == null) {
-                        String uuidXml = reportService.getDec(userInfo, declarationId, DeclarationDataReportType.XML_DEC);
+                        String uuidXml = reportService.getDec(declarationId, DeclarationDataReportType.XML_DEC);
                         if (uuidXml != null) {
                             String keyTask = declarationDataService.generateAsyncTaskKey(declarationId, ddReportType);
                             Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);

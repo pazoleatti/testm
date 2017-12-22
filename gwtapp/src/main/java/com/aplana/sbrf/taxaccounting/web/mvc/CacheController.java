@@ -38,6 +38,12 @@ public class CacheController {
         return "Кэш сброшен";
     }
 
+    @GetMapping(value = "/actions/gc", produces = CustomMediaType.TEXT_HTML_UTF8_VALUE)
+    public String runGc() {
+        System.gc();
+        return "run gc";
+    }
+
     /**
      * Сброс кэша аутентификации
      *

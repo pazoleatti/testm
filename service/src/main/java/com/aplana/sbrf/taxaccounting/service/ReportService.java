@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,12 +21,11 @@ public interface ReportService {
 
     /**
      * Получение записи об отчете декларации
-     * @param userInfo
      * @param declarationDataId
      * @param type
      * @return uuid
      */
-    String getDec(TAUserInfo userInfo, long declarationDataId, DeclarationDataReportType type);
+    String getDec(long declarationDataId, DeclarationDataReportType type);
 
     /**
      * Удаление всех отчетов по id декларации

@@ -221,7 +221,7 @@
                                 if (data.uuid && data.uuid !== null) {
                                     $logPanel.open('log-panel-container', data.uuid);
                                 }
-                                if (data.declarationDataFiles !== null && data.comment !== null) {
+                                if (data.declarationDataFiles !== null) {
                                     $scope.fileCommentGrid.ctrl.refreshGridData(data.declarationDataFiles);
                                     $scope.commentForm.comment = data.comment;
                                 }

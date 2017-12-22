@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
@@ -15,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +50,9 @@ public class DeclarationDataController {
     private DeclarationTemplateService declarationTemplateService;
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
+
+    @Autowired
+    private DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
@@ -86,16 +92,8 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/xlsx", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationXlsx(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        TAUserInfo userInfo = securityService.currentUserInfo();
-
-        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_DEC);
-
-        BlobData blobData = blobDataService.get(blobId);
-        if (blobData != null) {
-            ResponseUtils.createBlobResponse(req, response, blobData);
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
+        String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_DEC);
+        createBlobResponse(blobId, req, response);
     }
 
     /**
@@ -108,18 +106,21 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}/excelTemplate", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadDeclarationExcelTemplate(@PathVariable long declarationDataId, HttpServletRequest req, HttpServletResponse response)
             throws IOException {
-        TAUserInfo userInfo = securityService.currentUserInfo();
+        String blobId = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+        createBlobResponse(blobId, req, response);
+    }
 
-        String blobId = reportService.getDec(userInfo, declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
-
+    private void createBlobResponse(String blobId, HttpServletRequest req, HttpServletResponse response) throws IOException {
+        BlobData blobData = null;
         if (blobId != null) {
-            BlobData blobData = blobDataService.get(blobId);
-            if (blobData != null) {
-                ResponseUtils.createBlobResponse(req, response, blobData);
-                return;
-            }
+            blobData = blobDataService.get(blobId);
         }
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+
+        if (blobData != null) {
+            ResponseUtils.createBlobResponse(req, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 
     /**
@@ -138,7 +139,7 @@ public class DeclarationDataController {
         DeclarationData declaration = declarationService.get(declarationDataId, userInfo);
         ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), alias));
 
-        String uuid = reportService.getDec(securityService.currentUserInfo(), declarationDataId, ddReportType);
+        String uuid = reportService.getDec(declarationDataId, ddReportType);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
 
@@ -421,7 +422,11 @@ public class DeclarationDataController {
      */
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=filesComments")
     public DeclarationDataFileComment fetchFilesComments(@PathVariable long declarationDataId) {
-        return declarationService.fetchFilesComments(declarationDataId);
+        DeclarationDataFileComment result = declarationService.fetchFilesComments(declarationDataId);
+        if (!result.getDeclarationDataFiles().isEmpty()) {
+            declarationDataFilePermissionSetter.setPermissions(result.getDeclarationDataFiles(), DeclarationDataFilePermission.DELETE);
+        }
+        return result;
     }
 
     /**
