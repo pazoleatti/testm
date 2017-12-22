@@ -2091,7 +2091,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
             params.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xml);
             final JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(100, jrSwapFile);
-            Runtime.getRuntime().addShutdownHook(new Thread() {
+            Runtime.getRuntime().addShutdownHook(new Thread("JRSwapFileVirtualizerCleanup-" + virtualizer) {
                 @Override
                 public void run() {
                     virtualizer.cleanup();
