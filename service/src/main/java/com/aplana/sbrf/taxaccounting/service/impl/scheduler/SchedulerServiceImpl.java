@@ -81,7 +81,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @Bean(destroyMethod = "shutdown")
     public Executor taskExecutor() {
-        return Executors.newScheduledThreadPool(100);
+        return Executors.newScheduledThreadPool(10);
     }
 
     @Override
