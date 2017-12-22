@@ -81,6 +81,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.impl.PermissionDaoFactory"/>
     </bean>
 
+    <!--TODO SBRFNDFL-3119-->
     <bean id="declarationDataPermissionFactory" class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
         <constructor-arg
                 value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission"/>

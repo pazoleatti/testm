@@ -166,7 +166,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DBUtils bdUtils;
     @Autowired
     private NdflPersonDao ndflPersonDao;
-    @Autowired
+    @Autowired//TODO SBRFNDFL-3119
     private DeclarationDataPermissionSetter declarationDataPermissionSetter;
     @Autowired
     private NotificationService notificationService;
@@ -609,6 +609,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
 
+        //TODO SBRFNDFL-3119
         declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
                 DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
                 DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
@@ -920,6 +921,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
             for (DeclarationDataJournalItem item : page) {
                 DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
+                //TODO SBRFNDFL-3119
                 declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
                         DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
                         DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
