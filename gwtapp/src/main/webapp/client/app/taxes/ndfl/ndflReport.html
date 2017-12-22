@@ -90,8 +90,7 @@
                                 </div>
                                 <div class="col-md-12">
                                     <label class="label-title-panel w150">{{::'title.period' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.reportPeriodYear}},
-                                        {{declarationData.reportPeriod}}</label>
+                                    <label class="font-normal info-text30" data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="label-title-panel w150">{{::'title.state' | translate}}:</label>
