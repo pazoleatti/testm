@@ -34,7 +34,7 @@ public class Dictionary {
     private static List<String> initDictionary(String filePath) {
         List<String> toReturn = new ArrayList<>();
         try (InputStream is = Main.class.getResourceAsStream(filePath)) {
-            Scanner scanner = new Scanner(is);
+            Scanner scanner = new Scanner(is, "Windows-1251");
             while (scanner.hasNextLine()) {
                 toReturn.add(scanner.nextLine());
             }
