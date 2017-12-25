@@ -1,9 +1,23 @@
-package refbook // declaration_type_ref комментарий для локального поиска скрипта
+package refbook
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
+
+// declaration_type_ref комментарий для локального поиска скрипта
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
+import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
+import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
+import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
+import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
+import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
+import org.apache.commons.io.IOUtils
+import org.joda.time.LocalDateTime
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
+import org.xml.sax.SAXParseException
 import org.xml.sax.helpers.DefaultHandler
 
 import javax.xml.parsers.ParserConfigurationException
@@ -11,18 +25,6 @@ import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
-import org.joda.time.LocalDateTime
-import org.apache.commons.io.IOUtils
-import com.aplana.sbrf.taxaccounting.model.DeclarationType
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
-import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
-import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
-import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 
 /**
  * Created by lhaziev on 09.02.2017.
@@ -372,6 +374,8 @@ class DeclarationType extends AbstractScriptClass {
     final String NDFL2_REGISTER_DATE = "РЕЕСТР N"
     final Pattern NDFL2_REGISTER_DATE_PATTERN = Pattern.compile("РЕЕСТР N .+ от (\\d{2}\\.\\d{2}\\.\\d{4}) в 9979")
     final Pattern NDFL6_FILE_NAME_PATTERN = Pattern.compile("((KV)|(UO)|(IV)|(UU))_(NONDFL.)_(.{19})_(.{19})_(.{4})_(\\d{4}\\d{2}\\d{2})_(.{1,36})\\.(xml|XML)")
+    final int sizeLastEntry = 4
+
 
 /**
  * Чтение содержание файла 2 НДФЛ - протокол
@@ -414,7 +418,8 @@ class DeclarationType extends AbstractScriptClass {
                     while (!isEndNotCorrect) {
                         line = bufferedReader.readLine()
 
-                        if (line.startsWith(NDFL2_NOT_CORRECT_SKIP)) {
+                        //Необходимо условие если две ошибки идут подряд и не разделены между собой спец строкой
+                        if ((lastEntry != null) && (lastEntry.size()==sizeLastEntry)){
                             notCorrectList.add(lastEntry)
                             lastEntry = [:]
                             continue
@@ -1020,26 +1025,34 @@ class DeclarationType extends AbstractScriptClass {
             SAXParserFactory factory = SAXParserFactory.newInstance()
             SAXParser saxParser = factory.newSAXParser()
             saxParser.parse(inputStream, handler)
+        } catch (SAXParseException e) {
+            logger.error(getSAXParseExceptionMessage(e))
+            return
         } catch (Exception e) {
-
-            e.printStackTrace()
-
+            logger.error(e)
+            return
         } finally {
             IOUtils.closeQuietly(inputStream)
         }
         handler.getListValueAttributesTag();
 
         //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
-        if (!departmentCode.equals(handler.getListValueAttributesTag().get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
+        def xmlDepartmentCode = handler.getListValueAttributesTag()?.get(KOD_DEPARTMENT)?.replaceFirst("_*", "")?.trim()
+        if (!departmentCode.equals(xmlDepartmentCode)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»",
+                    departmentCode, xmlDepartmentCode)
         }
 
-        if (!asnuCode.equals(handler.getListValueAttributesTag().get(KOD_ASNU))) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
+        def xmlAsnuCode = handler.getListValueAttributesTag()?.get(KOD_ASNU)
+        if (!asnuCode.equals(xmlAsnuCode)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»",
+                    asnuCode, xmlAsnuCode)
         }
 
-        if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))) {
-            logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»", UploadFileName.trim()[0..-5], handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
+        def xmlFileName = handler.getListValueAttributesTag()?.get(NAME_TF_NOT_EXTENSION)
+        if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(xmlFileName)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»",
+                    UploadFileName.trim()[0..-5], xmlFileName)
         }
 
         //достать из XML файла атрибуты тега СлЧасть
@@ -1049,24 +1062,32 @@ class DeclarationType extends AbstractScriptClass {
             SAXParserFactory factory = SAXParserFactory.newInstance()
             SAXParser saxParser = factory.newSAXParser()
             saxParser.parse(inputStream, handler)
+        } catch (SAXParseException e) {
+            logger.error(getSAXParseExceptionMessage(e))
+            return
         } catch (Exception e) {
-            e.printStackTrace()
+            logger.error(e)
+            return
         }
 
         //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
-        if (!reportPeriodCode.equals(handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
+        def xmlReportPeriodCode = handler.getListValueAttributesTag()?.get(KOD_REPORT_PERIOD)
+        if (!reportPeriodCode.equals(xmlReportPeriodCode)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»",
+                    reportPeriodCode, xmlReportPeriodCode)
         }
 
-        Integer reportYear;
+        def xmlReportYear = handler.getListValueAttributesTag()?.get(REPORT_YEAR)
+        Integer reportYear = null
         try {
-            reportYear = Integer.parseInt(handler.getListValueAttributesTag().get(REPORT_YEAR));
+            reportYear = Integer.parseInt(xmlReportYear);
         } catch (NumberFormatException nfe) {
             nfe.printStackTrace()
         }
 
         if (!year.equals(reportYear)) {
-            logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
+            logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»",
+                    year, xmlReportYear)
         }
 
         // Проверка не загружен ли уже такой файл в систему
@@ -1111,6 +1132,12 @@ class DeclarationType extends AbstractScriptClass {
                 .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
                 .append(", Вид: \"").append(declarationType.getName()).append("\"")
                 .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
+    }
+
+    String getSAXParseExceptionMessage(SAXParseException e) {
+        return "Ошибка: ${e.getLineNumber() != -1 ? "Строка: ${e.getLineNumber()}" : ""}" +
+                "${e.getColumnNumber() != -1 ? "; Столбец: ${e.getColumnNumber()}" : ""}" +
+                "${e.getLocalizedMessage() ? "; ${e.getLocalizedMessage()}" : ""}"
     }
 
     String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {

@@ -18,16 +18,6 @@
             });
         }])
 
-        .filter('balanceFormatter', function () {
-            return function (value) {
-                if (value && value === 1) {
-                    return 'Да';
-                } else {
-                    return 'Нет';
-                }
-            };
-        })
-
         .filter('reportPeriodFormatter', function () {
             return function (entity) {
                 if (entity) {
@@ -394,8 +384,10 @@
                     });
                 };
 
+                /**
+                 * @description Открытие модального окна назначения срока сдачи отчетности
+                 */
                 $scope.deadlinePeriod = function () {
-
                     $aplanaModal.open({
                         title: $filter('translate')('reportPeriod.modal.deadline.tittle'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/deadlinePeriod.html?v=${buildUuid}',
@@ -458,6 +450,7 @@
 
                 /**
                  * @description Проверяет на наличие деклараций на редактировании
+                 * @return признак блокировки периода формой
                  */
                 $scope.checkHasBlocked = function () {
                     $scope.checkHasBlockedDefer = $q.defer();
@@ -476,6 +469,7 @@
 
                 /**
                  * @description Проверяет на наличие коректирующих периодов с более поздней датой сдачи корректировки
+                 * @return признак существования корректирующих периодов с более поздней датой сдачи корректировки
                  */
                 $scope.hasLaterCorrectionPeriod = function () {
                     $scope.hasLaterCorrectionPeriodDefer = $q.defer();
@@ -506,6 +500,7 @@
 
                 /**
                  * @description Проверяет на наличие корректирующего периода
+                 * @return признак корректировки
                  */
                 $scope.hasCorrectionPeriod = function () {
                     $scope.hasCorrectionPeriodDefer = $q.defer();

@@ -13,6 +13,7 @@ import com.gwtplatform.dispatch.annotation.In;
 import net.sf.jasperreports.web.actions.ActionException;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -144,10 +145,10 @@ public class DepartmentReportPeriodController {
     /**
      * Установка срока сдачи отчетности для периода
      */
-    @PostMapping(value = "actions/departmentReportPeriod/updateDeadline")
-    public void setDeadline(@RequestParam DepartmentReportPeriodFilter filter, @RequestParam boolean withChild) throws ActionException {
+    @PostMapping(value = "actions/departmentReportPeriod/updateDeadline", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void setDeadline(@RequestBody DepartmentReportPeriodFilter filter) throws ActionException {
         filter.setDeadline(new LocalDateTime(filter.getUtilDeadline()));
-        periodService.setDeadline(filter, withChild);
+            periodService.setDeadline(filter);
     }
 
     /**

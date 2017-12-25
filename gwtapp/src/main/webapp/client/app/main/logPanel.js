@@ -93,7 +93,7 @@
                                     {
                                         name: 'date',
                                         index: 'date',
-                                        width: 176,
+                                        width: 126,
                                         sortable: false,
                                         formatter: $filter('dateTimeFormatter')
                                     },
@@ -108,7 +108,7 @@
                                     {
                                         name: 'message',
                                         index: 'message',
-                                        width: 1428,
+                                        width: 1278,
                                         sortable: false,
                                         formatter: $filter('textColorFormatter'),
                                         classes: 'grid-cell-white-space'
@@ -116,7 +116,7 @@
                                     {
                                         name: 'type',
                                         index: 'type',
-                                        width: 100,
+                                        width: 200,
                                         sortable: false,
                                         formatter: $filter('textColorFormatter'),
                                         classes: 'grid-cell-white-space'
@@ -124,7 +124,7 @@
                                     {
                                         name: 'object',
                                         index: 'object',
-                                        width: 100,
+                                        width: 200,
                                         sortable: false,
                                         formatter: $filter('textColorFormatter'),
                                         classes: 'grid-cell-white-space'

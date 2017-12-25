@@ -2,15 +2,21 @@
     'use strict';
 
     /**
-     * @description конфигурация модального окна выбора срока сдачи отчетности
+     * @description модуль модального окна выбора срока сдачи отчетности
      */
 
     angular.module('app.deadlinePeriodModal', ['ui.router', 'app.rest'])
 
+    /**
+     * @description Контроллер модального откна "Назначить срок сдачи отчетности"
+     */
+        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', 'AppointDeadlineResource',
+            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, AppointDeadlineResource) {
 
-        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils',
-            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils) {
-
+                /** в $shareData.period.deadline используется дата в фомате ISO,
+                 * а для date-picker нужна дата в формате UTC
+                 * для перобразования добавляется 'Z'
+                 */
                 var deadline = new Date($shareData.period.deadline + "Z");
 
                 $scope.filter = {
@@ -20,6 +26,9 @@
                     withChild: false
                 };
 
+                /**
+                 * @description Сохранение даты сдачи отчетности
+                 */
                 $scope.save = function () {
                     if (ValidationUtils.checkDateValidateInterval($scope.filter.deadline)) {
                         $dialogs.confirmDialog({
@@ -28,51 +37,40 @@
                             okBtnCaption: $filter('translate')('common.button.yes'),
                             cancelBtnCaption: $filter('translate')('common.button.no'),
                             okBtnClick: function () {
-                                createQuery(true);
+                                AppointDeadlineResource.doOperation({
+                                    id: $scope.filter.departmentReportPeriod.id,
+                                    departmentId: $scope.filter.department.id,
+                                    utilDeadline: $scope.filter.deadline,
+                                    withChild: true
+                                }, function () {
+                                    $modalInstance.close();
+                                });
                             },
                             cancelBtnClick: function () {
-                                createQuery(false);
+                                AppointDeadlineResource.doOperation({
+                                    id: $scope.filter.departmentReportPeriod.id,
+                                    departmentId: $scope.filter.department.id,
+                                    utilDeadline: $scope.filter.deadline,
+                                    withChild: false
+                                }, function () {
+                                    $modalInstance.close();
+                                });
                             }
 
                         });
-                    }else {
+                    } else {
                         $dialogs.errorDialog({
                             content: $filter('translate')('common.validation.dateInterval')
                         });
                     }
                 };
+
+                /**
+                 * @description Закрыть модальное окно
+                 */
                 $scope.close = function () {
                     $modalInstance.dismiss();
                 };
-
-                var createQuery = function (withChild) {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/departmentReportPeriod/updateDeadline",
-                        params: {
-                            filter: JSON.stringify({
-                                id: $scope.filter.departmentReportPeriod.id,
-                                departmentId: $scope.filter.department.id,
-                                utilDeadline: $scope.filter.deadline
-                            }),
-                            withChild: withChild
-                        }
-                    }).then(function () {
-                        $modalInstance.close();
-                    });
-                };
-
-                /**
-                 * Форматирует дату для ее представления в <date-picker>
-                 * @param date -
-                 * @return {string}
-                 */
-                var dateFormate = function (date) {
-                    var month = date.getMonth()+1;
-                    var newdate = date.getDate() + '.' + (month < 10 ? '0' : '') + month + '.' + date.getFullYear();
-                    return newdate;
-                };
-
             }])
 
 
