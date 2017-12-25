@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -531,12 +532,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public void setCommonParamsDefault() {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
+    public void setCommonParamsDefault(TAUserInfo userInfo) {
         configurationDao.setCommonParamsDefault(defaultCommonParams());
     }
 
     @Override
-    public ActionResult update(Configuration config) {
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
+    public ActionResult update(TAUserInfo userInfo, Configuration config) {
         ActionResult result = new ActionResult();
         Logger logger = new Logger();
 

@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
-import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
+import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
@@ -33,6 +30,7 @@ import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
 import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
@@ -166,10 +164,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DBUtils bdUtils;
     @Autowired
     private NdflPersonDao ndflPersonDao;
-    @Autowired
+    @Autowired//TODO SBRFNDFL-3119
     private DeclarationDataPermissionSetter declarationDataPermissionSetter;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private MoveToCreateFacade moveToCreateFacade;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -609,6 +609,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
 
+        //TODO SBRFNDFL-3119
         declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
                 DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
                 DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
@@ -920,6 +921,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
             for (DeclarationDataJournalItem item : page) {
                 DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
+                //TODO SBRFNDFL-3119
                 declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
                         DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
                         DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
@@ -1484,16 +1486,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).RETURN_TO_CREATED)")
-    public void cancel(Logger logger, long id, String note, TAUserInfo userInfo) {
+    public void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo) {
         try {
-            List<Long> receiversIdList = getReceiversAcceptedPrepared(id, logger, userInfo);
+            List<Long> receiversIdList = getReceiversAcceptedPrepared(declarationDataId, logger, userInfo);
             if (receiversIdList.isEmpty()) {
-                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
-                DeclarationData declarationData = declarationDataDao.get(id);
+                DeclarationData declarationData = declarationDataDao.get(declarationDataId);
 
                 Map<String, Object> exchangeParams = new HashMap<>();
-                declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+                moveToCreateFacade.cancel(userInfo, declarationData, logger, exchangeParams);
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
                 }
@@ -1501,11 +1501,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationData.setState(State.CREATED);
                 sourceService.updateDDConsolidation(declarationData.getId());
 
-                logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
+                logBusinessService.add(null, declarationDataId, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, note);
                 auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
-                declarationDataDao.setStatus(id, declarationData.getState());
-                String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", id, State.CREATED.getTitle()).toString();
+                declarationDataDao.setStatus(declarationDataId, declarationData.getState());
+                String message = new Formatter().format("Налоговая форма № %d успешно переведена в статус \"%s\".", declarationDataId, State.CREATED.getTitle()).toString();
                 logger.info(message);
                 sendNotification("Выполнена операция \"Возврат в Создана\"", logEntryService.save(logger.getEntries()), userInfo.getUser().getId(), NotificationType.DEFAULT, null);
             } else {
@@ -1517,7 +1517,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         } catch (Exception e) {
             logger.error(e);
         } finally {
-            lockDataService.unlock(generateAsyncTaskKey(id, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
+            lockDataService.unlock(generateAsyncTaskKey(declarationDataId, DeclarationDataReportType.TO_CREATE_DEC), userInfo.getUser().getId());
         }
     }
 
@@ -3442,5 +3442,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
         reportService.deleteDec(declarationDataId);
+    }
+
+    private void performCancel(TAUserInfo userInfo, DeclarationData declarationData, Logger logger, Map<String, Object> exchangeParams) {
+
     }
 }

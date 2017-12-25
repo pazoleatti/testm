@@ -15,12 +15,12 @@ public class Main {
     static PrintStream printStream;
 
     public static void main(String[] args) {
+        Date startDate = new Date();
         try {
             printStream = new PrintStream(System.out, true, "cp866");
             if (args.length < 3) {
                 printStream.print("Вы ввели неверное количество аргументов");
             } else {
-                printStream.println("Время начала: " + new Date());
                 initDictionaries();
                 String path = args[0];
 
@@ -49,11 +49,13 @@ public class Main {
                 } else {
                     printStream.println("Тип формируемого файла не указан (xml или xlsx)");
                 }
-                printStream.println("Время окончания: " + new Date());
             }
 
         } catch (Exception e) {
             e.printStackTrace(printStream);
+        } finally {
+            printStream.println("Время начала: " + startDate);
+            printStream.println("Время окончания: " + new Date());
         }
     }
 }

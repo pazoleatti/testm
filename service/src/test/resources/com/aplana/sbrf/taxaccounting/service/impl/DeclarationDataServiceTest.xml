@@ -74,6 +74,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.NotificationService"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade" />
+    </bean>
 
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl" />
 
@@ -81,6 +84,7 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.impl.PermissionDaoFactory"/>
     </bean>
 
+    <!--TODO SBRFNDFL-3119-->
     <bean id="declarationDataPermissionFactory" class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
         <constructor-arg
                 value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission"/>
