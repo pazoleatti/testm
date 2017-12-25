@@ -60,7 +60,7 @@
                                 departmentId: $scope.department.id
                             }
                         }).then(function (response) {
-                            if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE){
+                            if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE) {
                                 $dialogs.confirmDialog({
                                     title: $filter('translate')('title.confirm'),
                                     content: $filter('translate')('reportPeriod.confirm.openPeriod.reopenPeriod.text'),
@@ -83,17 +83,17 @@
                                         });
                                     }
                                 });
-                            }else {
-                                if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.OPEN){
+                            } else {
+                                if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.OPEN) {
                                     $dialogs.errorDialog({
                                         content: $filter('translate')('reportPeriod.error.openPeriod.alreadyOpen')
                                     });
-                                }else {
-                                    if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_ALREADY_EXIST){
+                                } else {
+                                    if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_ALREADY_EXIST) {
                                         $dialogs.errorDialog({
                                             content: $filter('translate')('reportPeriod.error.openPeriod.hasCorrectionPeriod')
                                         });
-                                    }else {
+                                    } else {
                                         OpenPeriodResource.query({
                                             reportPeriod: {
                                                 dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
@@ -113,42 +113,92 @@
                             }
                         });
                     } else {
+                        if ($scope.period.reportPeriod.dictPeriod.id === $shareData.period.dictTaxPeriodId && $scope.period.reportPeriod.taxPeriod.year === $shareData.period.year) {
+                            $dialogs.errorDialog({
+                                content: $filter('translate')('reportPeriod.error.editPeriod.noChange.text')
+                            });
+                            return;
+                        }
+
+                        // Проверяем наличие периода в системе
                         $http({
                             method: "POST",
-                            url: "controller/rest/departmentReportPeriod/" + $shareData.period.id + "?projection=checkHasNotAccepted"
-                        }).then(function (logger) {
-                            LogEntryResource.query({
-                                    uuid: logger,
-                                    projection: 'count'
-                                },
-                                function (data) {
-                                    if ((data.ERROR + data.WARNING) !== 0) {
-                                        $logPanel.open('log-panel-container', logger);
-                                    } else {
-                                        $http({
-                                            method: "POST",
-                                            url: "controller/rest/departmentReportPeriod/" + $scope.period.id,
-                                            params: {
-                                                departmentReportPeriod: JSON.stringify({
-                                                    id: $scope.period.id,
-                                                    reportPeriod: {
-                                                        dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
-                                                        taxPeriod: {
-                                                            year: $scope.period.reportPeriod.taxPeriod.year
-                                                        }
-                                                    }
-                                                })
-                                            }
-                                        }).then(function (response) {
-                                            if (response.data) {
-                                                $logPanel.open('log-panel-container', response.data);
+                            url: "controller/rest/departmentReportPeriod/status",
+                            params: {
+                                dictTaxPeriodId: $shareData.period.dictTaxPeriodId,
+                                year: $shareData.period.year,
+                                departmentId: $scope.department.id
+                            }
+                        }).then(function (status) {
+                            if (status.data && status.data !== APP_CONSTANTS.REPORT_PERIOD_STATUS.NOT_EXIST) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('reportPeriod.error.editPeriod.alreadyExist.text')
+                                });
+                                return;
+                            }
+                            // Проверяем статус редактируемого периода
+                            $http({
+                                method: "POST",
+                                url: "controller/rest/departmentReportPeriod/status",
+                                params: {
+                                    dictTaxPeriodId: $shareData.period.dictTaxPeriodId,
+                                    year: $shareData.period.year,
+                                    departmentId: $scope.department.id
+                                }
+                            }).then(function (status) {
+                                if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE) {
+                                    $dialogs.errorDialog({
+                                        content: $filter('translate')('reportPeriod.error.editPeriod.alreadyClose.text')
+                                    });
+                                    return;
+                                } else {
+                                    if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_ALREADY_EXIST) {
+                                        $dialogs.errorDialog({
+                                            content: $filter('translate')('reportPeriod.error.editPeriod.hasCorPeriod.text')
+                                        });
+                                        return;
+                                    }
+                                }
+                                // Проверяем наличие связанных объектов
+                                $http({
+                                    method: "POST",
+                                    url: "controller/rest/departmentReportPeriod/" + $shareData.period.id + "?projection=checkHasNotAccepted"
+                                }).then(function (logger) {
+                                    LogEntryResource.query({
+                                            uuid: logger,
+                                            projection: 'count'
+                                        },
+                                        function (data) {
+                                            if ((data.ERROR + data.WARNING) !== 0) {
+                                                $logPanel.open('log-panel-container', logger);
                                                 $dialogs.errorDialog({
                                                     content: $filter('translate')('reportPeriod.error.editPeriod.text')
                                                 });
+                                            } else {
+                                                // СОхраняем отредактированный период
+                                                $http({
+                                                    method: "POST",
+                                                    url: "controller/rest/departmentReportPeriod/" + $scope.period.id,
+                                                    params: {
+                                                        departmentReportPeriod: JSON.stringify({
+                                                            id: $scope.period.id,
+                                                            reportPeriod: {
+                                                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                                                taxPeriod: {
+                                                                    year: $scope.period.reportPeriod.taxPeriod.year
+                                                                }
+                                                            }
+                                                        })
+                                                    }
+                                                }).then(function (response) {
+                                                    if (response.data) {
+                                                        $logPanel.open('log-panel-container', response.data);
+                                                    }
+                                                });
                                             }
                                         });
-                                    }
                                 });
+                            });
                         });
                     }
                 };
@@ -157,14 +207,24 @@
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
-                    if ($scope.isAdd){
+                    if ($scope.isAdd) {
                         $dialogs.confirmDialog({
                             title: $filter('translate')('reportPeriod.confirm.openPeriod.title'),
                             content: $filter('translate')('reportPeriod.confirm.openPeriod.text'),
                             okBtnCaption: $filter('translate')('common.button.yes'),
                             cancelBtnCaption: $filter('translate')('common.button.no'),
                             okBtnClick: function () {
-                                     $modalInstance.dismiss('Canceled');
+                                $modalInstance.dismiss('Canceled');
+                            }
+                        });
+                    } else {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('reportPeriod.confirm.editPeriod.title'),
+                            content: $filter('translate')('reportPeriod.confirm.editPeriod.text'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                $modalInstance.dismiss('Canceled');
                             }
                         });
                     }

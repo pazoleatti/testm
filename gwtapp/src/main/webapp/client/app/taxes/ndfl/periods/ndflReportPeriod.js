@@ -450,6 +450,7 @@
 
                 /**
                  * @description Проверяет на наличие деклараций на редактировании
+                 * @return признак блокировки периода формой
                  */
                 $scope.checkHasBlocked = function () {
                     $scope.checkHasBlockedDefer = $q.defer();
@@ -468,6 +469,7 @@
 
                 /**
                  * @description Проверяет на наличие коректирующих периодов с более поздней датой сдачи корректировки
+                 * @return признак существования корректирующих периодов с более поздней датой сдачи корректировки
                  */
                 $scope.hasLaterCorrectionPeriod = function () {
                     $scope.hasLaterCorrectionPeriodDefer = $q.defer();
@@ -498,6 +500,7 @@
 
                 /**
                  * @description Проверяет на наличие корректирующего периода
+                 * @return признак корректировки
                  */
                 $scope.hasCorrectionPeriod = function () {
                     $scope.hasCorrectionPeriodDefer = $q.defer();

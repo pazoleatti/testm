@@ -44,6 +44,7 @@
                  */
                 $scope.close = function () {
                     $modalInstance.dismiss('Canceled');
+                    commonParamsGrid.ctrl.refreshGrid();
 
                 };
 
