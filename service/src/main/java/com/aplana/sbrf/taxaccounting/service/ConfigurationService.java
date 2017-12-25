@@ -71,10 +71,10 @@ public interface ConfigurationService {
     /**
      * Обновление общего параметра в табл. CONFIGURATION
      */
-    ActionResult update(Configuration config);
+    ActionResult update(TAUserInfo userInfo, Configuration config);
 
     /**
      * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)
      */
-    void setCommonParamsDefault();
+    void setCommonParamsDefault(TAUserInfo userInfo);
 }

@@ -52,7 +52,8 @@ public class ConfigParamsController {
      */
     @PostMapping(value = "/actions/editCommonParams")
     public ActionResult editCommonParams(@RequestParam Configuration config) {
-        return configurationService.update(config);
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return configurationService.update(userInfo, config);
     }
 
     /**
@@ -60,7 +61,8 @@ public class ConfigParamsController {
      */
     @PostMapping(value = "/actions/changeToDefaultCommonParams")
     public void setCommonParamsDefault() {
-        configurationService.setCommonParamsDefault();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        configurationService.setCommonParamsDefault(userInfo);
     }
 
 }
