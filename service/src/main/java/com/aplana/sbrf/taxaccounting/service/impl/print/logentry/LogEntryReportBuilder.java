@@ -9,7 +9,6 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class LogEntryReportBuilder extends AbstractReportBuilder {
 
@@ -71,7 +70,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 
             csvWriter.writeNext(headers);
             for (int i = 0; i < list.size(); i++) {
-                csvWriter.writeNext(assemble(list.get(i), i));
+                csvWriter.writeNext(assemble(list.get(i), i+1));
             }
             csvWriter.close();
         } catch (IOException e) {

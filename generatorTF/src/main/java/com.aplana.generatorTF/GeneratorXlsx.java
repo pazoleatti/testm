@@ -70,7 +70,7 @@ public class GeneratorXlsx {
                 {
                     int startIndex = Math.max(sheet.getLastRowNum() + 1, sourceSheet.getLastRowNum() + 1);
                     Row row = sheet.createRow(startIndex);
-                    copyRow(sourceSheet.getRow(personRowIndex), row, rowNum);
+                    copyRow(sourceSheet.getRow(personRowIndex), row, rowNum++);
                     mutateRow(row, sourceSheet.getRow(personRowIndex));
                     personRowIndex++;
 
@@ -92,8 +92,6 @@ public class GeneratorXlsx {
             printStream.println("Идет сохранение...");
             workBook.write(out);
             printStream.println(String.format("Данные сохранены в файл %s", outFile.getAbsolutePath()));
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             if (workBook != null) {
                 deleteSXSSFTempFiles(workBook);
@@ -161,7 +159,7 @@ public class GeneratorXlsx {
     }
 
     private void copyRow(Row fromRow, Row toRow, Range<Integer> range, int rowNum) {
-        int fromIndex = range == null ? 1 : range.lowerEndpoint();
+        int fromIndex = range == null ? 0 : range.lowerEndpoint();
         int toIndex = range == null ? fromRow.getLastCellNum() : range.upperEndpoint();
         for (int i = fromIndex; i < toIndex; i++) {
             Cell cell = fromRow.getCell(i);

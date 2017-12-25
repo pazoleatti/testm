@@ -11,11 +11,13 @@
         <div class="button_panel">
             <div class="btn-toolbar" role="toolbar">
                 <span>
-                     <button type="button" class="btn btn-default" data-ng-click="changeToDefault()">
+                     <button type="button" class="btn btn-default" data-ng-click="changeToDefault()"
+                             data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_GENERAL_PARAMS)">
                          {{::'commonParams.default' | translate}}
                       </button>
 
-                      <button type="button" class="btn btn-default" ng-disabled="commonParamsGrid.value.length == 0" data-ng-click="edit()">
+                      <button type="button" class="btn btn-default" data-ng-click="edit()"
+                              ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_GENERAL_PARAMS) || commonParamsGrid.value.length == 0">
                           {{::'button.edit' | translate}}
                       </button>
 

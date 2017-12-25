@@ -71,6 +71,20 @@
         </update>
     </changeSet>
 
+    <changeSet id="2.2-dnovikov-0" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2-dnovikov-1" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
+
     <!-- https://jira.aplana.com/browse/SBRFNDFL-3076 -->
     <changeSet id="2.2-ytrofimov-6" author="ytrofimov">
         <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">

@@ -270,5 +270,22 @@
                 doOperation: {method: 'POST'}
             });
         }])
+
+        /**
+         * @description Установить срок сдачи отчетности
+         */
+        .factory('AppointDeadlineResource',[
+            '$resource', function ($resource) {
+                return $resource('controller/actions/departmentReportPeriod/updateDeadline', {}, {
+                    doOperation: {method: 'POST'}
+                });
+        }])
+
+        .factory('OpenPeriodResource', [
+            '$resource', function ($resource) {
+                return $resource('controller/actions/departmentReportPeriod/open', {}, {
+                    query: {method: 'POST'}
+                });
+        }])
     ;
 }());

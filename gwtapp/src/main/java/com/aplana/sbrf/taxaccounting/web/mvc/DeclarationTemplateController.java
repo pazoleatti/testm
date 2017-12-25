@@ -31,6 +31,7 @@ import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
 /**
  * Контроллер для работы с шаблоном декларации
+ * TODO только для gwt!!! ошибки обрабатываются через свой @ExceptionHandler, поправится после перехода настройщика на angular
  */
 @RestController
 public class DeclarationTemplateController {

@@ -347,7 +347,7 @@
                  * Добавить в список открытые отчетные периоды и определить последний
                  */
                 $scope.initSelectWithOpenPeriods = function (latestPeriod) {
-                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, false, 'periodFormatter');
+                    $scope.periodSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, 'periodFormatter');
                     fillSelectListAndFindLatestPeriod("opened", latestPeriod);
                 };
             }])

@@ -5,7 +5,7 @@
      * @description Модуль для работы окном 'Общие параметры'
      */
 
-    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.logPanel', 'app.editParams', 'app.confirmationAction'])
+    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.logPanel', 'app.editParams'])
 
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('commonParams', {
@@ -18,8 +18,8 @@
         /**
          * @description Контроллер для общих параметров
          */
-        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS',
-            function ($scope, CommonParams, $filter, $http, $aplanaModal, APP_CONSTANTS) {
+        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS','$dialogs',
+            function ($scope, CommonParams, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs) {
 
                 /**
                  * @description Создание и заполнение грида
@@ -56,15 +56,17 @@
                  * @description Изменение общих параметров на значения по умолчанию
                  */
                 $scope.changeToDefault = function () {
-                    $aplanaModal.open({
-                        title: $filter('translate')('title.commonParams.default'),
-                        templateUrl: 'client/app/taxes/commonParams/confirmationAction.html?v=${buildUuid}',
-                        controller: 'confirmationActionCtrl',
-                        windowClass: 'modal600',
-                        resolve: {
-                            commonParamsGrid: function () {
-                                return $scope.commonParamsGrid;
-                            }
+                    $dialogs.confirmDialog({
+                        content: $filter('translate')('title.acceptCommonParamsDefault'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('DIALOGS_CANCELLATION'),
+                        okBtnClick: function () {
+                            $http({
+                                method: "POST",
+                                url: "controller/actions/changeToDefaultCommonParams"
+                            }).then(function () {
+                                $scope.commonParamsGrid.ctrl.refreshGrid();
+                            });
                         }
                     });
                 };

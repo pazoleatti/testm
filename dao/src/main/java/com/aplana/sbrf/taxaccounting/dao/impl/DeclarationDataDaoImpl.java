@@ -76,9 +76,8 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
       В зависимости от принадлежности формы к открытому корр. периоду*/
     final private Expression<String> caseStringForReportPeriod = new CaseBuilder()
             .when(departmentReportPeriod.correctionDate.isNotNull()).then(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).
-                    concat(", корр. (").concat(departmentReportPeriod.correctionDate.dayOfMonth().stringValue()).concat(".").
-                    concat(departmentReportPeriod.correctionDate.month().stringValue()).concat(".").
-                    concat(departmentReportPeriod.correctionDate.year().stringValue().concat(")")) )
+                    concat(", корр. (").concat(departmentReportPeriod.correctionDate.stringValue().substring(0,5)).concat(".").
+                    concat(departmentReportPeriod.correctionDate.year().stringValue()).concat(")") )
             .otherwise(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name))
             .as("reportPeriod");
 
