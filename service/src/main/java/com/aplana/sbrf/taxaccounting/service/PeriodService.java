@@ -183,9 +183,9 @@ public interface PeriodService {
 	/**
 	 * Устанавливает дату сдачи отчетности для периода подразделения
 	 * @param filter - данные о периоде
-	 * @param withChild - если ТБ, то устанавливать ли для дочерних
+	 *
 	 */
-    void setDeadline(DepartmentReportPeriodFilter filter, boolean withChild) throws ActionException;
+    void setDeadline(DepartmentReportPeriodFilter filter) throws ActionException;
 
 	enum Operation {
 		FIND, // Поиск периода

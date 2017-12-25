@@ -18,16 +18,6 @@
             });
         }])
 
-        .filter('balanceFormatter', function () {
-            return function (value) {
-                if (value && value === 1) {
-                    return 'Да';
-                } else {
-                    return 'Нет';
-                }
-            };
-        })
-
         .filter('reportPeriodFormatter', function () {
             return function (entity) {
                 if (entity) {
@@ -394,8 +384,10 @@
                     });
                 };
 
+                /**
+                 * @description Открытие модального окна назначения срока сдачи отчетности
+                 */
                 $scope.deadlinePeriod = function () {
-
                     $aplanaModal.open({
                         title: $filter('translate')('reportPeriod.modal.deadline.tittle'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/deadlinePeriod.html?v=${buildUuid}',

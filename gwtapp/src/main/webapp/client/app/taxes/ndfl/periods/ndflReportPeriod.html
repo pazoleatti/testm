@@ -13,28 +13,28 @@
             <div class="btn-toolbar" role="toolbar">
                 <button type="button" class="btn btn-default" data-ng-click="openPeriod()"
                         data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN)">
-                    Открыть период
+                    {{::'reportPeriod.pils.openPeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="closePeriod()"
                         data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE))">
-                    Закрыть период
+                    {{:: 'reportPeriod.pils.closePeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="editPeriod()"
                         data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT))">
-                    Редактировать перирод
+                    {{:: 'reportPeriod.pils.editPeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="openCorrectPeriod()"
                         data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT))">
-                    Открыть корректирующий период
+                    {{:: 'reportPeriod.pils.correctPeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="deletePeriod()"
 
                         data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DELETE))">
-                    Удалить период
+                    {{:: 'reportPeriod.pils.deletePeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="deadlinePeriod()"
                         data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE))">
-                    Назначить срок сдачи
+                    {{:: 'reportPeriod.pils.deadline' | translate}}
                 </button>
             </div>
         </div>
