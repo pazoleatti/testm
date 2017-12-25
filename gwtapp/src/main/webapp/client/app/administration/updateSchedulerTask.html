@@ -15,7 +15,7 @@
             </button>
             <!--Отмена изменений-->
             <button type="button" class="btn btn-default"
-                    data-ng-click="cancel()" >
+                    data-ng-click="cancel()">
                 <span data-translate-once="DIALOGS_CANCEL"></span>
             </button>
 
@@ -44,9 +44,9 @@
                             <div class="col-md-9">
                                 <input type="text" class="form-control"
                                        value="{{updateSchedulerTask.schedule}}"
-                                       ng-model="updateSchedulerTask.schedule"
-                                       />
-                                <img src="resources/img/question_mark.png" class="floatWindow-href" style="position:absolute; text-align:right; margin-left:376px; margin-top: -22px">
+                                       ng-model="updateSchedulerTask.schedule"/>
+                                <img src="resources/img/question_mark.png" class="floatWindow-href"
+                                     style="position:absolute; text-align:right; top: 0; bottom: 0; margin: auto;">
                                 <div class="floatWindow-element" ng-bind-html="taskScheduleHelpUpdateParam"
                                      style="font-size: 8pt; width: 460px; position:absolute;margin-top:-30px; margin-left:400px"/>
                             </div>
@@ -69,6 +69,6 @@
                     </div>
                 </div>
             </form>
-</div>
+        </div>
     </div>
 </div>

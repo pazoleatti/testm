@@ -2,16 +2,19 @@
     'use strict';
 
     /**
-     * @description Модуль для создания отчетных периодов
+     * @description Модуль для создания и редактирования отчетных периодов
      */
 
     angular.module('app.reportPeriodModal', ['ui.router', 'app.rest'])
 
 
+    /**
+     * @description Контроллер создания и редактирования отчетных периодов
+     */
         .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', 'DepartmentResource', '$shareData', 'DepartmentReportPeriodCheckerResource', '$http', '$logPanel', 'LogEntryResource',
-            'ReportPeriodTypeResource', '$dialogs',
+            'ReportPeriodTypeResource', '$dialogs', 'OpenPeriodResource',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, DepartmentResource, $shareData, DepartmentReportPeriodCheckerResource, $http, $logPanel, LogEntryResource, ReportPeriodTypeResource,
-                      $dialogs) {
+                      $dialogs, OpenPeriodResource) {
 
                 $scope.isAdd = $shareData.isAdd;
 
@@ -25,10 +28,10 @@
                 };
 
                 if ($scope.isAdd) {
-                    $scope.title = "Открытие периода";
+                    $scope.title = $filter('translate')('reportPeriod.pils.openPeriod');
                     $scope.department = $shareData.department;
                 } else {
-                    $scope.title = "Редактирование периода";
+                    $scope.title = $filter('translate')('reportPeriod.pils.editPeriod');
                     $scope.period.id = $shareData.period.id;
                     $scope.department = $shareData.department;
                     $scope.period.reportPeriod.taxPeriod.year = $shareData.period.year;
@@ -64,7 +67,20 @@
                                     okBtnCaption: $filter('translate')('common.button.yes'),
                                     cancelBtnCaption: $filter('translate')('common.button.no'),
                                     okBtnClick: function () {
-                                                createQuery();
+                                        OpenPeriodResource.query({
+                                            reportPeriod: {
+                                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                                taxPeriod: {
+                                                    year: $scope.period.reportPeriod.taxPeriod.year
+                                                }
+                                            },
+                                            departmentId: $scope.department.id
+                                        }, function (response) {
+                                            if (response.data) {
+                                                $logPanel.open('log-panel-container', response.data);
+                                                $modalInstance.close();
+                                            }
+                                        });
                                     }
                                 });
                             }else {
@@ -78,7 +94,20 @@
                                             content: $filter('translate')('reportPeriod.error.openPeriod.hasCorrectionPeriod')
                                         });
                                     }else {
-                                        createQuery();
+                                        OpenPeriodResource.query({
+                                            reportPeriod: {
+                                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                                taxPeriod: {
+                                                    year: $scope.period.reportPeriod.taxPeriod.year
+                                                }
+                                            },
+                                            departmentId: $scope.department.id
+                                        }, function (response) {
+                                            if (response.data) {
+                                                $logPanel.open('log-panel-container', response.data);
+                                                $modalInstance.close();
+                                            }
+                                        });
                                     }
                                 }
                             }
@@ -124,34 +153,21 @@
                     }
                 };
 
-                var createQuery = function () {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/departmentReportPeriod/open",
-                        params: {
-                            departmentReportPeriod: JSON.stringify({
-                                reportPeriod: {
-                                    dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
-                                    taxPeriod: {
-                                        year: $scope.period.reportPeriod.taxPeriod.year
-                                    }
-                                },
-                                departmentId: $scope.department.id
-                            })
-                        }
-                    }).then(function (response) {
-                        if (response.data) {
-                            $logPanel.open('log-panel-container', response.data);
-                            $modalInstance.close();
-                        }
-                    });
-                };
-
                 /**
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
-                    $modalInstance.dismiss('Canceled');
+                    if ($scope.isAdd){
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('reportPeriod.confirm.openPeriod.title'),
+                            content: $filter('translate')('reportPeriod.confirm.openPeriod.text'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                     $modalInstance.dismiss('Canceled');
+                            }
+                        });
+                    }
                 };
             }
         ])

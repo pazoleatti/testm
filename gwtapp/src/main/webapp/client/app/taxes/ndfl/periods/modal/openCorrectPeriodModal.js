@@ -2,7 +2,7 @@
     'use strict';
 
     /**
-     * @description конфигурация модального окна выбора типа отчетного периода
+     * @description Модуль модального окна создания корректирующего периода
      */
 
     angular.module('app.openCorrectPeriodModal', ['ui.router', 'app.rest'])
@@ -13,6 +13,9 @@
             };
         })
 
+        /**
+         * @description  Контроллер модального окна открытия корректирующего перода
+         */
         .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter',
             function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter) {
 

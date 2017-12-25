@@ -478,7 +478,7 @@ public class PeriodServiceImpl implements PeriodService {
 
 
     @Override
-    public void setDeadline(DepartmentReportPeriodFilter filter, boolean withChild) throws ActionException {
+    public void setDeadline(DepartmentReportPeriodFilter filter) throws ActionException {
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         TAUser userInfo = userService.getCurrentUser();
         DepartmentReportPeriod period = departmentReportPeriodService.get(filter.getId());
@@ -488,15 +488,12 @@ public class PeriodServiceImpl implements PeriodService {
             throw new ActionException("Дата сдачи отчетности должна быть указана!");
         }
         List<Department> departments = new ArrayList<>();
-        if (withChild) {
+        if (filter.isWithChild()) {
             departments.addAll(departmentService.getAllChildren(filter.getDepartmentId()));
         } else {
             departments.add(departmentService.getDepartment(filter.getDepartmentId()));
         }
         for (Department department : departments) {
-//            if (department.getId() == null) {
-//                throw new ActionException("Отправитель должен быть указан!");
-//            }
             Notification notification = new Notification();
             notification.setCreateDate(new LocalDateTime());
             notification.setDeadline(filter.getDeadline());
