@@ -455,6 +455,8 @@
         "reportPeriod.confirm.openPeriod.reopenPeriod.text": "Выбранный период закрыт. Выполнить переоткрытие?",
         "reportPeriod.confirm.openPeriod.text": "Отменить операцию открытия периода?",
         "reportPeriod.confirm.openPeriod.title": "Отмена операции открытия периода",
+        "reportPeriod.confirm.editPeriod.text": "Отменить операцию редактирования периода?",
+        "reportPeriod.confirm.editPeriod.title": "Отмена операции редактирования периода",
         "reportPeriod.error.editPeriod.text": "Редактирование периода невозможно!",
         "reportPeriod.error.closePeriod.hasBlocked.text": "Период не может быть закрыт, пока выполняется редактирование форм, относящихся к этому периоду!",
         "reportPeriod.error.deletePeriod.hasLaterCorPeriod.text": "Удаление периода невозможно, т.к. существует более поздний корректирующий период!",
@@ -462,6 +464,10 @@
         "reportPeriod.error.openPeriod.alreadyOpen": "Период уже открыт!",
         "reportPeriod.error.openPeriod.hasCorrectionPeriod": "Для указанного периода существуют корректирующие периоды, его переоткрытие невозможно!",
         "reportPeriod.error.openCorrectionPeriod.smallCorrectionYear": "Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!",
+        "reportPeriod.error.editPeriod.alreadyClose.text": "Закрытый период не может быть отредактирован!",
+        "reportPeriod.error.editPeriod.noChange.text": "Ни одни параметр не был изменен!",
+        "reportPeriod.error.editPeriod.hasCorPeriod.text":"Перед изменением периода необходимо удалить все связанные корректирующие периоды!",
+        "reportPeriod.error.editPeriod.alreadyExist.text": "Указанный период уже заведён в Системе!",
 
 
 
