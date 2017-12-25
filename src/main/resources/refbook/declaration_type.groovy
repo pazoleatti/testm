@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils
 import org.joda.time.LocalDateTime
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
+import org.xml.sax.SAXParseException
 import org.xml.sax.helpers.DefaultHandler
 
 import javax.xml.parsers.ParserConfigurationException
@@ -1024,10 +1025,12 @@ class DeclarationType extends AbstractScriptClass {
             SAXParserFactory factory = SAXParserFactory.newInstance()
             SAXParser saxParser = factory.newSAXParser()
             saxParser.parse(inputStream, handler)
+        } catch (SAXParseException e) {
+            logger.error(getSAXParseExceptionMessage(e))
+            return
         } catch (Exception e) {
-
-            e.printStackTrace()
-
+            logger.error(e)
+            return
         } finally {
             IOUtils.closeQuietly(inputStream)
         }
@@ -1053,8 +1056,12 @@ class DeclarationType extends AbstractScriptClass {
             SAXParserFactory factory = SAXParserFactory.newInstance()
             SAXParser saxParser = factory.newSAXParser()
             saxParser.parse(inputStream, handler)
+        } catch (SAXParseException e) {
+            logger.error(getSAXParseExceptionMessage(e))
+            return
         } catch (Exception e) {
-            e.printStackTrace()
+            logger.error(e)
+            return
         }
 
         //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
@@ -1115,6 +1122,12 @@ class DeclarationType extends AbstractScriptClass {
                 .append(", Подразделение: \"").append(formDepartment.getName()).append("\"")
                 .append(", Вид: \"").append(declarationType.getName()).append("\"")
                 .append(", АСНУ: \"").append(asnuProvider.getRecordData(asnuId).get("NAME").getStringValue()).append("\"");
+    }
+
+    String getSAXParseExceptionMessage(SAXParseException e) {
+        return "Ошибка: ${e.getLineNumber() != -1 ? "Строка: ${e.getLineNumber()}" : ""}" +
+                "${e.getColumnNumber() != -1 ? "; Столбец: ${e.getColumnNumber()}" : ""}" +
+                "${e.getLocalizedMessage() ? "; ${e.getLocalizedMessage()}" : ""}"
     }
 
     String getCorrectionDateString(DepartmentReportPeriod reportPeriod) {
