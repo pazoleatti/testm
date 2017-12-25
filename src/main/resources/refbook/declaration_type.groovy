@@ -1037,16 +1037,22 @@ class DeclarationType extends AbstractScriptClass {
         handler.getListValueAttributesTag();
 
         //Проверка на соответствие имени и содержимого ТФ в теге Файл.СлЧасть
-        if (!departmentCode.equals(handler.getListValueAttributesTag().get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»", departmentCode, handler.ListValueAttributesTag.get(KOD_DEPARTMENT).replaceFirst("_*", "").trim())
+        def xmlDepartmentCode = handler.getListValueAttributesTag()?.get(KOD_DEPARTMENT)?.replaceFirst("_*", "")?.trim()
+        if (!departmentCode.equals(xmlDepartmentCode)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Код подразделения» = «%s» и параметра содержимого «Файл.СлЧасть.КодПодр» = «%s»",
+                    departmentCode, xmlDepartmentCode)
         }
 
-        if (!asnuCode.equals(handler.getListValueAttributesTag().get(KOD_ASNU))) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»", asnuCode, handler.getListValueAttributesTag().get(KOD_ASNU))
+        def xmlAsnuCode = handler.getListValueAttributesTag()?.get(KOD_ASNU)
+        if (!asnuCode.equals(xmlAsnuCode)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Код АСНУ» = «%s» и параметра содержимого «Файл.СлЧасть.КодАС» = «%s»",
+                    asnuCode, xmlAsnuCode)
         }
 
-        if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))) {
-            logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»", UploadFileName.trim()[0..-5], handler.getListValueAttributesTag().get(NAME_TF_NOT_EXTENSION))
+        def xmlFileName = handler.getListValueAttributesTag()?.get(NAME_TF_NOT_EXTENSION)
+        if (!UploadFileName.trim().substring(0, UploadFileName.length() - 4).equals(xmlFileName)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Имя ТФ без расширения» = «%s» и параметра содержимого «Файл.СлЧасть.ИдФайл» = «%s»",
+                    UploadFileName.trim()[0..-5], xmlFileName)
         }
 
         //достать из XML файла атрибуты тега СлЧасть
@@ -1065,19 +1071,23 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         //Проверка на соответствие имени и содержимого ТФ в теге Все элементы Файл.ИнфЧасть файла
-        if (!reportPeriodCode.equals(handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))) {
-            logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»", reportPeriodCode, handler.getListValueAttributesTag().get(KOD_REPORT_PERIOD))
+        def xmlReportPeriodCode = handler.getListValueAttributesTag()?.get(KOD_REPORT_PERIOD)
+        if (!reportPeriodCode.equals(xmlReportPeriodCode)) {
+            logger.error("В ТФ не совпадают значения параметра имени «Код периода» = «%s» и параметра содержимого «Файл.ИнфЧасть.ПериодОтч» = «%s»",
+                    reportPeriodCode, xmlReportPeriodCode)
         }
 
-        Integer reportYear;
+        def xmlReportYear = handler.getListValueAttributesTag()?.get(REPORT_YEAR)
+        Integer reportYear = null
         try {
-            reportYear = Integer.parseInt(handler.getListValueAttributesTag().get(REPORT_YEAR));
+            reportYear = Integer.parseInt(xmlReportYear);
         } catch (NumberFormatException nfe) {
             nfe.printStackTrace()
         }
 
         if (!year.equals(reportYear)) {
-            logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»", year, handler.getListValueAttributesTag().get(REPORT_YEAR))
+            logger.error("В ТФ не совпадают значения параметра имени «Год» = «%s» и параметра содержимого «Файл.ИнфЧасть.ОтчетГод» = «%s»",
+                    year, xmlReportYear)
         }
 
         // Проверка не загружен ли уже такой файл в систему
