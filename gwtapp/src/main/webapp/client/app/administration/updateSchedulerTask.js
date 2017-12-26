@@ -49,7 +49,6 @@
                              schedulerTaskModel: $scope.updateSchedulerTask
                         }
                     }).then(function (response) {
-                        console.log(response.data.length);
                         if (response.data !== null && response.data.length !== 0) {
                             $dialogs.errorDialog({
                                 content: response.data
