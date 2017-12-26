@@ -88,6 +88,18 @@
         "common.validation.year": "Значение поля \"Год\" должно соответствовать формату \"ХХХХ\"",
         "common.validation.dateInterval": "Значение поля должно входить в интервал дат от 01.01.1900 до 31.12.2099.",
 
+        "pager.firstPage": "Первая страница",
+        "pager.prevPage": "Предыдущая страница",
+        "pager.nextPage": "Следующая страница",
+        "pager.lastPage": "Последняя страница",
+        "pager.page": "Стр.",
+        "pager.of": "из {{pagesTotal}}",
+
+        "resizer.scale": "Масштаб",
+        "resizer.scaleDown": "Уменьшить масштаб",
+        "resizer.scaleUp": "Увеличить масштаб",
+        "resizer.fitToWidth": "По ширине",
+
         "filter.placeholder.all": "-Все-",
         "filterPanelLabel": "Фильтр",
         "infoPanelLabel": "Информация",
