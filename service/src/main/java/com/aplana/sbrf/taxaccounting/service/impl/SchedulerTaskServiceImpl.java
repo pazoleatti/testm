@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.SchedulerTaskDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.result.MessageResult;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskModel;
@@ -78,13 +77,13 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public MessageResult updateTask(SchedulerTaskData taskData) {
-        MessageResult result = new MessageResult();
+    public String updateTask(SchedulerTaskData taskData) {
+        String result = null;
         if (!validateSchedule(taskData.getSchedule())) {
-            result.setMessage(" Значение атрибута «Расписание» не соответствует требованиям формата Cron!");
-            return result;
+            result = " Значение атрибута «Расписание» не соответствует требованиям формата Cron!";
+        } else {
+            schedulerTaskDao.updateTask(taskData);
         }
-        schedulerTaskDao.updateTask(taskData);
         return result;
     }
 
