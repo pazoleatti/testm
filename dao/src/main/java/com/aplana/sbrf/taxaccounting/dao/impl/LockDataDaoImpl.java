@@ -178,11 +178,6 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void unlockAll(List<Long> ids) {
-        getJdbcTemplate().update("DELETE FROM lock_data ld WHERE " + SqlUtils.transformToSqlInStatement("id", ids));
-    }
-
-    @Override
     public SecuredEntity getSecuredEntity(long id) {
         throw new UnsupportedOperationException("Not implemented yet");
     }

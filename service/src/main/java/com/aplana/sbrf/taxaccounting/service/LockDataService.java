@@ -113,9 +113,9 @@ public interface LockDataService {
 
     /**
      * Удаляет все указанные блокировки
-     * @param ids идентификаторы блокировок
+     * @param keys ключи блокировок
      */
-    void unlockAll(List<Long> ids);
+    void unlockAll(TAUserInfo userInfo, List<String> keys);
 
 	/**
 	 * Удаляет блокировки, созданные ранее "seconds" секунд назад. Предполагается, что данный метод

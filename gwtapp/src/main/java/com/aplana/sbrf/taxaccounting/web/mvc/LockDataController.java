@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.LockDataItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,8 @@ public class LockDataController {
 
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private SecurityService securityService;
 
     /**
      * Привязка данных из параметров запроса
@@ -52,10 +52,11 @@ public class LockDataController {
     /**
      * Удаление блокировок
      *
-     * @param ids идентификаторы блокировок
+     * @param keys ключи блокировок
      */
     @PostMapping(value = "/actions/lock/delete")
-    public void deleteLocks(@RequestParam Long[] ids) {
-        lockDataService.unlockAll(Arrays.asList(ids));
+    public void deleteLocks(@RequestParam String[] keys) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        lockDataService.unlockAll(userInfo, Arrays.asList(keys));
     }
 }
