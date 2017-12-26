@@ -3,7 +3,7 @@
 
     /* Директива для пейджера */
     angular.module("app.pager", [])
-        .directive('pager', [function () {
+        .directive('appPager', [function () {
             return {
                 restrict: 'EA',
                 templateUrl: 'client/app/common/directives/pager/pager.html?v=${buildUuid}',
