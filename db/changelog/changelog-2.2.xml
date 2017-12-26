@@ -93,4 +93,24 @@
             <where>id=1</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2750 -->
+    <changeSet id="2.2-aokunev-1" author="aokunev">
+        <update tableName="DECLARATION_TYPE">
+            <column name="NAME" value="РНУ НДФЛ (первичная)"/>
+            <where>id=100</where>
+        </update>
+        <update tableName="DECLARATION_TYPE">
+            <column name="NAME" value="РНУ НДФЛ (консолидированная)"/>
+            <where>id=101</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="NAME" value="РНУ НДФЛ (первичная)"/>
+            <where>id=100</where>
+        </update>
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="NAME" value="РНУ НДФЛ (консолидированная)"/>
+            <where>id=101</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
