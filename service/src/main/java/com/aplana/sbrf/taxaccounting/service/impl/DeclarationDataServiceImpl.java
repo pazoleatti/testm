@@ -2334,18 +2334,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ddReportType));
         if (lock != null) {
             AsyncTaskData taskData = asyncTaskDao.getLightTaskData(lock.getTaskId());
-            if (AsyncTaskState.IN_QUEUE == taskData.getState()) {
-                logger.info(AsyncTask.CANCEL_TASK_NOT_PROGRESS,
-                        SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
-                        taUserService.getUser(lock.getUserId()).getName(),
-                        taskData.getDescription());
-            } else {
-                logger.info(AsyncTask.CANCEL_TASK_IN_PROGRESS,
-                        SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
-                        taUserService.getUser(lock.getUserId()).getName(),
-                        taskData.getDescription());
+            if (taskData != null) {
+                if (AsyncTaskState.IN_QUEUE == taskData.getState()) {
+                    logger.info(AsyncTask.CANCEL_TASK_NOT_PROGRESS,
+                            SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
+                            taUserService.getUser(lock.getUserId()).getName(),
+                            taskData.getDescription());
+                } else {
+                    logger.info(AsyncTask.CANCEL_TASK_IN_PROGRESS,
+                            SDF_DD_MM_YYYY_HH_MM_SS.get().format(lock.getDateLock()),
+                            taUserService.getUser(lock.getUserId()).getName(),
+                            taskData.getDescription());
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }
