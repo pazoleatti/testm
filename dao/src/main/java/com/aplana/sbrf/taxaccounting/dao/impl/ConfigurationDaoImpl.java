@@ -131,7 +131,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         for (ConfigurationParam configurationParam : model.keySet()) {
             Map<Integer, List<String>> map = model.get(configurationParam);
             for (int departmentId : map.keySet()) {
-                Configuration entity = new Configuration(model.getFullStringValue(configurationParam, departmentId), departmentId, configurationParam.name());
+                Configuration entity = new Configuration(configurationParam.name(), departmentId, model.getFullStringValue(configurationParam, departmentId));
                 if (!oldModel.containsKey(configurationParam)
                         || (oldModel.get(configurationParam) != null && !oldModel.get(configurationParam).containsKey(departmentId))) {
                     insertParams.add(entity);
