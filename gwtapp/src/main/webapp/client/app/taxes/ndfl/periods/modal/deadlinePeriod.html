@@ -25,7 +25,7 @@
                              data-ui-select2="departmentsSelect.options"
                              data-ng-init="initSingleSelectWithAllDepartments()"
                              data-ng-model="filter.department"
-                             style="width:250px;"
+                             style="width:196px;"
                              data-ng-required="true">
                         </div>
                         <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
@@ -42,6 +42,7 @@
     <button type="submit" class="btn btn-default" id="openButton">
         <span data-translate-once="button.create"></span>
     </button>
+
     <button type="button" class="btn btn-default" id="closeButton" ng-click="close()">
         <span data-translate-once="button.close"></span>
     </button>

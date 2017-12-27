@@ -71,6 +71,8 @@
         "button.today": "Сегодня",
         "button.clear": "Очистить",
         "button.select": "Выбрать",
+        "button.open": "Открыть",
+        "button.cancel": "Отмена",
         "button.updateFLData": "Обновить данные ФЛ",
         "button.fillTransferTerm": "Заполнить \"Срок перечисления в бюджет\"",
         "button.fillIncomeAttr": "Заполнить \"Признак дохода\"",
