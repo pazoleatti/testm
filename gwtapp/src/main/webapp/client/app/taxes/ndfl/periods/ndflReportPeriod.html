@@ -33,7 +33,7 @@
                     {{:: 'reportPeriod.pils.deletePeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="deadlinePeriod()"
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE))">
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE)) || reportPeriodGrid.value[0].correctionDate">
                     {{:: 'reportPeriod.pils.deadline' | translate}}
                 </button>
             </div>
