@@ -21,8 +21,9 @@
                 templateUrl: 'client/components/dateFromToFilter/dateFromToFilter.html',
                 scope: {
                     ngLabel: '@?',
-                    ngFromModel: '=',
-                    ngToModel: '=',
+                    ngPeriodModel: '=',
+                    ngFromParam: '@',
+                    ngToParam: '@',
                     labelWidth: "@"
                 },
                 link: function (scope, element, attributes) {

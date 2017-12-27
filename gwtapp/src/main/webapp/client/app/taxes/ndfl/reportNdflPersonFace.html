@@ -72,8 +72,9 @@
 
             <date-from-to-filter
                     data-label-width="4"
-                    ng-from-model="searchFilter.params.dateFrom"
-                    ng-to-model="searchFilter.params.dateTo"
+                    ng-period-model="searchFilter.params"
+                    ng-from-param="dateFrom"
+                    ng-to-param="dateTo"
                     ng-label="title.dateOfBirthFrom"
                     paragraph="personRnuParagraphForDate">
             </date-from-to-filter>

@@ -4,14 +4,14 @@
     </div>
     <div class="{{pickerGridClass}}">
         <div style="width: 130px; float: left;">
-            <div data-aplana-datepicker data-ng-model="ngFromModel"></div>
+            <div data-aplana-datepicker data-ng-model="ngPeriodModel[ngFromParam]"></div>
         </div>
         <div class="date-to-label" style="float: left;margin-left: -26px;width: 39px;">
             <label class="control-label">{{'title.dateToFilterLabel' | translate}}:</label>
         </div>
 
         <div style="width: 130px; float: right; margin-right: -17px" class="date-to-block">
-            <div data-aplana-datepicker data-ng-model="ngFromModel"></div>
+            <div data-aplana-datepicker data-ng-model="ngPeriodModel[ngToParam]"></div>
         </div>
     </div>
 </div>

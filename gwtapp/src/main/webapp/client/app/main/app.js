@@ -44,6 +44,8 @@
         "yes": "Да",
         "no": "Нет",
 
+        "common.validation.required": "Необходимо заполнить поле",
+
         "common.hint": "Заполните обязательные поля (отмечены желтым)",
         "common.error.message.caption.stackTrace": "Ошибка",
         "common.error.message.seemore": "Смотреть подробности",
