@@ -10,8 +10,8 @@
     /**
      * @description Контроллер модального откна "Назначить срок сдачи отчетности"
      */
-        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', 'AppointDeadlineResource', 'DepartmentCheckerResource', '$q',
-            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, AppointDeadlineResource, DepartmentCheckerResource, $q) {
+        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', 'AppointDeadlineResource', '$q',
+            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, AppointDeadlineResource, $q) {
 
                 /** в $shareData.period.deadline используется дата в фомате ISO,
                  * а для date-picker нужна дата в формате UTC

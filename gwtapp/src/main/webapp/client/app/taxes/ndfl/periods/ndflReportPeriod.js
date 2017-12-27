@@ -370,7 +370,7 @@
                         title: $filter('translate')('reportPeriod.pils.correctPeriod'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.html?v=${buildUuid}',
                         controller: 'openCorrectCtrlModal',
-                        windowClass: 'modal800',
+                        windowClass: 'modal600',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -392,7 +392,7 @@
                         title: $filter('translate')('reportPeriod.modal.deadline.tittle'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/deadlinePeriod.html?v=${buildUuid}',
                         controller: 'deadlinePeriodController',
-                        windowClass: 'modal600',
+                        windowClass: 'modal400',
                         resolve: {
                             $shareData: function () {
                                 return {
