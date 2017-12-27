@@ -17,6 +17,9 @@
     <link rel="stylesheet" type="text/css" href="client/components/grid/ui.jqgrid.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/components/grid/app-ui.jqgrid.css?v=${buildUuid}">
     <link rel="stylesheet" type="text/css" href="client/components/alert/alert.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/outerWidth/outerwidth.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/datetimepicker/datetimepicker.css?v=${buildUuid}">
+    <link rel="stylesheet" type="text/css" href="client/components/popover/popover.css?v=${buildUuid}">
 
 
 </head>
@@ -42,11 +45,13 @@
 <script src="client/lib/angular-ui-router-1.0.3.js"></script>
 <script src="client/lib/ui-bootstrap-tpls.js"></script>
 <script src="client/lib/bootstrap.js"></script>
+<script src="client/lib/bootstrap-tooltip-extension.js"></script>
 <script src="client/lib/angular-messages-1.5.9.js"></script>
 <script src="client/lib/angular-animate-1.5.9.js"></script>
 <script src="client/lib/validate-1.2.2.js"></script>
 <script src="client/lib/angular-file-upload-2.5.0.js"></script>
 <script src="client/lib/moment-2.18.1.js"></script>
+<script src="client/lib/moment-locale-ru.js"></script>
 <script src="client/lib/underscore-1.8.3.js"></script>
 <script src="client/lib/angular-dialog-service-5.3.0.js"></script>
 <script src="client/lib/grid.locale-ru.js"></script>
@@ -58,6 +63,11 @@
 <script src="client/lib/angular-translate-once.js"></script>
 <script src="client/lib/angular-resource-1.4.7.js"></script>
 <script src="client/lib/date.format.js"></script>
+<script src="client/lib/date-parser.js"></script>
+
+<script type="text/javascript">
+    moment.locale('ru');
+</script>
 
 <script src="client/components/utils/aplana.js?v=${buildUuid}"></script>
 <script src="client/components/collapse/collapse.js?v=${buildUuid}"></script>
@@ -71,6 +81,14 @@
 <script src="client/components/uiSelect2/uiSelect2.js?v=${buildUuid}"></script>
 <script src="client/components/field/field.js?v=${buildUuid}"></script>
 <script src="client/components/focus/focus.js?v=${buildUuid}"></script>
+<script src="client/components/outerWidth/outerWidth.js?v=${buildUuid}"></script>
+<script src="client/components/datepicker/datepicker.js?v=${buildUuid}"></script>
+<script src="client/components/datepickerTimepicker/datepickerTimepicker.js?v=${buildUuid}"></script>
+<script src="client/components/datetimepicker/datetimepicker.js?v=${buildUuid}"></script>
+<script src="client/components/popover/popover.js?v=${buildUuid}"></script>
+<script src="client/components/selectUniversal/selectUniversal.js?v=${buildUuid}"></script>
+<script src="client/components/timeHint/timeHint.js?v=${buildUuid}"></script>
+<script src="client/components/timepicker/timepicker.js?v=${buildUuid}"></script>
 <script src="client/components/dateFromToFilter/dateFromToFilter.js?v=${buildUuid}"></script>
 <script src="client/components/dropDown/dropdown.js?v=${buildUuid}"></script>
 <script src="client/components/formLeaveConfirmer/formLeaveConfirmer.js?v=${buildUuid}"></script>
