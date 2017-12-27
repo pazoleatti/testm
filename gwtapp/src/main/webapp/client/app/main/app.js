@@ -634,7 +634,6 @@
             'aplana.collapse',
             'aplana.field',
             'aplana.dateFromToFilter',
-            'aplana.datePicker',
             'aplana.dropdown',
             'aplana.formLeaveConfirmer',
             'aplana.link',
