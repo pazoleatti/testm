@@ -49,7 +49,9 @@
                  * @param page
                  */
                 $scope.refreshGrid = function (page) {
-                    $scope.ndflPersonGrid.ctrl.refreshGrid(page);
+                    if ($scope.ndflPersonGrid.ctrl.refreshGrid) {
+                        $scope.ndflPersonGrid.ctrl.refreshGrid(page);
+                    }
                 };
 
                 $scope.searchFilter = {
