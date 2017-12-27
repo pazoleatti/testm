@@ -10,8 +10,8 @@
     /**
      * @description Контроллер модального откна "Назначить срок сдачи отчетности"
      */
-        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', 'AppointDeadlineResource',
-            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, AppointDeadlineResource) {
+        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', 'AppointDeadlineResource', 'DepartmentCheckerResource', '$q',
+            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, AppointDeadlineResource, DepartmentCheckerResource, $q) {
 
                 /** в $shareData.period.deadline используется дата в фомате ISO,
                  * а для date-picker нужна дата в формате UTC
@@ -31,22 +31,8 @@
                  */
                 $scope.save = function () {
                     if (ValidationUtils.checkDateValidateInterval($scope.filter.deadline)) {
-                        $dialogs.confirmDialog({
-                            title: $filter('translate')('title.confirm'),
-                            content: $filter('translate')('reportPeriod.confirm.text'),
-                            okBtnCaption: $filter('translate')('common.button.yes'),
-                            cancelBtnCaption: $filter('translate')('common.button.no'),
-                            okBtnClick: function () {
-                                AppointDeadlineResource.doOperation({
-                                    id: $scope.filter.departmentReportPeriod.id,
-                                    departmentId: $scope.filter.department.id,
-                                    utilDeadline: $scope.filter.deadline,
-                                    withChild: true
-                                }, function () {
-                                    $modalInstance.close();
-                                });
-                            },
-                            cancelBtnClick: function () {
+                        checkHasChildDepartment ($scope.filter.department.id).then(function (hasChild) {
+                            if (!hasChild) {
                                 AppointDeadlineResource.doOperation({
                                     id: $scope.filter.departmentReportPeriod.id,
                                     departmentId: $scope.filter.department.id,
@@ -55,8 +41,35 @@
                                 }, function () {
                                     $modalInstance.close();
                                 });
-                            }
+                            } else {
+                                $dialogs.confirmDialog({
+                                    title: $filter('translate')('title.confirm'),
+                                    content: $filter('translate')('reportPeriod.confirm.text'),
+                                    okBtnCaption: $filter('translate')('common.button.yes'),
+                                    cancelBtnCaption: $filter('translate')('common.button.no'),
+                                    okBtnClick: function () {
+                                        AppointDeadlineResource.doOperation({
+                                            id: $scope.filter.departmentReportPeriod.id,
+                                            departmentId: $scope.filter.department.id,
+                                            utilDeadline: $scope.filter.deadline,
+                                            withChild: true
+                                        }, function () {
+                                            $modalInstance.close();
+                                        });
+                                    },
+                                    cancelBtnClick: function () {
+                                        AppointDeadlineResource.doOperation({
+                                            id: $scope.filter.departmentReportPeriod.id,
+                                            departmentId: $scope.filter.department.id,
+                                            utilDeadline: $scope.filter.deadline,
+                                            withChild: false
+                                        }, function () {
+                                            $modalInstance.close();
+                                        });
+                                    }
 
+                                });
+                            }
                         });
                     } else {
                         $dialogs.errorDialog({
@@ -70,6 +83,20 @@
                  */
                 $scope.close = function () {
                     $modalInstance.dismiss();
+                };
+
+                /**
+                 * @description проверяет наличие дочерних подразделений для выбранного
+                 */
+                var checkHasChildDepartment = function (id) {
+                    var checkHasChildDepartmentDefer = $q.defer();
+                    $http({
+                        method: "GET",
+                        url: "controller/rest/department/" + id + "?projection=checkHasChildDepartment"
+                    }).success(function (response) {
+                        checkHasChildDepartmentDefer.resolve(response);
+                    });
+                    return checkHasChildDepartmentDefer.promise;
                 };
             }])
 

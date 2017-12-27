@@ -34,12 +34,12 @@
          * @description Контроллер формы "Ведение периодов"
          */
 
-        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'DepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
+        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'BankDepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
             'ValidationUtils', '$dialogs', '$q',
-            function ($scope, $filter, DepartmentReportPeriodResource, DepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource,
+            function ($scope, $filter, DepartmentReportPeriodResource, BankDepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource,
                       ValidationUtils, $dialogs, $q) {
 
-                DepartmentResource.query({}, function (department) {
+                BankDepartmentResource.query({}, function (department) {
                     $scope.department = department;
                 });
                 if (!$scope.searchFilter) {
