@@ -28,6 +28,18 @@
                             tElement.find('button').attr('data-bs-dropdown', tAttrs.aplanaDropdown);
                             tElement.find('button>span:first').attr('data-ng-transclude', '');
                             tElement.find('button').append('<span class=\"caret\"></span>');
+
+                            AplanaUtils.moveAttributes(tElement, tElement.find('button'), ['data-aplana-dropdown']);
+
+                            if (!tAttrs.aplanaDropdown) {
+                                var nextSibling = tElement[0].nextSibling;
+                                while (nextSibling && nextSibling.nodeType !== 1) {
+                                    nextSibling = nextSibling.nextSibling;
+                                }
+                                if (nextSibling && nextSibling.classList.contains('dropdown-menu')) {
+                                    tElement.find('button').after(nextSibling);
+                                }
+                            }
                         }
 
                         // направление выпадашки

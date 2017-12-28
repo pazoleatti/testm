@@ -8,13 +8,13 @@
         <div class="row" style="min-width: 1000px;">
             <div class="header-col w200" style="float: right; margin-top: 14px; margin-right: 32px;">
                 <div class="btn-group" style="float: right;">
-                    <button id="single-button" type="button" class="btn btn-default-nonBg"
-                            data-bs-dropdown
+                    <div id="single-button"
+                            data-aplana-dropdown
                             data-placement="bottom-right"
                             data-ng-disabled="!availableReports && !canCreateExcelTemplate()">
                         <span class="icon-ok"></span>
                         <span data-translate-once="link.ndfl.reporting"></span>
-                    </button>
+                    </div>
                     <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
                         <li role="menuitem"
                             ng-show="!declarationData.manuallyCreated && availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
