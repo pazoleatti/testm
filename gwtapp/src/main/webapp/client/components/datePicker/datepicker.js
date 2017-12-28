@@ -16,7 +16,7 @@
                 replace: true,
                 transclude: true,
                 scope: true,
-                templateUrl: AplanaUtils.templatePath + 'datepicker/datepicker.html',
+                templateUrl: AplanaUtils.templatePath + 'datePicker/datepicker.html',
                 compile: function (element, attrs) {
                     element[0].removeAttribute('data-aplana-datepicker');
                     var inputElement = element.find('input');
