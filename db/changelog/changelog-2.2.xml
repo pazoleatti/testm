@@ -128,4 +128,12 @@
             <where>id = 1</where>
         </delete>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2891 -->
+    <changeSet id="2.2-aokunev-2" author="aokunev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
