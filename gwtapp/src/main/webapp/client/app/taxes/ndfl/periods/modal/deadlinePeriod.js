@@ -79,10 +79,37 @@
                 };
 
                 /**
-                 * @description Закрыть модальное окно
+                 * @description Закрыть модальное окно по нажатию на "Закрыть"
                  */
                 $scope.close = function () {
-                    $modalInstance.dismiss();
+                    if ($scope.isEdit) {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('reportPeriod.confirm.deadline.title'),
+                            content: $filter('translate')('reportPeriod.confirm.deadline.text'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                $modalInstance.dismiss();
+                            }
+                        });
+                    }else {
+                        $modalInstance.dismiss();
+                    }
+                };
+
+                /**
+                 * @description Закрыть модальное окно по нажатию на "Отмена"
+                 */
+                $scope.cancel = function () {
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('reportPeriod.confirm.deadline.title'),
+                            content: $filter('translate')('reportPeriod.confirm.deadline.text'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                            okBtnClick: function () {
+                                $modalInstance.dismiss();
+                            }
+                        });
                 };
 
                 /**
@@ -98,6 +125,10 @@
                     });
                     return checkHasChildDepartmentDefer.promise;
                 };
+
+                $scope.$watch('filter.deadline', function () {
+                    $scope.isEdit = $scope.filter.deadline.toString() !== deadline.toString();
+                });
             }])
 
 

@@ -389,10 +389,10 @@
                  */
                 $scope.deadlinePeriod = function () {
                     $aplanaModal.open({
-                        title: $filter('translate')('reportPeriod.modal.deadline.tittle'),
+                        title: $filter('translate')('reportPeriod.deadline.title') + $scope.reportPeriodGrid.value[0].name + " " + $scope.reportPeriodGrid.value[0].year,
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/deadlinePeriod.html?v=${buildUuid}',
                         controller: 'deadlinePeriodController',
-                        windowClass: 'modal400',
+                        windowClass: 'modal500',
                         resolve: {
                             $shareData: function () {
                                 return {
