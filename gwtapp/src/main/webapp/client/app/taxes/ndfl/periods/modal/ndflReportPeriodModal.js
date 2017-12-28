@@ -11,9 +11,9 @@
     /**
      * @description Контроллер создания и редактирования отчетных периодов
      */
-        .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', 'DepartmentResource', '$shareData', 'DepartmentReportPeriodCheckerResource', '$http', '$logPanel', 'LogEntryResource',
+        .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', 'BankDepartmentResource', '$shareData', 'DepartmentReportPeriodCheckerResource', '$http', '$logPanel', 'LogEntryResource',
             'ReportPeriodTypeResource', '$dialogs', 'OpenPeriodResource',
-            function ($scope, $filter, APP_CONSTANTS, $modalInstance, DepartmentResource, $shareData, DepartmentReportPeriodCheckerResource, $http, $logPanel, LogEntryResource, ReportPeriodTypeResource,
+            function ($scope, $filter, APP_CONSTANTS, $modalInstance, BankDepartmentResource, $shareData, DepartmentReportPeriodCheckerResource, $http, $logPanel, LogEntryResource, ReportPeriodTypeResource,
                       $dialogs, OpenPeriodResource) {
 
                 $scope.isAdd = $shareData.isAdd;

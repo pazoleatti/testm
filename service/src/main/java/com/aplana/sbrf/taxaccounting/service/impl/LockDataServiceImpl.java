@@ -153,8 +153,10 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void unlockAll(List<Long> ids) {
-        dao.unlockAll(ids);
+    public void unlockAll(TAUserInfo userInfo, List<String> keys) {
+        for (String key : keys) {
+            unlock(key, userInfo.getUser().getId(), userInfo.getUser().hasRole(TARole.ROLE_ADMIN));
+        }
     }
 
     private void auditLockDeletion(TAUserInfo userInfo, LockData lockData, TaskInterruptCause cause) {

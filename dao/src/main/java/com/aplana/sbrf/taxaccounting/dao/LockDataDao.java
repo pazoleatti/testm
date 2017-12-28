@@ -77,12 +77,6 @@ public interface LockDataDao extends PermissionDao {
     PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
 
     /**
-     * Удаляет все указанные блокировки
-     * @param keys список ключей блокировок
-     */
-    void unlockAll(List<Long> keys);
-
-    /**
      * Возвращяет список истекших блокировок
      * @param seconds "срок годности" блокировки в секундах
      * @return список истекший блокировок

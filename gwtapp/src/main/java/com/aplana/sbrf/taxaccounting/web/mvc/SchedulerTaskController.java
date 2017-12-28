@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.result.MessageResult;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
@@ -26,6 +25,7 @@ import java.util.List;
  */
 
 @RestController
+// TODO Необходим рефакторинг бэкенда и фронтенда см. https://jira.aplana.com/browse/SBRFNDFL-3138
 public class SchedulerTaskController {
 
     private final SchedulerTaskService schedulerTaskService;
@@ -112,7 +112,7 @@ public class SchedulerTaskController {
      * @param schedulerTaskModel измененная задача планировщика
      */
     @PostMapping(value = "/actions/updateSchedulerTask")
-    public MessageResult updateSchedulerTask(@RequestParam(value = "schedulerTaskModel") SchedulerTaskModel schedulerTaskModel) {
+    public String updateSchedulerTask(@RequestParam(value = "schedulerTaskModel") SchedulerTaskModel schedulerTaskModel) {
        return schedulerTaskService.updateTask(schedulerTaskModel.getShedulerTaskData() );
     }
 }

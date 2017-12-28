@@ -1,0 +1,27 @@
+<div class="appPager">
+    <table cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td title="{{::'pager.firstPage' | translate}}" style="cursor: pointer;">
+                <span class="ui-icon ui-icon-seek-first" ng-click="firstPage()"></span>
+            </td>
+            <td title="{{::'pager.prevPage' | translate}}" style="cursor: pointer;">
+                <span class="ui-icon ui-icon-seek-prev" ng-click="prevPage()"></span>
+            </td>
+            <td dir="ltr">
+                <label for="pageInput">{{::'pager.page' | translate}}</label>
+                <input id="pageInput" data-ng-model="inputValue" data-ng-keyup="$event.keyCode == 13 && onInputChange()"
+                       style="width: 3em"
+                       role="textbox" type="text" size="2" maxlength="7">
+                <span>{{'pager.of' | translate: '{pagesTotal: ' + (pagesTotal ? pagesTotal : '1') + '}'}}</span>
+            </td>
+            <td title="{{::'pager.nextPage' | translate}}" class="" style="cursor: pointer;">
+                <span class="ui-icon ui-icon-seek-next" ng-click="nextPage()"></span>
+            </td>
+            <td title="{{::'pager.lastPage' | translate}}" class="" style="cursor: pointer;">
+                <span class="ui-icon ui-icon-seek-end" ng-click="lastPage()"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

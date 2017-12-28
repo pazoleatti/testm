@@ -1,1 +1,1 @@
-liquibase --changeLogFile="db.changelog-master.xml" --username=ndfl_unstable --password=ndfl_unstable clearChecksums
+liquibase --changeLogFile="db.changelog-master.xml" --username=ndfl_dev --password=ndfl_dev clearChecksums

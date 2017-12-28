@@ -1,0 +1,26 @@
+<div class="resizer" style="display: inline-block;">
+    <table cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+            <td>
+                <div class="">Масштаб:</div>
+            </td>
+            <td>
+                <button title="{{::'resizer.scaleDown' | translate}}" type="button" data-ng-click="onScaleDown()">-</button>
+            </td>
+            <td>
+                <select title="{{::'resizer.scale' | translate}}"
+                        data-ng-options="value + '%' for value in selectValues"
+                        data-ng-model="selectValue"
+                        data-ng-change="onSelectChange()"></select>
+            </td>
+            <td>
+                <button title="{{::'resizer.scaleUp' | translate}}" type="button" data-ng-click="onScaleUp()">+</button>
+            </td>
+            <td>
+                <button title="{{::'resizer.fitToWidth' | translate}}" type="button" data-ng-click="onFitToWidth()">&lt;&gt;</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

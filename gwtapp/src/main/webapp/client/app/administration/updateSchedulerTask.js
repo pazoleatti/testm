@@ -49,9 +49,9 @@
                              schedulerTaskModel: $scope.updateSchedulerTask
                         }
                     }).then(function (response) {
-                        if (response.data.message !== null) {
+                        if (response.data !== null && response.data.length !== 0) {
                             $dialogs.errorDialog({
-                                content: response.data.message
+                                content: response.data
                             });
                         } else {
                             $state.go('schedulerTaskList');

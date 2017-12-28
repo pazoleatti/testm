@@ -1,8 +1,7 @@
-package refbook
+package refbook // declaration_type_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 
-// declaration_type_ref комментарий для локального поиска скрипта
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory

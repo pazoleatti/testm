@@ -194,7 +194,7 @@
             });
         }])
 
-        .factory('DepartmentResource', ['$resource', function ($resource) {
+        .factory('BankDepartmentResource', ['$resource', function ($resource) {
             return $resource('controller/rest/getBankDepartment', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
             });

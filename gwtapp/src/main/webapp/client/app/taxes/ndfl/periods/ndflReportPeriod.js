@@ -34,12 +34,12 @@
          * @description Контроллер формы "Ведение периодов"
          */
 
-        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'DepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
+        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'BankDepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
             'ValidationUtils', '$dialogs', '$q',
-            function ($scope, $filter, DepartmentReportPeriodResource, DepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource,
+            function ($scope, $filter, DepartmentReportPeriodResource, BankDepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource,
                       ValidationUtils, $dialogs, $q) {
 
-                DepartmentResource.query({}, function (department) {
+                BankDepartmentResource.query({}, function (department) {
                     $scope.department = department;
                 });
                 if (!$scope.searchFilter) {
@@ -370,7 +370,7 @@
                         title: $filter('translate')('reportPeriod.pils.correctPeriod'),
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/openCorrectPeriodModal.html?v=${buildUuid}',
                         controller: 'openCorrectCtrlModal',
-                        windowClass: 'modal800',
+                        windowClass: 'modal600',
                         resolve: {
                             $shareData: function () {
                                 return {
@@ -389,10 +389,10 @@
                  */
                 $scope.deadlinePeriod = function () {
                     $aplanaModal.open({
-                        title: $filter('translate')('reportPeriod.modal.deadline.tittle'),
+                        title: $filter('translate')('reportPeriod.deadline.title') + $scope.reportPeriodGrid.value[0].name + " " + $scope.reportPeriodGrid.value[0].year,
                         templateUrl: 'client/app/taxes/ndfl/periods/modal/deadlinePeriod.html?v=${buildUuid}',
                         controller: 'deadlinePeriodController',
-                        windowClass: 'modal600',
+                        windowClass: 'modal500',
                         resolve: {
                             $shareData: function () {
                                 return {

@@ -17,7 +17,9 @@
             'app.filesComments',
             'app.rest',
             'app.reportNdflPersonFace',
-            'app.returnToCreatedDialog'])
+            'app.returnToCreatedDialog',
+            'app.resizer',
+            'app.pager'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('ndflReport', {
                 url: '/taxes/ndfl/ndflReport/{declarationDataId}?uuid',
@@ -171,20 +173,13 @@
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     if (!$scope.pdfLoaded && data.availablePdf) {
-                                        getPageImage.query({
-                                                declarationDataId: $stateParams.declarationDataId,
-                                                pageId: 0
-                                            },
-                                            function (response) {
-                                                $scope.reportImage = response.requestUrl;
-                                                $scope.currPage = 1;
-                                                $http({
-                                                    method: "GET",
-                                                    url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
-                                                }).success(function (response) {
-                                                    $scope.pagesTotal = response;
-                                                });
-                                            });
+                                        $scope.loadPage(1);
+                                        $http({
+                                            method: "GET",
+                                            url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
+                                        }).success(function (response) {
+                                            $scope.pagesTotal = response;
+                                        });
                                         $scope.pdfLoaded = true;
                                     }
                                     if (!$scope.availablePdf && !$scope.pdfLoading) {
@@ -206,35 +201,18 @@
                 updateAvailableReports();
 
                 /**
-                 * @description Выбрать следующую страницу отчета
+                 * @description Загружает страницу отчета
+                 * @param page  номер страницы (начиная с 1)
                  */
-                $scope.nextPage = function () {
-                    if ($scope.currPage !== $scope.pagesTotal) {
-                        getPageImage.query({
-                                declarationDataId: $stateParams.declarationDataId,
-                                pageId: $scope.currPage
-                            },
-                            function (response) {
-                                $scope.reportImage = response.requestUrl;
-                                $scope.currPage++;
-                            });
-                    }
-                };
-
-                /**
-                 * @description Выбрать предыдущую страницу отчета
-                 */
-                $scope.prevPage = function () {
-                    if ($scope.currPage > 1) {
-                        getPageImage.query({
-                                declarationDataId: $stateParams.declarationDataId,
-                                pageId: $scope.currPage - 2
-                            },
-                            function (response) {
-                                $scope.reportImage = response.requestUrl;
-                                $scope.currPage--;
-                            });
-                    }
+                $scope.loadPage = function (page) {
+                    getPageImage.query({
+                            declarationDataId: $stateParams.declarationDataId,
+                            pageId: page - 1
+                        },
+                        function (response) {
+                            $scope.reportImage = response.requestUrl;
+                            $scope.currPage = page;
+                        });
                 };
 
                 $rootScope.$on("$locationChangeStart", function () {

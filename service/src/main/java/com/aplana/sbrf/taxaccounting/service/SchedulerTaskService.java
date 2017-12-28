@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.result.MessageResult;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 
@@ -62,7 +61,7 @@ public interface SchedulerTaskService {
      *
      * @param taskData объект {@link SchedulerTaskData} задачи
      */
-    MessageResult updateTask(SchedulerTaskData taskData);
+    String updateTask(SchedulerTaskData taskData);
 
     /**
      * Валидация расписания
