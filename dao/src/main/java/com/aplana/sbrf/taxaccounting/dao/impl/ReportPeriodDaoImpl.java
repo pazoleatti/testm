@@ -281,17 +281,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             period = reportPeriodDateFormatter(period);
         }
         return res;
-
-//		return getJdbcTemplate().query(
-//				"select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-//						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
-//						"(select distinct report_period_id from department_report_period " +
-//						"where "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+" and is_active=1 " +
-//						(withoutCorrect ? "and correction_date is null" : "") + " ) " +
-//						"and rp.tax_period_id = tp.id " +
-//						"and tp.tax_type = \'" + taxType.getCode() +"\' " +
-//						"order by tp.year desc, rp.calendar_start_date",
-//				new ReportPeriodMapper());
     }
 
     @Override
@@ -302,20 +291,13 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                 .and(departmentReportPeriod.departmentId.eq(departmentId))
                 .and(departmentReportPeriod.isActive.eq(false));
 
-        String orderingProperty = pagingParams.getProperty();
-        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
-
-        OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                reportPeriodQBean, orderingProperty, ascDescOrder, departmentReportPeriod.id.asc());
-
-
         List<ReportPeriod> result = sqlQueryFactory
                 .select(reportPeriodQBean)
                 .from(reportPeriod)
                 .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .leftJoin(reportPeriod._depRepPerFkRepPeriodId, departmentReportPeriod)
                 .where(where)
-                .orderBy(order)
+                .orderBy(taxPeriod.year.asc(), reportPeriod.dictTaxPeriodId.asc())
                 .transform(GroupBy.groupBy(reportPeriod.id).list(reportPeriodQBean));
 
         for (ReportPeriod period : result) {
