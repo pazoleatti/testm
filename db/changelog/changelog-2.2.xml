@@ -113,4 +113,13 @@
             <where>id=101</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3133 - проверка -->
+    <changeSet id="2.2-dloshkarev-0" author="dloshkarev">
+        <insert tableName="LOCK_DATA">
+            <column name="id" value="1"/>
+            <column name="key" value="TEST_LOCK"/>
+            <column name="user_id" value="13276"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
