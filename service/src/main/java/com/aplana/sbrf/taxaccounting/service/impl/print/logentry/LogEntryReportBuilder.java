@@ -12,10 +12,10 @@ import java.util.List;
 
 public class LogEntryReportBuilder extends AbstractReportBuilder {
 
-	private static final String FIRST_COLUMN = "№ п/п";
+    private static final String FIRST_COLUMN = "№ п/п";
     private static final String SECOND_COLUMN = "Дата-время";
     private static final String THIRD_COLUMN = "Тип сообщения";
-	private static final String FOURTH_COLUMN = "Текст сообщения";
+    private static final String FOURTH_COLUMN = "Текст сообщения";
     private static final String FIFTH_COLUMN = "Тип";
     private static final String SIXTH_COLUMN = "Объект";
 
@@ -26,21 +26,21 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         }
     };
 
-    private static String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN, FIFTH_COLUMN, SIXTH_COLUMN};
+    private static final String[] headers = new String[]{FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN, FIFTH_COLUMN, SIXTH_COLUMN};
     private static final String ENCODING = "windows-1251";
 
-    private List<LogEntry> list;
+    private final List<LogEntry> list;
 
 
-	public LogEntryReportBuilder(List<LogEntry> list){
+    public LogEntryReportBuilder(List<LogEntry> list) {
         super("log", ".xlsx");
         this.list = list;
-	}
+    }
 
-	@Override
-    protected void createTableHeaders(){
+    @Override
+    protected void createTableHeaders() {
         //No need to implement
-	}
+    }
 
     @Override
     protected void fillHeader() {
@@ -53,9 +53,9 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
     }
 
     @Override
-    protected void createDataForTable(){
+    protected void createDataForTable() {
         //No need to implement
-	}
+    }
 
     @Override
     protected File createTempFile() throws IOException {
@@ -70,7 +70,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 
             csvWriter.writeNext(headers);
             for (int i = 0; i < list.size(); i++) {
-                csvWriter.writeNext(assemble(list.get(i), i+1));
+                csvWriter.writeNext(assemble(list.get(i), i + 1));
             }
             csvWriter.close();
         } catch (IOException e) {
@@ -80,8 +80,8 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         }
     }
 
-    private String[] assemble(LogEntry item, int numberStr){
-        List<String> entries = new ArrayList<String>(4);
+    private String[] assemble(LogEntry item, int numberStr) {
+        List<String> entries = new ArrayList<>(4);
         entries.add(String.valueOf(numberStr));
         entries.add(DATE_DATA_FORMAT.get().format(item.getDate().toDate()));
         switch (item.getLevel()) {
