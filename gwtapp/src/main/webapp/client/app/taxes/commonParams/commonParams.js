@@ -83,10 +83,12 @@
                         controller: 'editParamsCtrl',
                         windowClass: 'modal600',
                         resolve: {
-                            commonParamsGrid: function () {
-                                return $scope.commonParamsGrid;
+                            parameter: function () {
+                                return angular.copy($scope.commonParamsGrid.value[0]);
                             }
                         }
+                    }).result.then(function () {
+                        $scope.commonParamsGrid.ctrl.refreshGrid();
                     });
 
                 };
