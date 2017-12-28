@@ -122,4 +122,10 @@
             <column name="user_id" value="13276"/>
         </insert>
     </changeSet>
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3133 - откат -->
+    <changeSet id="2.2-dloshkarev-1" author="dloshkarev">
+        <delete tableName="LOCK_DATA">
+            <where>id = 1</where>
+        </delete>
+    </changeSet>
 </databaseChangeLog>
