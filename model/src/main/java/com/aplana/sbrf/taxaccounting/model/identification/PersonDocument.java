@@ -65,6 +65,23 @@ public class PersonDocument extends RefBookObject {
         return incRep != null && incRep.equals(1);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PersonDocument that = (PersonDocument) o;
+
+        if (!docType.equals(that.docType)) return false;
+        return documentNumber.replaceAll("[^А-Яа-я\\w]", "").equals(that.documentNumber.replaceAll("[^А-Яа-я\\w]", ""));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = docType.hashCode();
+        result = 31 * result + documentNumber.replaceAll("[^А-Яа-я\\w]", "").hashCode();
+        return result;
+    }
 
     @Override
     public String toString() {
