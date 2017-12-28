@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,10 +109,9 @@ public interface DepartmentReportPeriodDao {
     /**
      * Возвращает отчетные периоды подразделений с фильтрацией и пагинацией
      * @param departmentReportPeriodFilter - фильтр отчетных периодов подразделений
-     * @param pagingParams - параметры пагинации
      * @return отчетные периоды подразделений
      */
-    PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter departmentReportPeriodFilter, PagingParams pagingParams);
+    List<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     @Transactional(readOnly = false)
     DepartmentReportPeriod update(DepartmentReportPeriod departmentReportPeriodItem);
