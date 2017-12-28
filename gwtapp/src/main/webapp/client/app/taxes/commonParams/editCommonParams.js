@@ -10,8 +10,8 @@
     /**
      * @description Модуль для редактирования общих параметров'
      */
-        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'commonParamsGrid', '$logPanel',
-            function ($scope, $filter, $http, $modalInstance, commonParamsGrid, $logPanel) {
+        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'parameter', '$logPanel','$dialogs',
+            function ($scope, $filter, $http, $modalInstance, parameter, $logPanel, $dialogs) {
 
                 /**
                  * @description Редактирование параметра
@@ -24,28 +24,29 @@
                         params: {
                             config: $scope.parameter
                         }
-                    }).then(function(response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        }
-                        commonParamsGrid.ctrl.refreshGrid();
+                    }).then(function() {
+                        $modalInstance.close('Canceled');
                     });
-
-                    $modalInstance.dismiss('Canceled');
-
                 };
+
                 /**
                  * @description Переменная содержащая значения редактируемое значение
                  */
-                $scope.parameter = commonParamsGrid.value[0];
+                $scope.parameter = parameter;
 
                 /**
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $modalInstance.dismiss('Canceled');
-                    commonParamsGrid.ctrl.refreshGrid();
-
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('title.cancelChanges'),
+                        content: $filter('translate')('commonParams.notSavedData'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('DIALOGS_CANCELLATION'),
+                        okBtnClick: function () {
+                            $modalInstance.dismiss('Canceled');
+                        }
+                    });
                 };
 
             }]);

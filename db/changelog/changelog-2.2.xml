@@ -122,6 +122,20 @@
             <column name="user_id" value="13276"/>
         </insert>
     </changeSet>
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3133 - откат -->
+    <changeSet id="2.2-dloshkarev-1" author="dloshkarev">
+        <delete tableName="LOCK_DATA">
+            <where>id = 1</where>
+        </delete>
+    </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2891 -->
+    <changeSet id="2.2-aokunev-2" author="aokunev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/declaration_type.groovy"/>
+            <where>id='352adf59-372b-4020-98fe-8960dd5bc972'</where>
+        </update>
+    </changeSet>
 
     <!-- https://jira.aplana.com/browse/SBRFNDFL-2583 -->
     <changeSet id="2.2-ytrofimov-7" author="ytrofimov">

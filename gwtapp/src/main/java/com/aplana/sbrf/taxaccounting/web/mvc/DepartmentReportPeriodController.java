@@ -9,17 +9,13 @@ import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
-import com.gwtplatform.dispatch.annotation.In;
 import net.sf.jasperreports.web.actions.ActionException;
 import org.joda.time.LocalDateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 
 @RestController
@@ -53,17 +49,25 @@ public class DepartmentReportPeriodController {
 
     /**
      * Получение отчетных периодов с фильтрацией и пагинацией
-     *
-     * @param
      */
     @GetMapping(value = "/rest/departmentReportPeriod")
-    public JqgridPagedList<DepartmentReportPeriodJournalItem> getAllPeriods(@RequestParam DepartmentReportPeriodFilter filter, @RequestParam PagingParams pagingParams){
-        PagingResult<DepartmentReportPeriodJournalItem> result = departmentReportPeriodService.findAll(filter, pagingParams);
+    public List<DepartmentReportPeriodJournalItem> getAllPeriods(@RequestParam DepartmentReportPeriodFilter filter){
+        List<DepartmentReportPeriodJournalItem> result = departmentReportPeriodService.findAll(filter);
+        Map<Integer, DepartmentReportPeriodJournalItem> yearMap = new HashMap<>();
+        for(DepartmentReportPeriodJournalItem item : result){
+            if (yearMap.get(item.getYear()) == null){
+                DepartmentReportPeriodJournalItem parentItem = new DepartmentReportPeriodJournalItem();
+                parentItem.setYear(item.getYear());
+                parentItem.setId(item.getYear());
+                parentItem.setName("Календарный год " + item.getYear());
+                yearMap.put(item.getYear(), parentItem);
+                item.setParent(parentItem);
+            }else {
+                item.setParent(yearMap.get(item.getYear()));
+            }
+        }
 
-        return JqgridPagedResourceAssembler.buildPagedList(
-                result,
-                result.getTotalCount(),
-                pagingParams);
+        return result;
     }
 
     /**

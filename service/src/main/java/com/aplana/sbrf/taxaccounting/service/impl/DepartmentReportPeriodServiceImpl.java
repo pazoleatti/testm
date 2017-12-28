@@ -218,8 +218,8 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
 	@Override
-	public PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter, PagingParams pagingParams) {
-		PagingResult<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.findAll(filter, pagingParams);
+	public List<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter) {
+		List<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.findAll(filter);
 		for (DepartmentReportPeriodJournalItem item : page){
 			DepartmentReportPeriod period = new DepartmentReportPeriod();
 			period.setIsActive(item.getIsActive());

@@ -534,7 +534,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional(readOnly = true)
-    public PagingResult<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter, PagingParams pagingParams) {
+    public List<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter) {
         BooleanBuilder where = new BooleanBuilder();
         if (filter.getDepartmentId() != null) {
             where.and(departmentReportPeriod.departmentId.eq(filter.getDepartmentId()));
@@ -547,8 +547,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             where.and(departmentReportPeriod.departmentId.eq(filter.getDepartmentId()));
         }
 
-        String orderingProperty = pagingParams.getProperty();
-        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
+        String orderingProperty = "year";
+        Order ascDescOrder = Order.ASC;
 
         OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
                 qDepartmentReportPeriodJournalItem, orderingProperty, ascDescOrder, departmentReportPeriod.id.asc());
@@ -567,9 +567,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
                 .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
                 .where(where)
-                .orderBy(order)
-                .offset(pagingParams.getStartIndex())
-                .limit(pagingParams.getCount())
+                .orderBy(departmentReportPeriod.correctionDate.asc(), reportPeriod.dictTaxPeriodId.asc(), taxPeriod.year.asc())
                 .transform(GroupBy.groupBy(departmentReportPeriod.id).list(qDepartmentReportPeriodJournalItem));
 
         for (DepartmentReportPeriodJournalItem period : result){
@@ -579,7 +577,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
 
 
-        return new PagingResult<>(result, getTotalCount(where));
+        return result;
 
     }
 
@@ -610,16 +608,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             }
         }
         return period;
-    }
-
-    private int getTotalCount(BooleanBuilder where) {
-        return (int) sqlQueryFactory.select(
-                departmentReportPeriod.id)
-                .from(departmentReportPeriod)
-                .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(where)
-                .fetchCount();
     }
 
     @Override

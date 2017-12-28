@@ -32,6 +32,13 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
 
     private long dictTaxPeriodId;
 
+    /**
+     * Объект для грида в окне просмотра списка периодов для группировки по году
+     */
+    private DepartmentReportPeriodJournalItem parent;
+
+
+
     public Integer getId() {
         return id;
     }
@@ -102,6 +109,14 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
 
     public void setDictTaxPeriodId(long dictTaxPeriodId) {
         this.dictTaxPeriodId = dictTaxPeriodId;
+    }
+
+    public DepartmentReportPeriodJournalItem getParent() {
+        return parent;
+    }
+
+    public void setParent(DepartmentReportPeriodJournalItem parent) {
+        this.parent = parent;
     }
 
     @Override

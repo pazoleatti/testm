@@ -60,19 +60,9 @@
                     ctrl: {},
                     value: [],
                     options: {
-                        datatype: "angularResource",
-                        angularResource: DepartmentReportPeriodResource,
-                        requestParameters: function () {
-                            return {
-                                filter: JSON.stringify({
-                                    yearStart: $scope.searchFilter.params.yearStart,
-                                    yearEnd: $scope.searchFilter.params.yearEnd,
-                                    departmentId: $scope.departmentId
-                                })
-                            };
-                        },
+                        datatype: "local",
+                        rowNum: 1000,
                         colNames: [
-                            $filter('translate')('reportPeriod.modal.year'),
                             $filter('translate')('reportPeriod.grid.period'),
                             $filter('translate')('reportPeriod.grid.state'),
                             $filter('translate')('reportPeriod.grid.deadline'),
@@ -80,8 +70,7 @@
 
                         ],
                         colModel: [
-                            {name: 'year', index: 'year', width: 55},
-                            {name: 'name', index: 'name', sortable: false, width: 140},
+                            {name: 'name', index: 'name', sortable: false, width: 300},
                             {
                                 name: 'isActive',
                                 index: 'isActive',
@@ -102,15 +91,51 @@
                                 formatter: $filter('dateFormatter')
                             }
                         ],
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
                         viewrecords: true,
-                        sortname: 'year',
-                        sortorder: "asc",
                         hidegrid: false,
-                        multiselect: false
+                        groupConfig: {
+                            level: 1,
+                            colModel: {
+                                formatter: $filter('groupFormatter'),
+                                sorttype: $filter('groupSortCustomType')('id', 'parent.year', 'dictTaxPeriodId', 'parent.year')
+                            },
+                            noTree: {
+                                groupObject: 'parent',
+                                groupId: 'parent.id',
+                                groupColumnModel: {'name': 'name'}
+                            }
+                        }
                     }
                 };
+
+                $scope.initGrid = function() {
+                    $scope.periodGridData = [];
+                    DepartmentReportPeriodResource.query({
+                        filter: JSON.stringify({
+                            yearStart: $scope.searchFilter.params.yearStart,
+                            yearEnd: $scope.searchFilter.params.yearEnd,
+                            departmentId: $scope.departmentId
+                        })
+                    }, function (response) {
+                        var array = [];
+                        angular.forEach(response, function (period) {
+                            var periodTmp = {};
+                            angular.copy(period, periodTmp);
+                            array.push(periodTmp);
+                        });
+                        // $scope.periodGridData = sortGridData(array);
+                        $scope.periodGridData = array;
+                        $scope.reportPeriodGrid.ctrl.refreshGridData($scope.periodGridData);
+                    });
+                };
+
+                var sortGridData = function(array){
+                    array = _.sortBy(array, 'correctionDate');
+                    array = _.sortBy(array, 'dictTaxPeriodId');
+                    array =  _.sortBy(array, 'year');
+                    return array;
+                };
+
 
 
                 /**
@@ -118,7 +143,7 @@
                  * @param page
                  */
                 $scope.refreshGrid = function (page) {
-                    $scope.reportPeriodGrid.ctrl.refreshGrid(page);
+                    $scope.initGrid();
                 };
 
 
@@ -134,7 +159,7 @@
                     }
                     $scope.searchFilter.ajaxFilter = [];
                     $scope.searchFilter.fillFilterParams();
-                    $scope.refreshGrid(1);
+                    $scope.initGrid();
                     $scope.searchFilter.isClear = !_.isEmpty($scope.searchFilter.ajaxFilter);
                 };
 
@@ -255,7 +280,7 @@
                                                     });
                                                 }
                                             });
-                                        }else {
+                                        } else {
                                             $http({
                                                 method: "POST",
                                                 url: "controller/actions/departmentReportPeriod/" + $scope.reportPeriodGrid.value[0].id + "/close"
@@ -478,13 +503,6 @@
                             yearStart: $scope.reportPeriodGrid.value[0].year,
                             yearEnd: $scope.reportPeriodGrid.value[0].year,
                             departmentId: $scope.departmentId
-                        }),
-                        pagingParams: JSON.stringify({
-                            "page":1,
-                            "count":100,
-                            "startIndex":0,
-                            "property":"year",
-                            "direction":"asc"
                         })
                     }, function (response) {
                         response.rows.forEach(function (item) {
@@ -509,14 +527,7 @@
                             yearStart: $scope.reportPeriodGrid.value[0].year,
                             yearEnd: $scope.reportPeriodGrid.value[0].year,
                             departmentId: $scope.departmentId
-                        }),
-                            pagingParams: JSON.stringify({
-                                "page":1,
-                                "count":100,
-                                "startIndex":0,
-                                "property":"year",
-                                "direction":"asc"
-                            })
+                        })
                     }, function (response) {
                         response.rows.forEach(function (item) {
                             if ($scope.reportPeriodGrid.value[0].year === item.year && $scope.reportPeriodGrid.value[0].dictTaxPeriodId === item.dictTaxPeriodId && item.correctionDate) {

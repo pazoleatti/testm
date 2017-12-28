@@ -112,6 +112,7 @@
         "title.redactParametr": "Редактировать параметр",
         "commonParams.default": "Восстановить значения по умолчанию",
         "title.commonParams.default": "Восстановление значений по умолчанию",
+        "commonParams.notSavedData": "На форме общих параметров системы имеются несохраненные данные. Выйти без сохранения?",
         "menu.taxes": "Налоги",
         "menu.taxes.ndfl": "НДФЛ",
         "menu.taxes.ndfl.details": "НДФЛ детализация",
@@ -185,6 +186,7 @@
         "title.comParams.param": "Параметр",
         "title.comParams.paramValue": "Значение параметра",
 
+        "title.cancelChanges": "Отмена операции",
         "title.period": "Период",
         "title.period.value": "{{year}}, {{periodName}}{{correctionString}}",
         "title.period.value.correctionString": ", кор. ({{correctionDate}})",

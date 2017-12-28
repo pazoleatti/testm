@@ -184,7 +184,7 @@
 
         .factory('DepartmentReportPeriodResource', ['$resource', function ($resource) {
             return $resource('controller/rest/departmentReportPeriod?projection=:projection', {}, {
-                query: {method: 'GET', isArray: false, cache: false}
+                query: {method: 'GET', isArray: true, cache: false}
             });
         }])
 
