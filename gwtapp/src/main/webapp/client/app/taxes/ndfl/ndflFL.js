@@ -13,6 +13,14 @@
             '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', 'ShowToDoDialog', '$rootScope', 'APP_CONSTANTS',
             function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $showToDoDialog, $rootScope, APP_CONSTANTS) {
 
+                var tab = $scope.ndfFLTab;
+
+                $scope.$watch("ndfFLTab.active", function (newValue, oldValue) {
+                    if (newValue && !oldValue) {
+                        $scope.submitSearch();
+                    }
+                });
+
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
                         $scope.searchFilter.params.inp = data;
@@ -20,23 +28,8 @@
                     }
                 });
 
-                var isTabActive = true;
-
-                $scope.$on('tabSelected', function(event, data) {
-                    if (_.isEqual(data, 'ndflFL')){
-                        $scope.submitSearch();
-                        isTabActive = true;
-                    }
-                });
-
-                $scope.$on('tabDeselected', function(event, data) {
-                    if (_.isEqual(data, 'ndflFL')){
-                        isTabActive = false;
-                    }
-                });
-
                 $scope.$on('refreshDeclarationGrid', function(event, data) {
-                    if (isTabActive) {
+                    if (tab.active) {
                         $scope.refreshGrid();
                     }
                 });

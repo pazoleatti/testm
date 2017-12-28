@@ -148,10 +148,10 @@
         "header.ndfl.fl.edit": "Редактировать запись ФЛ",
         "header.CommonParams": "Налоги - Общие параметры",
 
-        "tab.ndfl.requisites": "Реквизиты",
-        "tab.ndfl.informationOnIncomesAndNdfl": "Сведения о доходах и НДФЛ",
-        "tab.ndfl.informationOnDeductions": "Сведения о вычетах",
-        "tab.ndfl.informationOnAdvancePayments": "Сведения о доходах в виде авансовых платежей",
+        "tab.ndfl.requisites": "1. Реквизиты",
+        "tab.ndfl.informationOnIncomesAndNdfl": "2. Сведения о доходах и НДФЛ",
+        "tab.ndfl.informationOnDeductions": "3. Сведения о вычетах",
+        "tab.ndfl.informationOnAdvancePayments": "4. Сведения о доходах в виде авансовых платежей",
 
         "link.ndfl.reporting": "Формирование отчетов",
         "link.ndfl.reporting.uploadXml": "Выгрузить в XML",
@@ -633,6 +633,7 @@
             'mgcrea.ngStrap.dropdown',
             'aplana.dropdown',
             'aplana.dropdownMenu',
+            'aplana.tabs',
             'aplana.submitValid',
             'aplana.collapse',
             'aplana.field',

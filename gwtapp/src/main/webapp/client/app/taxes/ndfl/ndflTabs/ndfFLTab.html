@@ -1,0 +1,15 @@
+<div data-ng-controller="ndflFLCtrl">
+    <div class='container-grid-top'>
+        <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
+    </div>
+    <div data-aplana-grid
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector=".form100"
+         data-grid-fill-space-container-selector-top=".container-grid-top"
+         data-grid-options="ndflPersonGrid.options"
+         data-init-grid="ndflPersonGrid.init(ctrl)"
+         data-grid-ctrl="ndflPersonGrid.ctrl"
+         data-ng-model="ndflPersonGrid.value"
+         id="ndflPersonTable"
+         style="float: left; width: 100%;"></div>
+</div>
