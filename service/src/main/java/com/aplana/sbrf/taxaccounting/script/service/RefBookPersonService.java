@@ -77,4 +77,13 @@ public interface RefBookPersonService {
      * @return
      */
     List<NaturalPerson> findNaturalPersonPrimaryDataFromNdfl(long declarationDataId, RowMapper<NaturalPerson> naturalPersonRowMapper);
+
+    /**
+     * Рассчитывает вес, который показывает насколько похоже сравниваемое физлицо с физлицом из списка. Метод ничего не
+     * возвращает поскольку вес записывается в поле weigth объекта NaturalPerson.
+     * @param searchPersonData  физлицо для которого определяется схожесть по весам.
+     * @param personDataList    физлица которые были отобраны для сравнения по весам с основным физлицом
+     * @param weigthComporators объект содержащий логику сравнения по весам
+     */
+    void calculateWeigth(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators);
 }

@@ -122,4 +122,13 @@
             <column name="user_id" value="13276"/>
         </insert>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-2583 -->
+    <changeSet id="2.2-ytrofimov-7" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

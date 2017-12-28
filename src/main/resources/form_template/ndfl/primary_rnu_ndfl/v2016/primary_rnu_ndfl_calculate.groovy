@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.Country
 import com.aplana.sbrf.taxaccounting.model.identification.DocType
 import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson
+import com.aplana.sbrf.taxaccounting.model.identification.PersonalData
 import com.aplana.sbrf.taxaccounting.model.identification.PersonDocument
 import com.aplana.sbrf.taxaccounting.model.identification.PersonIdentifier
 import com.aplana.sbrf.taxaccounting.model.identification.RefBookObject
@@ -24,6 +25,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
+import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams
@@ -38,6 +40,29 @@ import java.sql.SQLSyntaxErrorException
 
 new Calculate(this).run();
 
+/**
+ * Скрипт отвечает за идентификацию физлиц. Результатом работы скрипта является создание или обновление записей
+ * в справочнике физлиц на основе данных содержащихся в разделе Реквизиты налоговой формы.
+ * Алгоритм имеет несколько этапов. Данные для кждого этапа определяются соответствующей процедурой в БД.
+ * 1. На первом этапе определяются физлица, которые не имеют совпадений по важным критериям в справочнике ФЛ и
+ * для них должны создаться новые записи в справочнике.
+ * Сами физлица являются сущностями таблицы NDFL_PERSON, но для них используется
+ * класс {@link #com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson}.
+ * Также может возникнуть ситуация когда в реквизитах налоговой формы есть несколько записей, которые по своей сути
+ * являются одним физлицом. Эта ситуация обрабатывается в {@link performPrimaryPersonDuplicates(List<NaturalPerson)}.
+ * 2. На втором этапе ищутся записи в справочнике физлиц, которые совпадают по всем ключевым параметам с записями из
+ * реквизитов налоговой формы. Считается что это одни и теже физлица. Если какие-то параметры отличаются, то они
+ * обновляются.
+ * 3. На третьем этапе ищутся физлица, которые совпадают хотя бы по одному ключевому параметру, тогда необходимо
+ * провести сравнение физлица из реквизитов налоговй формы с отобранными физлицами из справочника физлиц.
+ * Из этих физлиц выбирается одно физлицо с максимальным весом выше порога схожести. Значения в справочнике
+ * обновляются свежими даннными.
+ * Если все таки ни одно физлицо при сравнении по весам не прошло порог схожести, тогда создается новая запись в
+ * справочнике физлиц.
+ *
+ * По результату работы скрипта каждое физлицо из налоговой формы раздела "Рекввизиты" будет иметь ссылку на запись в
+ * справочнике "Физические лица"
+ */
 @TypeChecked
 class Calculate extends AbstractScriptClass {
 
@@ -94,6 +119,16 @@ class Calculate extends AbstractScriptClass {
     Map<Long, String> asnuCache = [:]
     //Приоритет Асну
     Map<Long, Integer> asnuPriority = [:];
+    /**
+     * Мапа используется при определении дубликатов между физлицами которые еще не имеют ссылок на справочник физлиц.
+     * Ключем здесь выступает физлицо, которе будет оригиналом и для которого будет создана запись в справочнике ФЛ,
+     * а значением является список физлиц которые будут ссылаться на запись в справочнике ФЛ созданную для оригинала.
+     */
+    Map<NaturalPerson, List<NaturalPerson>> primaryPersonOriginalDuplicates = new HashMap<>();
+    /**
+     * Список идентификаторов физлиц из реквизитов налоговой формы, которые были определены как дубликаты ранее
+     */
+    List<Long> primaryDuplicateIds = []
 
     private Calculate() {
     }
@@ -171,6 +206,8 @@ class Calculate extends AbstractScriptClass {
                     time = System.currentTimeMillis();
                     List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true));
                     logForDebug("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
+
+                    performPrimaryPersonDuplicates(insertPersonList)
 
                     time = System.currentTimeMillis();
                     createNaturalPersonRefBookRecords(insertPersonList);
@@ -270,8 +307,6 @@ class Calculate extends AbstractScriptClass {
         }
         naturalPersonRowMapper.setAsnuId(declarationData.asnuId);
 
-        //naturalPersonRowMapper.setLogger(logger); //TODO отключил из-за предупреждений по справочнику ФИАС
-
         List<Country> countryList = getCountryRefBookList();
         naturalPersonRowMapper.setCountryCodeMap(countryList.collectEntries {
             [it.code, it]
@@ -340,7 +375,161 @@ class Calculate extends AbstractScriptClass {
     }
 
     //---------------- Identification ----------------
-    // Далее идет код скрипта такой же как и в 1151111 возможно следует вынести его в отдельный сервис
+
+    /**
+     * Выполняет действия для того чтобы определить имеются ли в налоговой форме записи в разделе реквизиты, которые
+     * являются одним и тем же физическим лицом. Для таких физлиц будет создана одна запись в справочнике
+     * "Физические лица".
+     * Алгоритм следующий:
+     * A. Проходим циклом по <code>insertRecords</code> и для каждого физлица определяем значения:
+     * 1. ИНП
+     * 2. СНИЛС
+     * 3. ИНН
+     * 4. ИНН в стране гражданства
+     * 5. ДУЛ
+     * 6. Персональные данные (ФИО и дата рождения)
+     * B. Для каждого значения необходимо проверить встречалось ли оно на предыдущих итерациях и тогда:
+     * 1. Если оно встречалось более 1 раза оно будет находится в мапе где где ключ значение из шага A, а значение
+     * список физлиц у которых такое же значение из шага A. Добавляем в этот список физлиц текущее физлицо.
+     * 2. Если оно встречалось только 1 раз оно будет находится в мапе где ключ значение из шага A, а значение физлицо.
+     * Тогда мы создаем запись в мапе из шага B1 с двумя физлицами.
+     * 3. Если оно не встречалось добавляем запись в мапу из шага B2 с физлицом.
+     * За шаг B отвечает метод {@link #addToReduceMap(Object, Map<?, NaturalPerson>, Map<?, List<NaturalPerson>>, NaturalPerson)}
+     * C. Далее для каждой entry из мапы описаной на шаге B1, сравниваем между собой физлиц из значения этой entry.
+     * Сравнение выполняется с вложенным циклом для того чтобы не делать лишнюю работу заведено поле{@link #primaryDuplicateIds}
+     * В это поле добавляется идентификатор физлица определенное ранне как дубликат и таким образом алгоритм будет знать
+     * что физлицо не надо делать оригиналом и не надо сравнивать по другим совпадающим параметрам.
+     * Для оригинала выбирается первое значение из списка физлиц, для того чтобы обеспечить повторяемость результата список
+     * предварительно сортируется по ключу идентификатора из реквизитов налоговой формы.
+     * Результат записывается в {@link #primaryPersonOriginalDuplicates}
+     * Одновременно удаляем дубликаты из списка физлиц отобранных для вставки в справочник физлиц, чтобы для дубликатов
+     * не создалась отдельная запись.
+     * За шаг C отвечает {@link #mapDuplicates(List<NaturalPerson>, List<NaturalPerson>)}
+     * D. После создания записей в справочнике физлиц назначаем дубликатам ссылку на запись в справочнике физлиц, такую
+     * же какую имеют оригиналы.
+     * @param insertRecords Список физлиц отобранных для вставки
+     */
+    void performPrimaryPersonDuplicates(List<NaturalPerson> insertRecords) {
+
+        Map<String, NaturalPerson> inpMatchedMap = new HashMap<>()
+        Map<String, List<NaturalPerson>> inpReducedMatchedMap = new HashMap<>()
+
+        Map<String, NaturalPerson> snilsMatchedMap = new HashMap<>()
+        Map<String, List<NaturalPerson>> snilsReducedMatchedMap = new HashMap<>()
+
+        Map<String, NaturalPerson> innMatchedMap = new HashMap<>()
+        Map<String, List<NaturalPerson>> innReducedMatchedMap = new HashMap<>()
+
+        Map<String, NaturalPerson> innForeignMatchedMap = new HashMap<>()
+        Map<String, List<NaturalPerson>> innForeignReducedMatchedMap = new HashMap<>()
+
+        Map<PersonDocument, NaturalPerson> idDocMatchedMap = new HashMap<>()
+        Map<PersonDocument, List<NaturalPerson>> idDocReducedMatchedMap = new HashMap<>()
+
+        Map<PersonalData, NaturalPerson> personalDataMatchedMap = new HashMap<>()
+        Map<PersonalData, List<NaturalPerson>> personalDataReducedMatchedMap = new HashMap<>()
+
+        for (NaturalPerson person : insertRecords) {
+            String inp = person.personIdentityList.get(0).getInp()
+            String snils = person.snils.replaceAll("[\\s-]", "").toLowerCase()
+            String inn = person.inn
+            String innForeign = person.innForeign
+            PersonDocument personDocument = person.personDocumentList.get(0)
+            PersonalData personalData = new PersonalData(person.firstName, person.lastName, person.middleName, person.birthDate)
+            addToReduceMap(inp, inpMatchedMap, inpReducedMatchedMap, person)
+            addToReduceMap(snils, snilsMatchedMap, snilsReducedMatchedMap, person)
+            if (inn != null) {
+                addToReduceMap(inn, innMatchedMap, innReducedMatchedMap, person)
+            }
+            if (innForeign != null) {
+                addToReduceMap(innForeign, innForeignMatchedMap, innForeignReducedMatchedMap, person)
+            }
+            addToReduceMap(personDocument, idDocMatchedMap, idDocReducedMatchedMap, person)
+            addToReduceMap(personalData, personalDataMatchedMap, personalDataReducedMatchedMap, person)
+        }
+
+        sendToMapDuplicates(inpReducedMatchedMap, insertRecords)
+        sendToMapDuplicates(snilsReducedMatchedMap, insertRecords)
+        sendToMapDuplicates(innReducedMatchedMap, insertRecords)
+        sendToMapDuplicates(innForeignReducedMatchedMap, insertRecords)
+        sendToMapDuplicates(idDocReducedMatchedMap, insertRecords)
+        sendToMapDuplicates(personalDataReducedMatchedMap, insertRecords)
+    }
+
+    /**
+     * Посылает сравнивать по весам физлиц из раздела Реквизиты Налоговой формы, которые на предыдущем шаге имели
+     * совпадение по важным параметрам.
+     * @param processingPersonList  список обрабатываемых Физлиц.
+     * @param insertPersonList      список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
+     * дубликатом
+     */
+    void sendToMapDuplicates(Map<?, List<NaturalPerson>> processingPersonList, List<NaturalPerson> insertRecords) {
+        if (!processingPersonList.isEmpty()) {
+            for (List<NaturalPerson> personList : processingPersonList.values()) {
+                mapDuplicates(personList, insertRecords)
+            }
+        }
+    }
+
+    /**
+     * Добавляет физлиц в мапу по ключу.
+     * @param key       ключ по которому добавляется параметр
+     * @param matchMap  здесь находятся физлица, которые имеют значение с таким же <code>key</code>
+     * @param reduceMap если физлицо уже присутствует в <code>matchMap</code>, тогда возможно это дубликат и необходимо
+     * провести сравнение по весам
+     * @param person    сравниваемое физлицо
+     */
+    void addToReduceMap(Object key, Map<?, NaturalPerson> matchMap, Map<?, List<NaturalPerson>> reduceMap, NaturalPerson person) {
+        List<NaturalPerson> list1 = reduceMap.get(key)
+        if (list1 != null) {
+            reduceMap.get(key).add(person)
+        } else {
+            NaturalPerson pastMatchedPerson = matchMap.get(key)
+            if (pastMatchedPerson != null) {
+                reduceMap.put(key, [person, pastMatchedPerson])
+            } else {
+                matchMap.put(key, person)
+            }
+        }
+    }
+
+    /**
+     * Отвечает за распределение физлиц на оригиналы и дубликаты, на основе расчета по весам
+     * @param processingPersonList  список обрабатываемых Физлиц.
+     * @param insertPersonList      список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
+     * дубликатом
+     */
+    void mapDuplicates(List<NaturalPerson> processingPersonList, List<NaturalPerson> insertPersonList) {
+        Double similarityLine = similarityThreshold.doubleValue() / 1000
+        Collections.sort(processingPersonList, new Comparator<NaturalPerson>() {
+            @Override
+            int compare(NaturalPerson o1, NaturalPerson o2) {
+                return o1.primaryPersonId.compareTo(o2.primaryPersonId)
+            }
+        })
+        for (int i = 0; i < processingPersonList.size() - 1; i++) {
+            if (primaryDuplicateIds.contains(processingPersonList.get(i).primaryPersonId)) {
+                continue
+            }
+            for (int j = i + 1; j<processingPersonList.size(); j++) {
+                if (primaryDuplicateIds.contains(processingPersonList.get(j).primaryPersonId)) {
+                    continue
+                }
+                refBookPersonService.calculateWeigth(processingPersonList.get(i), [processingPersonList.get(j)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
+                if (processingPersonList.get(j).weigth > similarityLine) {
+                    primaryDuplicateIds << processingPersonList.get(j).primaryPersonId
+                    List<NaturalPerson> duplicates = primaryPersonOriginalDuplicates.get(processingPersonList.get(i))
+                    insertPersonList.remove(processingPersonList.get(j))
+                    if (duplicates != null) {
+                        duplicates.add(processingPersonList.get(j))
+                    } else {
+                        primaryPersonOriginalDuplicates.put(processingPersonList.get(i), [processingPersonList.get(j)])
+                    }
+                }
+            }
+        }
+    }
+
 
     def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
 
@@ -396,6 +585,13 @@ class Calculate extends AbstractScriptClass {
             //update reference to ref book
 
             updatePrimaryToRefBookPersonReferences(insertRecords);
+
+            for (Map.Entry<NaturalPerson, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
+                for (NaturalPerson duplicatePerson : entry.getValue()) {
+                    duplicatePerson.id = entry.getKey().id
+                }
+                updatePrimaryToRefBookPersonReferences(entry.getValue());
+            }
 
             //Выводим информацию о созданных записях
             for (NaturalPerson person : insertRecords) {

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
+import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -130,7 +131,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         }
     }
 
-    private static void calculateWeigth(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators) {
+    public void calculateWeigth(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators) {
         for (IdentityPerson personData : personDataList) {
             double weigth = weigthComporators.calc(searchPersonData, personData);
             personData.setWeigth(weigth);
@@ -373,35 +374,6 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
             }
             return weightComp;
         }
-    }
-
-    public class PersonDataWeightCalculator implements WeigthCalculator<IdentityPerson> {
-
-        private Map<String, Double> result = new HashMap<String, Double>();
-
-        private List<BaseWeigthCalculator> compareList;
-
-        public PersonDataWeightCalculator(List<BaseWeigthCalculator> compareList) {
-            this.compareList = compareList;
-        }
-
-        @Override
-        public double calc(IdentityPerson a, IdentityPerson b) {
-            double summWeigth = 0D;
-            double summParameterWeigt = 0D;
-            for (BaseWeigthCalculator calculator : compareList) {
-                double weigth = calculator.calc(a, b);
-                result.put(calculator.getName(), weigth);
-                summWeigth += weigth;
-                summParameterWeigt += calculator.getWeigth();
-            }
-            return summWeigth / summParameterWeigt;
-        }
-
-        public Map<String, Double> getResult() {
-            return result;
-        }
-
     }
 
 }
