@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+//TODO Необходимо сделать ревью и рефакторинг бэкенда и фронтенда по работе с Общими параметрами. https://jira.aplana.com/browse/SBRFNDFL-3174
 /**
  * Контроллер для работы с конфигурационными параметрами приложения
  */

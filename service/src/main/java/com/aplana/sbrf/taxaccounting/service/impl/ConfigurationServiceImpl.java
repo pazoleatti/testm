@@ -27,6 +27,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
+//TODO Необходимо организовать проверку прав доступа в ConfigurationServiceImpl, через com.aplana.sbrf.taxaccounting.permissions.Permission. https://jira.aplana.com/browse/SBRFNDFL-3173
 @Service
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
