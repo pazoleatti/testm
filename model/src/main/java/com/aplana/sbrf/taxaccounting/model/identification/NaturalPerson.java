@@ -94,7 +94,7 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     /**
      * Поле для хранения веса записи при идентификации
      */
-    private Double weigth;
+    private Double weight;
 
     /**
      * Флаг указывающий на то что запись в справочнике не надо обновлять
@@ -271,13 +271,13 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
 
 
     @Override
-    public Double getWeigth() {
-        return weigth;
+    public Double getWeight() {
+        return weight;
     }
 
     @Override
-    public void setWeigth(Double weigth) {
-        this.weigth = weigth;
+    public void setWeight(Double weight) {
+        this.weight = weight;
     }
 
     public boolean isNeedUpdate() {
@@ -307,7 +307,7 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
                 .append("personDocumentList", personDocumentList)
                 .append("address", address)
                 .append("employee", employee)
-                .append("weigth", weigth)
+                .append("weight", weight)
                 .toString();
     }
 

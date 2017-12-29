@@ -24,7 +24,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.FiasCheckInfo
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
-import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator
+import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
@@ -49,7 +49,7 @@ new Calculate(this).run();
  * Сами физлица являются сущностями таблицы NDFL_PERSON, но для них используется
  * класс {@link #com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson}.
  * Также может возникнуть ситуация когда в реквизитах налоговой формы есть несколько записей, которые по своей сути
- * являются одним физлицом. Эта ситуация обрабатывается в {@link performPrimaryPersonDuplicates(List<NaturalPerson)}.
+ * являются одним физлицом. Эта ситуация обрабатывается в {@link performPrimaryPersonDuplicates ( List < NaturalPerson )}.
  * 2. На втором этапе ищутся записи в справочнике физлиц, которые совпадают по всем ключевым параметам с записями из
  * реквизитов налоговой формы. Считается что это одни и теже физлица. Если какие-то параметры отличаются, то они
  * обновляются.
@@ -60,7 +60,7 @@ new Calculate(this).run();
  * Если все таки ни одно физлицо при сравнении по весам не прошло порог схожести, тогда создается новая запись в
  * справочнике физлиц.
  *
- * По результату работы скрипта каждое физлицо из налоговой формы раздела "Рекввизиты" будет иметь ссылку на запись в
+ * По результату работы скрипта каждое физлицо из налоговой формы раздела "Рекввзиты" будет иметь ссылку на запись в
  * справочнике "Физические лица"
  */
 @TypeChecked
@@ -256,13 +256,13 @@ class Calculate extends AbstractScriptClass {
     // Вывод информации о количестве обработынных физлиц всего и уникальных
     void countTotalAndUniquePerson(Collection<NaturalPerson> persons) {
         def personIds = persons.collect { NaturalPerson person -> return person.id }
-        int countOfNulls = personIds.count{Long id -> return id == null}.intValue()
+        int countOfNulls = personIds.count { Long id -> return id == null }.intValue()
         personIds.removeAll([null])
         def personIdSet = personIds.toSet()
         if (!personIdSet.isEmpty()) {
             Set<Long> duplicateIdSet = personService.getDuplicate(personIdSet).toSet()
-            for (Long duplicateId : duplicateIdSet){
-                if (personIdSet.contains(duplicateId)){
+            for (Long duplicateId : duplicateIdSet) {
+                if (personIdSet.contains(duplicateId)) {
                     personIdSet.remove(duplicateId)
                 }
             }
@@ -394,17 +394,17 @@ class Calculate extends AbstractScriptClass {
      * 2. Если оно встречалось только 1 раз оно будет находится в мапе где ключ значение из шага A, а значение физлицо.
      * Тогда мы создаем запись в мапе из шага B1 с двумя физлицами.
      * 3. Если оно не встречалось добавляем запись в мапу из шага B2 с физлицом.
-     * За шаг B отвечает метод {@link #addToReduceMap(Object, Map<?, NaturalPerson>, Map<?, List<NaturalPerson>>, NaturalPerson)}
+     * За шаг B отвечает метод {@link #addToReduceMap(Object, Map < ?, NaturalPerson >, Map < ?, List < NaturalPerson > >, NaturalPerson)}
      * C. Далее для каждой entry из мапы описаной на шаге B1, сравниваем между собой физлиц из значения этой entry.
      * Сравнение выполняется с вложенным циклом для того чтобы не делать лишнюю работу заведено поле{@link #primaryDuplicateIds}
-     * В это поле добавляется идентификатор физлица определенное ранне как дубликат и таким образом алгоритм будет знать
+     * В это поле добавляется идентификатор физлица определенный раннее как дубликат и таким образом алгоритм будет знать
      * что физлицо не надо делать оригиналом и не надо сравнивать по другим совпадающим параметрам.
      * Для оригинала выбирается первое значение из списка физлиц, для того чтобы обеспечить повторяемость результата список
      * предварительно сортируется по ключу идентификатора из реквизитов налоговой формы.
      * Результат записывается в {@link #primaryPersonOriginalDuplicates}
      * Одновременно удаляем дубликаты из списка физлиц отобранных для вставки в справочник физлиц, чтобы для дубликатов
      * не создалась отдельная запись.
-     * За шаг C отвечает {@link #mapDuplicates(List<NaturalPerson>, List<NaturalPerson>)}
+     * За шаг C отвечает {@link #mapDuplicates(List < NaturalPerson >, List < NaturalPerson >)}
      * D. После создания записей в справочнике физлиц назначаем дубликатам ссылку на запись в справочнике физлиц, такую
      * же какую имеют оригиналы.
      * @param insertRecords Список физлиц отобранных для вставки
@@ -457,10 +457,10 @@ class Calculate extends AbstractScriptClass {
     }
 
     /**
-     * Посылает сравнивать по весам физлиц из раздела Реквизиты Налоговой формы, которые на предыдущем шаге имели
-     * совпадение по важным параметрам.
-     * @param processingPersonList  список обрабатываемых Физлиц.
-     * @param insertPersonList      список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
+     * Разделяет <code>processingPersonList</code> на отдельные списки, каждый список передается
+     * в {@link #mapDuplicates(List < NaturalPerson >, List < NaturalPerson >)} для дальнейшей обработки
+     * @param processingPersonList списки обрабатываемых Физлиц, сгруппированные по ключевому параметру.
+     * @param insertPersonList список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
      * дубликатом
      */
     void sendToMapDuplicates(Map<?, List<NaturalPerson>> processingPersonList, List<NaturalPerson> insertRecords) {
@@ -473,11 +473,11 @@ class Calculate extends AbstractScriptClass {
 
     /**
      * Добавляет физлиц в мапу по ключу.
-     * @param key       ключ по которому добавляется параметр
-     * @param matchMap  здесь находятся физлица, которые имеют значение с таким же <code>key</code>
+     * @param key ключ по которому добавляется параметр
+     * @param matchMap здесь находятся физлица, которые имеют значение с таким же <code>key</code>
      * @param reduceMap если физлицо уже присутствует в <code>matchMap</code>, тогда возможно это дубликат и необходимо
      * провести сравнение по весам
-     * @param person    сравниваемое физлицо
+     * @param person сравниваемое физлицо
      */
     void addToReduceMap(Object key, Map<?, NaturalPerson> matchMap, Map<?, List<NaturalPerson>> reduceMap, NaturalPerson person) {
         List<NaturalPerson> list1 = reduceMap.get(key)
@@ -495,8 +495,8 @@ class Calculate extends AbstractScriptClass {
 
     /**
      * Отвечает за распределение физлиц на оригиналы и дубликаты, на основе расчета по весам
-     * @param processingPersonList  список обрабатываемых Физлиц.
-     * @param insertPersonList      список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
+     * @param processingPersonList список обрабатываемых Физлиц.
+     * @param insertPersonList список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
      * дубликатом
      */
     void mapDuplicates(List<NaturalPerson> processingPersonList, List<NaturalPerson> insertPersonList) {
@@ -511,12 +511,12 @@ class Calculate extends AbstractScriptClass {
             if (primaryDuplicateIds.contains(processingPersonList.get(i).primaryPersonId)) {
                 continue
             }
-            for (int j = i + 1; j<processingPersonList.size(); j++) {
+            for (int j = i + 1; j < processingPersonList.size(); j++) {
                 if (primaryDuplicateIds.contains(processingPersonList.get(j).primaryPersonId)) {
                     continue
                 }
-                refBookPersonService.calculateWeigth(processingPersonList.get(i), [processingPersonList.get(j)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
-                if (processingPersonList.get(j).weigth > similarityLine) {
+                refBookPersonService.calculateWeight(processingPersonList.get(i), [processingPersonList.get(j)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
+                if (processingPersonList.get(j).weight > similarityLine) {
                     primaryDuplicateIds << processingPersonList.get(j).primaryPersonId
                     List<NaturalPerson> duplicates = primaryPersonOriginalDuplicates.get(processingPersonList.get(i))
                     insertPersonList.remove(processingPersonList.get(j))
@@ -773,7 +773,7 @@ class Calculate extends AbstractScriptClass {
                 PersonDocument primaryPersonDocument = primaryPerson.getPersonDocument();
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
-                    PersonDocument personDocument = BaseWeigthCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
+                    PersonDocument personDocument = BaseWeightCalculator.findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
 
                     if (personDocument == null) {
                         if (primaryPersonDocument.docType != null) {
@@ -796,10 +796,10 @@ class Calculate extends AbstractScriptClass {
 
                     if (refBookPersonIdentifier != null) {
 
-                        String primaryInp = BaseWeigthCalculator.prepareString(primaryPersonIdentifier.getInp());
-                        String refbookInp = BaseWeigthCalculator.prepareString(refBookPersonIdentifier.getInp());
+                        String primaryInp = BaseWeightCalculator.prepareString(primaryPersonIdentifier.getInp());
+                        String refbookInp = BaseWeightCalculator.prepareString(refBookPersonIdentifier.getInp());
 
-                        if (!BaseWeigthCalculator.isEqualsNullSafeStr(primaryInp, refbookInp)) {
+                        if (!BaseWeightCalculator.isEqualsNullSafeStr(primaryInp, refbookInp)) {
 
                             AttributeChangeEvent changeEvent = new AttributeChangeEvent("INP", primaryInp);
                             changeEvent.setCurrentValue(new RefBookValue(RefBookAttributeType.STRING, refbookInp));
@@ -909,7 +909,7 @@ class Calculate extends AbstractScriptClass {
         String toReturn = personDocument.documentNumber
         if (docTypes.contains(personDocument.docType)) {
             String docNumber = personDocument.documentNumber
-            if (ScriptUtils.checkDulSymbols(personDocument.docType.code, BaseWeigthCalculator.prepareStringDul(personDocument.documentNumber).toUpperCase())){
+            if (ScriptUtils.checkDulSymbols(personDocument.docType.code, BaseWeightCalculator.prepareStringDul(personDocument.documentNumber).toUpperCase())) {
                 toReturn = ScriptUtils.formatDocNumber(personDocument.docType.code, docNumber.replaceAll("[^А-Яа-я\\w]", "").toUpperCase())
             }
         }
@@ -1256,7 +1256,7 @@ class Calculate extends AbstractScriptClass {
 
     Boolean isAttrEquals(RefBookAttributeType type, Object valueA, Object valueB) {
         if (type.equals(RefBookAttributeType.STRING)) {
-            return BaseWeigthCalculator.isEqualsNullSafeStr((String) valueA, (String) valueB);
+            return BaseWeightCalculator.isEqualsNullSafeStr((String) valueA, (String) valueB);
         } else if (type.equals(RefBookAttributeType.DATE)) {
             return ScriptUtils.equalsNullSafe(valueA, valueB);
         } else {

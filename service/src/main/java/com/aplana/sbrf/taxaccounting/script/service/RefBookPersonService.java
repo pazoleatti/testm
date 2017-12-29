@@ -5,8 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.identification.IdentificationData;
 import com.aplana.sbrf.taxaccounting.model.identification.IdentityPerson;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
-import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
+import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
+import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -30,9 +30,9 @@ public interface RefBookPersonService {
 
     NaturalPerson identificatePerson(IdentificationData identificationData, Logger logger);
 
-    NaturalPerson identificatePerson(IdentificationData identificationData, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger);
+    NaturalPerson identificatePerson(IdentificationData identificationData, WeightCalculator<IdentityPerson> weightCalculator, Logger logger);
 
-    List<BaseWeigthCalculator> getBaseCalculateList();
+    List<BaseWeightCalculator> getBaseCalculateList();
 
 
     /**
@@ -80,10 +80,10 @@ public interface RefBookPersonService {
 
     /**
      * Рассчитывает вес, который показывает насколько похоже сравниваемое физлицо с физлицом из списка. Метод ничего не
-     * возвращает поскольку вес записывается в поле weigth объекта NaturalPerson.
+     * возвращает поскольку вес записывается в поле weight объекта NaturalPerson.
      * @param searchPersonData  физлицо для которого определяется схожесть по весам.
      * @param personDataList    физлица которые были отобраны для сравнения по весам с основным физлицом
-     * @param weigthComporators объект содержащий логику сравнения по весам
+     * @param weightCalculator  объект содержащий логику сравнения по весам
      */
-    void calculateWeigth(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators);
+    void calculateWeight(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeightCalculator<IdentityPerson> weightCalculator);
 }

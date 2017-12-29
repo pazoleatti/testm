@@ -14,7 +14,7 @@ import java.util.Date;
  *
  * @param <T> тип класса
  */
-public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
+public abstract class BaseWeightCalculator<T> implements WeightCalculator<T> {
 
     /**
      * Наименование сравнения
@@ -24,15 +24,15 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
     /**
      * Вес параметра
      */
-    protected double weigth;
+    protected double weight;
 
     /**
      * Конструктор
      *
-     * @param weigth вес параметра
+     * @param weight вес параметра
      */
-    public BaseWeigthCalculator(String name, double weigth) {
-        this.weigth = weigth;
+    public BaseWeightCalculator(String name, double weight) {
+        this.weight = weight;
         this.name = name;
     }
 
@@ -48,8 +48,8 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
      *
      * @return вес параметра
      */
-    public double getWeigth() {
-        return weigth;
+    public double getWeight() {
+        return weight;
     }
 
     public String getName() {
@@ -60,21 +60,21 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
      * Сравнить строки исключая пробелы, без учета регистра
      */
     protected double compareString(String a, String b) {
-        return isStringEquals(a, b) ? weigth : 0D;
+        return isStringEquals(a, b) ? weight : 0D;
     }
 
     /**
      * Сравнить числа
      */
     protected double compareNumber(Number a, Number b) {
-        return equalsNullSafe(a, b) ? weigth : 0D;
+        return equalsNullSafe(a, b) ? weight : 0D;
     }
 
     /**
      * Сравнить даты
      */
     protected double compareDate(Date a, Date b) {
-        return equalsNullSafe(formatDate(a), formatDate(b)) ? weigth : 0D;
+        return equalsNullSafe(formatDate(a), formatDate(b)) ? weight : 0D;
     }
 
     /**
@@ -197,7 +197,7 @@ public abstract class BaseWeigthCalculator<T> implements WeigthCalculator<T> {
 
     public PersonIdentifier findIdentifier(NaturalPerson person, String inp, Long asnuId) {
         for (PersonIdentifier personIdentifier : person.getPersonIdentityList()) {
-            if (equalsNullSafe(BaseWeigthCalculator.prepareString(inp), BaseWeigthCalculator.prepareString(personIdentifier.getInp())) && equalsNullSafe(asnuId, personIdentifier.getAsnuId())) {
+            if (equalsNullSafe(BaseWeightCalculator.prepareString(inp), BaseWeightCalculator.prepareString(personIdentifier.getInp())) && equalsNullSafe(asnuId, personIdentifier.getAsnuId())) {
                 return personIdentifier;
             }
         }

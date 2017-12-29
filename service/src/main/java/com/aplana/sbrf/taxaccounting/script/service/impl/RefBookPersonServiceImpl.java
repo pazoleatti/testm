@@ -5,8 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.identification.NaturalPersonRefbookHand
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookPersonDao;
 import com.aplana.sbrf.taxaccounting.model.identification.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.BaseWeigthCalculator;
-import com.aplana.sbrf.taxaccounting.model.util.WeigthCalculator;
+import com.aplana.sbrf.taxaccounting.model.util.BaseWeightCalculator;
+import com.aplana.sbrf.taxaccounting.model.util.WeightCalculator;
 import com.aplana.sbrf.taxaccounting.model.util.impl.PersonDataWeightCalculator;
 import com.aplana.sbrf.taxaccounting.script.service.RefBookPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     }
 
     @Override
-    public NaturalPerson identificatePerson(IdentificationData identificationData, WeigthCalculator<IdentityPerson> weigthComporators, Logger logger) {
+    public NaturalPerson identificatePerson(IdentificationData identificationData, WeightCalculator<IdentityPerson> weightCalculator, Logger logger) {
 
         double treshold = identificationData.getTresholdValue() / 1000D;
         List<NaturalPerson> personDataList = identificationData.getRefBookPersonList();
@@ -81,12 +81,12 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 }
             }
 
-            calculateWeigth(identificationData.getNaturalPerson(), personDataList, weigthComporators);
+            calculateWeight(identificationData.getNaturalPerson(), personDataList, weightCalculator);
 
             // Удаляем ФЛ с весом < порога схожести
             List<NaturalPerson> personForRemoveList = new LinkedList<>();
             for (NaturalPerson person : personDataList) {
-                if (person.getWeigth() <= treshold) {
+                if (person.getWeight() <= treshold) {
                     personForRemoveList.add(person);
                 }
             }
@@ -105,12 +105,12 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                     msg.append("Для ФЛ " + IdentificationUtils.buildNotice(identificationData.getNaturalPerson()) + " сходных записей найдено: " + personDataList.size()).append(" ");
                     DecimalFormat df = new DecimalFormat("0.00");
                     for (IdentityPerson applicablePersonData : personDataList) {
-                        msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeigth()) + ")").append("]");
+                        msg.append("[").append(IdentificationUtils.buildRefBookNotice((NaturalPerson) applicablePersonData) + " (" + df.format(applicablePersonData.getWeight()) + ")").append("]");
                     }
-                    if (identificatedPerson.getWeigth() > treshold) {
+                    if (identificatedPerson.getWeight() > treshold) {
                         //Если Степень соответствия выбранной записи > ПорогСхожести, то обновление данных выбранной записи справочника
                         if (personDataList.size() > 1) {
-                            msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeigth()) + ")]");
+                            msg.append(". Выбрана запись: [" + IdentificationUtils.buildRefBookNotice((NaturalPerson) identificatedPerson) + " (" + df.format(identificatedPerson.getWeight()) + ")]");
                             logger.info(msg.toString());
                         }
 
@@ -131,10 +131,10 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         }
     }
 
-    public void calculateWeigth(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeigthCalculator<IdentityPerson> weigthComporators) {
+    public void calculateWeight(NaturalPerson searchPersonData, List<NaturalPerson> personDataList, WeightCalculator<IdentityPerson> weightCalculator) {
         for (IdentityPerson personData : personDataList) {
-            double weigth = weigthComporators.calc(searchPersonData, personData);
-            personData.setWeigth(weigth);
+            double weight = weightCalculator.calc(searchPersonData, personData);
+            personData.setWeight(weight);
         }
     }
 
@@ -143,12 +143,12 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
      *
      * @return
      */
-    public List<BaseWeigthCalculator> getBaseCalculateList() {
+    public List<BaseWeightCalculator> getBaseCalculateList() {
 
-        List<BaseWeigthCalculator> result = new ArrayList<BaseWeigthCalculator>();
+        List<BaseWeightCalculator> result = new ArrayList<BaseWeightCalculator>();
 
         //Фамилия
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Фамилия", 5) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Фамилия", 5) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getLastName(), b.getLastName());
@@ -156,7 +156,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Имя
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Имя", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Имя", 10) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getFirstName(), b.getFirstName());
@@ -164,7 +164,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Отчество
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Отчество", 5) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Отчество", 5) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getMiddleName(), b.getMiddleName());
@@ -172,7 +172,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Дата рождения
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Дата рождения", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Дата рождения", 10) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareDate(a.getBirthDate(), b.getBirthDate());
@@ -180,7 +180,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Гражданство
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Гражданство", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Гражданство", 1) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareNumber(getIdOrNull(a.getCitizenship()), getIdOrNull(b.getCitizenship()));
@@ -188,7 +188,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Идентификатор физлица номер и код АСНУ
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Идентификатор физлица", 15) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Идентификатор физлица", 15) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
 
@@ -202,17 +202,17 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 if (primaryPersonId != null) {
                     //Ищем совпадение в списке идентификаторов
                     PersonIdentifier refBookPersonId = findIdentifier(refBookPerson, primaryPersonId.getInp(), primaryPersonId.getAsnuId());
-                    return (refBookPersonId != null) ? weigth : 0D;
+                    return (refBookPersonId != null) ? weight : 0D;
                 } else {
                     //Если  значени параметра не задано то оно не должно учитыватся при сравнении со списком
-                    return weigth;
+                    return weight;
                 }
             }
 
         });
 
         //ИНН в РФ
-        result.add(new BaseWeigthCalculator<IdentityPerson>("ИНН в РФ", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("ИНН в РФ", 10) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getInn(), b.getInn());
@@ -220,7 +220,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //ИНН в стране гражданства
-        result.add(new BaseWeigthCalculator<IdentityPerson>("ИНН Ино", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("ИНН Ино", 10) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(a.getInnForeign(), b.getInnForeign());
@@ -228,7 +228,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //СНИЛС
-        result.add(new BaseWeigthCalculator<IdentityPerson>("СНИЛС", 15) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("СНИЛС", 15) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 return compareString(prepareSnils(a.getSnils()), prepareSnils(b.getSnils()));
@@ -236,7 +236,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Статус налогоплательщика
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Статус налогоплательщика", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Статус налогоплательщика", 1) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
                 TaxpayerStatus a = personA.getTaxPayerStatus();
@@ -245,7 +245,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 if (a != null && b != null) {
                     return compareNumber(a.getId(), b.getId());
                 } else if (a == null && b == null) {
-                    return weigth;
+                    return weight;
                 } else {
                     return 0D;
                 }
@@ -253,7 +253,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Документ вид документа и код
-        result.add(new BaseWeigthCalculator<IdentityPerson>("ДУЛ", 10) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("ДУЛ", 10) {
             @Override
             public double calc(IdentityPerson a, IdentityPerson b) {
                 //Запись первичной НФ
@@ -266,9 +266,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                 if (primaryPersonDocument != null) {
                     Long docTypeId = primaryPersonDocument.getDocType() != null ? primaryPersonDocument.getDocType().getId() : null;
                     PersonDocument personDocument = findDocument(refBookPerson, docTypeId, primaryPersonDocument.getDocumentNumber());
-                    return (personDocument != null) ? weigth : 0D;
+                    return (personDocument != null) ? weight : 0D;
                 } else {
-                    return weigth;
+                    return weight;
                 }
             }
 
@@ -276,7 +276,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Адрес в РФ
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Адрес в РФ", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Адрес в РФ", 1) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
 
@@ -328,9 +328,9 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                     if (!result) {
                         return 0D;
                     }
-                    return weigth;
+                    return weight;
                 } else if (a == null && b == null) {
-                    return weigth;
+                    return weight;
                 } else {
                     return 0D;
                 }
@@ -340,7 +340,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
         });
 
         //Адрес ино
-        result.add(new BaseWeigthCalculator<IdentityPerson>("Адрес ино", 1) {
+        result.add(new BaseWeightCalculator<IdentityPerson>("Адрес ино", 1) {
             @Override
             public double calc(IdentityPerson personA, IdentityPerson personB) {
 
@@ -354,7 +354,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
                     }
                     return compareString(a.getAddressIno(), b.getAddressIno());
                 } else if (a == null && b == null) {
-                    return weigth;
+                    return weight;
                 } else {
                     return 0D;
                 }
@@ -368,7 +368,7 @@ public class RefBookPersonServiceImpl implements RefBookPersonService {
     private class PersonDataComparator implements Comparator<IdentityPerson> {
         @Override
         public int compare(IdentityPerson a, IdentityPerson b) {
-            int weightComp = Double.compare(a.getWeigth(), b.getWeigth());
+            int weightComp = Double.compare(a.getWeight(), b.getWeight());
             if (weightComp == 0) {
                 return Long.compare(b.getRecordId(), a.getRecordId());
             }

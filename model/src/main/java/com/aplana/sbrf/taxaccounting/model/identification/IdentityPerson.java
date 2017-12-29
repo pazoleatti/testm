@@ -34,7 +34,7 @@ public interface IdentityPerson {
     Integer getEmployee();
 
     //поле для хранения веса записи
-    Double getWeigth();
+    Double getWeight();
 
-    void setWeigth(Double weigth);
+    void setWeight(Double weight);
 }
