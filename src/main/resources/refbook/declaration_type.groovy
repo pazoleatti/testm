@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.service.impl.TAAbstractScriptingServiceImpl
 import groovy.transform.TypeChecked
 import org.apache.commons.io.IOUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.joda.time.LocalDateTime
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -33,6 +35,7 @@ import java.util.regex.Pattern
 
 @TypeChecked
 class DeclarationType extends AbstractScriptClass {
+    private static final Log LOG = LogFactory.getLog(DeclarationType.class)
 
     String UploadFileName
     InputStream ImportInputStream
@@ -1025,10 +1028,12 @@ class DeclarationType extends AbstractScriptClass {
             SAXParser saxParser = factory.newSAXParser()
             saxParser.parse(inputStream, handler)
         } catch (SAXParseException e) {
-            logger.error(getSAXParseExceptionMessage(e))
+            LOG.error(getSAXParseExceptionMessage(e), e)
+            logger.error("Ошибка чтения файла «${UploadFileName}»")
             return
         } catch (Exception e) {
-            logger.error(e)
+            LOG.error("Ошибка чтения файла ${UploadFileName}", e)
+            logger.error("Ошибка чтения файла «${UploadFileName}»")
             return
         } finally {
             IOUtils.closeQuietly(inputStream)
@@ -1062,10 +1067,12 @@ class DeclarationType extends AbstractScriptClass {
             SAXParser saxParser = factory.newSAXParser()
             saxParser.parse(inputStream, handler)
         } catch (SAXParseException e) {
-            logger.error(getSAXParseExceptionMessage(e))
+            LOG.error(getSAXParseExceptionMessage(e), e)
+            logger.error("Ошибка чтения файла «${UploadFileName}»")
             return
         } catch (Exception e) {
-            logger.error(e)
+            LOG.error("Ошибка чтения файла ${UploadFileName}", e)
+            logger.error("Ошибка чтения файла «${UploadFileName}»")
             return
         }
 
