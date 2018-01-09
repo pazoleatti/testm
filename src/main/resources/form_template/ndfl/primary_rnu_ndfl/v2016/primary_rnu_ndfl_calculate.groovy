@@ -207,8 +207,6 @@ class Calculate extends AbstractScriptClass {
                     List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true));
                     logForDebug("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
-                    performPrimaryPersonDuplicates(insertPersonList)
-
                     time = System.currentTimeMillis();
                     createNaturalPersonRefBookRecords(insertPersonList);
                     logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
@@ -431,13 +429,15 @@ class Calculate extends AbstractScriptClass {
 
         for (NaturalPerson person : insertRecords) {
             String inp = person.personIdentityList.get(0).getInp()
-            String snils = person.snils.replaceAll("[\\s-]", "").toLowerCase()
+            String snils = person.snils?.replaceAll("[\\s-]", "")?.toLowerCase()
             String inn = person.inn
             String innForeign = person.innForeign
             PersonDocument personDocument = person.personDocumentList.get(0)
             PersonalData personalData = new PersonalData(person.firstName, person.lastName, person.middleName, person.birthDate)
             addToReduceMap(inp, inpMatchedMap, inpReducedMatchedMap, person)
-            addToReduceMap(snils, snilsMatchedMap, snilsReducedMatchedMap, person)
+            if (snils != null) {
+                addToReduceMap(snils, snilsMatchedMap, snilsReducedMatchedMap, person)
+            }
             if (inn != null) {
                 addToReduceMap(inn, innMatchedMap, innReducedMatchedMap, person)
             }
@@ -519,8 +519,14 @@ class Calculate extends AbstractScriptClass {
                 if (processingPersonList.get(j).weight > similarityLine) {
                     primaryDuplicateIds << processingPersonList.get(j).primaryPersonId
                     List<NaturalPerson> duplicates = primaryPersonOriginalDuplicates.get(processingPersonList.get(i))
+
                     insertPersonList.remove(processingPersonList.get(j))
+
                     if (duplicates != null) {
+                        if (primaryPersonOriginalDuplicates.containsKey(processingPersonList.get(j))) {
+                            primaryPersonOriginalDuplicates.get(processingPersonList.get(i)).addAll(primaryPersonOriginalDuplicates.remove(processingPersonList.get(j)))
+                            primaryPersonOriginalDuplicates.get(processingPersonList.get(i)).add(processingPersonList.get(j))
+                        }
                         duplicates.add(processingPersonList.get(j))
                     } else {
                         primaryPersonOriginalDuplicates.put(processingPersonList.get(i), [processingPersonList.get(j)])
@@ -535,6 +541,8 @@ class Calculate extends AbstractScriptClass {
 
         int createCnt = 0;
         if (insertRecords != null && !insertRecords.isEmpty()) {
+
+            performPrimaryPersonDuplicates(insertRecords)
 
             List<Address> addressList = new ArrayList<Address>();
             List<PersonDocument> documentList = new ArrayList<PersonDocument>();
