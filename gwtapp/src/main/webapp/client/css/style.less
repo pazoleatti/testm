@@ -25,8 +25,18 @@ body {
   background-color: @grayMoreLighter;
 }
 
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
 .clear {
   clear: both;
+}
+
+.form-control {
+  width: 100%;
 }
 
 form {
@@ -1028,12 +1038,6 @@ button.btn.btn-default.ng-binding {
   margin-bottom: 8px;
 }
 
-.filter-col .control-label {
-  padding-top: 5px;
-  float: right;
-  margin-right: -20px !important;
-}
-
 .ui-grid-pager-container {
   float: right;
   margin-right: 6px;
@@ -1525,6 +1529,10 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   #log-panel .ui-jqgrid-bdiv{
     max-height: 508px!important;
   }
+}
+
+.cbr-picker input {
+  box-sizing: content-box;
 }
 
 .resizer td {

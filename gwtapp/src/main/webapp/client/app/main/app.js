@@ -43,7 +43,9 @@
 
         "yes": "Да",
         "no": "Нет",
-
+        "common.select.formatSearching": "Идет поиск...",
+        "common.select.formatNoMatches": "По вашему запросу ничего не найдено",
+        "common.select.formatLoadMore" : "Подождите, идет загрузка данных...",
         "common.validation.required": "Необходимо заполнить поле",
 
         "common.hint": "Заполните обязательные поля (отмечены желтым)",
@@ -701,6 +703,57 @@
                 $translateProvider.translations('ru', translateDictionary);
                 $translateProvider.preferredLanguage('ru');
                 $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
+            }
+        ])
+
+        .run(['$rootScope', 'ValidationUtils','$overlayService', '$alertService', '$filter', 'uiSelect2Config', 'PermissionChecker', '$window',
+            function ($rootScope, ValidationUtils, $overlayService, $alertService, $filter, uiSelect2Config, PermissionChecker, $window) {
+
+                //Регистрируем глобальные сервисы
+                $rootScope.validationUtils = ValidationUtils;
+                $rootScope.permissionChecker = PermissionChecker;
+
+                angular.element($window).scroll(function () {
+                    $rootScope.$broadcast('WINDOW_SCROLLED_MSG');
+                });
+
+                //В осле есть баг: http://stackoverflow.com/questions/1852751/window-resize-event-firing-in-internet-explorer
+                //он кастует ресайз окна на каждый чих, даже если онкно свой размер не меняло, нужно самим следить за его размерами
+                var lastWindow = {};
+                angular.element($window).resize(function () {
+                    if (angular.isUndefined(lastWindow.width) || angular.isUndefined(lastWindow.height) ||
+                        (lastWindow.width !== $window.innerWidth) || (lastWindow.height !== $window.innerHeight)) {
+
+                        $rootScope.$broadcast('WINDOW_RESIZED_MSG');
+
+                        lastWindow = {
+                            width: $window.innerWidth,
+                            height: $window.innerHeight
+                        };
+                    }
+                });
+
+                // глобальные настройки для select2
+                angular.extend(uiSelect2Config, {
+                    openOnEnter: false,
+                    formatLoadMore: function () {
+                        return $filter('translate')('common.select.formatLoadMore');
+                    },
+                    formatSearching: function () {
+                        return $filter('translate')('common.select.formatSearching');
+                    },
+                    formatNoMatches: function () {
+                        return $filter('translate')('common.select.formatNoMatches');
+                    },
+                    formatSelection: $filter('nameFormatter'),
+                    formatResult: $filter('nameFormatter'),
+                    placeholder: $filter('translate')('common.placeholder.notSelected'),
+                    allowClear: true,
+                    initSelection: function (element) {
+                        return $(element).data('$ngModelController') ? $(element).data('$ngModelController').$modelValue : null;
+                    }
+                });
+
             }
         ]);
 

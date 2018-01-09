@@ -1,33 +1,33 @@
 <div data-ng-controller="CommonFilterCtrl">
     <div class="grid-filter"
-         style="min-width: 1900px; margin: 0 0 0 -19px; padding: 0 0 0 21px;">
+         style="margin: 0 0 0 -19px; padding: 0 0 0 21px;">
         <div data-aplana-collapse data-is-collapsed="searchFilter.hideExtendedFilter"
              data-label="'filterPanelLabel' | translate">
             <form class="form-horizontal" role="form" novalidate>
                 <div class="row">
                     <div class="filter-col w450">
-                        <div class="form-group">
-                            <div class="col-md-4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.period' | translate}}:</label>
                             </div>
                             <div data-ui-select2="periodSelect.options"
                                  data-ng-model="searchFilter.params.periods"
-                                 class="col-md-8"></div>
+                                 class="span8"></div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-md-4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.department' | translate}}:</label>
                             </div>
                             <div data-ui-select2="departmentsSelect.options"
                                  data-ng-model="searchFilter.params.departments"
-                                 class="col-md-8"></div>
+                                 class="span8"></div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-md-4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.declarationNumber' |
                                     translate}}:</label>
                             </div>
-                            <div class="col-md-8">
+                            <div class="span8">
                                 <input data-ng-model="searchFilter.params.declarationNumber"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"
@@ -38,50 +38,50 @@
                     <div class="filter-col w250">
                         <div data-ui-select2="correctionTagSelect.options"
                              data-ng-model="searchFilter.params.correctionTag"
-                             class="col-md-12"></div>
+                             class="span12"></div>
                     </div>
                     <div class="filter-col w500">
-                        <div class="form-group">
-                            <div class="col-md-4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.declarationKind' |
                                     translate}}:</label>
                             </div>
                             <div data-ui-select2="declarationKindSelect.options"
                                  data-ng-model="searchFilter.params.declarationKinds"
-                                 class="col-md-8"></div>
+                                 class="span8"></div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-md-4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.declarationType' |
                                     translate}}:</label>
                             </div>
                             <div data-ui-select2="declarationTypeSelect.options"
                                  data-ng-model="searchFilter.params.declarationTypes"
-                                 class="col-md-8"></div>
+                                 class="span8"></div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-md-4">
+                        <div class="row-fluid form-group">
+                            <div class="span4">
                                 <label class="control-label">{{::'ndflJournal.filter.asnu' | translate}}:</label>
                             </div>
                             <div data-ui-select2="asnuSelect.options"
                                  data-ng-model="searchFilter.params.asnuList"
-                                 class="col-md-8"></div>
+                                 class="span8"></div>
                         </div>
                     </div>
                     <div class="filter-col w350">
-                        <div class="form-group">
-                            <div class="col-md-3">
+                        <div class="row-fluid form-group">
+                            <div class="span3">
                                 <label class="control-label">{{::'ndflJournal.filter.state' | translate}}:</label>
                             </div>
                             <div data-ui-select2="stateSelect.options"
                                  data-ng-model="searchFilter.params.state"
-                                 class="col-md-9"></div>
+                                 class="span9"></div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-md-3">
+                        <div class="row-fluid form-group">
+                            <div class="span3">
                                 <label class="control-label">{{::'ndflJournal.filter.file' | translate}}:</label>
                             </div>
-                            <div class="col-md-9">
+                            <div class="span9">
                                 <input data-ng-model="searchFilter.params.file"
                                        placeholder="{{'filter.placeholder.search' | translate}}"
                                        type="text" class="form-control"

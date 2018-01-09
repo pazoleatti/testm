@@ -3,12 +3,12 @@
 
     <div class="row">
         <div class="filter-col w500" style="height: 360px; width: 500px; margin: auto">
-            <div class="form-group">
-                <div class="col-md-3">
+            <div class="row-fluid form-group">
+                <div class="span3">
                     <label class="control-label">{{::'title.refNumber' |
                         translate}}:</label>
                 </div>
-                <div class="col-md-9">
+                <div class="span9">
                     <input data-ng-model="searchFilter.params.refNumber"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            type="text" class="form-control"
@@ -16,12 +16,12 @@
                            ng-style="fieldStyles.refNumber"/>
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-md-3">
+            <div class="row-fluid form-group">
+                <div class="span3">
                     <label class="control-label">{{::'title.lastName' |
                         translate}}:</label>
                 </div>
-                <div class="col-md-9">
+                <div class="span9">
                     <input data-ng-model="searchFilter.params.lastName"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            type="text" class="form-control"
@@ -29,12 +29,12 @@
                            ng-style="fieldStyles.lastName"/>
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-md-3">
+            <div class="row-fluid form-group">
+                <div class="span3">
                     <label class="control-label">{{::'title.firstName' |
                         translate}}:</label>
                 </div>
-                <div class="col-md-9">
+                <div class="span9">
                     <input data-ng-model="searchFilter.params.firstName"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            type="text" class="form-control"
@@ -42,12 +42,12 @@
                            ng-style="fieldStyles.firstName"/>
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-md-3">
+            <div class="row-fluid form-group">
+                <div class="span3">
                     <label class="control-label">{{::'title.middleName' |
                         translate}}:</label>
                 </div>
-                <div class="col-md-9">
+                <div class="span9">
                     <input data-ng-model="searchFilter.params.middleName"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            type="text" class="form-control"
@@ -56,12 +56,12 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <div class="col-md-3">
+            <div class="row-fluid form-group">
+                <div class="span3">
                     <label class="control-label">{{::'title.inn' |
                         translate}}: </label>
                 </div>
-                <div class="col-md-9">
+                <div class="span9">
                     <input data-ng-model="searchFilter.params.inn"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            type="text" class="form-control"
@@ -71,7 +71,7 @@
             </div>
 
             <date-from-to-filter
-                    data-label-width="4"
+                    data-label-width="3"
                     ng-period-model="searchFilter.params"
                     ng-from-param="dateFrom"
                     ng-to-param="dateTo"
@@ -79,12 +79,12 @@
                     paragraph="personRnuParagraphForDate">
             </date-from-to-filter>
 
-            <div class="form-group">
-                <div class="col-md-3">
+            <div class="row-fluid form-group">
+                <div class="span3">
                     <label class="control-label">{{::'title.idDocNumber' |
                         translate}}: </label>
                 </div>
-                <div class="col-md-9">
+                <div class="span9">
                     <input data-ng-model="searchFilter.params.idDocNumber"
                            placeholder="{{'filter.placeholder.search' | translate}}"
                            type="text" class="form-control"
@@ -92,7 +92,7 @@
                            ng-style="fieldStyles.idDocNumber"/>
                 </div>
             </div>
-            <div class="col-md-12" data-ng-show="showInfo" style="width: auto; min-width: 650px; border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px">
+            <div class="span12" data-ng-show="showInfo" style="width: auto; min-width: 650px; border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px">
                 <div style="padding: 5px 0 5px 0; background-color: #f0f8d1">{{infoText}}</div>
             </div>
         </div>

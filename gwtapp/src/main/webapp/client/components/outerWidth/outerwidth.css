@@ -45,7 +45,7 @@ label.cbr-fileUpload-viewButton {
 
 /* picker */
 .cbr-picker {
-	width: 220px; /* default width */
+	width: 100%; /* default width */
 	display: inline-block;
 	white-space: nowrap;
 }
