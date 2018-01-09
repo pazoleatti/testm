@@ -61,15 +61,17 @@
                         <div class="form-group long-label">
                             <date-from-to-filter
                                     data-label-width="5"
-                                    ng-from-model="searchFilter.params.calculationDateFrom"
-                                    ng-to-model="searchFilter.params.calculationDateTo"
+                                    ng-period-model="searchFilter.params"
+                                    ng-from-param="calculationDateFrom"
+                                    ng-to-param="calculationDateTo"
                                     ng-label="title.dateCalcIncomeFrom"></date-from-to-filter>
                         </div>
                         <div class="form-group long-label">
                             <date-from-to-filter
                                     data-label-width="5"
-                                    ng-from-model="searchFilter.params.deductionDateFrom"
-                                    ng-to-model="searchFilter.params.deductionDateTo"
+                                    ng-period-model="searchFilter.params"
+                                    ng-from-param="deductionDateFrom"
+                                    ng-to-param="deductionDateTo"
                                     ng-label="title.currentDeductionDateFrom"></date-from-to-filter>
                         </div>
                     </div>

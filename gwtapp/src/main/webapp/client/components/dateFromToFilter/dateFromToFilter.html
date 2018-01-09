@@ -4,51 +4,14 @@
     </div>
     <div class="{{pickerGridClass}}">
         <div style="width: 130px; float: left;">
-            <p class="input-group">
-                <input type="text"
-                       class="form-control"
-                       data-datetime="dd.MM.yyyy"
-                       data-datepicker-timezone
-                       data-uib-datepicker-popup="dd.MM.yyyy"
-                       data-is-open="dateFromOpened"
-                       data-close-text="{{'button.select' | translate}}"
-                       data-current-text="{{'button.today' | translate}}"
-                       data-clear-text="{{'button.clear' | translate}}"
-                       data-ng-model="ngFromModel"
-                       data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
-                       title="{{ngFromModel}}">
-            <span class="input-group-btn">
-                <button type="button" class="btn btn-default btn-sm" data-ng-click="dateFromSelectClick()">
-                    <i class="glyphicon glyphicon-calendar"></i>
-                </button>
-            </span>
-            </p>
+            <div data-aplana-datepicker data-ng-model="ngPeriodModel[ngFromParam]"></div>
         </div>
         <div class="date-to-label" style="float: left;margin-left: -26px;width: 39px;">
             <label class="control-label">{{'title.dateToFilterLabel' | translate}}:</label>
         </div>
 
         <div style="width: 130px; float: right; margin-right: -17px" class="date-to-block">
-            <p class="input-group">
-                <input type="text"
-                       class="form-control"
-                       data-datetime="dd.MM.yyyy"
-                       data-datepicker-timezone
-                       data-uib-datepicker-popup="dd.MM.yyyy"
-                       data-is-open="dateToOpened"
-                       data-close-text="{{'button.select' | translate}}"
-                       data-current-text="{{'button.today' | translate}}"
-                       data-clear-text="{{'button.clear' | translate}}"
-                       data-datepicker-options="dateToOptions"
-                       data-ng-model="ngToModel"
-                       data-ng-pattern="/^(0[1-9]|[12][0-9]|3[01])[.](0[1-9]|1[012])[.]\d\d\d\d$/"
-                       title="{{ngToModel}}" >
-            <span class="input-group-btn">
-                <button type="button" class="btn btn-default btn-sm" data-ng-click="dateToSelectClick()">
-                    <i class="glyphicon glyphicon-calendar"></i>
-                </button>
-            </span>
-            </p>
+            <div data-aplana-datepicker data-ng-model="ngPeriodModel[ngToParam]"></div>
         </div>
     </div>
 </div>

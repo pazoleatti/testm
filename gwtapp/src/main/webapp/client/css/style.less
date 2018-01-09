@@ -112,9 +112,8 @@ a {
   background-color: @grayLighter;
 }
 
-.navbar-right {
-  margin-left: 0;
-  margin-right: 15px;
+.navbar .nav.pull-right {
+  color: @white;
 }
 
 /* Курсор мыши в виде кисти для пунктов меню */
@@ -191,7 +190,9 @@ h6,
 .h6 {
   font-size: 12px;
 }
-
+.btn{
+  text-shadow: none;
+}
 .btn, .form-control {
   font-size: 12px;
 }
@@ -785,11 +786,11 @@ hr {
     margin-top: 7px !important;
   }
   .new-message {
-    width: 28px;
-    height: 28px;
+    width: 12px;
+    height: 15px;
     border-radius: 32px;
     background: #f39346;
-    border: solid 6px #ffffff;
+    border: solid 5px #fff;
     display: inline-block;
     text-align: center;
     padding: 0 2px 0 1px;
@@ -801,11 +802,11 @@ hr {
     &::before {
       content: "";
       border: solid 3px #1c8740;
-      width: 26px;
-      height: 26px;
+      width: 17px;
+      height: 17px;
       position: absolute;
-      top: -5px;
-      left: -5px;
+      top: -4px;
+      left: -4px;
       border-radius: 34px;
     }
   }
@@ -839,11 +840,6 @@ hr {
   display: inline-block;
   vertical-align: top;
   font-style: italic;
-}
-
-.navbar-right {
-  color: @white;
-  margin-right: 0;
 }
 
 .info-icon {

@@ -5,7 +5,7 @@
      * @description Модуль, содержащий директивы для работы с многоуровневым меню
      */
 
-    angular.module('aplana.dropdown', [])
+    angular.module('app.treeMenu', [])
         /**
          * @description Директива для многоуровневого меню
          */
@@ -16,7 +16,7 @@
                 scope: {
                     tree: '='
                 },
-                templateUrl: 'client/components/dropDown/tree.html'
+                templateUrl: 'client/app/common/directives/treeMenu/tree.html'
             };
         })
 
@@ -30,7 +30,7 @@
                 scope: {
                     leaf: "="
                 },
-                templateUrl: 'client/components/dropDown/leaf.html',
+                templateUrl: 'client/app/common/directives/treeMenu/leaf.html',
                 link: function(scope, element) {
                     if (angular.isArray(scope.leaf.subtree)) {
                         element.append("<tree tree='leaf.subtree'></tree>");

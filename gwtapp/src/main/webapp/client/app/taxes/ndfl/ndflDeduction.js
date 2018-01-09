@@ -13,6 +13,14 @@
             '$scope', '$timeout', '$state', '$stateParams', '$http', 'NdflPersonResource', '$filter', '$rootScope', 'APP_CONSTANTS',
             function ($scope, $timeout, $state, $stateParams, $http, NdflPersonResource, $filter, $rootScope, APP_CONSTANTS) {
 
+                var tab = $scope.deductionsTab;
+
+                $scope.$watch("deductionsTab.active", function (newValue, oldValue) {
+                    if (newValue && !oldValue) {
+                        $scope.submitSearch();
+                    }
+                });
+
                 $scope.$on('INP_CHANGED', function(event, data) {
                     if (!_.isEqual($scope.searchFilter.params.inp, data)){
                         $scope.searchFilter.params.inp = data;
@@ -27,23 +35,8 @@
                     }
                 });
 
-                var isTabActive = false;
-
-                $scope.$on('tabSelected', function(event, data) {
-                    if (_.isEqual(data, 'deductions')){
-                        $scope.submitSearch();
-                        isTabActive = true;
-                    }
-                });
-
-                $scope.$on('tabDeselected', function(event, data) {
-                    if (_.isEqual(data, 'deductions')){
-                        isTabActive = false;
-                    }
-                });
-
                 $scope.$on('refreshDeclarationGrid', function(event, data) {
-                    if (isTabActive) {
+                    if (tab.active) {
                         $scope.refreshGrid();
                     }
                 });

@@ -1,0 +1,87 @@
+.address-container {
+	width: 220px; /* default width */
+}
+
+/* file upload component */
+.cbr-fileUpload {
+	width: 220px; /* default width */
+}
+.cbr-fileUpload-input {
+	margin-right: 130px; /* 116px + 12px left/right padding + 2px left/right border = 130*/
+}
+input.cbr-fileUpload-fileName {
+	width: 100%;
+}
+
+.cbr-fileUpload-button {
+	float: right;
+	width: 116px; /* removeButton + uploadLabel = 
+	(30px width + 8px left/right margin) + (50px width + 26px left/right padding + 2 left/right border) =
+	38 + 78 = 116 */
+}
+button.cbr-fileUpload-removeButton {
+	margin: 0 4px;
+	float: left;
+	width: 30px;
+}
+label.cbr-fileUpload-viewButton {
+	float: left;
+	margin-top: 0;
+}
+
+/*date picker time picker*/
+.cbr-datepickerTimepicker {
+	width: 220px; /* default width */
+}
+.cbr-datepickerTimepicker .cbr-datepickerTimepicker-date .cbr-picker {
+	width: 100%;
+}
+.cbr-datepickerTimepicker-time {
+	float: right;
+}
+.cbr-datepickerTimepicker-date {
+	margin-right: 72px;
+}
+
+/* picker */
+.cbr-picker {
+	width: 220px; /* default width */
+	display: inline-block;
+	white-space: nowrap;
+}
+.cbr-picker.cbr-timepicker {
+	width: 68px; /* default width */
+}
+.cbr-picker-input {
+	margin-right: 35px; /* 22px + 12px left/right padding + 2px left/right border - 1px (right offset -1) = 35*/
+}
+.cbr-picker-input > input {
+	width: 100%;
+}
+.cbr-picker-button {
+	float: right;
+	width: 22px;
+}
+.cbr-picker-button{
+	color: #333;
+	background-color: #fff;
+	border-color: #ccc;
+}
+.cbr-picker .cbr-picker-button > button.btn {
+	margin: 0;
+	width: 22px;
+}
+.cbr-picker-button > .btn-popover {
+	margin: 0;
+}
+.cbr-timepicker .cbr-picker-button > span > button.btn,
+.cbr-timepicker .cbr-picker-button > span > button.btn-popover {
+	margin: 0;
+}
+
+/* input with percent */
+div.cbr-inputWidthPercentWrapper {
+	margin-right: 14px; /* 12px left/right padding + 2px left/right border */
+}
+
+
