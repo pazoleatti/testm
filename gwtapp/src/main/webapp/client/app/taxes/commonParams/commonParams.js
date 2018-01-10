@@ -84,7 +84,7 @@
                         windowClass: 'modal600',
                         resolve: {
                             parameter: function () {
-                                return angular.copy($scope.commonParamsGrid.value[0]);
+                                return $scope.commonParamsGrid.value[0];
                             }
                         }
                     }).result.then(function () {

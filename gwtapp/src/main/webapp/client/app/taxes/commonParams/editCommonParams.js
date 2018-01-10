@@ -32,21 +32,26 @@
                 /**
                  * @description Переменная содержащая значения редактируемое значение
                  */
-                $scope.parameter = parameter;
+                $scope.parameter = angular.copy(parameter)
 
                 /**
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $dialogs.confirmDialog({
-                        title: $filter('translate')('title.cancelChanges'),
-                        content: $filter('translate')('commonParams.notSavedData'),
-                        okBtnCaption: $filter('translate')('common.button.yes'),
-                        cancelBtnCaption: $filter('translate')('DIALOGS_CANCELLATION'),
-                        okBtnClick: function () {
-                            $modalInstance.dismiss();
-                        }
-                    });
+                    if (angular.equals($scope.parameter, parameter)) {
+                        $modalInstance.dismiss();
+                    } else {
+                        //Если внесены изменения предупреждаем пользователя о потери данных при закрытии
+                        $dialogs.confirmDialog({
+                            title: $filter('translate')('title.cancelChanges'),
+                            content: $filter('translate')('commonParams.notSavedData'),
+                            okBtnCaption: $filter('translate')('common.button.yes'),
+                            cancelBtnCaption: $filter('translate')('DIALOGS_CANCELLATION'),
+                            okBtnClick: function () {
+                                $modalInstance.dismiss();
+                            }
+                        });
+                    }
                 };
 
             }]);
