@@ -983,26 +983,49 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 
         def operationId = toString((GPathResult) ndflPersonOperationsNode.getProperty('@ИдОпер'))
         LocalDateTime incomeAccruedDate = null
+        def incomeAccruedRowNum = null;
         LocalDateTime incomePayoutDate = null
+        def incomePayoutRowNum = null;
+        def allRowNums = new ArrayList<String>();
+
 
         ndflPersonOperationsNode.childNodes().each { node ->
+            def rowNum = node.attributes['НомСтр']
+            allRowNums.add(rowNum)
             if (node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
                 incomeAccruedDate = LocalDateTime.parse(node.attributes['ДатаДохНач'], DateTimeFormat.forPattern(DATE_FORMAT));
+                incomeAccruedRowNum = rowNum
             }
             if (node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
                 incomePayoutDate = LocalDateTime.parse(node.attributes['ДатаДохВыпл'], DateTimeFormat.forPattern(DATE_FORMAT));
+                incomePayoutRowNum = rowNum
             }
         }
 
         // Доход.Дата.Начисление
-        boolean incomeAccruedDateOk = incomeAccruedDate != null && dateRelateToCurrentPeriod(incomeAccruedDate)
+        boolean incomeAccruedDateOk = dateRelateToCurrentPeriod(incomeAccruedDate)
         // Доход.Дата.Выплата
         boolean incomePayoutDateOk = dateRelateToCurrentPeriod(incomePayoutDate)
         if (incomeAccruedDateOk || incomePayoutDateOk) {
             return true
         } else {
-            String pathError = String.format(SECTION_LINE_RANGE_MSG, T_PERSON_INCOME, "тут должен быть номер строк")
-            logPeriodError(pathError, incomeAccruedDate, incomePayoutDate, inp, fio, operationId)
+            def rowNums = new ArrayList<String>();
+            if (!incomeAccruedDateOk && incomeAccruedRowNum != null) {
+                // Дата.Начисление не попала в период
+                rowNums.add(incomeAccruedRowNum)
+            }
+            if (!incomePayoutDateOk && incomePayoutRowNum != null) {
+                // Дата.Выплата не попала в период
+                rowNums.add(incomePayoutRowNum)
+            }
+            if (incomeAccruedRowNum == null && incomePayoutRowNum == null) {
+                // Обе даты пустые - выводим сообщение по каждой строке операции (т.к не знаем где должна была быть каждая дата)
+                rowNums = allRowNums
+            }
+            for (String rowNum : rowNums) {
+                String pathError = String.format(SECTION_LINE_RANGE_MSG, T_PERSON_INCOME, rowNum)
+                logPeriodError(pathError, incomeAccruedDate, incomePayoutDate, inp, fio, operationId)
+            }
             return false
         }
     }
