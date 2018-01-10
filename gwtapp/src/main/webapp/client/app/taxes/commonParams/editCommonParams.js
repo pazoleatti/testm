@@ -10,8 +10,8 @@
     /**
      * @description Модуль для редактирования общих параметров'
      */
-        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'parameter', '$dialogs',
-            function ($scope, $filter, $http, $modalInstance, parameter, $dialogs) {
+        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'parameter', '$dialogs', '$logPanel',
+            function ($scope, $filter, $http, $modalInstance, parameter, $dialogs,  $logPanel) {
 
                 /**
                  * @description Редактирование параметра
@@ -24,7 +24,10 @@
                         params: {
                             config: $scope.parameter
                         }
-                    }).then(function () {
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                         $modalInstance.close();
                     });
                 };
@@ -32,7 +35,7 @@
                 /**
                  * @description Переменная содержащая значения редактируемое значение
                  */
-                $scope.parameter = angular.copy(parameter)
+                $scope.parameter = angular.copy(parameter);
 
                 /**
                  * @description Закрытие окна
