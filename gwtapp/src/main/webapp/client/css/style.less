@@ -58,6 +58,7 @@ form .row {
 a {
   text-decoration: none;
   cursor: pointer;
+  text-shadow: none;
 }
 
 #main-content {
@@ -116,6 +117,13 @@ a {
 .navbar {
   margin-bottom: 0; /* Устраняем лишнее пространство межжу меню и основным содержимым*/
   min-height: 41px;
+  .nav {
+    li {
+      a {
+          text-shadow: none;
+      }
+    }
+  }
 }
 
 .navbar .dropdown:hover {
@@ -796,8 +804,8 @@ hr {
     margin-top: 7px !important;
   }
   .new-message {
-    width: 12px;
-    height: 15px;
+    width: 25px;
+    height: 25px;
     border-radius: 32px;
     background: #f39346;
     border: solid 5px #fff;
