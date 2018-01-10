@@ -14,7 +14,7 @@
                     scope: true,
                     transclude: true,
                     replace: false,
-                    templateUrl: AplanaUtils.templatePath + 'dropdown/dropdown.html',
+                    templateUrl: AplanaUtils.templatePath + 'dropDown/dropdown.html',
                     compile: function compile(tElement, tAttrs, transclude) {
                         // выбор режима отображения
                         if (tAttrs.split !== undefined) {

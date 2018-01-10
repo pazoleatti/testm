@@ -10,7 +10,65 @@
  * http://localhost:8080/#/aplana_datetimepicker
  */
 
-angular.module('aplana.datetimepicker', [])
+
+
+angular.module("aplana/templates/datetimepicker/bootstrap-datetimepicker.html", []).run(["$templateCache", function($templateCache) {
+    $templateCache.put("aplana/templates/datetimepicker/bootstrap-datetimepicker.html",
+        "<div style=\"padding: 0px\" class='datetimepicker' data-ng-init=\"init()\">\n" +
+        "    <table class='table-condensed'>\n" +
+        "        <thead>\n" +
+        "        <tr>\n" +
+        "            <th class='left' data-ng-click=\"changeView(data.currentView, data.leftDate, $event)\">\n" +
+        "                <i class='icon-chevron-left'/>\n" +
+        "            </th>\n" +
+        "            <th class='switch' colspan='5' data-ng-click=\"changeView(data.previousView, data.currentDate, $event)\">\n" +
+        "                {{ data.title }}\n" +
+        "            </th>\n" +
+        "            <th class='right' data-ng-click=\"changeView(data.currentView, data.rightDate, $event)\">\n" +
+        "                <i class='icon-chevron-right'/>\n" +
+        "            </th>\n" +
+        "        </tr>\n" +
+        "        <tr>\n" +
+        "            <th class='dow' data-ng-repeat='day in data.dayNames'>{{ day }}</th>\n" +
+        "        </tr>\n" +
+        "        </thead>\n" +
+        "        <tbody>\n" +
+        "        <tr data-ng-class='{ hide: data.currentView == \"day\" }'>\n" +
+        "            <td colspan='7'>\n" +
+        "                          <span class='{{ data.currentView }}'\n" +
+        "                                data-ng-repeat='dateValue in data.dates'\n" +
+        "                                data-ng-class='{active: dateValue.active,\n" +
+        "                                past: dateValue.past,\n" +
+        "                                future: dateValue.future,\n" +
+        "                                now: dateValue.now,\n" +
+        "                                disabled: dateValue.disabled,\n" +
+        "                                weekends: dateValue.weekends,\n" +
+        "                                isHolidays: dateValue.isHolidays}'\n" +
+        "                                data-ng-click=\"changeView(data.nextView, dateValue.date, $event)\">\n" +
+        "                              {{ dateValue.display }}\n" +
+        "                          </span>\n" +
+        "            </td>\n" +
+        "        </tr>\n" +
+        "        <tr data-ng-show='data.currentView == \"day\"' data-ng-repeat='week in data.weeks'>\n" +
+        "            <td data-ng-repeat='dateValue in week.dates'\n" +
+        "                data-ng-click=\"changeView(data.nextView, dateValue.date, $event)\"\n" +
+        "                class='day'\n" +
+        "                data-ng-class='{active: dateValue.active,\n" +
+        "                 past: dateValue.past,\n" +
+        "                 future: dateValue.future,\n" +
+        "                 now: dateValue.now,\n" +
+        "                 disabled: dateValue.disabled,\n" +
+        "                 weekends: dateValue.weekends,\n" +
+        "                 isHolidays: dateValue.isHolidays}'>\n" +
+        "            {{ dateValue.display }}\n" +
+        "            </td>\n" +
+        "        </tr>\n" +
+        "        </tbody>\n" +
+        "    </table>\n" +
+        "</div>");
+}]);
+
+angular.module('aplana.datetimepicker', ['aplana/templates/datetimepicker/bootstrap-datetimepicker.html'])
 
 /**
  * Сервис изменения даты у сущности datetime
@@ -129,7 +187,7 @@ angular.module('aplana.datetimepicker', [])
             return {
                 restrict: 'A',
                 require: 'ngModel',
-                templateUrl: AplanaUtils.templatePath + 'datetimepicker/bootstrap-datetimepicker.html',
+                templateUrl: 'aplana/templates/datetimepicker/bootstrap-datetimepicker.html',
                 scope: {
                     ngModel: "=",
                     onSetTime: "&",
