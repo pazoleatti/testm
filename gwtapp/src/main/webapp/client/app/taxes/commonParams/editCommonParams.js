@@ -5,13 +5,13 @@
      * @description Модуль для редактирования общих параметров'
      */
 
-    angular.module('app.editParams', ['ui.router', 'app.rest', 'app.logPanel'])
+    angular.module('app.editParams', ['ui.router', 'app.rest'])
 
     /**
      * @description Модуль для редактирования общих параметров'
      */
-        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'parameter', '$logPanel','$dialogs',
-            function ($scope, $filter, $http, $modalInstance, parameter, $logPanel, $dialogs) {
+        .controller('editParamsCtrl', ['$scope', '$filter', '$http', '$modalInstance', 'parameter', '$dialogs',
+            function ($scope, $filter, $http, $modalInstance, parameter, $dialogs) {
 
                 /**
                  * @description Редактирование параметра
@@ -24,8 +24,8 @@
                         params: {
                             config: $scope.parameter
                         }
-                    }).then(function() {
-                        $modalInstance.close('Canceled');
+                    }).then(function () {
+                        $modalInstance.close();
                     });
                 };
 
@@ -44,7 +44,7 @@
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('DIALOGS_CANCELLATION'),
                         okBtnClick: function () {
-                            $modalInstance.dismiss('Canceled');
+                            $modalInstance.dismiss();
                         }
                     });
                 };

@@ -5,7 +5,7 @@
      * @description Модуль для работы окном 'Общие параметры'
      */
 
-    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.logPanel', 'app.editParams'])
+    angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.editParams'])
 
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('commonParams', {
@@ -18,7 +18,7 @@
         /**
          * @description Контроллер для общих параметров
          */
-        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS','$dialogs',
+        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS', '$dialogs',
             function ($scope, CommonParams, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs) {
 
                 /**
