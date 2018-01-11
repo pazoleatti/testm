@@ -61,6 +61,7 @@ a {
   text-decoration: none;
   cursor: pointer;
   text-shadow: none;
+  color: #336ed0;
 }
 
 #main-content {
@@ -212,6 +213,10 @@ h6,
 }
 .btn{
   text-shadow: none;
+}
+.btn.active{
+  background: transparent;
+  box-shadow: none;
 }
 .btn, .form-control {
   font-size: 12px;
@@ -408,7 +413,7 @@ input[type="number"] {
 .modal-header .close {
   font-weight: normal;
   font-size: 35px;
-  margin-top: -8px;
+  margin-top: 0;
 }
 
 .modal-header .close:hover {
@@ -453,6 +458,7 @@ input[type="number"] {
   padding: 15px;
   text-align: right;
   border-top: 1px solid #e5e5e5;
+  background: transparent;
 }
 
 .modal-backdrop {
@@ -1472,7 +1478,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
 
     .filter-col {
       width: 27%;
-      div:not([class="datepicker-block"]), div:not([class="cbr-picker"]) {
+      div {
         width: 100%;
         margin-bottom: 1px;
       }
@@ -1489,23 +1495,19 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
       margin: 0 !important;
       width: 319px!important;
       .date-from-label {
-        margin: 0 0 0 31px;
-      }
-      .date-to-label {
-        margin: -23px 0 0 46px !important;
+        margin-bottom: -8px;
       }
       .date-to-block {
         margin-right: -11px !important;
       }
-
+      .row-fluid [class*="span"]{
+        margin-left: 7px;
+      }
     }
     .long-label {
       .date-from-label {
         margin: 0 0 0 31px;
         width: 202px;
-      }
-      .date-to-label {
-        margin: -23px 0 0 80px !important;
       }
       .date-to-block {
         margin-right: -49px !important;
@@ -1521,6 +1523,30 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
       button{
         margin: 4px 0 0 0;
       }
+    }
+    div.cbr-picker{
+      width: 150px;
+      .cbr-picker-button, .cbr-picker-input{
+        display: inline-block;
+        vertical-align: top;
+      }
+      .cbr-picker-button{
+        width: 37px;
+      }
+      .cbr-picker-input{
+        width: 107px;
+        margin: 0 0 0 -6px;
+      }
+
+    }
+    .date-to-label{
+      .control-label{
+        width: 24px;
+      }
+    }
+    .row-fluid [class*="span"]:first-child {
+      margin-left: 7px;
+      margin-bottom: -6px;
     }
   }
   .report-wrapper {

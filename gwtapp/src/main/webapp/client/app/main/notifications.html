@@ -1,6 +1,5 @@
-<div class="modal-body form100" style="min-height: 462px;">
+<div class="modal-body form100">
     <div class="row container-grid-top">
-
         <a class="btn btn-default" data-aplana-link-click="delete()"
            data-aplana-link="'notifications.title.deleteLink' | translate" style="line-height: 13px;margin: 0 0 12px 13px;">
             <i class="glyphicon glyphicon-remove" style="color: red;"></i></a>
@@ -8,14 +7,14 @@
     <div data-aplana-grid
          data-grid-fill-space="true"
          data-grid-fill-space-container-selector=".modal-body"
-         data-grid-fill-space-container-selector-top=".modal-header "
+         data-grid-fill-space-container-selector-top=".container-grid-top"
          data-grid-options="notificationsGrid.options"
          data-grid-ctrl="notificationsGrid.ctrl"
          data-ng-model="notificationsGrid.value"
          id="notificationsTable"
          style="float: left; width: 100%;"></div>
 </div>
-<div class="modal-footer" style="margin: -22px 0 -19px 0; position: relative; z-index: 100">
+<div class="modal-footer" style="margin: 0 0 -19px 0; position: relative; z-index: 100">
     <button type="button" class="btn btn-default" id="closeButton" data-ng-click="close()" style="margin: -9px 0 18px 0">
         <span data-translate-once="button.close"></span>
     </button>
