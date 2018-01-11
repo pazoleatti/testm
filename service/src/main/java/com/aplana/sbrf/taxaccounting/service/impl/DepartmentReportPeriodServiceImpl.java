@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission;
-import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,8 +33,6 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	private DeclarationTemplateService declarationTemplateService;
 	@Autowired
 	private LogEntryService logEntryService;
-	@Autowired
-	private DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter;
 	@Autowired
 	private NotificationService notificationService;
 	@Autowired
@@ -221,12 +217,6 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	public List<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter) {
 		List<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.findAll(filter);
 		for (DepartmentReportPeriodJournalItem item : page){
-			DepartmentReportPeriod period = new DepartmentReportPeriod();
-			period.setIsActive(item.getIsActive());
-			departmentReportPeriodPermissionSetter.setPermissions(period, DepartmentReportPeriodPermission.EDIT, DepartmentReportPeriodPermission.OPEN,
-					DepartmentReportPeriodPermission.DELETE, DepartmentReportPeriodPermission.CLOSE, DepartmentReportPeriodPermission.OPEN_CORRECT,
-					DepartmentReportPeriodPermission.DEADLINE);
-			item.setPermissions(period.getPermissions());
 			Notification notification = notificationService.get(item.getReportPeriodId(), null, item.getDepartmentId());
 			if (notification != null) {
 				item.setDeadline(notification.getDeadline());

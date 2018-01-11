@@ -63,15 +63,8 @@
                     filterName: 'prepaymentFilter'
                 };
 
-                var init = function (ctrl) {
-                    ctrl.loadComplete = function (data) {
-                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
-                    };
-                };
-
                 $scope.prepaymentGrid =
                     {
-                        init: init,
                         ctrl: {},
                         value: [],
                         options: {

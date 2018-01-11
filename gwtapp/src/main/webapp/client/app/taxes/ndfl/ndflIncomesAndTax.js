@@ -65,15 +65,8 @@
                     filterName: 'incomesAndTaxFilter'
                 };
 
-                var init = function (ctrl) {
-                    ctrl.loadComplete = function (data) {
-                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
-                    };
-                };
-
                 $scope.incomesAndTaxGrid =
                     {
-                        init: init,
                         ctrl: {},
                         value: [],
                         options: {

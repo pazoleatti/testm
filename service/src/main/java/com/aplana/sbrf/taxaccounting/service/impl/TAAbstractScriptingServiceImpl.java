@@ -197,7 +197,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
                 if (script != null) {
                     return script;
                 }
-            } else if (file.getName().contains(event.name().toLowerCase())) {
+            } else if (file.getName().contains("_" + event.name().toLowerCase() + ".")) {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 try {
                     String line = reader.readLine();

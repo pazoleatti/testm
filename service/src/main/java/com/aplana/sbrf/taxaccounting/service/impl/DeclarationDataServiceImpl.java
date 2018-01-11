@@ -25,8 +25,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -164,8 +162,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DBUtils bdUtils;
     @Autowired
     private NdflPersonDao ndflPersonDao;
-    @Autowired//TODO SBRFNDFL-3119
-    private DeclarationDataPermissionSetter declarationDataPermissionSetter;
     @Autowired
     private NotificationService notificationService;
     @Autowired
@@ -609,16 +605,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             result.setCreationUserName(taUserService.getUser(userLogin).getName());
         }
 
-        //TODO SBRFNDFL-3119
-        declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
-                DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
-                DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
-                DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS,
-                DeclarationDataPermission.SHOW, DeclarationDataPermission.IMPORT_EXCEL);
-
-        result.setPermissions(declaration.getPermissions());
-
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         result.setDeclarationFormKind(declarationTemplate.getDeclarationFormKind().getTitle());
         result.setDeclarationType(declarationTemplate.getType().getId());
@@ -894,42 +880,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             page = declarationDataDao.findPage(filter, pagingParams);
         }
 
-        setPageItemsPermissions(page);
-
         return page;
-    }
-
-    /**
-     * Установка прав доступа для всех налоговых форм страницы
-     *
-     * @param page Страница списка налоговых форм
-     */
-    private void setPageItemsPermissions(PagingResult<DeclarationDataJournalItem> page) {
-        if (!page.isEmpty()) {
-            //Получение id всех форм
-            List<Long> declarationIds = new ArrayList<Long>();
-            for (DeclarationDataJournalItem item : page) {
-                declarationIds.add(item.getDeclarationDataId());
-            }
-
-            //Сохранение в мапе для получения формы по id
-            Map<Long, DeclarationData> declarationDataMap = new HashMap<Long, DeclarationData>();
-            for (DeclarationData declarationData : declarationDataDao.get(declarationIds)) {
-                declarationDataMap.put(declarationData.getId(), declarationData);
-            }
-
-            //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
-            for (DeclarationDataJournalItem item : page) {
-                DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
-                //TODO SBRFNDFL-3119
-                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
-                        DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
-                        DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
-                        DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
-                item.setPermissions(declaration.getPermissions());
-            }
-        }
     }
 
 
@@ -1245,6 +1196,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public DeclarationData get(long id, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         return declarationDataDao.get(id);
+    }
+
+    @Override
+    public List<DeclarationData> get(List<Long> ids) {
+        return declarationDataDao.get(ids);
     }
 
     @Override

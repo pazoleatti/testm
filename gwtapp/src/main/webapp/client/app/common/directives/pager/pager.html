@@ -2,24 +2,24 @@
     <table cellpadding="0" cellspacing="0">
         <tbody>
         <tr>
-            <td title="{{::'pager.firstPage' | translate}}" style="cursor: pointer;">
-                <span class="ui-icon ui-icon-seek-first" ng-click="firstPage()"></span>
+            <td title="{{::'pager.firstPage' | translate}}" ng-class="{'pager-btn-state-disabled' : currPage === 1}">
+                <span class="ui-icon ui-icon-seek-first" data-ng-disabled="currPage === 1" data-ng-click="currPage = 1"></span>
             </td>
-            <td title="{{::'pager.prevPage' | translate}}" style="cursor: pointer;">
-                <span class="ui-icon ui-icon-seek-prev" ng-click="prevPage()"></span>
+            <td title="{{::'pager.prevPage' | translate}}" ng-class="{'pager-btn-state-disabled' : currPage === 1}">
+                <span class="ui-icon ui-icon-seek-prev" data-ng-disabled="currPage === 1" data-ng-click="currPage = currPage - 1"></span>
             </td>
             <td dir="ltr">
                 <label for="pageInput">{{::'pager.page' | translate}}</label>
-                <input id="pageInput" data-ng-model="inputValue" data-ng-keyup="$event.keyCode == 13 && onInputChange()"
+                <input id="pageInput" data-ng-model="inputValue" data-ng-keyup="$event.keyCode == 13 && onInputEnter()"
                        style="width: 3em"
-                       role="textbox" type="text" size="2" maxlength="7">
+                       role="textbox" type="number" size="2" maxlength="7">
                 <span>{{'pager.of' | translate: '{pagesTotal: ' + (pagesTotal ? pagesTotal : '1') + '}'}}</span>
             </td>
-            <td title="{{::'pager.nextPage' | translate}}" class="" style="cursor: pointer;">
-                <span class="ui-icon ui-icon-seek-next" ng-click="nextPage()"></span>
+            <td title="{{::'pager.nextPage' | translate}}" ng-class="{'pager-btn-state-disabled' : currPage === pagesTotal}">
+                <span class="ui-icon ui-icon-seek-next" data-ng-disabled="currPage === pagesTotal" data-ng-click="currPage = currPage + 1"></span>
             </td>
-            <td title="{{::'pager.lastPage' | translate}}" class="" style="cursor: pointer;">
-                <span class="ui-icon ui-icon-seek-end" ng-click="lastPage()"></span>
+            <td title="{{::'pager.lastPage' | translate}}" ng-class="{'pager-btn-state-disabled' : currPage === pagesTotal}">
+                <span class="ui-icon ui-icon-seek-end" data-ng-disabled="currPage === pagesTotal" data-ng-click="currPage = pagesTotal"></span>
             </td>
         </tr>
         </tbody>
