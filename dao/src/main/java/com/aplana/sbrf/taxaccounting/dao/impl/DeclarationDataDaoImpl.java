@@ -10,11 +10,10 @@ import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.QBean;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -63,24 +62,34 @@ import static com.querydsl.core.types.Projections.bean;
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
 
     private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
+    private final static String FIND_DD_BY_RANGE_IN_RP =
+            "select dd.id " +
+                    " from DECLARATION_DATA dd \n" +
+                    "  INNER JOIN DEPARTMENT_REPORT_PERIOD drp ON dd.DEPARTMENT_REPORT_PERIOD_ID = drp.ID\n" +
+                    "  INNER JOIN REPORT_PERIOD rp ON drp.REPORT_PERIOD_ID = rp.ID\n" +
+                    "  where dd.DECLARATION_TEMPLATE_ID = :decTemplateId and (rp.CALENDAR_START_DATE NOT BETWEEN :startDate AND :endDate\n" +
+                    "    OR rp.END_DATE NOT BETWEEN :startDate AND :endDate)";
     private final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("dd.MM.yyyy");
         }
     };
-
     final private SQLQueryFactory sqlQueryFactory;
-
+    final private QBean<DeclarationData> declarationDataQBean = bean(DeclarationData.class, declarationData.id, declarationData.declarationTemplateId,
+            declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo, declarationData.state,
+            declarationData.departmentReportPeriodId.intValue().as("departmentReportPeriodId"), declarationData.asnuId,
+            declarationData.note, declarationData.fileName, declarationData.docStateId.as("docState"),
+            departmentReportPeriod.reportPeriodId.as("reportPeriodId"), departmentReportPeriod.departmentId.as("departmentId"), declarationData.manuallyCreated);
+    StringTemplate dateCorrection = Expressions.stringTemplate(
+            "to_char({0},'{1s}')", departmentReportPeriod.correctionDate, ConstantImpl.create("DD.MM.YYYY"));
     /*Период формируется как "наименование периода год", или как "наименование периода год коррелирующий период"
       В зависимости от принадлежности формы к открытому корр. периоду*/
     final private Expression<String> caseStringForReportPeriod = new CaseBuilder()
             .when(departmentReportPeriod.correctionDate.isNotNull()).then(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).
-                    concat(", корр. (").concat(departmentReportPeriod.correctionDate.stringValue().substring(0,5)).concat(".").
-                    concat(departmentReportPeriod.correctionDate.year().stringValue()).concat(")") )
+                    concat(", корр. (").concat(dateCorrection).concat(")"))
             .otherwise(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name))
             .as("reportPeriod");
-
     final private QBean<DeclarationDataJournalItem> dataJournalItemQBean = bean(DeclarationDataJournalItem.class,
             declarationData.id.as("declarationDataId"),
             declarationKind.name.as("declarationKind"),
@@ -98,11 +107,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             refBookDocState.name.as("docState"),
             declarationData.note.as("note"));
 
-    final private QBean<DeclarationData> declarationDataQBean = bean(DeclarationData.class, declarationData.id, declarationData.declarationTemplateId,
-            declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo, declarationData.state,
-            declarationData.departmentReportPeriodId.intValue().as("departmentReportPeriodId"), declarationData.asnuId,
-            declarationData.note, declarationData.fileName, declarationData.docStateId.as("docState"),
-            departmentReportPeriod.reportPeriodId.as("reportPeriodId"), departmentReportPeriod.departmentId.as("departmentId"), declarationData.manuallyCreated);
 
     public DeclarationDataDaoImpl(SQLQueryFactory sqlQueryFactory) {
         this.sqlQueryFactory = sqlQueryFactory;
@@ -111,31 +115,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     @Override
     public SecuredEntity getSecuredEntity(long id) {
         return get(id);
-    }
-
-    private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
-        @Override
-        public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
-            DeclarationData d = new DeclarationData();
-            d.setId(SqlUtils.getLong(rs, "id"));
-            d.setDeclarationTemplateId(SqlUtils.getInteger(rs, "declaration_template_id"));
-            d.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
-            d.setTaxOrganCode(rs.getString("tax_organ_code"));
-            d.setKpp(rs.getString("kpp"));
-            d.setOktmo(rs.getString("oktmo"));
-            d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
-            d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
-            d.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
-            d.setNote(rs.getString("note"));
-            d.setFileName(rs.getString("file_name"));
-            d.setState(State.fromId(SqlUtils.getInteger(rs, "state")));
-            d.setDocState(SqlUtils.getLong(rs, "doc_state_id"));
-            d.setManuallyCreated(SqlUtils.getInteger(rs, "manually_created") == 1);
-            if (SqlUtils.isExistColumn(rs, "last_data_modified") && rs.getTimestamp("last_data_modified") != null) {
-                d.setLastDataModifiedDate(new Date(rs.getTimestamp("last_data_modified").getTime()));
-            }
-            return d;
-        }
     }
 
     @Override
@@ -794,14 +773,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
     }
 
-    private final static String FIND_DD_BY_RANGE_IN_RP =
-            "select dd.id " +
-                    " from DECLARATION_DATA dd \n" +
-                    "  INNER JOIN DEPARTMENT_REPORT_PERIOD drp ON dd.DEPARTMENT_REPORT_PERIOD_ID = drp.ID\n" +
-                    "  INNER JOIN REPORT_PERIOD rp ON drp.REPORT_PERIOD_ID = rp.ID\n" +
-                    "  where dd.DECLARATION_TEMPLATE_ID = :decTemplateId and (rp.CALENDAR_START_DATE NOT BETWEEN :startDate AND :endDate\n" +
-                    "    OR rp.END_DATE NOT BETWEEN :startDate AND :endDate)";
-
     @Override
     public List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate) {
         try {
@@ -1087,5 +1058,30 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         return countOfExisted > 0;
+    }
+
+    private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
+        @Override
+        public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
+            DeclarationData d = new DeclarationData();
+            d.setId(SqlUtils.getLong(rs, "id"));
+            d.setDeclarationTemplateId(SqlUtils.getInteger(rs, "declaration_template_id"));
+            d.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
+            d.setTaxOrganCode(rs.getString("tax_organ_code"));
+            d.setKpp(rs.getString("kpp"));
+            d.setOktmo(rs.getString("oktmo"));
+            d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
+            d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
+            d.setAsnuId(SqlUtils.getLong(rs, "asnu_id"));
+            d.setNote(rs.getString("note"));
+            d.setFileName(rs.getString("file_name"));
+            d.setState(State.fromId(SqlUtils.getInteger(rs, "state")));
+            d.setDocState(SqlUtils.getLong(rs, "doc_state_id"));
+            d.setManuallyCreated(SqlUtils.getInteger(rs, "manually_created") == 1);
+            if (SqlUtils.isExistColumn(rs, "last_data_modified") && rs.getTimestamp("last_data_modified") != null) {
+                d.setLastDataModifiedDate(new Date(rs.getTimestamp("last_data_modified").getTime()));
+            }
+            return d;
+        }
     }
 }
