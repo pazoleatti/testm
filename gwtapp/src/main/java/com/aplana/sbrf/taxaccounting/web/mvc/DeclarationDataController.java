@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.model.LogBusinessModel;
@@ -17,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,9 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
@@ -50,13 +53,13 @@ public class DeclarationDataController {
     private DeclarationTemplateService declarationTemplateService;
     private LogBusinessService logBusinessService;
     private TAUserService taUserService;
-
-    @Autowired
     private DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter;
+    private DeclarationDataPermissionSetter declarationDataPermissionSetter;
 
     public DeclarationDataController(DeclarationDataService declarationService, SecurityService securityService, ReportService reportService,
                                      BlobDataService blobDataService, DeclarationTemplateService declarationTemplateService, LogBusinessService logBusinessService,
-                                     TAUserService taUserService) {
+                                     TAUserService taUserService, DeclarationDataFilePermissionSetter declarationDataFilePermissionSetter,
+                                     DeclarationDataPermissionSetter declarationDataPermissionSetter) {
         this.declarationService = declarationService;
         this.securityService = securityService;
         this.reportService = reportService;
@@ -64,6 +67,8 @@ public class DeclarationDataController {
         this.declarationTemplateService = declarationTemplateService;
         this.logBusinessService = logBusinessService;
         this.taUserService = taUserService;
+        this.declarationDataFilePermissionSetter = declarationDataFilePermissionSetter;
+        this.declarationDataPermissionSetter = declarationDataPermissionSetter;
     }
 
     /**
@@ -233,7 +238,19 @@ public class DeclarationDataController {
     @GetMapping(value = "/rest/declarationData/{declarationDataId}", params = "projection=declarationData")
     public DeclarationResult fetchDeclarationData(@PathVariable long declarationDataId) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.fetchDeclarationData(userInfo, declarationDataId);
+        DeclarationResult declarationResult = declarationService.fetchDeclarationData(userInfo, declarationDataId);
+
+        DeclarationData declarationData = declarationService.get(declarationDataId, userInfo);
+        //noinspection unchecked
+        declarationDataPermissionSetter.setPermissions(declarationData, DeclarationDataPermission.VIEW,
+                DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
+                DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
+                DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS,
+                DeclarationDataPermission.SHOW, DeclarationDataPermission.IMPORT_EXCEL);
+        declarationResult.setPermissions(declarationData.getPermissions());
+
+        return declarationResult;
     }
 
     /**
@@ -495,11 +512,46 @@ public class DeclarationDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
         PagingResult<DeclarationDataJournalItem> pagingResult = declarationService.fetchDeclarations(userInfo, filter, pagingParams);
 
+        setDeclarationDataJournalItemsPermissions(pagingResult);
+
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,
                 pagingResult.getTotalCount(),
                 pagingParams
         );
+    }
+
+    /**
+     * Установка прав доступа для всех налоговых форм страницы
+     *
+     * @param page Страница списка налоговых форм
+     */
+    private void setDeclarationDataJournalItemsPermissions(PagingResult<DeclarationDataJournalItem> page) {
+        if (!page.isEmpty()) {
+            //Получение id всех форм
+            List<Long> declarationIds = new ArrayList<>();
+            for (DeclarationDataJournalItem item : page) {
+                declarationIds.add(item.getDeclarationDataId());
+            }
+
+            //Сохранение в мапе для получения формы по id
+            Map<Long, DeclarationData> declarationDataMap = new HashMap<>();
+            for (DeclarationData declarationData : declarationService.get(declarationIds)) {
+                declarationDataMap.put(declarationData.getId(), declarationData);
+            }
+
+            //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
+            for (DeclarationDataJournalItem item : page) {
+                DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
+                //noinspection unchecked
+                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
+                        DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
+                        DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
+                        DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
+                item.setPermissions(declaration.getPermissions());
+            }
+        }
     }
 
     /**
