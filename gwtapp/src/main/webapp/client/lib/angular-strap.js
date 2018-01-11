@@ -1456,7 +1456,7 @@
       multiple: false,
       allNoneButtons: false,
       sort: true,
-      caretHtml: '&nbsp;', //<span class="caret"></span>
+      caretHtml: '&nbsp;<span class="caret"></span>',
       placeholder: 'Choose among the following...',
       allText: 'All',
       noneText: 'None',
