@@ -17,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 
 import java.util.HashSet;
 import java.util.List;
@@ -62,7 +61,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
      * @param departmentReportPeriod Отчетный период подразделения
      * @param asnuId                 id АСНУ ТФ
      * @param checkedSet             необязательный параметр — набор проверенных наборов параметров, используется для оптимизации
-     * @deprecated см {@link DeclarationDataPermission.ViewPermission}
+     * @deprecated см {@link com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission.ViewPermission}
      */
     @Deprecated
     private void checkRolesForReading(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DepartmentReportPeriod departmentReportPeriod, Long asnuId, Set<String> checkedSet, Logger logger) {

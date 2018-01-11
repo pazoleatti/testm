@@ -118,7 +118,22 @@ public interface DeclarationDataService {
      */
     PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
 
+    /**
+     * Получить декларацию
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo пользователь
+     * @return объекты декларации
+     */
     DeclarationData get(long declarationDataId, TAUserInfo userInfo);
+
+    /**
+     * Получить список деклараций
+     *
+     * @param ids идентификаторы декларации
+     * @return объекты декларации
+     */
+    List<DeclarationData> get(List<Long> ids);
 
     /**
      * Удалить декларацию, при этом создается блокировка

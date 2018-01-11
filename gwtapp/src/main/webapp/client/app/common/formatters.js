@@ -176,7 +176,7 @@
          */
         .filter('activeStatusPeriodFormatter', ['$filter', function ($filter) {
             return function (value) {
-                return value === null || value === undefined ? "Не задано" :
+                return value === null || value === undefined ? $filter('translate')('common.undefined') :
                     (value ? $filter('translate')('reportPeriod.grid.status.open') :
                         $filter('translate')('reportPeriod.grid.status.close'));
             };

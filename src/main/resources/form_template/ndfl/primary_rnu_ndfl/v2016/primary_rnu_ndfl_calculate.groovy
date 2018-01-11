@@ -125,10 +125,11 @@ class Calculate extends AbstractScriptClass {
      * а значением является список физлиц которые будут ссылаться на запись в справочнике ФЛ созданную для оригинала.
      */
     Map<NaturalPerson, List<NaturalPerson>> primaryPersonOriginalDuplicates = new HashMap<>();
+
     /**
-     * Список идентификаторов физлиц из реквизитов налоговой формы, которые были определены как дубликаты ранее
+     * Список физлиц для вставки
      */
-    List<Long> primaryDuplicateIds = []
+    List<NaturalPerson> insertPersonList = []
 
     private Calculate() {
     }
@@ -204,12 +205,8 @@ class Calculate extends AbstractScriptClass {
 
                     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
                     time = System.currentTimeMillis();
-                    List<NaturalPerson> insertPersonList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true));
-                    logForDebug("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
-
-                    time = System.currentTimeMillis();
-                    createNaturalPersonRefBookRecords(insertPersonList);
-                    logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
+                    this.insertPersonList.addAll(refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true)));
+                    logForDebug("Предварительная выборка новых данных (" + this.insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
                     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
                     time = System.currentTimeMillis();
@@ -227,6 +224,10 @@ class Calculate extends AbstractScriptClass {
                     time = System.currentTimeMillis();
                     updateNaturalPersonRefBookRecords(primaryPersonMap, checkSimilarityPersonMap);
                     logForDebug("Обновление записей (" + ScriptUtils.calcTimeMillis(time));
+
+                    time = System.currentTimeMillis();
+                    createNaturalPersonRefBookRecords();
+                    logForDebug("Создание (" + this.insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
                     countTotalAndUniquePerson(primaryPersonMap.values())
                     logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull));
@@ -379,7 +380,7 @@ class Calculate extends AbstractScriptClass {
      * являются одним и тем же физическим лицом. Для таких физлиц будет создана одна запись в справочнике
      * "Физические лица".
      * Алгоритм следующий:
-     * A. Проходим циклом по <code>insertRecords</code> и для каждого физлица определяем значения:
+     * A. Проходим циклом по <code>insertPersonList</code> и для каждого физлица определяем значения:
      * 1. ИНП
      * 2. СНИЛС
      * 3. ИНН
@@ -402,12 +403,11 @@ class Calculate extends AbstractScriptClass {
      * Результат записывается в {@link #primaryPersonOriginalDuplicates}
      * Одновременно удаляем дубликаты из списка физлиц отобранных для вставки в справочник физлиц, чтобы для дубликатов
      * не создалась отдельная запись.
-     * За шаг C отвечает {@link #mapDuplicates(List < NaturalPerson >, List < NaturalPerson >)}
+     * За шаг C отвечает {@link #mapDuplicates(List < NaturalPerson >)}
      * D. После создания записей в справочнике физлиц назначаем дубликатам ссылку на запись в справочнике физлиц, такую
      * же какую имеют оригиналы.
-     * @param insertRecords Список физлиц отобранных для вставки
      */
-    void performPrimaryPersonDuplicates(List<NaturalPerson> insertRecords) {
+    void performPrimaryPersonDuplicates() {
 
         Map<String, NaturalPerson> inpMatchedMap = new HashMap<>()
         Map<String, List<NaturalPerson>> inpReducedMatchedMap = new HashMap<>()
@@ -427,7 +427,7 @@ class Calculate extends AbstractScriptClass {
         Map<PersonalData, NaturalPerson> personalDataMatchedMap = new HashMap<>()
         Map<PersonalData, List<NaturalPerson>> personalDataReducedMatchedMap = new HashMap<>()
 
-        for (NaturalPerson person : insertRecords) {
+        for (NaturalPerson person : this.insertPersonList) {
             String inp = person.personIdentityList.get(0).getInp()
             String snils = person.snils?.replaceAll("[\\s-]", "")?.toLowerCase()
             String inn = person.inn
@@ -448,25 +448,24 @@ class Calculate extends AbstractScriptClass {
             addToReduceMap(personalData, personalDataMatchedMap, personalDataReducedMatchedMap, person)
         }
 
-        sendToMapDuplicates(inpReducedMatchedMap, insertRecords)
-        sendToMapDuplicates(snilsReducedMatchedMap, insertRecords)
-        sendToMapDuplicates(innReducedMatchedMap, insertRecords)
-        sendToMapDuplicates(innForeignReducedMatchedMap, insertRecords)
-        sendToMapDuplicates(idDocReducedMatchedMap, insertRecords)
-        sendToMapDuplicates(personalDataReducedMatchedMap, insertRecords)
+        List<NaturalPerson> pickedForWeightComparePersons = []
+        sendToMapDuplicates(inpReducedMatchedMap)
+        sendToMapDuplicates(snilsReducedMatchedMap)
+        sendToMapDuplicates(innReducedMatchedMap)
+        sendToMapDuplicates(innForeignReducedMatchedMap)
+        sendToMapDuplicates(idDocReducedMatchedMap)
+        sendToMapDuplicates(personalDataReducedMatchedMap)
     }
 
     /**
      * Разделяет <code>processingPersonList</code> на отдельные списки, каждый список передается
-     * в {@link #mapDuplicates(List < NaturalPerson >, List < NaturalPerson >)} для дальнейшей обработки
+     * в {@link #mapDuplicates(List < NaturalPerson >)} для дальнейшей обработки
      * @param processingPersonList списки обрабатываемых Физлиц, сгруппированные по ключевому параметру.
-     * @param insertPersonList список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
-     * дубликатом
      */
-    void sendToMapDuplicates(Map<?, List<NaturalPerson>> processingPersonList, List<NaturalPerson> insertRecords) {
+    void sendToMapDuplicates(Map<?, List<NaturalPerson>> processingPersonList) {
         if (!processingPersonList.isEmpty()) {
             for (List<NaturalPerson> personList : processingPersonList.values()) {
-                mapDuplicates(personList, insertRecords)
+                mapDuplicates(personList)
             }
         }
     }
@@ -496,59 +495,62 @@ class Calculate extends AbstractScriptClass {
     /**
      * Отвечает за распределение физлиц на оригиналы и дубликаты, на основе расчета по весам
      * @param processingPersonList список обрабатываемых Физлиц.
-     * @param insertPersonList список физлиц для вставки. Из этого списка будут удаляться физлица которые признаны
-     * дубликатом
      */
-    void mapDuplicates(List<NaturalPerson> processingPersonList, List<NaturalPerson> insertPersonList) {
+    void mapDuplicates(List<NaturalPerson> processingPersonList) {
         Double similarityLine = similarityThreshold.doubleValue() / 1000
+        Integer originalPersonIndex = null
+        List<Long> originalPrimaryPersonIdList = []
+        for (NaturalPerson person : primaryPersonOriginalDuplicates.keySet()) {
+            originalPrimaryPersonIdList.add(person.primaryPersonId)
+        }
+        for (int i = 0; i < processingPersonList.size(); i++) {
+            if (originalPrimaryPersonIdList.contains(processingPersonList.get(i).primaryPersonId)) {
+                originalPersonIndex = i
+                break
+            }
+        }
+        NaturalPerson originalPerson = null
+        if (originalPersonIndex != null) {
+            originalPerson = processingPersonList.remove(originalPersonIndex)
+        }
+
         Collections.sort(processingPersonList, new Comparator<NaturalPerson>() {
             @Override
             int compare(NaturalPerson o1, NaturalPerson o2) {
                 return o1.primaryPersonId.compareTo(o2.primaryPersonId)
             }
         })
-        for (int i = 0; i < processingPersonList.size() - 1; i++) {
-            if (primaryDuplicateIds.contains(processingPersonList.get(i).primaryPersonId)) {
-                continue
-            }
-            for (int j = i + 1; j < processingPersonList.size(); j++) {
-                if (primaryDuplicateIds.contains(processingPersonList.get(j).primaryPersonId)) {
-                    continue
-                }
-                refBookPersonService.calculateWeight(processingPersonList.get(i), [processingPersonList.get(j)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
-                if (processingPersonList.get(j).weight > similarityLine) {
-                    primaryDuplicateIds << processingPersonList.get(j).primaryPersonId
-                    List<NaturalPerson> duplicates = primaryPersonOriginalDuplicates.get(processingPersonList.get(i))
-
-                    insertPersonList.remove(processingPersonList.get(j))
-
-                    if (duplicates != null) {
-                        if (primaryPersonOriginalDuplicates.containsKey(processingPersonList.get(j))) {
-                            primaryPersonOriginalDuplicates.get(processingPersonList.get(i)).addAll(primaryPersonOriginalDuplicates.remove(processingPersonList.get(j)))
-                            primaryPersonOriginalDuplicates.get(processingPersonList.get(i)).add(processingPersonList.get(j))
-                        }
-                        duplicates.add(processingPersonList.get(j))
+        if (originalPerson == null && !processingPersonList.isEmpty()) {
+            originalPerson = processingPersonList.remove(0)
+        }
+        for (int i = 0; i < processingPersonList.size(); i++) {
+            List<NaturalPerson> duplicatePersons = primaryPersonOriginalDuplicates.get(originalPerson)
+            if (duplicatePersons == null || !duplicatePersons.contains(processingPersonList.get(i))) {
+                refBookPersonService.calculateWeight(originalPerson, [processingPersonList.get(i)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
+                if (processingPersonList.get(i).weight > similarityLine) {
+                    insertPersonList.remove(processingPersonList.get(i))
+                    if (duplicatePersons != null) {
+                        duplicatePersons.add(processingPersonList.get(i))
                     } else {
-                        primaryPersonOriginalDuplicates.put(processingPersonList.get(i), [processingPersonList.get(j)])
+                        primaryPersonOriginalDuplicates.put(originalPerson, [processingPersonList.get(i)])
                     }
                 }
             }
         }
     }
 
-
-    def createNaturalPersonRefBookRecords(List<NaturalPerson> insertRecords) {
+    def createNaturalPersonRefBookRecords() {
 
         int createCnt = 0;
-        if (insertRecords != null && !insertRecords.isEmpty()) {
+        if (!this.insertPersonList.isEmpty()) {
 
-            performPrimaryPersonDuplicates(insertRecords)
+            performPrimaryPersonDuplicates()
 
             List<Address> addressList = new ArrayList<Address>();
             List<PersonDocument> documentList = new ArrayList<PersonDocument>();
             List<PersonIdentifier> identifierList = new ArrayList<PersonIdentifier>();
 
-            for (NaturalPerson person : insertRecords) {
+            for (NaturalPerson person : this.insertPersonList) {
 
                 ScriptUtils.checkInterrupted();
 
@@ -576,7 +578,7 @@ class Calculate extends AbstractScriptClass {
             });
 
             //insert persons batch
-            insertBatchRecords(RefBook.Id.PERSON.getId(), insertRecords, { NaturalPerson person ->
+            insertBatchRecords(RefBook.Id.PERSON.getId(), this.insertPersonList, { NaturalPerson person ->
                 mapPersonAttr(person)
             });
 
@@ -592,7 +594,7 @@ class Calculate extends AbstractScriptClass {
 
             //update reference to ref book
 
-            updatePrimaryToRefBookPersonReferences(insertRecords);
+            updatePrimaryToRefBookPersonReferences(this.insertPersonList);
 
             for (Map.Entry<NaturalPerson, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
                 for (NaturalPerson duplicatePerson : entry.getValue()) {
@@ -602,7 +604,7 @@ class Calculate extends AbstractScriptClass {
             }
 
             //Выводим информацию о созданных записях
-            for (NaturalPerson person : insertRecords) {
+            for (NaturalPerson person : this.insertPersonList) {
                 Long recordId = refBookService.getNumberValue(RefBook.Id.PERSON.id, person.getId(), "record_id").longValue()
                 String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", recordId, person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
                 logger.info(noticeMsg);
@@ -646,7 +648,6 @@ class Calculate extends AbstractScriptClass {
         //Проходим по списку и определяем наиболее подходящюю запись, если подходящей записи не найдено то содадим ее
         List<NaturalPerson> updatePersonReferenceList = new ArrayList<NaturalPerson>();
 
-        List<NaturalPerson> insertPersonList = new ArrayList<NaturalPerson>();
         //список записей для обновления атрибутов справочника физлиц
         Set<Map<String, RefBookValue>> updatePersonList = new LinkedHashSet<>();
 
@@ -839,7 +840,7 @@ class Calculate extends AbstractScriptClass {
                 }
             } else {
                 //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
-                insertPersonList.add(primaryPerson);
+                this.insertPersonList.add(primaryPerson);
             }
 
             if (msgCnt < maxMsgCnt) {
@@ -853,9 +854,6 @@ class Calculate extends AbstractScriptClass {
         logForDebug("Обновление ФЛ, документов (" + ScriptUtils.calcTimeMillis(time));
         time = System.currentTimeMillis();
         //println "crete and update reference"
-
-        //crete and update reference
-        createNaturalPersonRefBookRecords(insertPersonList);
 
         //update reference to ref book
         if (!updatePersonReferenceList.isEmpty()) {

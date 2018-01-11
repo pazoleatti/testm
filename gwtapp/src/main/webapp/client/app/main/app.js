@@ -44,6 +44,7 @@
         "yes": "Да",
         "no": "Нет",
 
+        "common.undefined": "Не задано",
         "common.hint": "Заполните обязательные поля (отмечены желтым)",
         "common.error.message.caption.stackTrace": "Ошибка",
         "common.error.message.seemore": "Смотреть подробности",
