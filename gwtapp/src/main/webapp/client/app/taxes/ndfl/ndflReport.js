@@ -173,7 +173,6 @@
                                     $scope.availableReports = data.downloadXmlAvailable;
                                     $scope.availableXlsxReport = data.downloadXlsxAvailable;
                                     if (!$scope.pdfLoaded && data.availablePdf) {
-                                        $scope.loadPage(1);
                                         $http({
                                             method: "GET",
                                             url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
@@ -202,16 +201,14 @@
 
                 /**
                  * @description Загружает страницу отчета
-                 * @param page  номер страницы (начиная с 1)
                  */
-                $scope.loadPage = function (page) {
+                $scope.onPageChange = function () {
                     getPageImage.query({
                             declarationDataId: $stateParams.declarationDataId,
-                            pageId: page - 1
+                            pageId: $scope.currPage - 1
                         },
                         function (response) {
                             $scope.reportImage = response.requestUrl;
-                            $scope.currPage = page;
                         });
                 };
 

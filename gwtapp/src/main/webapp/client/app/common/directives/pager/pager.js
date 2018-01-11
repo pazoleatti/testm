@@ -1,9 +1,11 @@
 (function () {
     'use strict';
 
-    /* Директива для пейджера */
+    /**
+     * Директива для пейджера с кнопками на первую, пердыдущую, следующую и последнюю страницы и полем ввода номера страницы
+     */
     angular.module("app.pager", [])
-        .directive('appPager', [function () {
+        .directive('appPager', ['$timeout', function ($timeout) {
             return {
                 restrict: 'EA',
                 templateUrl: 'client/app/common/directives/pager/pager.html?v=${buildUuid}',
@@ -16,43 +18,32 @@
                 },
                 link: function (scope) {
 
-                    function setPage(page) {
-                        scope.onPageChange({page: page});
+                    // По-умолчания текущая страница первая
+                    if (!scope.currPage) {
+                        scope.currPage = 1;
                     }
+                    // Модель для поля ввода номера страницы. Отделена от currPage чтобы можно было восстановить значение при некорректном вводе
+                    scope.inputValue = scope.currPage;
 
+                    /**
+                     * Если страница изменилась, то вызваем внешнюю функцию для отображения страницы
+                     */
                     scope.$watch('currPage', function (newValue) {
                         scope.inputValue = newValue;
+                        scope.onPageChange();
                     });
 
-                    scope.onInputChange = function () {
+                    /**
+                     * Вызывается при нажатии на enter в элементе ввода номера страницы.
+                     * Выполняет проверку корректности ввода номера страницы
+                     */
+                    scope.onInputEnter = function () {
                         if (scope.inputValue >= 1 && scope.inputValue <= scope.pagesTotal && scope.inputValue !== scope.currPage) {
-                            setPage(scope.inputValue);
+                            // если введена корректная страница, то показываем её
+                            scope.currPage = scope.inputValue;
                         } else {
+                            // если введена некоректная страница, то восстанавливаем значение на текущее
                             scope.inputValue = scope.currPage;
-                        }
-                    };
-
-                    scope.firstPage = function () {
-                        if (scope.currPage !== 1) {
-                            setPage(1);
-                        }
-                    };
-
-                    scope.nextPage = function () {
-                        if (scope.currPage !== scope.pagesTotal) {
-                            setPage(scope.currPage + 1)
-                        }
-                    };
-
-                    scope.prevPage = function () {
-                        if (scope.currPage > 1) {
-                            setPage(scope.currPage - 1);
-                        }
-                    };
-
-                    scope.lastPage = function () {
-                        if (scope.currPage !== scope.pagesTotal) {
-                            setPage(scope.pagesTotal);
                         }
                     };
                 }

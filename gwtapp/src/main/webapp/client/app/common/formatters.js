@@ -77,7 +77,7 @@
          * @param plural - множественное число
          * @return Текст, склонение которого зависит от переданного числа
          */
-        .filter('amountCasesFormatter', ['$filter', function ($filter) {
+        .filter('amountCasesFormatter', function () {
             return function (num, nominative, singular, plural) {
                 var text;
                 if (num > 10 && ((num % 100) / 10) === 1) {
@@ -97,7 +97,7 @@
                 }
                 return text;
             };
-        }])
+        })
 
 
         /**
@@ -170,14 +170,22 @@
             };
         }])
 
+        /**
+         * @description Преобразует значение признака активности периода в текст (Открыт/Закрыт/Не задано)
+         * @param value признак активности периода
+         */
         .filter('activeStatusPeriodFormatter', ['$filter', function ($filter) {
             return function (value) {
-                return value === null || value === undefined ? "Не задано" :
+                return value === null || value === undefined ? $filter('translate')('common.undefined') :
                     (value ? $filter('translate')('reportPeriod.grid.status.open') :
                         $filter('translate')('reportPeriod.grid.status.close'));
             };
         }])
 
+        /**
+         * @description Преобразует булевые значения в текст (Да/Нет)
+         * @param value булевое значение
+         */
         .filter('yesNoFormatter', ['$filter', function ($filter) {
             return function (value) {
                 return value ?
@@ -186,6 +194,11 @@
             };
         }])
 
+        /**
+         * @description Форматтер периода формы в виде
+         * "<Год>, <Название периода><Дата корректировки через запятую (если имеется)>"
+         * @param value признак активности периода
+         */
         .filter('ndflPeriodFormatter', ['$filter', function ($filter) {
             return function (declarationData) {
                 if (declarationData) {

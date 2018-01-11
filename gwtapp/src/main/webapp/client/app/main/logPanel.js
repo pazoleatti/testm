@@ -4,8 +4,8 @@
      * @description Модуль панели уведомлений
      */
     angular.module('app.logPanel', ['aplana.splitter', 'ui.router'])
-        .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource', 'APP_CONSTANTS',
-            function ($compile, $rootScope, $filter, LogEntryResource, APP_CONSTANTS) {
+        .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource', 'APP_CONSTANTS', '$transitions',
+            function ($compile, $rootScope, $filter, LogEntryResource, APP_CONSTANTS, $transitions) {
                 var logPanel = {};
 
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
@@ -186,6 +186,10 @@
                 $rootScope.closeLogPanel = function () {
                     logPanel.close();
                 };
+
+                $transitions.onSuccess({}, function() {
+                    logPanel.close();
+                });
 
                 return logPanel;
             }])

@@ -135,19 +135,6 @@
                 $scope.close = function () {
                     $modalInstance.dismiss('Canceled');
                 };
-
-                //Переход по ссылке на другую форму
-                $(document).undelegate('#sourcesTable .sources-link', 'click');
-                $(document).delegate('#sourcesTable .sources-link', 'click', function () {
-                    var declarationDataId = $(this).attr('data-declaration-data-id');
-                    var declarationKind = $(this).attr('data-declaration-kind');
-                    $scope.close();
-                    if(declarationKind === 'REPORTS') {
-                        $state.go('ndflReport', {declarationDataId: declarationDataId});
-                    } else {
-                        $state.go('ndfl', {declarationDataId: declarationDataId});
-                    }
-                });
             }])
 
         .filter('indexFormatter', function () {
@@ -219,10 +206,17 @@
             };
         })
 
-        .filter('declarationDataIdFormatter', function () {
+        .filter('declarationDataIdFormatter', ['$state', function ($state) {
             return function (declarationDataId, row, declarationData) {
-                return '<a class="sources-link" data-declaration-data-id="' + declarationDataId + '" ' +
-                    'data-declaration-kind="' + declarationData.declarationTemplate.declarationFormKind + '">' + declarationDataId + '</a>';
+                var url;
+
+                if(declarationData.declarationTemplate.declarationFormKind === 'REPORTS') {
+                    url = $state.href('ndflReport', {declarationDataId: declarationDataId});
+                } else {
+                    url = $state.href('ndfl', {declarationDataId: declarationDataId});
+                }
+
+                return '<a href="' + url + '">' + declarationDataId + '</a>';
             };
-        });
+        }]);
 }());

@@ -4,6 +4,8 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission;
+import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -24,6 +26,7 @@ public class DepartmentReportPeriodController {
     private DepartmentReportPeriodService departmentReportPeriodService;
     private PeriodService periodService;
     private SecurityService securityService;
+    private DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter;
 
     /**
      * Привязка данных из параметров запроса
@@ -41,10 +44,12 @@ public class DepartmentReportPeriodController {
         binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
 
-    public DepartmentReportPeriodController(DepartmentReportPeriodService departmentReportPeriodService, PeriodService periodService, SecurityService securityService) {
+    public DepartmentReportPeriodController(DepartmentReportPeriodService departmentReportPeriodService, PeriodService periodService, SecurityService securityService,
+                                            DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter) {
         this.departmentReportPeriodService = departmentReportPeriodService;
         this.periodService = periodService;
         this.securityService = securityService;
+        this.departmentReportPeriodPermissionSetter = departmentReportPeriodPermissionSetter;
     }
 
     /**
@@ -67,7 +72,21 @@ public class DepartmentReportPeriodController {
             }
         }
 
+        setDepartmentReportPeriodPagePermissions(result);
+
         return result;
+    }
+
+    private void setDepartmentReportPeriodPagePermissions(List<DepartmentReportPeriodJournalItem> page) {
+        for (DepartmentReportPeriodJournalItem item : page){
+            DepartmentReportPeriod period = new DepartmentReportPeriod();
+            period.setIsActive(item.getIsActive());
+            //noinspection unchecked
+            departmentReportPeriodPermissionSetter.setPermissions(period, DepartmentReportPeriodPermission.EDIT, DepartmentReportPeriodPermission.OPEN,
+                    DepartmentReportPeriodPermission.DELETE, DepartmentReportPeriodPermission.CLOSE, DepartmentReportPeriodPermission.OPEN_CORRECT,
+                    DepartmentReportPeriodPermission.DEADLINE);
+            item.setPermissions(period.getPermissions());
+        }
     }
 
     /**
