@@ -59,15 +59,8 @@
                     filterName: 'ndflFilter'
                 };
 
-                var init = function (ctrl) {
-                    ctrl.loadComplete = function (data) {
-                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
-                    };
-                };
-
                 $scope.ndflPersonGrid =
                     {
-                        init: init,
                         ctrl: {},
                         value: [],
                         options: {

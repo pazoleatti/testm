@@ -63,15 +63,8 @@
                     filterName: 'deductionFilter'
                 };
 
-                var init = function (ctrl) {
-                    ctrl.loadComplete = function (data) {
-                        $rootScope.$broadcast("UPDATE_DECLARATION_DATA");
-                    };
-                };
-
                 $scope.deductionGrid =
                     {
-                        init: init,
                         ctrl: {},
                         value: [],
                         options: {
