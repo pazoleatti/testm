@@ -199,13 +199,15 @@
 
                 updateAvailableReports();
 
+                $scope.pager = {};
+
                 /**
                  * @description Загружает страницу отчета
                  */
                 $scope.onPageChange = function () {
                     getPageImage.query({
                             declarationDataId: $stateParams.declarationDataId,
-                            pageId: $scope.currPage - 1
+                            pageId: $scope.pager.currPage - 1
                         },
                         function (response) {
                             $scope.reportImage = response.requestUrl;

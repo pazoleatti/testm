@@ -241,13 +241,7 @@ public class DeclarationDataController {
         DeclarationResult declarationResult = declarationService.fetchDeclarationData(userInfo, declarationDataId);
 
         DeclarationData declarationData = declarationService.get(declarationDataId, userInfo);
-        //noinspection unchecked
-        declarationDataPermissionSetter.setPermissions(declarationData, DeclarationDataPermission.VIEW,
-                DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
-                DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
-                DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS,
-                DeclarationDataPermission.SHOW, DeclarationDataPermission.IMPORT_EXCEL);
+        declarationDataPermissionSetter.setPermissions(declarationData, null);
         declarationResult.setPermissions(declarationData.getPermissions());
 
         return declarationResult;
@@ -691,6 +685,7 @@ public class DeclarationDataController {
     /**
      * Подготовить данные для спецотчета. Используется для получения списка ФЛ, для выбора одного из них для
      * создания спецотчета.
+     *
      * @param action
      * @return
      */
