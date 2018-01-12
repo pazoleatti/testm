@@ -173,7 +173,9 @@ input[type="file"] {
   *margin-top: 4px; /* For IE7, add top margin to align select with labels */
   line-height: @inputHeight;
 }
-
+input[type="text"]{
+  font-size: 12px;
+}
 // Make select elements obey height by applying a border
 select {
   width: 220px; // default input width + 10px of padding that doesn't get applied
@@ -724,6 +726,10 @@ legend + .control-group {
 textarea {
   resize: none;
 }
+
+
+/*----------------------------------------------------------------------------------------------------------*/
+
 .button_panel button.btn {
   padding: 1px 5px;
 }
@@ -850,12 +856,6 @@ button.btn.btn-default.ng-binding {
   margin-bottom: 8px;
 }
 
-.filter-col .control-label {
-  padding-top: 5px;
-  float: right;
-  margin-right: -20px !important;
-}
-
 .ui-grid-pager-container {
   float: right;
   margin-right: 6px;
@@ -916,7 +916,7 @@ button.btn.btn-default:hover:not([disabled]):hover,
   border: none;
 }
 .btn-default {
-  background-color: @greenDarker;
+  background: @greenDarker;
 }
 .btn-default-nonBg{
   color: @greenDarker;
@@ -947,6 +947,7 @@ button.btn.btn-default-nonBg:hover:not([disabled]):hover{
   background-size: contain;
   width: 24px;
   height: 24px;
+  margin-top: -3px;
 }
 button.btn-default-ok,
 button.btn-default-close,

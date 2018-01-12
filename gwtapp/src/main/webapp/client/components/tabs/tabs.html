@@ -1,0 +1,74 @@
+<div class="tabs" data-bindonce>
+    <div class="alert alert-danger" data-ng-show="ctrl.getTabsWithErrors().length != 0">
+        <div style="margin-bottom: 5px">Следующие вкладки содержат некорректно заполненные поля:</div>
+        <ul>
+            <li data-ng-repeat="tab in ctrl.getTabsWithErrors()">
+                <span>{{tab.getTitle()}}</span>
+            </li>
+        </ul>
+    </div>
+    <div class="alert alert-warning" data-ng-show="ctrl.getTabsWithWarnings().length != 0">
+        <div style="margin-bottom: 5px">Необходимо проверить правильность заполнения следующих вкладок:</div>
+        <ul>
+            <li data-ng-repeat="tab in ctrl.getTabsWithWarnings()">
+                <span>{{tab.getTitle()}}</span>
+            </li>
+        </ul>
+    </div>
+    <ul class="nav nav-tabs" style="padding: 0 0 0 14px;">
+        <li data-ng-show="tabButton" class="cbr-tabsControl">
+            <div class="btn-group">
+                <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                    {{::tabButton.title}}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li data-ng-repeat="item in tabButton.items">
+                        <a data-ng-href="{{::item.url}}" data-ng-click="tabButton.onClick(item)">{{::item.name}}</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        <li data-ng-repeat="tab in tabModel"
+            data-ng-class="{active:tab.active}" data-ng-show="!tab.notFitOnScreen "
+            data-aplana-tab-element data-tab="tab" data-tab-index="{{$index}}"
+            data-warning-keys="warningKeys">
+            <button title="Закрыть" class="close" data-ng-hide="!tab.close"
+                    data-ng-click="ctrl.closeTabByIndex($index)">&times;</button>
+
+            <a data-ng-click="ctrl.activateTabByIndex($index)">
+                <span>{{tab.getTitle()}}</span>
+            </a>
+        </li>
+        <li class="cbr-notFitOnScreenTabs" data-ng-hide="!showNotFitOnScreenTabsContainer"
+            data-ng-class="{'active': activeTabIsNotFitOnWindow}">
+            <div class="dropdown">
+                <a data-toggle="dropdown">▼</a>
+                <ul class="dropdown-menu">
+                    <li data-ng-repeat="tab in tabModel" data-ng-show="tab.notFitOnScreen"
+                        data-ng-class="{active:tab.active}">
+                        <a data-ng-click="ctrl.activateTabByIndex($index)">{{tab.getTitle()}}</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div data-ng-repeat="tab in tabModel" class="tab-pane" data-ng-class="{active:tab.active}">
+            <div data-ng-switch="$getContent(tab)">
+                <div data-ng-switch-when="content">
+                    <div data-ng-bind="tab.content"></div>
+                </div>
+                <div data-ng-switch-when="htmlContent">
+                    <div data-ng-bind-html="tab.htmlContent"></div>
+                </div>
+                <div data-ng-switch-when="contentUrl">
+                    <div data-ng-include="tab.contentUrl"></div>
+                </div>
+                <div data-ng-switch-default>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

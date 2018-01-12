@@ -1,10 +1,10 @@
 <nav id="app-header" class="navbar navbar-default" style="min-width: 1300px;">
-    <div class="navbar-header">
+    <div class="nav navbar-nav">
         <a href="#">
             <div class="logo"></div>
         </a>
     </div>
-    <div class="navbar-header">
+    <div class="nav navbar-nav">
         <span class="sub-logo">АС «Учет налогов»</span>
     </div>
     <ul class="nav navbar-nav" ng-if="permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.VIEW_TAXES)">
@@ -25,7 +25,7 @@
             <tree tree='treeAdministration'></tree>
         </li>
     </ul>
-    <ul class="nav navbar-nav navbar-right">
+    <ul class="nav navbar-nav pull-right">
         <li type="button" id="btnNotif" class="btn btn-link width66" data-toggle="button"
             data-ng-click="openNotifications()" style="color: white; font-size: 11pt;">
             <span ng-class="notificationsCountClass">{{notificationsCount}}</span>

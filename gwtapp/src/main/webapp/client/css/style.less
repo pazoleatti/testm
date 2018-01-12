@@ -25,8 +25,18 @@ body {
   background-color: @grayMoreLighter;
 }
 
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
 .clear {
   clear: both;
+}
+
+.form-control {
+  width: 100%;
 }
 
 form {
@@ -40,7 +50,9 @@ form label {
 form input[type="submit"], form input[type="button"] {
   margin-left: 10px;
 }
-
+input:focus{
+  outline: none;
+}
 form .row {
   margin: 10px 0;
 }
@@ -48,6 +60,8 @@ form .row {
 a {
   text-decoration: none;
   cursor: pointer;
+  text-shadow: none;
+  color: #336ed0;
 }
 
 #main-content {
@@ -106,15 +120,21 @@ a {
 .navbar {
   margin-bottom: 0; /* Устраняем лишнее пространство межжу меню и основным содержимым*/
   min-height: 41px;
+  .nav {
+    li {
+      a {
+          text-shadow: none;
+      }
+    }
+  }
 }
 
 .navbar .dropdown:hover {
   background-color: @grayLighter;
 }
 
-.navbar-right {
-  margin-left: 0;
-  margin-right: 15px;
+.navbar .nav.pull-right {
+  color: @white;
 }
 
 /* Курсор мыши в виде кисти для пунктов меню */
@@ -191,7 +211,13 @@ h6,
 .h6 {
   font-size: 12px;
 }
-
+.btn{
+  text-shadow: none;
+}
+.btn.active{
+  background: transparent;
+  box-shadow: none;
+}
 .btn, .form-control {
   font-size: 12px;
 }
@@ -387,7 +413,7 @@ input[type="number"] {
 .modal-header .close {
   font-weight: normal;
   font-size: 35px;
-  margin-top: -8px;
+  margin-top: 0;
 }
 
 .modal-header .close:hover {
@@ -426,12 +452,14 @@ input[type="number"] {
 
 .modal-body {
   padding: 10px 13px;
+  max-height: 600px;
 }
 
 .modal-footer {
   padding: 15px;
   text-align: right;
   border-top: 1px solid #e5e5e5;
+  background: transparent;
 }
 
 .modal-backdrop {
@@ -785,11 +813,11 @@ hr {
     margin-top: 7px !important;
   }
   .new-message {
-    width: 28px;
-    height: 28px;
+    width: 25px;
+    height: 25px;
     border-radius: 32px;
     background: #f39346;
-    border: solid 6px #ffffff;
+    border: solid 5px #fff;
     display: inline-block;
     text-align: center;
     padding: 0 2px 0 1px;
@@ -801,11 +829,11 @@ hr {
     &::before {
       content: "";
       border: solid 3px #1c8740;
-      width: 26px;
-      height: 26px;
+      width: 17px;
+      height: 17px;
       position: absolute;
-      top: -5px;
-      left: -5px;
+      top: -4px;
+      left: -4px;
       border-radius: 34px;
     }
   }
@@ -839,11 +867,6 @@ hr {
   display: inline-block;
   vertical-align: top;
   font-style: italic;
-}
-
-.navbar-right {
-  color: @white;
-  margin-right: 0;
 }
 
 .info-icon {
@@ -1030,12 +1053,6 @@ button.btn.btn-default.ng-binding {
 
 .button_panel {
   margin-bottom: 8px;
-}
-
-.filter-col .control-label {
-  padding-top: 5px;
-  float: right;
-  margin-right: -20px !important;
 }
 
 .ui-grid-pager-container {
@@ -1373,6 +1390,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   width: 97.6%;
   border-top: 2px solid rgba(0, 0, 0, 0.3);
   padding: 10px 12px 0;
+  min-height: 100px;
 }
 
 .modal-lg {
@@ -1478,23 +1496,19 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
       margin: 0 !important;
       width: 319px!important;
       .date-from-label {
-        margin: 0 0 0 31px;
-      }
-      .date-to-label {
-        margin: -23px 0 0 46px !important;
+        margin-bottom: -8px;
       }
       .date-to-block {
         margin-right: -11px !important;
       }
-
+      .row-fluid [class*="span"]{
+        margin-left: 7px;
+      }
     }
     .long-label {
       .date-from-label {
         margin: 0 0 0 31px;
         width: 202px;
-      }
-      .date-to-label {
-        margin: -23px 0 0 80px !important;
       }
       .date-to-block {
         margin-right: -49px !important;
@@ -1510,6 +1524,30 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
       button{
         margin: 4px 0 0 0;
       }
+    }
+    div.cbr-picker{
+      width: 150px;
+      .cbr-picker-button, .cbr-picker-input{
+        display: inline-block;
+        vertical-align: top;
+      }
+      .cbr-picker-button{
+        width: 37px;
+      }
+      .cbr-picker-input{
+        width: 107px;
+        margin: 0 0 0 -6px;
+      }
+
+    }
+    .date-to-label{
+      .control-label{
+        width: 24px;
+      }
+    }
+    .row-fluid [class*="span"]:first-child {
+      margin-left: 7px;
+      margin-bottom: -6px;
     }
   }
   .report-wrapper {
@@ -1529,6 +1567,10 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   #log-panel .ui-jqgrid-bdiv{
     max-height: 508px!important;
   }
+}
+
+.cbr-picker input {
+  box-sizing: content-box;
 }
 
 .appPager td {
@@ -1562,4 +1604,44 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
 .resizer select {
   width: auto;
   height: auto;
+}
+.tab-wrapper .tab-content{
+  background: transparent;
+}
+.btn-group{
+  .btn{
+    font-size: 12px;
+     .caret {
+        margin-top: 0;
+        margin-left: 9px;
+    }
+  }
+  .dropdown-menu{
+    font-size: 12px;
+  }
+}
+.cbr-picker {
+  .cbr-picker-button > button.btn{
+    width: 36px!important;
+    border-radius: 0;
+  }
+  .icon-calendar{
+    margin-top: -4px;
+  }
+  button.btn.btn-default:hover:not([disabled]):hover{
+    border-top: 3px solid #6ec151;
+  }
+  .cbr-picker-input input{
+    height: 18px;
+    background-color: #fff;
+    box-shadow: inset 2px 2px 0 0 rgba(0,0,0,0.2);
+    border: solid 1px rgba(0,0,0,0.2);
+    border-radius: 0;
+  }
+  .btn-sm{
+    height: 28px;
+  }
+}
+.btn-group .btn .caret{
+  display: none;
 }

@@ -1,43 +1,58 @@
+/**
+ * aplana-dropdown (Выпадающее меню)
+ * Директива aplana-dropdown служит для отображения кнопки с выпадающим меню
+ * http://localhost:8080/#/aplana_dropdown
+ */
 (function () {
     'use strict';
+    angular.module('aplana.dropdown', ['aplana.utils'])
+        .directive('aplanaDropdown', [
+            'AplanaUtils',
+            function (AplanaUtils) {
+                return {
+                    restrict: 'A',
+                    scope: true,
+                    transclude: true,
+                    replace: false,
+                    templateUrl: AplanaUtils.templatePath + 'dropDown/dropdown.html',
+                    compile: function compile(tElement, tAttrs, transclude) {
+                        // выбор режима отображения
+                        if (tAttrs.split !== undefined) {
+                            // двухкнопочный режим
+//                            tElement.find('button').text(tAttrs.text);
+                            tElement.find('button').attr('data-ng-transclude', '');
+                            tElement.find('div.btn-group').append('<button class="btn btn-primary dropdown-toggle" data-bs-dropdown="' + tAttrs.aplanaDropdown + '"><span class=\"caret\"></span></button>');
+                        } else {
+                            // однокнопочный режим
 
-    /**
-     * @description Модуль, содержащий директивы для работы с многоуровневым меню
-     */
+                            tElement.find('button').attr('data-bs-dropdown', tAttrs.aplanaDropdown);
+                            tElement.find('button>span:first').attr('data-ng-transclude', '');
+                            tElement.find('button').append('<span class=\"caret\"></span>');
 
-    angular.module('aplana.dropdown', [])
-        /**
-         * @description Директива для многоуровневого меню
-         */
-        .directive('tree', function() {
-            return {
-                restrict: "E",
-                replace: true,
-                scope: {
-                    tree: '='
-                },
-                templateUrl: 'client/components/dropDown/tree.html'
-            };
-        })
+                            AplanaUtils.moveAttributes(tElement, tElement.find('button'), ['data-aplana-dropdown']);
 
-        /**
-         * @description Директива для перехода по ссылке в многоуровневом меню
-         */
-        .directive('leaf', function($compile) {
-            return {
-                restrict: "E",
-                replace: true,
-                scope: {
-                    leaf: "="
-                },
-                templateUrl: 'client/components/dropDown/leaf.html',
-                link: function(scope, element) {
-                    if (angular.isArray(scope.leaf.subtree)) {
-                        element.append("<tree tree='leaf.subtree'></tree>");
-                        element.addClass('dropdown-submenu');
-                        $compile(element.contents())(scope);
+                            if (!tAttrs.aplanaDropdown) {
+                                var nextSibling = tElement[0].nextSibling;
+                                while (nextSibling && nextSibling.nodeType !== 1) {
+                                    nextSibling = nextSibling.nextSibling;
+                                }
+                                if (nextSibling && nextSibling.classList.contains('dropdown-menu')) {
+                                    tElement.find('button').after(nextSibling);
+                                }
+                            }
+                        }
+
+                        // направление выпадашки
+                        if (tAttrs.dropup !== undefined) {
+                            // выпадает вверх
+                            tElement.find('div.btn-group').addClass('dropup');
+                        }
+
+                        if (tAttrs.small !== undefined) {
+                            tElement.find('button').addClass('btn-small');
+                        }
                     }
-                }
-            };
-        });
+                };
+            }
+        ]);
 }());

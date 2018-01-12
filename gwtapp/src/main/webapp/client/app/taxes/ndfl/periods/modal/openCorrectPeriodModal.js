@@ -20,8 +20,8 @@
             function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter) {
 
                 $scope.department = $shareData.department;
-                $scope.correctionDate = new Date();
-                $scope.departmentReportPeriod = $shareData.period;
+                $scope.departmentReportPeriod = angular.copy($shareData.period);
+                $scope.departmentReportPeriod.correctionDate = new Date();
 
                 $scope.correctPeriod = {
                     reportPeriod : {
@@ -37,7 +37,7 @@
                  * @description Обработчик кнопки "Открыть"
                  **/
                 $scope.save = function () {
-                    if (ValidationUtils.checkYearInterval($scope.correctPeriod.reportPeriod.taxPeriod.year , $scope.correctionDate.getFullYear())) {
+                    if (ValidationUtils.checkYearInterval($scope.correctPeriod.reportPeriod.taxPeriod.year , $scope.departmentReportPeriod.correctionDate.getFullYear())) {
                         $http({
                             method: "POST",
                             url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
@@ -45,7 +45,7 @@
                                 filter: JSON.stringify({
                                     id: $scope.departmentReportPeriod.id,
                                     reportPeriod: $scope.correctPeriod.reportPeriod,
-                                    correctionDate: $scope.correctionDate,
+                                    correctionDate: $scope.departmentReportPeriod.correctionDate,
                                     departmentId: $scope.department.id
                                 })
                             }
