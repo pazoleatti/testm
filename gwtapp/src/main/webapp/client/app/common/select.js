@@ -21,8 +21,7 @@
                         formatSelection: $filter(formatter),
                         formatResult: $filter(formatter),
                         multiple: isMultiple,
-                        allowClear: allowClear,
-                        placeholder: $filter('translate')('filter.placeholder.select')
+                        allowClear: allowClear
                     }
                 };
             };

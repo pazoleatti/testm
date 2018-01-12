@@ -43,6 +43,11 @@
 
         "yes": "Да",
         "no": "Нет",
+        "common.select.formatSearching": "Идет поиск...",
+        "common.select.formatNoMatches": "По вашему запросу ничего не найдено",
+        "common.select.formatLoadMore" : "Подождите, идет загрузка данных...",
+        "common.placeholder.notSelected": "Значение не выбрано",
+        "common.validation.required": "Необходимо заполнить поле",
 
         "common.undefined": "Не задано",
         "common.hint": "Заполните обязательные поля (отмечены желтым)",
@@ -107,7 +112,6 @@
         "filterPanelLabel": "Фильтр",
         "infoPanelLabel": "Информация",
         "filter.placeholder.search": "Введите строку",
-        "filter.placeholder.select": "Значение не выбрано",
         "filter.placeholder.empty": "",
         "theNumberOfSelectedItems": "Выбрано значений:",
         "title.redactParametr": "Редактировать параметр",
@@ -148,10 +152,10 @@
         "header.ndfl.fl.edit": "Редактировать запись ФЛ",
         "header.CommonParams": "Налоги - Общие параметры",
 
-        "tab.ndfl.requisites": "Реквизиты",
-        "tab.ndfl.informationOnIncomesAndNdfl": "Сведения о доходах и НДФЛ",
-        "tab.ndfl.informationOnDeductions": "Сведения о вычетах",
-        "tab.ndfl.informationOnAdvancePayments": "Сведения о доходах в виде авансовых платежей",
+        "tab.ndfl.requisites": "1. Реквизиты",
+        "tab.ndfl.informationOnIncomesAndNdfl": "2. Сведения о доходах и НДФЛ",
+        "tab.ndfl.informationOnDeductions": "3. Сведения о вычетах",
+        "tab.ndfl.informationOnAdvancePayments": "4. Сведения о доходах в виде авансовых платежей",
 
         "link.ndfl.reporting": "Формирование отчетов",
         "link.ndfl.reporting.uploadXml": "Выгрузить в XML",
@@ -625,8 +629,6 @@
             'ui.router',
             'ui.validate',
             'ui.select2',
-            'ui.bootstrap',
-            'dialogs.main',
             'ngMessages',
             'angularFileUpload',
             'pascalprecht.translate',
@@ -635,17 +637,26 @@
             'aplana.alert',
             'aplana.utils',
             'aplana.grid',
+            'mgcrea.ngStrap.dropdown',
+            'aplana.dropdown',
+            'aplana.dropdownMenu',
+            'aplana.tabs',
             'aplana.submitValid',
             'aplana.collapse',
             'aplana.field',
+            'aplana.datepicker',
+            'aplana.popover',
+            'aplana.outerWidth',
+            'aplana.select.universal',
+            'aplana.timepicker',
+            'aplana.datepickerTimepicker',
             'aplana.dateFromToFilter',
-            'aplana.datePicker',
-            'aplana.dropdown',
             'aplana.formLeaveConfirmer',
             'aplana.link',
             'aplana.modal',
             'aplana.modal.dialogs',
             // Модули приложения
+            'app.treeMenu',
             'app.header',
             'app.logPanel',
             'app.validationUtils',
@@ -693,6 +704,57 @@
                 $translateProvider.translations('ru', translateDictionary);
                 $translateProvider.preferredLanguage('ru');
                 $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
+            }
+        ])
+
+        .run(['$rootScope', 'ValidationUtils','$overlayService', '$alertService', '$filter', 'uiSelect2Config', 'PermissionChecker', '$window',
+            function ($rootScope, ValidationUtils, $overlayService, $alertService, $filter, uiSelect2Config, PermissionChecker, $window) {
+
+                //Регистрируем глобальные сервисы
+                $rootScope.validationUtils = ValidationUtils;
+                $rootScope.permissionChecker = PermissionChecker;
+
+                angular.element($window).scroll(function () {
+                    $rootScope.$broadcast('WINDOW_SCROLLED_MSG');
+                });
+
+                //В осле есть баг: http://stackoverflow.com/questions/1852751/window-resize-event-firing-in-internet-explorer
+                //он кастует ресайз окна на каждый чих, даже если онкно свой размер не меняло, нужно самим следить за его размерами
+                var lastWindow = {};
+                angular.element($window).resize(function () {
+                    if (angular.isUndefined(lastWindow.width) || angular.isUndefined(lastWindow.height) ||
+                        (lastWindow.width !== $window.innerWidth) || (lastWindow.height !== $window.innerHeight)) {
+
+                        $rootScope.$broadcast('WINDOW_RESIZED_MSG');
+
+                        lastWindow = {
+                            width: $window.innerWidth,
+                            height: $window.innerHeight
+                        };
+                    }
+                });
+
+                // глобальные настройки для select2
+                angular.extend(uiSelect2Config, {
+                    openOnEnter: false,
+                    formatLoadMore: function () {
+                        return $filter('translate')('common.select.formatLoadMore');
+                    },
+                    formatSearching: function () {
+                        return $filter('translate')('common.select.formatSearching');
+                    },
+                    formatNoMatches: function () {
+                        return $filter('translate')('common.select.formatNoMatches');
+                    },
+                    formatSelection: $filter('nameFormatter'),
+                    formatResult: $filter('nameFormatter'),
+                    placeholder: $filter('translate')('common.placeholder.notSelected'),
+                    allowClear: true,
+                    initSelection: function (element) {
+                        return $(element).data('$ngModelController') ? $(element).data('$ngModelController').$modelValue : null;
+                    }
+                });
+
             }
         ]);
 

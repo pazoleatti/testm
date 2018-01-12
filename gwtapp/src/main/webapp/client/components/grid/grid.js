@@ -1552,10 +1552,10 @@
                                         //высота всего грида = (родительский контейнер).высота минус  (контейнер для фильтра).высота
                                         var tempHeight = containerHeight - containerTopHeight;
                                         // высота панели по "восстановить по умолчанию"
-                                        var heightRestore = 50;
+                                        var heightRestore = scope.gridParams.gridItself.find('.ui-jqgrid-restore').height();
 
                                         scope.gridParams.bdiv.parents('.ui-jqgrid').css({
-                                            height: tempHeight - heightRestore + 20
+                                            height: tempHeight - heightRestore
                                         });
 
                                         // вычитаем высоту заголовков таблицы. пагинацию и легенду
@@ -1565,7 +1565,7 @@
                                             scope.gridParams.gridItself.find('.legend').outerHeight();
                                         // отдельно меняем высоту внутренней части грида, иначе скролл отображается не корректно
                                         scope.gridParams.bdiv.css({
-                                            height: tempHeight - tempOther - heightRestore - 30
+                                            height: tempHeight - tempOther - heightRestore
                                         });
                                     }
                                 }

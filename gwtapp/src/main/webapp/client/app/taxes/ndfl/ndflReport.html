@@ -6,14 +6,15 @@
                 translate}}</a> - {{declarationTypeName}}</h1>
         </div>
         <div class="row" style="min-width: 1000px;">
-            <div class="header-col w200" style="float: right; margin-top: 14px; margin-right: 32px;">
-                <div class="btn-group" data-uib-dropdown style="float: right;">
-                    <button id="single-button" type="button" class="btn btn-default-nonBg" data-uib-dropdown-toggle
+            <div class="header-col w200" style="float: right; margin-top: 14px; margin-right: 10px;">
+                <div class="btn-group" style="float: right;">
+                    <button id="single-button" type="button" class="btn btn-default-nonBg"
+                            data-bs-dropdown
+                            data-placement="bottom-right"
                             data-ng-disabled="!availableReports">
-                        <span class="icon-ok"></span>
                         <span data-translate-once="link.ndfl.reporting"></span>
                     </button>
-                    <ul class="dropdown-menu" data-uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="single-button">
                         <li role="menuitem">
                             <div class="row menuitem">
                                 <a ng-click="downloadXml()">{{::'link.ndfl.reporting.uploadXml' | translate}}</a>
@@ -68,57 +69,57 @@
                 <!--Основная информация-->
                 <div class="header-details">
                     <div class="row">
-                        <div class="col-sm-12 info-wrapper">
+                        <div class="info-wrapper">
                             <div class="header-col group-title-panel">
-                                <div class="col-md-9">
+                                <div>
                                     <label class="label-title-panel w100">{{::'title.department' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.department}}</label>
                                 </div>
-                                <div class="col-md-9">
+                                <div>
                                     <label class="label-title-panel w100">{{::'title.formNumber' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationDataId}}</label>
                                 </div>
-                                <div class="col-md-9">
+                                <div>
                                     <label class="label-title-panel w100">{{::'title.creator' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.creationUserName}}</label>
                                 </div>
                             </div>
                             <div class="header-col group-title-panel">
-                                <div class="col-md-12">
+                                <div>
                                     <label class="label-title-panel w150">{{::'title.formType' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.declarationFormKind}}</label>
                                 </div>
-                                <div class="col-md-12">
+                                <div>
                                     <label class="label-title-panel w150">{{::'title.period' | translate}}:</label>
                                     <label class="font-normal info-text30" data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                 </div>
-                                <div class="col-md-12">
+                                <div>
                                     <label class="label-title-panel w150">{{::'title.state' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.state}}</label>
                                 </div>
 
                             </div>
                             <div class="header-col group-title-panel">
-                                <div class="col-md-9">
+                                <div>
                                     <label class="label-title-panel w100">{{::'title.stateDoc' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.docState}}</label>
                                 </div>
-                                <div class="col-md-9">
+                                <div>
                                     <label class="label-title-panel w100">{{::'title.kpp' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.kpp}}</label>
                                 </div>
-                                <div class="col-md-9">
+                                <div>
                                     <label class="label-title-panel w100">{{::'title.oktmo' | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.oktmo}}</label>
                                 </div>
                             </div>
                             <div class="header-col group-title-panel">
-                                <div class="col-md-12" style="padding: 0px">
+                                <div style="padding: 0px">
                                     <label class="label-title-panel " style="width: 200px;">{{::'title.dateAndTimeCreate'
                                         | translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.creationDate}}</label>
                                 </div>
-                                <div class="col-md-12" style="padding: 0px">
+                                <div style="padding: 0px">
                                     <label class="label-title-panel" style="width: 200px;">{{::'title.codeNO' |
                                         translate}}:</label>
                                     <label class="font-normal info-text30">{{declarationData.taxOrganCode}}</label>

@@ -158,6 +158,31 @@
 
                 $rootScope.$broadcast('UPDATE_NOTIF_COUNT');
 
+                $scope.ndflTabsCtrl = {};
+                $scope.ndfFLTab = {
+                    title: $filter('translate')('tab.ndfl.requisites'),
+                        contentUrl: 'client/app/taxes/ndfl/ndflTabs/ndfFLTab.html?v=${buildUuid}',
+                    fetchTab: true,
+                    active: true
+                };
+                $scope.incomesAndTaxTab = {
+                    title: $filter('translate')('tab.ndfl.informationOnIncomesAndNdfl'),
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/incomesAndTaxTab.html?v=${buildUuid}',
+                    fetchTab: true
+                };
+                $scope.deductionsTab = {
+                    title: $filter('translate')('tab.ndfl.informationOnDeductions'),
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/deductionsTab.html?v=${buildUuid}',
+                    fetchTab: true
+                };
+                $scope.prepaymentTab = {
+                    title: $filter('translate')('tab.ndfl.informationOnAdvancePayments'),
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/prepaymentTab.html?v=${buildUuid}',
+                    fetchTab: true
+                };
+                $scope.ndflTabs = [$scope.ndfFLTab, $scope.incomesAndTaxTab, $scope.deductionsTab, $scope.prepaymentTab];
+
+
                 $scope.openHistoryOfChange = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('logBusiness.title'),
@@ -509,14 +534,6 @@
                         controller: 'sourcesFormCtrl',
                         windowClass: 'modal1200'
                     });
-                };
-
-                $scope.selectTab = function (tab) {
-                    $rootScope.$broadcast('tabSelected', tab);
-                };
-
-                $scope.deselectTab = function (tab) {
-                    $rootScope.$broadcast('tabDeselected', tab);
                 };
 
                 $scope.downloadXml = function () {
