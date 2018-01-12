@@ -205,8 +205,8 @@ class Calculate extends AbstractScriptClass {
 
                     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
                     time = System.currentTimeMillis();
-                    this.insertPersonList.addAll(refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true)));
-                    logForDebug("Предварительная выборка новых данных (" + this.insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
+                    insertPersonList.addAll(refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true)));
+                    logForDebug("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
                     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
                     time = System.currentTimeMillis();
@@ -227,7 +227,7 @@ class Calculate extends AbstractScriptClass {
 
                     time = System.currentTimeMillis();
                     createNaturalPersonRefBookRecords();
-                    logForDebug("Создание (" + this.insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
+                    logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
                     countTotalAndUniquePerson(primaryPersonMap.values())
                     logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull));
@@ -427,7 +427,7 @@ class Calculate extends AbstractScriptClass {
         Map<PersonalData, NaturalPerson> personalDataMatchedMap = new HashMap<>()
         Map<PersonalData, List<NaturalPerson>> personalDataReducedMatchedMap = new HashMap<>()
 
-        for (NaturalPerson person : this.insertPersonList) {
+        for (NaturalPerson person : insertPersonList) {
             String inp = person.personIdentityList.get(0).getInp()
             String snils = person.snils?.replaceAll("[\\s-]", "")?.toLowerCase()
             String inn = person.inn
@@ -542,7 +542,7 @@ class Calculate extends AbstractScriptClass {
     def createNaturalPersonRefBookRecords() {
 
         int createCnt = 0;
-        if (!this.insertPersonList.isEmpty()) {
+        if (!insertPersonList.isEmpty()) {
 
             performPrimaryPersonDuplicates()
 
@@ -550,7 +550,7 @@ class Calculate extends AbstractScriptClass {
             List<PersonDocument> documentList = new ArrayList<PersonDocument>();
             List<PersonIdentifier> identifierList = new ArrayList<PersonIdentifier>();
 
-            for (NaturalPerson person : this.insertPersonList) {
+            for (NaturalPerson person : insertPersonList) {
 
                 ScriptUtils.checkInterrupted();
 
@@ -578,7 +578,7 @@ class Calculate extends AbstractScriptClass {
             });
 
             //insert persons batch
-            insertBatchRecords(RefBook.Id.PERSON.getId(), this.insertPersonList, { NaturalPerson person ->
+            insertBatchRecords(RefBook.Id.PERSON.getId(), insertPersonList, { NaturalPerson person ->
                 mapPersonAttr(person)
             });
 
@@ -594,7 +594,7 @@ class Calculate extends AbstractScriptClass {
 
             //update reference to ref book
 
-            updatePrimaryToRefBookPersonReferences(this.insertPersonList);
+            updatePrimaryToRefBookPersonReferences(insertPersonList);
 
             for (Map.Entry<NaturalPerson, List<NaturalPerson>> entry : primaryPersonOriginalDuplicates.entrySet()) {
                 for (NaturalPerson duplicatePerson : entry.getValue()) {
@@ -604,7 +604,7 @@ class Calculate extends AbstractScriptClass {
             }
 
             //Выводим информацию о созданных записях
-            for (NaturalPerson person : this.insertPersonList) {
+            for (NaturalPerson person : insertPersonList) {
                 Long recordId = refBookService.getNumberValue(RefBook.Id.PERSON.id, person.getId(), "record_id").longValue()
                 String noticeMsg = String.format("Создана новая запись в справочнике 'Физические лица': %d, %s %s %s", recordId, person.getLastName(), person.getFirstName(), (person.getMiddleName() ?: ""));
                 logger.info(noticeMsg);
@@ -840,7 +840,7 @@ class Calculate extends AbstractScriptClass {
                 }
             } else {
                 //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
-                this.insertPersonList.add(primaryPerson);
+                insertPersonList.add(primaryPerson);
             }
 
             if (msgCnt < maxMsgCnt) {
