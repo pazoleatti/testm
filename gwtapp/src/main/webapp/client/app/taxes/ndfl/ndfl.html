@@ -114,7 +114,8 @@
                                 </div>
                                 <div>
                                     <label>{{::'title.period' | translate}}:</label>
-                                    <label class="font-normal info-text200" data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
+                                    <label class="font-normal info-text200"
+                                           data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                 </div>
                                 <div>
                                     <label>{{::'title.state' | translate}}:</label>
@@ -132,7 +133,8 @@
                                 </div>
                                 <div>
                                     <label style="width: 207px;">{{::'title.manuallyCreated' | translate}}:</label>
-                                    <label class="font-normal info-text200" style="width: 138px;">{{declarationData.manuallyCreated | yesNoFormatter}}</label>
+                                    <label class="font-normal info-text200" style="width: 138px;">{{declarationData.manuallyCreated
+                                        | yesNoFormatter}}</label>
                                 </div>
                             </div>
                         </div>
@@ -147,16 +149,10 @@
                         <button type="button" class="btn btn-default"
                                 data-ng-click="calculate()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CALCULATE)">
-                            <span data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id" data-translate-once="button.identifyPersons"></span>
-                            <span data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id" data-translate-once="button.consolidate"></span>
-                        </button>
-                    </span>
-                    <!--Принять -->
-                    <span>
-                        <button type="button" class="btn btn-default"
-                                data-ng-click="accept()"
-                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
-                            <span data-translate-once="button.accept"></span>
+                            <span data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id"
+                                  data-translate-once="button.identifyPersons"></span>
+                            <span data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id"
+                                  data-translate-once="button.consolidate"></span>
                         </button>
                     </span>
                     <!--Проверить -->
@@ -165,6 +161,14 @@
                                 data-ng-click="check()"
                                 data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CHECK)">
                             <span data-translate-once="button.check"></span>
+                        </button>
+                    </span>
+                    <!--Принять -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="accept()"
+                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
+                            <span data-translate-once="button.accept"></span>
                         </button>
                     </span>
                     <!--Вернуть в Создана -->
@@ -201,9 +205,9 @@
             <data-uib-tab index="0" heading="1. {{::'tab.ndfl.requisites' | translate}}"
                           select="selectTab('ndflFL')" deselect="deselectTab('ndflFL')">
                 <div data-ng-controller="ndflFLCtrl">
-                        <div class='container-grid-top'>
-                            <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
-                        </div>
+                    <div class='container-grid-top'>
+                        <span data-ng-include="'client/app/taxes/ndfl/ndflFLFilter.html'"></span>
+                    </div>
                     <div data-aplana-grid
                          data-grid-fill-space="true"
                          data-grid-fill-space-container-selector=".form100"
