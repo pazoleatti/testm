@@ -21,31 +21,20 @@
                 templateUrl: 'client/components/dateFromToFilter/dateFromToFilter.html',
                 scope: {
                     ngLabel: '@?',
-                    ngFromModel: '=',
-                    ngToModel: '=',
+                    ngPeriodModel: '=',
+                    ngFromParam: '@',
+                    ngToParam: '@',
                     labelWidth: "@"
                 },
                 link: function (scope, element, attributes) {
                     scope.ngLabel = angular.isDefined(scope.ngLabel) ? scope.ngLabel : "title.dateFromFilterLabel";
-                    scope.dateFromOpened = false;
-                    scope.dateToOpened = false;
-                    scope.dateFromSelectClick = function () {
-                        scope.dateFromOpened = true;
-                    };
-                    scope.dateToSelectClick = function () {
-                        scope.dateToOpened = true;
-                        scope.dateToOptions = {
-                            minDate: scope.ngFromModel,
-                            maxDate: undefined
-                        };
-                    };
                     // Изменение пропорций метки и поля
-                    scope.labelGridClass = 'col-md-3';
-                    scope.pickerGridClass = 'col-md-9';
+                    scope.labelGridClass = 'span3';
+                    scope.pickerGridClass = 'span9';
                     if (attributes.labelWidth !== undefined) {
                         var labelWidth = parseInt(attributes.labelWidth);
-                        scope.labelGridClass = 'col-md-' + labelWidth;
-                        scope.pickerGridClass = 'col-md-' + (12 - labelWidth);
+                        scope.labelGridClass = 'span' + labelWidth;
+                        scope.pickerGridClass = 'span' + (12 - labelWidth);
                     }
                     scope.paragraph = 'standartParagraphForDate';
                     if (attributes.paragraph !== undefined) {

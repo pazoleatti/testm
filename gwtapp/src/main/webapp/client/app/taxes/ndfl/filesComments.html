@@ -1,41 +1,40 @@
-<div class="modal-body" style="height: 500px">
-
-    <div class="form-horizontal" data-ng-form="commentForm" style="height: 510px;">
-
-        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table" style="margin: 0; min-height: 100px; height: 100px;">
-            <thead>
-            <tr>
-                <td>
-                    <label class="font-normal" for="note">{{::'filesComment.comment' |translate}}</label>
-                </td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>
-                    <div data-aplana-field>
+<div class="modal-body">
+    <div class="form-horizontal" data-ng-form="commentForm">
+        <div class="top-block">
+            <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table" style="">
+                <thead>
+                <tr>
+                    <td>
+                        <label class="font-normal" for="note">{{::'filesComment.comment' |translate}}</label>
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <div data-aplana-field>
                         <textarea
-                                style="width: 1190px;"
+                                style="width: 1170px;"
                                 rows="6"
                                 data-ng-model="commentForm.comment"
                                 data-ng-maxlength="512"
                                 id="note">
                         </textarea>
-                        <div data-aplana-validator data-key='maxlength'>{{::'filesComment.tooLongNoteMessage'
-                            |translate}}
+                            <div data-aplana-validator data-key='maxlength'>{{::'filesComment.tooLongNoteMessage'
+                                |translate}}
+                            </div>
                         </div>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
         <div>
             <label class="font-normal" for="fileCommentGrid">{{::'filesComment.files' |translate}}</label>
             <div data-aplana-grid
                  data-grid-fill-space="true"
                  data-grid-fill-space-container-selector=".modal-body"
-                 data-grid-fill-space-container-selector-top=".horizontal-input-table"
+                 data-grid-fill-space-container-selector-top=".top-block"
                  data-grid-options="fileCommentGrid.options"
                  data-grid-ctrl="fileCommentGrid.ctrl"
                  data-ng-model="fileCommentGrid.value"
@@ -47,7 +46,7 @@
 
     </div>
 </div>
-<div class="modal-footer" style="margin: -48px 0 2px 0;position: relative; z-index: 1000;">
+<div class="modal-footer" style="margin: 0 0 2px 0;position: relative; z-index: 1000;">
     <div class="button_panel" style="float: left; margin: 0 0 11px 0;">
         <div class="btn-toolbar" role="toolbar" data-ng-show="editMode">
             <span>

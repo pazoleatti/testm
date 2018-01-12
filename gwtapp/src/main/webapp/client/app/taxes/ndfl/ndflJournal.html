@@ -2,23 +2,22 @@
     <div class="header-col" style="margin: 14px 0 0 28px;">
         <h1>{{::'header.ndflJournal.forms' | translate}}</h1>
     </div>
-    <div class="header-col w200" style="float: right; margin-top: 14px;  margin-right: 14px;">
+    <div class="header-col" style="float: right; margin-top: 14px;  margin-right: 14px;">
         <button type="button" class="btn btn-default" data-ng-click="showCreateDeclarationModal()"
                 data-ng-show="declarationCreateAllowed">
-            <span class="icon-ok"></span>
             <span data-translate-once="ndflJournal.button.create"></span>
         </button>
     </div>
 </div>
-<div id="production-planning" class="container-grid box-shadow-block" >
+<div id="production-planning" class="container-grid box-shadow-block">
 
-        <!-- Фильтр -->
-        <div class='container-grid-top'>
-            <span data-ng-include="'client/app/taxes/ndfl/ndflJournalFilter.html'"></span>
+    <!-- Фильтр -->
+    <div class='container-grid-top'>
+        <span data-ng-include="'client/app/taxes/ndfl/ndflJournalFilter.html'"></span>
 
 
         <!--Панель кнопок -->
-        <div class="button_panel"  style="min-height: 52px;margin: -5px 0 -17px 0;">
+        <div class="button_panel" style="min-height: 52px;margin: -5px 0 -17px 0;">
             <div class="btn-toolbar" role="toolbar">
                 <!--Рассчитать -->
                 <span>
@@ -57,16 +56,16 @@
             </span>
             </div>
         </div>
-        </div>
+    </div>
 
     <!-- Таблица -->
     <div data-aplana-grid
          data-grid-fill-space="true"
-         data-grid-fill-space-container-selector=".cbr-page-layout__view"
+         data-grid-fill-space-container-selector=".container-grid"
          data-grid-fill-space-container-selector-top=".container-grid-top"
          data-grid-options="ndflJournalGrid.options"
          data-grid-ctrl="ndflJournalGrid.ctrl"
          data-ng-model="ndflJournalGrid.value"
-         id="ndflJournalTable"
-         style="float: left; width: 100%;"></div>
+         id="ndflJournalTable">
+    </div>
 </div>
