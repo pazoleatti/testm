@@ -46,6 +46,7 @@
         "common.select.formatSearching": "Идет поиск...",
         "common.select.formatNoMatches": "По вашему запросу ничего не найдено",
         "common.select.formatLoadMore" : "Подождите, идет загрузка данных...",
+        "common.placeholder.notSelected": "Значение не выбрано",
         "common.validation.required": "Необходимо заполнить поле",
 
         "common.hint": "Заполните обязательные поля (отмечены желтым)",
@@ -110,7 +111,6 @@
         "filterPanelLabel": "Фильтр",
         "infoPanelLabel": "Информация",
         "filter.placeholder.search": "Введите строку",
-        "filter.placeholder.select": "Значение не выбрано",
         "filter.placeholder.empty": "",
         "theNumberOfSelectedItems": "Выбрано значений:",
         "title.redactParametr": "Редактировать параметр",
