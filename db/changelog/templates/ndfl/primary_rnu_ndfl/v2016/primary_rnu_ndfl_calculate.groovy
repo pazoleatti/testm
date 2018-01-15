@@ -131,6 +131,11 @@ class Calculate extends AbstractScriptClass {
      */
     List<NaturalPerson> insertPersonList = []
 
+    /**
+     * Список физлиц дубликатов
+     */
+    List<NaturalPerson> duplicatePersonList = []
+
     private Calculate() {
     }
 
@@ -205,7 +210,8 @@ class Calculate extends AbstractScriptClass {
 
                     //Шаг 1. список физлиц первичной формы для создания записей в справочниках
                     time = System.currentTimeMillis();
-                    insertPersonList.addAll(refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true)));
+                    List<NaturalPerson> insertList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true))
+                    insertPersonList.addAll(insertList);
                     logForDebug("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
                     //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
@@ -497,42 +503,55 @@ class Calculate extends AbstractScriptClass {
      * @param processingPersonList список обрабатываемых Физлиц.
      */
     void mapDuplicates(List<NaturalPerson> processingPersonList) {
-        Double similarityLine = similarityThreshold.doubleValue() / 1000
-        Integer originalPersonIndex = null
-        List<Long> originalPrimaryPersonIdList = []
-        for (NaturalPerson person : primaryPersonOriginalDuplicates.keySet()) {
-            originalPrimaryPersonIdList.add(person.primaryPersonId)
-        }
-        for (int i = 0; i < processingPersonList.size(); i++) {
-            if (originalPrimaryPersonIdList.contains(processingPersonList.get(i).primaryPersonId)) {
-                originalPersonIndex = i
-                break
-            }
-        }
-        NaturalPerson originalPerson = null
-        if (originalPersonIndex != null) {
-            originalPerson = processingPersonList.remove(originalPersonIndex)
-        }
-
         Collections.sort(processingPersonList, new Comparator<NaturalPerson>() {
             @Override
             int compare(NaturalPerson o1, NaturalPerson o2) {
                 return o1.primaryPersonId.compareTo(o2.primaryPersonId)
             }
         })
-        if (originalPerson == null && !processingPersonList.isEmpty()) {
-            originalPerson = processingPersonList.remove(0)
+        Double similarityLine = similarityThreshold.doubleValue() / 1000
+        // Список физлиц которые были выбраны в качестве оригинала
+        NaturalPerson originalPerson = null
+        List<NaturalPerson> originalPrimaryPersonList = new ArrayList<>(primaryPersonOriginalDuplicates.keySet())
+
+        // Выбираем физлицо, которое будет оригиналом.
+        // Проверяем было ли физлицо выбрано оригиналом раннее. Если да, то вы выбираем его снова.
+        for (NaturalPerson person : processingPersonList) {
+            if (originalPrimaryPersonList.contains(person)) {
+                originalPerson = person
+                processingPersonList.remove(person)
+                break
+            }
         }
-        for (int i = 0; i < processingPersonList.size(); i++) {
-            List<NaturalPerson> duplicatePersons = primaryPersonOriginalDuplicates.get(originalPerson)
-            if (duplicatePersons == null || !duplicatePersons.contains(processingPersonList.get(i))) {
-                refBookPersonService.calculateWeight(originalPerson, [processingPersonList.get(i)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
-                if (processingPersonList.get(i).weight > similarityLine) {
-                    insertPersonList.remove(processingPersonList.get(i))
-                    if (duplicatePersons != null) {
-                        duplicatePersons.add(processingPersonList.get(i))
-                    } else {
-                        primaryPersonOriginalDuplicates.put(originalPerson, [processingPersonList.get(i)])
+
+        /* Если физлицо не было раннее выбрано в качестве оригинала, тогда берем первое физлицо, но проверяем чтобы оно
+         не содержалось в списке дубликатов*/
+        if (originalPerson == null && !processingPersonList.isEmpty()) {
+            for (NaturalPerson person : processingPersonList) {
+                if (duplicatePersonList.contains(person)) {
+                    continue
+                } else {
+                    originalPerson = person
+                    processingPersonList.remove(person)
+                    break
+                }
+            }
+        }
+
+        if (originalPerson != null) {
+            for (int i = 0; i < processingPersonList.size(); i++) {
+                // Это список физлиц-дубликатов для конкретного оригинала
+                List<NaturalPerson> duplicatePersons = primaryPersonOriginalDuplicates.get(originalPerson)
+                if (duplicatePersons == null || !duplicatePersonList.contains(processingPersonList.get(i))) {
+                    refBookPersonService.calculateWeight(originalPerson, [processingPersonList.get(i)], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
+                    if (processingPersonList.get(i).weight > similarityLine) {
+                        duplicatePersonList.add(processingPersonList.get(i))
+                        insertPersonList.remove(processingPersonList.get(i))
+                        if (duplicatePersons != null) {
+                            duplicatePersons.add(processingPersonList.get(i))
+                        } else {
+                            primaryPersonOriginalDuplicates.put(originalPerson, [processingPersonList.get(i)])
+                        }
                     }
                 }
             }
