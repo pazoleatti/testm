@@ -175,12 +175,12 @@
                         </span>
                 </div>
             </div>
-            <div ng-show="!availablePdf">
+            <div ng-if="!availablePdf">
                 <div style="min-height: 600px;text-align:center" class="report-wrapper">
                     <h1>{{pdfMessage}}</h1>
                 </div>
             </div>
-            <div ng-show="availablePdf">
+            <div ng-if="availablePdf">
                 <div style="overflow: auto;width: 100%;max-height: 500px;padding: 10px 12px 0;background-color: lightgray;text-align:center">
                     <img id="pdfImage" style="width: 793px; height: auto;" ng-src="{{reportImage}}">
                 </div>
@@ -191,7 +191,7 @@
                     <div data-app-pager
                          style="position: absolute; top: 0; right: 30px;"
                          data-on-page-change="onPageChange()"
-                         data-curr-page="currPage"
+                         data-ng-model="pager"
                          data-pages-total="pagesTotal">
                     </div>
                 </div>

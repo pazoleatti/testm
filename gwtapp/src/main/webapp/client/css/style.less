@@ -662,12 +662,13 @@ input[type="checkbox"] {
 /* Панель для отображения информации о версии приложения и его сборке */
 .build_info {
   position: fixed; /* Фиксированное положение */
-  left: 16px;
+  left: 24px;
   bottom: 5px; /* Левый нижний угол */
   font-size: 12px;
   line-height: 1.33;
   text-align: left;
   color: rgba(0, 0, 0, 0.5);
+  z-index: 18;
 }
 
 /* Признак обязательности поля */
@@ -1644,4 +1645,11 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
 }
 .btn-group .btn .caret{
   display: none;
+}
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a{
+  color: #333333;
+  background: #e7e7e7;
+}
+.modal-footer .button_panel .btn-toolbar{
+  margin: 0;
 }
