@@ -73,10 +73,8 @@ public class NotificationController {
      * @param ids - массив id оповещений
      */
     @PostMapping(value = "/actions/notification/delete")
-    public void deleteNotifications(@RequestParam Long[] ids) {
-        List<Long> notificationIdList = new ArrayList<Long>();
-        Collections.addAll(notificationIdList, ids);
-        notificationService.deleteAll(notificationIdList);
+    public void deleteNotifications(@RequestBody List<Long> ids) {
+        notificationService.deleteAll(ids);
     }
 
     /**

@@ -101,9 +101,7 @@
                                 $http({
                                     method: "POST",
                                     url: "controller/actions/notification/delete",
-                                    params: {
-                                        ids: $filter('idExtractor')($scope.notificationsGrid.value)
-                                    }
+                                    data: $filter('idExtractor')($scope.notificationsGrid.value)
                                 }).success(function () {
                                     $scope.notificationsGrid.ctrl.refreshGrid();
                                 });
