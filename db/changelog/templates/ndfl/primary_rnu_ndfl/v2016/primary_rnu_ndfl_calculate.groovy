@@ -438,7 +438,10 @@ class Calculate extends AbstractScriptClass {
             String snils = person.snils?.replaceAll("[\\s-]", "")?.toLowerCase()
             String inn = person.inn
             String innForeign = person.innForeign
-            PersonDocument personDocument = person.personDocumentList.get(0)
+            PersonDocument personDocument = null
+            if (!person?.personDocumentList.isEmpty()) {
+                person.personDocumentList.get(0)
+            }
             PersonalData personalData = new PersonalData(person.firstName, person.lastName, person.middleName, person.birthDate)
             addToReduceMap(inp, inpMatchedMap, inpReducedMatchedMap, person)
             if (snils != null) {
