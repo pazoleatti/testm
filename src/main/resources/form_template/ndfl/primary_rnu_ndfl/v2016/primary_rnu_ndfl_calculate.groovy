@@ -525,12 +525,21 @@ class Calculate extends AbstractScriptClass {
         }
 
         /* Если физлицо не было раннее выбрано в качестве оригинала, тогда берем первое физлицо, но проверяем чтобы оно
-         не содержалось в списке дубликатов*/
+         не содержалось в списке дубликатов и чтобы оно не было дубликатом имеющихся оригиналов*/
         if (originalPerson == null && !processingPersonList.isEmpty()) {
-            for (NaturalPerson person : processingPersonList) {
+            outer: for (NaturalPerson person : processingPersonList) {
                 if (duplicatePersonList.contains(person)) {
                     continue
                 } else {
+                    for (NaturalPerson original : originalPrimaryPersonList) {
+                        refBookPersonService.calculateWeight(original, [person], new PersonDataWeightCalculator(refBookPersonService.getBaseCalculateList()))
+                        if (person.weight > similarityLine) {
+                            duplicatePersonList.add(person)
+                            insertPersonList.remove(person)
+                            primaryPersonOriginalDuplicates.get(original).add(person)
+                            continue outer
+                        }
+                    }
                     originalPerson = person
                     processingPersonList.remove(person)
                     break
