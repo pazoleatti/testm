@@ -1,115 +1,127 @@
-<form class="form-horizontal" role="form" style="width: 600px; margin: auto">
+<div class="modal-body">
 
+    <form class="form-horizontal" role="form" style="width: 100%; margin: auto">
+        <div class="row">
+            <div class="filter-col w450">
+                <div class="row-fluid form-group">
+                    <div class="span4">
+                        <label class="control-label">{{::'title.lastName' |
+                            translate}}:</label>
+                    </div>
+                    <div class="span8">
+                        <input data-ng-model="searchFilter.params.lastName"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.lastName}}"
+                               ng-style="fieldStyles.lastName"/>
+                    </div>
+                </div>
 
-    <div class="row">
-        <div class="filter-col w500" style="height: 360px; width: 500px; margin: auto">
-            <div class="row-fluid form-group">
-                <div class="span3">
-                    <label class="control-label">{{::'title.refNumber' |
-                        translate}}:</label>
+                <div class="row-fluid form-group">
+                    <div class="span4">
+                        <label class="control-label">{{::'title.refNumber' |
+                            translate}}:</label>
+                    </div>
+                    <div class="span8">
+                        <input data-ng-model="searchFilter.params.refNumber"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.refNumber}}"
+                               ng-style="fieldStyles.refNumber"/>
+                    </div>
                 </div>
-                <div class="span9">
-                    <input data-ng-model="searchFilter.params.refNumber"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.refNumber}}"
-                           ng-style="fieldStyles.refNumber"/>
-                </div>
-            </div>
-            <div class="row-fluid form-group">
-                <div class="span3">
-                    <label class="control-label">{{::'title.lastName' |
-                        translate}}:</label>
-                </div>
-                <div class="span9">
-                    <input data-ng-model="searchFilter.params.lastName"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.lastName}}"
-                           ng-style="fieldStyles.lastName"/>
-                </div>
-            </div>
-            <div class="row-fluid form-group">
-                <div class="span3">
-                    <label class="control-label">{{::'title.firstName' |
-                        translate}}:</label>
-                </div>
-                <div class="span9">
-                    <input data-ng-model="searchFilter.params.firstName"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.firstName}}"
-                           ng-style="fieldStyles.firstName"/>
-                </div>
-            </div>
-            <div class="row-fluid form-group">
-                <div class="span3">
-                    <label class="control-label">{{::'title.middleName' |
-                        translate}}:</label>
-                </div>
-                <div class="span9">
-                    <input data-ng-model="searchFilter.params.middleName"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.middleName}}"
-                           ng-style="fieldStyles.middleName"/>
-                </div>
+
+                <date-from-to-filter
+                        data-label-width="4"
+                        ng-period-model="searchFilter.params"
+                        ng-from-param="dateFrom"
+                        ng-to-param="dateTo"
+                        ng-label="title.dateOfBirthFrom"
+                        paragraph="personRnuParagraphForDate">
+                </date-from-to-filter>
             </div>
 
-            <div class="row-fluid form-group">
-                <div class="span3">
-                    <label class="control-label">{{::'title.inn' |
-                        translate}}: </label>
+            <div class="filter-col w250">
+                <div class="row-fluid form-group">
+                    <div class="span3">
+                        <label class="control-label">{{::'title.firstName' |
+                            translate}}:</label>
+                    </div>
+                    <div class="span9">
+                        <input data-ng-model="searchFilter.params.firstName"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.firstName}}"
+                               ng-style="fieldStyles.firstName"/>
+                    </div>
                 </div>
-                <div class="span9">
-                    <input data-ng-model="searchFilter.params.inn"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.inn}}"
-                           ng-style="fieldStyles.inn"/>
+
+                <div class="row-fluid form-group">
+                    <div class="span3">
+                        <label class="control-label">{{::'title.inn' |
+                            translate}}: </label>
+                    </div>
+                    <div class="span9">
+                        <input data-ng-model="searchFilter.params.inn"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.inn}}"
+                               ng-style="fieldStyles.inn"/>
+                    </div>
                 </div>
+
             </div>
 
-            <date-from-to-filter
-                    data-label-width="3"
-                    ng-period-model="searchFilter.params"
-                    ng-from-param="dateFrom"
-                    ng-to-param="dateTo"
-                    ng-label="title.dateOfBirthFrom"
-                    paragraph="personRnuParagraphForDate">
-            </date-from-to-filter>
-
-            <div class="row-fluid form-group">
-                <div class="span3">
-                    <label class="control-label">{{::'title.idDocNumber' |
-                        translate}}: </label>
+            <div class="filter-col w350">
+                <div class="row-fluid form-group">
+                    <div class="span3">
+                        <label class="control-label">{{::'title.middleName' |
+                            translate}}:</label>
+                    </div>
+                    <div class="span9">
+                        <input data-ng-model="searchFilter.params.middleName"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.middleName}}"
+                               ng-style="fieldStyles.middleName"/>
+                    </div>
                 </div>
-                <div class="span9">
-                    <input data-ng-model="searchFilter.params.idDocNumber"
-                           placeholder="{{'filter.placeholder.search' | translate}}"
-                           type="text" class="form-control"
-                           title="{{searchFilter.params.idDocNumber}}"
-                           ng-style="fieldStyles.idDocNumber"/>
+
+                <div class="row-fluid form-group">
+                    <div class="span3">
+                        <label class="control-label">{{::'title.idDocNumber' |
+                            translate}}: </label>
+                    </div>
+                    <div class="span9">
+                        <input data-ng-model="searchFilter.params.idDocNumber"
+                               placeholder="{{'filter.placeholder.search' | translate}}"
+                               type="text" class="form-control"
+                               title="{{searchFilter.params.idDocNumber}}"
+                               ng-style="fieldStyles.idDocNumber"/>
+                    </div>
                 </div>
             </div>
-            <div class="span12" data-ng-show="showInfo" style="width: auto; min-width: 650px; border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px">
+        </div>
+        <div class="w500" style="margin: auto;">
+            <div data-ng-show="showInfo"
+                 style="width: auto; min-width: 650px; border: 1px solid #aeaeac; border-radius: 6px; margin: 10px 5px 30px 5px">
                 <div style="padding: 5px 0 5px 0; background-color: #f0f8d1">{{infoText}}</div>
             </div>
         </div>
+    </form>
+
+    <div data-ng-show="enabledGrid">
+        <div data-aplana-grid
+             data-grid-disable-adjust-width="true"
+             data-grid-options="reportNdflGrid.options"
+             data-grid-ctrl="reportNdflGrid.ctrl"
+             data-ng-model="reportNdflGrid.value"
+             data-grid-enable-adjust-width-by-columns="true"
+             id="rnuNdflTable"
+             style="float: left; width: 100%;"
+             data-grid-no-paging="true">
+        </div>
     </div>
-</form>
-
-
-<div class="modal-body form100" id="FindGrid" data-ng-show="enabledGrid" style="min-height: 100px;">
-    <div data-aplana-grid
-         data-grid-disable-adjust-width="true"
-         data-grid-options="reportNdflGrid.options"
-         data-grid-ctrl="reportNdflGrid.ctrl"
-         data-ng-model="reportNdflGrid.value"
-         data-grid-enable-adjust-width-by-columns="true"
-         id="rnuNdflTable"
-         style="float: left; width: 100%;"
-         data-grid-no-paging="true"></div>
 </div>
 
 <div class="modal-footer" style="margin: 30px">

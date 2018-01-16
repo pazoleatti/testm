@@ -13,6 +13,14 @@
             function ($scope, $modalInstance, $shareData, $filter, $dialogs, APP_CONSTANTS, $logPanel,
                       prepareSpecificReport, createReport) {
 
+
+                $scope.searchFilter = {
+                    ajaxFilter: [],
+                    params: {},
+                    isClear: false,
+                    filterName: 'reportNdflPersonFaceFilter'
+                };
+
                 /**
                  * @description Проверяет все ли поля на форме пустые
                  * @returns {boolean}
@@ -58,14 +66,17 @@
                  * @param date дата
                  * @param fieldName название поля
                  */
-                var checkDateField = function(date, fieldName) {
+                var checkDateField = function (date, fieldName) {
                     var mindate = new Date();
                     var maxdate = new Date();
                     mindate.setFullYear(1900, 0, 1);
                     maxdate.setFullYear(2100, 11, 31);
+                    if (date && !date instanceof Date) {
+                        date = new Date(date);
+                    }
 
                     if (date < mindate || date > maxdate) {
-                        var msg = $filter('translate')('reportPersonFace.error.attr')  + fieldName +
+                        var msg = $filter('translate')('reportPersonFace.error.attr') + fieldName +
                             $filter('translate')('reportPersonFace.error.dateInterval');
                         errorList.push(msg.split(" ").join("\u00a0"));
                     }
@@ -99,19 +110,18 @@
                  *
                  * @description грид для вывода результата по найденным физлицам
                  */
-                $scope.reportNdflGrid =
-                    {
-                        ctrl: {},
-                        value: [],
-                        options: {
-                            datatype: "local",
-                            height: 'auto',
-                            colNames: $scope.colNames,
-                            data: [],
-                            colModel: $scope.colModel,
-                            multiselect: false
-                        }
-                    };
+                $scope.reportNdflGrid = {
+                    ctrl: {},
+                    value: [],
+                    options: {
+                        datatype: "local",
+                        height: 'auto',
+                        colNames: $scope.colNames,
+                        data: [],
+                        colModel: $scope.colModel,
+                        multiselect: false
+                    }
+                };
 
                 $scope.searchPerson = function () {
                     // очищаем список ошибок

@@ -279,7 +279,7 @@
                     var title = $scope.declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.REPORT_2_NDFL_1.id?$filter('translate')('reportPersonFace.title'):$filter('translate')('reportPersonFace.title2');
                     $aplanaModal.open({
                         title: title,
-                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html',
+                        templateUrl: 'client/app/taxes/ndfl/reportNdflPersonFace.html?v=${buildUuid}',
                         controller: 'reportNdflPersonFaceFormCtrl',
                         windowClass: 'modal1200',
                         resolve: {
