@@ -1,14 +1,14 @@
 <div class="modal-body">
 
-    <form class="form-horizontal" role="form" style="width:1250px; margin: auto">
+    <form class="form-horizontal" role="form" style="width: 100%; margin: auto">
         <div class="row">
             <div class="filter-col w450">
 
                 <div class="row-fluid form-group">
-                    <div class="span3">
+                    <div class="span4">
                         <label class="control-label">{{::'title.lastName' | translate}}:</label>
                     </div>
-                    <div class="span9" style="width: 335px;">
+                    <div class="span8">
                         <input data-ng-model="searchFilter.params.lastName"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
@@ -17,10 +17,10 @@
                 </div>
 
                 <div class="row-fluid form-group">
-                    <div class="span3">
+                    <div class="span4">
                         <label class="control-label">{{::'title.snils' | translate}}: </label>
                     </div>
-                    <div class="span9" style="width: 335px;">
+                    <div class="span8">
                         <input data-ng-model="searchFilter.params.snils"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
@@ -29,7 +29,7 @@
                 </div>
 
                 <date-from-to-filter
-                        data-label-width="3"
+                        data-label-width="4"
                         ng-period-model="searchFilter.params"
                         ng-from-param="dateFrom"
                         ng-to-param="dateTo"
