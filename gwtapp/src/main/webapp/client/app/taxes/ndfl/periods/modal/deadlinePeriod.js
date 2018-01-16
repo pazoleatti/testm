@@ -17,7 +17,10 @@
                  * а для date-picker нужна дата в формате UTC
                  * для перобразования добавляется 'Z'
                  */
-                var deadline = new Date($shareData.period.deadline + "Z");
+                var deadline = null;
+                if($shareData.period.deadline) {
+                    deadline = new Date($shareData.period.deadline + "Z");
+                }
 
                 $scope.filter = {
                     departmentReportPeriod: $shareData.period,
@@ -127,7 +130,7 @@
                 };
 
                 $scope.$watch('filter.deadline', function () {
-                    $scope.isEdit = $scope.filter.deadline.toString() !== deadline.toString();
+                    $scope.isEdit = ((!deadline && $scope.filter.deadline) || (new Date($scope.filter.deadline.toString()).toString() !== deadline.toString()));
                 });
             }])
 
