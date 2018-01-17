@@ -55,80 +55,79 @@
                 /**
                  * Grid для отображения найденных физ лиц в документе
                  */
-                $scope.rnuNdflGrid =
-                    {
-                        ctrl: {},
-                        value: [],
-                        options: {
-                            datatype: "angularResource",
-                            angularResource: RnuPerson,
-                            requestParameters: function () {
-                                if (!$scope.isEmptySearchParams) {
-                                    return {
-                                        projection: 'rnuPersons',
-                                        ndflPersonFilter: JSON.stringify({
-                                            declarationDataId: $shareData.declarationDataId,
-                                            lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
-                                            firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
-                                            middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
-                                            inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
-                                            snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
-                                            innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
-                                            idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
-                                            dateFrom: $scope.searchFilter.params.dateFrom,
-                                            dateTo: $scope.searchFilter.params.dateTo
-                                        })
-                                    };
-                                } else {
-                                    return {
-                                        projection: 'rnuPersons',
-                                        ndflPersonFilter: {}
-                                    };
-                                }
+                $scope.rnuNdflGrid = {
+                    ctrl: {},
+                    value: [],
+                    options: {
+                        datatype: "angularResource",
+                        angularResource: RnuPerson,
+                        requestParameters: function () {
+                            if (!$scope.isEmptySearchParams) {
+                                return {
+                                    projection: 'rnuPersons',
+                                    ndflPersonFilter: JSON.stringify({
+                                        declarationDataId: $shareData.declarationDataId,
+                                        lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
+                                        firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
+                                        middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
+                                        inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
+                                        snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
+                                        innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
+                                        idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
+                                        dateFrom: $scope.searchFilter.params.dateFrom,
+                                        dateTo: $scope.searchFilter.params.dateTo
+                                    })
+                                };
+                            } else {
+                                return {
+                                    projection: 'rnuPersons',
+                                    ndflPersonFilter: {}
+                                };
+                            }
+                        },
+                        height: 220,
+                        colNames: [
+                            '',
+                            $filter('translate')('title.lastName'),
+                            $filter('translate')('title.firstName'),
+                            $filter('translate')('title.middleName'),
+                            $filter('translate')('title.snils'),
+                            $filter('translate')('title.innNp'),
+                            $filter('translate')('title.innForeign'),
+                            $filter('translate')('title.inp'),
+                            $filter('translate')('title.dateOfBirth'),
+                            $filter('translate')('title.idDocNumber'),
+                            $filter('translate')('title.status.taxpayer')
+
+                        ],
+                        colModel: [
+                            {name: 'id', index: 'id', width: 100, key: true, hidden: true},
+                            {name: 'lastName', index: 'last_name', width: 140},
+                            {name: 'firstName', index: 'first_name', width: 140},
+                            {name: 'middleName', index: 'middle_name', width: 140},
+                            {name: 'snils', index: 'snils', width: 100, sortable: false},
+                            {name: 'innNp', index: 'innNp', width: 100},
+                            {name: 'innForeign', index: 'innForeign', width: 100},
+                            {name: 'inp', index: 'inp', width: 100},
+                            {
+                                name: 'birthDay',
+                                index: 'birth_day',
+                                width: 100,
+                                formatter: $filter('dateFormatter')
                             },
-                            height: 220,
-                            colNames: [
-                                '',
-                                $filter('translate')('title.lastName'),
-                                $filter('translate')('title.firstName'),
-                                $filter('translate')('title.middleName'),
-                                $filter('translate')('title.snils'),
-                                $filter('translate')('title.innNp'),
-                                $filter('translate')('title.innForeign'),
-                                $filter('translate')('title.inp'),
-                                $filter('translate')('title.dateOfBirth'),
-                                $filter('translate')('title.idDocNumber'),
-                                $filter('translate')('title.status.taxpayer')
 
-                            ],
-                            colModel: [
-                                {name: 'id', index: 'id', width: 100, key: true, hidden: true},
-                                {name: 'lastName', index: 'last_name', width: 140},
-                                {name: 'firstName', index: 'first_name', width: 140},
-                                {name: 'middleName', index: 'middle_name', width: 140},
-                                {name: 'snils', index: 'snils', width: 100, sortable: false},
-                                {name: 'innNp', index: 'innNp', width: 100},
-                                {name: 'innForeign', index: 'innForeign', width: 100},
-                                {name: 'inp', index: 'inp', width: 100},
-                                {
-                                    name: 'birthDay',
-                                    index: 'birth_day',
-                                    width: 100,
-                                    formatter: $filter('dateFormatter')
-                                },
+                            {name: 'idDocNumber', index: 'id_doc_number', width: 95},
+                            {name: 'status', index: 'status', width: 160}
 
-                                {name: 'idDocNumber', index: 'id_doc_number', width: 95},
-                                {name: 'status', index: 'status', width: 160}
-
-                            ],
-                            rowNum: 10,
-                            viewrecords: true,
-                            sortname: 'createDate',
-                            sortorder: "desc",
-                            hidegrid: false,
-                            multiselect: false
-                        }
-                    };
+                        ],
+                        rowNum: 10,
+                        viewrecords: true,
+                        sortname: 'createDate',
+                        sortorder: "desc",
+                        hidegrid: false,
+                        multiselect: false
+                    }
+                };
 
                 /**
                  * @description Поиск физ лиц для формирования рну
