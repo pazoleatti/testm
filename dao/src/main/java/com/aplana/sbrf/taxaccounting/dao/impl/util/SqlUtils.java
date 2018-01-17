@@ -1,15 +1,26 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.util;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationFormKind;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 
-
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Вспомогательные методы для работы с SQL в DAO
@@ -22,7 +33,18 @@ import java.util.*;
 // (Semyon Goryachkin 19.04.2013) а ещё помоему JDBC поддерживает работу со
 // списками параметров
 // (Marat Fayzullin 29.10.2013) да, поддерживает через, например, batchUpdate()
-public final class SqlUtils {
+@Configurable
+public final class SqlUtils extends AbstractDao {
+    private static final Log LOG = LogFactory.getLog(SqlUtils.class);
+
+    private static SqlUtils repository;
+
+    private static SqlUtils getRepository() {
+    	if (repository == null) {
+			repository = new SqlUtils();
+		}
+    	return repository;
+	}
 
 	/**
 	 * Запрещаем создавать экземляры класса
@@ -103,6 +125,77 @@ public final class SqlUtils {
 		}
 
 		return transformToSqlInStatement(prefix, strings, IN_CAUSE_LIMIT);
+	}
+
+	/**
+	 * Сохраняет коллекцию во временную таблицу, а затем формирует sql-условие in с этой таблицей вида "prefix in (select * from tmp)"
+	 *
+	 * @param prefix     значение, которое будет соединяться со значениями из коллекции
+	 * @param collection коллекция чисел
+	 * @return sql-условие вида "prefix in (...)"
+	 */
+	public static String transformToSqlInStatementViaTmpTable(String prefix, Collection<? extends Number> collection) {
+		return transformToSqlInStatementViaTmpTable(prefix, collection, 0);
+	}
+
+	/**
+	 * Сохраняет коллекцию во временную таблицу, а затем формирует sql-условие in с этой таблицей
+	 * Используется если в одном запросе несколько таких условий
+	 *
+	 * @param prefix       значение, которое будет соединяться со значениями из коллекции
+	 * @param collection   коллекция чисел
+	 * @param statementNum если в запросе несколько таких условий, то для каждого указывать разные значения для параметра (начиная с 0, пока доступно 2)
+	 * @return sql-условие вида "prefix in (...)"
+	 */
+	public static String transformToSqlInStatementViaTmpTable(String prefix, Collection<? extends Number> collection, int statementNum) {
+		checkListSize(collection);
+		String collectionTable = saveCollectionAsTable(collection, statementNum);
+		return String.format("%s in (select num from %s)", prefix, collectionTable);
+	}
+
+	/**
+	 * Сохраняет коллекцию чисел в определенную временную таблицу и возвращяет название этой таблицы
+	 *
+	 * @param collection коллекция чисел
+	 * @param tableIndex индекс временной таблицы
+	 * @return название таблицы, в которую были сохранена коллекция
+	 */
+	private static String saveCollectionAsTable(final Collection<? extends Number> collection, int tableIndex) {
+		String tableName = "TMP_NUMBERS" + tableIndex;// - global temporary table on commit delete rows
+		if (tableIndex > 1) {
+			throw new IllegalArgumentException(String.format("table %s not exists", tableName));
+		}
+		truncateTable(tableName); // нужно т.к. в одной транзакции могут быть несколько запросов
+		saveCollectionAsTable(collection, tableName);
+		return tableName;
+	}
+
+	private static void saveCollectionAsTable(final Collection<? extends Number> collection, String tableName) {
+		final Iterator<? extends Number> iterator = collection.iterator();
+		getRepository().getJdbcTemplate().batchUpdate("insert into " + tableName + "(num) VALUES(?)", new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				ps.setLong(1, iterator.next().longValue());
+			}
+
+			@Override
+			public int getBatchSize() {
+				return collection.size();
+			}
+		});
+	}
+
+	/**
+	 * Очищает таблицу
+	 *
+	 * @param tableName таблица
+	 */
+	private static void truncateTable(String tableName) {
+		try {
+			getRepository().getJdbcTemplate().update("truncate table " + tableName);
+		} catch (DataAccessException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	/**
