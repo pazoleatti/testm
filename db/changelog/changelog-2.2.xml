@@ -242,4 +242,15 @@
             <where>id=1</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2-dnovikov-3" author="dnovikov">
+        <sql>
+            CREATE global TEMPORARY TABLE tmp_numbers0 (
+                num NUMBER(18,0)
+            ) ON COMMIT DELETE ROWS ;
+            CREATE global TEMPORARY TABLE tmp_numbers1 (
+                num NUMBER(18,0)
+            ) ON COMMIT DELETE ROWS ;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -77,24 +77,17 @@ public class PersonDaoImpl extends AbstractDao implements PersonDao {
 
     @Override
     public List<Long> getDuplicateIds(Set<Long> originalRecordIds) {
-        List<Long> result = new ArrayList<>();
-        for (List<Long> subset : Iterables.partition(originalRecordIds, 1000)) {
-            result.addAll(getNamedParameterJdbcTemplate().query(
-                    String.format("with version as (select old_id, max(version) version from ref_book_person \n" +
-                            "where %s and old_id is not null and old_status = 0 \n" +
-                            "group by old_id) \n" +
-                            "select id \n" +
-                            "from ref_book_person rbp \n" +
-                            "join version on version.version = rbp.version and version.old_id = rbp.old_id and old_status = 0",
-                            SqlUtils.transformToSqlInStatement("id", subset)),
-                    new RowMapper<Long>() {
-                        @Override
-                        public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return rs.getLong("id");
-                        }
-                    }));
-        }
-        return result;
+        Map<String, Object> params = new HashMap<>();
+        return getNamedParameterJdbcTemplate().queryForList(
+                String.format("with version as (select old_id, max(version) version from ref_book_person \n" +
+                                "where %s and old_id is not null and old_status = 0 \n" +
+                                "group by old_id) \n" +
+                                "select id \n" +
+                                "from ref_book_person rbp \n" +
+                                "join version on version.version = rbp.version and version.old_id = rbp.old_id and old_status = 0",
+                        SqlUtils.transformToSqlInStatementViaTmpTable("id", originalRecordIds)),
+                params,
+                Long.class);
     }
 
 }
