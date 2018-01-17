@@ -641,6 +641,7 @@
             'aplana.dropdown',
             'aplana.dropdownMenu',
             'aplana.tabs',
+            'aplana.tooltip',
             'aplana.submitValid',
             'aplana.collapse',
             'aplana.field',

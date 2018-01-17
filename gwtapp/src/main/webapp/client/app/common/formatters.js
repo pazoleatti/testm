@@ -156,7 +156,7 @@
          */
         .filter('correctionTagFormatter', ['APP_CONSTANTS', function (APP_CONSTANTS) {
             return function (correctionTag) {
-                if(correctionTag && correctionTag.id !== undefined) {
+                if (correctionTag && correctionTag.id !== undefined) {
                     switch (correctionTag.id) {
                         case APP_CONSTANTS.CORRETION_TAG.ALL.id:
                             return undefined;
@@ -214,5 +214,26 @@
                 return '';
             };
         }])
+
+        /**
+         * @description Соединяет объекты в строку через разделитель,
+         * при этом в строку попадает не сам объект, а свойство объекта, полученное по пути
+         * @param array массив объектов
+         * @param separator разделитель (', ' по умолчанию)
+         * @param path путь к полю, которое будет записано в строку через разделитель (name по-умолчанию)
+         */
+        .filter('joinObjectsFormatter', function () {
+            return function (array, separator, path) {
+                if (array && array.length > 0) {
+                    var nameArray = _.map(array, function (obj) {
+                        return _.deep(obj, path || 'name');
+                    });
+
+                    return nameArray.join(separator || ', ');
+                }
+
+                return '';
+            };
+        })
     ;
 }());

@@ -41,8 +41,10 @@
             </ul>
         </li>
         <li class="app-header-user-info" style="padding-top: 4px;">
-            <div>{{security.user.department.name}}</div>
-            <div>{{security.user.name}}</div>
+            <div data-aplana-tooltip="{{security.user.department.name}}">{{security.user.department.name}}</div>
+            <div data-aplana-tooltip="{{security.user.name + '</br>'}}{{::security.user.roles | joinObjectsFormatter : '; '}}">
+                {{security.user.name}}
+            </div>
         </li>
         <li><a class="logout_link" data-ng-click="logout()"></a></li>
     </ul>
