@@ -213,9 +213,7 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/accept",
-                        params: {
-                            declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
-                        }
+                        data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
                         //Обновить страницу и, если есть сообщения, показать их
                         var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
@@ -231,9 +229,7 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/check",
-                        params: {
-                            declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
-                        }
+                        data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
                         //Обновить страницу и, если есть сообщения, показать их
                         var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
@@ -262,8 +258,8 @@
                         $http({
                             method: "POST",
                             url: "controller/actions/declarationData/returnToCreated",
+                            data: $filter('idExtractor')(selectedItems, 'declarationDataId'),
                             params: {
-                                declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId'),
                                 reason: reason
                             }
                         }).then(function (response) {
@@ -282,9 +278,7 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/downloadReports",
-                        params: {
-                            declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
-                        }
+                        data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
                         //Обновить страницу и, если есть сообщения, показать их
                         var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
@@ -305,9 +299,7 @@
                             $http({
                                 method: "POST",
                                 url: "controller/actions/declarationData/delete",
-                                params: {
-                                    declarationDataIds: $filter('idExtractor')(selectedItems, 'declarationDataId')
-                                }
+                                data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                             }).then(function (response) {
                                 //Обновить страницу и, если есть сообщения, показать их
                                 var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};

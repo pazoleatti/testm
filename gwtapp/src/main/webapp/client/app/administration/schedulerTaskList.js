@@ -83,9 +83,7 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/schedulerTask/activate",
-                        params: {
-                            ids: $filter('idExtractor')($scope.taskListGrid.value)
-                        }
+                        data: $filter('idExtractor')($scope.taskListGrid.value)
                     }).then(function () {
                         $scope.refreshGrid(1);
                     });
@@ -113,9 +111,7 @@
                     $http({
                         method: "POST",
                         url: "controller/actions/schedulerTask/deactivate",
-                        params: {
-                            ids: $filter('idExtractor')($scope.taskListGrid.value)
-                        }
+                        data: $filter('idExtractor')($scope.taskListGrid.value)
                     }).then(function () {
                         $scope.refreshGrid(1);
                     });

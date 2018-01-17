@@ -72,12 +72,10 @@ public class SchedulerTaskController {
     /**
      * Запуск выполнения задач по расписанию
      *
-     * @param ids идентификаторы задач
+     * @param tasksIds идентификаторы задач
      */
     @PostMapping(value = "/actions/schedulerTask/activate")
-    public void activateSchedulerTasks(@RequestParam Long[] ids) {
-        List<Long> tasksIds = new ArrayList<>();
-        Collections.addAll(tasksIds, ids);
+    public void activateSchedulerTasks(@RequestBody List<Long> tasksIds) {
         schedulerTaskService.setActiveSchedulerTask(true, tasksIds);
         schedulerService.updateAllTask();
 
@@ -86,12 +84,10 @@ public class SchedulerTaskController {
     /**
      * Остановка выполнения задач по расписанию
      *
-     * @param ids идентификаторы задач
+     * @param tasksIds идентификаторы задач
      */
     @PostMapping(value = "/actions/schedulerTask/deactivate")
-    public void deactivateStateSchedulerTasks(@RequestParam Long[] ids) {
-        List<Long> tasksIds = new ArrayList<>();
-        Collections.addAll(tasksIds, ids);
+    public void deactivateStateSchedulerTasks(@RequestBody List<Long> tasksIds) {
         schedulerTaskService.setActiveSchedulerTask(false, tasksIds);
         schedulerService.updateAllTask();
     }

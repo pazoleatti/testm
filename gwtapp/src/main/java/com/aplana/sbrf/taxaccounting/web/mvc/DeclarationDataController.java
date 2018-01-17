@@ -295,9 +295,9 @@ public class DeclarationDataController {
      * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
      */
     @PostMapping(value = "/actions/declarationData/delete")
-    public ActionResult deleteDeclarations(@RequestParam Long[] declarationDataIds) {
+    public ActionResult deleteDeclarations(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.deleteDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.deleteDeclarationList(userInfo, declarationDataIds);
     }
 
     /**
@@ -344,9 +344,9 @@ public class DeclarationDataController {
      * @return Модель {@link ActionResult}, в которой содержаться данные о результате операции
      */
     @PostMapping(value = "/actions/declarationData/returnToCreated")
-    public ActionResult returnToCreatedDeclaration(@RequestParam Long[] declarationDataIds, @RequestParam String reason) {
+    public ActionResult returnToCreatedDeclaration(@RequestBody List<Long> declarationDataIds, @RequestParam String reason) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.cancelDeclarationList(Arrays.asList(declarationDataIds), reason, userInfo);
+        return declarationService.cancelDeclarationList(declarationDataIds, reason, userInfo);
     }
 
     /**
@@ -370,9 +370,9 @@ public class DeclarationDataController {
      * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     @PostMapping(value = "/actions/declarationData/recalculate")
-    public ActionResult recalculateDeclarationList(@RequestParam Long[] declarationDataIds) {
+    public ActionResult recalculateDeclarationList(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.recalculateDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.recalculateDeclarationList(userInfo, declarationDataIds);
     }
 
     /**
@@ -395,9 +395,9 @@ public class DeclarationDataController {
      * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     @PostMapping(value = "/actions/declarationData/check")
-    public ActionResult checkDeclaration(@RequestParam Long[] declarationDataIds) {
+    public ActionResult checkDeclaration(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.checkDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.checkDeclarationList(userInfo, declarationDataIds);
     }
 
     /**
@@ -419,9 +419,9 @@ public class DeclarationDataController {
      * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     @PostMapping(value = "/actions/declarationData/accept")
-    public ActionResult acceptDeclarationList(@RequestParam Long[] declarationDataIds) {
+    public ActionResult acceptDeclarationList(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.acceptDeclarationList(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.acceptDeclarationList(userInfo, declarationDataIds);
     }
 
     /**
