@@ -42,7 +42,7 @@
         </li>
         <li class="app-header-user-info" style="padding-top: 4px;">
             <div data-aplana-tooltip="{{security.user.department.name}}">{{security.user.department.name}}</div>
-            <div data-aplana-tooltip="{{security.user.name + '</br>'}}{{::security.user.roles | joinObjectsFormatter : '; '}}">
+            <div data-aplana-tooltip="{{security.user.name + '</br>'}}{{::security.user.roles | joinObjectsPropFormatter : '; '}}">
                 {{security.user.name}}
             </div>
         </li>

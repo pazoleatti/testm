@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetCorrectPeriodsAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetCorrectPeriodsResult;
-import com.google.gwt.rpc.server.RPC;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,7 +32,7 @@ public class GetCorrectPeriodsHandler extends AbstractActionHandler<GetCorrectPe
         PagingParams params = new PagingParams();
         params.setProperty("id");
         params.setDirection("ASC");
-        PagingResult<ReportPeriod> periods = periodService.getCorrectPeriods(action.getTaxType(), action.getDepartmentId(), params);
+        List<ReportPeriod> periods = periodService.getCorrectPeriods(action.getTaxType(), action.getDepartmentId());
         result.setReportPeriod(periods);
         return result;
     }

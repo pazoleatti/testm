@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
@@ -264,4 +266,28 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
         Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
     }
+
+    @Test
+    public void findAllTest(){
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setYearStart(1900);
+        filter.setYearEnd(2099);
+
+        //1
+        filter.setDepartmentId(1);
+        Assert.assertNotEquals(0, departmentReportPeriodDao.findAll(filter).size());
+
+        //2
+        filter.setDepartmentId(-1);
+        Assert.assertEquals(0, departmentReportPeriodDao.findAll(filter).size());
+
+        //3 с пустым фильтром
+        Assert.assertNotEquals(0, departmentReportPeriodDao.findAll(new DepartmentReportPeriodFilter()).size());
+    }
+
+    @Test()
+    public void findAllWithEmptyFilter(){
+
+    }
+
 }

@@ -129,20 +129,12 @@
                     });
                 };
 
-                var sortGridData = function(array){
-                    array = _.sortBy(array, 'correctionDate');
-                    array = _.sortBy(array, 'dictTaxPeriodId');
-                    array =  _.sortBy(array, 'year');
-                    return array;
-                };
-
-
 
                 /**
                  * @description Обновление грида
                  * @param page
                  */
-                $scope.refreshGrid = function (page) {
+                $scope.refreshGrid = function () {
                     $scope.initGrid();
                 };
 
@@ -171,7 +163,7 @@
                     $scope.searchFilter.params = {
                         yearStart: new Date().getFullYear(),
                         yearEnd: new Date().getFullYear(),
-                        department: null
+                        department: $scope.department
                     };
 
                     /* убираем надпись "Сброс" */
@@ -222,7 +214,7 @@
                             }
                         }
                     }).result.then(function () {
-                        $scope.refreshGrid(1);
+                        $scope.refreshGrid();
                     });
                 };
 
@@ -245,7 +237,7 @@
                             }
                         }
                     }).result.then(function () {
-                        $scope.refreshGrid(1);
+                        $scope.refreshGrid();
                     });
                 };
 
@@ -287,7 +279,7 @@
                                             }).then(function (response) {
                                                 if (response.data) {
                                                     $logPanel.open('log-panel-container', response.data);
-                                                    $scope.refreshGrid(1);
+                                                    $scope.refreshGrid();
                                                 }
                                             });
                                         }
@@ -346,7 +338,7 @@
                                         }).then(function (response) {
                                             if (response.data) {
                                                 $logPanel.open('log-panel-container', response.data);
-                                                $scope.refreshGrid(1);
+                                                $scope.refreshGrid();
                                             }
                                         });
                                     }
@@ -376,7 +368,7 @@
                                         }).then(function (response) {
                                             if (response.data) {
                                                 $logPanel.open('log-panel-container', response.data);
-                                                $scope.refreshGrid(1);
+                                                $scope.refreshGrid();
                                             }
                                         });
                                     }
@@ -405,7 +397,7 @@
                             }
                         }
                     }).result.then(function () {
-                        $scope.refreshGrid(1);
+                        $scope.refreshGrid();
                     });
                 };
 
@@ -426,7 +418,7 @@
                             }
                         }
                     }).result.then(function () {
-                        $scope.refreshGrid(1);
+                        $scope.refreshGrid();
                     });
                 };
 
@@ -505,7 +497,7 @@
                             departmentId: $scope.departmentId
                         })
                     }, function (response) {
-                        response.rows.forEach(function (item) {
+                        response.forEach(function (item) {
                             if ($scope.reportPeriodGrid.value[0].year === item.year && $scope.reportPeriodGrid.value[0].dictTaxPeriodId === item.dictTaxPeriodId &&
                                 $scope.reportPeriodGrid.value[0].correctionDate < item.correctionDate) {
                                 $scope.hasLaterCorrectionPeriodDefer.resolve(true);
@@ -529,7 +521,7 @@
                             departmentId: $scope.departmentId
                         })
                     }, function (response) {
-                        response.rows.forEach(function (item) {
+                        response.forEach(function (item) {
                             if ($scope.reportPeriodGrid.value[0].year === item.year && $scope.reportPeriodGrid.value[0].dictTaxPeriodId === item.dictTaxPeriodId && item.correctionDate) {
                                 $scope.hasCorrectionPeriodDefer.resolve(true);
                             }

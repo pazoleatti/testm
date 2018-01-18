@@ -67,15 +67,21 @@
                                     okBtnCaption: $filter('translate')('common.button.yes'),
                                     cancelBtnCaption: $filter('translate')('common.button.no'),
                                     okBtnClick: function () {
-                                        OpenPeriodResource.query({
-                                            reportPeriod: {
-                                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
-                                                taxPeriod: {
-                                                    year: $scope.period.reportPeriod.taxPeriod.year
-                                                }
-                                            },
-                                            departmentId: $scope.department.id
-                                        }, function (response) {
+                                        $http({
+                                            method: "POST",
+                                            url: "controller/actions/departmentReportPeriod/open",
+                                            params: {
+                                                departmentReportPeriod: JSON.stringify({
+                                                    departmentId: $scope.department.id,
+                                                    reportPeriod: {
+                                                        dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                                        taxPeriod: {
+                                                            year: $scope.period.reportPeriod.taxPeriod.year
+                                                        }
+                                                    }
+                                                })
+                                            }
+                                        }).then(function (response) {
                                             if (response.data) {
                                                 $logPanel.open('log-panel-container', response.data);
                                                 $modalInstance.close();
@@ -94,15 +100,21 @@
                                             content: $filter('translate')('reportPeriod.error.openPeriod.hasCorrectionPeriod')
                                         });
                                     } else {
-                                        OpenPeriodResource.query({
-                                            reportPeriod: {
-                                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
-                                                taxPeriod: {
-                                                    year: $scope.period.reportPeriod.taxPeriod.year
-                                                }
-                                            },
-                                            departmentId: $scope.department.id
-                                        }, function (response) {
+                                        $http({
+                                            method: "POST",
+                                            url: "controller/actions/departmentReportPeriod/open",
+                                            params: {
+                                                departmentReportPeriod: JSON.stringify({
+                                                    departmentId: $scope.department.id,
+                                                    reportPeriod: {
+                                                        dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                                        taxPeriod: {
+                                                            year: $scope.period.reportPeriod.taxPeriod.year
+                                                        }
+                                                    }
+                                                })
+                                            }
+                                        }).then(function (response) {
                                             if (response.data) {
                                                 $logPanel.open('log-panel-container', response.data);
                                                 $modalInstance.close();
@@ -125,8 +137,8 @@
                             method: "POST",
                             url: "controller/rest/departmentReportPeriod/status",
                             params: {
-                                dictTaxPeriodId: $shareData.period.dictTaxPeriodId,
-                                year: $shareData.period.year,
+                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                year: $scope.period.reportPeriod.taxPeriod.year,
                                 departmentId: $scope.department.id
                             }
                         }).then(function (status) {
@@ -193,6 +205,7 @@
                                                 }).then(function (response) {
                                                     if (response.data) {
                                                         $logPanel.open('log-panel-container', response.data);
+                                                        $modalInstance.close();
                                                     }
                                                 });
                                             }

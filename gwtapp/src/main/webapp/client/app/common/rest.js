@@ -284,7 +284,7 @@
         .factory('OpenPeriodResource', [
             '$resource', function ($resource) {
                 return $resource('controller/actions/departmentReportPeriod/open', {}, {
-                    query: {method: 'POST'}
+                    doOperation: {method: 'POST'}
                 });
         }])
     ;

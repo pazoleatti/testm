@@ -116,6 +116,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+	@Deprecated
     public void updateCorrectionDate(int id, Date correctionDate) {
 		try {
 			departmentReportPeriodDao.updateCorrectionDate(id, correctionDate);
@@ -128,6 +129,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+	@Deprecated
     public void delete(int id) {
 		try {
 			departmentReportPeriodDao.delete(id);
@@ -142,9 +144,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Override
     public void delete(List<Integer> ids) {
 		try {
-			for(Integer id : ids) {
-				departmentReportPeriodDao.delete(id);
-			}
+			departmentReportPeriodDao.delete(ids);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -166,6 +166,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+	@Deprecated
     public Integer getCorrectionNumber(int id) {
 		try {
 			return departmentReportPeriodDao.getCorrectionNumber(id);

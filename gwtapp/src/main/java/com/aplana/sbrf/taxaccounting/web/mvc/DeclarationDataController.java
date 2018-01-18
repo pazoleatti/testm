@@ -537,13 +537,15 @@ public class DeclarationDataController {
             //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
             for (DeclarationDataJournalItem item : page) {
                 DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
-                //noinspection unchecked
-                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
-                        DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
-                        DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
-                        DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
-                item.setPermissions(declaration.getPermissions());
+                if (declaration != null) {
+                    //noinspection unchecked
+                    declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
+                            DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                            DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
+                            DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
+                            DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
+                    item.setPermissions(declaration.getPermissions());
+                }
             }
         }
     }

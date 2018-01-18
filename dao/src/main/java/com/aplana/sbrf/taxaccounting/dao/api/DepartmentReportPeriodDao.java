@@ -113,6 +113,5 @@ public interface DepartmentReportPeriodDao {
      */
     List<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
-    @Transactional(readOnly = false)
-    DepartmentReportPeriod update(DepartmentReportPeriod departmentReportPeriodItem);
+
 }

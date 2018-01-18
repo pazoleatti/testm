@@ -4,20 +4,16 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriodType;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.QBean;
-import com.querydsl.core.types.SubQueryExpression;
-import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -25,16 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.*;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentReportPeriod.departmentReportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QReportPeriod.reportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QReportPeriodType.reportPeriodType;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QTaxPeriod.taxPeriod;
-import static com.querydsl.core.types.Projections.bean;
-
 /**
  * Реализация DAO для работы с {@link ReportPeriod отчётными периодами}
  *
@@ -47,29 +35,10 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     private static final Log LOG = LogFactory.getLog(ReportPeriodDaoImpl.class);
 
     private TaxPeriodDao taxPeriodDao;
-    private SQLQueryFactory sqlQueryFactory;
-
-    private QBean<ReportPeriodType> reportPeriodTypeQBean = bean(ReportPeriodType.class,
-            reportPeriodType.id,
-            reportPeriodType.code,
-            reportPeriodType.name,
-            reportPeriodType.calendarStartDate,
-            reportPeriodType.startDate,
-            reportPeriodType.endDate);
-    private QBean<ReportPeriod> reportPeriodQBean = bean(ReportPeriod.class, reportPeriod.id,
-            reportPeriod.name,
-            reportPeriod.startDate,
-            reportPeriod.endDate,
-            reportPeriod.dictTaxPeriodId,
-            reportPeriod.calendarStartDate,
-            bean(TaxPeriod.class, taxPeriod.year, taxPeriod.id).as("taxPeriod")
-    );
-    private QBean<TaxPeriod> taxPeriodQBean = bean(TaxPeriod.class, taxPeriod.id, taxPeriod.year);
 
     @Autowired
-    public ReportPeriodDaoImpl(TaxPeriodDao taxPeriodDao, SQLQueryFactory sqlQueryFactory) {
+    public ReportPeriodDaoImpl(TaxPeriodDao taxPeriodDao) {
         this.taxPeriodDao = taxPeriodDao;
-        this.sqlQueryFactory = sqlQueryFactory;
     }
 
 
@@ -118,37 +87,46 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
         }
     }
 
+    private class ReportPeriodTypeMapper implements RowMapper<ReportPeriodType>{
+
+        @Override
+        public ReportPeriodType mapRow(ResultSet resultSet, int index) throws SQLException {
+            ReportPeriodType reportPeriodType = new ReportPeriodType();
+            reportPeriodType.setId(SqlUtils.getLong(resultSet, "id"));
+            reportPeriodType.setName(resultSet.getString("name"));
+            reportPeriodType.setStartDate(resultSet.getDate("start_date"));
+            reportPeriodType.setEndDate(resultSet.getDate("end_date"));
+            reportPeriodType.setCalendarStartDate(resultSet.getDate("calendar_start_date"));
+            reportPeriodType.setCode(resultSet.getString("code"));
+            return reportPeriodType;
+        }
+    }
+
     @Override
     public ReportPeriod get(Integer id) {
-        ReportPeriod period = sqlQueryFactory.select(reportPeriodQBean)
-                .from(reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(reportPeriod.id.eq(id))
-                .fetchOne();
-
-        if (period != null) {
-            period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-            period.setAccName(FormatUtils.getAccName(period.getName(), period.getCalendarStartDate()));
-            return reportPeriodDateFormatter(period);
-        } else {
+        try {
+            return 0 == id? null :
+                    getJdbcTemplate().queryForObject(
+                            "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date  " +
+                                    "from report_period where id = ?",
+                            new Object[]{id},
+                            new int[]{Types.NUMERIC},
+                            new ReportPeriodMapper()
+                    );
+        } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не существует периода с id=" + id);
         }
 
     }
 
     @Override
+    @Deprecated
     public List<ReportPeriod> get(List<Integer> ids) {
-        List<ReportPeriod> periods = sqlQueryFactory.select(reportPeriodQBean)
-                .from(reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(reportPeriod.id.in(ids))
-                .transform(GroupBy.groupBy(reportPeriod.id).list(reportPeriodQBean));
-        for (ReportPeriod period : periods) {
-            period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-            period.setAccName(FormatUtils.getAccName(period.getName(), period.getCalendarStartDate()));
-            period = reportPeriodDateFormatter(period);
-        }
-        return periods;
+        return getJdbcTemplate().query(
+                "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date " +
+                        "from report_period where " + SqlUtils.transformToSqlInStatement("id", ids),
+                new ReportPeriodMapper()
+        );
     }
 
     @Override
@@ -164,244 +142,136 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 
     @Override
     @Transactional(readOnly = false)
-    public Integer save(ReportPeriod newReportPeriod) {
-        Integer id = newReportPeriod.getId();
+    public Integer save(ReportPeriod reportPeriod) {
+        JdbcTemplate jt = getJdbcTemplate();
+
+        Integer id = reportPeriod.getId();
         if (id == null) {
             id = generateId("seq_report_period", Integer.class);
         }
-        newReportPeriod.setOrder(getReportOrder(newReportPeriod.getCalendarStartDate(), id));
 
-        sqlQueryFactory.insert(reportPeriod)
-                .columns(
-                        reportPeriod.id,
-                        reportPeriod.name,
-                        reportPeriod.taxPeriodId,
-                        reportPeriod.dictTaxPeriodId,
-                        reportPeriod.startDate,
-                        reportPeriod.endDate,
-                        reportPeriod.calendarStartDate)
-                .values(
-                        id,
-                        newReportPeriod.getName(),
-                        newReportPeriod.getTaxPeriod().getId(),
-                        newReportPeriod.getDictTaxPeriodId(),
-                        newReportPeriod.getStartDate(),
-                        newReportPeriod.getEndDate(),
-                        newReportPeriod.getCalendarStartDate())
-                .execute();
+        jt.update(
+                "insert into report_period (id, name, tax_period_id, " +
+                        " dict_tax_period_id, start_date, end_date, calendar_start_date)" +
+                        " values (?, ?, ?, ?, ?, ?, ?)",
+                id,
+                reportPeriod.getName(),
+                reportPeriod.getTaxPeriod().getId(),
+                reportPeriod.getDictTaxPeriodId(),
+                reportPeriod.getStartDate(),
+                reportPeriod.getEndDate(),
+                reportPeriod.getCalendarStartDate()
+        );
+        reportPeriod.setId(id);
         return id;
     }
 
     @Override
     public void remove(int reportPeriodId) {
-        sqlQueryFactory.delete(reportPeriod)
-                .where(reportPeriod.id.eq(reportPeriodId))
-                .execute();
+        getJdbcTemplate().update(
+                "delete from report_period where id = ?",
+                new Object[] {reportPeriodId},
+                new int[] {Types.NUMERIC}
+        );
     }
 
     @Override
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
-
-
-        OrderSpecifier order1 = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                taxPeriodQBean, "year", Order.DESC);
-        OrderSpecifier order2 = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                reportPeriodQBean, "calendarStartDate", Order.ASC);
-
-
-        SubQueryExpression<Integer> childrenQuery = sqlQueryFactory
-                .select(reportPeriod.id)
-                .from(departmentReportPeriod)
-                .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .where(departmentReportPeriod.correctionDate.isNull())
-                .where(departmentReportPeriod.departmentId.in(departmentList))
-                .distinct();
-
-        List<ReportPeriod> res = sqlQueryFactory.select(reportPeriodQBean)
-                .from(reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(reportPeriod.id.in(childrenQuery))
-                .where(taxPeriod.taxType.eq(String.valueOf(taxType.getCode())))
-                .orderBy(order1, order2)
-                .transform(GroupBy.groupBy(reportPeriod.id).list(reportPeriodQBean));
-
-        for (ReportPeriod period : res) {
-            period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-            period.setAccName(FormatUtils.getAccName(period.getName(), period.getCalendarStartDate()));
-            period = reportPeriodDateFormatter(period);
-        }
-        return res;
-
-
-//        return getJdbcTemplate().query(
-//                "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-//						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
-//                        "(select distinct report_period_id from department_report_period " +
-//                        "where correction_date is null and "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+") " +
-//                        "and rp.tax_period_id = tp.id " +
-//                        "and tp.tax_type = \'" + taxType.getCode() + "\' " +
-//                        "order by tp.year desc, rp.calendar_start_date",
-//                new ReportPeriodMapper());
+        return getJdbcTemplate().query(
+                "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
+                        "(select distinct report_period_id from department_report_period " +
+                        "where correction_date is null and "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+") " +
+                        "and rp.tax_period_id = tp.id " +
+                        "and tp.tax_type = \'" + taxType.getCode() + "\' " +
+                        "order by tp.year desc, rp.calendar_start_date",
+                new ReportPeriodMapper());
     }
 
     @Override
     public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutCorrect) {
-
-        OrderSpecifier order1 = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                taxPeriodQBean, "year", Order.DESC);
-        OrderSpecifier order2 = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                reportPeriodQBean, "calendarStartDate", Order.ASC);
-
-        BooleanBuilder where = new BooleanBuilder();
-
-        where.and(departmentReportPeriod.departmentId.in(departmentList));
-        where.and(departmentReportPeriod.isActive.eq(true));
-        if (withoutCorrect) {
-            where.and(departmentReportPeriod.correctionDate.isNull());
-        }
-
-        SubQueryExpression<Integer> childrenQuery = sqlQueryFactory
-                .select(reportPeriod.id)
-                .from(departmentReportPeriod)
-                .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .where(where)
-                .distinct();
-
-        List<ReportPeriod> res = sqlQueryFactory.select(reportPeriodQBean)
-                .from(reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(reportPeriod.id.in(childrenQuery))
-                .where(taxPeriod.taxType.eq(String.valueOf(taxType.getCode())))
-                .orderBy(order1, order2)
-                .transform(GroupBy.groupBy(reportPeriod.id).list(reportPeriodQBean));
-
-        for (ReportPeriod period : res) {
-            period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-            period.setAccName(FormatUtils.getAccName(period.getName(), period.getCalendarStartDate()));
-            period = reportPeriodDateFormatter(period);
-        }
-        return res;
+        return getJdbcTemplate().query(
+                "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                        "rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
+                        "(select distinct report_period_id from department_report_period " +
+                        "where "+ SqlUtils.transformToSqlInStatement("department_id", departmentList)+" and is_active=1 " +
+                        (withoutCorrect ? "and correction_date is null" : "") + " ) " +
+                        "and rp.tax_period_id = tp.id " +
+                        "and tp.tax_type = \'" + taxType.getCode() +"\' " +
+                        "order by tp.year desc, rp.calendar_start_date",
+                new ReportPeriodMapper());
     }
 
     @Override
-    public PagingResult<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId, PagingParams pagingParams) {
-        BooleanBuilder where = new BooleanBuilder();
-
-        where.and(taxPeriod.taxType.eq(String.valueOf(taxType.getCode())))
-                .and(departmentReportPeriod.departmentId.eq(departmentId))
-                .and(departmentReportPeriod.isActive.eq(false));
-
-        List<ReportPeriod> result = sqlQueryFactory
-                .select(reportPeriodQBean)
-                .from(reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .leftJoin(reportPeriod._depRepPerFkRepPeriodId, departmentReportPeriod)
-                .where(where)
-                .orderBy(taxPeriod.year.asc(), reportPeriod.dictTaxPeriodId.asc())
-                .transform(GroupBy.groupBy(reportPeriod.id).list(reportPeriodQBean));
-
-        for (ReportPeriod period : result) {
-            period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-            period.setAccName(FormatUtils.getAccName(period.getName(), period.getCalendarStartDate()));
-            period = reportPeriodDateFormatter(period);
+    public List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId) {
+        try {
+            return getJdbcTemplate().query(
+                    "select * from REPORT_PERIOD rp " +
+                            "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
+                            "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
+                            "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
+                            "and drp.IS_ACTIVE=0 and CORRECTION_DATE is null " +
+                            "order by year",
+                    new Object[]{String.valueOf(taxType.getCode()), departmentId},
+                    new int[] { Types.VARCHAR, Types.NUMERIC},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
         }
-        return new PagingResult<>(result, getTotalCount(where));
     }
 
     @Override
+    @Deprecated
     public List<ReportPeriod> getComparativPeriods(TaxType taxType, int departmentId) {
-
-        OrderSpecifier order1 = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                taxPeriodQBean, "year", Order.DESC);
-        OrderSpecifier order2 = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                reportPeriodQBean, "calendarStartDate", Order.ASC);
-
-        SubQueryExpression<Integer> childrenQuery = sqlQueryFactory
-                .select(reportPeriod.id)
-                .from(departmentReportPeriod)
-                .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .where(departmentReportPeriod.departmentId.eq(departmentId))
-                .where(departmentReportPeriod.correctionDate.isNull())
-                .distinct();
-
-        List<ReportPeriod> res =  sqlQueryFactory.select(reportPeriodQBean)
-                .from(reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(reportPeriod.id.in(childrenQuery))
-                .where(taxPeriod.taxType.eq(String.valueOf(taxType.getCode())))
-                .orderBy(order1, order2)
-                .transform(GroupBy.groupBy(reportPeriod.id).list(reportPeriodQBean));
-
-        for (ReportPeriod period : res) {
-            period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-            period.setAccName(FormatUtils.getAccName(period.getName(), period.getCalendarStartDate()));
-            period = reportPeriodDateFormatter(period);
+        try {
+            return getJdbcTemplate().query(
+                    "select * from REPORT_PERIOD rp " +
+                            "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
+                            "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
+                            "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
+                            "and CORRECTION_DATE is null " +
+                            "order by tp.year desc, rp.calendar_start_date",
+                    new Object[]{String.valueOf(taxType.getCode()), departmentId},
+                    new int[] { Types.VARCHAR, Types.NUMERIC},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
         }
-        return res;
-
-//        try {
-//            return getJdbcTemplate().query(
-//                    "select * from REPORT_PERIOD rp " +
-//                            "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
-//                            "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
-//                            "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
-//                            "and CORRECTION_DATE is null " +
-//                            "order by tp.year desc, rp.calendar_start_date",
-//                    new Object[]{String.valueOf(taxType.getCode()), departmentId},
-//                    new int[] { Types.VARCHAR, Types.NUMERIC},
-//                    new ReportPeriodMapper()
-//            );
-//        } catch (EmptyResultDataAccessException e) {
-//            return Collections.emptyList();
-//        }
     }
 
     @Override
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId) {
-
         try {
-            ReportPeriod period = sqlQueryFactory.select(reportPeriodQBean)
-                    .from(reportPeriod)
-                    .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                    .where(reportPeriod.dictTaxPeriodId.eq(dictTaxPeriodId).and(taxPeriod.id.eq(taxPeriodId)))
-                    .fetchOne();
-            if (period != null) {
-                period.setOrder(getReportOrder(period.getCalendarStartDate(), period.getId()));
-                period.setAccName(FormatUtils.getAccName(period.getName(), period.getCalendarStartDate()));
-                return reportPeriodDateFormatter(period);
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw new DaoException(e.getMessage());
+            return getJdbcTemplate().queryForObject(
+                    "select id, name, tax_period_id, start_date, end_date, dict_tax_period_id, calendar_start_date " +
+                            "from report_period where tax_period_id = ? and dict_tax_period_id = ?",
+                    new Object[]{taxPeriodId, dictTaxPeriodId},
+                    new int[]{Types.NUMERIC, Types.NUMERIC},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
     }
 
     @Override
+    @Deprecated
     public ReportPeriod getReportPeriodByDate(TaxType taxType, Date date) {
         try {
-            ReportPeriod result = sqlQueryFactory.select(reportPeriodQBean)
-                    .from(reportPeriod)
-                    .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                    .where(taxPeriod.taxType.eq(String.valueOf(taxType.getCode())))
-                    .where(reportPeriod.endDate.eq(date))
-                    .fetchOne();
-
-//			getJdbcTemplate().query(
-//					"select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
-//							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
-//							"where tp.tax_type = ? and rp.end_date=?",
-//					new Object[]{taxType.getCode(), date},
-//					new int[] { Types.VARCHAR, Types.DATE },
-//					new ReportPeriodMapper()
-//			);
-            if (result == null) {
+            List<ReportPeriod> result = getJdbcTemplate().query(
+                    "select rp.id, rp.name, rp.tax_period_id, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+                            "rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
+                            "where tp.tax_type = ? and rp.end_date=?",
+                    new Object[]{taxType.getCode(), date},
+                    new int[] { Types.VARCHAR, Types.DATE },
+                    new ReportPeriodMapper()
+            );
+            if (result.isEmpty()) {
                 throw new DaoException(String.format("Не найден отчетный период с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
-            }else {
-                result.setOrder(getReportOrder(result.getCalendarStartDate(), result.getId()));
-                result.setAccName(FormatUtils.getAccName(result.getName(), result.getCalendarStartDate()));
-                return reportPeriodDateFormatter(result);
             }
+            return result.get(0);
         } catch (Exception e) {
             // изменить форматирование для даты на "%td %<tm,%<tY" (31.12.2013) вместо "%tD" (12/31/13)(Marat Fayzullin 02.18.2014)
             LOG.error("Возникли ошибки во время поиска отчетного периода с типом = \"%s\" на дату \"%tD\"", e);
@@ -444,6 +314,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                     "ORDER BY rp.end_date";
 
     @Override
+    @Deprecated
     public List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate) {
         return getJdbcTemplate().query(
                 RP_BY_DATE_AND_DEPARTMENT,
@@ -474,111 +345,25 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
-    public PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams) {
+    public List<ReportPeriodType> getPeriodType() {
 
-        String orderingProperty = "ID";
-        Order ascDescOrder = Order.valueOf(Order.ASC.name());
-
-        OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                reportPeriodTypeQBean, orderingProperty, ascDescOrder, reportPeriodType.id.asc());
-
-        List<ReportPeriodType> result = sqlQueryFactory.select(reportPeriodType.id,
-                reportPeriodType.code,
-                reportPeriodType.name,
-                reportPeriodType.calendarStartDate,
-                reportPeriodType.startDate,
-                reportPeriodType.endDate)
-                .from(reportPeriodType)
-                .orderBy(order)
-                .offset(pagingParams.getStartIndex())
-                .limit(pagingParams.getCount())
-                .transform(GroupBy.groupBy(reportPeriodType.id).list(reportPeriodTypeQBean));
-        for (ReportPeriodType type : result) {
-            type = reportPeriodTypeDateFormatter(type);
+        try{
+            return getJdbcTemplate().query("select * from report_period_type order by id", new ReportPeriodTypeMapper());
+        }catch (EmptyResultDataAccessException e ){
+            return null;
         }
-        return new PagingResult<>(result, result.size());
     }
 
     @Override
-    public ReportPeriodType getReportPeriodType(Long id) {
-        ReportPeriodType result = sqlQueryFactory.select(reportPeriodTypeQBean)
-                .from(reportPeriodType)
-                .where(reportPeriodType.id.eq(id))
-                .fetchOne();
-
-        return reportPeriodTypeDateFormatter(result);
-    }
-
-    @Override
-    public ReportPeriodType getPeriodTypeById(Long id) {
-        return reportPeriodTypeDateFormatter(sqlQueryFactory.select(reportPeriodTypeQBean)
-                .from(reportPeriodType)
-                .where(reportPeriodType.id.eq(id))
-                .fetchOne());
-    }
-
-    private int getTotalCount(BooleanBuilder where) {
-        return (int) sqlQueryFactory.select(reportPeriodQBean)
-                .from(reportPeriod)
-                .leftJoin(reportPeriod._depRepPerFkRepPeriodId, departmentReportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(where)
-                .fetchCount();
-
-    }
-
-    private int getReportOrder(Date date, Integer id) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int monthNumber = calendar.get(Calendar.MONTH);
-        List<Integer> correctMonths = Arrays.asList(0, 3, 6, 9);
-        // день всегда первое число месяца; месяцы только янв, апр, июл и окт
-        if (calendar.get(Calendar.DAY_OF_MONTH) != 1 || (!correctMonths.contains(monthNumber))) {
-            throw new DaoException("Неверная календарная дата начала отчетного периода с id=" + id);
+    public ReportPeriodType getReportPeriodTypeById(Long id) {
+        try{
+            return getJdbcTemplate().queryForObject("select * from report_period_type WHERE ID = ? order by id",
+                    new Object[]{id},
+                    new int[]{Types.NUMERIC},
+                    new ReportPeriodTypeMapper());
+        }catch (EmptyResultDataAccessException e ){
+            throw new DaoException("Не существует типа отчетного периода с id=" + id);
         }
-        return (monthNumber + 3) / 3;
-    }
-
-    /**
-     * Преобразовывает {@link java.sql.Timestamp}, который выдает QueryDSL в {@link java.util.Date}
-     *
-     * @param period {@link ReportPeriod} период из БД
-     * @return отформатированный период
-     */
-    private ReportPeriod reportPeriodDateFormatter(ReportPeriod period) {
-        if (period != null) {
-            if (period.getStartDate() != null) {
-                period.setStartDate(new Date(period.getStartDate().getTime()));
-            }
-            if (period.getEndDate() != null) {
-                period.setEndDate(new Date(period.getEndDate().getTime()));
-            }
-            if (period.getCalendarStartDate() != null) {
-                period.setCalendarStartDate(new Date(period.getCalendarStartDate().getTime()));
-            }
-        }
-        return period;
-    }
-
-    /**
-     * Преобразовывает {@link Timestamp}, который выдает QueryDSL в {@link Date}
-     *
-     * @param type {@link ReportPeriodType} тип периода из БД
-     * @return отформатированный тип периода
-     */
-    private ReportPeriodType reportPeriodTypeDateFormatter(ReportPeriodType type) {
-        if (type != null) {
-            if (type.getStartDate() != null) {
-                type.setStartDate(new Date(type.getStartDate().getTime()));
-            }
-            if (type.getEndDate() != null) {
-                type.setEndDate(new Date(type.getEndDate().getTime()));
-            }
-            if (type.getCalendarStartDate() != null) {
-                type.setCalendarStartDate(new Date(type.getCalendarStartDate().getTime()));
-            }
-        }
-        return type;
     }
 
 }

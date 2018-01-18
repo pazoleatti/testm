@@ -282,10 +282,9 @@ public interface PeriodService {
      * Получить корректирующие периоды
      * @param taxType тип налога
      * @param departmentId идентификатор подразделения
-     * @param pagingParams
      * @return список корректирующих периодов
      */
-    PagingResult<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId, PagingParams pagingParams);
+    List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
 
     /**
      * Получить периоды сравнени - выборка 50
@@ -377,10 +376,9 @@ public interface PeriodService {
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
 
 	/**
-	 * @return список отчетных периодов по дате актуальности
-     * @param pagingParams
+	 * @return список отчетных периодов
      */
-	PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams);
+	List<ReportPeriodType> getPeriodType();
 
 	/**
      * Возвращает все периоды по виду налога, которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
