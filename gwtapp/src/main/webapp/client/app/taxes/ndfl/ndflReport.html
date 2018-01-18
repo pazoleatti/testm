@@ -181,15 +181,15 @@
                 </div>
             </div>
             <div ng-if="availablePdf">
-                <div style="overflow: auto;width: 100%;max-height: 500px;padding: 10px 12px 0;background-color: lightgray;text-align:center">
+                <div style="overflow: auto;width: 100%; max-height: 504px;;padding: 10px 12px 0;background-color: lightgray;text-align:center">
                     <img id="pdfImage" style="width: 793px; height: auto;" ng-src="{{reportImage}}">
                 </div>
-                <div style="position: relative; text-align: center;">
+                <div style="position: relative; text-align: center; border-top: 1px solid #ccc; padding-top: 7px;">
                     <div data-resizer
                          data-element-selector="#pdfImage">
                     </div>
                     <div data-app-pager
-                         style="position: absolute; top: 0; right: 30px;"
+                         style="position: absolute; top: 7px; right: 30px;"
                          data-on-page-change="onPageChange()"
                          data-ng-model="pager"
                          data-pages-total="pagesTotal">
