@@ -222,7 +222,7 @@
          * @param separator разделитель (', ' по умолчанию)
          * @param path путь к полю, которое будет записано в строку через разделитель (name по-умолчанию)
          */
-        .filter('joinObjectsFormatter', function () {
+        .filter('joinObjectsPropFormatter', function () {
             return function (array, separator, path) {
                 if (array && array.length > 0) {
                     var nameArray = _.map(array, function (obj) {

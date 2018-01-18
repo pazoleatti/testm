@@ -74,4 +74,31 @@ describe('formatters', function () {
             });
         });
     });
+
+    /**
+     * Тесты на joinObjectsPropFormatter
+     */
+    describe("joinObjectsPropFormatter", function () {
+        var argsArray = [
+            [null], [[]],
+            [[{name: 1},{name: 2},{name: 3}]],
+            [[{a: 1},{a: 2},{a: 3}], '; ', 'a'],
+            [[{a: {b: 1}},{a: {b: 2}},{a: {b: 3}}], '; ', 'a.b']
+        ];
+        var results = [
+            '', '',
+            '1, 2, 3',
+            '1; 2; 3',
+            '1; 2; 3'
+        ];
+
+        using(argsArray, results, function (args, result) {
+            it("Formatters. Test1. Проверка joinObjectsPropFormatter", function () {
+                inject(function (joinObjectsPropFormatterFilter) {
+                    expect(joinObjectsPropFormatterFilter(args[0], args[1], args[2]))
+                        .toBe(result);
+                });
+            });
+        });
+    });
 });
