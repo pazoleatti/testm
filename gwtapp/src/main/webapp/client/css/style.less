@@ -1389,6 +1389,8 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   border-top: 2px solid rgba(0, 0, 0, 0.3);
   padding: 10px 12px 0;
   min-height: 100px;
+  display: inline-block;
+  vertical-align: top;
 }
 
 .modal-lg {
@@ -1434,7 +1436,9 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
 .floatWindow-href:hover + div {
   display: block;
 }
-
+.report-content{
+  height: 550px;
+}
 /*------------------------------------------------------------------*/
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   .ui-jqgrid .ui-jqgrid-bdiv {
@@ -1463,6 +1467,9 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   #log-panel{
     width: 96.5%!important;
     max-height: 780px;
+  }
+  .report-content{
+    height: 518px;
   }
 }
 @media (max-width: 1450px) {
@@ -1557,6 +1564,9 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   #log-panel .ui-jqgrid-bdiv{
     max-height: 581px!important;
   }
+  .report-content{
+    height: 496px;
+  }
 }
 @media (max-width: 1290px) {
   #log-panel{
@@ -1564,6 +1574,14 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   }
   #log-panel .ui-jqgrid-bdiv{
     max-height: 508px!important;
+  }
+  .report-content{
+    height: 460px
+  }
+}
+@media (max-width: 1190px) {
+  .report-content{
+    height: 418px;
   }
 }
 
