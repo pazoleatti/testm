@@ -50,27 +50,31 @@
     <div class="button_panel" style="float: left; margin: 0;">
         <div class="btn-toolbar" role="toolbar" data-ng-show="editMode">
             <span>
-                <button type="file" class="btn btn-default" ngf-select="addFileClick($file)">
+                <button type="file" class="btn btn-default iconed-btn" ngf-select="addFileClick($file)">
                      {{::'filesComment.button.add' |translate}}
+                    <span class="btn-icon-add"></span>
                 </button>
             </span>
             <span>
-                <button type="button" class="btn btn-default"
+                <button type="button" class="btn btn-default iconed-btn"
                         data-ng-click="removeFileClick()"
                         data-ng-disabled="!filesDeleteAvailable()">
                      {{::'filesComment.button.remove' |translate}}
+                    <span class="btn-icon-remove"></span>
                 </button>
             </span>
         </div>
     </div>
 
-    <button type="button" class="btn btn-default" id="saveButton" data-ng-disabled="commentForm.$invalid"
+    <button type="button" class="btn btn-default iconed-btn" id="saveButton" data-ng-disabled="commentForm.$invalid"
             data-ng-click="save()" data-ng-show="editMode">
         <span data-translate-once="button.save"></span>
+        <span class="btn-icon-ok"></span>
     </button>
 
-    <button type="button" class="btn btn-default" id="closeButton" data-ng-click="close()">
+    <button type="button" class="btn btn-default iconed-btn" id="closeButton" data-ng-click="close()">
         <span data-translate-once="button.close"></span>
+        <span class="btn-icon-close"></span>
     </button>
 </div>
 

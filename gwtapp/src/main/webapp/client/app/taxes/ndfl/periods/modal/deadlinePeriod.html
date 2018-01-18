@@ -45,16 +45,18 @@
     <div class="modal-footer" style="text-align: left">
         <div style="width: 100%">
             <div data-ng-show="isEdit" style="text-align: left; float: left">
-                <button type="submit" class="btn btn-default" id="saveButton">
+                <button type="submit" class="btn btn-default iconed-btn" id="saveButton">
                     <span data-translate-once="button.create"></span>
+                    <span class="btn-icon-ok"></span>
                 </button>
                 <button type="button" class="btn btn-default" id="cancelButton" ng-click="cancel()">
                     <span data-translate-once="button.cancel"></span>
                 </button>
             </div>
             <div style="text-align: right">
-                <button type="button" class="btn btn-default" id="closeButton" ng-click="close()">
+                <button type="button" class="btn btn-default iconed-btn" id="closeButton" ng-click="close()">
                     <span data-translate-once="button.close"></span>
+                    <span class="btn-icon-close"></span>
                 </button>
             </div>
         </div>
