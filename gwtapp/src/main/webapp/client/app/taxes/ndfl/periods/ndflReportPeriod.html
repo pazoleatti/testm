@@ -20,7 +20,7 @@
                     {{:: 'reportPeriod.pils.closePeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="editPeriod()"
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT)) || reportPeriodGrid.value[0].correctionDate">
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT)) ">
                     {{:: 'reportPeriod.pils.editPeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="openCorrectPeriod()"
@@ -33,7 +33,7 @@
                     {{:: 'reportPeriod.pils.deletePeriod' | translate}}
                 </button>
                 <button type="button" class="btn btn-default" data-ng-click="deadlinePeriod()"
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE)) || reportPeriodGrid.value[0].correctionDate">
+                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE))">
                     {{:: 'reportPeriod.pils.deadline' | translate}}
                 </button>
             </div>

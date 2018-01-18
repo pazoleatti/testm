@@ -58,7 +58,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
-            return targetDomainObject.isActive() && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+            return targetDomainObject.isActive() && targetDomainObject.getCorrectionDate() == null && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 
@@ -118,7 +118,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
-            return !targetDomainObject.isActive() && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+            return !targetDomainObject.isActive() && targetDomainObject.getCorrectionDate() == null && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 
@@ -133,7 +133,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
-            return targetDomainObject.isActive() && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
+            return targetDomainObject.isActive() && targetDomainObject.getCorrectionDate() == null && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 }

@@ -430,17 +430,13 @@
                  * Инициализация списка с загрузкой доступных периодов корректировки
                  */
                 $scope.initCorrectPeriods = function (departmentId) {
-                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/departmentReportPeriod?projection=closedWithoutCorrection", {departmentId: departmentId}, {
-                        property: "reportPeriod.taxPeriod.year",
-                        direction: "asc"
-                    }, "correctPeriodFormatter");
+                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/departmentReportPeriod?projection=closedWithoutCorrection", {departmentId: departmentId}, {},
+                        "correctPeriodFormatter");
                 };
 
                 $scope.initReportPeriodType = function () {
-                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/reportPeriodType", {}, {
-                        property: "id",
-                        direction: "asc"
-                    }, 'periodTypeFormatter');
+                    $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/reportPeriodType", {}, {},
+                        'periodTypeFormatter');
                 };
             }
         ]);

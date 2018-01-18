@@ -145,8 +145,9 @@ public class RefBookValuesController {
      */
     @GetMapping(value = "/rest/refBookValues/reportPeriodType")
     public JqgridPagedList<ReportPeriodType> fetchReportPeriodsType(@RequestParam PagingParams pagingParams) {
-        PagingResult<ReportPeriodType> result = periodService.getPeriodType(pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
+        List<ReportPeriodType> result = periodService.getPeriodType();
+        pagingParams.setCount(result.size());
+        return JqgridPagedResourceAssembler.buildPagedList(result, result.size(), pagingParams);
     }
 
     /**

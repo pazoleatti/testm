@@ -29,6 +29,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    @Deprecated
     public Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIds) {
         return departmentReportPeriodDao.getCorrectionDateListByReportPeriod(reportPeriodIds);
     }

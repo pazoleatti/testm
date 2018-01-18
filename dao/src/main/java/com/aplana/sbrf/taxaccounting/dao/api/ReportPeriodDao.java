@@ -104,10 +104,9 @@ public interface ReportPeriodDao extends PermissionDao {
      * Получить корректирующие периоды
      * @param taxType тип налога
      * @param departmentId идентификатор подразделения
-     * @param pagingParams
-	 * @return список корректирующих периодов
+     * @return список корректирующих периодов
      */
-    PagingResult<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId, PagingParams pagingParams);
+    List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
 
     /**
      * Получить периоды сравнения - выборка 50
@@ -125,20 +124,13 @@ public interface ReportPeriodDao extends PermissionDao {
 
 
 	/**
-	 * Получить список типов отчетных периодов с пагинацией
-	 * @param pagingParams - параметры пагинации
-	 */
-	PagingResult<ReportPeriodType> getPeriodType(PagingParams pagingParams);
+	 * Получить список типов отчетных периодов
+     */
+	List<ReportPeriodType> getPeriodType();
 
 	/**
-	 * Получить тип отчетного периода
+	 * Получить тип отчетного периода по идентификатору
 	 * @param id - идентификатор
 	 */
-    ReportPeriodType getReportPeriodType(Long id);
-
-	/**
-	 * Возвращает тип отчетного периода по идентификатору
-	 * @param id - идентификатор
-	 */
-	ReportPeriodType getPeriodTypeById(Long id);
+    ReportPeriodType getReportPeriodTypeById(Long id);
 }

@@ -1,26 +1,23 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.CacheConstants;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.CacheConstants;
-import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import org.springframework.cache.annotation.Cacheable;
-import com.querydsl.sql.SQLQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QTaxPeriod.taxPeriod;
 
 /**
  * Реализация DAO для работы с {@link com.aplana.sbrf.taxaccounting.model.TaxPeriod налоговыми периодами}
@@ -28,13 +25,6 @@ import static com.aplana.sbrf.taxaccounting.model.querydsl.QTaxPeriod.taxPeriod;
 @Repository
 @Transactional(readOnly = true)
 public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
-
-	private SQLQueryFactory sqlQueryFactory;
-
-	@Autowired
-	public TaxPeriodDaoImpl(SQLQueryFactory sqlQueryFactory) {
-		this.sqlQueryFactory = sqlQueryFactory;
-	}
 
 	private final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
 		@Override
@@ -91,26 +81,30 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 	}
 
 	@Override
-	public int add(TaxPeriod newTaxPeriod) {
-		Integer id = newTaxPeriod.getId();
+	public int add(TaxPeriod taxPeriod) {
+		JdbcTemplate jt = getJdbcTemplate();
+
+		Integer id = taxPeriod.getId();
 		if (id == null) {
 			id = generateId("seq_tax_period", Integer.class);
 		}
-		sqlQueryFactory.insert(taxPeriod)
-				.columns(
-						taxPeriod.id,
-						taxPeriod.year,
-						taxPeriod.taxType)
-				.values(
+		jt.update(
+				"insert into tax_period (id, tax_type, year)" +
+						" values (?, ?, ?)",
+				new Object[]{
 						id,
-						newTaxPeriod.getYear(),
-						TaxType.NDFL.getCode()
-				)
-				.execute();
+						taxPeriod.getTaxType().getCode(),
+						taxPeriod.getYear()
+				},
+				new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC}
+
+		);
+		taxPeriod.setId(id);
 		return id;
 	}
 
 	@Override
+	@Deprecated
 	public TaxPeriod getLast(TaxType taxType) {
 		try {
 			return getJdbcTemplate().queryForObject( //TODO Вероятно, это можно оптимизировать

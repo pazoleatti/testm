@@ -54,7 +54,7 @@ public class ReportPeriodDaoTest {
         PagingParams pagingParams = new PagingParams();
         pagingParams.setProperty("id");
         pagingParams.setDirection("ASC");
-        reportPeriodDao.getCorrectPeriods(TaxType.NDFL, 1, pagingParams);
+        reportPeriodDao.getCorrectPeriods(TaxType.NDFL, 1);
     }
 	
 	@Test

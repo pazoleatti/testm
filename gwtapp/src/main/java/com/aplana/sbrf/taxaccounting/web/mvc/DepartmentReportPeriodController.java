@@ -3,10 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -27,6 +28,7 @@ public class DepartmentReportPeriodController {
     private PeriodService periodService;
     private SecurityService securityService;
     private DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter;
+    private DepartmentService departmentService;
 
     /**
      * Привязка данных из параметров запроса
@@ -45,11 +47,12 @@ public class DepartmentReportPeriodController {
     }
 
     public DepartmentReportPeriodController(DepartmentReportPeriodService departmentReportPeriodService, PeriodService periodService, SecurityService securityService,
-                                            DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter) {
+                                            DepartmentReportPeriodPermissionSetter departmentReportPeriodPermissionSetter, DepartmentService departmentService) {
         this.departmentReportPeriodService = departmentReportPeriodService;
         this.periodService = periodService;
         this.securityService = securityService;
         this.departmentReportPeriodPermissionSetter = departmentReportPeriodPermissionSetter;
+        this.departmentService = departmentService;
     }
 
     /**
@@ -57,6 +60,10 @@ public class DepartmentReportPeriodController {
      */
     @GetMapping(value = "/rest/departmentReportPeriod")
     public List<DepartmentReportPeriodJournalItem> getAllPeriods(@RequestParam DepartmentReportPeriodFilter filter) {
+        //утсанавливаем значение фильтра по-умолчанию
+        if (filter.getDepartmentId() == null){
+            filter.setDepartmentId(departmentService.getBankDepartment().getId());
+        }
         List<DepartmentReportPeriodJournalItem> result = departmentReportPeriodService.findAll(filter);
         Map<Integer, DepartmentReportPeriodJournalItem> yearMap = new HashMap<>();
         for (DepartmentReportPeriodJournalItem item : result) {
@@ -86,6 +93,7 @@ public class DepartmentReportPeriodController {
         for (DepartmentReportPeriodJournalItem item : page) {
             DepartmentReportPeriod period = new DepartmentReportPeriod();
             period.setIsActive(item.getIsActive());
+            period.setCorrectionDate(item.getCorrectionDate());
             departmentReportPeriodPermissionSetter.setPermissions(period, null);
             item.setPermissions(period.getPermissions());
         }
@@ -142,8 +150,9 @@ public class DepartmentReportPeriodController {
      */
     @GetMapping(value = "rest/departmentReportPeriod", params = "projection=closedWithoutCorrection")
     public JqgridPagedList<ReportPeriod> fetchСlosedWithoutCorrection(@RequestParam Integer departmentId, @RequestParam PagingParams pagingParams) {
-        PagingResult<ReportPeriod> result = periodService.getCorrectPeriods(TaxType.NDFL, departmentId, pagingParams);
-        return JqgridPagedResourceAssembler.buildPagedList(result, result.getTotalCount(), pagingParams);
+        List<ReportPeriod> result = periodService.getCorrectPeriods(TaxType.NDFL, departmentId);
+        pagingParams.setCount(result.size());
+        return JqgridPagedResourceAssembler.buildPagedList(result, result.size(), pagingParams);
     }
 
     /**

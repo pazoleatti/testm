@@ -37,7 +37,7 @@
                  * @description Обработчик кнопки "Открыть"
                  **/
                 $scope.save = function () {
-                    if (ValidationUtils.checkYearInterval($scope.correctPeriod.reportPeriod.taxPeriod.year , $scope.departmentReportPeriod.correctionDate.getFullYear())) {
+                    if (ValidationUtils.checkYearInterval($scope.correctPeriod.reportPeriod.taxPeriod.year , $scope.departmentReportPeriod.correctionDate.substr(0, 4))) {
                         $http({
                             method: "POST",
                             url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
