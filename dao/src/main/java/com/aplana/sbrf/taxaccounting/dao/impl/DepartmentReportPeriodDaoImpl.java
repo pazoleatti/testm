@@ -2,20 +2,15 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.CacheConstants;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.QBean;
-import com.querydsl.sql.SQLQueryFactory;
-import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,12 +27,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentReportPeriod.departmentReportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QReportPeriod.reportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QTaxPeriod.taxPeriod;
-import static com.querydsl.core.types.Projections.bean;
 
 @Repository
 public class DepartmentReportPeriodDaoImpl extends AbstractDao implements DepartmentReportPeriodDao {
@@ -46,37 +38,29 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     private ReportPeriodDao reportPeriodDao;
 
-    private SQLQueryFactory sqlQueryFactory;
 
-    public DepartmentReportPeriodDaoImpl(ReportPeriodDao reportPeriodDao, SQLQueryFactory sqlQueryFactory) {
+    public DepartmentReportPeriodDaoImpl(ReportPeriodDao reportPeriodDao) {
         this.reportPeriodDao = reportPeriodDao;
-        this.sqlQueryFactory = sqlQueryFactory;
     }
 
-    private final QBean<DepartmentReportPeriodJournalItem> qDepartmentReportPeriodJournalItem = bean(DepartmentReportPeriodJournalItem.class,
-            departmentReportPeriod.id,
-            reportPeriod.name,
-            taxPeriod.year,
-            departmentReportPeriod.isActive,
-            departmentReportPeriod.correctionDate,
-            departmentReportPeriod.reportPeriodId,
-            departmentReportPeriod.departmentId,
-            reportPeriod.dictTaxPeriodId);
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy");
+        }
+    };
 
-    private final QBean<DepartmentReportPeriod> departmentReportPeriodQBean = bean(DepartmentReportPeriod.class,
-            departmentReportPeriod.id,
-            departmentReportPeriod.departmentId,
-            departmentReportPeriod.correctionDate,
-            departmentReportPeriod.isActive,
-            bean(ReportPeriod.class,
-                    reportPeriod.id,
-                    reportPeriod.name,
-                    reportPeriod.calendarStartDate,
-                    reportPeriod.dictTaxPeriodId,
-                    reportPeriod.startDate,
-                    reportPeriod.endDate,
-                    bean(TaxPeriod.class, taxPeriod.id, taxPeriod.year).as("taxPeriod"))
-                    .as("reportPeriod"));
+    private static final String QUERY_TEMPLATE_SIMPLE = "select id, department_id, report_period_id, is_active, " +
+            "correction_date from department_report_period";
+
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date \n" +
+            "          from \n" +
+            "          department_report_period drp \n" +
+            "          join report_period rp on drp.report_period_id = rp.id \n" +
+            "          join tax_period tp on rp.tax_period_id = tp.id \n" +
+            "            %s \n" +
+            "            order by tp.year, drp.CORRECTION_DATE NULLS FIRST";
+
 
     private final RowMapper<DepartmentReportPeriod> mapper = new RowMapper<DepartmentReportPeriod>() {
         @Override
@@ -91,146 +75,107 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
     };
 
+    private final RowMapper<DepartmentReportPeriodJournalItem> mapperJournalItem = new RowMapper<DepartmentReportPeriodJournalItem>() {
+        @Override
+        public DepartmentReportPeriodJournalItem mapRow(ResultSet rs, int index) throws SQLException {
+            DepartmentReportPeriodJournalItem departmentReportPeriodJournalItem = new DepartmentReportPeriodJournalItem();
+            departmentReportPeriodJournalItem.setId(SqlUtils.getInteger(rs, "id"));
+            departmentReportPeriodJournalItem.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
+            ReportPeriod reportPeriod = reportPeriodDao.get(SqlUtils.getInteger(rs, "report_period_id"));
+            departmentReportPeriodJournalItem.setReportPeriodId(reportPeriod.getId());
+            departmentReportPeriodJournalItem.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
+            departmentReportPeriodJournalItem.setYear(reportPeriod.getTaxPeriod().getYear());
+            departmentReportPeriodJournalItem.setName(reportPeriod.getName());
+            departmentReportPeriodJournalItem.setIsActive(!SqlUtils.getInteger(rs, "is_active").equals(0));
+            departmentReportPeriodJournalItem.setCorrectionDate(rs.getDate("correction_date"));
+            return departmentReportPeriodJournalItem;
+        }
+    };
+
+    private String getFilterString(DepartmentReportPeriodFilter filter) {
+        if (filter == null) {
+            return "";
+        }
+
+        List<String> causeList = new LinkedList<String>();
+
+        if (filter.isCorrection() != null) {
+            causeList.add("drp.correction_date is " + (filter.isCorrection() ? " not " : "") + " null");
+        }
+
+        if (filter.isActive() != null) {
+            causeList.add("drp.is_active " + (filter.isActive() ? "<>" : "=") + " 0");
+        }
+
+        if (filter.getCorrectionDate() != null) {
+            causeList.add("drp.correction_date = to_date('" +
+                    SIMPLE_DATE_FORMAT.get().format(filter.getCorrectionDate()) +
+                    "', 'DD.MM.YYYY')");
+        }
+
+        if (filter.getDepartmentIdList() != null) {
+            causeList.add(SqlUtils.transformToSqlInStatement("drp.department_id",
+                    filter.getDepartmentIdList()));
+        }
+
+        if (filter.getReportPeriodIdList() != null) {
+            causeList.add(SqlUtils.transformToSqlInStatement("drp.report_period_id",
+                    filter.getReportPeriodIdList()));
+        }
+
+        if (filter.getTaxTypeList() != null) {
+            causeList.add("tp.tax_type in " +
+                    SqlUtils.transformTaxTypeToSqlInStatement(filter.getTaxTypeList()));
+        }
+        if (filter.getYearStart() != null || filter.getYearEnd() != null){
+            causeList.add("(:yearStart is null or tp.year >= :yearStart) and (:yearEnd is null or tp.year <= :yearEnd)");
+        }
+
+        if (filter.getDepartmentId() != null){
+            causeList.add("drp.department_id = " + filter.getDepartmentId());
+        }
+
+        if (filter.getReportPeriod() != null){
+            causeList.add("drp.report_period_id = " + filter.getReportPeriod().getId());
+        }
+
+        if (causeList.isEmpty()) {
+            return "";
+        }
+
+        return " where " + StringUtils.join(causeList, " and ");
+    }
+
     @Override
-    @Transactional(readOnly = true)
     public List<DepartmentReportPeriod> getListByFilter(final DepartmentReportPeriodFilter filter) {
         try {
-            BooleanBuilder where = new BooleanBuilder();
-
-            if (filter.isCorrection() != null) {
-                if (filter.isCorrection()) {
-                    where.and(departmentReportPeriod.correctionDate.isNotNull());
-                } else {
-                    where.and(departmentReportPeriod.correctionDate.isNull());
-                }
-            }
-
-            if (filter.isActive() != null) {
-                if (filter.isActive()) {
-                    where.and(departmentReportPeriod.isActive.eq(true));
-                } else {
-                    where.and(departmentReportPeriod.isActive.eq(false));
-                }
-            }
-
-            if (filter.getCorrectionDate() != null) {
-                where.and(departmentReportPeriod.correctionDate.eq(filter.getCorrectionDate()));
-            }
-
-            if (filter.getDepartmentIdList() != null) {
-                where.and(departmentReportPeriod.departmentId.in(filter.getDepartmentIdList()));
-            }
-
-            if (filter.getReportPeriodIdList() != null) {
-                where.and(departmentReportPeriod.reportPeriodId.in(filter.getReportPeriodIdList()));
-            }
-
-            if (filter.getReportPeriod() != null) {
-                where.and(departmentReportPeriod.reportPeriodId.eq(filter.getReportPeriod().getId()));
-            }
-
-            if (filter.getYearStart() != null) {
-                where.and(taxPeriod.year.goe(filter.getYearStart()));
-            }
-
-            if (filter.getYearEnd() != null) {
-                where.and(taxPeriod.year.loe(filter.getYearEnd()));
-            }
-
-            if (filter.getDepartmentId() != null) {
-                where.and(departmentReportPeriod.departmentId.eq(filter.getDepartmentId()));
-
-            }
-
-
-            List<DepartmentReportPeriod> res =  sqlQueryFactory.select(departmentReportPeriodQBean)
-                    .from(departmentReportPeriod)
-                    .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                    .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                    .where(where)
-                    .transform(GroupBy.groupBy(departmentReportPeriod.id).list(departmentReportPeriodQBean));
-            for (DepartmentReportPeriod period : res){
-                if (period.getCorrectionDate() != null) {
-                    period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
-                }
-                if (period.getReportPeriod() != null) {
-                    if (period.getReportPeriod().getStartDate() != null) {
-                        period.getReportPeriod().setStartDate(new Date(period.getReportPeriod().getStartDate().getTime()));
-                    }
-                    if (period.getReportPeriod().getEndDate() != null) {
-                        period.getReportPeriod().setEndDate(new Date(period.getReportPeriod().getEndDate().getTime()));
-                    }
-                    if (period.getReportPeriod().getCalendarStartDate() != null) {
-                        period.getReportPeriod().setCalendarStartDate(new Date(period.getReportPeriod().getCalendarStartDate().getTime()));
-                    }
-                }
-            }
-            return res;
+            return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, getFilterString(filter)),
+                    new HashMap<String, Object>(2) {{
+                        put("yearStart", filter.getYearStart());
+                        put("yearEnd", filter.getYearEnd());
+                    }}, mapper);
         } catch (DataAccessException e) {
             LOG.error("", e);
             throw new DaoException("", e);
         }
     }
 
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT_ID =
+            "select drp.id from department_report_period drp " +
+                    "join report_period rp on drp.report_period_id = rp.id \n" +
+                    "join tax_period tp on rp.tax_period_id = tp.id " +
+                    " %s ";
+
     @Override
-    @Transactional(readOnly = true)
     public List<Integer> getListIdsByFilter(final DepartmentReportPeriodFilter filter) {
         try {
-            BooleanBuilder where = new BooleanBuilder();
-
-            if (filter.isCorrection() != null) {
-                if (filter.isCorrection()) {
-                    where.and(departmentReportPeriod.correctionDate.isNotNull());
-                } else {
-                    where.and(departmentReportPeriod.correctionDate.isNull());
-                }
-            }
-
-            if (filter.isActive() != null) {
-                if (filter.isActive()) {
-                    where.and(departmentReportPeriod.isActive.eq(true));
-                } else {
-                    where.and(departmentReportPeriod.isActive.eq(false));
-                }
-            }
-
-            if (filter.getCorrectionDate() != null) {
-                where.and(departmentReportPeriod.correctionDate.eq(filter.getCorrectionDate()));
-            }
-
-            if (filter.getDepartmentIdList() != null) {
-                where.and(departmentReportPeriod.departmentId.in(filter.getDepartmentIdList()));
-            }
-
-            if (filter.getReportPeriodIdList() != null) {
-                where.and(departmentReportPeriod.reportPeriodId.in(filter.getReportPeriodIdList()));
-            }
-
-            if (filter.getReportPeriod() != null) {
-                where.and(departmentReportPeriod.reportPeriodId.eq(filter.getReportPeriod().getId()));
-            }
-
-            if (filter.getYearStart() != null) {
-                where.and(taxPeriod.year.goe(filter.getYearStart()));
-            }
-
-            if (filter.getYearEnd() != null) {
-                where.and(taxPeriod.year.loe(filter.getYearEnd()));
-            }
-
-            if (filter.getDepartmentId() != null) {
-                where.and(departmentReportPeriod.departmentId.eq(filter.getDepartmentId()));
-
-            }
-
-
-            return sqlQueryFactory.select(departmentReportPeriodQBean)
-                    .from(departmentReportPeriod)
-                    .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                    .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                    .where(where)
-                    .transform(GroupBy.groupBy(departmentReportPeriod.id).list(departmentReportPeriod.id));
-        } catch (DataAccessException e) {
+            return getNamedParameterJdbcTemplate().queryForList(
+                    String.format(QUERY_TEMPLATE_COMPOSITE_SORT_ID, getFilterString(filter)),
+                    new HashMap<String, Object>(2) {{
+                        put("yearStart", filter.getYearStart());
+                        put("yearEnd", filter.getYearEnd());
+                    }}, Integer.class);
+        } catch (DataAccessException e){
             LOG.error("", e);
             throw new DaoException("", e);
         }
@@ -238,37 +183,20 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
-    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriodItem.id")
-    public DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriodItem) {
-        departmentReportPeriodItem.setId(generateId("seq_department_report_period", Integer.class));
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriod.id")
+    public DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriod) {
+        Integer id = generateId("seq_department_report_period", Integer.class);
 
-        sqlQueryFactory.insert(departmentReportPeriod)
-                .columns(departmentReportPeriod.id,
-                        departmentReportPeriod.departmentId,
-                        departmentReportPeriod.reportPeriodId,
-                        departmentReportPeriod.isActive,
-                        departmentReportPeriod.correctionDate)
-                .values(departmentReportPeriodItem.getId(),
-                        departmentReportPeriodItem.getDepartmentId(),
-                        departmentReportPeriodItem.getReportPeriod().getId(),
-                        departmentReportPeriodItem.isActive(),
-                        departmentReportPeriodItem.getCorrectionDate())
-                .execute();
-        if (departmentReportPeriodItem.getCorrectionDate() != null) {
-            departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
-        }
-        if (departmentReportPeriodItem.getReportPeriod() != null) {
-            if (departmentReportPeriodItem.getReportPeriod().getStartDate() != null) {
-                departmentReportPeriodItem.getReportPeriod().setStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getStartDate().getTime()));
-            }
-            if (departmentReportPeriodItem.getReportPeriod().getEndDate() != null) {
-                departmentReportPeriodItem.getReportPeriod().setEndDate(new Date(departmentReportPeriodItem.getReportPeriod().getEndDate().getTime()));
-            }
-            if (departmentReportPeriodItem.getReportPeriod().getCalendarStartDate() != null) {
-                departmentReportPeriodItem.getReportPeriod().setCalendarStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getCalendarStartDate().getTime()));
-            }
-        }
-        return departmentReportPeriodItem;
+        getJdbcTemplate()
+                .update("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, " +
+                                "CORRECTION_DATE) values (?, ?, ?, ?, ?)",
+                        id,
+                        departmentReportPeriod.getDepartmentId(),
+                        departmentReportPeriod.getReportPeriod().getId(),
+                        departmentReportPeriod.isActive(),
+                        departmentReportPeriod.getCorrectionDate());
+        departmentReportPeriod.setId(id);
+        return departmentReportPeriod;
 
     }
 
@@ -320,26 +248,29 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
+    @Deprecated
     public void updateCorrectionDate(int id, Date correctionDate) {
-        Date corrDate;
-        if (correctionDate == null) {
-            corrDate = null;
-        } else {
-            corrDate = DateUtils.truncate(correctionDate, Calendar.DATE);
-        }
-        sqlQueryFactory.update(departmentReportPeriod)
-                .where(departmentReportPeriod.id.eq(id))
-                .set(departmentReportPeriod.correctionDate, corrDate)
-                .execute();
+        getJdbcTemplate().update(
+                "update department_report_period set correction_date = ? where id = ?",
+                new Object[]{correctionDate, id},
+                new int[]{Types.DATE, Types.NUMERIC}
+        );
     }
 
     @Override
     @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
+    @Deprecated
     public void delete(Integer id) {
-        sqlQueryFactory.delete(departmentReportPeriod)
-                .where(departmentReportPeriod.id.eq(id))
-                .execute();
+        try {
+            getJdbcTemplate().update(
+                    "delete from department_report_period where id = ?",
+                    new Object[]{id},
+                    new int[]{Types.NUMERIC}
+            );
+        } catch (DataAccessException e){
+            LOG.error("", e);
+        }
     }
 
     @Override
@@ -347,10 +278,20 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void delete(final List<Integer> ids) {
         try {
-            sqlQueryFactory.delete(departmentReportPeriod)
-                    .where(departmentReportPeriod.id.in(ids))
-                    .execute();
-        } catch (DataAccessException e) {
+            getJdbcTemplate().batchUpdate("delete from department_report_period where id = ?",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            ps.setInt(1, ids.get(i));
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return ids.size();
+                        }
+                    }
+            );
+        } catch (DataAccessException e){
             LOG.error("", e);
         }
     }
@@ -448,13 +389,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
         try {
-            return sqlQueryFactory.select(departmentReportPeriodQBean)
-                    .from(departmentReportPeriod)
-                    .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                    .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                    .where(departmentReportPeriod.departmentId.eq(departmentId).and(reportPeriod.id.eq(reportPeriodId).and(departmentReportPeriod.correctionDate.gt(correctionDate))))
-                    .fetchCount() > 0;
-        } catch (DataAccessException e) {
+            return getJdbcTemplate().
+                    queryForObject(
+                            "select count(*) from department_report_period drp where " +
+                                    "drp.DEPARTMENT_ID = ? and drp.report_period_id = ? and drp.CORRECTION_DATE > ?",
+                            new Object[]{departmentId, reportPeriodId, correctionDate}, Integer.class) > 0;
+        } catch (DataAccessException e){
             LOG.error("", e);
             throw new DaoException("", e);
         }
@@ -471,6 +411,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional(readOnly = true)
+    @Deprecated
     public Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(final Collection<Integer> reportPeriodIdList) {
         Map<Integer, List<Date>> retVal = new HashMap<Integer, List<Date>>();
         if (reportPeriodIdList == null) {
@@ -499,6 +440,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional(readOnly = true)
+    @Deprecated
     public List<DepartmentReportPeriod> getClosedForFormTemplate(final int formTemplateId) {
         try {
             return getNamedParameterJdbcTemplate().query("select drp.id, drp.department_id, drp.report_period_id, " +
@@ -534,50 +476,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional(readOnly = true)
-    public List<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter) {
-        BooleanBuilder where = new BooleanBuilder();
-        if (filter.getDepartmentId() != null) {
-            where.and(departmentReportPeriod.departmentId.eq(filter.getDepartmentId()));
-        } else {
-            where.and(departmentReportPeriod.departmentId.eq(0));
+    public List<DepartmentReportPeriodJournalItem> findAll(final DepartmentReportPeriodFilter filter) {
+        try {
+            return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, getFilterString(filter)),
+                    new HashMap<String, Object>(2) {{
+                        put("yearStart", filter.getYearStart());
+                        put("yearEnd", filter.getYearEnd());
+                    }}, mapperJournalItem);
+        } catch (DataAccessException e) {
+            LOG.error("", e);
+            throw new DaoException("", e);
         }
-        where.and(taxPeriod.year.between(filter.getYearStart().shortValue(), filter.getYearEnd().shortValue()))
-                .and(taxPeriod.taxType.eq(String.valueOf(TaxType.NDFL.getCode())));
-        if (filter.getDepartmentId() != null) {
-            where.and(departmentReportPeriod.departmentId.eq(filter.getDepartmentId()));
-        }
-
-        String orderingProperty = "year";
-        Order ascDescOrder = Order.ASC;
-
-        OrderSpecifier order = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                qDepartmentReportPeriodJournalItem, orderingProperty, ascDescOrder, departmentReportPeriod.id.asc());
-
-
-        List<DepartmentReportPeriodJournalItem> result = sqlQueryFactory.select(
-                departmentReportPeriod.id,
-                reportPeriod.name,
-                taxPeriod.year,
-                departmentReportPeriod.isActive,
-                departmentReportPeriod.correctionDate,
-                departmentReportPeriod.reportPeriodId,
-                departmentReportPeriod.departmentId,
-                reportPeriod.dictTaxPeriodId)
-                .from(departmentReportPeriod)
-                .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(where)
-                .orderBy(departmentReportPeriod.correctionDate.asc(), reportPeriod.dictTaxPeriodId.asc(), taxPeriod.year.asc())
-                .transform(GroupBy.groupBy(departmentReportPeriod.id).list(qDepartmentReportPeriodJournalItem));
-
-        for (DepartmentReportPeriodJournalItem period : result){
-            if (period.getCorrectionDate() != null) {
-                period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
-            }
-        }
-
-
-        return result;
 
     }
 
@@ -585,57 +494,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     @Cacheable(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public DepartmentReportPeriod get(int id) {
-        DepartmentReportPeriod period =  sqlQueryFactory.select(departmentReportPeriodQBean)
-                .from(departmentReportPeriod)
-                .leftJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .leftJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .where(departmentReportPeriod.id.eq(id))
-                .fetchOne();
-        if (period != null){
-            if (period.getCorrectionDate() != null) {
-                period.setCorrectionDate(new Date(period.getCorrectionDate().getTime()));
-            }
-            if (period.getReportPeriod() != null) {
-                if (period.getReportPeriod().getStartDate() != null) {
-                    period.getReportPeriod().setStartDate(new Date(period.getReportPeriod().getStartDate().getTime()));
-                }
-                if (period.getReportPeriod().getEndDate() != null) {
-                    period.getReportPeriod().setEndDate(new Date(period.getReportPeriod().getEndDate().getTime()));
-                }
-                if (period.getReportPeriod().getCalendarStartDate() != null) {
-                    period.getReportPeriod().setCalendarStartDate(new Date(period.getReportPeriod().getCalendarStartDate().getTime()));
-                }
-            }
+        try {
+            return getJdbcTemplate().queryForObject(QUERY_TEMPLATE_SIMPLE + " where id = ?", new Object[]{id}, mapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        return period;
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriodItem.id")
-    public DepartmentReportPeriod update(DepartmentReportPeriod departmentReportPeriodItem) {
-
-        sqlQueryFactory.update(departmentReportPeriod)
-                .where(departmentReportPeriod.id.eq(departmentReportPeriodItem.getId()))
-                .set(departmentReportPeriod.reportPeriodId, departmentReportPeriodItem.getReportPeriod().getId())
-                .set(taxPeriod.year, departmentReportPeriodItem.getReportPeriod().getTaxPeriod().getYear())
-                .execute();
-        if (departmentReportPeriodItem.getCorrectionDate() != null) {
-            departmentReportPeriodItem.setCorrectionDate(new Date(departmentReportPeriodItem.getCorrectionDate().getTime()));
-        }
-        if (departmentReportPeriodItem.getReportPeriod() != null) {
-            if (departmentReportPeriodItem.getReportPeriod().getStartDate() != null) {
-                departmentReportPeriodItem.getReportPeriod().setStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getStartDate().getTime()));
-            }
-            if (departmentReportPeriodItem.getReportPeriod().getEndDate() != null) {
-                departmentReportPeriodItem.getReportPeriod().setEndDate(new Date(departmentReportPeriodItem.getReportPeriod().getEndDate().getTime()));
-            }
-            if (departmentReportPeriodItem.getReportPeriod().getCalendarStartDate() != null) {
-                departmentReportPeriodItem.getReportPeriod().setCalendarStartDate(new Date(departmentReportPeriodItem.getReportPeriod().getCalendarStartDate().getTime()));
-            }
-        }
-
-        return departmentReportPeriodItem;
-
     }
 }
