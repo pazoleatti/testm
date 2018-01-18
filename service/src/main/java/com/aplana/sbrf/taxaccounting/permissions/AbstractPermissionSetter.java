@@ -42,10 +42,7 @@ public abstract class AbstractPermissionSetter<T extends SecuredEntity> implemen
     @SuppressWarnings("unchecked")
     @Override
     public void setPermissions(final T targetDomainObject, Permission<T>... permissions) {
-        /*if (targetDomainObject == null) {
-            throw new CbrError("common.error.message.not.enough.rights");
-        }
-        Validate.notNull(targetDomainObject);*/
+        Validate.notNull(targetDomainObject);
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Iterable<Permission<T>> retrievedPermissions = permissions == null ?
