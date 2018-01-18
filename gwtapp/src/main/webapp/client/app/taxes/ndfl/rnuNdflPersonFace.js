@@ -230,8 +230,8 @@
                     mindate.setFullYear(1900, 0, 1);
                     maxdate.setFullYear(2100, 11, 31);
 
-                    return (!dateFrom || mindate < dateFrom && dateFrom < maxdate) &&
-                        (!dateTo || mindate < dateTo && dateTo < maxdate);
+                    return (!dateFrom || mindate <= dateFrom && dateFrom <= maxdate) &&
+                        (!dateTo || mindate <= dateTo && dateTo <= maxdate);
                 };
 
             }]);
