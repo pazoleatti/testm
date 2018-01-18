@@ -760,11 +760,11 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 }
             } else {
                 relation.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs, "departmentId")));
-                relation.setDepartmentReportPeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "departmentReportPeriod")));
+                relation.setDepartmentReportPeriod(departmentReportPeriodDao.fetchOne(SqlUtils.getInteger(rs, "departmentReportPeriod")));
                 if (!forDeclaration) {
                     Integer comparativePeriodId = SqlUtils.getInteger(rs, "compPeriodId");
                     if (comparativePeriodId != null) {
-                        relation.setComparativePeriod(departmentReportPeriodDao.get(comparativePeriodId));
+                        relation.setComparativePeriod(departmentReportPeriodDao.fetchOne(comparativePeriodId));
                     }
                 }
             }

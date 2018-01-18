@@ -55,7 +55,7 @@ public class CreateFormsDeclarationHandler extends AbstractActionHandler<CreateF
         CreateFormsDeclarationResult result = new CreateFormsDeclarationResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(action.getDepartmentId(),
                 action.getReportPeriodId());
         if (departmentReportPeriod == null) {
             throw new ActionException("Не удалось определить налоговый период.");

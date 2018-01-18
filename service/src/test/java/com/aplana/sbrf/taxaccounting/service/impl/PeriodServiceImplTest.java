@@ -202,7 +202,7 @@ public class PeriodServiceImplTest {
         departmentReportPeriod.setCorrectionDate(null);
         departmentReportPeriod.setDepartmentId(1);
         departmentReportPeriod.setReportPeriod(reportPeriod11);
-        when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.fetchOne(1)).thenReturn(departmentReportPeriod);
 
         RefBook refBook = new RefBook(){{
             setId(PERIOD_CODE_REFBOOK);

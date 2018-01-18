@@ -730,7 +730,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         DepartmentReportPeriodFilter drpFilter = new DepartmentReportPeriodFilter();
         drpFilter.setIsCorrection(null);
         drpFilter.setDepartmentIdList(Arrays.asList(depId));
-        List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(drpFilter);
+        List<Integer> corrIds = departmentReportPeriodService.fetchAllIdsByFilter(drpFilter);
         departmentReportPeriodService.delete(corrIds);
     }
 

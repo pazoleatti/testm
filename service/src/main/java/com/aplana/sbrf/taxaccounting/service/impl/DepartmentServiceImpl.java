@@ -370,7 +370,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         departmentReportPeriodFilter.setIsActive(true);
         departmentReportPeriodFilter.setDepartmentIdList(list);
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
         for (DepartmentReportPeriod departmentReportPeriod : departmentReportPeriodList) {
             retList.add(departmentReportPeriod.getDepartmentId());
         }

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -134,7 +133,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             }
 
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
             Long asnuId = targetDomainObject.getAsnuId();
 
@@ -206,7 +205,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
             return departmentReportPeriod.isActive() && CHECK.isGranted(currentUser, targetDomainObject);
         }
     }
@@ -225,7 +224,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (VIEW.isGranted(currentUser, targetDomainObject)) {
                 if (targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.PREPARED) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
                         if (departmentReportPeriod.isActive()) {
                             DeclarationFormKind kind = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind();
                             if (kind == DeclarationFormKind.PRIMARY &&
@@ -254,7 +253,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
 
             if (departmentReportPeriod.isActive()) {
                 if (VIEW.isGranted(currentUser, targetDomainObject)) {
@@ -284,7 +283,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
             if (targetDomainObject.getState() == State.CREATED) {
                 if (VIEW.isGranted(currentUser, targetDomainObject)) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
-                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
                         if (departmentReportPeriod.isActive()) {
                             return true;
                         }
@@ -306,7 +305,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
         @Override
         protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(targetDomainObject.getDepartmentReportPeriodId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
 
             // Период формы открыт
             if (departmentReportPeriod.isActive()) {

@@ -123,7 +123,7 @@ public class AuditServiceImpl implements AuditService {
                     int departmentId = declarationData.getDepartmentId();
                     Integer reportPeriodId = declarationData.getReportPeriodId();
                     int departmentRPId = declarationData.getDepartmentReportPeriodId();
-                    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentRPId);
+                    DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentRPId);
                     String corrStr = departmentReportPeriod.getCorrectionDate() != null ? " в корр.периоде " + sdf.get().format(departmentReportPeriod.getCorrectionDate()) : "";
 
 

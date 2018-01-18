@@ -40,9 +40,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
 
     @Override
-    public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
+    public List<DepartmentReportPeriod> fetchAllByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
 		try {
-			return departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
+			return departmentReportPeriodDao.fetchAllByFilter(departmentReportPeriodFilter);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -52,9 +52,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
+    public List<Integer> fetchAllIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
 		try {
-        	return departmentReportPeriodDao.getListIdsByFilter(departmentReportPeriodFilter);
+        	return departmentReportPeriodDao.fetchAllIdsByFilter(departmentReportPeriodFilter);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -64,9 +64,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public DepartmentReportPeriod save(DepartmentReportPeriod departmentReportPeriod) {
+    public void create(DepartmentReportPeriod departmentReportPeriod) {
 		try {
-        	return departmentReportPeriodDao.save(departmentReportPeriod);
+        	departmentReportPeriodDao.create(departmentReportPeriod);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -76,11 +76,14 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
 	@Override
-	public void save(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds) {
+	public void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds) {
 		if (departmentIds == null || departmentIds.isEmpty())
 			throw new ServiceException(ERROR_BATCH_MESSAGE);
 		try {
-			departmentReportPeriodDao.save(departmentReportPeriod, departmentIds);
+			for(Integer departmentId : departmentIds) {
+				departmentReportPeriod.setDepartmentId(departmentId);
+				departmentReportPeriodDao.create(departmentReportPeriod);
+			}
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -115,22 +118,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 		}
     }
 
-    @Override
-	@Deprecated
-    public void updateCorrectionDate(int id, Date correctionDate) {
-		try {
-			departmentReportPeriodDao.updateCorrectionDate(id, correctionDate);
-		} catch (ServiceException e) {
-			throw e;
-		} catch (Exception e) {
-			LOG.error(COMMON_ERROR_MESSAGE, e);
-			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
-		}
-    }
 
     @Override
 	@Deprecated
-    public void delete(int id) {
+    public void delete(Integer id) {
 		try {
 			departmentReportPeriodDao.delete(id);
 		} catch (ServiceException e) {
@@ -154,9 +145,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public boolean existForDepartment(int departmentId, int reportPeriodId) {
+    public boolean checkExistForDepartment(int departmentId, int reportPeriodId) {
 		try {
-			return departmentReportPeriodDao.existForDepartment(departmentId, reportPeriodId);
+			return departmentReportPeriodDao.checkExistForDepartment(departmentId, reportPeriodId);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -166,10 +157,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-	@Deprecated
-    public Integer getCorrectionNumber(int id) {
+    public DepartmentReportPeriod fetchLast(int departmentId, int reportPeriodId) {
 		try {
-			return departmentReportPeriodDao.getCorrectionNumber(id);
+			return departmentReportPeriodDao.fetchLast(departmentId, reportPeriodId);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -179,21 +169,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public DepartmentReportPeriod getLast(int departmentId, int reportPeriodId) {
-		try {
-			return departmentReportPeriodDao.getLast(departmentId, reportPeriodId);
-		} catch (ServiceException e) {
-			throw e;
-		} catch (Exception e) {
-			LOG.error(COMMON_ERROR_MESSAGE, e);
-			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
-		}
-    }
-
-    @Override
-    public DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId) {
+    public DepartmentReportPeriod fetchFirst(int departmentId, int reportPeriodId) {
         try {
-            return departmentReportPeriodDao.getFirst(departmentId, reportPeriodId);
+            return departmentReportPeriodDao.fetchFirst(departmentId, reportPeriodId);
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
@@ -203,9 +181,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
+    public boolean checkExistLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
 		try {
-			return departmentReportPeriodDao.existLargeCorrection(departmentId, reportPeriodId, correctionDate);
+			return departmentReportPeriodDao.checkExistLargeCorrection(departmentId, reportPeriodId, correctionDate);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
@@ -215,8 +193,8 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
 	@Override
-	public List<DepartmentReportPeriodJournalItem> findAll(DepartmentReportPeriodFilter filter) {
-		List<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.findAll(filter);
+	public List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(DepartmentReportPeriodFilter filter) {
+		List<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.fetchJournalItemByFilter(filter);
 		for (DepartmentReportPeriodJournalItem item : page){
 			Notification notification = notificationService.get(item.getReportPeriodId(), null, item.getDepartmentId());
 			if (notification != null) {
@@ -230,7 +208,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	public String checkHasNotAccepted(Integer id) {
 		Logger logger = new Logger();
 
-		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(id);
+		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(id);
 		if (departmentReportPeriod == null){
 			throw new ServiceException(COMMON_ERROR_MESSAGE, "Ошибка загрузки отчтетного периода подразделения с id " + id +
 					". Период не существует или не найден.");
@@ -268,15 +246,15 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	}
 
 	@Override
-	public DepartmentReportPeriod get(int id) {
-		return departmentReportPeriodDao.get(id);
+	public DepartmentReportPeriod fetchOne(int id) {
+		return departmentReportPeriodDao.fetchOne(id);
 	}
 
 	@Override
 	public String checkHasBlockedDeclaration(Integer id){
 		Logger logger = new Logger();
 
-		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(id);
+		DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(id);
 		if (departmentReportPeriod == null){
 			throw new ServiceException(COMMON_ERROR_MESSAGE, "Ошибка загрузки отчтетного периода подразделения с id " + id +
 					". Период не существует или не найден.");

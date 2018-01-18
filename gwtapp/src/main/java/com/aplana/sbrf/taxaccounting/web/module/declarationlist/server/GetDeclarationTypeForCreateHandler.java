@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
 public class GetDeclarationTypeForCreateHandler extends AbstractActionHandler<GetDeclarationTypeAction, GetDeclarationTypeResult> {
@@ -37,7 +35,7 @@ public class GetDeclarationTypeForCreateHandler extends AbstractActionHandler<Ge
     public GetDeclarationTypeResult execute(GetDeclarationTypeAction action, ExecutionContext executionContext) throws ActionException {
         GetDeclarationTypeResult result = new GetDeclarationTypeResult();
         result.setDeclarationTypes(declarationTypeService.getTypes(action.getDepartmentId(), action.getReportPeriod(), action.getTaxType(), action.getDeclarationFormKindList()));
-        result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId(), action.getReportPeriod()).getCorrectionDate());
+        result.setCorrectionDate(departmentReportPeriodService.fetchLast(action.getDepartmentId(), action.getReportPeriod()).getCorrectionDate());
         result.setTaxType(action.getTaxType());
         return result;
     }

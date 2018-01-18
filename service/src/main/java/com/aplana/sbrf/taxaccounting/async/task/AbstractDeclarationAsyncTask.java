@@ -58,7 +58,7 @@ public abstract class AbstractDeclarationAsyncTask extends AbstractAsyncTask {
     protected final String getDeclarationDescription(int userId, Map<String, Object> params) {
         DeclarationData declaration = getDeclaration(userId, params);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
-        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
 
         return String.format(DECLARATION_DESCRIPTION,

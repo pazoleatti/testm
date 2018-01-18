@@ -34,7 +34,7 @@ public class CheckHasCorrectionPeriodHandler extends AbstractActionHandler<Check
         filter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
         filter.setTaxTypeList(Arrays.asList(action.getTaxType()));
         filter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.fetchAllByFilter(filter);
         result.setHasCorrectionPeriods(!departmentReportPeriodList.isEmpty());
         return result;
     }

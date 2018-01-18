@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
@@ -64,7 +63,7 @@ public class DepartmentReportPeriodController {
         if (filter.getDepartmentId() == null){
             filter.setDepartmentId(departmentService.getBankDepartment().getId());
         }
-        List<DepartmentReportPeriodJournalItem> result = departmentReportPeriodService.findAll(filter);
+        List<DepartmentReportPeriodJournalItem> result = departmentReportPeriodService.fetchJournalItemByFilter(filter);
         Map<Integer, DepartmentReportPeriodJournalItem> yearMap = new HashMap<>();
         for (DepartmentReportPeriodJournalItem item : result) {
             if (yearMap.get(item.getYear()) == null) {

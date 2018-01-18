@@ -65,8 +65,8 @@ public class RefBookDepartmentDaoTest {
 //        data = refBookDepartmentDao.getRecords(DEPARTMENT_REF_BOOK_ID, new PagingParams(), sortAttribute);
 //        assertTrue(data.getTotalCount() == DEPARTMENTS_TOTAL_RECORDS);
 //        assertTrue(data.size() == DEPARTMENTS_COUNT);
-//        assertTrue(data.get(1).get(RefBook.RECORD_ID_ALIAS).equals(departmentBankid));
-//        assertTrue(data.get(0).get("name").equals(departmentTB1Name));
+//        assertTrue(data.get(1).fetchOne(RefBook.RECORD_ID_ALIAS).equals(departmentBankid));
+//        assertTrue(data.get(0).fetchOne("name").equals(departmentTB1Name));
 
         // Проверка фильтрации
         data = refBookDepartmentDao.getRecords(new PagingParams(), "sbrf_code like '%003%'", null);

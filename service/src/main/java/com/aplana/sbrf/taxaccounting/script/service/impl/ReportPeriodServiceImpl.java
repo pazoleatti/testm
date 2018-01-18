@@ -116,7 +116,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 
     @Override
     public Integer getCorrectionNumber(int departmentReportPeriodId) {
-        return departmentReportPeriodDao.getCorrectionNumber(departmentReportPeriodId);
+        return departmentReportPeriodDao.fetchCorrectionNumber(departmentReportPeriodId);
     }
 
     @Override

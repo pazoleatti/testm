@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
@@ -75,7 +74,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
             departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(depCombined.getDepartmentId().get(0).intValue()));
             departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
-            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
+            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.fetchAllByFilter(departmentReportPeriodFilter);
             if (departmentReportPeriodList.isEmpty()) {
                 throw new ActionException("Не найден отчетный период!");
             }

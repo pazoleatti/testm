@@ -199,7 +199,7 @@ public class DeclarationDataAccessServiceImplTest {
                 Integer key = (Integer) invocation.getArguments()[0];
                 return periods.get(key);
             }
-        }).when(departmentReportPeriodDao).get(anyInt());
+        }).when(departmentReportPeriodDao).fetchOne(anyInt());
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
 
         SourceService sourceService = mock(SourceService.class);
@@ -342,18 +342,18 @@ public class DeclarationDataAccessServiceImplTest {
 
         // Контролёр УНП может создавать декларации в любом подразделении, если они там разрешены
         userInfo.setUser(mockUser(USER_CONTROL_UNP_ID, DEPARTMENT_TB1_ID, TARole.N_ROLE_CONTROL_UNP));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(BANK_REPORT_PERIOD_ID)));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
-        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.fetchOne(BANK_REPORT_PERIOD_ID)));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.fetchOne(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.fetchOne(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.fetchOne(TB2_REPORT_PERIOD_ID)));
+        assertTrue(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.fetchOne(TB2_REPORT_PERIOD_ID)));
 
         // Оператор не может создавать декларации
         userInfo.setUser(mockUser(USER_OPERATOR_ID, DEPARTMENT_TB1_ID, TARole.N_ROLE_OPER));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(BANK_REPORT_PERIOD_ID)));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB1_REPORT_PERIOD_ID)));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
-        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.get(TB2_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.fetchOne(BANK_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.fetchOne(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.fetchOne(TB1_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_1_ID, departmentReportPeriodDao.fetchOne(TB2_REPORT_PERIOD_ID)));
+        assertFalse(canCreate(userInfo, DECLARATION_TEMPLATE_2_ID, departmentReportPeriodDao.fetchOne(TB2_REPORT_PERIOD_ID)));
     }
 }

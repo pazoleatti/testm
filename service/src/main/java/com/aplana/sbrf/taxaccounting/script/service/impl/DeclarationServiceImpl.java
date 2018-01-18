@@ -185,7 +185,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public boolean checkExistDeclarationsInPeriod(int declarationTypeId, int departmentReportPeriodId) {
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(departmentReportPeriodId);
         DeclarationDataFilter declarationFilter = new DeclarationDataFilter();
         // фильтр
         declarationFilter.setDeclarationTypeIds(Arrays.asList((long) declarationTypeId));

@@ -29,19 +29,28 @@ public abstract class AbstractDao {
         return namedParameterJdbcTemplate;
     }
 
+    /**
+     * Возвращает новое значение id, следующее за текущим значением sequenceName
+     * @param sequenceName - наименования последовательности, из которой следует получить следующее значение
+     * @param resultType - тип возвращаемого значения
+     * @return объект класса resultType со значением, следующим за текущим значеним sequenceName
+     */
     protected <T extends Number> T generateId(String sequenceName, Class<T> resultType) {
         return getJdbcTemplate().queryForObject("select " + sequenceName + ".nextval from dual", resultType);
     }
 
+    /**
+     * Возвращает признак поддержки функции row_number() over (...)
+     */
     protected boolean isSupportOver() {
         return dbInfo.isSupportOver();
     }
 
+
+    /**
+     * Возвращает признак целочисленной разницы дат (для Oracle)
+     */
     protected boolean isWithRecursive() {
         return dbInfo.isWithRecursive();
-    }
-
-    protected boolean isDateDiffNumber() {
-        return dbInfo.isDateDiffNumber();
     }
 }

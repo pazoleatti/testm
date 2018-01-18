@@ -129,12 +129,12 @@ public class DepartmentServiceImplTest {
             taRoles.add(taRole);
         }
 
-        when(departmentReportPeriodDao.existForDepartment(root.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.existForDepartment(departmentTB2.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.existForDepartment(departmentTB3.getId(), 0)).thenReturn(false);
-        when(departmentReportPeriodDao.existForDepartment(departmentGOSB31.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.existForDepartment(departmentOSB311.getId(), 0)).thenReturn(true);
-        when(departmentReportPeriodDao.existForDepartment(departmentOSB311.getId(), 1)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(root.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentTB2.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentTB3.getId(), 0)).thenReturn(false);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentGOSB31.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentOSB311.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.checkExistForDepartment(departmentOSB311.getId(), 1)).thenReturn(true);
 
         doAnswer(new Answer<Object>() {
             @Override
@@ -152,7 +152,7 @@ public class DepartmentServiceImplTest {
                 }
                 return result;
             }
-        }).when(departmentReportPeriodDao).getListByFilter(any(DepartmentReportPeriodFilter.class));
+        }).when(departmentReportPeriodDao).fetchAllByFilter(any(DepartmentReportPeriodFilter.class));
 
         // Доступность по связям
         when(departmentDao.getDepartmentIdsByExecutors(Arrays.asList(311))).thenReturn(Arrays.asList(3));

@@ -677,7 +677,7 @@ public class RefBookSimpleDataProvider implements RefBookDataProvider {
         if (parentVersions != null && !parentVersions.isEmpty()) {
             StringBuilder versions = new StringBuilder();
             for (int i=0; i<parentVersions.size(); i++) {
-                versions.append(formatter.get().format(parentVersions.get(i)));
+                versions.append(formatter.get().format(parentVersions.fetchOne(i)));
                 if (i < parentVersions.size() - 1) {
                     versions.append(", ");
                 }

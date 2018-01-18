@@ -225,7 +225,7 @@ public class SourceServiceImpl implements SourceService {
                     *//** Если единственное назначение было удалено, то продолжать нет смысла *//*
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
                             "Форма",
-                            sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.get(0).getSourceType(),
+                            sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.fetchOne(0).getSourceType(),
                             sourcePairs.get(0).getSourceDepartmentName()));
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
                             logEntryService.save(logger.getEntries()));
@@ -344,7 +344,7 @@ public class SourceServiceImpl implements SourceService {
                     }
                     if (!processedDestinations.contains(form.getId())) {
                         DepartmentReportPeriod drpCompare = form.getDrpComapreId() != null ?
-                                departmentReportPeriodService.get(form.getDrpComapreId()) : null;
+                                departmentReportPeriodService.fetchOne(form.getDrpComapreId()) : null;
                         logger.warn(MessageGenerator.getFDMsg("",
                                 form.getType(),
                                 form.getFormKind().getTitle(),

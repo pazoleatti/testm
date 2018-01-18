@@ -578,7 +578,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
 
             // Период отсутствует либо закрыт
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(formDepartment.getId(), reportPeriod.getId());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(formDepartment.getId(), reportPeriod.getId());
             if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
                 logger.warn(U3 + U3_4, fileName, TaxType.NDFL.getName(), reportPeriodCode, reportPeriodName, year);
                 return null;

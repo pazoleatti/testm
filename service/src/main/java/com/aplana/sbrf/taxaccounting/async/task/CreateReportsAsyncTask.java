@@ -52,7 +52,7 @@ public class CreateReportsAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
 
         if (departmentReportPeriod == null) {
             throw new ServiceException("Не удалось определить налоговый период.");
@@ -75,7 +75,7 @@ public class CreateReportsAsyncTask extends AbstractAsyncTask {
         Integer declarationTypeId = (Integer) taskData.getParams().get("declarationTypeId");
         Integer departmentReportPeriodId = (Integer) taskData.getParams().get("departmentReportPeriodId");
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
 
@@ -97,7 +97,7 @@ public class CreateReportsAsyncTask extends AbstractAsyncTask {
         Integer declarationTypeId = (Integer) taskData.getParams().get("declarationTypeId");
         Integer departmentReportPeriodId = (Integer) taskData.getParams().get("departmentReportPeriodId");
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(departmentReportPeriodId);
         Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId, departmentReportPeriod.getReportPeriod().getId()));
 

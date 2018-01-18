@@ -104,7 +104,7 @@ public class GetDeclarationDataHandler
         result.setSubreports(declarationTemplate.getSubreports());
         result.setDepartment(departmentService.getParentsHierarchy(
                 declaration.getDepartmentId()));
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchOne(
                 declaration.getDepartmentReportPeriodId());
 
         result.setReportPeriod(departmentReportPeriod.getReportPeriod().getName());

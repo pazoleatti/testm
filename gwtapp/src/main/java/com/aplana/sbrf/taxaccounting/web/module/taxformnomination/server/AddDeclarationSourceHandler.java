@@ -80,12 +80,12 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setDepartmentIdList(Arrays.asList(depId));
 
-        List<DepartmentReportPeriod> currDepDrpList = departmentReportPeriodService.getListByFilter(filter);
+        List<DepartmentReportPeriod> currDepDrpList = departmentReportPeriodService.fetchAllByFilter(filter);
 
         // Находим все периоды для ПАО "Сбербанк"
         DepartmentReportPeriodFilter filterAll = new DepartmentReportPeriodFilter();
         filterAll.setDepartmentIdList(Arrays.asList(0));
-        List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filterAll);
+        List<DepartmentReportPeriod> drpList = departmentReportPeriodService.fetchAllByFilter(filterAll);
 
         List<DepartmentReportPeriod> drpForSave = new LinkedList<DepartmentReportPeriod>(drpList);
 
@@ -103,7 +103,7 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
         for (DepartmentReportPeriod drp : drpForSave) {
             drp.setId(null);
             drp.setDepartmentId(depId);
-            departmentReportPeriodService.save(drp);
+            departmentReportPeriodService.create(drp);
         }
     }
 }

@@ -36,7 +36,7 @@ public class IsPeriodOpenHandler extends AbstractActionHandler<IsPeriodOpenActio
         filter.setDepartmentIdList(Arrays.asList(isPeriodOpenAction.getDepartmentId()));
         filter.setReportPeriodIdList(Arrays.asList(isPeriodOpenAction.getReportPeriodId()));
         filter.setIsCorrection(false);
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.fetchAllByFilter(filter);
         if (departmentReportPeriodList.size() == 1) {
             IsPeriodOpenResult result = new IsPeriodOpenResult();
             result.setPeriodOpen(departmentReportPeriodList.get(0).isActive());

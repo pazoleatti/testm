@@ -48,7 +48,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
         filter.setYearStart(action.getFrom());
         filter.setYearEnd(action.getTo());
 
-		List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
+		List<DepartmentReportPeriod> drpList = departmentReportPeriodService.fetchAllByFilter(filter);
 		List<Integer> depIds = new ArrayList<Integer>();
 		for (DepartmentReportPeriod d : drpList) {
 			depIds.add(d.getDepartmentId());

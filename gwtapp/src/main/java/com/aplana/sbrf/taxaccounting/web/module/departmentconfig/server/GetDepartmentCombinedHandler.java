@@ -160,7 +160,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(action.getDepartmentId()));
         departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
         departmentReportPeriodFilter.setIsActive(true);
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.fetchAllByFilter(departmentReportPeriodFilter);
         DepartmentReportPeriod departmentReportPeriod = null;
         if (departmentReportPeriodList.size() == 1) {
             departmentReportPeriod = departmentReportPeriodList.get(0);

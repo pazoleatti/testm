@@ -66,7 +66,7 @@ public class CreateReportsDeclarationHandler extends AbstractActionHandler<Creat
         } else {
             departmentReportPeriodFilter.setIsCorrection(false);
         }
-        List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
+        List<DepartmentReportPeriod> departmentReportPeriods = departmentReportPeriodService.fetchAllByFilter(departmentReportPeriodFilter);
 
         if (departmentReportPeriods == null || departmentReportPeriods.isEmpty() || departmentReportPeriods.size() > 1) {
             throw new ActionException("Не удалось определить налоговый период.");

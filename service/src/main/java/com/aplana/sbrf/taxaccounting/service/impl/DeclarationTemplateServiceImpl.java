@@ -360,7 +360,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.PDF_DEC);
             String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, DeclarationDataReportType.EXCEL_DEC);
             ReportPeriod rp = periodService.getReportPeriod(data.getReportPeriodId());
-            DepartmentReportPeriod drp = departmentReportPeriodService.get(data.getDepartmentReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.fetchOne(data.getDepartmentReportPeriodId());
             if (
                     reportDao.getDec(dataId, DeclarationDataReportType.PDF_DEC) != null
                             ||

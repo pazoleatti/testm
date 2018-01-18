@@ -127,10 +127,10 @@ public class DeclarationDataServiceImplTest {
         when(declarationDataDao.get(2)).thenReturn(declarationData1);
 
         DepartmentReportPeriod drp = new DepartmentReportPeriod();
-        when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp);
+        when(departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId())).thenReturn(drp);
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
         drp1.setCorrectionDate(SDF.parse("01.01.2014"));
-        when(departmentReportPeriodService.get(declarationData1.getDepartmentReportPeriodId())).thenReturn(drp1);
+        when(departmentReportPeriodService.fetchOne(declarationData1.getDepartmentReportPeriodId())).thenReturn(drp1);
 
         when(declarationTemplateService.get(1)).thenReturn(declarationTemplate);
 
@@ -264,11 +264,11 @@ public class DeclarationDataServiceImplTest {
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
 
-        when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
+        when(departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
 
-        when(departmentReportPeriodService.getLast(1, 1)).thenReturn(drp1);
+        when(departmentReportPeriodService.fetchLast(1, 1)).thenReturn(drp1);
 
-        when(departmentReportPeriodService.getLast(2, 1)).thenReturn(drp2);
+        when(departmentReportPeriodService.fetchLast(2, 1)).thenReturn(drp2);
 
         try{
             when(sourceService.isDDConsolidationTopical(1L)).thenReturn(false);

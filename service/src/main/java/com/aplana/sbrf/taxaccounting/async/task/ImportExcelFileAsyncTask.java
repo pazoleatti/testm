@@ -70,7 +70,7 @@ public class ImportExcelFileAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(taskData.getUserId()));
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-        ReportPeriod reportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getReportPeriod();
+        ReportPeriod reportPeriod = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId()).getReportPeriod();
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
         DeclarationTemplate declarationTemplate = declarationService.getTemplate(declarationData.getDeclarationTemplateId());
         RefBookAsnu asnu = refBookAsnuService.fetchById(declarationData.getAsnuId());

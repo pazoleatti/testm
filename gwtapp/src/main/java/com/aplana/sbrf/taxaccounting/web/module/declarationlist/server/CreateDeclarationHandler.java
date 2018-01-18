@@ -46,7 +46,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
         CreateDeclarationResult result = new CreateDeclarationResult();
         Logger logger = new Logger();
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.fetchLast(command.getDepartmentId(),
                 command.getReportPeriodId());
         Integer declarationTypeId = command.getDeclarationTypeId();
 
