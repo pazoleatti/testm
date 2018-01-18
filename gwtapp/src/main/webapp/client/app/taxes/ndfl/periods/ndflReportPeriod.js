@@ -35,9 +35,9 @@
          */
 
         .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'BankDepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
-            'ValidationUtils', '$dialogs', '$q',
+            'ValidationUtils', '$dialogs', '$q', '$rootScope',
             function ($scope, $filter, DepartmentReportPeriodResource, BankDepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource,
-                      ValidationUtils, $dialogs, $q) {
+                      ValidationUtils, $dialogs, $q, $rootScope) {
 
                 BankDepartmentResource.query({}, function (department) {
                     $scope.department = department;
@@ -305,7 +305,7 @@
                         });
                     } else {
                         if (permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN) {
-                            return PermissionChecker.check(permission);
+                            return $rootScope.user.roles[0].alias === APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP;
                         }
                     }
                 };
