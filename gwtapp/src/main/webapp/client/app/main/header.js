@@ -61,8 +61,8 @@
                                 href: "Main.jsp" + $scope.gwtMode + "#!departmentConfigProperty;nType=NDFL"
                             });
                             subtree.push({
-                                name: $filter('translate')('menu.taxes.ndfl.formAssignment'),
-                                href: "Main.jsp" + $scope.gwtMode + "#!destination;nType=NDFL;isForm=false"
+                                name: $filter('translate')('menu.taxes.ndfl.declarationTypeAssignment'),
+                                href: $state.href('declarationTypeAssignment')
                             });
                         }
 

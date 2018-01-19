@@ -80,6 +80,15 @@ public interface DepartmentDeclarationTypeDao {
     List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
 
     /**
+     * Получение списка видов налоговых форм, назначенных подразделениям
+     *
+     * @param departmentIds Идентификаторы подразделений
+     * @param pagingParams  Параметры пагинации
+     * @return Страница списка назначенных видов форм выбранным подразделениям
+     */
+    List<FormTypeKind> fetchAssignedDeclarationTypes(List<Long> departmentIds, PagingParams pagingParams);
+
+    /**
      * Возвращает количество назначенных деклараций для выбранного налога и подразделений
      *
      * @param departmentsIds идентификаторы подразделений

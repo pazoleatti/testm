@@ -924,6 +924,14 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public PagingResult<FormTypeKind> fetchAssignedDeclarationTypes(List<Long> departmentIds, PagingParams pagingParams) {
+        List<FormTypeKind> data = departmentDeclarationTypeDao.fetchAssignedDeclarationTypes(departmentIds, pagingParams);
+        int count = departmentDeclarationTypeDao.getAssignedDeclarationsCount(departmentIds, 'N');
+
+        return new PagingResult<>(data, count);
+    }
+
+    @Override
     public void updateDDTPerformers(int id, List<Integer> performerIds) {
         //Удаляем всех исполнителей и назначаем новых
         departmentDeclarationTypeDao.deletePerformers(id);

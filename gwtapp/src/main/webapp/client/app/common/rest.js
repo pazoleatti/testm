@@ -46,6 +46,14 @@
             });
         }])
         /**
+         * @description Данные по назначению налоговых форм
+         */
+        .factory('DeclarationTypeAssignmentResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/declarationTypeAssignment', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+        /**
          * @description Декларация
          */
         .factory('DeclarationDataResource', ['$resource', function ($resource) {

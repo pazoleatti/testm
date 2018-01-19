@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
@@ -390,6 +391,56 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     }
 
     /**
+     * Метод построения модели работы с запросом на получение страницы списка назначенных видов форм
+     *
+     * @param departmentIds     Список id подразделений
+     * @param pagingParams      Параметры пагинации
+     * @param withoutPerformers
+     * @return Модель работы с запросом
+     */
+    private QueryData getAssignedDeclarationTypesQueryData(List<Long> departmentIds, PagingParams pagingParams, boolean withoutPerformers) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+        String order = "";
+        if (StringUtils.isNotBlank(pagingParams.getProperty())) {
+            String property = "";
+            switch (pagingParams.getProperty()) {
+                case "departmentFullName":
+                    property = "department_full_name";
+                    break;
+                case "declarationTypeName":
+                    property = "name";
+                    break;
+                case "performersFullNames":
+                    property = "performer_full_name";
+                    break;
+            }
+            if (StringUtils.isNotBlank(property)) {
+                order = "ORDER BY " + property + (StringUtils.isNotBlank(pagingParams.getDirection()) ? " " + pagingParams.getDirection() : "");
+            }
+        }
+
+        String departmentClause = "";
+        if (departmentIds != null && !departmentIds.isEmpty()) {
+            departmentClause = "AND " + SqlUtils.transformToSqlInStatement("ddt.department_id", departmentIds) + "\n";
+            parameters.addValue("params", departmentIds);
+        }
+
+        String whereClause = " WHERE ddt.row_number_over BETWEEN :from and :to";
+        parameters.addValue("from", pagingParams.getStartIndex() + 1);
+        parameters.addValue("to", pagingParams.getStartIndex() + pagingParams.getCount());
+        parameters.addValue("withoutPerformers", withoutPerformers ? 1 : 0);
+
+        String query = String.format(QUERY, departmentClause, whereClause, order.toString());
+
+        QueryData queryData = new QueryData();
+        queryData.setQuery(query);
+        queryData.setParameterSource(parameters);
+
+        return queryData;
+    }
+
+    /**
      * Метод составляет запрос используя переданные ей параметры
      *
      * @param departmentIds подразделелния
@@ -571,6 +622,14 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     @Override
     public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentIds, taxType, queryParams, false);
+        List<FormTypeKind> result = new ArrayList<FormTypeKind>();
+        getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), new AllAssignCallBackHandler(result));
+        return result;
+    }
+
+    @Override
+    public List<FormTypeKind> fetchAssignedDeclarationTypes(List<Long> departmentIds, PagingParams pagingParams) {
+        QueryData assignedFormsQueryData = getAssignedDeclarationTypesQueryData(departmentIds, pagingParams, false);
         List<FormTypeKind> result = new ArrayList<FormTypeKind>();
         getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), new AllAssignCallBackHandler(result));
         return result;

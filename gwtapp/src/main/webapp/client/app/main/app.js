@@ -124,7 +124,7 @@
         "menu.taxes.ndfl.forms": "Формы",
         "menu.taxes.ndfl.maintenanceOfPeriods": "Ведение периодов",
         "menu.taxes.ndfl.settingsUnits": "Настройки подразделений",
-        "menu.taxes.ndfl.formAssignment": "Назначение форм",
+        "menu.taxes.ndfl.declarationTypeAssignment": "Назначение форм",
         "menu.taxes.ndfl.accountability": "Отчетность",
         "menu.taxes.service": "Сервис",
         "menu.taxes.service.loadFiles": "Загрузить файлы",
@@ -150,6 +150,7 @@
         "header.ndfl.form.create": "Создание новой записи",
         "header.ndfl.fl.create": "Добавить запись ФЛ",
         "header.ndfl.fl.edit": "Редактировать запись ФЛ",
+        "header.declarationTypeAssignment": "НДФЛ - Назначение налоговых форм",
         "header.CommonParams": "Налоги - Общие параметры",
 
         "tab.ndfl.requisites": "1. Реквизиты",
@@ -181,6 +182,10 @@
         "ndflReportJournal.filter.kpp": "КПП",
         "ndflReportJournal.filter.oktmo": "ОКТМО",
         "ndflReportJournal.filter.codeNO": "Код НО",
+
+        "declarationTypeAssignment.grid.columnName.department": "Подразделение",
+        "declarationTypeAssignment.grid.columnName.declarationType": "Макет",
+        "declarationTypeAssignment.grid.columnName.performer": "Исполнитель",
 
         "ndflReport.label.page": "Стр.",
         "ndflReport.label.from": "из",
@@ -673,7 +678,8 @@
             'app.formatters',
             'app.reportPeriod',
             'app.reportPeriodModal',
-            'app.deadlinePeriodModal'
+            'app.deadlinePeriodModal',
+            'app.declarationTypeAssignment'
         ])
         /**
          * @description Отображение модального окна с сообщением "Функционал находится в разработке".
