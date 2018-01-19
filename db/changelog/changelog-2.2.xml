@@ -253,4 +253,10 @@
             ) ON COMMIT DELETE ROWS ;
         </sql>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-1382 Исправить наполнение справочника REF_BOOK_TARIFF_PAYER. Нужно удалить таблицу-->
+	<changeSet id="2.1-rnurgaleev-0" author="rnurgaleev">
+        <dropTable cascadeConstraints="true"
+                   tableName="ref_book_tariff_payer"/>
+    </changeSet>
 </databaseChangeLog>
