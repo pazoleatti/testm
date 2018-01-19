@@ -20,6 +20,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -238,14 +240,18 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#departmentReportPeriod.id")
     public void create(DepartmentReportPeriod departmentReportPeriod) {
+        final KeyHolder keyHolder = new GeneratedKeyHolder();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("DEPARTMENT_ID", departmentReportPeriod.getDepartmentId());
+        params.addValue("REPORT_PERIOD_ID", departmentReportPeriod.getReportPeriod().getId());
+        params.addValue("IS_ACTIVE", departmentReportPeriod.isActive());
+        params.addValue("CORRECTION_DATE", departmentReportPeriod.getCorrectionDate());
 
-        getJdbcTemplate()
-                .update("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, " +
-                                "CORRECTION_DATE) values (seq_department_report_period.nextval, ?, ?, ?, ?)",
-                        departmentReportPeriod.getDepartmentId(),
-                        departmentReportPeriod.getReportPeriod().getId(),
-                        departmentReportPeriod.isActive(),
-                        departmentReportPeriod.getCorrectionDate());
+        getNamedParameterJdbcTemplate().update(
+                "insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
+                        " values (seq_department_report_period.nextval, :DEPARTMENT_ID, :REPORT_PERIOD_ID, :IS_ACTIVE, :CORRECTION_DATE)",
+                params, keyHolder, new String[]{"ID"});
+        departmentReportPeriod.setId(keyHolder.getKey().intValue());
     }
 
     @Override
