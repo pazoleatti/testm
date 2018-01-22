@@ -369,6 +369,16 @@
                 };
 
                 /**
+                 * Инициализировать список с загрузкой всех достуных для бизнес-администрирования подразделений через ajax
+                 */
+                $scope.initSelectWithBADepartments = function () {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=BADepartments", {}, {
+                        property: "fullPath",
+                        direction: "asc"
+                    }, "fullPathFormatter");
+                };
+
+                /**
                  * Инициализировать список с загрузкой всех подразделений через ajax
                  */
                 $scope.initSingleSelectWithAllDepartments = function () {

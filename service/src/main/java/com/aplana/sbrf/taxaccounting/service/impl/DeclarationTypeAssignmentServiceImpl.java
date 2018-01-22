@@ -28,16 +28,22 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     /**
      * Получение списка назначений налоговых форм подразделениям, доступным пользователю
      *
+     * @param filter       Параметры фильтрации
      * @param userInfo     Информация о пользователе
      * @param pagingParams Параметры пагинации
      * @return Список назначений
      */
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_NDFL_SETTINGS)")
-    public PagingResult<FormTypeKind> fetchDeclarationTypeAssignments(TAUserInfo userInfo, PagingParams pagingParams) {
-        List<Long> departmentsIds = new ArrayList<Long>();
-        for (Integer id : departmentService.getBADepartmentIds(userInfo.getUser())) {
-            departmentsIds.add(Long.valueOf(id));
+    public PagingResult<FormTypeKind> fetchDeclarationTypeAssignments(TAUserInfo userInfo, DeclarationTypeAssignmentFilter filter, PagingParams pagingParams) {
+        List<Long> departmentsIds = new ArrayList<>();
+
+        if (filter.getDepartmentIds().isEmpty()) {
+            for (Integer id : departmentService.getBADepartmentIds(userInfo.getUser())) {
+                departmentsIds.add(Long.valueOf(id));
+            }
+        } else {
+            departmentsIds.addAll(filter.getDepartmentIds());
         }
 
         PagingResult<FormTypeKind> result = sourceService.fetchAssignedDeclarationTypes(departmentsIds, pagingParams);
