@@ -2957,7 +2957,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             notification.setReportId(reportId);
             notification.setNotificationType(notificationType);
             notifications.add(notification);
-            notificationService.saveList(notifications);
+            notificationService.create(notifications);
         }
     }
 

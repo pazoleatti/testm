@@ -176,7 +176,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
             notification.setReportId(reportId);
             notification.setNotificationType(notificationType);
             notifications.add(notification);
-            notificationService.saveList(notifications);
+            notificationService.create(notifications);
         }
     }
 

@@ -13,12 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import javax.management.NotificationFilter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 @Component
 @PreAuthorize("isAuthenticated()")
@@ -48,8 +44,8 @@ public class GetNotificationCountHandler extends AbstractActionHandler<GetNotifi
         //filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
         filter.setUserRoleIds(userRoles);
         filter.setRead(false);
-		result.setNotificationCount(notificationService.getCountByFilter(filter));
-        result.setLastNotificationDate(notificationService.getLastNotificationDate());
+		result.setNotificationCount(notificationService.fetchCountByFilter(filter));
+        result.setLastNotificationDate(notificationService.fetchLastNotificationDate());
 
         if (user.getRoles().hashCode() != getNotificationCountAction.getRolesHashCode()) {
             // изменился набор ролей

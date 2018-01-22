@@ -14,30 +14,31 @@ import java.util.List;
  * @author dloshkarev
  */
 public interface NotificationDao {
-    /**
-     * Создает новое оповещение
-     *
-     * @param notification оповещение
-     * @return идентификатор нового оповещения
-     */
-    long save(Notification notification);
 
     /**
-     * Получает оповещение
+     * Возвращяет оповещение
      *
      * @param reportPeriodId       отчетный период
      * @param senderDepartmentId   подразделение-отправитель
      * @param receiverDepartmentId подразделение-получатель
-     * @return оповещение
+     * @return оповещение или null, если ничего не найдено
      */
-    Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId);
+    Notification fetchOne(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId);
+
+    /**
+     * Возвращяет оповещение по его идентификатору
+     *
+     * @param id идентификатор оповещения
+     * @return оповещение или null, если ничего не найдено
+     */
+    Notification fetchOne(long id);
 
     /**
      * Сохраняет список уведомлений с помощью batch-запроса
      *
      * @param notifications список уведомлений
      */
-    void saveList(List<Notification> notifications);
+    void create(List<Notification> notifications);
 
     /**
      * Удаляет все оповещения для группы подразделений за указанный отчетный период
@@ -45,40 +46,7 @@ public interface NotificationDao {
      * @param reportPeriodId отчетный период
      * @param departments    группа подразделений, связки подразделение-родительское подразделение
      */
-    void deleteList(int reportPeriodId, List<DepartmentPair> departments);
-
-    /**
-     * Получить оповещение по его идентификатору
-     *
-     * @param id идентификатор оповещения
-     * @return оповещение
-     */
-    Notification get(long id);
-
-    /**
-     * Получить список оповещений по фильтру (без пагинации)
-     *
-     * @param filter фильтр
-     * @return список идентификаторов оповещений
-     */
-    List<Notification> getByFilter(NotificationsFilterData filter);
-
-    /**
-     * Получить список оповещений по фильтру (с пагинацией)
-     *
-     * @param filter фильтр
-     * @param pagingParams параметры пагинации
-     * @return список идентификаторов оповещений
-     */
-    List<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams);
-
-    /**
-     * Получить количество оповещений по фильтру
-     *
-     * @param filter фильтр
-     * @return количество оповещений
-     */
-    int getCountByFilter(NotificationsFilterData filter);
+    void delete(int reportPeriodId, List<DepartmentPair> departments);
 
     /**
      * Удалить оповещения для отчетного периода
@@ -88,22 +56,46 @@ public interface NotificationDao {
     void deleteByReportPeriod(int reportPeriodId);
 
     /**
-     * Обновляет статус уведомлений пользователя на "Просмотрен"
-     *
-     * @param filter фильтр оповещений
-     */
-    void updateUserNotificationsStatus(NotificationsFilterData filter);
-
-    /**
      * Удаляет все оповещения из списка
      *
      * @param notificationIds идентификаторы оповещений
      */
     void deleteAll(List<Long> notificationIds);
 
-	/**
-	 * Получение даты последнего оповещения
-	 * @return
-	 */
-	Date getLastNotificationDate();
+    /**
+     * Получить список оповещений по фильтру (без пагинации)
+     *
+     * @param filter фильтр
+     * @return список идентификаторов оповещений
+     */
+    List<Notification> fetchAllByFilter(NotificationsFilterData filter);
+
+    /**
+     * Получить список оповещений по фильтру (с пагинацией)
+     *
+     * @param filter       фильтр
+     * @param pagingParams параметры пагинации
+     * @return список идентификаторов оповещений
+     */
+    List<Notification> fetchAllByFilterAndPaging(NotificationsFilterData filter, PagingParams pagingParams);
+
+    /**
+     * Получить количество оповещений по фильтру
+     *
+     * @param filter фильтр
+     * @return количество оповещений
+     */
+    int fetchCountByFilter(NotificationsFilterData filter);
+
+    /**
+     * Обновляет статус уведомлений пользователя на "Просмотрен"
+     *
+     * @param filter фильтр оповещений
+     */
+    void updateReadTrueByFilter(NotificationsFilterData filter);
+
+    /**
+     * Возвращяет дату последнего оповещения
+     */
+    Date fetchLastNotificationDate();
 }

@@ -99,7 +99,7 @@ public class DeleteDeclarationListHandler extends AbstractActionHandler<DeleteDe
             notification.setReportId(reportId);
             notification.setNotificationType(notificationType);
             notifications.add(notification);
-            notificationService.saveList(notifications);
+            notificationService.create(notifications);
         }
     }
 }

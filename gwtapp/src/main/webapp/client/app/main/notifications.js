@@ -34,7 +34,7 @@
                         colModel: [
                             {
                                 name: 'createDate',
-                                index: 'createDate',
+                                index: 'create_date',
                                 width: 155,
                                 formatter: $filter('dateTimeFormatter')
                             },
@@ -54,7 +54,7 @@
                             },
                             {
                                 name: 'reportId',
-                                index: 'reportId',
+                                index: 'report_id',
                                 hidden: true,
                                 width: 175,
                                 sortable: false
@@ -64,7 +64,7 @@
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,
                         viewrecords: true,
-                        sortname: 'createDate',
+                        sortname: 'create_date',
                         sortorder: "desc",
                         hidegrid: false,
                         multiselect: true

@@ -54,34 +54,42 @@ public class NotificationsFilterData implements Serializable {
 		this.senderDepartmentId = senderDepartmentId;
 	}
 
+	@Deprecated
 	public Integer getCountOfRecords() {
 		return countOfRecords;
 	}
 
+	@Deprecated
 	public void setCountOfRecords(Integer countOfRecords) {
 		this.countOfRecords = countOfRecords;
 	}
 
+	@Deprecated
 	public Integer getStartIndex() {
 		return startIndex;
 	}
 
+	@Deprecated
 	public void setStartIndex(Integer startIndex) {
 		this.startIndex = startIndex;
 	}
 
+	@Deprecated
     public SortColumn getSortColumn() {
         return sortColumn;
     }
 
+    @Deprecated
     public void setSortColumn(SortColumn sortColumn) {
         this.sortColumn = sortColumn;
     }
 
+    @Deprecated
     public boolean isAsc() {
         return isAsc;
     }
 
+    @Deprecated
     public void setAsc(boolean isAsc) {
         this.isAsc = isAsc;
     }

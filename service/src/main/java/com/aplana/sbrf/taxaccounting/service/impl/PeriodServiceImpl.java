@@ -438,7 +438,7 @@ public class PeriodServiceImpl implements PeriodService {
 
             notifications.add(notification);
         }
-        notificationService.saveList(notifications);
+        notificationService.create(notifications);
     }
 
 

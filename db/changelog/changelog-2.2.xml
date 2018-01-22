@@ -259,4 +259,19 @@
         <dropTable cascadeConstraints="true"
                    tableName="ref_book_tariff_payer"/>
     </changeSet>
+	
+	<changeSet id="2.2-rnurgaleev-1" author="rnurgaleev">
+        <delete
+                tableName="ref_book_attribute">
+            <where>ref_book_id=938
+            </where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="2.2-rnurgaleev-2" author="rnurgaleev">
+        <delete
+                tableName="ref_book">
+            <where>table_name='REF_BOOK_TARIFF_PAYER'</where>
+        </delete>
+    </changeSet>
 </databaseChangeLog>

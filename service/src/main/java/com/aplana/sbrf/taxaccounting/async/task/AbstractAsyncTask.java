@@ -241,7 +241,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     notifications.add(notification);
                 }
                 //Создаем оповещение для каждого пользователя из списка
-                notificationService.saveList(notifications);
+                notificationService.create(notifications);
             }
         }
         LOG.info(String.format("Sending notification for async task with id %s completed", taskId));

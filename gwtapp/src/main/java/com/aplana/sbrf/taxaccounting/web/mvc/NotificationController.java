@@ -59,7 +59,7 @@ public class NotificationController {
         filter.setReceiverDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
         filter.setUserRoleIds(userRoles);
 
-        PagingResult<Notification> notifications = notificationService.getByFilterWithPaging(filter, pagingParams);
+        PagingResult<Notification> notifications = notificationService.fetchAllByFilterAndPaging(filter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 notifications,
                 notifications.getTotalCount(),
@@ -95,7 +95,7 @@ public class NotificationController {
         filter.setRead(false);
 
         Map<String, Object> result = new HashMap<String, Object>();
-        result.put("notifications_count", notificationService.getCountByFilter(filter));
+        result.put("notifications_count", notificationService.fetchCountByFilter(filter));
         return result;
     }
 
@@ -112,6 +112,6 @@ public class NotificationController {
         NotificationsFilterData filter = new NotificationsFilterData();
         filter.setUserId(user.getId());
         filter.setUserRoleIds(userRoles);
-        notificationService.updateUserNotificationsStatus(filter);
+        notificationService.updateReadTrueByFilter(filter);
     }
 }

@@ -248,7 +248,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                                                notification.setText(msg);
                                                                notifications.add(notification);
                                                            }
-                                                           notificationService.saveList(notifications);
+                                                           notificationService.create(notifications);
                                                        }
                                                        asyncTaskDao.cancelTask(taskData.getId());
                                                    } else {

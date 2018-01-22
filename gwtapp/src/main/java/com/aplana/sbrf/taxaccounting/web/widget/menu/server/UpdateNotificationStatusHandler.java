@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.server;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 @Component
 @PreAuthorize("isAuthenticated()")
@@ -47,7 +44,7 @@ public class UpdateNotificationStatusHandler extends AbstractActionHandler<Updat
         filter.setUserId(user.getId());
         //filter.setReceiverDepartmentIds(departmentService.getTaxFormDepartments(user, asList(TaxType.values()), null, null));
         filter.setUserRoleIds(userRoles);
-        notificationService.updateUserNotificationsStatus(filter);
+        notificationService.updateReadTrueByFilter(filter);
         return new UpdateNotificationStatusResult();
     }
 

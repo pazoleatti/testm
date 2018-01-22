@@ -31,7 +31,7 @@ public class CheckReportNotificationHandler extends AbstractActionHandler<CheckR
     @Override
     public CheckReportNotificationResult execute(CheckReportNotificationAction action, ExecutionContext context) throws ActionException {
         TAUser user = securityService.currentUserInfo().getUser();
-        Notification notification = notificationService.get(action.getId());
+        Notification notification = notificationService.fetchOne(action.getId());
         CheckReportNotificationResult result = new CheckReportNotificationResult();
         result.setNotificationType(notification.getNotificationType());
         if (notification.getUserId() == user.getId()) {

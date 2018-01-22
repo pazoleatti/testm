@@ -78,7 +78,7 @@ public class CheckReceiversAcceptedPreparedHandler extends AbstractActionHandler
             notification.setReportId(reportId);
             notification.setNotificationType(notificationType);
             notifications.add(notification);
-            notificationService.saveList(notifications);
+            notificationService.create(notifications);
         }
     }
 }

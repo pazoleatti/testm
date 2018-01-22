@@ -1,13 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @Transactional
@@ -17,62 +23,44 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationDao notificationDao;
 
     @Override
-    public Notification get(long id) {
-        return notificationDao.get(id);
+    public Notification fetchOne(long id) {
+        return notificationDao.fetchOne(id);
     }
 
     @Override
-    public long save(Notification notification) {
-        return notificationDao.save(notification);
-    }
-
-    @Override
-    public void saveList(List<Notification> notifications) {
+    public void create(List<Notification> notifications) {
         if (notifications.get(0).getReportPeriodId() != null) {
             //Выполняется сохранение уведомлений по сроку сдачи отчетности
             List<DepartmentPair> departments = new ArrayList<DepartmentPair>();
             for (Notification item : notifications) {
                 departments.add(new DepartmentPair(item.getSenderDepartmentId(), item.getReceiverDepartmentId()));
             }
-            notificationDao.deleteList(notifications.get(0).getReportPeriodId(), departments);
+            notificationDao.delete(notifications.get(0).getReportPeriodId(), departments);
         }
-        notificationDao.saveList(notifications);
+        notificationDao.create(notifications);
     }
 
     @Override
-    public Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId) {
-        return notificationDao.get(reportPeriodId, senderDepartmentId, receiverDepartmentId);
+    public Notification fetchOne(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId) {
+        return notificationDao.fetchOne(reportPeriodId, senderDepartmentId, receiverDepartmentId);
     }
 
     @Override
-    public Map<Integer, Notification> mapByDepartments(int senderDepartmentId, Integer receiverDepartmentId) {
-        Map<Integer, Notification> notificationMap = new HashMap<Integer, Notification>();
-        NotificationsFilterData filter = new NotificationsFilterData();
-        filter.setSenderDepartmentId(senderDepartmentId);
-        filter.setReceiverDepartmentIds(Arrays.asList(receiverDepartmentId));
-        List<Notification> list = notificationDao.getByFilter(filter);
-        for (Notification notification : list) {
-            notificationMap.put(notification.getReportPeriodId(), notification);
-        }
-        return notificationMap;
+    public PagingResult<Notification> fetchByFilter(NotificationsFilterData filter) {
+        List<Notification> notifications = notificationDao.fetchAllByFilter(filter);
+        return new PagingResult<>(notifications, fetchCountByFilter(filter));
     }
-
-	@Override
-	public PagingResult<Notification> getByFilter(NotificationsFilterData filter) {
-		List<Notification> notifications = notificationDao.getByFilter(filter);
-		return new PagingResult<Notification>(notifications, getCountByFilter(filter));
-	}
 
     @Override
-    public PagingResult<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
-        List<Notification> notifications = notificationDao.getByFilterWithPaging(filter, pagingParams);
-        return new PagingResult<Notification>(notifications, getCountByFilter(filter));
+    public PagingResult<Notification> fetchAllByFilterAndPaging(NotificationsFilterData filter, PagingParams pagingParams) {
+        List<Notification> notifications = notificationDao.fetchAllByFilterAndPaging(filter, pagingParams);
+        return new PagingResult<>(notifications, fetchCountByFilter(filter));
     }
 
-	@Override
-	public int getCountByFilter(NotificationsFilterData filter) {
-		return notificationDao.getCountByFilter(filter);
-	}
+    @Override
+    public int fetchCountByFilter(NotificationsFilterData filter) {
+        return notificationDao.fetchCountByFilter(filter);
+    }
 
     @Override
     public void deleteByReportPeriod(int reportPeriodId) {
@@ -80,8 +68,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void updateUserNotificationsStatus(NotificationsFilterData filter) {
-        notificationDao.updateUserNotificationsStatus(filter);
+    public void updateReadTrueByFilter(NotificationsFilterData filter) {
+        notificationDao.updateReadTrueByFilter(filter);
     }
 
     @Override
@@ -90,7 +78,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Date getLastNotificationDate() {
-        return notificationDao.getLastNotificationDate();
+    public Date fetchLastNotificationDate() {
+        return notificationDao.fetchLastNotificationDate();
     }
 }
