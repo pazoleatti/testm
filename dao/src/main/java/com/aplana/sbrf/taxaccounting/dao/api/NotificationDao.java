@@ -14,21 +14,14 @@ import java.util.List;
  * @author dloshkarev
  */
 public interface NotificationDao {
-    /**
-     * Создает новое оповещение
-     *
-     * @param notification оповещение
-     * @return идентификатор нового оповещения
-     */
-    long save(Notification notification);
 
     /**
-     * Получает оповещение
+     * Возвращяет оповещение
      *
      * @param reportPeriodId       отчетный период
      * @param senderDepartmentId   подразделение-отправитель
      * @param receiverDepartmentId подразделение-получатель
-     * @return оповещение
+     * @return оповещение или null, если ничего не найдено
      */
     Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId);
 
@@ -51,7 +44,7 @@ public interface NotificationDao {
      * Получить оповещение по его идентификатору
      *
      * @param id идентификатор оповещения
-     * @return оповещение
+     * @return оповещение или null, если ничего не найдено
      */
     Notification get(long id);
 
@@ -66,7 +59,7 @@ public interface NotificationDao {
     /**
      * Получить список оповещений по фильтру (с пагинацией)
      *
-     * @param filter фильтр
+     * @param filter       фильтр
      * @param pagingParams параметры пагинации
      * @return список идентификаторов оповещений
      */
@@ -101,9 +94,8 @@ public interface NotificationDao {
      */
     void deleteAll(List<Long> notificationIds);
 
-	/**
-	 * Получение даты последнего оповещения
-	 * @return
-	 */
-	Date getLastNotificationDate();
+    /**
+     * Возвращяет дату последнего оповещения
+     */
+    Date getLastNotificationDate();
 }

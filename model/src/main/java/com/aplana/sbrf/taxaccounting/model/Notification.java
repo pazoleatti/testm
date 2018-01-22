@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.model;
 import org.joda.time.LocalDateTime;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Оповещения о назначении даты сдачи отчетности
@@ -150,5 +151,49 @@ public class Notification implements Serializable {
 
     public void setLogId(String logId) {
         this.logId = logId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Notification that = (Notification) o;
+        return read == that.read &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(reportPeriodId, that.reportPeriodId) &&
+                Objects.equals(senderDepartmentId, that.senderDepartmentId) &&
+                Objects.equals(receiverDepartmentId, that.receiverDepartmentId) &&
+                Objects.equals(text, that.text) &&
+                Objects.equals(logId, that.logId) &&
+                Objects.equals(createDate, that.createDate) &&
+                Objects.equals(deadline, that.deadline) &&
+                Objects.equals(userId, that.userId) &&
+                Objects.equals(roleId, that.roleId) &&
+                Objects.equals(reportId, that.reportId) &&
+                notificationType == that.notificationType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, reportPeriodId, senderDepartmentId, receiverDepartmentId, text, logId, createDate, deadline, userId, roleId, read, reportId, notificationType);
+    }
+
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "id=" + id +
+                ", reportPeriodId=" + reportPeriodId +
+                ", senderDepartmentId=" + senderDepartmentId +
+                ", receiverDepartmentId=" + receiverDepartmentId +
+                ", text='" + text + '\'' +
+                ", logId='" + logId + '\'' +
+                ", createDate=" + createDate +
+                ", deadline=" + deadline +
+                ", userId=" + userId +
+                ", roleId=" + roleId +
+                ", read=" + read +
+                ", reportId='" + reportId + '\'' +
+                ", notificationType=" + notificationType +
+                '}';
     }
 }

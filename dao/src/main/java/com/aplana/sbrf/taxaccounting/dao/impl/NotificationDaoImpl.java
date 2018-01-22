@@ -1,305 +1,251 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.QBean;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.SimpleExpression;
-import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.sql.SQLExpressions;
-import com.querydsl.sql.SQLQueryFactory;
 import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Date;
 import java.util.List;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QNotification.notification;
-import static com.querydsl.core.types.Projections.bean;
 
 @Repository
 public class NotificationDaoImpl extends AbstractDao implements NotificationDao {
 
-    final private SQLQueryFactory sqlQueryFactory;
+    @Autowired
+    private DBUtils dbUtils;
 
-    public NotificationDaoImpl(SQLQueryFactory sqlQueryFactory) {
-        this.sqlQueryFactory = sqlQueryFactory;
-    }
-
-    final private QBean<Notification> notificationBean = bean(Notification.class, notification.all());
-
-    @Override
-    public long save(Notification notificationForSave) {
-        Long id = sqlQueryFactory.insert(notification)
-                .columns(notification.id, notification.reportPeriodId, notification.senderDepartmentId
-                        , notification.receiverDepartmentId, notification.isRead, notification.text
-                        , notification.createDate, notification.deadline, notification.logId
-                        , notification.reportId, notification.type)
-                .values(notificationForSave.getId() == null ? SQLExpressions.nextval("seq_notification") : notificationForSave.getId() == null,
-                        notificationForSave.getReportPeriodId(), notificationForSave.getSenderDepartmentId(),
-                        notificationForSave.getReceiverDepartmentId(), notificationForSave.isRead(), notificationForSave.getText(),
-                        notificationForSave.getCreateDate(), notificationForSave.getDeadline(), notificationForSave.getLogId(),
-                        notificationForSave.getReportId(), notificationForSave.getNotificationType().getId())
-                .executeWithKey(Long.class);
-        notificationForSave.setId(id);
-        return id;
+    private class NotificationMapper implements RowMapper<Notification> {
+        @Override
+        public Notification mapRow(ResultSet rs, int index) throws SQLException {
+            Notification notification = new Notification();
+            notification.setId(SqlUtils.getLong(rs, "ID"));
+            notification.setReportPeriodId(SqlUtils.getInteger(rs, "REPORT_PERIOD_ID"));
+            notification.setSenderDepartmentId(SqlUtils.getInteger(rs, "SENDER_DEPARTMENT_ID"));
+            notification.setReceiverDepartmentId(SqlUtils.getInteger(rs, "RECEIVER_DEPARTMENT_ID"));
+            notification.setRead(rs.getBoolean("IS_READ"));
+            notification.setText(rs.getString("TEXT"));
+            notification.setLogId(rs.getString("LOG_ID"));
+            notification.setCreateDate(new LocalDateTime(rs.getTimestamp("CREATE_DATE").getTime()));
+            notification.setDeadline(new LocalDateTime(rs.getDate("DEADLINE")));
+            notification.setUserId(SqlUtils.getInteger(rs, "USER_ID"));
+            notification.setRoleId(SqlUtils.getInteger(rs, "ROLE_ID"));
+            notification.setReportId(rs.getString("REPORT_ID"));
+            notification.setNotificationType(NotificationType.fromId(rs.getInt("TYPE")));
+            return notification;
+        }
     }
 
     @Override
     public Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId) {
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(notification.reportPeriodId.eq(reportPeriodId));
-        if (senderDepartmentId == null) {
-            where.and(notification.senderDepartmentId.isNull());
-        } else {
-            where.and(notification.senderDepartmentId.eq(senderDepartmentId));
-        }
-        if (receiverDepartmentId == null) {
-            where.and(notification.receiverDepartmentId.isNull());
-        } else {
-            where.and(notification.receiverDepartmentId.eq(receiverDepartmentId));
-        }
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("rpid", reportPeriodId);
+            params.addValue("sdid", senderDepartmentId);
+            if (receiverDepartmentId != null) {
+                params.addValue("rdid", receiverDepartmentId);
+            }
 
-        List<Notification> notifications = sqlQueryFactory.from(notification)
-                .where(where)
-                .transform(GroupBy.groupBy(notification.id).list(notificationBean));
-        return notifications.isEmpty() ? null : notifications.get(0);
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select * from notification where " +
+                            "REPORT_PERIOD_ID = :rpid and " +
+                            "SENDER_DEPARTMENT_ID " + (senderDepartmentId == null ? "is null" : "= :sdid") + " and " +
+                            "RECEIVER_DEPARTMENT_ID " + (receiverDepartmentId == null ? "is null" : "= :rdid") + "",
+                    params, new NotificationMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
     public void saveList(final List<Notification> notifications) {
-        for (Notification tmpNotification : notifications) {
-            sqlQueryFactory.insert(notification)
-                    .columns(notification.id,
-                            notification.reportPeriodId, notification.senderDepartmentId,
-                            notification.receiverDepartmentId, notification.isRead, notification.text,
-                            notification.createDate, notification.deadline, notification.userId,
-                            notification.roleId, notification.logId, notification.reportId, notification.type)
-                    .values(tmpNotification.getId() == null ? SQLExpressions.nextval("seq_notification") : tmpNotification.getId(),
-                            tmpNotification.getReportPeriodId(), tmpNotification.getSenderDepartmentId(),
-                            tmpNotification.getReceiverDepartmentId(), tmpNotification.isRead() ? 1 : 0, tmpNotification.getText(),
-                            tmpNotification.getCreateDate(), tmpNotification.getDeadline(), tmpNotification.getUserId(),
-                            tmpNotification.getRoleId(), tmpNotification.getLogId(), tmpNotification.getReportId(), tmpNotification.getNotificationType().getId())
-                    .execute();
-        }
+        final List<Long> ids = dbUtils.getNextIds("seq_notification", notifications.size());
+
+        getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
+                "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, LOG_ID, TYPE, REPORT_ID)" +
+                " values (?, ?, ?, ?, ?, ?, sysdate ,?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Notification elem = notifications.get(i);
+                elem.setId(ids.get(i));
+                ps.setLong(1, ids.get(i));
+                ps.setObject(2, elem.getReportPeriodId(), Types.NUMERIC);
+                ps.setObject(3, elem.getSenderDepartmentId(), Types.NUMERIC);
+                ps.setObject(4, elem.getReceiverDepartmentId(), Types.NUMERIC);
+                ps.setBoolean(5, elem.isRead());
+                ps.setString(6, elem.getText());
+                ps.setDate(7, elem.getDeadline() != null ? new java.sql.Date(elem.getDeadline().toDate().getTime()) : null);
+                ps.setObject(8, elem.getUserId(), Types.NUMERIC);
+                ps.setObject(9, elem.getRoleId(), Types.NUMERIC);
+                ps.setString(10, elem.getLogId());
+                ps.setInt(11, elem.getNotificationType().getId());
+                ps.setString(12, elem.getReportId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return notifications.size();
+            }
+        });
     }
 
     @Override
     public void deleteList(int reportPeriodId, List<DepartmentPair> departments) {
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(notification.reportPeriodId.eq(reportPeriodId));
-        BooleanBuilder innerWhere = new BooleanBuilder();
-        for (DepartmentPair pair : departments) {
-            if (pair.getDepartmentId() == null && pair.getParentDepartmentId() == null) {
-                innerWhere.or(notification.senderDepartmentId.isNull().and(notification.receiverDepartmentId.isNull()));
-            } else if (pair.getDepartmentId() != null && pair.getParentDepartmentId() == null) {
-                innerWhere.or(notification.senderDepartmentId.eq(pair.getDepartmentId()).and(notification.receiverDepartmentId.isNull()));
-            } else if (pair.getDepartmentId() == null && pair.getParentDepartmentId() != null) {
-                innerWhere.or(notification.senderDepartmentId.isNull().and(notification.receiverDepartmentId.eq(pair.getParentDepartmentId())));
-            } else if (pair.getDepartmentId() != null && pair.getParentDepartmentId() != null) {
-                innerWhere.or(notification.senderDepartmentId.eq(pair.getDepartmentId()).and(notification.receiverDepartmentId.eq(pair.getParentDepartmentId())));
+        StringBuilder sql = new StringBuilder("delete from notification where REPORT_PERIOD_ID = ? and (");
+        for (int i = 0; i < departments.size(); i++) {
+            DepartmentPair pair = departments.get(i);
+            sql.append("(SENDER_DEPARTMENT_ID ")
+                    .append(pair.getDepartmentId() == null ? "is null " : " = " + pair.getDepartmentId())
+                    .append(" and RECEIVER_DEPARTMENT_ID ")
+                    .append(pair.getParentDepartmentId() == null ? " is null " : " = " + pair.getParentDepartmentId()).append(")");
+            if (i < departments.size() - 1) {
+                sql.append(" or ");
             }
         }
-
-        where.and(innerWhere);
-
-        sqlQueryFactory.delete(notification)
-                .where(where)
-                .execute();
+        sql.append(")");
+        getJdbcTemplate().update(sql.toString(),
+                new Object[]{reportPeriodId},
+                new int[]{Types.NUMERIC});
     }
 
     @Override
     public Notification get(long id) {
-        List<Notification> notifications = sqlQueryFactory.from(notification)
-                .where(notification.id.eq(id))
-                .transform(GroupBy.groupBy(notification.id).list(notificationBean));
-
-        return notifications.isEmpty() ? null : notifications.get(0);
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("id", id);
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select * from notification where id = :id", params, new NotificationMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
     public List<Notification> getByFilter(NotificationsFilterData filter) {
-        StringPath rn = Expressions.stringPath("rn");
-        StringPath notificationTable = Expressions.stringPath("notification");
-        OrderSpecifier order;
-        switch (filter.getSortColumn()) {
-            case DATE:
-                order = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
-                break;
-            case TEXT:
-                order = filter.isAsc() ? notification.text.asc() : notification.text.desc();
-                break;
-            default:
-                order = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
-                break;
+        PagingParams pagingParams = null;
+        // Только для GWT, неGWT использует pagingParams, а не filter
+        if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
+            pagingParams = new PagingParams(filter.getStartIndex(), filter.getCountOfRecords());
+            switch (filter.getSortColumn()) {
+                case DATE:
+                    pagingParams.setProperty("CREATE_DATE");
+                    break;
+                case TEXT:
+                    pagingParams.setProperty("TEXT");
+                    break;
+                default:
+                    pagingParams.setProperty("CREATE_DATE");
+                    break;
+            }
+            pagingParams.setDirection(filter.isAsc() ? "ASC" : "DESC");
         }
 
-        BooleanBuilder where = new BooleanBuilder();
-        if (filter.getSenderDepartmentId() != null) {
-            where.and(notification.senderDepartmentId.eq(filter.getSenderDepartmentId()));
-        }
-        if (filter.getUserId() != null) {
-            where.and(notification.userId.eq(filter.getUserId()));
-        }
-        if (!(filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty())) {
-            where.or(notification.receiverDepartmentId.in(filter.getReceiverDepartmentIds()));
-        }
-        if (!(filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty())) {
-            where.or(notification.roleId.in(filter.getUserRoleIds()));
-        }
-
-        if (filter.isRead() != null) {
-            where.and(notification.isRead.eq(filter.isRead()));
-        }
-
-        BooleanBuilder whereOut = new BooleanBuilder();
-        if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
-            whereOut.and(rn.between(filter.getStartIndex().toString(), String.valueOf(filter.getStartIndex() + filter.getCountOfRecords())));
-        }
-
-        SimpleExpression subQuery = sqlQueryFactory.select(notification.id, notification.reportPeriodId, notification.senderDepartmentId, notification.receiverDepartmentId, notification.isRead
-                , notification.text, notification.logId, notification.createDate, notification.deadline, notification.userId, notification.roleId, notification.reportId, notification.type
-                , isSupportOver() ? SQLExpressions.rowNumber().over().orderBy(order).as("rn") : SQLExpressions.rowNumber().over().as("rn"))
-                .from(notification)
-                .where(where).as(notificationTable);
-
-        return sqlQueryFactory.select(SQLExpressions.all).from(subQuery)
-                .where(whereOut)
-                .transform(GroupBy.groupBy(notification.id).list(notificationBean));
+        return getByFilterWithPaging(filter, pagingParams);
     }
+
+    private static final String GET_BY_FILTER = "select * from (\n" +
+            "  select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, LOG_ID, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, REPORT_ID, TYPE, \n" +
+            " row_number() %s as rn \n" +
+            "  from notification \n" +
+            "where (\n" +
+            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "(:userId is not null and USER_ID = :userId)%s%s \n" +
+            ") and (:read is null or IS_READ = :read) \n" +
+            ")";
 
     @Override
     public List<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
-        StringPath rn = Expressions.stringPath("rn");
-        StringPath notificationTable = Expressions.stringPath("notification");
+        MapSqlParameterSource params = new MapSqlParameterSource();
 
-        OrderSpecifier orderForRowNumber;
-        switch (filter.getSortColumn()) {
-            case DATE:
-                orderForRowNumber = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
-                break;
-            case TEXT:
-                orderForRowNumber = filter.isAsc() ? notification.text.asc() : notification.text.desc();
-                break;
-            default:
-                orderForRowNumber = filter.isAsc() ? notification.createDate.asc() : notification.createDate.desc();
-                break;
+        String orderClause = isSupportOver() ? "over (order by " + pagingParams.getProperty() + " " + pagingParams.getDirection() + ")" : "over()";
+        StringBuilder sql = new StringBuilder(String.format(GET_BY_FILTER,
+                orderClause,
+                orInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
+                orInStatement("ROLE_ID", filter.getUserRoleIds())));
+
+        params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
+        params.addValue("userId", filter.getUserId());
+        params.addValue("read", filter.isRead());
+
+        if (pagingParams != null) {
+            params.addValue("start", pagingParams.getStartIndex() + 1);
+            params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+            sql.append(" where rn between :start and :end");
         }
 
-        BooleanBuilder where = new BooleanBuilder();
-        if (filter.getSenderDepartmentId() != null) {
-            where.and(notification.senderDepartmentId.eq(filter.getSenderDepartmentId()));
-        }
-        if (filter.getUserId() != null) {
-            where.and(notification.userId.eq(filter.getUserId()));
-        }
-        if (!(filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty())) {
-            where.or(notification.receiverDepartmentId.in(filter.getReceiverDepartmentIds()));
-        }
-        if (!(filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty())) {
-            where.or(notification.roleId.in(filter.getUserRoleIds()));
-        }
-
-        if (filter.isRead() != null) {
-            where.and(notification.isRead.eq(filter.isRead()));
-        }
-
-        BooleanBuilder whereOut = new BooleanBuilder();
-        if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
-            whereOut.and(rn.between(filter.getStartIndex().toString(), String.valueOf(filter.getStartIndex() + filter.getCountOfRecords())));
-        }
-
-        //Определяем способ сортировки
-        String orderingProperty = pagingParams.getProperty();
-        Order ascDescOrder = Order.valueOf(pagingParams.getDirection().toUpperCase());
-
-        OrderSpecifier orderForSubQuery = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                notificationBean, orderingProperty, ascDescOrder, notification.createDate.desc());
-
-        SimpleExpression subQuery = sqlQueryFactory.select(notification.id, notification.reportPeriodId, notification.senderDepartmentId, notification.receiverDepartmentId, notification.isRead
-                , notification.text, notification.logId, notification.createDate, notification.deadline, notification.userId, notification.roleId, notification.reportId, notification.type
-                , isSupportOver() ? SQLExpressions.rowNumber().over().orderBy(orderForRowNumber).as("rn") : SQLExpressions.rowNumber().over().as("rn"))
-                .from(notification)
-                .orderBy(orderForSubQuery)
-                .where(where).as(notificationTable);
-
-        return sqlQueryFactory.select(SQLExpressions.all).from(subQuery)
-                .where(whereOut)
-                .offset(pagingParams.getStartIndex())
-                .limit(pagingParams.getCount())
-                .transform(GroupBy.groupBy(notification.id).list(notificationBean));
+        return getNamedParameterJdbcTemplate().query(sql.toString(), params, new NotificationMapper());
     }
+
+    private static final String GET_COUNT_BY_FILTER = "select count(id) from notification \n" +
+            "where (\n" +
+            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "(:userId is not null and USER_ID = :userId)%s%s \n" +
+            ") and (:read is null or IS_READ = :read)";
 
     @Override
     public int getCountByFilter(NotificationsFilterData filter) {
-        BooleanBuilder where = new BooleanBuilder();
-        if (filter.getSenderDepartmentId() != null) {
-            where.and(notification.senderDepartmentId.eq(filter.getSenderDepartmentId()));
-        }
-        if (filter.getUserId() != null) {
-            where.or(notification.userId.eq(filter.getUserId()));
-        }
-        if (!(filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty())) {
-            where.or(notification.receiverDepartmentId.in(filter.getReceiverDepartmentIds()));
-        }
-        if (!(filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty())) {
-            where.or(notification.roleId.in(filter.getUserRoleIds()));
-        }
-        if (filter.isRead() != null) {
-            where.and(notification.isRead.eq(filter.isRead()));
-        }
+        String sql = String.format(GET_COUNT_BY_FILTER,
+                orInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
+                orInStatement("ROLE_ID", filter.getUserRoleIds()));
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
+        params.addValue("userId", filter.getUserId());
+        params.addValue("read", filter.isRead());
 
-        return (int) sqlQueryFactory.from(notification)
-                .where(where)
-                .fetchCount();
+        return getNamedParameterJdbcTemplate().queryForObject(sql, params, Integer.class);
     }
 
     @Override
     public void deleteByReportPeriod(int reportPeriodId) {
-        sqlQueryFactory.delete(notification).where(notification.reportPeriodId.eq(reportPeriodId)).execute();
+        getJdbcTemplate().update("delete from notification where REPORT_PERIOD_ID = ?",
+                reportPeriodId);
     }
+
+    private static final String UPDATE_USER_NOTIFICATIONS_STATUS = "update notification set IS_READ = 1 \n" +
+            "where (\n" +
+            "(:senderDepartmentId is not null and SENDER_DEPARTMENT_ID = :senderDepartmentId) or \n" +
+            "(:userId is not null and USER_ID = :userId)%s%s \n" +
+            ") and IS_READ = 0";
 
     @Override
     public void updateUserNotificationsStatus(NotificationsFilterData filter) {
-        BooleanBuilder where = new BooleanBuilder();
-        if (filter.getSenderDepartmentId() != null) {
-            where.and(notification.senderDepartmentId.eq(filter.getSenderDepartmentId()));
-        }
-        if (filter.getUserId() != null) {
-            where.or(notification.userId.eq(filter.getUserId()));
-        }
-        if (!(filter.getReceiverDepartmentIds() == null || filter.getReceiverDepartmentIds().isEmpty())) {
-            where.or(notification.receiverDepartmentId.in(filter.getReceiverDepartmentIds()));
-        }
-        if (!(filter.getUserRoleIds() == null || filter.getUserRoleIds().isEmpty())) {
-            where.or(notification.roleId.in(filter.getUserRoleIds()));
-        }
-        where.and(notification.isRead.eq(false));
-        sqlQueryFactory.update(notification)
-                .where(where)
-                .set(notification.isRead, true)
-                .execute();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = String.format(UPDATE_USER_NOTIFICATIONS_STATUS,
+                orInStatement("RECEIVER_DEPARTMENT_ID", filter.getReceiverDepartmentIds()),
+                orInStatement("ROLE_ID", filter.getUserRoleIds()));
+
+        //Фильтры по типу оповещения
+        params.addValue("senderDepartmentId", filter.getSenderDepartmentId());
+        params.addValue("userId", filter.getUserId());
+        getNamedParameterJdbcTemplate().update(sql, params);
     }
 
     @Override
     public void deleteAll(List<Long> notificationIds) {
-        sqlQueryFactory.delete(notification).where(notification.id.in(notificationIds)).execute();
+        getJdbcTemplate().update("delete from notification where " + SqlUtils.transformToSqlInStatement("id", notificationIds));
     }
 
     @Override
     public Date getLastNotificationDate() {
-        LocalDateTime lastDate = sqlQueryFactory.select(notification.createDate.max()).from(notification).fetchFirst();
-        if (lastDate != null) {
-            return lastDate.toDate();
-        }
-        return null;
+        return getJdbcTemplate().queryForObject("select max(create_date) from notification", Date.class);
+    }
+
+    private String orInStatement(String prefix, List<Integer> numbers) {
+        return numbers == null || numbers.isEmpty() ?
+                "" : " or \n" + SqlUtils.transformToSqlInStatement(prefix, numbers);
     }
 }

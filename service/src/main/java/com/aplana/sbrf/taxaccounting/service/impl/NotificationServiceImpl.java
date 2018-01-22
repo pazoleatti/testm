@@ -22,11 +22,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public long save(Notification notification) {
-        return notificationDao.save(notification);
-    }
-
-    @Override
     public void saveList(List<Notification> notifications) {
         if (notifications.get(0).getReportPeriodId() != null) {
             //Выполняется сохранение уведомлений по сроку сдачи отчетности
@@ -45,34 +40,21 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Map<Integer, Notification> mapByDepartments(int senderDepartmentId, Integer receiverDepartmentId) {
-        Map<Integer, Notification> notificationMap = new HashMap<Integer, Notification>();
-        NotificationsFilterData filter = new NotificationsFilterData();
-        filter.setSenderDepartmentId(senderDepartmentId);
-        filter.setReceiverDepartmentIds(Arrays.asList(receiverDepartmentId));
-        List<Notification> list = notificationDao.getByFilter(filter);
-        for (Notification notification : list) {
-            notificationMap.put(notification.getReportPeriodId(), notification);
-        }
-        return notificationMap;
+    public PagingResult<Notification> getByFilter(NotificationsFilterData filter) {
+        List<Notification> notifications = notificationDao.getByFilter(filter);
+        return new PagingResult<>(notifications, getCountByFilter(filter));
     }
-
-	@Override
-	public PagingResult<Notification> getByFilter(NotificationsFilterData filter) {
-		List<Notification> notifications = notificationDao.getByFilter(filter);
-		return new PagingResult<Notification>(notifications, getCountByFilter(filter));
-	}
 
     @Override
     public PagingResult<Notification> getByFilterWithPaging(NotificationsFilterData filter, PagingParams pagingParams) {
         List<Notification> notifications = notificationDao.getByFilterWithPaging(filter, pagingParams);
-        return new PagingResult<Notification>(notifications, getCountByFilter(filter));
+        return new PagingResult<>(notifications, getCountByFilter(filter));
     }
 
-	@Override
-	public int getCountByFilter(NotificationsFilterData filter) {
-		return notificationDao.getCountByFilter(filter);
-	}
+    @Override
+    public int getCountByFilter(NotificationsFilterData filter) {
+        return notificationDao.getCountByFilter(filter);
+    }
 
     @Override
     public void deleteByReportPeriod(int reportPeriodId) {
