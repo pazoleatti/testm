@@ -9,9 +9,10 @@ public interface DeclarationTypeAssignmentService {
     /**
      * Получение списка назначений налоговых форм подразделениям, доступным пользователю
      *
+     * @param filter       Параметры фильтрации
      * @param userInfo     Информация о пользователе
      * @param pagingParams Параметры пагинации
      * @return Список назначений
      */
-    PagingResult<FormTypeKind> fetchDeclarationTypeAssignments(TAUserInfo userInfo, PagingParams pagingParams);
+    PagingResult<FormTypeKind> fetchDeclarationTypeAssignments(TAUserInfo userInfo, DeclarationTypeAssignmentFilter filter, PagingParams pagingParams);
 }

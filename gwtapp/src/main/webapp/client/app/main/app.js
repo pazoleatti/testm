@@ -185,6 +185,7 @@
         "declarationTypeAssignment.grid.columnName.department": "Подразделение",
         "declarationTypeAssignment.grid.columnName.declarationType": "Макет",
         "declarationTypeAssignment.grid.columnName.performer": "Исполнитель",
+        "declarationTypeAssignment.filter.department": "Подразделение",
 
         "ndflReport.label.page": "Стр.",
         "ndflReport.label.from": "из",

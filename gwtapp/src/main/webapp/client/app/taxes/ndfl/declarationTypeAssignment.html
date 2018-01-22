@@ -5,6 +5,45 @@
 </div>
 <div id="declaration-type-assignment" class="container-grid box-shadow-block">
     <div class='container-grid-top' style="min-height: 50px; margin-bottom: -17px">
+        <div data-ng-controller="CommonFilterCtrl">
+            <div class="grid-filter" style="margin: -6px 0 13px -19px; padding: 0 0 0 21px;">
+                <div data-aplana-collapse data-is-collapsed="false"
+                     data-label="'filterPanelLabel' | translate">
+                    <form class="form-horizontal info-wrapper" style="min-height: 70px;" role="form" novalidate>
+                        <div class="row">
+                            <div class="filter-col w650">
+                                <div class="row-fluid form-group">
+                                    <div class="span3">
+                                        <label class="control-label">{{::'declarationTypeAssignment.filter.department' | translate}}:</label>
+                                    </div>
+                                    <div data-ng-controller="SelectDepartmentCtrl"
+                                         data-ui-select2="departmentsSelect.options"
+                                         data-ng-init="initSelectWithBADepartments()"
+                                         data-ng-model="searchFilter.params.departments"
+                                         class="span9"></div>
+                                </div>
+                            </div>
+                            <div class="filter-col button-block">
+                                <!--Кнопка Найти-->
+                                <button type="button"
+                                        class="btn btn-default"
+                                        id="searchButton"
+                                        data-ng-click="submitSearch('assignments')">
+                                    <span data-translate-once="common.button.search"></span>
+                                </button>
+                                <!--Кнопка Сбросить-->
+                                <button type="button" data-ng-show="searchFilter.isClear"
+                                        class="btn btn-default"
+                                        id="clearButton"
+                                        data-ng-click="resetFilter('assignments')">
+                                    <span data-translate-once="common.button.clear"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Таблица -->

@@ -4,7 +4,7 @@
     /**
      * @description Модуль назначения налоговых форм
      */
-    angular.module('app.declarationTypeAssignment', ['ui.router', 'app.constants', 'app.rest', 'app.logPanel', 'app.formatters', 'app.select.common'])
+    angular.module('app.declarationTypeAssignment', ['ui.router', 'app.constants', 'app.rest', 'app.logPanel', 'app.formatters', 'app.select.common', 'app.filterUtils'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTypeAssignment', {
                 url: '/taxes/declarationTypeAssignment',
@@ -20,13 +20,24 @@
             '$scope', '$state', '$stateParams', '$filter', 'APP_CONSTANTS', '$aplanaModal', '$dialogs', '$logPanel', 'DeclarationTypeAssignmentResource',
             function ($scope, $state, $stateParams, $filter, APP_CONSTANTS, $aplanaModal, $dialogs, $logPanel, DeclarationTypeAssignmentResource) {
 
+                $scope.searchFilter = {
+                    params: {},
+                    ajaxFilter: [],
+                    isClear: false,
+                    filterName: 'declarationTypeAssignmentsFilter',
+                };
+
                 $scope.declarationTypeAssignmentGrid = {
                     ctrl: {},
                     options: {
                         datatype: "angularResource",
                         angularResource: DeclarationTypeAssignmentResource,
                         requestParameters: function () {
-                            return {};
+                            return {
+                                filter: JSON.stringify({
+                                    departmentIds: $filter('idExtractor')($scope.searchFilter.params.departments)
+                                })
+                            };
                         },
                         value: [],
                         colNames: [
@@ -65,6 +76,20 @@
                     $scope.declarationTypeAssignmentGrid.ctrl.refreshGrid(page);
                 };
 
+                // Флаг отображения кнопки "Сбросить"
+                $scope.searchFilter.isClearByFilterParams = function () {
+                    var needToClear = false;
+                    angular.forEach($scope.searchFilter.params, function (value, key) {
+                        if (value != null) {
+                            if (Array.isArray(value) || typeof(value) === "string" || value instanceof String) {
+                                needToClear = needToClear || value.length > 0;
+                            } else {
+                                needToClear = true;
+                            }
+                        }
+                    });
+                    $scope.searchFilter.isClear = needToClear;
+                };
             }])
 
         /**
@@ -75,7 +100,7 @@
         .filter('performersFormatter', function () {
             return function (cellValue, options) {
                 var performersFullNames = [];
-                if(cellValue) {
+                if (cellValue) {
                     performersFullNames = cellValue.map(function (performer) {
                         return performer.fullName;
                     });
