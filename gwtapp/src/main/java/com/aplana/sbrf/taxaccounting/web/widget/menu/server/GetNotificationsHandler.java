@@ -46,7 +46,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         filter.setUserRoleIds(userRoles);
 
 		List<NotificationTableRow> rows = new ArrayList<NotificationTableRow>();
-		PagingResult<Notification> result = notificationService.getByFilter(filter);
+		PagingResult<Notification> result = notificationService.fetchByFilter(filter);
 		for (Notification notification : result) {
 			NotificationTableRow row = new NotificationTableRow();
             row.setId(notification.getId());

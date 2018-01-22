@@ -67,7 +67,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             notifications.add(notification);
         }
 
-        notificationService.saveList(notifications);
+        notificationService.create(notifications);
         return result;
     }
 

@@ -196,7 +196,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 	public List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(DepartmentReportPeriodFilter filter) {
 		List<DepartmentReportPeriodJournalItem> page =  departmentReportPeriodDao.fetchJournalItemByFilter(filter);
 		for (DepartmentReportPeriodJournalItem item : page){
-			Notification notification = notificationService.get(item.getReportPeriodId(), null, item.getDepartmentId());
+			Notification notification = notificationService.fetchOne(item.getReportPeriodId(), null, item.getDepartmentId());
 			if (notification != null) {
 				item.setDeadline(notification.getDeadline());
 			}
