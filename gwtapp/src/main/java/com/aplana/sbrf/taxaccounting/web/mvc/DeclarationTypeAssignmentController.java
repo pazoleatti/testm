@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeAssignmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -37,18 +34,20 @@ public class DeclarationTypeAssignmentController {
     @InitBinder
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(DeclarationTypeAssignmentFilter.class, new RequestParamEditor(DeclarationTypeAssignmentFilter.class));
     }
 
     /**
      * Получение списка назначений
      *
+     * @param filter       Значения фильтра
      * @param pagingParams Параметры для пагинации
      * @return Список назначений {@link FormTypeKind}
      */
     @GetMapping(value = "/rest/declarationTypeAssignment")
-    public JqgridPagedList<FormTypeKind> fetchDeclarationTypeAssignments(@RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<FormTypeKind> fetchDeclarationTypeAssignments(@RequestParam DeclarationTypeAssignmentFilter filter, @RequestParam PagingParams pagingParams) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        PagingResult<FormTypeKind> pagingResult = assignmentService.fetchDeclarationTypeAssignments(userInfo, pagingParams);
+        PagingResult<FormTypeKind> pagingResult = assignmentService.fetchDeclarationTypeAssignments(userInfo, filter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,

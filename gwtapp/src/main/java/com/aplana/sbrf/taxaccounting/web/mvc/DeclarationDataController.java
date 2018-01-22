@@ -350,29 +350,55 @@ public class DeclarationDataController {
     }
 
     /**
-     * Рассчитать декларацию
+     * Идентифицировать ФЛ
      *
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
      * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
      */
-    @PostMapping(value = "/actions/declarationData/{declarationDataId}/recalculate")
-    public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/identify")
+    public RecalculateDeclarationResult identify(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.recalculateDeclaration(userInfo, declarationDataId, force, cancelTask);
+        return declarationService.identifyDeclarationData(userInfo, declarationDataId, force, cancelTask);
     }
 
     /**
-     * Рассчитать налоговые формы
+     * Консолидировать
+     *
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @param cancelTask        признак для отмены задачи
+     * @return модель {@link RecalculateDeclarationResult}, в которой содержаться данные о результате расчета декларации
+     */
+    @PostMapping(value = "/actions/declarationData/{declarationDataId}/consolidate")
+    public RecalculateDeclarationResult recalculateDeclaration(@PathVariable long declarationDataId, @RequestParam boolean force, @RequestParam boolean cancelTask) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.consolidateDeclarationData(userInfo, declarationDataId, force, cancelTask);
+    }
+
+    /**
+     * Идентификация ФЛ налоговых форм
      *
      * @param declarationDataIds Идентификаторы налоговых форм
      * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    @PostMapping(value = "/actions/declarationData/recalculate")
-    public ActionResult recalculateDeclarationList(@RequestBody List<Long> declarationDataIds) {
+    @PostMapping(value = "/actions/declarationData/identify")
+    public ActionResult identifyDeclarationList(@RequestBody Long[] declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.recalculateDeclarationList(userInfo, declarationDataIds);
+        return declarationService.identifyDeclarationDataList(userInfo, Arrays.asList(declarationDataIds));
+    }
+
+    /**
+     * Консолидация списка налоговых форм
+     *
+     * @param declarationDataIds Идентификаторы налоговых форм
+     * @return Модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    @PostMapping(value = "/actions/declarationData/consolidate")
+    public ActionResult recalculateDeclarationList(@RequestBody Long[] declarationDataIds) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return declarationService.consolidateDeclarationDataList(userInfo, Arrays.asList(declarationDataIds));
     }
 
     /**
@@ -537,15 +563,13 @@ public class DeclarationDataController {
             //Для каждого элемента страницы взять форму, определить права доступа на нее и установить их элементу страницы
             for (DeclarationDataJournalItem item : page) {
                 DeclarationData declaration = declarationDataMap.get(item.getDeclarationDataId());
-                if (declaration != null) {
-                    //noinspection unchecked
-                    declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
-                            DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
-                            DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
-                            DeclarationDataPermission.CALCULATE, DeclarationDataPermission.CREATE,
-                            DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
-                    item.setPermissions(declaration.getPermissions());
-                }
+                if (declaration != null) {//noinspection unchecked
+                declarationDataPermissionSetter.setPermissions(declaration, DeclarationDataPermission.VIEW,
+                        DeclarationDataPermission.DELETE, DeclarationDataPermission.RETURN_TO_CREATED,
+                        DeclarationDataPermission.ACCEPTED, DeclarationDataPermission.CHECK,
+                         DeclarationDataPermission.CREATE,
+                        DeclarationDataPermission.EDIT_ASSIGNMENT, DeclarationDataPermission.DOWNLOAD_REPORTS);
+                item.setPermissions(declaration.getPermissions());}
             }
         }
     }

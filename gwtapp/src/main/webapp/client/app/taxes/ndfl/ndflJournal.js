@@ -212,13 +212,29 @@
                 };
 
                 /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
+                 * @description Событие, которое возникает по нажатию на кнопку "Идентифицировать ФЛ"
                  */
-                $scope.calculate = function () {
+                $scope.identify = function () {
                     var selectedItems = $scope.ndflJournalGrid.value;
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/recalculate",
+                        url: "controller/actions/declarationData/identify",
+                        data: $filter('idExtractor')(selectedItems, 'declarationDataId')
+                    }).then(function (response) {
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                    });
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Консолидировать"
+                 */
+                $scope.consolidate = function () {
+                    var selectedItems = $scope.ndflJournalGrid.value;
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/consolidate",
                         data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
                         if (response.data && response.data.uuid && response.data.uuid !== null) {

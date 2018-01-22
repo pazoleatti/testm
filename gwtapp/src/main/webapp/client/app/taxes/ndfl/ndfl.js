@@ -278,44 +278,71 @@
                 }
 
                 /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Рассчитать"
+                 * @description Обработать результат операций "Идентифицировать ФЛ" и "Консолидировать"
                  */
-                $scope.calculate = function (force, cancelTask) {
+                function calculateResult(response, force, cancelTask) {
+                    if (response.data && response.data.uuid && response.data.uuid !== null) {
+                        $logPanel.open('log-panel-container', response.data.uuid);
+                    } else {
+                        if (response.data.status === "LOCKED" && !force) {
+                            $dialogs.confirmDialog({
+                                content: response.data.restartMsg,
+                                okBtnCaption: $filter('translate')('common.button.yes'),
+                                cancelBtnCaption: $filter('translate')('common.button.no'),
+                                okBtnClick: function () {
+                                    $scope.calculate(true, cancelTask);
+                                }
+                            });
+                        } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
+                            $dialogs.confirmDialog({
+                                content: $filter('translate')('title.returnExistTask'),
+                                okBtnCaption: $filter('translate')('common.button.yes'),
+                                cancelBtnCaption: $filter('translate')('common.button.no'),
+                                okBtnClick: function () {
+                                    $scope.calculate(force, true);
+                                }
+                            });
+                        }
+                    }
+                }
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Идентифицировать ФЛ"
+                 */
+                $scope.identify = function (force, cancelTask) {
                     {
                         force = typeof force !== 'undefined' ? force : false;
                         cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
                     }
                     $http({
                         method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/recalculate",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/identify",
                         params: {
                             force: force ? force : false,
                             cancelTask: cancelTask ? cancelTask : false
                         }
                     }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        } else {
-                            if (response.data.status === "LOCKED" && !force) {
-                                $dialogs.confirmDialog({
-                                    content: response.data.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.calculate(true, cancelTask);
-                                    }
-                                });
-                            } else if (response.data.status === "EXIST_TASK" && !cancelTask) {
-                                $dialogs.confirmDialog({
-                                    content: $filter('translate')('title.returnExistTask'),
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.calculate(force, true);
-                                    }
-                                });
-                            }
+                        calculateResult(response, force, cancelTask);
+                    });
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Консолидировать"
+                 */
+                $scope.consolidate = function (force, cancelTask) {
+                    {
+                        force = typeof force !== 'undefined' ? force : false;
+                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
+                    }
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/consolidate",
+                        params: {
+                            force: force ? force : false,
+                            cancelTask: cancelTask ? cancelTask : false
                         }
+                    }).then(function (response) {
+                        calculateResult(response, force, cancelTask);
                     });
                 };
 
@@ -388,6 +415,28 @@
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }
                         }
+                    }).then(function (response) {
+                        calculateResult(response, force, cancelTask);
+                    });
+                };
+
+                /**
+                 * @description Событие, которое возникает по нажатию на кнопку "Консолидировать"
+                 */
+                $scope.consolidate = function (force, cancelTask) {
+                    {
+                        force = typeof force !== 'undefined' ? force : false;
+                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
+                    }
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/consolidate",
+                        params: {
+                            force: force ? force : false,
+                            cancelTask: cancelTask ? cancelTask : false
+                        }
+                    }).then(function (response) {
+                        calculateResult(response, force, cancelTask);
                     });
                 };
 

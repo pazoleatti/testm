@@ -64,7 +64,6 @@
         "common.button.yes": "Да",
         "button.create": "Создать",
         "button.check": "Проверить",
-        "button.calculate": "Рассчитать",
         "button.identifyPersons": "Идентифицировать ФЛ",
         "button.consolidate": "Консолидировать",
         "button.delete": "Удалить",
@@ -186,6 +185,7 @@
         "declarationTypeAssignment.grid.columnName.department": "Подразделение",
         "declarationTypeAssignment.grid.columnName.declarationType": "Макет",
         "declarationTypeAssignment.grid.columnName.performer": "Исполнитель",
+        "declarationTypeAssignment.filter.department": "Подразделение",
 
         "ndflReport.label.page": "Стр.",
         "ndflReport.label.from": "из",

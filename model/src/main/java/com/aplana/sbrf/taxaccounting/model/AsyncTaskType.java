@@ -24,6 +24,8 @@ public enum AsyncTaskType {
     EXCEL_REF_BOOK(0, "XLSX", "Формирование отчета справочника \"%s\" в XLSX-формате", 23L),
     CSV_REF_BOOK(1, "CSV", "Формирование отчета справочника \"%s\" в CSV-формате", 24L),
     TEST(-1, "TEST", "Тестовая задача %s", -1L),
+    IDENTIFY_PERSON(1, "IDENTIFY_PERSON", "Расчет НФ. %s", 8L),
+    CONSOLIDATE(1, "CONSOLIDATE", "Расчет НФ. %s", 9L),
 
     //Типы отчетов
     JASPER_DEC(3, "JASPER", ""),

@@ -58,15 +58,26 @@ public interface DeclarationDataService {
                 Long asunId, String fileName, String note, boolean writeAudit);
 
     /**
-     * Рассчитать декларацию
+     * Идентифицировать ФЛ
      *
      * @param logger            объект журнала
-     * @param declarationDataId идентификатор декларации
+     * @param declarationData   налоговая форма
      * @param userInfo          информация о пользователе, выполняющего операцию
      * @param docDate           дата обновления декларации
      * @param stateLogger       логгер для обновления статуса асинхронной задачи
      */
-    void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
+    void identify(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
+
+    /**
+     * Консолидировать НФ
+     *
+     * @param logger            объект журнала
+     * @param declarationData   налоговая форма
+     * @param userInfo          информация о пользователе, выполняющего операцию
+     * @param docDate           дата обновления декларации
+     * @param stateLogger       логгер для обновления статуса асинхронной задачи
+     */
+    void consolidate(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
     /**
      * Формирование Pdf отчета
@@ -182,7 +193,7 @@ public interface DeclarationDataService {
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
     /**
-     * Рассчитать декларацию
+     * Идентифицировать ФЛ НФ
      *
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
@@ -190,16 +201,34 @@ public interface DeclarationDataService {
      * @param cancelTask        признак для отмены задачи
      * @return                  модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
      */
-    RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
+    RecalculateDeclarationResult identifyDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
 
     /**
-     * Рассчитать список налоговых форм
+     * Консолидировать НФ
      *
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @param cancelTask        признак для отмены задачи
+     * @return                  модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
+     */
+    RecalculateDeclarationResult consolidateDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
+
+    /**
+     * Идентифицировать ФЛ в списке налоговых форм
      * @param userInfo              информация о пользователе, выполняющем действие
      * @param declarationDataIds    список идентификаторов налоговых форм
      * @return                      модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
-    ActionResult recalculateDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
+    ActionResult identifyDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds);
+
+    /**
+     * Консолидировать список налоговых форм
+     * @param userInfo              информация о пользователе, выполняющем действие
+     * @param declarationDataIds    список идентификаторов налоговых форм
+     * @return                      модель {@link ActionResult}, в которой содержатся данные о результате операции
+     */
+    ActionResult consolidateDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Формирует DeclarationResult
