@@ -1043,7 +1043,8 @@ button.btn-default-close-green::before{
   top: 6px;
   left: 7px;
   margin: 0;
-  background: url('../img/icon-sprit.png') no-repeat;
+  background: url('/client/img/icon-sprit.png') no-repeat;
+  //background: url('../img/icon-sprit.png') no-repeat;
   background-size: 100%;
   display: block;
 }
@@ -1053,9 +1054,18 @@ button.btn-default-close-green::before{
 .btn-icon-close{
   background-position: 0 -41px;
 }
+.btn-icon-noneBg-close {
+  background-position: 0 -1px;
+}
 .btn-icon-add{
   background-position: 0 -117px;
 }
 .btn-icon-remove{
   background-position: 0 -147px;
+}
+.btn-icon-noneBg-remove{
+  background-position: 0 -125px;
+}
+.btn-default-nonBg:disabled .btn-icon-noneBg-add {
+  background-position: 0 -165px;
 }
