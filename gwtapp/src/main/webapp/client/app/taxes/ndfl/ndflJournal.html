@@ -19,18 +19,17 @@
         <!--Панель кнопок -->
         <div class="button_panel" style="min-height: 52px;margin: -5px 0 -17px 0;">
             <div class="btn-toolbar" role="toolbar">
-                <!--Рассчитать -->
+                <!--Идентифицировать ФЛ -->
                 <span>
-                <button type="button" class="btn btn-default" data-ng-click="calculate()"
-                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.CALCULATE)">
-                    <span data-translate-once="button.calculate"></span>
+                <button type="button" class="btn btn-default" data-ng-click="identify()">
+                    <span data-translate-once="button.identifyPersons"></span>
                 </button>
             </span>
-                <!--Принять -->
+
+                <!-- Консолидировать-->
                 <span>
-                <button type="button" class="btn btn-default" data-ng-click="accept()"
-                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
-                    <span data-translate-once="button.accept"></span>
+                <button type="button" class="btn btn-default" data-ng-click="consolidate()">
+                    <span data-translate-once="button.consolidate"></span>
                 </button>
             </span>
                 <!--Проверить -->
@@ -40,6 +39,14 @@
                     <span data-translate-once="button.check"></span>
                 </button>
             </span>
+                <!--Принять -->
+                <span>
+                <button type="button" class="btn btn-default" data-ng-click="accept()"
+                        data-ng-disabled="!checkPermissionForSelectedItems(APP_CONSTANTS.DECLARATION_PERMISSION.ACCEPTED)">
+                    <span data-translate-once="button.accept"></span>
+                </button>
+            </span>
+
                 <!--Вернуть в Создана -->
                 <span>
                 <button type="button" class="btn btn-default" data-ng-click="returnToCreated()"

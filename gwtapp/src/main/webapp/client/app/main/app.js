@@ -64,7 +64,6 @@
         "common.button.yes": "Да",
         "button.create": "Создать",
         "button.check": "Проверить",
-        "button.calculate": "Рассчитать",
         "button.identifyPersons": "Идентифицировать ФЛ",
         "button.consolidate": "Консолидировать",
         "button.delete": "Удалить",

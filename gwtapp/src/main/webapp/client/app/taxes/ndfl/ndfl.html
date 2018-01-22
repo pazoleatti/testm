@@ -144,15 +144,20 @@
             <!--Панель кнопок -->
             <div class="button_panel" style="padding: 10px 12px 0;">
                 <div class="btn-toolbar" role="toolbar">
-                    <!--Рассчитать -->
+                    <!--Идентифицировать ФЛ -->
                     <span>
                         <button type="button" class="btn btn-default"
-                                data-ng-click="calculate()"
-                                data-ng-disabled="!permissionChecker.check(declarationData, APP_CONSTANTS.DECLARATION_PERMISSION.CALCULATE)">
-                            <span data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id"
-                                  data-translate-once="button.identifyPersons"></span>
-                            <span data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id"
-                                  data-translate-once="button.consolidate"></span>
+                                data-ng-click="identify()"
+                                data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id">
+                            <span data-translate-once="button.identifyPersons"></span>
+                        </button>
+                    </span>
+                    <!-- Консолидировать -->
+                    <span>
+                        <button type="button" class="btn btn-default"
+                                data-ng-click="consolidate()"
+                                data-ng-show="declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
+                            <span data-translate-once="button.consolidate"></span>
                         </button>
                     </span>
                     <!--Проверить -->

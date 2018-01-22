@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.result.*;
+import com.aplana.sbrf.taxaccounting.permissions.logging.LoggingPreauthorize;
+import com.aplana.sbrf.taxaccounting.permissions.logging.LoggingPreauthorizeType;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
@@ -379,19 +381,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return doCreate(logger, declarationTemplateId, userInfo, departmentReportPeriod, taxOrganCode, taxOrganKpp, oktmo, asunId, fileName, note, writeAudit, false);
     }
 
-    @Override
     @Transactional
-    @PreAuthorize("hasPermission(#id, 'com.aplana.sbrf.taxaccounting.model.DeclarationData', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CALCULATE)")
-    public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        boolean createForm = calculateDeclaration(logger, id, userInfo, docDate, exchangeParams, stateLogger);
+    private void calculate(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        boolean createForm = calculateDeclaration(logger, declarationData, userInfo, docDate, exchangeParams, stateLogger);
         if (createForm) {
-            declarationDataDao.setStatus(id, State.CREATED);
+            declarationDataDao.setStatus(declarationData.getId(), State.CREATED);
         }
     }
 
-    private boolean calculateDeclaration(Logger logger, long id, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
-        DeclarationData declarationData = declarationDataDao.get(id);
+    @Override
+    @LoggingPreauthorize(preauthorizeType = LoggingPreauthorizeType.IDENTIFY)
+    public void identify(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        calculate(logger, declarationData, userInfo, docDate, exchangeParams, stateLogger);
+    }
+
+    @Override
+    @LoggingPreauthorize(preauthorizeType = LoggingPreauthorizeType.CONSOLIDATE)
+    public void consolidate(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        calculate(logger, declarationData, userInfo, docDate, exchangeParams, stateLogger);
+    }
+
+    private boolean calculateDeclaration(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        declarationDataAccessService.checkEvents(userInfo, declarationData.getId(), FormDataEvent.CALCULATE);
 
         //2. проверяет состояние XML отчета экземпляра декларации
         boolean createForm = setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
@@ -407,10 +418,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
 
         //Обновление информации о консолидации.
-        sourceService.deleteDeclarationConsolidateInfo(id);
-        sourceService.addDeclarationConsolidationInfo(id, declarationDataIds);
+        sourceService.deleteDeclarationConsolidateInfo(declarationData.getId());
+        sourceService.addDeclarationConsolidationInfo(declarationData.getId(), declarationDataIds);
 
-        logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
+        logBusinessService.add(null, declarationData.getId(), userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE, userInfo, declarationData, "Налоговая форма обновлена", null);
         return createForm;
     }
@@ -454,8 +465,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, final long declarationDataId, final boolean force, final boolean cancelTask) {
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
+    public RecalculateDeclarationResult identifyDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask) {
+        return recalculateDeclaration(userInfo, declarationDataId, force, cancelTask, DeclarationDataReportType.IDENTIFY_PERSON);
+    }
+
+    @Override
+    public RecalculateDeclarationResult consolidateDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask) {
+        return recalculateDeclaration(userInfo, declarationDataId, force, cancelTask, DeclarationDataReportType.CONSOLIDATE);
+    }
+
+    private RecalculateDeclarationResult recalculateDeclaration(TAUserInfo userInfo, final long declarationDataId,
+                                                                final boolean force, final boolean cancelTask,
+                                                                final DeclarationDataReportType ddReportType) {
         final RecalculateDeclarationResult result = new RecalculateDeclarationResult();
         if (!existDeclarationData(declarationDataId)) {
             result.setExistDeclarationData(false);
@@ -522,9 +543,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public ActionResult identifyDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds) {
+        return recalculateDeclarationList(userInfo, DeclarationDataReportType.IDENTIFY_PERSON, declarationDataIds);
+    }
+
+    @Override
+    public ActionResult consolidateDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds) {
+        return recalculateDeclarationList(userInfo, DeclarationDataReportType.CONSOLIDATE, declarationDataIds);
+    }
+
     @Transactional
-    public ActionResult recalculateDeclarationList(final TAUserInfo userInfo, List<Long> declarationDataIds) {
-        final DeclarationDataReportType ddReportType = DeclarationDataReportType.XML_DEC;
+    private ActionResult recalculateDeclarationList(final TAUserInfo userInfo, final DeclarationDataReportType ddReportType, List<Long> declarationDataIds) {
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
 
@@ -2467,6 +2496,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else {
                     return (long) ndflPersonDao.getNdflPersonCount(declarationDataId);
                 }
+            case IDENTIFY_PERSON:
+            case CONSOLIDATE:
             case XML_DEC:
                 if (declarationTemplate.getDeclarationFormKind().equals(DeclarationFormKind.REPORTS)) {
                     return (long) ndflPersonDao.getNdflPersonReferencesCount(declarationDataId);
@@ -2725,7 +2756,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Logger scriptLogger = new Logger();
             boolean createForm = true;
             try {
-                createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
+                DeclarationData declarationData = get(entry.getKey(), userInfo);
+                createForm = calculateDeclaration(scriptLogger, declarationData, userInfo, new Date(), entry.getValue(), stateLogger);
             } catch (Exception e) {
                 createForm = false;
                 if (e.getMessage() != null) {

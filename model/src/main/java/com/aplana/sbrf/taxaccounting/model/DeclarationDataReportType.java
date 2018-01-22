@@ -13,6 +13,8 @@ public class DeclarationDataReportType implements Serializable {
     //Типы отчетов, связанные с асинхронными задачами
     public static final DeclarationDataReportType EXCEL_DEC = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
     public static final DeclarationDataReportType XML_DEC = new DeclarationDataReportType(AsyncTaskType.XML_DEC, null);
+    public static final DeclarationDataReportType IDENTIFY_PERSON = new DeclarationDataReportType(AsyncTaskType.IDENTIFY_PERSON, null);
+    public static final DeclarationDataReportType CONSOLIDATE = new DeclarationDataReportType(AsyncTaskType.CONSOLIDATE, null);
     public static final DeclarationDataReportType PDF_DEC = new DeclarationDataReportType(AsyncTaskType.PDF_DEC, null);
     public static final DeclarationDataReportType ACCEPT_DEC = new DeclarationDataReportType(AsyncTaskType.ACCEPT_DEC, null);
     public static final DeclarationDataReportType CHECK_DEC = new DeclarationDataReportType(AsyncTaskType.CHECK_DEC, null);
@@ -96,6 +98,10 @@ public class DeclarationDataReportType implements Serializable {
             return IMPORT_TF_DEC;
         } else if (EDIT_FILE_COMMENT_DEC.getReportType().getName().equals(name)) {
             return EDIT_FILE_COMMENT_DEC;
+        } else if (IDENTIFY_PERSON.getReportType().getName().equals(name)) {
+            return IDENTIFY_PERSON;
+        } else if (CONSOLIDATE.getReportType().getName().equals(name)) {
+            return CONSOLIDATE;
         } else {
             return new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, null);
         }
@@ -122,6 +128,10 @@ public class DeclarationDataReportType implements Serializable {
             return EDIT_FILE_COMMENT_DEC;
         } else if (EXCEL_TEMPLATE_DEC.getReportType().equals(reportType)) {
             return EXCEL_TEMPLATE_DEC;
+        } else if (IDENTIFY_PERSON.getReportType().equals(reportType)) {
+            return IDENTIFY_PERSON;
+        } else if (CONSOLIDATE.getReportType().equals(reportType)) {
+            return CONSOLIDATE;
         } else {
             throw new IllegalArgumentException("Некорректный тип отчета: " + reportType.getName());
         }
