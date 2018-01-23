@@ -50,17 +50,17 @@
     <div class="button_panel" style="float: left; margin: 0;">
         <div class="btn-toolbar" role="toolbar" data-ng-show="editMode">
             <span>
-                <button type="file" class="btn btn-default iconed-btn" ngf-select="addFileClick($file)">
+                <button type="file" class="btn btn-default-nonBg iconed-btn" ngf-select="addFileClick($file)">
                      {{::'filesComment.button.add' |translate}}
-                    <span class="btn-icon-add"></span>
+                    <span class="btn-icon-noneBg-add"></span>
                 </button>
             </span>
             <span>
-                <button type="button" class="btn btn-default iconed-btn"
+                <button type="button" class="btn btn-default-nonBg iconed-btn"
                         data-ng-click="removeFileClick()"
                         data-ng-disabled="!filesDeleteAvailable()">
                      {{::'filesComment.button.remove' |translate}}
-                    <span class="btn-icon-remove"></span>
+                    <span class="btn-icon-noneBg-add"></span>
                 </button>
             </span>
         </div>
@@ -72,9 +72,9 @@
         <span class="btn-icon-ok"></span>
     </button>
 
-    <button type="button" class="btn btn-default iconed-btn" id="closeButton" data-ng-click="close()">
+    <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
         <span data-translate-once="button.close"></span>
-        <span class="btn-icon-close"></span>
+        <span class="btn-icon-noneBg-close"></span>
     </button>
 </div>
 
