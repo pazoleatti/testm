@@ -355,6 +355,7 @@
         "reportPersonFace.info.needSearchClarify": ". Уточните критерии поиска.",
         "reportPersonFace.error.attr": "Атрибут \"",
         "reportPersonFace.error.symbolsQuantity": "\": Количество символов в значении не должно превышать ",
+        "reportPersonFace.error.symbolsQuantityAndNotDigits": "\": Значение должно состоять из цифр. Количество символов в значении не должно превышать ",
         "reportPersonFace.error.dateInterval": "\": значение поля должно входить в интервал дат 'от 01.01.1900 до 31.12.2099'.",
 
         "notifications.title.listNotifications": "Список оповещений",

@@ -70,8 +70,8 @@
                     var mindate = new Date();
                     var maxdate = new Date();
                     mindate.setFullYear(1900, 0, 1);
-                    maxdate.setFullYear(2100, 11, 31);
-                    if (date && !date instanceof Date) {
+                    maxdate.setFullYear(2099, 11, 31);
+                    if (date && !(date instanceof Date)) {
                         date = new Date(date);
                     }
 

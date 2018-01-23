@@ -12,7 +12,8 @@
                         <input data-ng-model="searchFilter.params.lastName"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
-                               title="{{searchFilter.params.lastName}}"/>
+                               title="{{searchFilter.params.lastName}}"
+                               ng-style="fieldStyles.lastName"/>
                     </div>
                 </div>
 
@@ -24,7 +25,8 @@
                         <input data-ng-model="searchFilter.params.snils"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
-                               title="{{searchFilter.params.snils}}"/>
+                               title="{{searchFilter.params.snils}}"
+                               ng-style="fieldStyles.snils"/>
                     </div>
                 </div>
 
@@ -50,7 +52,8 @@
                         <input data-ng-model="searchFilter.params.firstName"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
-                               title="{{searchFilter.params.firstName}}"/>
+                               title="{{searchFilter.params.firstName}}"
+                               ng-style="fieldStyles.firstName"/>
                     </div>
                 </div>
 
@@ -63,7 +66,8 @@
                         <input data-ng-model="searchFilter.params.inn"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
-                               title="{{searchFilter.params.inn}}"/>
+                               title="{{searchFilter.params.inn}}"
+                               ng-style="fieldStyles.inn"/>
                     </div>
                 </div>
 
@@ -76,7 +80,8 @@
                         <input data-ng-model="searchFilter.params.inp"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
-                               title="{{searchFilter.params.inp}}"/>
+                               title="{{searchFilter.params.inp}}"
+                               ng-style="fieldStyles.inp"/>
                     </div>
                 </div>
 
@@ -94,7 +99,8 @@
                         <input data-ng-model="searchFilter.params.middleName"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
-                               title="{{searchFilter.params.middleName}}"/>
+                               title="{{searchFilter.params.middleName}}"
+                               ng-style="fieldStyles.middleName"/>
                     </div>
                 </div>
 
@@ -107,7 +113,8 @@
                         <input data-ng-model="searchFilter.params.idDocNumber"
                                placeholder="{{'filter.placeholder.search' | translate}}"
                                type="text" class="form-control"
-                               title="{{searchFilter.params.idDocNumber}}"/>
+                               title="{{searchFilter.params.idDocNumber}}"
+                               ng-style="fieldStyles.idDocNumber"/>
                     </div>
                 </div>
             </div>
@@ -124,15 +131,8 @@
 
         <!-- Блок информации -->
         <div class="w500" style="margin: auto;">
-            <div data-ng-show="isEmptySearchParams">
-                <div style="height: 40px;border: 1px solid #aeaeac; border-radius: 6px; background-color: #d8f8b7">
-                    <div style="margin: 10px 0 0 20px;">
-                        <span>{{::'ndfl.rnuNdflPersonFace.emptySearchFilter' | translate}} </span>
-                    </div>
-                </div>
-            </div>
-            <div data-ng-show="!isEmptySearchParams">
-                <div style="min-height: 40px; border: 1px solid #aeaeac; border-radius: 6px;  background-color: #95f8f5">
+            <div data-ng-show="showInfo">
+                <div style="min-height: 40px; min-width: 750px; border: 1px solid #aeaeac; border-radius: 6px;  background-color: #f0f8d1">
                     <div style="margin: 10px 0 10px 20px;">
                         <span> {{infoMessage}}</span>
                     </div>

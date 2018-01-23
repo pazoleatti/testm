@@ -14,6 +14,139 @@
                 $scope.isEmptySearchParams = true;
 
                 /**
+                 * @description хранит список сообщений об ошибках
+                 * @type {Array}
+                 */
+                var errorList = [];
+
+
+                /**
+                 * @description список назавния стилей для биндинга с ngStyle
+                 * @type {{}}
+                 */
+                $scope.fieldStyles = {};
+
+                /**
+                 * @description Проверяет все ли поля на форме пустые
+                 * @returns {boolean}
+                 */
+                var fieldsEmpty = function () {
+                    if (typeof($scope.searchFilter) !== 'undefined' && typeof($scope.searchFilter.params) !== 'undefined') {
+                        for (var param in $scope.searchFilter.params) {
+                            var paramValue = $scope.searchFilter.params[param];
+                            if (paramValue != null && paramValue !== '') {
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
+                        return true;
+                    }
+                };
+
+                /**
+                 * @description Проверяет на наличие ошибок строкового поля формы. Текст ошибки добавляетс в errorList
+                 * @param string строка для проверки
+                 * @param requiredLength максимальная длина
+                 * @param fieldName название поля
+                 * @param styleName назания стиля для биндинга с ngStyle
+                 */
+                var checkStringField = function (string, requiredLength, fieldName, styleName) {
+                    if (string.length > requiredLength) {
+                        var msg = $filter('translate')('reportPersonFace.error.attr') + fieldName +
+                            $filter('translate')('reportPersonFace.error.symbolsQuantity') + requiredLength;
+                        errorList.push(msg.split(" ").join("\u00a0"));
+                        $scope.fieldStyles[styleName] = {"background-color": "#FFCCD2"};
+                    }
+                };
+
+                /**
+                 * @description Проверяет на наличие ошибок строкового поля формы, которое должно состоять из цифр.
+                 * Текст ошибки добавляетс в errorList
+                 * @param number строка для проверки
+                 * @param requiredLength максимальная длина
+                 * @param fieldName название поля
+                 * @param styleName назания стиля для биндинга с ngStyle
+                 */
+                var checkNumberField = function (number, requiredLength, fieldName, styleName) {
+                    if (number.length > requiredLength || /[^\d]/.test(number)) {
+                        var msg = $filter('translate')('reportPersonFace.error.attr') + fieldName +
+                            $filter('translate')('reportPersonFace.error.symbolsQuantityAndNotDigits') + requiredLength;
+                        errorList.push(msg.split(" ").join("\u00a0"));
+                        $scope.fieldStyles[styleName] = {"background-color": "#FFCCD2"};
+                    }
+                };
+
+                /**
+                 * @description Проверяет на наличие ошибок поля формы типа дата. Текст ошибки добавляетс в errorList
+                 * @param date дата
+                 * @param fieldName название поля
+                 */
+                var checkDateField = function (date, fieldName) {
+                    var mindate = new Date();
+                    var maxdate = new Date();
+                    mindate.setFullYear(1900, 0, 1);
+                    maxdate.setFullYear(2099, 11, 31);
+                    if (date && !(date instanceof Date)) {
+                        date = new Date(date);
+                    }
+
+                    if (date < mindate || date > maxdate) {
+                        var msg = $filter('translate')('reportPersonFace.error.attr') + fieldName +
+                            $filter('translate')('reportPersonFace.error.dateInterval');
+                        errorList.push(msg.split(" ").join("\u00a0"));
+                    }
+                };
+
+                var totalCountResult = function () {
+                    RnuPerson.query({
+                        projection: 'rnuPersons',
+                        ndflPersonFilter: JSON.stringify({
+                            declarationDataId: $shareData.declarationDataId,
+                            lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
+                            firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
+                            middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
+                            inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
+                            snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
+                            innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
+                            idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
+                            dateFrom: $scope.searchFilter.params.dateFrom,
+                            dateTo: $scope.searchFilter.params.dateTo
+                        }),
+                        pagingParams: {}
+
+                    }, function (data) {
+                        $scope.showInfo = true;
+                        if (data.records > 10) {
+                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.manyRecords', {count: data.records});
+                        } else {
+                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.countRecords', {count: data.records});
+                        }
+                    });
+                };
+
+                // Отбрасывает часы, минуты, секунды, миллисекунды
+                var truncHMS = function (date) {
+                    if (!_.isUndefined(date) && !_.isNull(date) && date !== "") {
+                        date.setHours(0);
+                        date.setMinutes(0);
+                        date.setSeconds(0);
+                        date.setMilliseconds(0);
+                        return date.getTime();
+                    }
+                    return date;
+                };
+
+                /**
+                 * Валидатор диапазона дат. Проверяет, что стартовая дата не превышает конечную
+                 * @returns {boolean} признак корректности диапазона дат
+                 */
+                var checkDateInterval = function () {
+                    return ($scope.searchFilter.params.dateFrom === undefined || $scope.searchFilter.params.dateFrom === null || $scope.searchFilter.params.dateFrom === "") ||
+                        ($scope.searchFilter.params.dateTo === undefined || $scope.searchFilter.params.dateTo === null || $scope.searchFilter.params.dateTo === "") ||
+                        (truncHMS(new Date($scope.searchFilter.params.dateFrom)) <= truncHMS(new Date($scope.searchFilter.params.dateTo)));
+                };
+                /**
                  * @description Создание рну ндфл для физ лица
                  */
                 $scope.formationRNU = function () {
@@ -133,11 +266,49 @@
                  * @description Поиск физ лиц для формирования рну
                  */
                 $scope.searchPerson = function () {
-                    if (validate()) {
-                        $scope.infoMessage = "";
-                        totalCountResult();
-                        $scope.rnuNdflGrid.ctrl.refreshGrid();
+                    // очищаем список ошибок
+                    errorList = [];
+                    // очищаем поля от стиля ошибок
+                    for (var fieldStyle in $scope.fieldStyles) {
+                        $scope.fieldStyles[fieldStyle] = {};
                     }
+                    // Проверяем что заполнено хотя бы одно поле
+                    if (fieldsEmpty()) {
+                        $scope.infoMessage = $filter('translate')('reportPersonFace.error.fieldsAreEmpty');
+                        $scope.showInfo = true;
+                        return;
+                    } else {
+                        $scope.showInfo = false;
+                    }
+
+                    for (var param in $scope.searchFilter.params) {
+                        for (var field in APP_CONSTANTS.PERSON_SEARCH_FIELDS_RNU) {
+                            var fieldProps = APP_CONSTANTS.PERSON_SEARCH_FIELDS_RNU[field];
+                            if (fieldProps.alias === param) {
+                                if (fieldProps === APP_CONSTANTS.PERSON_SEARCH_FIELDS_RNU.SNILS) {
+                                    checkNumberField($scope.searchFilter.params[param], fieldProps.length, fieldProps.label, param);
+                                } else {
+                                    checkStringField($scope.searchFilter.params[param], fieldProps.length, fieldProps.label, param);
+                                }
+                            }
+                        }
+                    }
+
+                    checkDateField($scope.searchFilter.params.dateFrom, $filter('translate')('title.dateOfBirthFrom'));
+                    checkDateField($scope.searchFilter.params.dateTo, $filter('translate')('title.dateOfBirthTo'));
+
+                    if (errorList.length > 0) {
+                        $scope.infoMessage = errorList.join("\n");
+                        $scope.showInfo = true;
+                        return;
+                    }
+
+                    $scope.showInfo = false;
+                    $scope.isEmptySearchParams = false;
+                    $scope.infoMessage = "";
+                    totalCountResult();
+                    $scope.rnuNdflGrid.ctrl.refreshGrid();
+
 
                 };
 
@@ -146,92 +317,6 @@
                     params: {},
                     isClear: false,
                     filterName: 'rnuNdflPersonFaceFilter'
-                };
-
-                var validate = function () {
-                    isEmptySearchPararms();
-                    if ($scope.isEmptySearchParams) {
-                        return false;
-                    }
-                    if (!checkDateInterval()) {
-                        $scope.infoMessage = $filter('translate')('rnuPersonFace.error.dateInterval');
-                        return false;
-                    }
-                    if (!checkDateField()) {
-                        $scope.infoMessage = $filter('translate')('rnuPersonFace.error.dateIntervalOutOfBounds');
-                        return false;
-                    }
-                    return true;
-                };
-
-
-                var isEmptySearchPararms = function () {
-                    $scope.isEmptySearchParams = !($scope.searchFilter.params.lastName || $scope.searchFilter.params.firstName || $scope.searchFilter.params.middleName ||
-                        $scope.searchFilter.params.inp || $scope.searchFilter.params.snils || $scope.searchFilter.params.inn ||
-                        $scope.searchFilter.params.idDocNumber || $scope.searchFilter.params.dateFrom || $scope.searchFilter.params.dateTo);
-                };
-
-                var totalCountResult = function () {
-                    RnuPerson.query({
-                        projection: 'rnuPersons',
-                        ndflPersonFilter: JSON.stringify({
-                            declarationDataId: $shareData.declarationDataId,
-                            lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
-                            firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
-                            middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
-                            inp: (typeof($scope.searchFilter.params.inp) !== 'undefined') ? '%' + $scope.searchFilter.params.inp + '%' : $scope.searchFilter.params.inp,
-                            snils: (typeof($scope.searchFilter.params.snils) !== 'undefined') ? '%' + $scope.searchFilter.params.snils + '%' : $scope.searchFilter.params.snils,
-                            innNp: (typeof($scope.searchFilter.params.inn) !== 'undefined') ? '%' + $scope.searchFilter.params.inn + '%' : $scope.searchFilter.params.inn,
-                            idDocNumber: (typeof($scope.searchFilter.params.idDocNumber) !== 'undefined') ? '%' + $scope.searchFilter.params.idDocNumber + '%' : $scope.searchFilter.params.idDocNumber,
-                            dateFrom: $scope.searchFilter.params.dateFrom,
-                            dateTo: $scope.searchFilter.params.dateTo
-                        }),
-                        pagingParams: {}
-
-                    }, function (data) {
-                        if (data.records > 10) {
-                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.manyRecords', {count: data.records});
-                        } else {
-                            $scope.infoMessage = $filter('translate')('ndfl.rnuNdflPersonFace.countRecords', {count: data.records});
-                        }
-                    });
-                };
-
-                /**
-                 * Валидатор диапазона дат. Проверяет, что стартовая дата не превышает конечную
-                 * @returns {boolean} признак корректности диапазона дат
-                 */
-                var checkDateInterval = function () {
-                    return ($scope.searchFilter.params.dateFrom === undefined || $scope.searchFilter.params.dateFrom === null || $scope.searchFilter.params.dateFrom === "") ||
-                        ($scope.searchFilter.params.dateTo === undefined || $scope.searchFilter.params.dateTo === null || $scope.searchFilter.params.dateTo === "") ||
-                        (truncHMS(new Date($scope.searchFilter.params.dateFrom)) <= truncHMS(new Date($scope.searchFilter.params.dateTo)));
-                };
-
-                // Отбрасывает часы, минуты, секунды, миллисекунды
-                var truncHMS = function (date) {
-                    if (!_.isUndefined(date) && !_.isNull(date) && date !== "") {
-                        date.setHours(0);
-                        date.setMinutes(0);
-                        date.setSeconds(0);
-                        date.setMilliseconds(0);
-                        return date.getTime();
-                    }
-                    return date;
-                };
-
-                /**
-                 * @description Проверяет на наличие ошибок поля формы Дата рождения.
-                 */
-                var checkDateField = function () {
-                    var mindate = new Date();
-                    var maxdate = new Date();
-                    var dateFrom = $scope.searchFilter.params.dateFrom ? new Date($scope.searchFilter.params.dateFrom) : null;
-                    var dateTo = $scope.searchFilter.params.dateTo ? new Date($scope.searchFilter.params.dateTo) : null;
-                    mindate.setFullYear(1900, 0, 1);
-                    maxdate.setFullYear(2100, 11, 31);
-
-                    return (!dateFrom || mindate <= dateFrom && dateFrom <= maxdate) &&
-                        (!dateTo || mindate <= dateTo && dateTo <= maxdate);
                 };
 
             }]);

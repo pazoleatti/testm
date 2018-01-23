@@ -151,6 +151,15 @@
                 ID_DOC : {alias: "idDocNumber", length: 25, label: "№ ДУЛ"},
                 REF_NUMBER : {alias: "refNumber", length: 10, label: "Номер справки"}
             },
+            PERSON_SEARCH_FIELDS_RNU : {
+                INP : {alias: "inp", length: 25, label: "ИНП"},
+                SNILS: {alias: "snils", length: 14, label: "СНИЛС"},
+                LAST_NAME : {alias: "lastName", length: 36, label: "Фамилия"},
+                FIRST_NAME : {alias: "firstName", length: 36, label: "Имя"},
+                MIDDLE_NAME : {alias: "middleName", length: 36, label: "Отчество"},
+                INN : {alias: "inn", length: 50, label: "ИНН"},
+                ID_DOC : {alias: "idDocNumber", length: 25, label: "№ ДУЛ"}
+            },
             REPORT_PERIOD_STATUS: {
                 OPEN: "OPEN", // Открыт
                 CLOSE: "CLOSE", // Закрыт
