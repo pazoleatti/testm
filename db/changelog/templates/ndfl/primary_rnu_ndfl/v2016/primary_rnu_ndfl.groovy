@@ -870,7 +870,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             reader?.close()
         }
         if (success == 0) {
-            logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду. Налоговая форма не создана")
+            logger.error("В ТФ отсутствуют операции, принадлежащие отчетному периоду.")
+            logger.error("Налоговая форма не создана.")
         }
     }
 
