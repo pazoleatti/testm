@@ -7,5 +7,10 @@ CREATE TABLE department_fullpath (
   shortname VARCHAR(4000)
 );
 
-INSERT INTO department_fullpath (id, shortname)
-  VALUES (1, 'Банк');
+INSERT INTO department_fullpath (id, shortname) VALUES (1, 'Банк');
+INSERT INTO department_fullpath (id, shortname) VALUES (2, 'Банк/ТБ1');
+INSERT INTO department_fullpath (id, shortname) VALUES (3, 'Банк/ТБ2');
+INSERT INTO department_fullpath (id, shortname) VALUES (4, 'Банк/ЦСКО 1');
+INSERT INTO department_fullpath (id, shortname) VALUES (5, 'Банк/ЦСКО 1');
+INSERT INTO department_fullpath (id, shortname) VALUES (6, 'Банк/ЦСКО 1');
+INSERT INTO department_fullpath (id, shortname) VALUES (7, 'Банк/ТБ3');

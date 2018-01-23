@@ -1512,3 +1512,10 @@ create table decl_template_event_script(
 );
 
 create sequence seq_decl_template_event_script start with 1 increment by 1;
+--------------------------------------------------------------------------------------------------------
+CREATE global TEMPORARY TABLE tmp_numbers0 (
+  num NUMBER(18,0)
+) ON COMMIT DELETE ROWS ;
+CREATE global TEMPORARY TABLE tmp_numbers1 (
+  num NUMBER(18,0)
+) ON COMMIT DELETE ROWS ;

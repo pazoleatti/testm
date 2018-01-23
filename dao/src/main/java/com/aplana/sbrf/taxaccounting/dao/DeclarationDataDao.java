@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataJournalItem;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.State;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.querydsl.core.types.Order;
 
 import java.util.Date;
 import java.util.List;
@@ -197,10 +203,10 @@ public interface DeclarationDataDao extends PermissionDao {
     /**
      * Найти все формы созданные в отчетном периоде
      *
-     * @param declarationTypeId Идентификатор вида налоговой формы
-     * @param departmentIds     Список идентификаторов подразделений
-     * @param reportPeriodId    Идентификатор отчетного периода
-     * @return Список налоговых форм заданного вида, созданных в заданном периоде и принадлежащих заданным подразделениям
+     * @param declarationTypeId идентификатор вида налоговой формы
+     * @param departmentIds     список идентификаторов подразделений
+     * @param reportPeriodId    идентификатор отчетного периода
+     * @return список налоговых форм заданного вида, созданных в заданном периоде и принадлежащих заданным подразделениям
      */
     List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId);
 
@@ -277,6 +283,7 @@ public interface DeclarationDataDao extends PermissionDao {
 
     /**
      * Проверяет существование НФ по критериям в зависимости от ее вида
+     *
      * @param declarationData
      * @return
      */
