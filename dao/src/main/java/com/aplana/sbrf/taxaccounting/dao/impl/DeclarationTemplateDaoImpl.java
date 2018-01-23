@@ -116,7 +116,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Override
 	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
         JdbcTemplate jt = getJdbcTemplate();
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        ReportPeriod reportPeriod = reportPeriodDao.fetchOne(reportPeriodId);
         try {
             return jt.queryForObject(getActiveVersionSql(),
                     new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
@@ -500,7 +500,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Override
     public boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId) {
         JdbcTemplate jt = getJdbcTemplate();
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        ReportPeriod reportPeriod = reportPeriodDao.fetchOne(reportPeriodId);
         try {
             return jt.queryForObject(getActiveVersionSql(),
                     new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},

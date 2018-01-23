@@ -90,7 +90,7 @@ public class RefBookDepartmentDaoTest {
     public void testGetMatchedRecordsByUniqueAttributes() {
         RefBook refBook = refBookDao.get(30L);
         PagingResult<Map<String, RefBookValue>> allValues = new PagingResult<Map<String, RefBookValue>>();
-        allValues.add(new HashMap<String, RefBookValue>(){{
+        allValues.add(new HashMap<String, RefBookValue>() {{
             put("code", new RefBookValue(RefBookAttributeType.NUMBER, 1));
             put("name", new RefBookValue(RefBookAttributeType.STRING, "Главный Банк"));
         }});
@@ -101,10 +101,10 @@ public class RefBookDepartmentDaoTest {
             record.setRecordId(null);
             records.add(record);
         }
-        List<Pair<String,String>> matches =
+        List<Pair<String, String>> matches =
                 refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(100l, refBook.getAttributes(), records);
         assertEquals(2, matches.size());
-        List<Pair<String,String>> matchesNull =
+        List<Pair<String, String>> matchesNull =
                 refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(null, refBook.getAttributes(), records);
         assertEquals(2, matchesNull.size());
     }
@@ -118,12 +118,12 @@ public class RefBookDepartmentDaoTest {
     @Test
     public void testCreate() {
 
-		RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
-		Map<String, RefBookValue> record = refBook.createRecord();
-		record.get("name").setValue("dsfs");
-		record.get("sbrf_code").setValue("99_0000_00");
-		record.get("type").setValue(Long.valueOf(DepartmentType.MANAGEMENT.getCode()));
-		record.get("code").setValue(101);
+        RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
+        Map<String, RefBookValue> record = refBook.createRecord();
+        record.get("name").setValue("dsfs");
+        record.get("sbrf_code").setValue("99_0000_00");
+        record.get("type").setValue(Long.valueOf(DepartmentType.MANAGEMENT.getCode()));
+        record.get("code").setValue(101);
         assertEquals(1000, refBookDepartmentDao.create(record, refBookDao.getAttributes(30l)));
     }
 

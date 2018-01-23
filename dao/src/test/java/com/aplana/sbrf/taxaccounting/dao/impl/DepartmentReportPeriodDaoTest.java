@@ -131,14 +131,14 @@ public class DepartmentReportPeriodDaoTest {
         departmentReportPeriod.setIsActive(true);
         departmentReportPeriod.setCorrectionDate(date);
         departmentReportPeriod.setDepartmentId(1);
-        departmentReportPeriod.setReportPeriod(reportPeriodDao.get(1));
+        departmentReportPeriod.setReportPeriod(reportPeriodDao.fetchOne(1));
         departmentReportPeriodDao.create(departmentReportPeriod);
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setIsActive(true);
         filter.setIsCorrection(true);
         filter.setDepartmentId(1);
-        filter.setReportPeriod(reportPeriodDao.get(1));
+        filter.setReportPeriod(reportPeriodDao.fetchOne(1));
         List<DepartmentReportPeriod> savedDepartmentReportPeriodList = departmentReportPeriodDao.fetchAllByFilter(filter);
         DepartmentReportPeriod savedDepartmentReportPeriod = savedDepartmentReportPeriodList.get(0);
 
@@ -152,14 +152,14 @@ public class DepartmentReportPeriodDaoTest {
     @Test
     public void saveBatchTest() {
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-        ReportPeriod reportPeriod = reportPeriodDao.get(11);
+        ReportPeriod reportPeriod = reportPeriodDao.fetchOne(11);
         departmentReportPeriod.setIsActive(true);
         departmentReportPeriod.setReportPeriod(reportPeriod);
         List<Integer> depIds = new ArrayList<Integer>();
         depIds.add(2);
         depIds.add(3);
         depIds.add(4);
-        for(Integer departmentId : depIds) {
+        for (Integer departmentId : depIds) {
             departmentReportPeriod.setDepartmentId(departmentId);
             departmentReportPeriodDao.create(departmentReportPeriod);
         }
@@ -194,16 +194,6 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertTrue(departmentReportPeriodDao.fetchOne(101).isActive());
     }
 
-
-    //@Test
-    public void getCorrectionNumberTest() {
-        Assert.assertNull(departmentReportPeriodDao.fetchCorrectionNumber(-1));
-        Assert.assertEquals(0, departmentReportPeriodDao.fetchCorrectionNumber(101).intValue());
-        Assert.assertEquals(0, departmentReportPeriodDao.fetchCorrectionNumber(301).intValue());
-        Assert.assertEquals(1, departmentReportPeriodDao.fetchCorrectionNumber(302).intValue());
-        Assert.assertEquals(2, departmentReportPeriodDao.fetchCorrectionNumber(303).intValue());
-    }
-
     @Test
     public void getFirstTest() {
         Assert.assertEquals(301, departmentReportPeriodDao.fetchFirst(1, 20).getId().intValue());
@@ -226,49 +216,13 @@ public class DepartmentReportPeriodDaoTest {
     }
 
     @Test
-    public void deleteTest1() {
-        departmentReportPeriodDao.delete(102);
-        Assert.assertNull(departmentReportPeriodDao.fetchOne(102));
-    }
-
-    @Test
     public void deleteTest2() {
         departmentReportPeriodDao.delete(Arrays.asList(102));
         Assert.assertNull(departmentReportPeriodDao.fetchOne(102));
     }
 
     @Test
-    public void getCorrectionDateListByReportPeriodTest() throws ParseException {
-        // Не задан параметр — пустая мапа
-        Assert.assertNotNull(departmentReportPeriodDao.fetchCorrectionDateListByReportPeriod(null));
-
-        // Отчетный период с id = 1
-        int reportPeriodId = 1;
-        List<Integer> reportPeriodIdList = Arrays.asList(reportPeriodId);
-        Map<Integer, List<Date>> map = departmentReportPeriodDao.fetchCorrectionDateListByReportPeriod(reportPeriodIdList);
-        Assert.assertEquals(reportPeriodIdList.size(), map.size());
-        List<Date> dateList = map.get(reportPeriodId);
-        Assert.assertEquals(2, dateList.size());
-        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
-        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.02.2014")));
-
-        // Отчетные периоды с id = 2, 20, 22
-        reportPeriodIdList = Arrays.asList(2, 20, 22);
-        map = departmentReportPeriodDao.fetchCorrectionDateListByReportPeriod(reportPeriodIdList);
-        Assert.assertEquals(2, map.size());
-        Assert.assertNull(map.get(2));
-        dateList = map.get(20);
-        Assert.assertEquals(2, dateList.size());
-        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
-        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
-        dateList = map.get(22);
-        Assert.assertEquals(2, dateList.size());
-        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("01.01.2014")));
-        Assert.assertTrue(dateList.contains(SIMPLE_DATE_FORMAT.parse("02.01.2014")));
-    }
-
-    @Test
-    public void findAllTest(){
+    public void findAllTest() {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setYearStart(1900);
         filter.setYearEnd(2099);
@@ -283,11 +237,6 @@ public class DepartmentReportPeriodDaoTest {
 
         //3 с пустым фильтром
         Assert.assertNotEquals(0, departmentReportPeriodDao.fetchJournalItemByFilter(new DepartmentReportPeriodFilter()).size());
-    }
-
-    @Test()
-    public void findAllWithEmptyFilter(){
-
     }
 
 }

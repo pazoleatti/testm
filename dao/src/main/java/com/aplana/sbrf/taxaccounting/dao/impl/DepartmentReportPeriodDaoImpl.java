@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +39,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     private ReportPeriodDao reportPeriodDao;
 
-
     public DepartmentReportPeriodDaoImpl(ReportPeriodDao reportPeriodDao) {
         this.reportPeriodDao = reportPeriodDao;
     }
@@ -55,32 +53,29 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     /**
      * Запрос обычной выборки отчетных периодов подразделения
      */
-    private static final String QUERY_TEMPLATE_SIMPLE = "select id, department_id, report_period_id, is_active, " +
-            "correction_date from department_report_period";
+    private static final String QUERY_TEMPLATE_SIMPLE = "select id, department_id, report_period_id, is_active, correction_date from department_report_period";
 
     /**
      * Запрос выборки отчетных периодов подразделения с сортировкой по году и периоду сдаче корректировки(сначала некорректирующие)
      */
     private static final String QUERY_TEMPLATE_COMPOSITE_SORT = "select drp.id, drp.department_id, drp.report_period_id, drp.is_active, drp.correction_date \n" +
-            "          from \n" +
-            "          department_report_period drp \n" +
-            "          join report_period rp on drp.report_period_id = rp.id \n" +
-            "          join tax_period tp on rp.tax_period_id = tp.id \n" +
-            "            %s \n" +
-            "            order by tp.year, drp.CORRECTION_DATE NULLS FIRST";
+            " from \n" +
+            " department_report_period drp \n" +
+            " join report_period rp on drp.report_period_id = rp.id \n" +
+            " join tax_period tp on rp.tax_period_id = tp.id \n" +
+            " %s \n" +
+            " order by tp.year, drp.correction_date NULLS FIRST";
 
     /**
      * Запрос выборки идентификаторов отчетных периодов подразделения
      */
-    private static final String QUERY_TEMPLATE_COMPOSITE_SORT_ID =
-            "select drp.id from department_report_period drp " +
-                    "join report_period rp on drp.report_period_id = rp.id \n" +
-                    "join tax_period tp on rp.tax_period_id = tp.id " +
-                    " %s ";
-
+    private static final String QUERY_TEMPLATE_COMPOSITE_SORT_ID = "select drp.id from department_report_period drp " +
+            "join report_period rp on drp.report_period_id = rp.id \n" +
+            "join tax_period tp on rp.tax_period_id = tp.id " +
+            " %s ";
 
     /**
-     * Маппер для {@link DepartmentReportPeriod} представления значений из {@link ResultSet} в объект отчетного периода подразделения
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link DepartmentReportPeriod}
      */
     private final RowMapper<DepartmentReportPeriod> mapper = new RowMapper<DepartmentReportPeriod>() {
         @Override
@@ -88,7 +83,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             DepartmentReportPeriod reportPeriod = new DepartmentReportPeriod();
             reportPeriod.setId(SqlUtils.getInteger(rs, "id"));
             reportPeriod.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
-            reportPeriod.setReportPeriod(reportPeriodDao.get(SqlUtils.getInteger(rs, "report_period_id")));
+            reportPeriod.setReportPeriod(reportPeriodDao.fetchOne(SqlUtils.getInteger(rs, "report_period_id")));
             reportPeriod.setIsActive(!Objects.equals(SqlUtils.getInteger(rs, "is_active"), 0));
             reportPeriod.setCorrectionDate(rs.getDate("correction_date"));
             return reportPeriod;
@@ -96,8 +91,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     };
 
     /**
-     * Маппер для {@link DepartmentReportPeriodJournalItem} представления значений из {@link ResultSet}
-     * в объект модели отчетного периода подразделения для отображения на клиенте
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link DepartmentReportPeriodJournalItem}
      */
     private final RowMapper<DepartmentReportPeriodJournalItem> mapperJournalItem = new RowMapper<DepartmentReportPeriodJournalItem>() {
         @Override
@@ -105,7 +99,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             DepartmentReportPeriodJournalItem departmentReportPeriodJournalItem = new DepartmentReportPeriodJournalItem();
             departmentReportPeriodJournalItem.setId(SqlUtils.getInteger(rs, "id"));
             departmentReportPeriodJournalItem.setDepartmentId(SqlUtils.getInteger(rs, "department_id"));
-            ReportPeriod reportPeriod = reportPeriodDao.get(SqlUtils.getInteger(rs, "report_period_id"));
+            ReportPeriod reportPeriod = reportPeriodDao.fetchOne(SqlUtils.getInteger(rs, "report_period_id"));
             departmentReportPeriodJournalItem.setReportPeriodId(reportPeriod.getId());
             departmentReportPeriodJournalItem.setDictTaxPeriodId(reportPeriod.getDictTaxPeriodId());
             departmentReportPeriodJournalItem.setYear(reportPeriod.getTaxPeriod().getYear());
@@ -117,23 +111,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     };
 
     /**
-     * Маппер для {@link CorrectionDateRowMapper} представления значений из {@link ResultSet}
-     * в пару значений Pair<reportPeriodId, correctionDate>
-     */
-    private class CorrectionDateRowMapper implements RowMapper<Pair<Integer, Date>> {
-        @Override
-        public Pair<Integer, Date> mapRow(ResultSet rs, int rowNum) throws SQLException {
-            int reportPeriodId = rs.getInt("report_period_id");
-            Date correctionDate = rs.getDate("correction_date");
-            return new Pair<>(reportPeriodId, correctionDate);
-        }
-    }
-
-    /**
      * Формирует sql выражение where с параметрами из фильтра
      *
-     * @param filter - фильтр
-     * @return строку с условиями выборки where
+     * @param filter фильтр
+     * @return строка с условиями выборки where
      */
     private String makeSqlWhereClause(DepartmentReportPeriodFilter filter) {
         if (filter == null) {
@@ -189,19 +170,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         return " where " + StringUtils.join(causeList, " and ");
     }
 
-    @Override
-    public List<DepartmentReportPeriod> fetchAllByFilter(final DepartmentReportPeriodFilter filter) {
-        return (List<DepartmentReportPeriod>) exequteFetchByFilter(filter, mapper);
-    }
-
     /**
      * Выполняет запрос в БД  с фильтрацией и формирует список объектов по указанному мапперу
      *
-     * @param filter - фильтр
-     * @param mapper - маппер
-     * @return список объектов {@link DepartmentReportPeriod} или {@link DepartmentReportPeriodJournalItem}, в зависимости от маппера
+     * @param filter фильтр
+     * @param mapper маппер
+     * @param <T>    целевой класс для выборки {@link DepartmentReportPeriod} или {@link DepartmentReportPeriodJournalItem}
+     * @return список объектов типа <T> или пустой список
      */
-    private List<?> exequteFetchByFilter(final DepartmentReportPeriodFilter filter, RowMapper<?> mapper) {
+    private <T> List<T> exequteFetchByFilter(final DepartmentReportPeriodFilter filter, RowMapper<T> mapper) {
         try {
             return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, makeSqlWhereClause(filter)),
                     new HashMap<String, Object>(2) {{
@@ -214,6 +191,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
     }
 
+    @Override
+    public List<DepartmentReportPeriod> fetchAllByFilter(final DepartmentReportPeriodFilter filter) {
+        return exequteFetchByFilter(filter, mapper);
+    }
 
     @Override
     public List<Integer> fetchAllIdsByFilter(final DepartmentReportPeriodFilter filter) {
@@ -233,7 +214,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     @Transactional(readOnly = true)
     public List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(final DepartmentReportPeriodFilter filter) {
-        return (List<DepartmentReportPeriodJournalItem>) exequteFetchByFilter(filter, mapperJournalItem);
+        return exequteFetchByFilter(filter, mapperJournalItem);
     }
 
     @Override
@@ -248,8 +229,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         params.addValue("CORRECTION_DATE", departmentReportPeriod.getCorrectionDate());
 
         getNamedParameterJdbcTemplate().update(
-                "insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
-                        " values (seq_department_report_period.nextval, :DEPARTMENT_ID, :REPORT_PERIOD_ID, :IS_ACTIVE, :CORRECTION_DATE)",
+                "INSERT INTO DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
+                        " VALUES (seq_department_report_period.nextval, :DEPARTMENT_ID, :REPORT_PERIOD_ID, :IS_ACTIVE, :CORRECTION_DATE)",
                 params, keyHolder, new String[]{"ID"});
         departmentReportPeriod.setId(keyHolder.getKey().intValue());
     }
@@ -259,7 +240,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public void updateActive(int id, boolean active) {
         getJdbcTemplate().update(
-                "update department_report_period set is_active = ? where id = ?",
+                "UPDATE department_report_period SET is_active = ? WHERE id = ?",
                 new Object[]{active ? 1 : 0, id},
                 new int[]{Types.NUMERIC, Types.NUMERIC}
         );
@@ -268,13 +249,13 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
-    public void updateActive(final List<Integer> ids, final Integer report_period_id, final boolean active) {
+    public void updateActive(final List<Integer> ids, final Integer reportPeriodId, final boolean active) {
         try {
-            getJdbcTemplate().batchUpdate("update department_report_period set is_active = ? where report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
+            getJdbcTemplate().batchUpdate("UPDATE department_report_period SET is_active = ? WHERE report_period_id = ? AND id = ?", new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     ps.setInt(1, active ? 1 : 0);
-                    ps.setInt(2, report_period_id);
+                    ps.setInt(2, reportPeriodId);
                     ps.setInt(3, ids.get(i));
                 }
 
@@ -289,29 +270,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
     }
 
-
-    @Override
-    @Transactional
-    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
-    @Deprecated
-    public void delete(Integer id) {
-        try {
-            getJdbcTemplate().update(
-                    "delete from department_report_period where id = ?",
-                    new Object[]{id},
-                    new int[]{Types.NUMERIC}
-            );
-        } catch (DataAccessException e) {
-            LOG.error("", e);
-        }
-    }
-
     @Override
     @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
     public void delete(final List<Integer> ids) {
         try {
-            getJdbcTemplate().batchUpdate("delete from department_report_period where id = ?",
+            getJdbcTemplate().batchUpdate("DELETE FROM department_report_period WHERE id = ?",
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -333,7 +297,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     public boolean checkExistForDepartment(int departmentId, int reportPeriodId) {
         Integer count = getJdbcTemplate().queryForObject(
-                "select count(*) from department_report_period where department_id = ? and report_period_id = ?",
+                "SELECT count(*) FROM department_report_period WHERE department_id = ? AND report_period_id = ?",
                 new Object[]{departmentId, reportPeriodId},
                 new int[]{Types.NUMERIC, Types.NUMERIC},
                 Integer.class
@@ -345,18 +309,18 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     public DepartmentReportPeriod fetchLast(int departmentId, int reportPeriodId) {
         try {
-            return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
+            return getJdbcTemplate().queryForObject("SELECT drp.id, drp.department_id, drp.report_period_id, " +
                             "drp.is_active, drp.correction_date " +
-                            "from " +
+                            "FROM " +
                             "department_report_period drp, " +
-                            "(select max(correction_date) as correction_date, department_id, report_period_id " +
-                            "from department_report_period " +
-                            "where department_id = ? and report_period_id = ? " +
-                            "group by department_id, report_period_id) m " +
-                            "where drp.department_id = m.department_id " +
-                            "and drp.report_period_id = m.report_period_id " +
-                            "and (drp.correction_date = m.correction_date or (m.correction_date is null " +
-                            "and drp.correction_date is null))",
+                            "(SELECT max(correction_date) AS correction_date, department_id, report_period_id " +
+                            "FROM department_report_period " +
+                            "WHERE department_id = ? AND report_period_id = ? " +
+                            "GROUP BY department_id, report_period_id) m " +
+                            "WHERE drp.department_id = m.department_id " +
+                            "AND drp.report_period_id = m.report_period_id " +
+                            "AND (drp.correction_date = m.correction_date OR (m.correction_date IS NULL " +
+                            "AND drp.correction_date IS NULL))",
                     new Object[]{departmentId, reportPeriodId}, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -370,13 +334,13 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("departmentId", departmentId).
                     addValue("reportPeriodId", reportPeriodId);
-            return getNamedParameterJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
-                            "drp.is_active, drp.correction_date from department_report_period drp " +
-                            "where drp.REPORT_PERIOD_ID = :reportPeriodId and drp.DEPARTMENT_ID = :departmentId and " +
-                            "drp.CORRECTION_DATE in (select max(CORRECTION_DATE) from department_report_period where " +
-                            "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId and CORRECTION_DATE " +
-                            "not in (select max(CORRECTION_DATE) from department_report_period where " +
-                            "REPORT_PERIOD_ID = :reportPeriodId and DEPARTMENT_ID = :departmentId))",
+            return getNamedParameterJdbcTemplate().queryForObject("SELECT drp.id, drp.department_id, drp.report_period_id, " +
+                            "drp.is_active, drp.correction_date FROM department_report_period drp " +
+                            "WHERE drp.REPORT_PERIOD_ID = :reportPeriodId AND drp.DEPARTMENT_ID = :departmentId AND " +
+                            "drp.CORRECTION_DATE IN (SELECT max(CORRECTION_DATE) FROM department_report_period WHERE " +
+                            "REPORT_PERIOD_ID = :reportPeriodId AND DEPARTMENT_ID = :departmentId AND CORRECTION_DATE " +
+                            "NOT IN (SELECT max(CORRECTION_DATE) FROM department_report_period WHERE " +
+                            "REPORT_PERIOD_ID = :reportPeriodId AND DEPARTMENT_ID = :departmentId))",
                     params, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -387,32 +351,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Transactional(readOnly = true)
     public DepartmentReportPeriod fetchFirst(int departmentId, int reportPeriodId) {
         try {
-            return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
+            return getJdbcTemplate().queryForObject("SELECT drp.id, drp.department_id, drp.report_period_id, " +
                             "drp.is_active, drp.correction_date " +
-                            "from " +
+                            "FROM " +
                             "department_report_period drp " +
-                            "where drp.department_id = ? " +
-                            "and drp.report_period_id = ? " +
-                            "and drp.correction_date is null",
+                            "WHERE drp.department_id = ? " +
+                            "AND drp.report_period_id = ? " +
+                            "AND drp.correction_date IS NULL",
                     new Object[]{departmentId, reportPeriodId}, mapper);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Integer fetchCorrectionNumber(int id) {
-        try {
-            return getJdbcTemplate().queryForObject(
-                    "select num from (\n" +
-                            "select id, correction_date as corr_date,\n" +
-                            "row_number() over(partition by report_period_id, department_id order by correction_date nulls first) - 1 as num\n" +
-                            "from department_report_period drp) where id = ?",
-                    new Object[]{id},
-                    new int[]{Types.NUMERIC}
-                    , Integer.class
-            );
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -424,8 +370,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         try {
             return getJdbcTemplate().
                     queryForObject(
-                            "select count(*) from department_report_period drp where " +
-                                    "drp.DEPARTMENT_ID = ? and drp.report_period_id = ? and drp.CORRECTION_DATE > ?",
+                            "SELECT count(*) FROM department_report_period drp WHERE " +
+                                    "drp.DEPARTMENT_ID = ? AND drp.report_period_id = ? AND drp.CORRECTION_DATE > ?",
                             new Object[]{departmentId, reportPeriodId, correctionDate}, Integer.class) > 0;
         } catch (DataAccessException e) {
             LOG.error("", e);
@@ -433,43 +379,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
     }
 
-
-    @Override
-    @Transactional(readOnly = true)
-    @Deprecated
-    public Map<Integer, List<Date>> fetchCorrectionDateListByReportPeriod(final Collection<Integer> reportPeriodIdList) {
-        Map<Integer, List<Date>> retVal = new HashMap<>();
-        if (reportPeriodIdList == null) {
-            return retVal;
-        }
-        try {
-            MapSqlParameterSource source = new MapSqlParameterSource();
-            List<Pair<Integer, Date>> list = getNamedParameterJdbcTemplate().query("select distinct report_period_id, " +
-                            "correction_date " +
-                            "from department_report_period where " +
-                            SqlUtils.transformToSqlInStatement("report_period_id", reportPeriodIdList) + " and correction_date is not null",
-                    source, new CorrectionDateRowMapper());
-
-            for (Pair<Integer, Date> pair : list) {
-                if (!retVal.containsKey(pair.getFirst())) {
-                    retVal.put(pair.getFirst(), new LinkedList<Date>());
-                }
-                retVal.get(pair.getFirst()).add(pair.getSecond());
-            }
-            return retVal;
-
-        } catch (EmptyResultDataAccessException e) {
-            return retVal;
-        }
-    }
-
     @Override
     @Transactional(readOnly = true)
     public List<Integer> fetchIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId) {
-        String query = "select drp.id from department_report_period drp \n" +
-                "join department_report_period drp2 on drp2.id = :departmentReportPeriodId\n" +
-                "where drp.department_id in (select id from department where type = :departmentType) \n" +
-                "and drp.report_period_id = drp2.report_period_id and (drp.correction_date is null and drp2.correction_date is null or drp.correction_date = drp2.correction_date)";
+        String query = "SELECT drp.id FROM department_report_period drp \n" +
+                "JOIN department_report_period drp2 ON drp2.id = :departmentReportPeriodId\n" +
+                "WHERE drp.department_id IN (SELECT id FROM department WHERE type = :departmentType) \n" +
+                "AND drp.report_period_id = drp2.report_period_id " +
+                "AND (drp.correction_date IS NULL AND drp2.correction_date IS NULL OR drp.correction_date = drp2.correction_date)";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("departmentType", departmentTypeCode);
         params.addValue("departmentReportPeriodId", departmentReportPeriodId);
@@ -480,13 +397,12 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
     }
 
-
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public DepartmentReportPeriod fetchOne(int id) {
         try {
-            return getJdbcTemplate().queryForObject(QUERY_TEMPLATE_SIMPLE + " where id = ?", new Object[]{id}, mapper);
+            return getJdbcTemplate().queryForObject(QUERY_TEMPLATE_SIMPLE + " WHERE id = ?", new Object[]{id}, mapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

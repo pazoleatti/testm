@@ -176,7 +176,7 @@
          */
         .controller('SelectDocStateCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption',
             function ($scope, APP_CONSTANTS, GetSelectOption) {
-                var docStates = [APP_CONSTANTS.DOC_STATE.ACCEPTED, APP_CONSTANTS.DOC_STATE.REFUSED, APP_CONSTANTS.DOC_STATE.REVISION, APP_CONSTANTS.DOC_STATE.SUCCESSFUL , APP_CONSTANTS.DOC_STATE.ERROR];
+                var docStates = [APP_CONSTANTS.DOC_STATE.ACCEPTED, APP_CONSTANTS.DOC_STATE.REFUSED, APP_CONSTANTS.DOC_STATE.REVISION, APP_CONSTANTS.DOC_STATE.SUCCESSFUL, APP_CONSTANTS.DOC_STATE.ERROR];
                 $scope.docStateSelect = GetSelectOption.getBasicMultiSelectOptionsWithResults(true, docStates);
             }])
 
@@ -186,12 +186,12 @@
         .controller('SelectAsnuCtrl', ['$scope', 'APP_CONSTANTS', 'GetSelectOption', 'RefBookValuesResource',
             function ($scope, APP_CONSTANTS, GetSelectOption, RefBookValuesResource) {
 
-            $scope.initMultipleSelectAsnu = function () {
-                $scope.asnuSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
-                RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
-                    $scope.asnuSelect.options.data.results = data;
-                });
-            };
+                $scope.initMultipleSelectAsnu = function () {
+                    $scope.asnuSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.ASNU}, function (data) {
+                        $scope.asnuSelect.options.data.results = data;
+                    });
+                };
 
                 $scope.initSingleSelectAsnu = function () {
                     $scope.asnuSelect = GetSelectOption.getBasicSingleSelectOptions(true);
@@ -225,7 +225,7 @@
                 $scope.initSelectWithAllDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
                     RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                        data = data.filter(function(declarationType) {
+                        data = data.filter(function (declarationType) {
                             return isTaxForm(declarationType);
                         });
                         $scope.declarationTypeSelect.options.data.results = data;
@@ -251,7 +251,7 @@
                                 departmentId: department.id,
                                 periodId: period.id
                             }, function (data) {
-                                data = data.filter(function(declarationType) {
+                                data = data.filter(function (declarationType) {
                                     if (declarationType.id === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_PRIMARY.id) {
                                         return isTaxForm(declarationType) && $rootScope.declarationPrimaryCreateAllowed;
                                     }
@@ -270,7 +270,7 @@
                 $scope.initSelectWithAllReportDeclarationTypes = function () {
                     $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
                     RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
-                        data = data.filter(function(declarationType) {
+                        data = data.filter(function (declarationType) {
                             return isReportForm(declarationType);
                         });
                         $scope.declarationTypeSelect.options.data.results = data;
@@ -296,7 +296,7 @@
                                 departmentId: department.id,
                                 periodId: period.id
                             }, function (data) {
-                                data = data.filter(function(declarationType) {
+                                data = data.filter(function (declarationType) {
                                     return isReportForm(declarationType);
                                 });
                                 $scope.declarationTypeSelect.options.data.results = data;
@@ -354,8 +354,8 @@
         /**
          * Контроллер для выбора подразделений
          */
-        .controller('SelectDepartmentCtrl', ['$scope', 'GetSelectOption','APP_CONSTANTS','RefBookValuesResource',
-            function ($scope, GetSelectOption,APP_CONSTANTS,RefBookValuesResource) {
+        .controller('SelectDepartmentCtrl', ['$scope', 'GetSelectOption', 'APP_CONSTANTS', 'RefBookValuesResource',
+            function ($scope, GetSelectOption, APP_CONSTANTS, RefBookValuesResource) {
                 $scope.departmentsSelect = {};
 
                 /**
@@ -416,7 +416,7 @@
                     }, function (data) {
                         $scope.departmentsSelect.options.data.results = data;
                         angular.forEach(data, function (department) {
-                            if (userTBDepartment.id === department.id){
+                            if (userTBDepartment.id === department.id) {
                                 userTBDepartment.department = department;
                             }
                         });
@@ -441,7 +441,7 @@
                  */
                 $scope.initCorrectPeriods = function (departmentId) {
                     $scope.periodSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/departmentReportPeriod?projection=closedWithoutCorrection", {departmentId: departmentId}, {},
-                        "correctPeriodFormatter");
+                        "periodFormatter");
                 };
 
                 $scope.initReportPeriodType = function () {

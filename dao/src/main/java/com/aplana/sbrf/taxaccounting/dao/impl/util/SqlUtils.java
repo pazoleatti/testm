@@ -37,14 +37,7 @@ import java.util.List;
 public final class SqlUtils extends AbstractDao {
     private static final Log LOG = LogFactory.getLog(SqlUtils.class);
 
-    private static SqlUtils repository;
-
-    private static SqlUtils getRepository() {
-    	if (repository == null) {
-			repository = new SqlUtils();
-		}
-    	return repository;
-	}
+    private static SqlUtils repository = new SqlUtils();
 
 	/**
 	 * Запрещаем создавать экземляры класса
@@ -172,7 +165,7 @@ public final class SqlUtils extends AbstractDao {
 
 	private static void saveCollectionAsTable(final Collection<? extends Number> collection, String tableName) {
 		final Iterator<? extends Number> iterator = collection.iterator();
-		getRepository().getJdbcTemplate().batchUpdate("insert into " + tableName + "(num) VALUES(?)", new BatchPreparedStatementSetter() {
+		repository.getJdbcTemplate().batchUpdate("insert into " + tableName + "(num) VALUES(?)", new BatchPreparedStatementSetter() {
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setLong(1, iterator.next().longValue());
@@ -192,7 +185,7 @@ public final class SqlUtils extends AbstractDao {
 	 */
 	private static void truncateTable(String tableName) {
 		try {
-			getRepository().getJdbcTemplate().update("truncate table " + tableName);
+			repository.getJdbcTemplate().update("truncate table " + tableName);
 		} catch (DataAccessException e) {
 			LOG.error(e.getMessage(), e);
 		}

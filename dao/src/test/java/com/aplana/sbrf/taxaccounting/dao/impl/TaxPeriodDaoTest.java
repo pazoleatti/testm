@@ -26,14 +26,14 @@ public class TaxPeriodDaoTest {
 
 	@Test
 	public void getSuccessfulTest() {
-		TaxPeriod taxPeriod = taxPeriodDao.get(1);
+		TaxPeriod taxPeriod = taxPeriodDao.fetchOne(1);
 		assertEquals(1, taxPeriod.getId().intValue());
 		assertEquals(TaxType.NDFL, taxPeriod.getTaxType());
 	}
 
 	@Test(expected = DaoException.class)
 	public void getNotExistentTest() {
-		taxPeriodDao.get(-1);
+		taxPeriodDao.fetchOne(-1);
 	}
 
 	@Test
@@ -41,20 +41,20 @@ public class TaxPeriodDaoTest {
 		TaxPeriod taxPeriod = new TaxPeriod();
 		taxPeriod.setTaxType(TaxType.NDFL);
 		taxPeriod.setYear(2015);
-		int id = taxPeriodDao.add(taxPeriod);
-		assertEquals(TaxType.NDFL, taxPeriodDao.get(id).getTaxType());
-		assertEquals(2015, taxPeriodDao.get(id).getYear());
+		int id = taxPeriodDao.create(taxPeriod);
+		assertEquals(TaxType.NDFL, taxPeriodDao.fetchOne(id).getTaxType());
+		assertEquals(2015, taxPeriodDao.fetchOne(id).getYear());
 	}
 
 	@Test
 	public void listAllPeriodsByTaxTypeSuccessfulTest() {
-		List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxType(TaxType.NDFL);
+		List<TaxPeriod> taxPeriodList = taxPeriodDao.fetchAllByTaxType(TaxType.NDFL);
 		assertEquals(3, taxPeriodList.size());
 	}
 
 	@Test
 	public void getLastTest() {
-		TaxPeriod lastTaxPeriod = taxPeriodDao.get(10);
+		TaxPeriod lastTaxPeriod = taxPeriodDao.fetchOne(10);
 		assertEquals(lastTaxPeriod.getYear(), taxPeriodDao.getLast(TaxType.NDFL).getYear());
 	}
 }

@@ -239,7 +239,7 @@ public class DeclarationDataAccessServiceImplTest {
     }
 
     @Test
-	public void testCanRefresh() {
+    public void testCanRefresh() {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setIp(LOCAL_IP);
 
@@ -263,7 +263,7 @@ public class DeclarationDataAccessServiceImplTest {
         assertFalse(canRefresh(userInfo, DECLARATION_ACCEPTED_TB2_ID));
     }
 
-	//@Test Todo выключил тесты на возможность принятия до обновления Ролевой модели
+    //@Test Todo выключил тесты на возможность принятия до обновления Ролевой модели
     public void testCanAccept() {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setIp(LOCAL_IP);

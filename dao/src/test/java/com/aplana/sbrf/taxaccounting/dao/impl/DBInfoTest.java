@@ -27,7 +27,6 @@ public class DBInfoTest {
 	public void test() {
 		Assert.assertFalse(dbInfo.isSupportOver());
 		Assert.assertTrue(dbInfo.isWithRecursive());
-		Assert.assertFalse(dbInfo.isDateDiffNumber());
 	}
 
 }

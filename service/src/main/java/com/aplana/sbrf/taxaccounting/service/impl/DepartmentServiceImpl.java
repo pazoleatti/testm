@@ -362,7 +362,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> getOpenPeriodDepartments(TAUser tAUser, TaxType taxType, int reportPeriodId) {
-        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+        ReportPeriod reportPeriod = periodService.fetchReportPeriod(reportPeriodId);
         List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxType, reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());

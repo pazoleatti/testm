@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -19,13 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 /**
  * @author Lenar Haziev
@@ -69,7 +64,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         result.setControlUnp(securityService.currentUserInfo().getUser().hasRoles(action.getTaxType(), TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP));
 
         Logger logger = new Logger();
-        ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
+        ReportPeriod period = reportService.fetchReportPeriod(action.getReportPeriodId());
         List<Integer> reportPeriodIds = new ArrayList<Integer>();
         Long refBookId = null;
         switch (action.getTaxType()) {
@@ -84,7 +79,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         if (!recordPairs.isEmpty()) {
             //RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(recordPairs.get(0).getFirst());
             dateEnd = provider.getRecordVersionInfo(recordPairs.get(0).getFirst()).getVersionEnd();
-            List<ReportPeriod> reportPeriodList = reportService.getReportPeriodsByDate(action.getTaxType(), dateStart, dateEnd);
+            List<ReportPeriod> reportPeriodList = reportService.getReportPeriodsByDate(dateStart, dateEnd);
             if (reportPeriodList.isEmpty()){
                 return result;
             }

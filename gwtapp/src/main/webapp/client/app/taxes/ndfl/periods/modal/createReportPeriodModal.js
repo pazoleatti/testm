@@ -12,9 +12,9 @@
      * @description Контроллер создания и редактирования отчетных периодов
      */
         .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', 'BankDepartmentResource', '$shareData', 'DepartmentReportPeriodCheckerResource', '$http', '$logPanel', 'LogEntryResource',
-            'ReportPeriodTypeResource', '$dialogs', 'OpenPeriodResource',
+            'ReportPeriodTypeResource', '$dialogs',
             function ($scope, $filter, APP_CONSTANTS, $modalInstance, BankDepartmentResource, $shareData, DepartmentReportPeriodCheckerResource, $http, $logPanel, LogEntryResource, ReportPeriodTypeResource,
-                      $dialogs, OpenPeriodResource) {
+                      $dialogs) {
 
                 $scope.isAdd = $shareData.isAdd;
 
@@ -37,7 +37,7 @@
                     $scope.period.reportPeriod.taxPeriod.year = $shareData.period.year;
                     $scope.period.reportPeriod.name = $shareData.period.name;
                     ReportPeriodTypeResource.query({
-                        id: $shareData.period.dictTaxPeriodId
+                        dictTaxPeriodId: $shareData.period.dictTaxPeriodId
                     }, function (data) {
                         if (data) {
                             $scope.period.reportPeriod.dictPeriod = data;
@@ -187,7 +187,7 @@
                                                     content: $filter('translate')('reportPeriod.error.editPeriod.text')
                                                 });
                                             } else {
-                                                // СОхраняем отредактированный период
+                                                // Сохраняем отредактированный период
                                                 $http({
                                                     method: "POST",
                                                     url: "controller/rest/departmentReportPeriod/" + $scope.period.id,
@@ -227,7 +227,7 @@
                             okBtnCaption: $filter('translate')('common.button.yes'),
                             cancelBtnCaption: $filter('translate')('common.button.no'),
                             okBtnClick: function () {
-                                $modalInstance.dismiss('Canceled');
+                                $modalInstance.dismiss();
                             }
                         });
                     } else {
@@ -237,7 +237,7 @@
                             okBtnCaption: $filter('translate')('common.button.yes'),
                             cancelBtnCaption: $filter('translate')('common.button.no'),
                             okBtnClick: function () {
-                                $modalInstance.dismiss('Canceled');
+                                $modalInstance.dismiss();
                             }
                         });
                     }

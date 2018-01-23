@@ -113,7 +113,7 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getDepartmentTBChildren(departmentGOSB31.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
         when(departmentDao.getDepartmentTBChildren(departmentOSB311.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
 
-        when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
+        when(periodService.fetchReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
 
         when(departmentDao.getDepartmentTBChildrenId(root.getId())).thenReturn(new ArrayList<Integer>(0));
         when(departmentDao.getDepartmentTBChildrenId(departmentTB2.getId())).thenReturn(asList(departmentTB2.getId()));
@@ -142,12 +142,14 @@ public class DepartmentServiceImplTest {
                 List<DepartmentReportPeriod> result = new ArrayList<DepartmentReportPeriod>();
                 DepartmentReportPeriodFilter drpf = (DepartmentReportPeriodFilter) invocation.getArguments()[0];
                 Integer repId = drpf.getReportPeriodIdList().get(0);
-                for(final Integer depId: drpf.getDepartmentIdList()) {
+                for (final Integer depId : drpf.getDepartmentIdList()) {
                     if ((depId.equals(root.getId()) && repId.equals(0)) ||
                             (depId.equals(departmentTB2.getId()) && repId.equals(0)) ||
                             (depId.equals(departmentOSB311.getId()) && repId.equals(0))
                             ) {
-                        result.add(new DepartmentReportPeriod(){{setDepartmentId(depId);}});
+                        result.add(new DepartmentReportPeriod() {{
+                            setDepartmentId(depId);
+                        }});
                     }
                 }
                 return result;
@@ -480,7 +482,7 @@ public class DepartmentServiceImplTest {
     }
 
     //@Test
-    public void getSourcesDepartmentsTest(){
+    public void getSourcesDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
         // test for ROLE_CONTROL_UNP

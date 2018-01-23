@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterData;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.PeriodsGetFilterDataResult;
@@ -75,20 +73,12 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
             }
         }
 	    res.setAvalDepartments(ad);
-        // TODO Левыкин: указанный метод всегда возвращает null!
-	    DepartmentReportPeriod rp = reportPeriodService.getLastReportPeriod(taxType, action.getDepartmentId());
 	    Calendar current = Calendar.getInstance();
-	    if (rp != null) {
-		    res.setYearFrom(rp.getReportPeriod().getTaxPeriod().getYear());
-		    res.setYearTo(rp.getReportPeriod().getTaxPeriod().getYear());
-		    res.setCurrentYear(current.get(Calendar.YEAR));
-	    } else {
-		    res.setYearFrom(current.get(Calendar.YEAR));
-		    res.setYearTo(current.get(Calendar.YEAR));
-		    res.setCurrentYear(current.get(Calendar.YEAR));
-	    }
+		res.setYearFrom(current.get(Calendar.YEAR));
+		res.setYearTo(current.get(Calendar.YEAR));
+		res.setCurrentYear(current.get(Calendar.YEAR));
 
-        return res;
+		return res;
     }
 
     @Override

@@ -165,14 +165,14 @@
             });
         }])
 
-      /**
-       *  @description Редактируемая задача планировщик
-       * */
-      .factory('updateScheduleTask', ['$resource', function ($resource) {
-        return $resource('controller/rest/updateSchedulerTask?idTaskScheduler=:idTaskScheduler', {}, {
-            query: {method: 'GET', isArray: false, cache: false}
-        });
-      }])
+        /**
+         *  @description Редактируемая задача планировщик
+         * */
+        .factory('updateScheduleTask', ['$resource', function ($resource) {
+            return $resource('controller/rest/updateSchedulerTask?idTaskScheduler=:idTaskScheduler', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
 
         /**
          * @description Асинхронные задачи
@@ -282,18 +282,11 @@
         /**
          * @description Установить срок сдачи отчетности
          */
-        .factory('AppointDeadlineResource',[
+        .factory('AppointDeadlineResource', [
             '$resource', function ($resource) {
                 return $resource('controller/actions/departmentReportPeriod/updateDeadline', {}, {
                     doOperation: {method: 'POST'}
                 });
-        }])
-
-        .factory('OpenPeriodResource', [
-            '$resource', function ($resource) {
-                return $resource('controller/actions/departmentReportPeriod/open', {}, {
-                    doOperation: {method: 'POST'}
-                });
-        }])
+            }])
     ;
 }());

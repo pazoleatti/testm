@@ -619,7 +619,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             if (departmentService.getParentTB(depId) != null){
                 //1А.1.1
                 List<DepartmentReportPeriod> listDRP =
-                        periodService.getDRPByDepartmentIds(null, Arrays.asList(terrBankId));
+                        periodService.getDRPByDepartmentIds(Arrays.asList(terrBankId));
                 if (!listDRP.isEmpty()){
                     for (DepartmentReportPeriod drp : listDRP)
                         //1А.1.1.1
@@ -641,7 +641,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         //2
         List<DepartmentReportPeriod> listDRP =
-                periodService.getDRPByDepartmentIds(Arrays.asList(TaxType.NDFL), Arrays.asList(0));
+                periodService.getDRPByDepartmentIds(Arrays.asList(0));
         if (!listDRP.isEmpty()){
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1
@@ -668,7 +668,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             logger.error(String.format("Существует экземпляр налоговой формы \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     declarationTemplateService.get(decData.getDeclarationTemplateId()).getName(),
                     department.getName(),
-                    periodService.getReportPeriod(decData.getReportPeriodId()).getName()));
+                    periodService.fetchReportPeriod(decData.getReportPeriodId()).getName()));
         }
 
         //3 точка запроса

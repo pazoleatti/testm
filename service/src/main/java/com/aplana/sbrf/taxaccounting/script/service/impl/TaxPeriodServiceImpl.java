@@ -13,15 +13,15 @@ import java.util.List;
 public class TaxPeriodServiceImpl implements TaxPeriodService {
 
 	@Autowired
-	TaxPeriodDao dao;
+	TaxPeriodDao taxPeriodDao;
 	
 	@Override
 	public TaxPeriod get(int taxPeriodId) {
-		return dao.get(taxPeriodId);
+		return taxPeriodDao.fetchOne(taxPeriodId);
 	}
 
 	@Override
 	public List<TaxPeriod> listByTaxType(TaxType taxType) {
-		return dao.listByTaxType(taxType);
+		return taxPeriodDao.fetchAllByTaxType(taxType);
 	}
 }

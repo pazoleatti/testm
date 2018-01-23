@@ -171,8 +171,8 @@ public class RefBookValuesController {
      * @return Список периодов
      */
     @GetMapping(value = "/rest/refBookValues/reportPeriodTypeById")
-    public ReportPeriodType fetchReportPeriodsTypeById(@RequestParam Long id) {
-        return periodService.getPeriodTypeById(id);
+    public ReportPeriodType fetchReportPeriodsTypeById(@RequestParam Long dictTaxPeriodId) {
+        return periodService.getPeriodTypeById(dictTaxPeriodId);
     }
 
     /**

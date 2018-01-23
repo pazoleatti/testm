@@ -73,7 +73,7 @@ public class GetSubreportHandler extends AbstractActionHandler<GetSubreportActio
 
         result.setRefBookParamInfoMap(refBookParamInfoMap);
         if (refBookParamInfoMap.size() > 0) {
-            ReportPeriod reportPeriod = periodService.getReportPeriod(declarationData.getReportPeriodId());
+            ReportPeriod reportPeriod = periodService.fetchReportPeriod(declarationData.getReportPeriodId());
             result.setStartDate(reportPeriod.getCalendarStartDate());
             result.setEndDate(reportPeriod.getEndDate());
         }

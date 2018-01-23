@@ -71,7 +71,7 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
 
         String filterMaster = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
 
-        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
+        ReportPeriod reportPeriod = periodService.fetchReportPeriod(action.getReportPeriodId());
 
         PagingResult<Map<String, RefBookValue>> paramsMaster = providerMaster.getRecords(
                 addDayToDate(reportPeriod.getEndDate(), -1), null, filterMaster, null);

@@ -9,119 +9,132 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Интерфейс сервиса для работы с {@link DepartmentReportPeriod отчётный период для подразделения}
+ * Интерфейс сервиса для работы с {@link DepartmentReportPeriod}
  */
 public interface DepartmentReportPeriodService {
 
-
     /**
-     * Возвращает объект {@link DepartmentReportPeriod отчётный период для подразделения} по идентификатору
-     * @param id - идентификаор
-     * @return объект {@link DepartmentReportPeriod}
+     * Возвращает объект {@link DepartmentReportPeriod} по идентификатору
+     *
+     * @param id идентификаор
+     * @return объект {@link DepartmentReportPeriod} или null
      */
     DepartmentReportPeriod fetchOne(int id);
 
     /**
      * Получение списка отчетных периодов для подразделений по указанному фильтру
-     * @param departmentReportPeriodFilter - фильтр
-     * @return список периодов
+     *
+     * @param departmentReportPeriodFilter фильтр
+     * @return список {@link DepartmentReportPeriod} или пустой список
      */
     List<DepartmentReportPeriod> fetchAllByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     /**
      * Получение списка идентификаторов отчетных периодов для подразделений по указанному фильтру
-     * @param departmentReportPeriodFilter - фильтр
-     * @return список идентификаторов
+     *
+     * @param departmentReportPeriodFilter фильтр
+     * @return список идентификаторов или пустой список
      */
     List<Integer> fetchAllIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     /**
-     * Сохранение в БД отчетного периода для подразделения
-     * @param departmentReportPeriod - сохраняемый объект
+     * Создание нового отчетного периода для подразделения
+     *
+     * @param departmentReportPeriod сохраняемый объект
      */
     void create(DepartmentReportPeriod departmentReportPeriod);
 
     /**
-     * Сохранение в БД отчетного периода для подразделения
-     * @param departmentReportPeriod - сохраняемый объект
-     * @param departmentIds - список идентификаторв подразделений, для которых необходимо создать отчетный период
+     * Создание нового отчетного периода для подразделения
+     *
+     * @param departmentReportPeriod сохраняемый объект
+     * @param departmentIds          список идентификаторв подразделений, для которых необходимо создать отчетный период
      */
     void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
     /**
      * Открытие/закрытие отчетного периода подразделения
+     *
+     * @param id     идентификатор отчетного периода подразделения, статус которого необходимо обновить
+     * @param active статус
      */
     void updateActive(int id, boolean active);
 
     /**
      * Открытие/закрытие отчетного периода подразделения
+     *
+     * @param ids            список идентификаторов отчетных периодов подразделения, для которых необходимо обновить статус
+     * @param reportPeriodId идентификатор отчетного периода
+     * @param active         статус (открыт/закрыт)
      */
-    void updateActive(List<Integer> ids, Integer report_period_id, boolean active);
+    void updateActive(List<Integer> ids, Integer reportPeriodId, boolean active);
 
     /**
-     * Удаление отчетного периода подразделения
-     * @param id - идентификатор
-     */
-    void delete(Integer id);
-
-    /**
-     * Удаление отчетных периода подразделения
-     * @param ids - список иденификаторов
+     * Удаление отчетных периодов подразделений
+     *
+     * @param ids список иденификаторов
      */
     void delete(List<Integer> ids);
 
     /**
      * Проверяет существование периода для подразделения
-     * @param departmentId - идентификатор подразделения
-     * @param reportPeriodId - идентификатор отчетного периода
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
      * @return признак существования отчетного периода пожразделения
      */
     boolean checkExistForDepartment(int departmentId, int reportPeriodId);
 
     /**
-     * Возвращает последний отчетный период подразделения для комбинации отчетный период-подразделение
-     * @param departmentId - идентификатор подразделения
-     * @param reportPeriodId - идентификатор отчетного периода
-     * @return последний отчетный период подразделения
+     * Получение последнего отчетного периода подразделения
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link DepartmentReportPeriod} или null
      */
     DepartmentReportPeriod fetchLast(int departmentId, int reportPeriodId);
 
     /**
-     * Обычный отчетный период подразделения для комбинации отчетный период-подразделение (первый и без корректировки)
-     * @param departmentId - идентификатор подразделения
-     * @param reportPeriodId - идентификатор отчетного периода
-     * @return отчетный период подразделения
+     * Получение первого некорректирующего отчетного периода подразделения по идентификатору подразделения
+     * и идентификатору отчетного периода
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link DepartmentReportPeriod} или null
      */
     DepartmentReportPeriod fetchFirst(int departmentId, int reportPeriodId);
 
     /**
      * Проверяет существует ли корректирующий период, атрибут "Период сдачи корректировки" которого содержит большее значение
-     * @param departmentId пара определяющая период
-     * @param reportPeriodId  пара определяющая период
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
      * @param correctionDate дата выбранного периода
-     * @return true - если существует
+     * @return true, если существует
      */
     boolean checkExistLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate);
 
-
     /**
      * Возвращает отчетные периоды подразделений с фильтрацией и пагинацией
-     * @param departmentReportPeriodFilter - фильтр отчетных периодов подразделений
-     * @return отчетные периоды подразделений
+     *
+     * @param departmentReportPeriodFilter фильтр отчетных периодов подразделений
+     * @return список {@link DepartmentReportPeriodJournalItem} или пустой список
      */
     List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     /**
      * Проверка периода на декларации, которые не в статусе "Принят"
-     * @param id - параметры проверяемого периода
-     * @return uuid - идентификатор логгера
+     *
+     * @param id параметры проверяемого периода
+     * @return uuid идентификатор логгера
      */
     String checkHasNotAccepted(Integer id);
 
     /**
      * Проверяет период на наличие деклараций, которые находятся на редактировании
-     * @param id - идентификатор проверяемого периода
-     * @return uuid - идентификатор логера
+     *
+     * @param id идентификатор проверяемого периода
+     * @return uuid  идентификатор логера
      */
     String checkHasBlockedDeclaration(Integer id);
 }

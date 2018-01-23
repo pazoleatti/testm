@@ -6,19 +6,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.model.util.QueryDSLOrderingUtils;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.*;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringTemplate;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDateTime;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -27,30 +18,19 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationData.declarationData;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationKind.declarationKind;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationTemplate.declarationTemplate;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationType.declarationType;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartment.department;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentFullpath.departmentFullpath;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentReportPeriod.departmentReportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QLogBusiness.logBusiness;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QRefBookAsnu.refBookAsnu;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QRefBookDocState.refBookDocState;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QReportPeriod.reportPeriod;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QSecUser.secUser;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QState.state;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QTaxPeriod.taxPeriod;
-import static com.querydsl.core.types.Projections.bean;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Реализация Dao для работы с декларациями
@@ -69,48 +49,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     "  INNER JOIN REPORT_PERIOD rp ON drp.REPORT_PERIOD_ID = rp.ID\n" +
                     "  where dd.DECLARATION_TEMPLATE_ID = :decTemplateId and (rp.CALENDAR_START_DATE NOT BETWEEN :startDate AND :endDate\n" +
                     "    OR rp.END_DATE NOT BETWEEN :startDate AND :endDate)";
-    private final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        }
-    };
-    final private SQLQueryFactory sqlQueryFactory;
-    final private QBean<DeclarationData> declarationDataQBean = bean(DeclarationData.class, declarationData.id, declarationData.declarationTemplateId,
-            declarationData.taxOrganCode, declarationData.kpp, declarationData.oktmo, declarationData.state,
-            declarationData.departmentReportPeriodId.intValue().as("departmentReportPeriodId"), declarationData.asnuId,
-            declarationData.note, declarationData.fileName, declarationData.docStateId.as("docState"),
-            departmentReportPeriod.reportPeriodId.as("reportPeriodId"), departmentReportPeriod.departmentId.as("departmentId"), declarationData.manuallyCreated);
-    StringTemplate dateCorrection = Expressions.stringTemplate(
-            "to_char({0},'{1s}')", departmentReportPeriod.correctionDate, ConstantImpl.create("DD.MM.YYYY"));
-    /*Период формируется как "наименование периода год", или как "наименование периода год коррелирующий период"
-      В зависимости от принадлежности формы к открытому корр. периоду*/
-    final private Expression<String> caseStringForReportPeriod = new CaseBuilder()
-            .when(departmentReportPeriod.correctionDate.isNotNull()).then(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name).
-                    concat(", корр. (").concat(dateCorrection).concat(")"))
-            .otherwise(taxPeriod.year.stringValue().concat(": ").concat(reportPeriod.name))
-            .as("reportPeriod");
-    final private QBean<DeclarationDataJournalItem> dataJournalItemQBean = bean(DeclarationDataJournalItem.class,
-            declarationData.id.as("declarationDataId"),
-            declarationKind.name.as("declarationKind"),
-            declarationType.name.as("declarationType"),
-            departmentFullpath.shortname.as("department"),
-            refBookAsnu.name.as("asnuName"),
-            caseStringForReportPeriod,
-            state.name.as("state"),
-            declarationData.fileName,
-            logBusiness.logDate.as("creationDate"),
-            secUser.name.as("creationUserName"),
-            declarationData.kpp.as("kpp"),
-            declarationData.oktmo.as("oktmo"),
-            declarationData.taxOrganCode.as("taxOrganCode"),
-            refBookDocState.name.as("docState"),
-            declarationData.note.as("note"));
-
-
-    public DeclarationDataDaoImpl(SQLQueryFactory sqlQueryFactory) {
-        this.sqlQueryFactory = sqlQueryFactory;
-    }
 
     @Override
     public SecuredEntity getSecuredEntity(long id) {
@@ -271,107 +209,113 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams params) {
-
-        BooleanBuilder where = new BooleanBuilder();
-
-        if (!CollectionUtils.isEmpty(filter.getAsnuIds())) {
-            where.and(refBookAsnu.id.in(filter.getAsnuIds()));
-        }
-
-        if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
-            filter.setDepartmentIds(Collections.EMPTY_LIST);
-        }
-        where.and(department.id.in(filter.getDepartmentIds()));
-
-        if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
-            filter.setFormKindIds(Collections.EMPTY_LIST);
-        }
-        where.and(declarationKind.id.in(filter.getFormKindIds()));
-
-        if (filter.getDeclarationDataId() != null) {
-            //Значение введенное в фильтре по длине может быть меньше, чем значение поля, и может содержаться в любой его части
-            where.and(declarationData.id.stringValue().contains(filter.getDeclarationDataId().toString()));
-        }
-
-        if (!CollectionUtils.isEmpty(filter.getDeclarationTypeIds())) {
-            where.and(declarationType.id.in(filter.getDeclarationTypeIds()));
-        }
-
-        if (filter.getFormState() != null) {
-            where.and(declarationData.state.eq(filter.getFormState()));
-        }
-
-        if (StringUtils.isNotBlank(filter.getFileName())) {
-            //Значение введенное в фильтре по длине может быть меньше, чем значение поля, и может содержаться в любой его части
-            where.and(declarationData.fileName.containsIgnoreCase(StringUtils.trim(filter.getFileName())));
-        }
-
-        if (!CollectionUtils.isEmpty(filter.getReportPeriodIds())) {
-            where.and(reportPeriod.id.in(filter.getReportPeriodIds()));
-        }
+    public PagingResult<DeclarationDataJournalItem> findPage(DeclarationDataFilter filter, PagingParams pagingParams) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        StringBuilder sql = new StringBuilder(
+                "select dd.id declarationDataId, dkind.name declarationKind, dtype.name declarationType, dep_fullpath.shortname department,\n" +
+                        "   asnu.name asnuName, state.name state, dd.file_name fileName, log_b.log_date creationDate, su.name creationUserName,\n" +
+                        "   case when drp.correction_date is not null then" +
+                        "       tp.year || ': ' || rp.name || ', корр. (' || to_char(drp.correction_date, 'DD.MM.YYYY') || ')'" +
+                        "       else tp.year || ': ' || rp.name end as reportPeriod,\n" +
+                        "   dd.kpp, dd.oktmo, dd.tax_organ_code taxOrganCode, doc_state.name docState, dd.note\n" +
+                        "from DECLARATION_DATA dd\n" +
+                        "left join REF_BOOK_ASNU asnu on asnu.id = dd.asnu_id\n" +
+                        "inner join LOG_BUSINESS log_b on log_b.DECLARATION_DATA_ID = dd.id and log_b.event_id = 1\n" +
+                        "inner join SEC_USER su on su.login = log_b.user_login\n" +
+                        "inner join DECLARATION_TEMPLATE dt on dt.id = dd.declaration_template_id\n" +
+                        "inner join DECLARATION_TYPE dtype on dtype.id = dt.declaration_type_id\n" +
+                        "inner join DECLARATION_KIND dkind on dkind.id = dt.form_kind\n" +
+                        "inner join DEPARTMENT_REPORT_PERIOD drp on drp.id = dd.department_report_period_id\n" +
+                        "inner join REPORT_PERIOD rp on rp.id = drp.report_period_id\n" +
+                        "inner join TAX_PERIOD tp on tp.id = rp.tax_period_id\n" +
+                        "inner join STATE state on state.id = dd.state\n" +
+                        "inner join DEPARTMENT dep on dep.id = drp.department_id\n" +
+                        "inner join DEPARTMENT_FULLPATH dep_fullpath on dep_fullpath.id = dep.id\n" +
+                        "left join REF_BOOK_DOC_STATE doc_state on doc_state.id = dd.doc_state_id\n" +
+                        "where (:declarationDataId is null or dd.id like '%' || :declarationDataId || '%')\n" +
+                        "   and (:state is null or dd.state = :state)\n" +
+                        "   and (:fileName is null or upper(dd.file_name) like '%' || upper(:fileName) || '%')\n" +
+                        "   and (:kpp is null or upper(dd.kpp) like '%' || upper(:kpp) || '%')\n" +
+                        "   and (:oktmo is null or upper(dd.oktmo) like '%' || upper(:oktmo) || '%')\n" +
+                        "   and (:note is null or upper(dd.note) like '%' || upper(:note) || '%')\n" +
+                        "   and (:taxOrganCode is null or upper(dd.tax_organ_code) like '%' || upper(:taxOrganCode) || '%')\n"
+        );
+        params.addValue("declarationDataId", filter.getDeclarationDataId());
+        params.addValue("state", filter.getFormState() != null ? filter.getFormState().getId() : null);
+        params.addValue("fileName", filter.getFileName());
+        params.addValue("kpp", filter.getTaxOrganKpp());
+        params.addValue("oktmo", filter.getOktmo());
+        params.addValue("note", filter.getNote());
+        params.addValue("taxOrganCode", filter.getTaxOrganCode());
 
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionTag()) {
-                where.and(departmentReportPeriod.correctionDate.isNotNull());
+                sql.append(" and drp.correction_date is not null ");
             } else {
-                where.and(departmentReportPeriod.correctionDate.isNull());
+                sql.append(" and drp.correction_date is null ");
             }
         }
-        // Для Отчётов
-        if (StringUtils.isNotEmpty(filter.getTaxOrganKpp())) {
-            where.and(declarationData.kpp.containsIgnoreCase(filter.getTaxOrganKpp()));
+
+        if (!isEmpty(filter.getAsnuIds())) {
+            sql.append(" and ").append(SqlUtils.transformToSqlInStatement("asnu.id", filter.getAsnuIds()));
         }
 
-        if (StringUtils.isNotEmpty(filter.getOktmo())) {
-            where.and(declarationData.oktmo.containsIgnoreCase(filter.getOktmo()));
+        if (!isEmpty(filter.getDepartmentIds())) {
+            sql.append(" and ").append(SqlUtils.transformToSqlInStatementViaTmpTable("dep.id", filter.getDepartmentIds()));
         }
 
-        if (StringUtils.isNotEmpty(filter.getNote())) {
-            where.and(declarationData.note.containsIgnoreCase(filter.getNote()));
+        if (!isEmpty(filter.getFormKindIds())) {
+            sql.append(" and ").append(SqlUtils.transformToSqlInStatement("dkind.id", filter.getFormKindIds()));
         }
 
-        if (StringUtils.isNotEmpty(filter.getTaxOrganCode())) {
-            where.and(declarationData.taxOrganCode.containsIgnoreCase(filter.getTaxOrganCode()));
+        if (!isEmpty(filter.getDeclarationTypeIds())) {
+            sql.append(" and ").append(SqlUtils.transformToSqlInStatement("dtype.id", filter.getDeclarationTypeIds()));
         }
 
-        if (!CollectionUtils.isEmpty(filter.getDocStateIds())) {
-            where.and(declarationData.docStateId.in(filter.getDocStateIds()));
+        if (!isEmpty(filter.getReportPeriodIds())) {
+            sql.append(" and ").append(SqlUtils.transformToSqlInStatement("rp.id", filter.getReportPeriodIds()));
         }
 
-        //Определяем способ сортировки
-        String orderingProperty = params.getProperty();
-        Order ascDescOrder = Order.valueOf(params.getDirection().toUpperCase());
+        if (!isEmpty(filter.getDocStateIds())) {
+            sql.append(" and ").append(SqlUtils.transformToSqlInStatement("dd.doc_state_id", filter.getDocStateIds()));
+        }
 
-        OrderSpecifier ordering = QueryDSLOrderingUtils.getOrderSpecifierByPropertyAndOrder(
-                dataJournalItemQBean, orderingProperty, ascDescOrder, declarationData.id.desc());
+        String orderedSql = sql.toString() + " order by " + pagingParams.getProperty() + " " + pagingParams.getDirection();
 
-        SQLQuery<Tuple> queryBase = sqlQueryFactory.select()
-                .from(declarationData)
-                .leftJoin(declarationData.declarationDataFkAsnuId, refBookAsnu)
-                .leftJoin(declarationData._logBusinessFkDeclarationId, logBusiness).on(logBusiness.eventId.eq((short) 1))
-                .innerJoin(declarationData.declarationDataFkDeclTId, declarationTemplate)
-                .innerJoin(declarationTemplate.declarationTemplateFkDtype, declarationType)
-                .innerJoin(declarationTemplate.declarationTemplateFkindFk, declarationKind)
-                .innerJoin(declarationData.declDataFkDepRepPerId, departmentReportPeriod)
-                .innerJoin(departmentReportPeriod.depRepPerFkRepPeriodId, reportPeriod)
-                .innerJoin(declarationData.declarationDataStateFk, state)
-                .innerJoin(departmentReportPeriod.depRepPerFkDepartmentId, department)
-                .innerJoin(reportPeriod.reportPeriodFkTaxperiod, taxPeriod)
-                .leftJoin(secUser).on(secUser.login.eq(logBusiness.userLogin))
-                .leftJoin(declarationData.declDataDocStateFk, refBookDocState)
-                .innerJoin(departmentFullpath).on(departmentFullpath.id.eq(department.id))
-                .orderBy(ordering)
-                .where(where);
+        String numberedSql = "select rownum rn, ordered.* from (" + orderedSql + ") ordered";
 
-        List<DeclarationDataJournalItem> items = queryBase
-                .offset(params.getStartIndex())
-                .limit(params.getCount())
-                .transform(GroupBy.groupBy(declarationData.id).list(dataJournalItemQBean));
+        String pagedSql = "select * from (" + numberedSql + ") where rn between :start and :end";
+        params.addValue("start", pagingParams.getStartIndex() + 1);
+        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
 
-        long count = queryBase.fetchCount();
+        List<DeclarationDataJournalItem> items = getNamedParameterJdbcTemplate().query(
+                pagedSql, params,
+                new RowMapper<DeclarationDataJournalItem>() {
+                    @Override
+                    public DeclarationDataJournalItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        DeclarationDataJournalItem item = new DeclarationDataJournalItem();
+                        item.setDeclarationDataId(rs.getLong("declarationDataId"));
+                        item.setDeclarationKind(rs.getString("declarationKind"));
+                        item.setDeclarationType(rs.getString("declarationType"));
+                        item.setDepartment(rs.getString("department"));
+                        item.setAsnuName(rs.getString("asnuName"));
+                        item.setState(rs.getString("state"));
+                        item.setFileName(rs.getString("fileName"));
+                        item.setCreationDate(new LocalDateTime(rs.getTimestamp("creationDate").getTime()));
+                        item.setCreationUserName(rs.getString("creationUserName"));
+                        item.setReportPeriod(rs.getString("reportPeriod"));
+                        item.setKpp(rs.getString("kpp"));
+                        item.setOktmo(rs.getString("oktmo"));
+                        item.setTaxOrganCode(rs.getString("taxOrganCode"));
+                        item.setDocState(rs.getString("docState"));
+                        item.setNote(rs.getString("note"));
+                        return item;
+                    }
+                }
+        );
+        long count = getNamedParameterJdbcTemplate().queryForObject("select count(*) from (" + sql.toString() + ")", params, Long.class);
 
-        return new PagingResult<DeclarationDataJournalItem>(items, (int) count);
+        return new PagingResult<>(items, (int) count);
     }
 
     @Override
@@ -541,7 +485,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionDate() != null) {
-                sql.append(" and drp.correction_date = '" + sdf.get().format(filter.getCorrectionDate()) + "\'");
+                sql.append(" and drp.correction_date = '" + new SimpleDateFormat("dd.MM.yyyy").format(filter.getCorrectionDate()) + "\'");
             } else {
                 sql.append(" and drp.correction_date is " +
                         (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
@@ -831,15 +775,22 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
     @Override
     public List<DeclarationData> fetchAllDeclarationData(int declarationTypeId, List<Integer> departmentIds, int reportPeriodId) {
-        return sqlQueryFactory
-                .select(declarationDataQBean)
-                .from(declarationData)
-                .innerJoin(declarationData.declarationDataFkDeclTId, declarationTemplate)
-                .innerJoin(declarationData.declDataFkDepRepPerId, departmentReportPeriod)
-                .where(declarationTemplate.declarationTypeId.eq((long) declarationTypeId)
-                        .and(departmentReportPeriod.departmentId.in(departmentIds))
-                        .and(departmentReportPeriod.reportPeriodId.eq(reportPeriodId)))
-                .fetch();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationTypeId", declarationTypeId);
+        params.addValue("departmentIds", departmentIds);
+        params.addValue("reportPeriodId", reportPeriodId);
+        return getNamedParameterJdbcTemplate().query(
+                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state,\n" +
+                        " dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id,\n" +
+                        " dd.manually_created, drp.report_period_id, drp.department_id\n" +
+                        "from DECLARATION_DATA dd\n" +
+                        "inner join DECLARATION_TEMPLATE dt on dd.declaration_template_id = dt.id\n" +
+                        "inner join DEPARTMENT_REPORT_PERIOD drp on dd.department_report_period_id = drp.id\n" +
+                        "where declaration_type_id = :declarationTypeId\n" +
+                        " and department_id in (:departmentIds)\n" +
+                        " and report_period_id = :reportPeriodId",
+                params,
+                new DeclarationDataRowMapper());
     }
 
     @Override

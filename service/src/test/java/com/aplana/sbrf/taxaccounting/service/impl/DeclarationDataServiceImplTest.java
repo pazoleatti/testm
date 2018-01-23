@@ -45,7 +45,7 @@ public class DeclarationDataServiceImplTest {
     @Autowired
     DeclarationDataServiceImpl declarationDataService;
     @Autowired
-	DeclarationDataDao declarationDataDao;
+    DeclarationDataDao declarationDataDao;
     @Autowired
     DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
@@ -61,14 +61,14 @@ public class DeclarationDataServiceImplTest {
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
-	////////////////
-	// TODO: (sgoryachkin)
-	// Незнаю как это тестировать. Закормментил тесты
-	//
-	//
-	//
-	////////////////
-	
+    ////////////////
+    // TODO: (sgoryachkin)
+    // Незнаю как это тестировать. Закормментил тесты
+    //
+    //
+    //
+    ////////////////
+
     @Test
     public void testme() {
         // TODO фиктивный тест, добил чтоб не падала сборка
@@ -134,8 +134,8 @@ public class DeclarationDataServiceImplTest {
 
         when(declarationTemplateService.get(1)).thenReturn(declarationTemplate);
 
-        when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
-        when(periodService.getReportPeriod(declarationData1.getReportPeriodId())).thenReturn(reportPeriod1);
+        when(periodService.fetchReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
+        when(periodService.fetchReportPeriod(declarationData1.getReportPeriodId())).thenReturn(reportPeriod1);
 
         when(departmentService.getDepartment(1)).thenReturn(department);
 
@@ -262,7 +262,7 @@ public class DeclarationDataServiceImplTest {
         when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
         when(reportService.getDec(anyLong(), Matchers.<DeclarationDataReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
-        when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
+        when(periodService.fetchReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
 
         when(departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
 
@@ -270,21 +270,21 @@ public class DeclarationDataServiceImplTest {
 
         when(departmentReportPeriodService.fetchLast(2, 1)).thenReturn(drp2);
 
-        try{
+        try {
             when(sourceService.isDDConsolidationTopical(1L)).thenReturn(false);
             declarationDataService.check(logger, 1L, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(AsyncTaskState state) {
                 }
             });
-        } catch (ServiceException e){
+        } catch (ServiceException e) {
             //Nothing
         }
 
         assertEquals("Налоговая форма содержит неактуальные консолидированные данные  (расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"",
                 logger.getEntries().get(0).getMessage());
 
-        try{
+        try {
             logger.clear();
             when(sourceService.isDDConsolidationTopical(1L)).thenReturn(true);
             declarationDataService.check(logger, 1L, userInfo, new LockStateLogger() {
@@ -292,7 +292,7 @@ public class DeclarationDataServiceImplTest {
                 public void updateState(AsyncTaskState state) {
                 }
             });
-        } catch (ServiceLoggerException e){
+        } catch (ServiceLoggerException e) {
             //Nothing
         }
 
@@ -381,7 +381,7 @@ public class DeclarationDataServiceImplTest {
         when(blobDataService.create(anyString(), anyString())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                String path = (String)invocation.getArguments()[0];
+                String path = (String) invocation.getArguments()[0];
                 BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
                 try {
                     String s;
@@ -396,7 +396,7 @@ public class DeclarationDataServiceImplTest {
         });
         ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
-        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null,null, userInfo, new LockStateLogger() {
+        declarationDataService.createSpecificReport(logger, declarationData, specificReport, null, null, null, userInfo, new LockStateLogger() {
             @Override
             public void updateState(AsyncTaskState state) {
                 //Nothing
@@ -419,7 +419,7 @@ public class DeclarationDataServiceImplTest {
         declarationData.setId(1L);
 
         when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
-                when(reportService.getDec(declarationData.getId(), DeclarationDataReportType.XML_DEC)).thenReturn("uuid1");
+        when(reportService.getDec(declarationData.getId(), DeclarationDataReportType.XML_DEC)).thenReturn("uuid1");
 
         BlobDataService blobDataService = mock(BlobDataService.class);
         when(blobDataService.getLength("uuid1")).thenReturn(1200L);
@@ -442,6 +442,8 @@ public class DeclarationDataServiceImplTest {
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.ACCEPT_DEC));
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.CHECK_DEC));
         assertEquals(new Long(2L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), DeclarationDataReportType.XML_DEC));
-        assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, new DeclarationSubreport(){{setAlias("alias1");}})));
+        assertEquals(new Long(10L), declarationDataService.getValueForCheckLimit(userInfo, declarationData.getId(), new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, new DeclarationSubreport() {{
+            setAlias("alias1");
+        }})));
     }
 }

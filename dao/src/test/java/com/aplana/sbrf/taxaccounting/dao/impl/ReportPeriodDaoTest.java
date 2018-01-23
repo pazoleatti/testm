@@ -38,7 +38,7 @@ public class ReportPeriodDaoTest {
 
 	@Test(expected = DaoException.class)
 	public void getNotExistentTest() {
-		reportPeriodDao.get(-1);
+		reportPeriodDao.fetchOne(-1);
 	}
 	
 	@Before
@@ -46,7 +46,7 @@ public class ReportPeriodDaoTest {
 		taxPeriod = new TaxPeriod();
 		taxPeriod.setTaxType(TaxType.NDFL);
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
-		taxPeriod.setId(taxPeriodDao.add(taxPeriod));
+		taxPeriod.setId(taxPeriodDao.create(taxPeriod));
 	}
 
     @Test
@@ -54,7 +54,7 @@ public class ReportPeriodDaoTest {
         PagingParams pagingParams = new PagingParams();
         pagingParams.setProperty("id");
         pagingParams.setDirection("ASC");
-        reportPeriodDao.getCorrectPeriods(TaxType.NDFL, 1);
+        reportPeriodDao.getCorrectPeriods(1);
     }
 	
 	@Test
@@ -66,7 +66,7 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setStartDate(new Date());
 		newReportPeriod.setEndDate(new Date());
 		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
-		reportPeriodDao.save(newReportPeriod);
+		reportPeriodDao.create(newReportPeriod);
 		
 		newReportPeriod = new ReportPeriod();
 		newReportPeriod.setName("MyTestName2");
@@ -75,12 +75,12 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setStartDate(new Date());
 		newReportPeriod.setEndDate(new Date());
 		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
-		reportPeriodDao.save(newReportPeriod);
+		reportPeriodDao.create(newReportPeriod);
 		
-		List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(taxPeriod.getId());
+		List<ReportPeriod> reportPeriodList = reportPeriodDao.fetchAllByTaxPeriod(taxPeriod.getId());
         assertEquals(2, reportPeriodList.size());
 
-		reportPeriodList = reportPeriodDao.listByTaxPeriod(-1);
+		reportPeriodList = reportPeriodDao.fetchAllByTaxPeriod(-1);
 		assertEquals(0, reportPeriodList.size());
 	}
 
@@ -94,8 +94,8 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setEndDate(new Date());
 		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 1).getTime());
 
-		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
-		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
+		int newReportPeriodId = reportPeriodDao.create(newReportPeriod);
+		ReportPeriod reportPeriod = reportPeriodDao.fetchOne(newReportPeriodId);
 
 		assertEquals("MyTestName", reportPeriod.getName());
 		assertEquals(taxPeriod.getId(), reportPeriod.getTaxPeriod().getId());
@@ -105,15 +105,15 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest1() {
-        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxPeriodAndDict(1, 21);
-        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxPeriodAndDict(1, 22);
+        ReportPeriod reportPeriod1 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 21);
+        ReportPeriod reportPeriod2 = reportPeriodDao.fetchOneByTaxPeriodAndDict(1, 22);
         Assert.assertEquals(reportPeriod1.getId(), Integer.valueOf(1));
         Assert.assertEquals(reportPeriod2.getId(), Integer.valueOf(2));
     }
 
     @Test
     public void getReportPeriodByTaxPeriodAndDictTest2() {
-        Assert.assertNull(reportPeriodDao.getByTaxPeriodAndDict(-1, -1));
+        Assert.assertNull(reportPeriodDao.fetchOneByTaxPeriodAndDict(-1, -1));
     }
 
     private List<Integer> getReportPeriodIds(List<ReportPeriod> reportPeriodList) {
@@ -127,7 +127,7 @@ public class ReportPeriodDaoTest {
     @Test
     public void getPeriodsByTaxTypeAndDepartmentsTest() {
         List<ReportPeriod> reportPeriods;
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, asList(1, 2, 3));
+        reportPeriods = reportPeriodDao.fetchAllByDepartments(asList(1, 2, 3));
         Assert.assertEquals(3, reportPeriods.size());
         Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2, 3)));
             }
@@ -146,24 +146,24 @@ public class ReportPeriodDaoTest {
     public void calendarStartDateTest1() {
         ReportPeriod newReportPeriod = getReportPeriod();
         newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 25).getTime());
-        int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
-        reportPeriodDao.get(newReportPeriodId);
+        int newReportPeriodId = reportPeriodDao.create(newReportPeriod);
+        reportPeriodDao.fetchOne(newReportPeriodId);
     }
 
     @Test(expected = DaoException.class)
     public void calendarStartDateTest2() {
         ReportPeriod newReportPeriod = getReportPeriod();
         newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.FEBRUARY, 1).getTime());
-        int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
-        reportPeriodDao.get(newReportPeriodId);
+        int newReportPeriodId = reportPeriodDao.create(newReportPeriod);
+        reportPeriodDao.fetchOne(newReportPeriodId);
     }
 
     @Test(expected = DaoException.class)
     public void calendarStartDateTest3() {
         ReportPeriod newReportPeriod = getReportPeriod();
         newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.MARCH, 10).getTime());
-        int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
-        reportPeriodDao.get(newReportPeriodId);
+        int newReportPeriodId = reportPeriodDao.create(newReportPeriod);
+        reportPeriodDao.fetchOne(newReportPeriodId);
     }
 
     @Test
@@ -171,16 +171,16 @@ public class ReportPeriodDaoTest {
         ReportPeriod newReportPeriod = getReportPeriod();
         Date date = new GregorianCalendar(2014, Calendar.APRIL, 1).getTime();
         newReportPeriod.setCalendarStartDate(date);
-        int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
-        ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
+        int newReportPeriodId = reportPeriodDao.create(newReportPeriod);
+        ReportPeriod reportPeriod = reportPeriodDao.fetchOne(newReportPeriodId);
         assertEquals(date, reportPeriod.getCalendarStartDate());
         assertEquals(2, reportPeriod.getOrder());
     }
 
     @Test
     public void getByTaxTypedCodeYearTest() {
-        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.NDFL, "21", 2013);
-        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear(TaxType.NDFL, "99", 2015);
+        ReportPeriod reportPeriod1 = reportPeriodDao.getByTaxTypedCodeYear("21", 2013);
+        ReportPeriod reportPeriod2 = reportPeriodDao.getByTaxTypedCodeYear("99", 2015);
         Assert.assertNull(reportPeriod1);
         Assert.assertNotNull(reportPeriod2);
         Assert.assertEquals(3, reportPeriod2.getId().intValue());
@@ -189,19 +189,12 @@ public class ReportPeriodDaoTest {
     @Test
     public void getReportPeriodsByDateTest() {
         List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
-        periodList.add(reportPeriodDao.get(1));
-        periodList.add(reportPeriodDao.get(2));
+        periodList.add(reportPeriodDao.fetchOne(1));
+        periodList.add(reportPeriodDao.fetchOne(2));
         Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
         Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
-        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(TaxType.NDFL, startDate, endDate);
+        List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(startDate, endDate);
         Assert.assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
         Assert.assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
-    }
-
-    @Test
-    public void getReportPeriodsByDateAndDepartmentTest() {
-        Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
-        Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
-        assertEquals(2, reportPeriodDao.getReportPeriodsByDateAndDepartment(TaxType.NDFL, 1, startDate, endDate).size());
     }
 }

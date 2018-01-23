@@ -87,7 +87,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         }
 
 
-        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
+        ReportPeriod reportPeriod = periodService.fetchReportPeriod(action.getReportPeriodId());
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         //Берем -1 день, чтобы исключить возможность пересечения периодов актуальности для периодов 9 мес и год.

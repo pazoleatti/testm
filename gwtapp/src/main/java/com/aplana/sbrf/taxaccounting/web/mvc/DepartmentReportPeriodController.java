@@ -17,9 +17,13 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-
+/**
+ * Контроллер для работы с {@link DepartmentReportPeriod}
+ */
 @RestController
 public class DepartmentReportPeriodController {
 
@@ -38,11 +42,9 @@ public class DepartmentReportPeriodController {
     public void init(ServletRequestDataBinder binder) {
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
         binder.registerCustomEditor(DepartmentReportPeriodFilter.class, new RequestParamEditor(DepartmentReportPeriodFilter.class));
-        binder.registerCustomEditor(DataRow.class, new RequestParamEditor(DataRow.class));
         binder.registerCustomEditor(DepartmentReportPeriod.class, new RequestParamEditor(DepartmentReportPeriod.class));
         binder.registerCustomEditor(ReportPeriod.class, new RequestParamEditor(ReportPeriod.class));
         binder.registerCustomEditor(TaxPeriod.class, new RequestParamEditor(TaxPeriod.class));
-        binder.registerCustomEditor(Cell.class, new RequestParamEditor(Cell.class));
     }
 
     public DepartmentReportPeriodController(DepartmentReportPeriodService departmentReportPeriodService, PeriodService periodService, SecurityService securityService,
@@ -60,11 +62,13 @@ public class DepartmentReportPeriodController {
     @GetMapping(value = "/rest/departmentReportPeriod")
     public List<DepartmentReportPeriodJournalItem> getAllPeriods(@RequestParam DepartmentReportPeriodFilter filter) {
         //утсанавливаем значение фильтра по-умолчанию
-        if (filter.getDepartmentId() == null){
+        if (filter.getDepartmentId() == null) {
             filter.setDepartmentId(departmentService.getBankDepartment().getId());
         }
         List<DepartmentReportPeriodJournalItem> result = departmentReportPeriodService.fetchJournalItemByFilter(filter);
         Map<Integer, DepartmentReportPeriodJournalItem> yearMap = new HashMap<>();
+        // создаем дополнительный родительский объект для каждого года
+        // для группировки в гриде
         for (DepartmentReportPeriodJournalItem item : result) {
             if (yearMap.get(item.getYear()) == null) {
                 DepartmentReportPeriodJournalItem parentItem = new DepartmentReportPeriodJournalItem();
@@ -122,6 +126,9 @@ public class DepartmentReportPeriodController {
 
     /**
      * Проверка преиода подразделения на наличие непринятых деклараций
+     *
+     * @param departmentReportPeriodId - идентификатор проверяемого периода подразделения
+     * @return uuid идентификатор логера
      */
     @PostMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}", params = "projection=checkHasNotAccepted")
     public String checkHasNotAccepted(@PathVariable Integer departmentReportPeriodId) {
@@ -130,6 +137,9 @@ public class DepartmentReportPeriodController {
 
     /**
      * Закрытие периода для подразделения
+     *
+     * @param departmentReportPeriodId идентификатор закрываемого перода с подразделением "Банк"
+     * @return uuid идентификатор логера
      */
     @PostMapping(value = "/actions/departmentReportPeriod/{departmentReportPeriodId}/close")
     public String close(@PathVariable Integer departmentReportPeriodId) {
@@ -138,18 +148,25 @@ public class DepartmentReportPeriodController {
 
     /**
      * Удаление периода для подразделения
+     *
+     * @param departmentReportPeriodId идентификатор удаляемого периода
+     * @return uuid идентификатор логера
      */
     @PostMapping(value = "/actions/departmentReportPeriod/delete")
-    public String delete(@RequestParam Integer id) {
-        return periodService.removeReportPeriod(id, securityService.currentUserInfo());
+    public String delete(@RequestParam Integer departmentReportPeriodId) {
+        return periodService.removeReportPeriod(departmentReportPeriodId, securityService.currentUserInfo());
     }
 
     /**
      * Получение доступных для выбора отчетных периодов для открытия коррекционного периода
+     *
+     * @param departmentId идентификатор подразделения, для которого производится поиск
+     * @param pagingParams параметры пагинации
+     * @return страница {@link ReportPeriod} или пустой список
      */
     @GetMapping(value = "rest/departmentReportPeriod", params = "projection=closedWithoutCorrection")
     public JqgridPagedList<ReportPeriod> fetchСlosedWithoutCorrection(@RequestParam Integer departmentId, @RequestParam PagingParams pagingParams) {
-        List<ReportPeriod> result = periodService.getCorrectPeriods(TaxType.NDFL, departmentId);
+        List<ReportPeriod> result = periodService.getCorrectPeriods(departmentId);
         pagingParams.setCount(result.size());
         return JqgridPagedResourceAssembler.buildPagedList(result, result.size(), pagingParams);
     }
@@ -164,24 +181,25 @@ public class DepartmentReportPeriodController {
      */
     @PostMapping(value = "rest/departmentReportPeriod/status")
     public String fetchStatus(@RequestParam Integer departmentId, @RequestParam Long dictTaxPeriodId, @RequestParam Integer year) {
-        return periodService.checkPeriodStatusBeforeOpen(TaxType.NDFL, year, departmentId, dictTaxPeriodId).name();
+        return periodService.checkPeriodStatus(year, departmentId, dictTaxPeriodId).name();
     }
 
     /**
      * Открыть коррекционный период для подразделения
+     *
+     * @param departmentReportPeriod открываемый коррекционный период
+     * @return uuid идентификатор логера
      */
     @PostMapping(value = "actions/departmentReportPeriod/openCorrectPeriod")
-    public String openCorrectPeriod(@RequestParam DepartmentReportPeriodFilter filter) {
-        DepartmentReportPeriod period = new DepartmentReportPeriod();
-        period.setCorrectionDate(filter.getCorrectionDate());
-        period.setReportPeriod(filter.getReportPeriod());
-        period.setId(filter.getId());
-        period.setDepartmentId(filter.getDepartmentId());
-        return periodService.openCorrectionPeriod(period);
+    public String openCorrectPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
+        return periodService.openCorrectionPeriod(departmentReportPeriod);
     }
 
     /**
      * Установка срока сдачи отчетности для периода
+     *
+     * @param filter фильтр с данными о периоде и датой сдачи отчетности
+     * @throws ActionException если дата сдачи отчетности не указана
      */
     @PostMapping(value = "actions/departmentReportPeriod/updateDeadline", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void setDeadline(@RequestBody DepartmentReportPeriodFilter filter) throws ActionException {
@@ -191,6 +209,9 @@ public class DepartmentReportPeriodController {
 
     /**
      * Проверка периода на наличие деклараций, находящихся на редактировании
+     *
+     * @param departmentReportPeriodId идентификатор проверяемого периода
+     * @return uuid идентификатор логера
      */
     @PostMapping(value = "rest/departmentReportPeriod/{departmentReportPeriodId}", params = "projection=checkHasBlockedDeclaration")
     public String checkHasBlockedDeclaration(@PathVariable Integer departmentReportPeriodId) {
