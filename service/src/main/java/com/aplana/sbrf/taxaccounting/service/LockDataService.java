@@ -143,5 +143,5 @@ public interface LockDataService {
 	 * @param keysBlocker - множество ключей
 	 * @return список существующих блокировок
 	 */
-    List<LockDataItem> getLocksByKeySet(Set<String> keysBlocker);
+    List<LockDataItem> fetchAllByKeySet(Set<String> keysBlocker);
 }

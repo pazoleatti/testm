@@ -2,14 +2,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
-import com.querydsl.core.types.QBean;
-import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,10 +18,12 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QLockData.lockData;
-import static com.querydsl.core.types.Projections.bean;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Реализация дао блокировок
@@ -31,15 +33,6 @@ import static com.querydsl.core.types.Projections.bean;
  */
 @Repository
 public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
-
-    @Autowired
-    private SQLQueryFactory sqlQueryFactory;
-
-    private final QBean<LockData> lockDataQBean = bean(LockData.class,
-            lockData.id,
-            lockData.key,
-            lockData.dateLock,
-            lockData.userId);
 
     private static final Log LOG = LogFactory.getLog(LockDataDaoImpl.class);
     private static final String LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок. %s";
@@ -213,11 +206,11 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public List<LockData> getLocksByKeySet(Set<String> keysBlocker) {
-        return sqlQueryFactory.select(lockDataQBean)
-                .from(lockData)
-                .where(lockData.key.in(keysBlocker))
-                .fetch();
+    public List<LockData> fetchAllByKeySet(Set<String> keysBlocker) {
+        return getJdbcTemplate().query(
+                "select id, key, user_id, task_id, date_lock, description from lock_data " +
+                        " where " + SqlUtils.transformToSqlInStatementForString("key", keysBlocker),
+                new LockDataMapper());
     }
 
 }
