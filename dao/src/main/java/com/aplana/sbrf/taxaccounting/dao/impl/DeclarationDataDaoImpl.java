@@ -749,31 +749,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<DeclarationData> getIfrs(int reportPeriodId) {
-        try {
-            return getJdbcTemplate().query(
-                    "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.oktmo, dd.state, " +
-                            "dd.department_report_period_id, dd.asnu_id, dd.note, dd.file_name, dd.doc_state_id, dd.manually_created, " +
-                            "drp.report_period_id, drp.department_id " +
-                            "from declaration_data dd, department_report_period drp, declaration_template dt, declaration_type t " +
-                            "where drp.id = dd.department_report_period_id and drp.report_period_id = ? and " +
-                            "dt.id = dd.declaration_template_id and t.id = dt.declaration_type_id and t.is_ifrs = 1 and drp.correction_date is null",
-                    new Object[]{
-                            reportPeriodId
-                    },
-                    new DeclarationDataRowMapper()
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new DaoException(
-                    "Для заданного сочетания параметров найдено несколько налоговых форм: reportPeriodId = %d",
-                    reportPeriodId
-            );
-        }
-    }
-
-    @Override
     public List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate) {
         try {
             Map<String, Object> params = new HashMap<String, Object>();

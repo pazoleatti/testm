@@ -95,8 +95,4 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
         return (List<DeclarationData>) datas;
     }
 
-    @Override
-    public List<DeclarationData> getIfrs(Integer reportPeriodId) {
-        return declarationDao.getIfrs(reportPeriodId);
-    }
 }
