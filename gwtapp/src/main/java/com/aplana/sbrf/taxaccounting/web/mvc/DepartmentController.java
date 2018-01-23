@@ -28,9 +28,12 @@ public class DepartmentController {
 
     /**
      * Проверка подразделения на наличие дочерних
+     *
+     * @param departmentId идентификатор проверяемого подразделения
+     * @return признак наличия
      */
     @GetMapping(value = "rest/department/{departmentId}", params = "projection=checkHasChildDepartment")
-    public Boolean checkHasChildDepartment(@PathVariable Integer departmentId){
+    public Boolean checkHasChildDepartment(@PathVariable Integer departmentId) {
         return !departmentService.getChildren(departmentId).isEmpty();
     }
 

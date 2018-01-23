@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.GetCorrectPeriodsAction;
@@ -32,7 +31,7 @@ public class GetCorrectPeriodsHandler extends AbstractActionHandler<GetCorrectPe
         PagingParams params = new PagingParams();
         params.setProperty("id");
         params.setDirection("ASC");
-        List<ReportPeriod> periods = periodService.getCorrectPeriods(action.getTaxType(), action.getDepartmentId());
+        List<ReportPeriod> periods = periodService.getCorrectPeriods(action.getDepartmentId());
         result.setReportPeriod(periods);
         return result;
     }

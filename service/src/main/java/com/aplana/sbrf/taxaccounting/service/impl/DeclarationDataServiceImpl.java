@@ -2183,7 +2183,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (logs != null) {
             for (long declarationId : declarationIds) {
                 DeclarationData declarationData = declarationDataDao.get(declarationId);
-                ReportPeriod period = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
+                ReportPeriod period = reportPeriodService.fetchReportPeriod(declarationData.getReportPeriodId());
                 DepartmentReportPeriod drp = departmentReportPeriodService.fetchOne(declarationData.getDepartmentReportPeriodId());
 
                 StringBuilder taKPPString = new StringBuilder("");
@@ -2378,7 +2378,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 startDate, endDate != null ? endDate : MAX_DATE);
         for (Integer id : ddIds) {
             DeclarationData dd = declarationDataDao.get(id);
-            ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
+            ReportPeriod rp = reportPeriodService.fetchReportPeriod(dd.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.fetchOne(dd.getDepartmentReportPeriodId());
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
             logger.error(DD_NOT_IN_RANGE,

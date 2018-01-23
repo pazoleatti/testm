@@ -73,9 +73,9 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
             }
 
             result.setAvailableDepartments(avSet);
-            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(currUser.getDepartmentId())));
+            result.setReportPeriods(periodService.getPeriodsByDepartments(asList(currUser.getDepartmentId())));
         } else {
-            result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), asList(action.getDepartmentId())));
+            result.setReportPeriods(periodService.getPeriodsByDepartments(asList(action.getDepartmentId())));
         }
 
         return result;

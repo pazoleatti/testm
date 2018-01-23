@@ -416,7 +416,7 @@ public class RefBookHelperImpl implements RefBookHelper {
         RefBook slaveRefBook = refBookFactory.get(slaveRefBookId);
         RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
         RefBookDataProvider providerSlave = refBookFactory.getDataProvider(slaveRefBookId);
-        ReportPeriod rp = periodService.getReportPeriod(reportPeriodId);
+        ReportPeriod rp = periodService.fetchReportPeriod(reportPeriodId);
         String filter = departmentAlias + " = " + departmentId;
 
         boolean needEdit = false;

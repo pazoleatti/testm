@@ -88,7 +88,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
             RefBook refBook = rbFactory.get(refBookId);
 
-            ReportPeriod period = periodService.getReportPeriod(action.getReportPeriodId());
+            ReportPeriod period = periodService.fetchReportPeriod(action.getReportPeriodId());
 
             Map<String, RefBookValue> paramsMap = new HashMap<String, RefBookValue>();
             // Id записи

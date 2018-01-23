@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.script.service;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
@@ -9,34 +11,66 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *
+ */
 @ScriptExposed
 public interface DepartmentReportPeriodService {
+
+    /**
+     * Получение объекта {@link DepartmentReportPeriod} по идентификатору
+     *
+     * @param id идентификатор
+     * @return объект {@link DepartmentReportPeriod} или null
+     */
     DepartmentReportPeriod get(int id);
 
-    Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIds);
-
+    /**
+     * Получение списка отчетных периодов для подразделений по фильтру
+     *
+     * @param departmentReportPeriodFilter фильтр
+     * @return список {@link DepartmentReportPeriod} или пустой список
+     */
     List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter);
 
     /**
-     * Обычный отчетный период подразделения для комбинации отчетный период-подразделение (первый и без корректировки)
+     * Получение первого некорректирующего отчетного периода подразделения по идентификатору подразделения
+     * и идентификатору отчетного периода
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link DepartmentReportPeriod} или null
      */
     DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId);
 
     /**
-     * Последний отчетный период подразделения для комбинации отчетный период-подразделение
+     * Получение последнего отчетного периода подразделения
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link DepartmentReportPeriod} или null
      */
     DepartmentReportPeriod getLast(int departmentId, int reportPeriodId);
 
     /**
-     * Предпоследний отчетный период подразделения для комбинации отчетный период-подразделение
+     * Получение предпоследнего отчетного периода подразделения по идентификатору подразделения
+     * и идентификатору отчетного периода
+     * Если предпоследний отчетный период не является корректировочным возвращается null
+     *
+     * @param departmentId   идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return объект {@link DepartmentReportPeriod} или null
      */
     DepartmentReportPeriod getPrevLast(int departmentId, int reportPeriodId);
 
     /**
-     * Найти id отчетных периодов подразделений для определенного типа подразделения и отчетного периода
-     * @param departmentTypeCode
-     * @param departmentReportPeriodId
-     * @return
+     * Получение идентификаторов некорректирующих отчетных периодов подразделений по типу подразделения и
+     * активному отчетному периоду
+     *
+     * @param departmentTypeCode       {@link DepartmentType} тип подразделения
+     * @param departmentReportPeriodId идентификатор отчетного периода подразделения, по {@link ReportPeriod} которого
+     *                                 производится поиск
+     * @return список идентификаторов или пустой список
      */
     List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId);
 }

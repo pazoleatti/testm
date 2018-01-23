@@ -527,7 +527,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             }
             // Указан недопустимый код периода
-            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(TaxType.NDFL, reportPeriodCode, year);
+            ReportPeriod reportPeriod = periodService.getByDictCodeAndYear(reportPeriodCode, year);
             if (reportPeriod == null) {
                 logger.warn(U2, fileName);
                 logger.warn(U2_3, TaxType.NDFL.getName(), reportPeriodCode, reportPeriodName, year);

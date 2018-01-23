@@ -20,112 +20,115 @@ import java.util.List;
 
 
 /**
- * Реализация DAO для работы с {@link com.aplana.sbrf.taxaccounting.model.TaxPeriod налоговыми периодами}
+ * Реализация DAO для работы с {@link TaxPeriod}
  */
 @Repository
 @Transactional(readOnly = true)
 public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 
-	private final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
-		@Override
-		public TaxPeriod mapRow(ResultSet rs, int index) throws SQLException {
-			TaxPeriod t = new TaxPeriod();
-			t.setId(SqlUtils.getInteger(rs, "id"));
-			t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-			t.setYear(SqlUtils.getInteger(rs,"year"));
-			return t;
-		}
-	}
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link TaxPeriod}
+     */
+    private final class TaxPeriodRowMapper implements RowMapper<TaxPeriod> {
+        @Override
+        public TaxPeriod mapRow(ResultSet rs, int index) throws SQLException {
+            TaxPeriod t = new TaxPeriod();
+            t.setId(SqlUtils.getInteger(rs, "id"));
+            t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            t.setYear(SqlUtils.getInteger(rs, "year"));
+            return t;
+        }
+    }
 
-	@Override
-	@Cacheable(CacheConstants.TAX_PERIOD)
-	public TaxPeriod get(int taxPeriodId) {
-		try {
-			return getJdbcTemplate().queryForObject(
-					"select id, tax_type, year from tax_period where id = ?",
-					new Object[] { taxPeriodId },
-					new int[] { Types.NUMERIC },
-					new TaxPeriodRowMapper()
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Не удалось найти налоговый период с id = " + taxPeriodId);
-		}
-	}
-
-	@Override
-	public List<TaxPeriod> listByTaxType(TaxType taxType) {
-		try {
-			return getJdbcTemplate().query(
-					"select id, tax_type, year from tax_period where tax_type = ? order by year",
-					new Object[]{taxType.getCode()},
-					new int[] { Types.VARCHAR },
-					new TaxPeriodRowMapper()
-			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Не удалось найти налоговые периоды с типом = " + taxType.getCode());
-		}
-	}
-
-	@Override
-	public TaxPeriod getByTaxTypeAndYear(TaxType taxType, int year) {
+    @Override
+    @Cacheable(CacheConstants.TAX_PERIOD)
+    public TaxPeriod fetchOne(int taxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, tax_type, year from tax_period where tax_type = ? and year = ?",
-                    new Object[]{taxType.getCode(), year},
-                    new int[]{Types.VARCHAR, Types.NUMERIC},
+                    "SELECT id, tax_type, year FROM tax_period WHERE id = ?",
+                    new Object[]{taxPeriodId},
+                    new int[]{Types.NUMERIC},
+                    new TaxPeriodRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не удалось найти налоговый период с id = " + taxPeriodId);
+        }
+    }
+
+    @Override
+    public List<TaxPeriod> fetchAllByTaxType(TaxType taxType) {
+        try {
+            return getJdbcTemplate().query(
+                    "SELECT id, tax_type, year FROM tax_period WHERE tax_type = ? ORDER BY year",
+                    new Object[]{taxType.getCode()},
+                    new int[]{Types.VARCHAR},
+                    new TaxPeriodRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не удалось найти налоговые периоды с типом = " + taxType.getCode());
+        }
+    }
+
+    @Override
+    public TaxPeriod fetchAllByYear(int year) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "SELECT id, tax_type, year FROM tax_period WHERE year = ?",
+                    new Object[]{year},
+                    new int[]{Types.NUMERIC},
                     new TaxPeriodRowMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
-	}
+    }
 
-	@Override
-	public int add(TaxPeriod taxPeriod) {
-		JdbcTemplate jt = getJdbcTemplate();
+    @Override
+    public int create(TaxPeriod taxPeriod) {
+        JdbcTemplate jt = getJdbcTemplate();
 
-		Integer id = taxPeriod.getId();
-		if (id == null) {
-			id = generateId("seq_tax_period", Integer.class);
-		}
-		jt.update(
-				"insert into tax_period (id, tax_type, year)" +
-						" values (?, ?, ?)",
-				new Object[]{
-						id,
-						taxPeriod.getTaxType().getCode(),
-						taxPeriod.getYear()
-				},
-				new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC}
+        Integer id = taxPeriod.getId();
+        if (id == null) {
+            id = generateId("seq_tax_period", Integer.class);
+        }
+        jt.update(
+                "INSERT INTO tax_period (id, tax_type, year)" +
+                        " VALUES (?, ?, ?)",
+                new Object[]{
+                        id,
+                        taxPeriod.getTaxType().getCode(),
+                        taxPeriod.getYear()
+                },
+                new int[]{Types.NUMERIC, Types.VARCHAR, Types.NUMERIC}
 
-		);
-		taxPeriod.setId(id);
-		return id;
-	}
+        );
+        taxPeriod.setId(id);
+        return id;
+    }
 
-	@Override
-	@Deprecated
-	public TaxPeriod getLast(TaxType taxType) {
-		try {
-			return getJdbcTemplate().queryForObject( //TODO Вероятно, это можно оптимизировать
-					"select id, tax_type, year from tax_period where tax_type = ? and " +
-							"year = (select max(year) from tax_period where tax_type = ?)",
-					new Object[]{taxType.getCode(), taxType.getCode()},
-					new int[] { Types.VARCHAR, Types.VARCHAR},
-					new TaxPeriodRowMapper()
-			);
+    @Override
+    @Deprecated
+    public TaxPeriod getLast(TaxType taxType) {
+        try {
+            return getJdbcTemplate().queryForObject( //TODO Вероятно, это можно оптимизировать
+                    "SELECT id, tax_type, year FROM tax_period WHERE tax_type = ? AND " +
+                            "year = (SELECT max(year) FROM tax_period WHERE tax_type = ?)",
+                    new Object[]{taxType.getCode(), taxType.getCode()},
+                    new int[]{Types.VARCHAR, Types.VARCHAR},
+                    new TaxPeriodRowMapper()
+            );
 
-		} catch (EmptyResultDataAccessException e) {
-			return null;
-		}
-	}
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 
     @Override
     public void delete(int taxPeriodId) {
         getJdbcTemplate().update(
-          "delete from tax_period where id = ?",
-          new Object[]{taxPeriodId},
-          new int[]{Types.NUMERIC}
+                "DELETE FROM tax_period WHERE id = ?",
+                new Object[]{taxPeriodId},
+                new int[]{Types.NUMERIC}
         );
     }
 }

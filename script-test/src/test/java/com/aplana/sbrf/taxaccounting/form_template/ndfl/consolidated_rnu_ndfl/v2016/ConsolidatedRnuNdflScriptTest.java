@@ -121,7 +121,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getDepartmentService().getAllChildren(anyInt())).thenReturn(createDepartmentList());
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(createDepartmentList().get(0));
 
-        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
+//        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(1))).thenReturn(createFirstQuarterDeclarationData());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(2))).thenReturn(createHalfYearDeclarationData());
 
@@ -151,7 +151,7 @@ public class ConsolidatedRnuNdflScriptTest extends DeclarationScriptTestBase {
         when(testHelper.getDeclarationService().getTemplate(eq(100))).thenReturn(declarationTemplate);
 
         when(testHelper.getDepartmentService().getAllChildren(anyInt())).thenReturn(createDepartmentList());
-        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
+//        when(testHelper.getReportPeriodService().getReportPeriodsByDate(eq(TaxType.NDFL), any(Date.class), any(Date.class))).thenReturn(createReportPeriodList());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(1))).thenReturn(createFirstQuarterDeclarationData());
         when(testHelper.getDeclarationService().findAllDeclarationData(anyInt(), anyInt(), eq(2))).thenReturn(createHalfYearDeclarationData());
 

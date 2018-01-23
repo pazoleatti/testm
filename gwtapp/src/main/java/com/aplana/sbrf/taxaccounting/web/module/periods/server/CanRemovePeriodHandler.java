@@ -49,7 +49,7 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
 	public CanRemovePeriodResult execute(CanRemovePeriodAction action, ExecutionContext executionContext) throws ActionException {
 		CanRemovePeriodResult result = new CanRemovePeriodResult();
         TAUserInfo user = securityService.currentUserInfo();
-        List<Integer> departmentIds = periodService.getAvailableDepartments(action.getTaxType(), user.getUser(), PeriodService.Operation.EDIT, action.getDepartmentId());
+        List<Integer> departmentIds = periodService.getAvailableDepartments(user.getUser(), PeriodService.Operation.EDIT);
         List<LogEntry> logs = new ArrayList<LogEntry>();
 
         DeclarationDataFilter filter = new DeclarationDataFilter();

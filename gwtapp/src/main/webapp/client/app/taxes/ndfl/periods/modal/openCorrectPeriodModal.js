@@ -42,7 +42,7 @@
                             method: "POST",
                             url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
                             params: {
-                                filter: JSON.stringify({
+                                departmentReportPeriod: JSON.stringify({
                                     id: $scope.departmentReportPeriod.id,
                                     reportPeriod: $scope.correctPeriod.reportPeriod,
                                     correctionDate: $scope.departmentReportPeriod.correctionDate,

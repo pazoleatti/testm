@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetRefBookPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetRefBookPeriodResult;
@@ -28,7 +25,7 @@ public class GetRefBookPeriodHandler extends AbstractActionHandler<GetRefBookPer
     @Override
     public GetRefBookPeriodResult execute(GetRefBookPeriodAction action, ExecutionContext context) throws ActionException {
         GetRefBookPeriodResult result = new GetRefBookPeriodResult();
-        ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
+        ReportPeriod period = reportService.fetchReportPeriod(action.getReportPeriodId());
         result.setStartDate(period.getCalendarStartDate());
         result.setEndDate(period.getEndDate());
         return result;

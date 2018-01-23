@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -39,7 +40,7 @@ public class ReportPeriodController {
     @GetMapping(value = "/rest/reportPeriod", params = "projection=opened")
     public List<ReportPeriod> fetchOpened() {
         TAUser user = securityService.currentUserInfo().getUser();
-        return new ArrayList<>(periodService.getOpenForUser(user, TaxType.NDFL));
+        return new ArrayList<>(periodService.getOpenReportPeriodForUser(user));
     }
 
     /**
@@ -50,7 +51,7 @@ public class ReportPeriodController {
     @GetMapping(value = "/rest/reportPeriod", params = "projection=all")
     public List<ReportPeriod> fetchAllReportPeriods() {
         TAUser user = securityService.currentUserInfo().getUser();
-        return periodService.getPeriodsByTaxTypeAndDepartments(TaxType.NDFL, Collections.singletonList(user.getDepartmentId()));
+        return periodService.getPeriodsByDepartments(Collections.singletonList(user.getDepartmentId()));
     }
 
 

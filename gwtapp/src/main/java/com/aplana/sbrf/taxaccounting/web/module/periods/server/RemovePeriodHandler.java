@@ -32,7 +32,7 @@ public class RemovePeriodHandler extends AbstractActionHandler<RemovePeriodActio
 	@Override
 	public RemovePeriodResult execute(RemovePeriodAction removePeriodAction, ExecutionContext executionContext) throws ActionException {
         Logger logger = new Logger();
-		periodService.removeReportPeriod(removePeriodAction.getTaxType(), removePeriodAction.getDepartmentReportPeriodId(), logger, securityService.currentUserInfo());
+		periodService.removeReportPeriod(removePeriodAction.getDepartmentReportPeriodId(), logger, securityService.currentUserInfo());
 		RemovePeriodResult result = new RemovePeriodResult();
         if (logger.containsLevel(LogLevel.ERROR)) {
             result.setHasFatalErrors(true);

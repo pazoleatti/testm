@@ -63,7 +63,7 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
 
 
             RefBookDataProvider provider = rbFactory.getDataProvider(action.getRefBookId());
-            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
+            ReportPeriod period = reportService.fetchReportPeriod(action.getReportPeriodId());
             Logger logger = new Logger();
             logger.setTaUserInfo(securityService.currentUserInfo());
 

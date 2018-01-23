@@ -111,8 +111,8 @@ public class UploadTransportDataServiceTest {
         ReportPeriod reportPeriod21 = new ReportPeriod();
         reportPeriod21.setId(1);
         reportPeriod21.setName("Test period");
-        when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod21);
-        when(periodService.getByTaxTypedCodeYear(TaxType.DEAL, "21", 2014)).thenReturn(reportPeriod21);
+        when(periodService.getByDictCodeAndYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod21);
+        when(periodService.getByDictCodeAndYear(TaxType.DEAL, "21", 2014)).thenReturn(reportPeriod21);
 
         when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, formType852_4.getId(), FormDataKind.PRIMARY)).thenReturn(true);
         when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, formType101_1.getId(), FormDataKind.PRIMARY)).thenReturn(true);

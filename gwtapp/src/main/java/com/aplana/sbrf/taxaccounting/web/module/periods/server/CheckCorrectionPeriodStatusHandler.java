@@ -25,7 +25,7 @@ public class CheckCorrectionPeriodStatusHandler extends AbstractActionHandler<Ch
 
     @Override
     public CheckCorrectionPeriodStatusResult execute(CheckCorrectionPeriodStatusAction action, ExecutionContext executionContext) throws ActionException {
-        ReportPeriod rp = periodService.getReportPeriod(action.getReportPeriodId());
+        ReportPeriod rp = periodService.fetchReportPeriod(action.getReportPeriodId());
         PeriodStatusBeforeOpen status =
                 periodService.checkPeriodStatusBeforeOpen(rp, action.getSelectedDepartments().get(0), action.getTerm());
         CheckCorrectionPeriodStatusResult result = new CheckCorrectionPeriodStatusResult();

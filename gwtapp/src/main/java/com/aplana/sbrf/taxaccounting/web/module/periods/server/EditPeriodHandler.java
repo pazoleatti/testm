@@ -36,7 +36,7 @@ public class EditPeriodHandler extends AbstractActionHandler<EditPeriodAction, E
         List<LogEntry> logs = new ArrayList<LogEntry>();
         if (action.getCorrectionDate() == null) {
             periodService.edit(action.getReportPeriodId(), action.getOldDepartmentId(), action.getNewDictTaxPeriodId(), action.getYear(),
-                    action.getTaxType(), securityService.currentUserInfo(), action.getNewDepartmentId(), logs);
+                    securityService.currentUserInfo(), action.getNewDepartmentId(), logs);
         }
         EditPeriodResult result = new EditPeriodResult();
         result.setUuid(logEntryService.save(logs));

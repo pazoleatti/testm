@@ -62,7 +62,7 @@ public class AuditServiceImpl implements AuditService {
                     final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String logId) {
         String rpName = null;
         if (reportPeriodId != null) {
-            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+            ReportPeriod reportPeriod = periodService.fetchReportPeriod(reportPeriodId);
             rpName = String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
         }
         add(event, userInfo, rpName, departmentId, declarationTypeName, formTypeName, formKindId, note, null, logId);
@@ -131,7 +131,7 @@ public class AuditServiceImpl implements AuditService {
                             departmentService.getDepartment(departmentId).getName() :
                             departmentService.getParentsHierarchy(departmentId);
 
-                    ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+                    ReportPeriod reportPeriod = periodService.fetchReportPeriod(reportPeriodId);
                     String rpName = String.format(
                             RP_NAME_WITH_CORR_PATTERN,
                             reportPeriod.getTaxPeriod().getYear(),

@@ -7,130 +7,113 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Интерфейс DAO для работы с {@link ReportPeriod отчётными периодами} 
+ * Интерфейс DAO для работы с {@link ReportPeriod}
+ *
  * @author dsultanbekov
  */
 public interface ReportPeriodDao extends PermissionDao {
-	
-	/**
-	 * Получить объект отчётного периода по идентификатору периода
-	 * @param reportPeriodId идентификатор отчётного периода
-	 * @return объект, задаваемый идентификатором
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
-	 */
-	ReportPeriod get(Integer reportPeriodId);
 
-	/** Получить список отчетных периодов по идентификаторам
-	 * @param reportPeriodIds список идентификаторов
-	 */
-	List<ReportPeriod> get(List<Integer> reportPeriodIds);
-	
     /**
-     * Отчетный период по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
-     * @param taxPeriodId
-     * @param dictTaxPeriodId
-     * @return
+     * Получить объект отчётного периода по идентификатору периода
+     *
+     * @param reportPeriodId идентификатор отчётного периода
+     * @return объект {@link ReportPeriod}
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если периода с заданным идентификатором не существует
      */
-    ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId);
-		
-	/**
-	 * Возвращает список отчётных периодов, входящий в данный налоговый период. 
-	 * Список отсортирован по {@link ReportPeriod#getOrder() порядковым номерам} отчётных периодов
-	 * @param taxPeriodId
-	 * @return список отчётных периодов, входящий в данный налоговый период, отсортированный по порядковому номеру
-	 */
-	List<ReportPeriod> listByTaxPeriod(int taxPeriodId);
-
-	/**
-	 *
-	 * @param reportPeriod отчётный период
-	 * @return идентификатор нового отчетного периода
-	 */
-	Integer save(ReportPeriod reportPeriod);
-
-	/**
-	 * Удалить период
-	 * @param reportPeriodId идентификатор периода
-	 */
-	void remove(int reportPeriodId);
+    ReportPeriod fetchOne(Integer reportPeriodId);
 
     /**
-     * Список отчетных периодов для указанного вида налога и для указанных подразделений
-     * @param taxType Вид налога
+     * Получение отчетного периода по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
+     *
+     * @param taxPeriodId     идентификатор налогового периода
+     * @param dictTaxPeriodId идентификатор записи справочника "Коды, определяющие налоговый (отчётный) период"
+     * @return объект {@link ReportPeriod} или null
+     */
+    ReportPeriod fetchOneByTaxPeriodAndDict(int taxPeriodId, long dictTaxPeriodId);
+
+    /**
+     * Получение списка отчётных периодов, входящий в данный налоговый период.
+     * Список отсортирован по {@link ReportPeriod#getOrder()} порядковым номерам отчётных периодов
+     *
+     * @param taxPeriodId идентификатор налогового периода
+     * @return список {@link ReportPeriod} или пустой список
+     */
+    List<ReportPeriod> fetchAllByTaxPeriod(int taxPeriodId);
+
+    /**
+     * Создание нового отчетного периода
+     *
+     * @param reportPeriod отчётный период
+     * @return идентификатор нового отчетного периода
+     */
+    Integer create(ReportPeriod reportPeriod);
+
+    /**
+     * Удалениие периода
+     *
+     * @param reportPeriodId идентификатор периода
+     */
+    void remove(int reportPeriodId);
+
+    /**
+     * Получение списка отчетных периодов для указанных подразделений
+     *
      * @param departmentList Список подразделений
-     * @return Список отчетных периодов
+     * @return Список {@link ReportPeriod} или пустой список
      */
-    List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
+    List<ReportPeriod> fetchAllByDepartments(List<Integer> departmentList);
 
-	/**
-	 * Получить список всех отчетных периодов по заданному виду налога за период. Алгоритм: ищет все отчетные периоды,
-	 * которые пересекаются с указанной датой. В случае, если период не найден возвращается ошибка.
-	 * Если было найдено несколько отчетных периодов, то возвращает тот, у котого порядок следования минимальный
-	 * @param taxType вид налога
-	 * @param date дата, на которую ищется период
-	 * @return  список отчетных периодов
-	 */
-	ReportPeriod getReportPeriodByDate(TaxType taxType, Date date);
+    /**
+     * Возвращает все периоды которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
+     *
+     * @param startDate начало диапазона
+     * @param endDate   конец диапазона
+     * @return список {@link ReportPeriod}
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если не найдены отчетные периоды
+     */
+    @Deprecated
+    List<ReportPeriod> getReportPeriodsByDate(Date startDate, Date endDate);
 
-	/**
-	 * Возвращает все периоды которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
-	 * @param taxType
-	 * @param startDate начало диапазона
-	 * @param endDate конец диапазона
-	 * @return
-	 */
-	List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
-
-	/**
-	 * Возвращает все периоды которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
-	 * @param taxType
-	 * @param depId
-	 * @param startDate начало диапазона
-	 * @param endDate конец диапазона
-	 * @return
-	 */
-	List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate);
-
-	/**
-	 * Список открытых периодов
-	 * @param taxType тип налога
-	 * @param departmentList подразделения
-	 * @return список отчетных периодов
-	 */
-	List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
-                                                             boolean withoutCorrect);
+    /**
+     * Получение списка открытых периодов по списку подразделений и признаку корректировки
+     *
+     * @param departmentList список подразделений
+     * @param withoutCorrect признак отсутствия корректировки(true - без корректировки/false - все периоды)
+     * @return список {@link ReportPeriod} или пустой список
+     */
+    List<ReportPeriod> getOpenPeriodsAndDepartments(List<Integer> departmentList, boolean withoutCorrect);
 
     /**
      * Получить корректирующие периоды
-     * @param taxType тип налога
+     *
      * @param departmentId идентификатор подразделения
-     * @return список корректирующих периодов
+     * @return список {@link ReportPeriod} или пустой список
      */
-    List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
+    List<ReportPeriod> getCorrectPeriods(int departmentId);
 
     /**
-     * Получить периоды сравнения - выборка 50
-     * http://conf.aplana.com/pages/viewpage.action?pageId=20386707
-     * @param taxType тип налога
-     * @param departmentId идентификатор подразделения
-     * @return
+     * Получение отчетного периода по коду записи справочника "Коды, определяющие налоговый (отчётный) период" и году
+     *
+     * @param code код записи справочника "Коды, определяющие налоговый (отчётный) период"
+     * @param year год отчетного периода
+     * @return объект {@link ReportPeriod} или null
      */
-    List<ReportPeriod> getComparativPeriods(TaxType taxType, int departmentId);
+    ReportPeriod getByTaxTypedCodeYear(String code, int year);
+
 
     /**
-     * Отчетный период по коду и году
+     * Получение списка всех записей справочника "Коды, определяющие налоговый (отчётный) период"
+     *
+     * @return список {@link ReportPeriodType} или пустой список
      */
-    ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
+    List<ReportPeriodType> getPeriodType();
 
-
-	/**
-	 * Получить список типов отчетных периодов
+    /**
+     * Получение записи справочника "Коды, определяющие налоговый (отчётный) период" по идентификатору
+     *
+     * @param id идентификатор
+     * @return объект {@link ReportPeriodType}
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если записи справочника с таким id не существует
      */
-	List<ReportPeriodType> getPeriodType();
-
-	/**
-	 * Получить тип отчетного периода по идентификатору
-	 * @param id - идентификатор
-	 */
     ReportPeriodType getReportPeriodTypeById(Long id);
 }

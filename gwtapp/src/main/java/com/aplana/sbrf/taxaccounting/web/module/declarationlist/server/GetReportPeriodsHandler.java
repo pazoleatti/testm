@@ -45,10 +45,10 @@ public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeri
         if (action.isDownloadReports()) {
             DeclarationDataFilterAvailableValues declarationFilterValues =
                     declarationDataSearchService.getFilterAvailableValues(userInfo, action.getTaxType(), false);
-            reportPeriods.addAll(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
+            reportPeriods.addAll(periodService.getPeriodsByDepartments(
                     new ArrayList<Integer>(declarationFilterValues.getDepartmentIds())));
         } else {
-            reportPeriods.addAll(periodService.getOpenForUser(userInfo.getUser(), action.getTaxType()));
+            reportPeriods.addAll(periodService.getOpenReportPeriodForUser(userInfo.getUser()));
         }
         result.setReportPeriods(reportPeriods);
 

@@ -11,12 +11,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 public abstract class AbstractDao {
 
     /**
-     * из oracle.jdbc.OracleTypes
+     * Указатель на строку в результерующем наборе данных
      */
     public static final int CURSOR = -10;
 
     @Autowired
-    DBInfo dbInfo;
+    private DBInfo dbInfo;
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -31,8 +31,9 @@ public abstract class AbstractDao {
 
     /**
      * Возвращает новое значение id, следующее за текущим значением sequenceName
+     *
      * @param sequenceName - наименования последовательности, из которой следует получить следующее значение
-     * @param resultType - тип возвращаемого значения
+     * @param resultType   - тип возвращаемого значения
      * @return объект класса resultType со значением, следующим за текущим значеним sequenceName
      */
     protected <T extends Number> T generateId(String sequenceName, Class<T> resultType) {
@@ -41,14 +42,18 @@ public abstract class AbstractDao {
 
     /**
      * Возвращает признак поддержки функции row_number() over (...)
+     *
+     * @return признак поддержки
      */
     protected boolean isSupportOver() {
         return dbInfo.isSupportOver();
     }
 
-
     /**
-     * Возвращает признак целочисленной разницы дат (для Oracle)
+     * Возвращает признак добавления служебного слова 'recursive' в конструкцию рекурсивных запросов with...
+     * не работает с Oracle
+     *
+     * @return признак добавления
      */
     protected boolean isWithRecursive() {
         return dbInfo.isWithRecursive();

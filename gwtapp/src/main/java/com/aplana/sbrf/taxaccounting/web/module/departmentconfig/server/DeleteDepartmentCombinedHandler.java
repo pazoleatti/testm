@@ -83,7 +83,7 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
                     break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
-            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
+            ReportPeriod period = reportService.fetchReportPeriod(action.getReportPeriodId());
             Logger logger = new Logger();
             logger.setTaUserInfo(securityService.currentUserInfo());
 

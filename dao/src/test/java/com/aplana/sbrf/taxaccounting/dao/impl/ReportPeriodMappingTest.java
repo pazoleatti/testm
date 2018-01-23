@@ -33,7 +33,7 @@ public class ReportPeriodMappingTest {
 
         Integer reportPeriodId = mappingDao.getByTaxPeriodAndDict(taxPeriodId, dictTaxPeriodId);
 
-        ReportPeriod reportPeriod = periodDao.get(reportPeriodId);
+        ReportPeriod reportPeriod = periodDao.fetchOne(reportPeriodId);
 
         assertEquals(Integer.valueOf(3), reportPeriod.getId());
         assertEquals("VAT report period 1", reportPeriod.getName());

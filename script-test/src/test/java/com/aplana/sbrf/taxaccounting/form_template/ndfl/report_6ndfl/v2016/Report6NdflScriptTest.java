@@ -213,7 +213,7 @@ public class Report6NdflScriptTest extends DeclarationScriptTestBase {
         );
 
         // НомКорр
-        when(testHelper.getReportPeriodService().getCorrectionNumber(anyInt())).thenReturn(111);
+//        when(testHelper.getReportPeriodService().getCorrectionNumber(anyInt())).thenReturn(111);
     }
 
     /**

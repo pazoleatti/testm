@@ -332,7 +332,7 @@
                                             method: "POST",
                                             url: "controller/actions/departmentReportPeriod/delete",
                                             params: {
-                                                id: $scope.reportPeriodGrid.value[0].id
+                                                departmentReportPeriodId: $scope.reportPeriodGrid.value[0].id
 
                                             }
                                         }).then(function (response) {

@@ -10,10 +10,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Transactional(readOnly = true)
 @Component("departmentReportPeriodService")
@@ -21,17 +18,11 @@ import java.util.Map;
 public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriodService {
 
     @Autowired
-    DepartmentReportPeriodDao departmentReportPeriodDao;
+    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
     public DepartmentReportPeriod get(int id) {
         return departmentReportPeriodDao.fetchOne(id);
-    }
-
-    @Override
-    @Deprecated
-    public Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIds) {
-        return departmentReportPeriodDao.fetchCorrectionDateListByReportPeriod(reportPeriodIds);
     }
 
     @Override

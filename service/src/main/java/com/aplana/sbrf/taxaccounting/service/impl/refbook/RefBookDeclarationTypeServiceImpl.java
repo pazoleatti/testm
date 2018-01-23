@@ -49,7 +49,7 @@ public class RefBookDeclarationTypeServiceImpl implements RefBookDeclarationType
     @Override
     @Transactional(readOnly = true)
     public List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, Integer periodId) {
-        ReportPeriod reportPeriod = periodService.getReportPeriod(periodId);
+        ReportPeriod reportPeriod = periodService.fetchReportPeriod(periodId);
         return refBookDeclarationTypeDao.fetchDeclarationTypes(declarationKind, departmentId, reportPeriod.getCalendarStartDate());
     }
 }
