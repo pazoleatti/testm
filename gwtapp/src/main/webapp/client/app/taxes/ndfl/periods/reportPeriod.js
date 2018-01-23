@@ -13,22 +13,10 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('reportPeriod', {
                 url: '/taxes/reportPeriod',
-                templateUrl: 'client/app/taxes/ndfl//periods/ndflReportPeriod.html',
+                templateUrl: 'client/app/taxes/ndfl//periods/reportPeriod.html',
                 controller: 'reportPeriodCtrl'
             });
         }])
-
-        .filter('reportPeriodFormatter', function () {
-            return function (entity) {
-                if (entity) {
-                    return entity.name;
-                } else {
-                    return '';
-                }
-            };
-        })
-
-
 
         /**
          * @description Контроллер формы "Ведение периодов"
@@ -108,7 +96,10 @@
                     }
                 };
 
-                $scope.initGrid = function() {
+                /**
+                 *@description инициализирует данные в гриде
+                 */
+                $scope.initGrid = function () {
                     $scope.periodGridData = [];
                     DepartmentReportPeriodResource.query({
                         filter: JSON.stringify({
@@ -123,7 +114,6 @@
                             angular.copy(period, periodTmp);
                             array.push(periodTmp);
                         });
-                        // $scope.periodGridData = sortGridData(array);
                         $scope.periodGridData = array;
                         $scope.reportPeriodGrid.ctrl.refreshGridData($scope.periodGridData);
                     });
@@ -132,7 +122,6 @@
 
                 /**
                  * @description Обновление грида
-                 * @param page
                  */
                 $scope.refreshGrid = function () {
                     $scope.initGrid();
@@ -202,7 +191,7 @@
                 $scope.openPeriod = function () {
                     $aplanaModal.open({
                         tittle: $filter('translate')('reportPeriod.pils.openPeriod'),
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/ndflReportPeriodModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/periods/modal/createReportPeriodModal.html?v=${buildUuid}',
                         controller: 'reportPeriodCtrlModal',
                         windowClass: 'modal600',
                         resolve: {
@@ -219,12 +208,12 @@
                 };
 
                 /**
-                 * @description Открытие модального окна создания периода
+                 * @description Открытие модального окна редактирования периода
                  */
                 $scope.editPeriod = function () {
                     $aplanaModal.open({
                         tittle: $filter('translate')('reportPeriod.pils.editPeriod'),
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/ndflReportPeriodModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/periods/modal/createReportPeriodModal.html?v=${buildUuid}',
                         controller: 'reportPeriodCtrlModal',
                         windowClass: 'modal600',
                         resolve: {
@@ -290,21 +279,21 @@
                     });
                 };
 
-                /** Проверка, может ли текущий пользоватеть выполнить операцию над выделенными налоговыми периодами
+                /** Проверка, может ли текущий пользоватеть выполнить операцию над выделенным налоговыми периодами
                  * @param permission
+                 * @return boolean возможность управления
                  */
                 $scope.checkPermissionForGridValue = function (permission) {
                     if ($scope.reportPeriodGrid.value && $scope.reportPeriodGrid.value.length > 0) {
-                        return $scope.reportPeriodGrid.value.every(function (item) {
-                            if ((permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE ||
-                                permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE) &&
-                                $scope.reportPeriodGrid.value.length !== 1) {
-                                return false;
-                            }
-                            return PermissionChecker.check(item, permission);
-                        });
+                        if ((permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE ||
+                            permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE) &&
+                            $scope.reportPeriodGrid.value.length !== 1) {
+                            return false;
+                        }
+                        return PermissionChecker.check($scope.reportPeriodGrid.value[0], permission);
                     } else {
                         if (permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN) {
+                            // проверяем роль авторизованного пользователя для операции открытия периода
                             return $rootScope.user.roles[0].alias === APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP;
                         }
                     }
@@ -407,7 +396,7 @@
                 $scope.deadlinePeriod = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('reportPeriod.deadline.title') + $scope.reportPeriodGrid.value[0].name + " " + $scope.reportPeriodGrid.value[0].year,
-                        templateUrl: 'client/app/taxes/ndfl/periods/modal/deadlinePeriod.html?v=${buildUuid}',
+                        templateUrl: 'client/app/taxes/ndfl/periods/modal/updateDeadlinePeriodModal.html?v=${buildUuid}',
                         controller: 'deadlinePeriodController',
                         windowClass: 'modal500',
                         resolve: {

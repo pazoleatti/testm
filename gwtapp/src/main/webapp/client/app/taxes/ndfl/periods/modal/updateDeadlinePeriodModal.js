@@ -18,7 +18,7 @@
                  * для перобразования добавляется 'Z'
                  */
                 var deadline = null;
-                if($shareData.period.deadline) {
+                if ($shareData.period.deadline) {
                     deadline = new Date($shareData.period.deadline + "Z");
                 }
 
@@ -34,7 +34,7 @@
                  */
                 $scope.save = function () {
                     if (ValidationUtils.checkDateValidateInterval($scope.filter.deadline)) {
-                        checkHasChildDepartment ($scope.filter.department.id).then(function (hasChild) {
+                        checkHasChildDepartment($scope.filter.department.id).then(function (hasChild) {
                             if (!hasChild) {
                                 AppointDeadlineResource.doOperation({
                                     id: $scope.filter.departmentReportPeriod.id,
@@ -95,7 +95,7 @@
                                 $modalInstance.dismiss();
                             }
                         });
-                    }else {
+                    } else {
                         $modalInstance.dismiss();
                     }
                 };
@@ -104,15 +104,15 @@
                  * @description Закрыть модальное окно по нажатию на "Отмена"
                  */
                 $scope.cancel = function () {
-                        $dialogs.confirmDialog({
-                            title: $filter('translate')('reportPeriod.confirm.deadline.title'),
-                            content: $filter('translate')('reportPeriod.confirm.deadline.text'),
-                            okBtnCaption: $filter('translate')('common.button.yes'),
-                            cancelBtnCaption: $filter('translate')('common.button.no'),
-                            okBtnClick: function () {
-                                $modalInstance.dismiss();
-                            }
-                        });
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('reportPeriod.confirm.deadline.title'),
+                        content: $filter('translate')('reportPeriod.confirm.deadline.text'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $modalInstance.dismiss();
+                        }
+                    });
                 };
 
                 /**
