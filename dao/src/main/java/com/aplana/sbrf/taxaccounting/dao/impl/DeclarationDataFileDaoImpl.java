@@ -4,9 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataFile;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
-import com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationDataFile;
-import com.querydsl.sql.SQLQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,14 +22,11 @@ import java.util.*;
 @Repository
 public class DeclarationDataFileDaoImpl extends AbstractDao implements DeclarationDataFileDao {
 
-    @Autowired
-    SQLQueryFactory sqlQueryFactory;
-
     private final static class DeclarationDataFilesMapper implements RowMapper<DeclarationDataFile> {
-		@Override
+        @Override
         public DeclarationDataFile mapRow(ResultSet rs, int index) throws SQLException {
-			final DeclarationDataFile result = new DeclarationDataFile();
-			result.setDeclarationDataId(rs.getLong("declaration_data_id"));
+            final DeclarationDataFile result = new DeclarationDataFile();
+            result.setDeclarationDataId(rs.getLong("declaration_data_id"));
             result.setUuid(rs.getString("blob_data_id"));
             result.setFileName(rs.getString("file_name"));
             result.setDate(new Date(rs.getTimestamp("file_creation_date").getTime()));
@@ -42,8 +36,8 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
             result.setFileTypeName(rs.getString("file_type_name"));
             result.setFileTypeId(rs.getLong("file_type_id"));
             return result;
-		}
-	}
+        }
+    }
 
     @Override
     public SecuredEntity getSecuredEntity(long id) {
@@ -60,25 +54,25 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
         }
     }
 
-	@Override
-	public List<DeclarationDataFile> getFiles(long declarationDataId) {
-		return getJdbcTemplate().query(
-				"select " +
+    @Override
+    public List<DeclarationDataFile> getFiles(long declarationDataId) {
+        return getJdbcTemplate().query(
+                "select " +
                         "declaration_data_id, blob_data_id, user_name, user_department_name, note, " +
                         "bd.creation_date file_creation_date, bd.name file_name, ft.name file_type_name, ft.id file_type_id " +
-                "from declaration_data_file " +
-                "left join blob_data bd on (bd.id = declaration_data_file.blob_data_id) " +
-                "left join ref_book_attach_file_type ft on (ft.id = declaration_data_file.file_type_id) " +
-                "where declaration_data_id = ?",
-				new Object[]{declarationDataId},
-				new int[]{Types.NUMERIC},
-				new DeclarationDataFilesMapper()
-		);
+                        "from declaration_data_file " +
+                        "left join blob_data bd on (bd.id = declaration_data_file.blob_data_id) " +
+                        "left join ref_book_attach_file_type ft on (ft.id = declaration_data_file.file_type_id) " +
+                        "where declaration_data_id = ?",
+                new Object[]{declarationDataId},
+                new int[]{Types.NUMERIC},
+                new DeclarationDataFilesMapper()
+        );
 
-	}
+    }
 
-	@Override
-	public void saveFiles(final long declarationDataId, List<DeclarationDataFile> files) {
+    @Override
+    public void saveFiles(final long declarationDataId, List<DeclarationDataFile> files) {
         final List<DeclarationDataFile> newFiles = new LinkedList<DeclarationDataFile>();
         final List<DeclarationDataFile> oldFiles = new LinkedList<DeclarationDataFile>();
         final Set<String> removedFiles = new HashSet<String>(getJdbcTemplate().queryForList(
@@ -97,7 +91,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
             }
         }
 
-        if(!removedFiles.isEmpty()){
+        if (!removedFiles.isEmpty()) {
             getJdbcTemplate().batchUpdate(
                     "delete from declaration_data_file where blob_data_id = ?",
                     new BatchPreparedStatementSetter() {
@@ -162,7 +156,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
                     }
             );
         }
-	}
+    }
 
     @Override
     public void saveFile(DeclarationDataFile file) {
@@ -178,42 +172,43 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
 
     @Override
     public long deleteByDeclarationDataIdAndType(long declarationDataId, AttachFileType type) {
-        QDeclarationDataFile qDeclarationDataFile = QDeclarationDataFile.declarationDataFile;
-        return sqlQueryFactory.delete(qDeclarationDataFile)
-                .where(qDeclarationDataFile.declarationDataId.eq(declarationDataId)
-                        .and(qDeclarationDataFile.fileTypeId.eq(type.getId())))
-                .execute();
+        String query = "delete from DECLARATION_DATA_FILE ddf " +
+                "where ddf.DECLARATION_DATA_ID = :declarationDataId and ddf.FILE_TYPE_ID = :type";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId);
+        params.addValue("type", type.getId());
+        return getNamedParameterJdbcTemplate().update(query, params);
     }
 
     @Override
     public DeclarationDataFile findFileWithMaxWeight(Long declarationDataId) {
         String sql =
                 "select " +
-                    "t.name file_name, t.creation_date file_creation_date " +
-                "from (  " +
-                    "select " +
+                        "t.name file_name, t.creation_date file_creation_date " +
+                        "from (  " +
+                        "select " +
                         "bd.name, bd.creation_date, " +
                         "case when (lower(bd.name) like 'iv_%' or lower(bd.name) like 'uu_%') then 2 else 1 end weight " +
-                    "from " +
+                        "from " +
                         "declaration_data_file ddf " +
                         "join declaration_data dd on (ddf.declaration_data_id = dd.id) " +
                         "join blob_data bd on ddf.blob_data_id = bd.id " +
-                    "where " +
+                        "where " +
                         "dd.id = :declarationDataId and ( " +
-                            "lower(bd.name) like 'prot_no_ndfl2%' " +
-                            "or lower(bd.name) like 'прот_no_ndfl2%' " +
-                            "or lower(bd.name) like 'reestr_no_ndfl2%' " +
-                            "or lower(bd.name) like 'реестр_no_ndfl2%' " +
-                            "or lower(bd.name) like 'kv_%' " +
-                            "or lower(bd.name) like 'uo_%' " +
-                            "or lower(bd.name) like 'iv_%' " +
-                            "or lower(bd.name) like 'uu_%' " +
+                        "lower(bd.name) like 'prot_no_ndfl2%' " +
+                        "or lower(bd.name) like 'прот_no_ndfl2%' " +
+                        "or lower(bd.name) like 'reestr_no_ndfl2%' " +
+                        "or lower(bd.name) like 'реестр_no_ndfl2%' " +
+                        "or lower(bd.name) like 'kv_%' " +
+                        "or lower(bd.name) like 'uo_%' " +
+                        "or lower(bd.name) like 'iv_%' " +
+                        "or lower(bd.name) like 'uu_%' " +
                         ") " +
-                    "order by " +
+                        "order by " +
                         "weight desc, " +
                         "bd.creation_date desc " +
-                ") t " +
-                "where rownum = 1 ";
+                        ") t " +
+                        "where rownum = 1 ";
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("declarationDataId", declarationDataId);
@@ -227,20 +222,20 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
 
     @Override
     public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
-	    String query = "select " +
+        String query = "select " +
                 "declaration_data_id, blob_data_id, user_name, user_department_name, note, " +
                 "bd.creation_date file_creation_date, bd.name file_name, ft.name file_type_name, ft.id file_type_id " +
                 "from declaration_data_file " +
                 "left join blob_data bd on (bd.id = declaration_data_file.blob_data_id) " +
                 "left join ref_book_attach_file_type ft on (ft.id = declaration_data_file.file_type_id) " +
                 "where declaration_data_id = :declarationDataId and ft.name = :fileTypeName";
-	    MapSqlParameterSource params = new MapSqlParameterSource();
-	    params.addValue("declarationDataId", declarationDataId)
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationDataId", declarationDataId)
                 .addValue("fileTypeName", fileTypeName);
-	    try {
-	        return getNamedParameterJdbcTemplate().query(query, params, new DeclarationDataFilesMapper());
+        try {
+            return getNamedParameterJdbcTemplate().query(query, params, new DeclarationDataFilesMapper());
         } catch (EmptyResultDataAccessException e) {
-	        return new ArrayList<DeclarationDataFile>();
+            return new ArrayList<DeclarationDataFile>();
         }
     }
 }
