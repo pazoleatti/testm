@@ -31,13 +31,13 @@ public class GetTaskInfoHandler extends AbstractActionHandler<GetTaskInfoAction,
     @Override
     public GetTaskInfoResult execute(GetTaskInfoAction action, ExecutionContext executionContext) throws ActionException {
         GetTaskInfoResult result = new GetTaskInfoResult();
-        SchedulerTaskData taskData = schedulerTaskService.getSchedulerTask(SchedulerTask.getByTaskId(action.getTaskId()));
+        SchedulerTaskData taskData = schedulerTaskService.fetchOne(SchedulerTask.getByTaskId(action.getTaskId()));
         result.setTaskId(taskData.getTask().getSchedulerTaskId());
         result.setTaskName(taskData.getTaskName());
         result.setTaskState(taskData.isActive() ? 0 : 1);
         result.setSchedule(taskData.getSchedule());
-        result.setTimeCreated(taskData.getModificationDate().toDate());
-        result.setNextFireTime(taskData.getLast_fire_date().toDate());
+        result.setTimeCreated(taskData.getModificationDate());
+        result.setNextFireTime(taskData.getLastFireDate());
         result.setContextId(taskData.getTask().getSchedulerTaskId());
         result.setParams(taskData.getParams());
         return result;

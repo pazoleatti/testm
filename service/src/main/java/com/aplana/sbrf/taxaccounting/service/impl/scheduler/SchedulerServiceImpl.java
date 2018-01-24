@@ -148,7 +148,7 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
         for (final Method method : methods) {
             //Планируем задачи с расписанием из БД на момент старта приложения
             String settingCode = method.getAnnotation(AplanaScheduled.class).settingCode();
-            SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.valueOf(settingCode));
+            SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.valueOf(settingCode));
             if (schedulerTask == null) {
                 LOG.error("Cannot find schedule for task with setting code = " + settingCode + ". Check database table 'CONFIGURATION_SCHEDULER'");
             } else if (schedulerTask.isActive()) {
@@ -218,10 +218,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "CLEAR_TEMP_DIR")
     public void clearTempDirectory() {
-        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.CLEAR_TEMP_DIR);
+        SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.CLEAR_TEMP_DIR);
         if (schedulerTask.isActive()) {
             LOG.info("Temp directory cleaning started by scheduler");
-            schedulerTaskService.updateTaskStartDate(SchedulerTask.CLEAR_TEMP_DIR);
+            schedulerTaskService.updateStartDate(SchedulerTask.CLEAR_TEMP_DIR);
             File tempPath = new File(System.getProperty("java.io.tmpdir"));
             File[] fileList = tempPath.listFiles();
             long currentDate = new Date().getTime();
@@ -248,10 +248,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     @AplanaScheduled(settingCode = "CLEAR_BLOB_DATA")
     @Transactional
     public void clearBlobData() {
-        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA);
+        SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.CLEAR_BLOB_DATA);
         if (schedulerTask.isActive()) {
             LOG.info("BLOB_DATA cleaning started by scheduler");
-            schedulerTaskService.updateTaskStartDate(SchedulerTask.CLEAR_BLOB_DATA);
+            schedulerTaskService.updateStartDate(SchedulerTask.CLEAR_BLOB_DATA);
             blobDataService.clean();
             LOG.info("BLOB_DATA cleaning finished");
         }
@@ -262,10 +262,10 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
      */
     @AplanaScheduled(settingCode = "CLEAR_LOCK_DATA")
     public void clearLockData() {
-        SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.CLEAR_LOCK_DATA);
+        SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.CLEAR_LOCK_DATA);
         if (schedulerTask.isActive()) {
             LOG.info("LOCK_DATA cleaning started by scheduler");
-            schedulerTaskService.updateTaskStartDate(SchedulerTask.CLEAR_LOCK_DATA);
+            schedulerTaskService.updateStartDate(SchedulerTask.CLEAR_LOCK_DATA);
             String secCountParam = schedulerTask.getParams().get(0).getValue();
             Long seconds = Long.parseLong(secCountParam);
             lockDataService.unlockIfOlderThan(seconds);
@@ -279,9 +279,9 @@ public class SchedulerServiceImpl implements SchedulingConfigurer, SchedulerServ
     @AplanaScheduled(settingCode = "LOG_TABLE_CHANGE_MONITORING")
     public void taxEventsMonitoring() {
         if (applicationInfo.isProductionMode()) {
-            SchedulerTaskData schedulerTask = schedulerTaskService.getSchedulerTask(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
+            SchedulerTaskData schedulerTask = schedulerTaskService.fetchOne(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
             if (schedulerTask.isActive()) {
-                schedulerTaskService.updateTaskStartDate(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
+                schedulerTaskService.updateStartDate(SchedulerTask.LOG_TABLE_CHANGE_MONITORING);
                 taxEventProcessor.processTaxEvents();
             }
         }

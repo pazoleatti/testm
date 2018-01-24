@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SchedulerTaskDao;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParamType;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask.CLEAR_BLOB_DATA;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -35,8 +38,8 @@ public class SchedulerTaskDaoTest {
      */
     @Test
     public void getClearBlobData() {
-        SchedulerTaskData task = dao.fetchOneSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId());
-        assertEquals(SchedulerTask.CLEAR_BLOB_DATA, task.getTask());
+        SchedulerTaskData task = dao.fetchOne(CLEAR_BLOB_DATA.getSchedulerTaskId());
+        assertEquals(CLEAR_BLOB_DATA, task.getTask());
         assertEquals("Очистка файлового хранилища", task.getTaskName());
         assertEquals("0 15 22 * * ?", task.getSchedule());
         assertEquals(true, task.isActive());
@@ -48,7 +51,7 @@ public class SchedulerTaskDaoTest {
      */
     @Test
     public void getClearLockData() {
-        SchedulerTaskData task = dao.fetchOneSchedulerTask(SchedulerTask.CLEAR_LOCK_DATA.getSchedulerTaskId());
+        SchedulerTaskData task = dao.fetchOne(SchedulerTask.CLEAR_LOCK_DATA.getSchedulerTaskId());
         assertEquals(SchedulerTask.CLEAR_LOCK_DATA, task.getTask());
         assertEquals("Удаление истекших блокировок", task.getTaskName());
         assertEquals("0 10 22 * * ?", task.getSchedule());
@@ -65,16 +68,16 @@ public class SchedulerTaskDaoTest {
      */
     @Test
     public void getAllTasks() {
-        List<SchedulerTaskData> tasks = dao.fetchAllSchedulerTasks();
+        List<SchedulerTaskData> tasks = dao.fetchAll();
         assertEquals(3, tasks.size());
 
-        assertEquals(SchedulerTask.CLEAR_BLOB_DATA, tasks.get(0).getTask());
+        assertEquals(CLEAR_BLOB_DATA, tasks.get(0).getTask());
         assertEquals("Очистка файлового хранилища", tasks.get(0).getTaskName());
         assertEquals("0 15 22 * * ?", tasks.get(0).getSchedule());
         assertEquals(true, tasks.get(0).isActive());
         assertEquals(0, tasks.get(0).getParams().size());
-        assertEquals(new LocalDateTime(2013, 3, 31, 0, 0), tasks.get(0).getModificationDate());
-        assertEquals(new LocalDateTime(2015, 3, 31, 0, 0), tasks.get(0).getLast_fire_date());
+        assertEquals(new LocalDateTime(2013, 3, 31, 0, 0).toDate(), tasks.get(0).getModificationDate());
+        assertEquals(new LocalDateTime(2015, 3, 31, 0, 0).toDate(), tasks.get(0).getLastFireDate());
 
 
         assertEquals(SchedulerTask.CLEAR_LOCK_DATA, tasks.get(1).getTask());
@@ -92,15 +95,32 @@ public class SchedulerTaskDaoTest {
     }
 
     /**
+     * Получение страницы задач
+     */
+    @Test
+    public void fetchAllByPaging() {
+        List<SchedulerTaskData> tasks = dao.fetchAllByPaging(PagingParams.getInstance(2, 1));
+        assertEquals(1, tasks.size());
+        assertEquals(SchedulerTask.CLEAR_LOCK_DATA, tasks.get(0).getTask());
+    }
+
+    /**
      * Получение задачи CLEAR_BLOB_DATA и ее обновление
      */
     @Test
     public void updateClearBlobData() {
-        SchedulerTaskData task = dao.fetchOneSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId());
+        SchedulerTaskData task = dao.fetchOne(CLEAR_BLOB_DATA.getSchedulerTaskId());
         task.setSchedule("15 15 22 * * ?");
-        dao.updateTask(task);
-        task = dao.fetchOneSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId());
+        dao.update(task);
+        task = dao.fetchOne(CLEAR_BLOB_DATA.getSchedulerTaskId());
         assertEquals("15 15 22 * * ?", task.getSchedule());
+    }
+
+    @Test
+    public void updateStartDate() {
+        dao.updateStartDate(CLEAR_BLOB_DATA.getSchedulerTaskId());
+        SchedulerTaskData task = dao.fetchOne(CLEAR_BLOB_DATA.getSchedulerTaskId());
+        assertEquals(LocalDate.now(), new LocalDate(task.getLastFireDate()));
     }
 
     /**
@@ -108,13 +128,13 @@ public class SchedulerTaskDaoTest {
      */
     @Test
     public void changeActiveClearBlobData() {
-        SchedulerTaskData task = dao.fetchOneSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId());
+        SchedulerTaskData task = dao.fetchOne(CLEAR_BLOB_DATA.getSchedulerTaskId());
         assertEquals(true, task.isActive());
-        dao.setActiveSchedulerTask(false, Arrays.asList(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId()));
-        task = dao.fetchOneSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId());
+        dao.updateActiveByIds(false, Arrays.asList(CLEAR_BLOB_DATA.getSchedulerTaskId()));
+        task = dao.fetchOne(CLEAR_BLOB_DATA.getSchedulerTaskId());
         assertEquals(false, task.isActive());
-        dao.setActiveSchedulerTask(true, Arrays.asList(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId()));
-        task = dao.fetchOneSchedulerTask(SchedulerTask.CLEAR_BLOB_DATA.getSchedulerTaskId());
+        dao.updateActiveByIds(true, Arrays.asList(CLEAR_BLOB_DATA.getSchedulerTaskId()));
+        task = dao.fetchOne(CLEAR_BLOB_DATA.getSchedulerTaskId());
         assertEquals(true, task.isActive());
     }
 }

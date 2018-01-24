@@ -50,15 +50,15 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
         List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
         Logger logger = new Logger();
 
-        List<SchedulerTaskData> tasks = schedulerTaskService.getAllSchedulerTask();
+        List<SchedulerTaskData> tasks = schedulerTaskService.fetchAll();
         for (SchedulerTaskData task : tasks) {
             TaskSearchResultItem item = new TaskSearchResultItem();
             item.setId(task.getTask().getSchedulerTaskId());
             item.setName(task.getTaskName());
             item.setSchedule(task.getSchedule());
             item.setState(task.getSchedule() != null ? (task.isActive() ? "Активна" : "Остановлена") : "Не задано расписание");
-            item.setModificationDate(df.format(task.getModificationDate().toDate()));
-            item.setLastFireTime(task.getLast_fire_date() != null ? df.format(task.getLast_fire_date().toDate()) : "");
+            item.setModificationDate(df.format(task.getModificationDate()));
+            item.setLastFireTime(task.getLastFireDate() != null ? df.format(task.getLastFireDate()) : "");
             Date nextFireTime = schedulerService.nextExecutionTime(task.getTask().name());
             item.setNextFireTime(nextFireTime != null ? df.format(nextFireTime) : "");
             item.setContextId(task.getTask().getSchedulerTaskId());

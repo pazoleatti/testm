@@ -6,16 +6,15 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTask;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskModel;
 import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,60 +28,63 @@ public class SchedulerTaskServiceImpl implements SchedulerTaskService {
     @Autowired
     private SchedulerService schedulerService;
 
+    private FastDateFormat dateFormatter = FastDateFormat.getInstance("dd-MM-yyyy, HH:mm:ss");
+
     @Override
-    public SchedulerTaskData getSchedulerTask(SchedulerTask task) {
-        return schedulerTaskDao.fetchOneSchedulerTask(task.getSchedulerTaskId());
+    public SchedulerTaskData fetchOne(SchedulerTask task) {
+        return schedulerTaskDao.fetchOne(task.getSchedulerTaskId());
     }
 
     @Override
-    public SchedulerTaskData getSchedulerTask(Long taskId) {
-        return schedulerTaskDao.fetchOneSchedulerTask(taskId );
-    }
-    @Override
-    public List<SchedulerTaskData> getAllSchedulerTask() {
-        return schedulerTaskDao.fetchAllSchedulerTasks();
+    public SchedulerTaskData fetchOne(Long taskId) {
+        return schedulerTaskDao.fetchOne(taskId);
     }
 
     @Override
-    public PagingResult<TaskSearchResultItem> fetchAllSchedulerTasks(PagingParams pagingParams) {
-        List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
+    public List<SchedulerTaskData> fetchAll() {
+        return schedulerTaskDao.fetchAll();
+    }
 
-        PagingResult<SchedulerTaskModel> tasks = schedulerTaskDao.fetchAllSchedulerTasks(pagingParams);
-        for (SchedulerTaskModel task : tasks) {
+    @Override
+    public PagingResult<TaskSearchResultItem> fetchAllByPaging(PagingParams pagingParams) {
+        List<TaskSearchResultItem> records = new ArrayList<>();
+
+        PagingResult<SchedulerTaskData> tasks = schedulerTaskDao.fetchAllByPaging(pagingParams);
+        for (SchedulerTaskData task : tasks) {
             TaskSearchResultItem item = new TaskSearchResultItem();
-            item.setId((long) task.getId());
+            item.setId(task.getTask().getSchedulerTaskId());
             item.setName(task.getTaskName());
             item.setSchedule(task.getSchedule());
-            item.setState(task.getSchedule() != null ? (task.getActive() == 1 ? "Активна" : "Остановлена") : "Не задано расписание");
-            item.setModificationDate(task.getModificationDate().toString("dd-MM-yyyy, HH:mm:ss"));
-            item.setLastFireTime(task.getLastFireDate() != null ? task.getLastFireDate().toString("dd-MM-yyyy, HH:mm:ss") : "");
-            Date nextFireTime = schedulerService.nextExecutionTime(SchedulerTask.getByTaskId(task.getId()).name());
-            item.setNextFireTime(nextFireTime != null ? new SimpleDateFormat("dd-MM-yyyy, HH:mm:ss").format(nextFireTime) : "");
+            item.setState(task.getSchedule() != null ? (task.isActive() ? "Активна" : "Остановлена") : "Не задано расписание");
+            item.setModificationDate(dateFormatter.format(task.getModificationDate()));
+            item.setLastFireTime(task.getLastFireDate() != null ? dateFormatter.format(task.getLastFireDate()) : "");
+            Date nextFireTime = schedulerService.nextExecutionTime(task.getTask().name());
+            item.setNextFireTime(nextFireTime != null ? dateFormatter.format(nextFireTime) : "");
             records.add(item);
         }
 
-        return new PagingResult<TaskSearchResultItem>(records, tasks.getTotalCount());
+        return new PagingResult<>(records, tasks.getTotalCount());
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public void setActiveSchedulerTask(boolean active, List<Long> ids) {
-        schedulerTaskDao.setActiveSchedulerTask(active, ids);
+    public void updateActiveByIds(boolean active, List<Long> ids) {
+        schedulerTaskDao.updateActiveByIds(active, ids);
     }
 
     @Override
-    public void updateTaskStartDate(SchedulerTask task) {
-        schedulerTaskDao.updateTaskStartDate(task.getSchedulerTaskId());
+    public void updateStartDate(SchedulerTask task) {
+        schedulerTaskDao.updateStartDate(task.getSchedulerTaskId());
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public String updateTask(SchedulerTaskData taskData) {
+    public String update(SchedulerTaskData taskData) {
         String result = null;
         if (!validateSchedule(taskData.getSchedule())) {
             result = " Значение атрибута «Расписание» не соответствует требованиям формата Cron!";
         } else {
-            schedulerTaskDao.updateTask(taskData);
+            schedulerTaskDao.update(taskData);
         }
         return result;
     }

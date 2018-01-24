@@ -32,7 +32,7 @@ public class SetActiveTaskHandler extends AbstractActionHandler<SetActiveTaskAct
     @Override
     public SetActiveTaskResult execute(SetActiveTaskAction action, ExecutionContext executionContext) throws ActionException {
         SetActiveTaskResult result = new SetActiveTaskResult();
-        schedulerTaskService.setActiveSchedulerTask(action.isActive(), action.getTasksIds());
+        schedulerTaskService.updateActiveByIds(action.isActive(), action.getTasksIds());
         schedulerService.updateAllTask();
         return result;
     }

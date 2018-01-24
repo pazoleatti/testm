@@ -10,14 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParam;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskParamType;
 import com.aplana.sbrf.taxaccounting.service.SchedulerTaskService;
 import com.aplana.sbrf.taxaccounting.service.scheduler.SchedulerService;
-import com.aplana.sbrf.taxaccounting.web.model.SchedulerTaskModel;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,7 +45,6 @@ public class SchedulerTaskController {
         binder.registerCustomEditor(SchedulerTask.class, new RequestParamEditor(SchedulerTask.class));
         binder.registerCustomEditor(SchedulerTaskParam.class, new RequestParamEditor(SchedulerTaskParam.class));
         binder.registerCustomEditor(SchedulerTaskParamType.class, new RequestParamEditor(SchedulerTaskParamType.class));
-        binder.registerCustomEditor(SchedulerTaskModel.class, new RequestParamEditor(SchedulerTaskModel.class));
         binder.registerCustomEditor(List.class, new RequestParamEditor(List.class));
         binder.registerCustomEditor(Boolean.class, new RequestParamEditor(Boolean.class));
 
@@ -60,7 +56,7 @@ public class SchedulerTaskController {
      */
     @GetMapping(value = "/rest/schedulerTask")
     public JqgridPagedList<TaskSearchResultItem> fetchSchedulerTasks(@RequestParam PagingParams pagingParams) {
-        PagingResult<TaskSearchResultItem> taskList = schedulerTaskService.fetchAllSchedulerTasks(pagingParams);
+        PagingResult<TaskSearchResultItem> taskList = schedulerTaskService.fetchAllByPaging(pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 taskList,
@@ -76,7 +72,7 @@ public class SchedulerTaskController {
      */
     @PostMapping(value = "/actions/schedulerTask/activate")
     public void activateSchedulerTasks(@RequestBody List<Long> tasksIds) {
-        schedulerTaskService.setActiveSchedulerTask(true, tasksIds);
+        schedulerTaskService.updateActiveByIds(true, tasksIds);
         schedulerService.updateAllTask();
 
     }
@@ -88,27 +84,27 @@ public class SchedulerTaskController {
      */
     @PostMapping(value = "/actions/schedulerTask/deactivate")
     public void deactivateStateSchedulerTasks(@RequestBody List<Long> tasksIds) {
-        schedulerTaskService.setActiveSchedulerTask(false, tasksIds);
+        schedulerTaskService.updateActiveByIds(false, tasksIds);
         schedulerService.updateAllTask();
     }
 
     /**
-     *Отображение редактируемой задачи планировщика
+     * Отображение редактируемой задачи планировщика
      *
      * @param idTaskScheduler идентификаторы задач
      */
     @GetMapping(value = "/rest/updateSchedulerTask")
     public SchedulerTaskData fetchUpdateSchedulerTask(long idTaskScheduler) {
-        return schedulerTaskService.getSchedulerTask(idTaskScheduler);
+        return schedulerTaskService.fetchOne(idTaskScheduler);
     }
 
     /**
-     *Редактирование задачи планировщика
+     * Редактирование задачи планировщика
      *
-     * @param schedulerTaskModel измененная задача планировщика
+     * @param schedulerTaskData измененная задача планировщика
      */
     @PostMapping(value = "/actions/updateSchedulerTask")
-    public String updateSchedulerTask(@RequestParam(value = "schedulerTaskModel") SchedulerTaskModel schedulerTaskModel) {
-       return schedulerTaskService.updateTask(schedulerTaskModel.getShedulerTaskData() );
+    public String updateSchedulerTask(@RequestParam(value = "schedulerTaskModel") SchedulerTaskData schedulerTaskData) {
+        return schedulerTaskService.update(schedulerTaskData);
     }
 }
