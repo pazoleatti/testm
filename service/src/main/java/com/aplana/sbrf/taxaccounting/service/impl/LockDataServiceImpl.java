@@ -205,8 +205,8 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public List<LockDataItem> getLocksByKeySet(Set<String> keysBlocker) {
-        List<LockData> lockDataList = dao.getLocksByKeySet(keysBlocker);
+    public List<LockDataItem> fetchAllByKeySet(Set<String> keysBlocker) {
+        List<LockData> lockDataList = dao.fetchAllByKeySet(keysBlocker);
         List<LockDataItem> lockDataItems = new ArrayList<>(lockDataList.size());
         for(LockData lockData: lockDataList){
             LockDataItem lockDataItem = new LockDataItem();

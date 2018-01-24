@@ -11,9 +11,9 @@
     /**
      * @description Контроллер создания и редактирования отчетных периодов
      */
-        .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', 'BankDepartmentResource', '$shareData', 'DepartmentReportPeriodCheckerResource', '$http', '$logPanel', 'LogEntryResource',
+        .controller('reportPeriodCtrlModal', ['$scope', '$filter', 'APP_CONSTANTS', '$modalInstance', '$shareData', '$http', '$logPanel', 'LogEntryResource',
             'ReportPeriodTypeResource', '$dialogs',
-            function ($scope, $filter, APP_CONSTANTS, $modalInstance, BankDepartmentResource, $shareData, DepartmentReportPeriodCheckerResource, $http, $logPanel, LogEntryResource, ReportPeriodTypeResource,
+            function ($scope, $filter, APP_CONSTANTS, $modalInstance, $shareData, $http, $logPanel, LogEntryResource, ReportPeriodTypeResource,
                       $dialogs) {
 
                 $scope.isAdd = $shareData.isAdd;
@@ -189,7 +189,7 @@
                                             } else {
                                                 // Сохраняем отредактированный период
                                                 $http({
-                                                    method: "POST",
+                                                    method: "PUT",
                                                     url: "controller/rest/departmentReportPeriod/" + $scope.period.id,
                                                     params: {
                                                         departmentReportPeriod: JSON.stringify({

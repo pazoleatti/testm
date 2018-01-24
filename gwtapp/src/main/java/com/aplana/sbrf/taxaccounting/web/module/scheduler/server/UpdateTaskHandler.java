@@ -37,7 +37,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
     @Override
     public UpdateTaskResult execute(UpdateTaskAction action, ExecutionContext executionContext) throws ActionException {
         UpdateTaskResult result = new UpdateTaskResult();
-        SchedulerTaskData taskData = schedulerTaskService.getSchedulerTask(SchedulerTask.getByTaskId(action.getTaskId()));
+        SchedulerTaskData taskData = schedulerTaskService.fetchOne(SchedulerTask.getByTaskId(action.getTaskId()));
 
         // список ошибок
         List<String> errors = new ArrayList<String>(1);
@@ -58,7 +58,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
 
         taskData.setParams(action.getParams());
         taskData.setSchedule(action.getSchedule());
-        schedulerTaskService.updateTask(taskData);
+        schedulerTaskService.update(taskData);
         schedulerService.updateAllTask();
         return result;
     }

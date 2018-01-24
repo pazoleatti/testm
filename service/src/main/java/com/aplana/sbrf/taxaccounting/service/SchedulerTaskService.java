@@ -10,58 +10,58 @@ import java.util.List;
 
 public interface SchedulerTaskService {
     /**
-     * Получение параметров задачи планировщика
+     * Возвращяет данные по id задачи
      *
      * @param task объект {@link SchedulerTask} задачи
      * @return объект {@link SchedulerTaskData} задачи
      */
-    SchedulerTaskData getSchedulerTask(SchedulerTask task);
+    SchedulerTaskData fetchOne(SchedulerTask task);
 
     /**
-     * Получение параметров задачи планировщика
+     * Возвращяет данные по id задачи
      *
      * @param taskId id задачи
      * @return объект {@link SchedulerTaskData} задачи
      */
-    SchedulerTaskData getSchedulerTask(Long taskId);
+    SchedulerTaskData fetchOne(Long taskId);
 
 
     /**
-     * Получение параметров всех задач планировщика
+     * Возвращяет все задачи планировщика
      *
      * @return список задач {@link SchedulerTaskData}
      */
-    List<SchedulerTaskData> getAllSchedulerTask();
+    List<SchedulerTaskData> fetchAll();
 
     /**
-     * Получение параметров всех задач планировщика
+     * Возвращяет страницу параметров всех задач планировщика
      *
      * @param pagingParams параметры пагиинации
-     * @return Список задач {@link SchedulerTaskData}
+     * @return Страница задач {@link SchedulerTaskData}
      */
-    PagingResult<TaskSearchResultItem> fetchAllSchedulerTasks(PagingParams pagingParams);
+    PagingResult<TaskSearchResultItem> fetchAllByPaging(PagingParams pagingParams);
 
     /**
-     * Изменение признака активности задач
+     * Изменяет признак активности задач
      *
      * @param active признак активности
      * @param ids    идентификаторы задач
      */
-    void setActiveSchedulerTask(boolean active, List<Long> ids);
+    void updateActiveByIds(boolean active, List<Long> ids);
 
     /**
-     * Обновить дату последнего запуска задачи
+     * Изменяет дату последнего запуска задачи
      *
      * @param task объект {@link SchedulerTask} задачи
      */
-    void updateTaskStartDate(SchedulerTask task);
+    void updateStartDate(SchedulerTask task);
 
     /**
-     * Обновление параметров задачи планировщика
+     * Изменяет параметры задачи планировщика
      *
      * @param taskData объект {@link SchedulerTaskData} задачи
      */
-    String updateTask(SchedulerTaskData taskData);
+    String update(SchedulerTaskData taskData);
 
     /**
      * Валидация расписания

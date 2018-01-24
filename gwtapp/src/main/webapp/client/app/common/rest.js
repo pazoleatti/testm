@@ -183,13 +183,6 @@
             });
         }])
 
-
-        .factory('DepartmentReportPeriodCheckerResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/departmentReportPeriod/:id?projection=:projection', {}, {
-                query: {method: 'POST', isArray: false, cache: false}
-            });
-        }])
-
         .factory('DepartmentReportPeriodResource', ['$resource', function ($resource) {
             return $resource('controller/rest/departmentReportPeriod?projection=:projection', {}, {
                 query: {method: 'GET', isArray: true, cache: false}
@@ -279,14 +272,5 @@
             });
         }])
 
-        /**
-         * @description Установить срок сдачи отчетности
-         */
-        .factory('AppointDeadlineResource', [
-            '$resource', function ($resource) {
-                return $resource('controller/actions/departmentReportPeriod/updateDeadline', {}, {
-                    doOperation: {method: 'POST'}
-                });
-            }])
     ;
 }());

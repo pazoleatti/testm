@@ -10,8 +10,8 @@
     /**
      * @description Контроллер модального откна "Назначить срок сдачи отчетности"
      */
-        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', 'AppointDeadlineResource', '$q',
-            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, AppointDeadlineResource, $q) {
+        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', '$q', '$logPanel',
+            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, $q, $logPanel) {
 
                 /** в $shareData.period.deadline используется дата в фомате ISO,
                  * а для date-picker нужна дата в формате UTC
@@ -36,13 +36,19 @@
                     if (ValidationUtils.checkDateValidateInterval($scope.filter.deadline)) {
                         checkHasChildDepartment($scope.filter.department.id).then(function (hasChild) {
                             if (!hasChild) {
-                                AppointDeadlineResource.doOperation({
-                                    id: $scope.filter.departmentReportPeriod.id,
-                                    departmentId: $scope.filter.department.id,
-                                    utilDeadline: $scope.filter.deadline,
-                                    withChild: false
-                                }, function () {
-                                    $modalInstance.close();
+                                $http({
+                                    method: "POST",
+                                    url: "controller/actions/departmentReportPeriod/updateDeadline",
+                                    params: {
+                                        filter: JSON.stringify({
+                                            id: $scope.filter.departmentReportPeriod.id,
+                                            departmentId: $scope.filter.department.id,
+                                            deadline: $scope.filter.deadline,
+                                            withChild: false
+                                        })
+                                    }
+                                }).then(function () {
+                                        $modalInstance.close();
                                 });
                             } else {
                                 $dialogs.confirmDialog({
@@ -51,23 +57,35 @@
                                     okBtnCaption: $filter('translate')('common.button.yes'),
                                     cancelBtnCaption: $filter('translate')('common.button.no'),
                                     okBtnClick: function () {
-                                        AppointDeadlineResource.doOperation({
-                                            id: $scope.filter.departmentReportPeriod.id,
-                                            departmentId: $scope.filter.department.id,
-                                            utilDeadline: $scope.filter.deadline,
-                                            withChild: true
-                                        }, function () {
-                                            $modalInstance.close();
+                                        $http({
+                                            method: "POST",
+                                            url: "controller/actions/departmentReportPeriod/updateDeadline",
+                                            params: {
+                                                filter: JSON.stringify({
+                                                    id: $scope.filter.departmentReportPeriod.id,
+                                                    departmentId: $scope.filter.department.id,
+                                                    deadline: $scope.filter.deadline,
+                                                    withChild: true
+                                                })
+                                            }
+                                        }).then(function () {
+                                                $modalInstance.close();
                                         });
                                     },
                                     cancelBtnClick: function () {
-                                        AppointDeadlineResource.doOperation({
-                                            id: $scope.filter.departmentReportPeriod.id,
-                                            departmentId: $scope.filter.department.id,
-                                            utilDeadline: $scope.filter.deadline,
-                                            withChild: false
-                                        }, function () {
-                                            $modalInstance.close();
+                                        $http({
+                                            method: "POST",
+                                            url: "controller/actions/departmentReportPeriod/updateDeadline",
+                                            params: {
+                                                filter: JSON.stringify({
+                                                    id: $scope.filter.departmentReportPeriod.id,
+                                                    departmentId: $scope.filter.department.id,
+                                                    deadline: $scope.filter.deadline,
+                                                    withChild: false
+                                                })
+                                            }
+                                        }).then(function () {
+                                                $modalInstance.close();
                                         });
                                     }
 

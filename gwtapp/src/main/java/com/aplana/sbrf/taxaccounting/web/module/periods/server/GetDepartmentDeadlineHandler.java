@@ -26,7 +26,7 @@ public class GetDepartmentDeadlineHandler extends AbstractActionHandler<GetDepar
     public GetDepartmentDeadlineResult execute(GetDepartmentDeadlineAction action, ExecutionContext executionContext) throws ActionException {
         GetDepartmentDeadlineResult result = new GetDepartmentDeadlineResult();
         Notification notification = notificationService.fetchOne(action.getReportPeriodId(), action.getSenderDepartmentId(), action.getReceiverDepartmentId());
-        result.setDeadline(notification != null ? notification.getDeadline().toDate() : null);
+        result.setDeadline(notification != null ? notification.getDeadline() : null);
         return result;
     }
 

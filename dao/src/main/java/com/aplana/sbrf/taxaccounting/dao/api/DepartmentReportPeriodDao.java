@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriodJournalItem;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -44,6 +43,14 @@ public interface DepartmentReportPeriodDao {
      * @param departmentReportPeriod сохраняемый объект {@link DepartmentReportPeriod}
      */
     void create(DepartmentReportPeriod departmentReportPeriod);
+
+    /**
+     * Сохранение в БД отчетного периода для подразделения в пакетном режиме
+     *
+     * @param departmentReportPeriod сохраняемый объект {@link DepartmentReportPeriod}
+     * @param departmentIds список подразделений, для которых создается отчетный период
+     */
+    void create(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds);
 
     /**
      * Открытие/закрытие отчетного периода подразделения

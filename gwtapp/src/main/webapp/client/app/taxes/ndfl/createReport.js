@@ -64,7 +64,7 @@
                         okBtnCaption: $filter('translate')('common.button.yes'),
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
-                            $modalInstance.dismiss('Canceled');
+                            $modalInstance.dismiss();
                         }
                     });
                 };

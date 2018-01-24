@@ -2983,7 +2983,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             List<Notification> notifications = new ArrayList<Notification>();
             Notification notification = new Notification();
             notification.setUserId(userId);
-            notification.setCreateDate(new LocalDateTime());
+            notification.setCreateDate(new Date());
             notification.setText(msg);
             notification.setLogId(uuid);
             notification.setReportId(reportId);

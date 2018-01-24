@@ -303,4 +303,12 @@ public interface DepartmentService {
      * @return
      */
     List<Integer> getAllTBPerformers(int userTBDepId, DeclarationType declarationType);
+
+    /**
+     * Получение списка подразделений по идентификаторам
+     *
+     * @param ids список идентификаторов
+     * @return список {@link Department} или пустой список
+     */
+    List<Department> fetchAllDepartmentByIds(List<Integer> ids);
 }

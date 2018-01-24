@@ -231,7 +231,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         DeclarationData declaration = declarationDataDao.get(declarationDataId);
         // Удалять декларацию можно только если она не принята
         if (!declaration.getState().equals(State.CREATED)) {
-            throw new AccessDeniedException("Налоговая форма должна находиться в статусе \"Создана\"");
+            throw new AccessDeniedException(String.format("Налоговая форма № %s должна находиться в статусе \"Создана\"", declarationDataId));
         }
 
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declaration.getDepartmentReportPeriodId());

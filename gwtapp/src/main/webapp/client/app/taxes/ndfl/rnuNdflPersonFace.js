@@ -175,14 +175,14 @@
                             $logPanel.open('log-panel-container', response.data.uuid);
                         }
                     });
-                    $modalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss();
                 };
 
                 /**
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $modalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss();
                 };
 
                 /**

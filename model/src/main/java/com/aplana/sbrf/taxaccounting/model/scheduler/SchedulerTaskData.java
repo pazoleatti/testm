@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.scheduler;
 
-import org.joda.time.LocalDateTime;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,10 +25,10 @@ public class SchedulerTaskData implements Serializable {
     private String schedule;
 
     /** Дата последей операции по редактированию параметров задачи */
-    private LocalDateTime modificationDate;
+    private Date modificationDate;
 
     /** Дата последнего запуска задачи */
-    private LocalDateTime last_fire_date;
+    private Date lastFireDate;
 
     /**
      * Признак активности задачи
@@ -63,19 +61,19 @@ public class SchedulerTaskData implements Serializable {
         this.schedule = schedule;
     }
 
-    public LocalDateTime getLast_fire_date() {
-        return last_fire_date;
+    public Date getLastFireDate() {
+        return lastFireDate;
     }
 
-    public void setLast_fire_date(LocalDateTime last_fire_date) {
-        this.last_fire_date = last_fire_date;
+    public void setLastFireDate(Date lastFireDate) {
+        this.lastFireDate = lastFireDate;
     }
 
-    public void setModificationDate(LocalDateTime modificationDate) {
+    public void setModificationDate(Date modificationDate) {
         this.modificationDate = modificationDate;
     }
 
-    public LocalDateTime getModificationDate() {
+    public Date getModificationDate() {
         return modificationDate;
     }
 
@@ -102,7 +100,7 @@ public class SchedulerTaskData implements Serializable {
                 ", taskName='" + taskName + '\'' +
                 ", schedule='" + schedule + '\'' +
                 ", modificationDate=" + modificationDate +
-                ", last_fire_date=" + last_fire_date +
+                ", last_fire_date=" + lastFireDate +
                 ", active=" + active +
                 '}';
     }

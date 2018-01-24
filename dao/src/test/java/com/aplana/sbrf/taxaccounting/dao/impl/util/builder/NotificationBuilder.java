@@ -2,7 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl.util.builder;
 
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationType;
-import org.joda.time.LocalDateTime;
+
+import java.util.Date;
 
 public final class NotificationBuilder {
     private Notification notification;
@@ -45,12 +46,12 @@ public final class NotificationBuilder {
         return this;
     }
 
-    public NotificationBuilder createDate(LocalDateTime createDate) {
+    public NotificationBuilder createDate(Date createDate) {
         notification.setCreateDate(createDate);
         return this;
     }
 
-    public NotificationBuilder deadline(LocalDateTime deadline) {
+    public NotificationBuilder deadline(Date deadline) {
         notification.setDeadline(deadline);
         return this;
     }

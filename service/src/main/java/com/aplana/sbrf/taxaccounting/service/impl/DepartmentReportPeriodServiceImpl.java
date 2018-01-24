@@ -267,7 +267,11 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
         for (DeclarationData declarationData : declarations) {
             keysBlocker.put("DECLARATION_DATA_" + declarationData.getId(), declarationData);
         }
-        List<LockDataItem> lockDataItems = lockDataService.getLocksByKeySet(keysBlocker.keySet());
+        List<LockDataItem> lockDataItems = new ArrayList<>();
+
+        if (keysBlocker.size() > 0){
+            lockDataItems = lockDataService.fetchAllByKeySet(keysBlocker.keySet());
+        }
 
         for (LockDataItem lockDataItem : lockDataItems) {
             DeclarationData dd = keysBlocker.get(lockDataItem.getKey());

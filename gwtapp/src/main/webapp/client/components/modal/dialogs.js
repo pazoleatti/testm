@@ -288,7 +288,7 @@
                     $scope.needDetails = true;
                 };
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss();
                 };
             }
         ]

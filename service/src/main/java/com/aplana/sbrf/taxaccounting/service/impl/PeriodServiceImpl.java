@@ -141,10 +141,7 @@ public class PeriodServiceImpl implements PeriodService {
 
         period.setIsActive(true);
         period.setReportPeriod(reportPeriod);
-        for (int id : getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN)) {
-            period.setDepartmentId(id);
-            saveOrOpen(period, logs);
-        }
+        saveOrOpen(period, getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN), logs);
         return logEntryService.save(logs);
     }
 
@@ -188,6 +185,48 @@ public class PeriodServiceImpl implements PeriodService {
             cacheManagerDecorator.evict(CacheConstants.DEPARTMENT_REPORT_PERIOD, item.getId());
         }
         return uuid;
+    }
+
+    @Override
+    public void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs) {
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setDepartmentIdList(Collections.singletonList(departmentReportPeriod.getDepartmentId()));
+        filter.setReportPeriodIdList(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
+        filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.fetchAllByFilter(filter);
+        DepartmentReportPeriod savedDepartmentReportPeriod = null;
+        if (departmentReportPeriodList.size() == 1) {
+            savedDepartmentReportPeriod = departmentReportPeriodList.get(0);
+        }
+
+        if (savedDepartmentReportPeriod == null) { //не существует
+            departmentReportPeriodService.create(departmentReportPeriod, departmentIds);
+        } else if (!savedDepartmentReportPeriod.isActive()) { // существует и не открыт
+            filter.setDepartmentIdList(departmentIds);
+            departmentReportPeriodService.updateActive(departmentReportPeriodService.fetchAllIdsByFilter(filter), departmentReportPeriod.getReportPeriod().getId(), true);
+        } else { // уже открыт
+            return;
+        }
+
+        if (logs != null) {
+            int year = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
+            for (Department department : departmentService.fetchAllDepartmentByIds(departmentIds)) {
+                if (departmentReportPeriod.getCorrectionDate() == null) {
+                    logOperation(logs, "Период " + "\"" + departmentReportPeriod.getReportPeriod().getName() + "\" "
+                                    + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() +
+                                    " открыт для \"%s\"",
+                            department.getName());
+                } else {
+                    logOperation(logs, "Корректирующий период: " + departmentReportPeriod.getReportPeriod().getName()
+                                    + " " + year + " открыт для \"%s\"",
+                            department.getName());
+
+                }
+            }
+        }
+
+
     }
 
     @Override
@@ -392,7 +431,7 @@ public class PeriodServiceImpl implements PeriodService {
 
 
     @Override
-    public void setDeadline(DepartmentReportPeriodFilter filter) throws ActionException {
+    public void updateDeadline(DepartmentReportPeriodFilter filter) throws ActionException {
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         TAUser userInfo = userService.getCurrentUser();
         DepartmentReportPeriod period = departmentReportPeriodService.fetchOne(filter.getId());
@@ -409,14 +448,14 @@ public class PeriodServiceImpl implements PeriodService {
         }
         for (Department department : departments) {
             Notification notification = new Notification();
-            notification.setCreateDate(new LocalDateTime());
+            notification.setCreateDate(new Date());
             notification.setDeadline(filter.getDeadline());
             notification.setReportPeriodId(period.getReportPeriod().getId());
             notification.setSenderDepartmentId(null);
             notification.setReceiverDepartmentId(department.getId());
             notification.setText(String.format(text,
                     userInfo.getName(), departmentService.getParentsHierarchy(department.getId()), TaxTypeCase.fromCode(TaxType.NDFL.getCode()).getGenitive(),
-                    period.getReportPeriod().getName(), period.getReportPeriod().getTaxPeriod().getYear(), df.format(filter.getDeadline().toDate())));
+                    period.getReportPeriod().getName(), period.getReportPeriod().getTaxPeriod().getYear(), df.format(filter.getDeadline())));
 
             notifications.add(notification);
         }

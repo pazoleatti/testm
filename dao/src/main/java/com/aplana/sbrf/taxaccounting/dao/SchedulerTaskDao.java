@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskData;
-import com.aplana.sbrf.taxaccounting.model.scheduler.SchedulerTaskModel;
 
 import java.util.List;
 
@@ -13,47 +12,47 @@ import java.util.List;
 public interface SchedulerTaskDao {
 
     /**
-     * Получение данных по id задачи
+     * Возвращяет данные по id задачи
      *
      * @param taskId идентификатор задачи
-     * @return объект {@link SchedulerTaskData}
+     * @return объект {@link SchedulerTaskData} или null, если не найден
      */
-    SchedulerTaskData fetchOneSchedulerTask(Long taskId);
+    SchedulerTaskData fetchOne(Long taskId);
 
     /**
-     * Получить все задачи планировщика
+     * Возвращяет все задачи планировщика
      *
      * @return Список задач {@link SchedulerTaskData}
      */
-    List<SchedulerTaskData> fetchAllSchedulerTasks();
+    List<SchedulerTaskData> fetchAll();
 
     /**
-     * Получение параметров всех задач планировщика
+     * Возвращяет страницу параметров всех задач планировщика
      *
      * @param pagingParams параметры пагиинации
-     * @return Список задач {@link SchedulerTaskModel}
+     * @return Страница задач {@link SchedulerTaskData}
      */
-    PagingResult<SchedulerTaskModel> fetchAllSchedulerTasks(PagingParams pagingParams);
+    PagingResult<SchedulerTaskData> fetchAllByPaging(PagingParams pagingParams);
 
     /**
-     * Обновление параметров задачи планировщика
+     * Изменяет параметры задачи планировщика
      *
-     * @param taskData объект задачи
+     * @param taskData объект {@link SchedulerTaskData} задачи
      */
-    void updateTask(SchedulerTaskData taskData);
+    void update(SchedulerTaskData taskData);
 
     /**
-     * Обновление даты последнего запуска задачи
+     * Изменяет дату последнего запуска задачи
      *
      * @param taskId идентификатор задачи
      */
-    void updateTaskStartDate(long taskId);
+    void updateStartDate(long taskId);
 
     /**
-     * Изменение признака активности задач
+     * Изменяет признак активности задач
      *
      * @param active признак активности
      * @param ids    список идентификаторов задач
      */
-    void setActiveSchedulerTask(boolean active, List<Long> ids);
+    void updateActiveByIds(boolean active, List<Long> ids);
 }

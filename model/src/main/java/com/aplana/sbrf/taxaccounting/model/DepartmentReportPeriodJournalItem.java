@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-
-import org.joda.time.LocalDateTime;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -26,7 +23,7 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
 
     private Integer departmentId;
 
-    private LocalDateTime deadline;
+    private Date deadline;
 
     private long permissions;
 
@@ -95,11 +92,11 @@ public class DepartmentReportPeriodJournalItem implements Serializable, SecuredE
         this.departmentId = departmentId;
     }
 
-    public LocalDateTime getDeadline() {
+    public Date getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDateTime deadline) {
+    public void setDeadline(Date deadline) {
         this.deadline = deadline;
     }
 

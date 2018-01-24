@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.model.NotificationType.REF_BOOK_REPORT;
@@ -34,7 +35,7 @@ public class NotificationDaoTest {
     @Autowired
     NotificationDao notificationDao;
 
-    private LocalDateTime date1 = new LocalDateTime(2013, 12, 31, 0, 0);
+    private Date date1 = new LocalDateTime(2013, 12, 31, 0, 0).toDate();
 
     @Test
     public void fetchOne() {
@@ -215,7 +216,7 @@ public class NotificationDaoTest {
 
     @Test
     public void fetchLastNotificationDate() {
-        assertEquals(date1.toDate(),
+        assertEquals(date1,
                 notificationDao.fetchLastNotificationDate());
     }
 }

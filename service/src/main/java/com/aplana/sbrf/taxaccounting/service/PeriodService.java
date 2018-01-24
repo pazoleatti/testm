@@ -27,6 +27,17 @@ public interface PeriodService {
     String open(DepartmentReportPeriod period);
 
     /**
+     * Создание новых отчетных периодов подразделений или открытие существующих по комбинации параметров
+     * - Отчетный период
+     * - Дата корректировки
+     *
+     * @param departmentReportPeriod отчетный период подразделения
+     * @param departmentIds          список подразделений, для которых необходимо открыть периоды
+     * @param logs                   логгер
+     */
+    void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs);
+
+    /**
      * Создание нового отчетного периода подразделения или открытие существующего по комбинации параметров
      * - Подразделение
      * - Отчетный период
@@ -163,7 +174,7 @@ public interface PeriodService {
      * @param filter фильтр с датой сдачи отчетности {@link DepartmentReportPeriodFilter#getDeadline()}
      * @throws ActionException если дата сдачи отчетности не указана
      */
-    void setDeadline(DepartmentReportPeriodFilter filter) throws ActionException;
+    void updateDeadline(DepartmentReportPeriodFilter filter) throws ActionException;
 
     enum Operation {
         FIND, // Поиск периода

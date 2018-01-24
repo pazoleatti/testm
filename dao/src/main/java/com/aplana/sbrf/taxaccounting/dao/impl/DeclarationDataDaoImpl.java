@@ -301,7 +301,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                         item.setAsnuName(rs.getString("asnuName"));
                         item.setState(rs.getString("state"));
                         item.setFileName(rs.getString("fileName"));
-                        item.setCreationDate(new LocalDateTime(rs.getTimestamp("creationDate").getTime()));
+                        item.setCreationDate(rs.getTimestamp("creationDate"));
                         item.setCreationUserName(rs.getString("creationUserName"));
                         item.setReportPeriod(rs.getString("reportPeriod"));
                         item.setKpp(rs.getString("kpp"));

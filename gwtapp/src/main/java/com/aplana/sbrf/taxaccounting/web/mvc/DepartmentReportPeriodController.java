@@ -109,7 +109,7 @@ public class DepartmentReportPeriodController {
      * @return идентификатор uuid для логов
      */
     @PostMapping(value = "/actions/departmentReportPeriod/open")
-    public String add(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
+    public String open(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
         return periodService.open(departmentReportPeriod);
     }
 
@@ -119,8 +119,8 @@ public class DepartmentReportPeriodController {
      * @param departmentReportPeriod открываемый период
      * @return идентификатор uuid для логов
      */
-    @PostMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}")
-    public String edit(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
+    @PutMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}")
+    public String editPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
         return periodService.editPeriod(departmentReportPeriod, securityService.currentUserInfo());
     }
 
@@ -152,8 +152,8 @@ public class DepartmentReportPeriodController {
      * @param departmentReportPeriodId идентификатор удаляемого периода
      * @return uuid идентификатор логера
      */
-    @PostMapping(value = "/actions/departmentReportPeriod/delete")
-    public String delete(@RequestParam Integer departmentReportPeriodId) {
+    @PostMapping(value = "/actions/departmentReportPeriod/remove")
+    public String remove(@RequestParam Integer departmentReportPeriodId) {
         return periodService.removeReportPeriod(departmentReportPeriodId, securityService.currentUserInfo());
     }
 
@@ -201,10 +201,9 @@ public class DepartmentReportPeriodController {
      * @param filter фильтр с данными о периоде и датой сдачи отчетности
      * @throws ActionException если дата сдачи отчетности не указана
      */
-    @PostMapping(value = "actions/departmentReportPeriod/updateDeadline", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void setDeadline(@RequestBody DepartmentReportPeriodFilter filter) throws ActionException {
-        filter.setDeadline(new LocalDateTime(filter.getUtilDeadline()));
-        periodService.setDeadline(filter);
+    @PostMapping(value = "actions/departmentReportPeriod/updateDeadline")
+    public void updateDeadline(@RequestParam DepartmentReportPeriodFilter filter) throws ActionException {
+        periodService.updateDeadline(filter);
     }
 
     /**

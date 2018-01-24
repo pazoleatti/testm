@@ -573,4 +573,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 .where(departmentDeclTypePerformer.performerDepId.in(performersIds))
                 .fetch();
     }
+
+    @Override
+    public List<Department> fetchAllDepartmentByIds(List<Integer> ids){
+        String where = "where" + SqlUtils.transformToSqlInStatement("id", ids);
+        return getNamedParameterJdbcTemplate().query(
+                "select * from department " + where,
+                new DepartmentJdbcMapper()
+        );
+    }
 }

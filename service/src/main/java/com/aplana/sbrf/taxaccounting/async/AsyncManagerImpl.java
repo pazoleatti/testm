@@ -14,7 +14,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -25,6 +24,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -141,51 +141,58 @@ public class AsyncManagerImpl implements AsyncManager {
     }
 
     @Override
-    public AsyncTaskData executeTask(String lockKey, AsyncTaskType taskType, TAUserInfo user, Map<String, Object> params, Logger logger, boolean cancelConfirmed, AbstractStartupAsyncTaskHandler handler) {
-        LOG.info(String.format("Выполнение проверок перед запуском для задачи с ключом %s", lockKey));
-        if (!cancelConfirmed && handler.checkExistTasks(taskType, user, logger)) {
-            //Задачи найдены, но их отмена пока не подтверждена - запрашиваем подтверждение у пользователя
-            LOG.info(String.format("Найдены запущенные задачи, по которым требуется удалить блокировку для задачи с ключом %s", lockKey));
-            handler.postCheckProcessing();
-        } else {
-            //Задачи найдены и подтверждена их отмена
-            LOG.info(String.format("Создание блокировки для задачи с ключом %s", lockKey));
-            LockData lockData = handler.lockObject(lockKey, taskType, user);
-            AsyncTaskData taskData = null;
-            if (lockData == null) {
-                //Блокировка успешно установлена
-                try {
-                    //Остановка найденных задач + выполнение специфичной бизнес-логики
-                    handler.interruptTasks(taskType, user);
+    public AsyncTaskData executeTask(final String lockKey, final AsyncTaskType taskType, final TAUserInfo user, final Map<String, Object> params, final Logger logger, final boolean cancelConfirmed, final AbstractStartupAsyncTaskHandler handler) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public Object execute() {
+                LOG.info(String.format("Выполнение проверок перед запуском для задачи с ключом %s", lockKey));
+                if (!cancelConfirmed && handler.checkExistTasks(taskType, user, logger)) {
+                    //Задачи найдены, но их отмена пока не подтверждена - запрашиваем подтверждение у пользователя
+                    LOG.info(String.format("Найдены запущенные задачи, по которым требуется удалить блокировку для задачи с ключом %s", lockKey));
+                    handler.postCheckProcessing();
+                } else {
+                    //Задачи найдены и подтверждена их отмена
+                    LOG.info(String.format("Создание блокировки для задачи с ключом %s", lockKey));
+                    LockData lockData = handler.lockObject(lockKey, taskType, user);
+                    AsyncTaskData taskData = null;
+                    if (lockData == null) {
+                        //Блокировка успешно установлена
+                        try {
+                            //Остановка найденных задач + выполнение специфичной бизнес-логики
+                            handler.interruptTasks(taskType, user);
 
-                    //Постановка новой задачи в очередь
-                    LOG.info(String.format("Постановка в очередь задачи с ключом %s", lockKey));
-                    taskData = executeTask(lockKey, taskType, user, params);
+                            //Постановка новой задачи в очередь
+                            LOG.info(String.format("Постановка в очередь задачи с ключом %s", lockKey));
+                            taskData = executeTask(lockKey, taskType, user, params);
 
-                    //Выполнение пост-обработки
-                    handler.postTaskScheduling(taskData, logger);
-                    return taskData;
-                } catch (Exception e) {
-                    if (taskData != null) {
-                        finishTask(taskData.getId());
+                            //Выполнение пост-обработки
+                            handler.postTaskScheduling(taskData, logger);
+                            return taskData;
+                        } catch (Exception e) {
+                            if (taskData != null) {
+                                finishTask(taskData.getId());
+                            } else {
+                                lockDataService.unlock(lockKey, user.getUser().getId(), true);
+                            }
+                            int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                            if (i != -1) {
+                                throw (ServiceLoggerException) ExceptionUtils.getThrowableList(e).get(i);
+                            }
+                            throw new ServiceException(e.getMessage(), e);
+                        }
                     } else {
-                        lockDataService.unlock(lockKey, user.getUser().getId(), true);
+                        //Блокировка не была установлена, т.к этот объект был заблокирован ранее - добавляем пользователя в подписчики на задачу
+                        LOG.info(String.format("Уже существует блокировка задачи с ключом %s", lockKey));
+                        addUserWaitingForTask(lockData.getTaskId(), user.getUser().getId());
+                        logger.info(String.format(AsyncTask.LOCK_INFO_MSG,
+                                sdf.get().format(lockData.getDateLock()),
+                                userService.getUser(lockData.getUserId()).getName()));
                     }
-                    int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
-                    if (i != -1) {
-                        throw (ServiceLoggerException) ExceptionUtils.getThrowableList(e).get(i);
-                    }
-                    throw new ServiceException(e.getMessage(), e);
                 }
-            } else {
-                //Блокировка не была установлена, т.к этот объект был заблокирован ранее - добавляем пользователя в подписчики на задачу
-                LOG.info(String.format("Уже существует блокировка задачи с ключом %s", lockKey));
-                addUserWaitingForTask(lockData.getTaskId(), user.getUser().getId());
-                logger.info(String.format(AsyncTask.LOCK_INFO_MSG,
-                        sdf.get().format(lockData.getDateLock()),
-                        userService.getUser(lockData.getUserId()).getName()));
+                return null;
             }
-        }
+        });
+
         return null;
     }
 
@@ -244,7 +251,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                                            for (Integer waitingUser : waitingUsers) {
                                                                Notification notification = new Notification();
                                                                notification.setUserId(waitingUser);
-                                                               notification.setCreateDate(new LocalDateTime());
+                                                               notification.setCreateDate(new Date());
                                                                notification.setText(msg);
                                                                notifications.add(notification);
                                                            }
@@ -338,7 +345,7 @@ public class AsyncManagerImpl implements AsyncManager {
                 asyncTaskDao.addUserWaitingForTask(taskId, userId);
             }
         } else {
-            LOG.warn(String.format("Cannot add subscriber with id = %s to task with id = %s. Cause: task doesn't exists", taskId, userId));
+            LOG.warn(String.format("Cannot add subscriber with id = %s to task with id = %s. Cause: task doesn't exists", userId, taskId));
         }
     }
 
