@@ -12,13 +12,13 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.shared.UpdateDepartmentD
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -55,8 +55,8 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             action.getTaxType().getName();
             char taxType = action.getTaxType().getCode();
             Notification notification = new Notification();
-            notification.setCreateDate(new LocalDateTime());
-            notification.setDeadline(new LocalDateTime(action.getDeadline()));
+            notification.setCreateDate(new Date());
+            notification.setDeadline(action.getDeadline());
             notification.setReportPeriodId(action.getReportPeriodId());
             notification.setSenderDepartmentId(null);
             notification.setReceiverDepartmentId(pair.getDepartmentId());

@@ -14,7 +14,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -25,6 +24,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -251,7 +251,7 @@ public class AsyncManagerImpl implements AsyncManager {
                                                            for (Integer waitingUser : waitingUsers) {
                                                                Notification notification = new Notification();
                                                                notification.setUserId(waitingUser);
-                                                               notification.setCreateDate(new LocalDateTime());
+                                                               notification.setCreateDate(new Date());
                                                                notification.setText(msg);
                                                                notifications.add(notification);
                                                            }

@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import org.joda.time.LocalDateTime;
-
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -21,8 +20,8 @@ public class Notification implements Serializable {
     private Integer receiverDepartmentId;
     private String text;
     private String logId;
-    private LocalDateTime createDate;
-    private LocalDateTime deadline;
+    private Date createDate;
+    private Date deadline;
     /**
      * Идентификатор пользователя, который получит оповещение
      */
@@ -105,19 +104,19 @@ public class Notification implements Serializable {
         }
     }
 
-    public LocalDateTime getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(LocalDateTime createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
-    public LocalDateTime getDeadline() {
+    public Date getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDateTime deadline) {
+    public void setDeadline(Date deadline) {
         this.deadline = deadline;
     }
 

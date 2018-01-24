@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
@@ -233,7 +232,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 for (Integer userId : waitingUsers) {
                     Notification notification = new Notification();
                     notification.setUserId(userId);
-                    notification.setCreateDate(new LocalDateTime());
+                    notification.setCreateDate(new Date());
                     notification.setText(msg);
                     notification.setLogId(uuid);
                     notification.setReportId(reportId);

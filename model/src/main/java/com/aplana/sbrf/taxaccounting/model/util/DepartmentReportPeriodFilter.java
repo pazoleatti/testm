@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.model.util;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.joda.time.LocalDateTime;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -24,7 +23,7 @@ public class DepartmentReportPeriodFilter implements Serializable {
     private Integer departmentId;
     private ReportPeriod reportPeriod;
     private Date utilDeadline;
-    private LocalDateTime deadline;
+    private Date deadline;
     private boolean withChild;
 
     public Integer getId() {
@@ -119,11 +118,11 @@ public class DepartmentReportPeriodFilter implements Serializable {
         this.reportPeriod = reportPeriod;
     }
 
-    public LocalDateTime getDeadline() {
+    public Date getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDateTime deadline) {
+    public void setDeadline(Date deadline) {
         this.deadline = deadline;
     }
 

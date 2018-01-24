@@ -203,7 +203,7 @@ public class DepartmentReportPeriodController {
      */
     @PostMapping(value = "actions/departmentReportPeriod/updateDeadline", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void setDeadline(@RequestBody DepartmentReportPeriodFilter filter) throws ActionException {
-        filter.setDeadline(new LocalDateTime(filter.getUtilDeadline()));
+        filter.setDeadline(filter.getUtilDeadline());
         periodService.setDeadline(filter);
     }
 

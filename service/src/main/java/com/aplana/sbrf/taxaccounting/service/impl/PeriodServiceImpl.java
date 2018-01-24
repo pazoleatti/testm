@@ -409,14 +409,14 @@ public class PeriodServiceImpl implements PeriodService {
         }
         for (Department department : departments) {
             Notification notification = new Notification();
-            notification.setCreateDate(new LocalDateTime());
+            notification.setCreateDate(new Date());
             notification.setDeadline(filter.getDeadline());
             notification.setReportPeriodId(period.getReportPeriod().getId());
             notification.setSenderDepartmentId(null);
             notification.setReceiverDepartmentId(department.getId());
             notification.setText(String.format(text,
                     userInfo.getName(), departmentService.getParentsHierarchy(department.getId()), TaxTypeCase.fromCode(TaxType.NDFL.getCode()).getGenitive(),
-                    period.getReportPeriod().getName(), period.getReportPeriod().getTaxPeriod().getYear(), df.format(filter.getDeadline().toDate())));
+                    period.getReportPeriod().getName(), period.getReportPeriod().getTaxPeriod().getYear(), df.format(filter.getDeadline())));
 
             notifications.add(notification);
         }

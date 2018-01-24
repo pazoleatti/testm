@@ -40,8 +40,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             notification.setRead(rs.getBoolean("IS_READ"));
             notification.setText(rs.getString("TEXT"));
             notification.setLogId(rs.getString("LOG_ID"));
-            notification.setCreateDate(new LocalDateTime(rs.getTimestamp("CREATE_DATE").getTime()));
-            notification.setDeadline(new LocalDateTime(rs.getDate("DEADLINE")));
+            notification.setCreateDate(rs.getTimestamp("CREATE_DATE"));
+            notification.setDeadline(rs.getDate("DEADLINE"));
             notification.setUserId(SqlUtils.getInteger(rs, "USER_ID"));
             notification.setRoleId(SqlUtils.getInteger(rs, "ROLE_ID"));
             notification.setReportId(rs.getString("REPORT_ID"));
@@ -100,7 +100,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 ps.setObject(4, elem.getReceiverDepartmentId(), Types.NUMERIC);
                 ps.setBoolean(5, elem.isRead());
                 ps.setString(6, elem.getText());
-                ps.setDate(7, elem.getDeadline() != null ? new java.sql.Date(elem.getDeadline().toDate().getTime()) : null);
+                ps.setDate(7, elem.getDeadline() != null ? new java.sql.Date(elem.getDeadline().getTime()) : null);
                 ps.setObject(8, elem.getUserId(), Types.NUMERIC);
                 ps.setObject(9, elem.getRoleId(), Types.NUMERIC);
                 ps.setString(10, elem.getLogId());
