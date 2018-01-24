@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.script.service;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.script.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.script.service.impl.DepartmentServiceImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,7 +48,7 @@ public class DepartmentServiceTest {
         List<Integer> tempIds = new ArrayList<Integer>();
         tempIds.add(valid.getId());
         tempIds.add(validTB.getId());
-        when(departmentDao.listDepartmentIds()).thenReturn(tempIds);
+        when(departmentDao.fetchAllIds()).thenReturn(tempIds);
 
         when(departmentDao.getDepartmentByName("Банк1")).thenReturn(new Department());
         when(departmentDao.getDepartmentByName("")).thenReturn(null);

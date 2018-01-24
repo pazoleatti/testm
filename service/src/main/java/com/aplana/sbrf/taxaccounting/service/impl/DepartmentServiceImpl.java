@@ -47,7 +47,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> listIdAll() {
-        return departmentDao.listDepartmentIds();
+        return departmentDao.fetchAllIds();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Integer> getAllChildrenIds(Integer depId) {
         if (depId == null)
             return new ArrayList<Integer>(0);
-        return departmentDao.getAllChildrenIds(depId);
+        return departmentDao.fetchAllChildrenIds(depId);
     }
 
     @Override
@@ -121,11 +121,11 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
-            retList.addAll(departmentDao.listDepartmentIds());
+            retList.addAll(departmentDao.fetchAllIds());
         } else if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
         } else if (tAUser.hasRoles(TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            retList.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
+            retList.addAll(departmentDao.fetchAllChildrenIds(tAUser.getDepartmentId()));
         }
 
         return retList;
@@ -226,7 +226,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Integer> retList = new ArrayList<Integer>();
         if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
-            retList.addAll(departmentDao.listDepartmentIds());
+            retList.addAll(departmentDao.fetchAllIds());
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS)) {
             Set<Integer> departments = new LinkedHashSet<Integer>();
             departments.addAll(departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId()));
@@ -236,10 +236,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departments);
         } else if (tAUser.hasRoles(taxType, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
             //Дочерние подразделения для подразделения пользователя
-            List<Integer> userDepartmentChildrenIds = departmentDao.getAllChildrenIds(tAUser.getDepartmentId());
+            List<Integer> userDepartmentChildrenIds = departmentDao.fetchAllChildrenIds(tAUser.getDepartmentId());
             //Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
-            List<Integer> declarationDepartmentsIds = departmentDao.getDepartmentsByDeclarationsPerformers(userDepartmentChildrenIds);
-            List<Integer> declarationDepartmentsChildrenIds = departmentDao.getAllChildrenIds(declarationDepartmentsIds);
+            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(userDepartmentChildrenIds);
+            List<Integer> declarationDepartmentsChildrenIds = departmentDao.fetchAllChildrenIds(declarationDepartmentsIds);
             //В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
             //назначены исполнителями, их дочерние подразделения
             retList.addAll(userDepartmentChildrenIds);
@@ -259,7 +259,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         Set<Integer> departments = new LinkedHashSet<Integer>();
         if (user.hasRoles(TARole.N_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
-            departments.addAll(departmentDao.listDepartmentIds());
+            departments.addAll(departmentDao.fetchAllIds());
         } else if (user.hasRoles(TARole.N_ROLE_CONTROL_NS)) {
             departments.addAll(departmentDao.getDepartmentTBChildrenId(userDepartmentId));
             for (int tbId : getTBDepartmentIdsByDeclarationPerformer(departmentDao.getParentTBId(userDepartmentId))) {
@@ -267,10 +267,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
         } else if (user.hasRoles(TARole.N_ROLE_OPER)) {
             //Дочерние подразделения для подразделения пользователя
-            List<Integer> userDepartmentChildrenIds = departmentDao.getAllChildrenIds(userDepartmentId);
+            List<Integer> userDepartmentChildrenIds = departmentDao.fetchAllChildrenIds(userDepartmentId);
             //Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
-            List<Integer> declarationDepartmentsIds = departmentDao.getDepartmentsByDeclarationsPerformers(userDepartmentChildrenIds);
-            List<Integer> declarationDepartmentsChildrenIds = departmentDao.getAllChildrenIds(declarationDepartmentsIds);
+            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(userDepartmentChildrenIds);
+            List<Integer> declarationDepartmentsChildrenIds = departmentDao.fetchAllChildrenIds(declarationDepartmentsIds);
             //В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
             //назначены исполнителями, их дочерние подразделения
             departments.addAll(userDepartmentChildrenIds);
@@ -309,7 +309,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         /*
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             // все подразделения из справочника подразделений
-            retList.addAll(departmentDao.listDepartmentIds());
+            retList.addAll(departmentDao.fetchAllIds());
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
             // подразделения, которым назначены формы, которые являются источниками данных для форм, назначенных подразделениям из 10 - Выборка для бизнес-администрирования.
             List<Integer> baDepartmentIds = getBADepartmentIds(tAUser);
@@ -464,14 +464,14 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_UNP)
                 || tAUser.hasRole(taxType, TARole.F_ROLE_CONTROL_UNP)) {
             // Все подразделения из справочника подразделений
-            return departmentDao.listDepartmentIds();
+            return departmentDao.fetchAllIds();
         } else if (tAUser.hasRole(taxType, TARole.N_ROLE_CONTROL_NS)) {
             // Все подразделения в рамках ТБ
             return departmentDao.getDepartmentTBChildrenId(tAUser.getDepartmentId());
         } else if (tAUser.hasRole(taxType, TARole.N_ROLE_OPER)) {
             List<Integer> departmentIds = new ArrayList<Integer>();
             // Подразделение + дочерниее
-            departmentIds.addAll(departmentDao.getAllChildrenIds(tAUser.getDepartmentId()));
+            departmentIds.addAll(departmentDao.fetchAllChildrenIds(tAUser.getDepartmentId()));
             // Подразделения для которых назначен источником
             departmentIds.addAll(departmentDao.getAllPerformers(tAUser.getDepartmentId(), declarationType.getId()));
             return departmentIds;

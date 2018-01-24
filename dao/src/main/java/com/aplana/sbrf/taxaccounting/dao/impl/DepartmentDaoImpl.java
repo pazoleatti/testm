@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.querydsl.core.types.SubQueryExpression;
-import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,24 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartment.department;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentChildView.departmentChildView;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentDeclTypePerformer.departmentDeclTypePerformer;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentDeclarationType.departmentDeclarationType;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     private static final Log LOG = LogFactory.getLog(DepartmentDaoImpl.class);
-
-    final private SQLQueryFactory sqlQueryFactory;
-
-    public DepartmentDaoImpl(SQLQueryFactory sqlQueryFactory) {
-        this.sqlQueryFactory = sqlQueryFactory;
-    }
 
     @Override
     @Cacheable(CacheConstants.DEPARTMENT)
@@ -492,86 +483,43 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> listDepartmentIds() {
-        return sqlQueryFactory
-                .select(department.id)
-                .from(department)
-                .fetch();
+    public List<Integer> fetchAllIds() {
+        return getJdbcTemplate().queryForList("select id from department", Integer.class);
     }
 
     @Override
-    public List<Integer> getAllChildrenIds(int parentDepartmentId) {
-        //В department_child_view, в отличие от начального запроса select id from department CONNECT BY prior id = parent_id start with id = ?
-        //подразделение не является родителем (потомком) самого себя, поэтому его тоже нужно добавить в список. Но нужно убедиться, что
-        //подразделение существует в БД
-
-        SubQueryExpression<Integer> childrenQuery = sqlQueryFactory
-                .select(departmentChildView.id)
-                .from(departmentChildView)
-                .where(departmentChildView.parentId.eq(parentDepartmentId));
-
-        SubQueryExpression<Integer> departmentQuery = sqlQueryFactory
-                .select(department.id)
-                .from(department)
-                .where(department.id.eq(parentDepartmentId));
-
-        return sqlQueryFactory
-                .query()
-                .union(childrenQuery, departmentQuery)
-                .fetch();
+    public List<Integer> fetchAllChildrenIds(int parentDepartmentId) {
+        return getJdbcTemplate().queryForList(
+                "select id from department CONNECT BY prior id = parent_id start with id = ?",
+                new Object[]{parentDepartmentId},
+                Integer.class
+        );
     }
 
     @Override
-    public List<Integer> getAllChildrenIds(List<Integer> parentDepartmentIds) {
-        //В department_child_view, в отличие от начального запроса select id from department CONNECT BY prior id = parent_id start with id = ?
-        //подразделение не является родителем (потомком) самого себя, поэтому его тоже нужно добавить в список. Но нужно убедиться, что
-        //подразделение существует в БД
-
-        SubQueryExpression<Integer> childrenQuery = sqlQueryFactory
-                .select(departmentChildView.id)
-                .from(departmentChildView)
-                .where(departmentChildView.parentId.in(parentDepartmentIds));
-
-        SubQueryExpression<Integer> departmentQuery = sqlQueryFactory
-                .select(department.id)
-                .from(department)
-                .where(department.id.in(parentDepartmentIds));
-
-        return sqlQueryFactory
-                .query()
-                .union(childrenQuery, departmentQuery)
-                .fetch();
+    public List<Integer> fetchAllChildrenIds(List<Integer> parentDepartmentIds) {
+        return getJdbcTemplate().queryForList(
+                "select id from department CONNECT BY prior id = parent_id start with " +
+                        SqlUtils.transformToSqlInStatement("id", parentDepartmentIds),
+                Integer.class
+        );
     }
 
     @Override
-    public List<Integer> fetchAllParentDepartmentsIds(int childDepartmentId) {
-        //В department_child_view подразделение не является родителем (потомком) самого себя, поэтому его тоже нужно
-        // добавить в список. Но нужно убедиться, что подразделение существует в БД
-
-        SubQueryExpression<Integer> parentsQuery = sqlQueryFactory
-                .select(departmentChildView.parentId)
-                .from(departmentChildView)
-                .where(departmentChildView.id.eq(childDepartmentId).and(departmentChildView.parentId.isNotNull()));
-
-        SubQueryExpression<Integer> departmentQuery = sqlQueryFactory
-                .select(department.id)
-                .from(department)
-                .where(department.id.eq(childDepartmentId));
-
-        return sqlQueryFactory
-                .query()
-                .union(parentsQuery, departmentQuery)
-                .fetch();
+    public List<Integer> fetchAllParentIds(int childDepartmentId) {
+        return getJdbcTemplate().queryForList(
+                "select id from department CONNECT BY prior parent_id = id start with id = ?",
+                new Object[]{childDepartmentId},
+                Integer.class
+        );
     }
 
     @Override
-    public List<Integer> getDepartmentsByDeclarationsPerformers(List<Integer> performersIds) {
-        return sqlQueryFactory
-                .select(departmentDeclarationType.departmentId)
-                .distinct()
-                .from(departmentDeclarationType).innerJoin(departmentDeclTypePerformer).on(departmentDeclarationType.id.eq(departmentDeclTypePerformer.departmentDeclTypeId))
-                .where(departmentDeclTypePerformer.performerDepId.in(performersIds))
-                .fetch();
+    public List<Integer> fetchAllIdsByDeclarationsPerformers(List<Integer> performersIds) {
+        return getJdbcTemplate().queryForList("select distinct department_id from DEPARTMENT_DECLARATION_TYPE ddt\n" +
+                        "inner join DEPARTMENT_DECL_TYPE_PERFORMER ddtp on ddt.id = ddtp.department_decl_type_id\n" +
+                        "where " + SqlUtils.transformToSqlInStatement("performer_dep_id", performersIds),
+                Integer.class);
     }
 
     @Override
