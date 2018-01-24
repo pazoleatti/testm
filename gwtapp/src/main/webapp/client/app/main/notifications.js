@@ -115,7 +115,7 @@
                  * @description Закрытие окна
                  */
                 $scope.close = function () {
-                    $modalInstance.dismiss('Canceled');
+                    $modalInstance.dismiss();
                 };
 
                 // Открытие панели уведомлений при клике по ссылке в оповещении

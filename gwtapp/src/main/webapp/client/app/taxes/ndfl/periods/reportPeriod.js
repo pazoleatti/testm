@@ -13,7 +13,7 @@
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('reportPeriod', {
                 url: '/taxes/reportPeriod',
-                templateUrl: 'client/app/taxes/ndfl//periods/reportPeriod.html',
+                templateUrl: 'client/app/taxes/ndfl/periods/reportPeriod.html',
                 controller: 'reportPeriodCtrl'
             });
         }])
@@ -22,9 +22,9 @@
          * @description Контроллер формы "Ведение периодов"
          */
 
-        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'BankDepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal', 'DepartmentReportPeriodCheckerResource',
+        .controller('reportPeriodCtrl', ['$scope', '$filter', 'DepartmentReportPeriodResource', 'BankDepartmentResource', 'LogEntryResource', '$logPanel', 'PermissionChecker', '$http', 'APP_CONSTANTS', '$aplanaModal',
             'ValidationUtils', '$dialogs', '$q', '$rootScope',
-            function ($scope, $filter, DepartmentReportPeriodResource, BankDepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal, DepartmentReportPeriodCheckerResource,
+            function ($scope, $filter, DepartmentReportPeriodResource, BankDepartmentResource, LogEntryResource, $logPanel, PermissionChecker, $http, APP_CONSTANTS, $aplanaModal,
                       ValidationUtils, $dialogs, $q, $rootScope) {
 
                 BankDepartmentResource.query({}, function (department) {
@@ -131,7 +131,7 @@
                 /**
                  * @description Поиск по фильтру
                  */
-                $scope.submit = function () {
+                $scope.searchByFilter = function () {
                     if (!ValidationUtils.checkYearInterval($scope.searchFilter.params.yearStart, $scope.searchFilter.params.yearEnd)) {
                         $dialogs.errorDialog({
                             content: $filter('translate')('common.validation.interval.year')
@@ -158,7 +158,7 @@
                     /* убираем надпись "Сброс" */
                     $scope.isClear = false;
 
-                    $scope.submit();
+                    $scope.searchByFilter();
                 };
 
                 /**
@@ -319,7 +319,7 @@
                                     okBtnClick: function () {
                                         $http({
                                             method: "POST",
-                                            url: "controller/actions/departmentReportPeriod/delete",
+                                            url: "controller/actions/departmentReportPeriod/remove",
                                             params: {
                                                 departmentReportPeriodId: $scope.reportPeriodGrid.value[0].id
 

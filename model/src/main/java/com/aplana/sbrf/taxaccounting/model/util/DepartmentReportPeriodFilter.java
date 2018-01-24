@@ -22,7 +22,6 @@ public class DepartmentReportPeriodFilter implements Serializable {
     private Integer yearEnd;
     private Integer departmentId;
     private ReportPeriod reportPeriod;
-    private Date utilDeadline;
     private Date deadline;
     private boolean withChild;
 
@@ -125,15 +124,6 @@ public class DepartmentReportPeriodFilter implements Serializable {
     public void setDeadline(Date deadline) {
         this.deadline = deadline;
     }
-
-    public Date getUtilDeadline() {
-        return utilDeadline;
-    }
-
-    public void setUtilDeadline(Date utilDeadline) {
-        this.utilDeadline = utilDeadline;
-    }
-
     public boolean isWithChild() {
         return withChild;
     }

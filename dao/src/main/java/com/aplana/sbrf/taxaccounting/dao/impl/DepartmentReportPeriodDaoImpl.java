@@ -237,6 +237,32 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, allEntries = true)
+    public void create(final DepartmentReportPeriod departmentReportPeriod, final List<Integer> departmentIds) {
+        getJdbcTemplate().batchUpdate("INSERT INTO DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, CORRECTION_DATE)" +
+                " VALUES (?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, generateId("seq_department_report_period", Integer.class));
+                ps.setInt(2, departmentIds.get(i));
+                ps.setInt(3, departmentReportPeriod.getReportPeriod().getId());
+                ps.setBoolean(4, departmentReportPeriod.isActive());
+                ps.setDate(5, new java.sql.Date(departmentReportPeriod.getCorrectionDate().getTime()));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return departmentIds.size();
+            }
+        });
+
+
+    }
+
+
+
+    @Override
+    @Transactional
     @CacheEvict(value = CacheConstants.DEPARTMENT_REPORT_PERIOD, key = "#id")
     public void updateActive(int id, boolean active) {
         getJdbcTemplate().update(

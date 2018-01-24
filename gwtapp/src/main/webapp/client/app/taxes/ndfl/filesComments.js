@@ -261,7 +261,7 @@
                             }
                         });
                     }else {
-                        $modalInstance.dismiss('Canceled');
+                        $modalInstance.dismiss();
                     }
                 };
 

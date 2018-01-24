@@ -246,4 +246,13 @@ public interface DepartmentDao extends PermissionDao {
      * @return
      */
     String getDepartmentNameByPairKppOktmo(String kpp, String oktmo, Date reportPeriodEndDate);
+
+    /**
+     * Получение подразделений по их идентификаторам
+     *
+     * @param ids список идентификаторов
+     * @return список {@link Department} или пустой список
+     */
+    List<Department> fetchAllDepartmentByIds(List<Integer> ids);
+
 }

@@ -14,7 +14,7 @@
              * @description Закрытие окна
              */
             $scope.close = function () {
-                $modalInstance.dismiss('Canceled');
+                $modalInstance.dismiss();
             };
 
             /**

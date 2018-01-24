@@ -482,4 +482,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Integer> getAllTBPerformers(int userTBDepId, DeclarationType declarationType) {
         return departmentDao.getAllTBPerformers(userTBDepId, declarationType.getId());
     }
+
+    @Override
+    public List<Department> fetchAllDepartmentByIds(List<Integer> ids){
+        return departmentDao.fetchAllDepartmentByIds(ids);
+    }
 }
