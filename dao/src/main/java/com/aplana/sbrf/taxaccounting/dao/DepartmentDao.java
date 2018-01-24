@@ -53,7 +53,7 @@ public interface DepartmentDao extends PermissionDao {
      * @param parentDepartmentId Идентификатор родительского подразделения
      * @return Список идентификаторов всех дочерних подразделений
      */
-    List<Integer> getAllChildrenIds(int parentDepartmentId);
+    List<Integer> fetchAllChildrenIds(int parentDepartmentId);
 
     /**
      * Получить список идентификаторов всех подразделений, являющихся дочерниими для заданных
@@ -61,7 +61,7 @@ public interface DepartmentDao extends PermissionDao {
      * @param parentDepartmentIds Идентификаторы родительских подразделений
      * @return Список идентификаторов всех дочерних подразделений
      */
-    List<Integer> getAllChildrenIds(List<Integer> parentDepartmentIds);
+    List<Integer> fetchAllChildrenIds(List<Integer> parentDepartmentIds);
 
     /**
      * Получить список идентификаторов подразделений, для которых заланное является дочерним. К списку добавляется само подразделение
@@ -69,7 +69,7 @@ public interface DepartmentDao extends PermissionDao {
      * @param childDepartmentId Идентификатор дочернего подразделения
      * @return Список идентификаторов родительских подразделений
      */
-    List<Integer> fetchAllParentDepartmentsIds(int childDepartmentId);
+    List<Integer> fetchAllParentIds(int childDepartmentId);
 
     /**
      * Возвращает путь в иерархии до указанного подразделения до корневого (не включительно),
@@ -110,7 +110,7 @@ public interface DepartmentDao extends PermissionDao {
      *
      * @return список идентификаторов всех подразделений
      */
-    List<Integer> listDepartmentIds();
+    List<Integer> fetchAllIds();
 
     /**
      * Получение обособленного подразделения по значению
@@ -227,7 +227,7 @@ public interface DepartmentDao extends PermissionDao {
      * @param performersIds Список подразделений-исполнителей
      * @return Список подразделений, исполнителями форм которых являются заданные подразделения
      */
-    List<Integer> getDepartmentsByDeclarationsPerformers(List<Integer> performersIds);
+    List<Integer> fetchAllIdsByDeclarationsPerformers(List<Integer> performersIds);
 
     /**
      * Получить список ID Территориальных банков подразделений, исполнителем макетов форм которых является заданное подразделение

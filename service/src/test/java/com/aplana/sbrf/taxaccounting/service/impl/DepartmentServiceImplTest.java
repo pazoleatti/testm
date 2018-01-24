@@ -91,7 +91,7 @@ public class DepartmentServiceImplTest {
         when(departmentDao.getAllChildren(departmentTB3.getId())).thenReturn(asList(departmentTB3, departmentGOSB31, departmentOSB311));
         // Все подразделения
         when(departmentDao.listDepartments()).thenReturn(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311));
-        when(departmentDao.listDepartmentIds()).thenReturn(asList(root.getId(), departmentTB2.getId(), departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
+        when(departmentDao.fetchAllIds()).thenReturn(asList(root.getId(), departmentTB2.getId(), departmentTB3.getId(), departmentGOSB31.getId(), departmentOSB311.getId()));
         // Типы подразделений
         when(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode())).thenReturn(asList(root));
         when(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode())).thenReturn(asList(departmentTB2, departmentTB3));
@@ -220,7 +220,7 @@ public class DepartmentServiceImplTest {
     @Test
     public void listIdAllTest() {
         departmentService.listIdAll();
-        verify(departmentDao, times(1)).listDepartmentIds();
+        verify(departmentDao, times(1)).fetchAllIds();
     }
 
     @Test

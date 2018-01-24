@@ -296,7 +296,7 @@ public class PeriodServiceImplTest {
 
 //    @Test
 //    public void close() {
-//        when(departmentService.getAllChildrenIds(1)).thenReturn(Arrays.asList(1,2,3));
+//        when(departmentService.fetchAllChildrenIds(1)).thenReturn(Arrays.asList(1,2,3));
 //
 //        periodService.close(TaxType.TRANSPORT, 1, new ArrayList<LogEntry>(), userInfo);
 //

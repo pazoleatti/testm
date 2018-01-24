@@ -42,7 +42,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Integer> fetchAllParentDepartmentsIds(int childDepartmentId) {
-        return departmentDao.fetchAllParentDepartmentsIds(childDepartmentId);
+        return departmentDao.fetchAllParentIds(childDepartmentId);
     }
 
     @Override
