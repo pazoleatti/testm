@@ -15,7 +15,6 @@ import groovy.transform.TypeChecked
 import org.apache.commons.io.IOUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import org.joda.time.LocalDateTime
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 import org.xml.sax.SAXParseException
@@ -815,7 +814,7 @@ class DeclarationType extends AbstractScriptClass {
         }
 
         // Сохранение файла ответа в форме
-        def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new LocalDateTime())
+        def fileUuid = blobDataServiceDaoImpl.create(dataFile, UploadFileName, new Date())
         def createUser = declarationService.getSystemUserInfo().getUser()
         def fileTypeSaveId = fileTypeProvider.getUniqueRecordIds(new Date(), "CODE = ${AttachFileType.TYPE_3.code}").get(0)
 
@@ -1127,7 +1126,7 @@ class DeclarationType extends AbstractScriptClass {
         inputStream = new FileInputStream(dataFile)
         try {
             // Запуск события скрипта для разбора полученного файла
-            declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, attachFileType, new LocalDateTime(createDateFile))
+            declarationService.importDeclarationData(logger, userInfo, declarationService.getDeclarationData(declarationDataId), inputStream, UploadFileName, dataFile, attachFileType, createDateFile)
         } finally {
             IOUtils.closeQuietly(inputStream);
         }

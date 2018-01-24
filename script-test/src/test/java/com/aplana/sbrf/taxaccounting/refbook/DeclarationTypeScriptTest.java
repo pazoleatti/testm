@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
-import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -137,7 +136,7 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
         notCorrect_2.put("ERRTEXT", new RefBookValue(RefBookAttributeType.STRING, null));
         when(ndflRefProvider.getRecordData(eq(NOT_CORRECT_2_ID))).thenReturn(notCorrect_2);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -176,16 +175,16 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
         verify(ndflRefProvider, Mockito.times(16)).updateRecordVersion(any(Logger.class), anyLong(), any(Date.class), any(Date.class), argumentUpdate.capture());
         List<Map> allValues = argumentUpdate.getAllValues();
 
-        Map<String, RefBookValue> notCorrect1 = (Map<String, RefBookValue>)allValues.get(0);
+        Map<String, RefBookValue> notCorrect1 = (Map<String, RefBookValue>) allValues.get(0);
         Assert.assertEquals("Путь к реквизиту: \"ОбщСвИ/НомСпр\"; Значение элемента: \"0913378\"; Текст ошибки: \"Дубликат справки\"", notCorrect1.get("ERRTEXT").getStringValue());
 
-        Map<String, RefBookValue> notCorrect2 = (Map<String, RefBookValue>)allValues.get(1);
+        Map<String, RefBookValue> notCorrect2 = (Map<String, RefBookValue>) allValues.get(1);
         Assert.assertEquals("Путь к реквизиту: \"ОбщСвИ/НомСпр\"; Значение элемента: \"0913386\"; Текст ошибки: \"Дубликат справки\"", notCorrect2.get("ERRTEXT").getStringValue());
 
-        Map<String, RefBookValue> correct3 = (Map<String, RefBookValue>)allValues.get(2);
+        Map<String, RefBookValue> correct3 = (Map<String, RefBookValue>) allValues.get(2);
         Assert.assertEquals("Текст ошибки от ФНС: \",629830,89,,ГУБКИНСКИЙ Г,,9-Й МКР,35,,26\" ДО исправления; (\",629830,89,,Губкинский г,,9 мкр,35,,26\" ПОСЛЕ исправления)", correct3.get("ERRTEXT").getStringValue());
 
-        Map<String, RefBookValue> correct15 = (Map<String, RefBookValue>)allValues.get(15);
+        Map<String, RefBookValue> correct15 = (Map<String, RefBookValue>) allValues.get(15);
         Assert.assertEquals("Текст ошибки от ФНС: \",141000,50,МЫТИЩИНСКИЙ Р-Н,МЫТИЩИ Г,,,ВЧ151,,\"; (Адрес признан верным (ИФНСМЖ - 5029))", correct15.get("ERRTEXT").getStringValue());
 
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
@@ -251,7 +250,7 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
         resultTypeRef.put("CODE", codeTypeRefBookValue);
         when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -329,7 +328,7 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
         resultTypeRef.put("CODE", codeTypeRefBookValue);
         when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -406,7 +405,7 @@ public class DeclarationTypeScriptTest extends RefBookScriptTestBase {
         resultTypeRef.put("CODE", codeTypeRefBookValue);
         when(declarationDataTypeRefProvider.getRecordData(DECLARATION_FORM_TYPE_ID)).thenReturn(resultTypeRef);
 
-        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(LocalDateTime.class))).thenReturn("123-123-123");
+        when(testHelper.getBlobDataService().create(any(File.class), anyString(), any(Date.class))).thenReturn("123-123-123");
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();

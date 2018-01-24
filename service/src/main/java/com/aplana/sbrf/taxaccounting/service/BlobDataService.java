@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
-import org.joda.time.LocalDateTime;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,7 +38,7 @@ public interface BlobDataService {
      * @param createDate дата (например, полученная из xml, как в декларациях)
      * @return uuid идентификатор
      */
-    String create(File file, String name, LocalDateTime createDate);
+    String create(File file, String name, Date createDate);
 
     /**
      * Создание записи

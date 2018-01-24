@@ -31,15 +31,11 @@ import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
 import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import org.joda.time.LocalDateTime
@@ -671,7 +667,7 @@ class Report6Ndfl extends AbstractScriptClass {
     }
 
     def saveFileInfo(Date currDate, String fileName) {
-        String fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", new LocalDateTime())
+        String fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", new Date())
         def createUser = declarationService.getSystemUserInfo().getUser()
 
         def fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())
@@ -1795,7 +1791,8 @@ class Report6Ndfl extends AbstractScriptClass {
  * @param index текущий индекс строки таблицы
  * @return
  */
-    def fillPrimaryRnuNDFLWithErrorsRow(final XSSFWorkbook workbook, NdflPerson ndflPerson, NdflPersonIncome operation, String sectionName, int index) {
+    def fillPrimaryRnuNDFLWithErrorsRow(
+            final XSSFWorkbook workbook, NdflPerson ndflPerson, NdflPersonIncome operation, String sectionName, int index) {
         XSSFSheet sheet = workbook.getSheetAt(0)
         XSSFRow row = sheet.createRow(index)
         XSSFCellStyle styleLeftAligned = makeStyleLeftAligned(workbook)

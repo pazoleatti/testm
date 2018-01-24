@@ -25,7 +25,6 @@ import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.util.IOUtils;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -384,7 +383,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile) {
+    public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream, String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
         loadDeclarationDataService.importDeclarationData(logger, userInfo, declarationData, inputStream, fileName, dataFile, attachFileType, createDateFile);
     }
 
@@ -498,10 +497,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         // Список блокировок на удаление форм
         List<LockData> lockList = new ArrayList<LockData>();
         try {
-            for(DeclarationData deletedDeclarationData: deletedDeclarationDataList) {
+            for (DeclarationData deletedDeclarationData : deletedDeclarationDataList) {
                 Map<DeclarationDataReportType, LockData> taskTypeMap = getLockTaskType(deletedDeclarationData.getId());
                 if (!taskTypeMap.isEmpty()) {
-                    for(DeclarationDataReportType declarationDataReportType: taskTypeMap.keySet()) {
+                    for (DeclarationDataReportType declarationDataReportType : taskTypeMap.keySet()) {
                         result.add(new Pair<Long, DeclarationDataReportType>(deletedDeclarationData.getId(), declarationDataReportType));
                     }
                 } else {
@@ -514,7 +513,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                 }
             }
             if (result.size() == 0) {
-                for(DeclarationData deletedDeclarationData: deletedDeclarationDataList) {
+                for (DeclarationData deletedDeclarationData : deletedDeclarationDataList) {
                     ScriptUtils.checkInterrupted();
                     try {
                         delete(deletedDeclarationData.getId(), userInfo);
@@ -527,7 +526,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             }
         } finally {
             // удаляем блокировки
-            for(LockData lockData: lockList) {
+            for (LockData lockData : lockList) {
                 lockDataService.unlock(lockData.getKey(), lockData.getUserId());
             }
         }

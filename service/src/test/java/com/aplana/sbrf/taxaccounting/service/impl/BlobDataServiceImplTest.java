@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import org.joda.time.LocalDateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -13,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -32,7 +32,7 @@ public class BlobDataServiceImplTest {
         BlobData blobData = new BlobData();
         blobData.setName("home");
         blobData.setInputStream(new FileInputStream(file));
-        blobData.setCreationDate(new LocalDateTime());
+        blobData.setCreationDate(new Date());
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
     }
 

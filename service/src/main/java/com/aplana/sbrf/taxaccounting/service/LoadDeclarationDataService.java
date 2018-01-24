@@ -4,10 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.AttachFileType;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import org.joda.time.LocalDateTime;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 
 /**
  * Сервис загрузки ТФ деклараций
@@ -22,7 +22,7 @@ public interface LoadDeclarationDataService {
      * @param userInfo
      * @param fileName
      * @param inputStream
-     * @param taskId идентификатор асинхронной задачи, которая занимается обработкой файла (необходим для логирования)
+     * @param taskId      идентификатор асинхронной задачи, которая занимается обработкой файла (необходим для логирования)
      */
     String uploadFile(Logger logger, TAUserInfo userInfo, String fileName, InputStream inputStream, long taskId);
 
@@ -37,5 +37,5 @@ public interface LoadDeclarationDataService {
      * @param createDateFile
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                               String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile);
+                               String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile);
 }

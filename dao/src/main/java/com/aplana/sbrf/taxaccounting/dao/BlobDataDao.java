@@ -44,7 +44,7 @@ public interface BlobDataDao {
      * Обновление поля с данными по идентификатору
      *
      * @param inputStream данные для сохранения
-     * @param uuid идентификатор
+     * @param uuid        идентификатор
      */
     void updateDataByUUID(String uuid, InputStream inputStream);
 

@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.State;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.CONSOLIDATED;
 import static com.aplana.sbrf.taxaccounting.model.DeclarationFormKind.PRIMARY;
@@ -55,7 +51,7 @@ public class DeclarationDataDaoTest {
         blobData = new BlobData();
         blobData.setName("");
         blobData.setInputStream(new ByteArrayInputStream("test-data-string-2".getBytes()));
-        blobData.setCreationDate(new LocalDateTime());
+        blobData.setCreationDate(new Date());
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
     }
 

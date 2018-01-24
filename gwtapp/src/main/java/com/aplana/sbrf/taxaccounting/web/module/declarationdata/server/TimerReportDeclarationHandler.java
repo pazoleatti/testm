@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 
 /**
  * @author lhaziev
- *
  */
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -91,7 +90,7 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
                 }
             } else {
                 BlobData blobData = blobDataService.get(uuid);
-                return new TimerReportResult.Status(TimerReportResult.StatusReport.EXIST, blobData.getCreationDate().toString("dd.MM.yyyy HH:mm:ss")) ;
+                return new TimerReportResult.Status(TimerReportResult.StatusReport.EXIST, sdf.get().format(blobData.getCreationDate()));
             }
         }
         return TimerReportResult.STATUS_LOCKED;

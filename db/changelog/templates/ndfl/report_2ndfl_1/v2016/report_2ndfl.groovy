@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataReportType
 import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants
 import groovy.transform.TypeCheckingMode
-import groovy.util.slurpersupport.GPathResult
 import groovy.xml.XmlUtil
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -17,9 +16,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import groovy.transform.TypeChecked
 import groovy.xml.MarkupBuilder
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
@@ -38,7 +34,6 @@ import com.aplana.sbrf.taxaccounting.model.ScriptSpecificDeclarationDataReportHo
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.PagingParams
 import com.aplana.sbrf.taxaccounting.model.PagingResult
-import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
@@ -50,7 +45,6 @@ import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter
 import com.aplana.sbrf.taxaccounting.model.util.Pair
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.dao.BlobDataService
-import com.aplana.sbrf.taxaccounting.script.service.DeclarationService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentService
 import com.aplana.sbrf.taxaccounting.script.service.NdflPersonService
@@ -59,7 +53,6 @@ import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import java.util.zip.ZipInputStream
 import org.joda.time.LocalDateTime
 
 new Report2Ndfl(this).run();
@@ -829,7 +822,7 @@ class Report2Ndfl extends AbstractScriptClass {
 
 // Сохранение информации о файле в комментариях
     def saveFileInfo(Date currDate, String fileName) {
-        String fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", LocalDateTime.now())
+        String fileUuid = blobDataServiceDaoImpl.create(xmlFile, fileName + ".xml", new Date())
         TAUser createUser = declarationService.getSystemUserInfo().getUser()
 
         RefBookDataProvider fileTypeProvider = refBookFactory.getDataProvider(RefBook.Id.ATTACH_FILE_TYPE.getId())

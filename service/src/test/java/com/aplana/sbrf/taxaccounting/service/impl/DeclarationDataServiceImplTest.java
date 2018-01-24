@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.TransactionLogic;
 import com.aplana.sbrf.taxaccounting.utils.ApplicationInfo;
 import org.apache.commons.io.IOUtils;
-import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -160,7 +159,7 @@ public class DeclarationDataServiceImplTest {
 
         BlobData blobData1 = new BlobData();
         blobData1.setInputStream(this.getClass().getClassLoader().getResourceAsStream(TEST_XML_FILE_NAME));
-        LocalDateTime expectedDate = new LocalDateTime();
+        Date expectedDate = new Date();
         blobData1.setCreationDate(expectedDate);
         BlobData blobData2 = new BlobData();
         String expectedName = "NO_PRIB_7750_7750_7707083893777777777_20141112_D63A8CB3-C93D-483C-BED5-81F4EC69B549";

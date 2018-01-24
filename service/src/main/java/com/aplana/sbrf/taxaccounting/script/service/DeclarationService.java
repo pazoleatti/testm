@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 import groovy.lang.Closure;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
-import org.joda.time.LocalDateTime;
 
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
@@ -345,7 +344,7 @@ public interface DeclarationService {
      * @param createDateFile
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                               String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile);
+                               String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile);
 
     /**
      * Найти декларацию НДФЛ операции по доходам которой имеют заданные КПП и ОКТМО
@@ -517,7 +516,8 @@ public interface DeclarationService {
 
     /**
      * Возвращает признак фатальности проверки внутри формы по ее коду
-     * @param code код проверки
+     *
+     * @param code       код проверки
      * @param templateId идентификатор макета
      * @return ошибка фатальна?
      */

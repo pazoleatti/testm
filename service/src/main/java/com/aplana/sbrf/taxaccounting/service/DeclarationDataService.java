@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
-import org.joda.time.LocalDateTime;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public interface DeclarationDataService {
      * @param oktmo                  ОКТМО, для НДФЛ
      * @param fileName
      * @param note
-     * @return                       идентификатор созданной декларации
+     * @return идентификатор созданной декларации
      */
     Long create(Logger logger, int declarationTemplateId, TAUserInfo userInfo,
                 DepartmentReportPeriod departmentReportPeriod, String taxOrganCode, String taxOrganKpp, String oktmo,
@@ -60,22 +59,22 @@ public interface DeclarationDataService {
     /**
      * Идентифицировать ФЛ
      *
-     * @param logger            объект журнала
-     * @param declarationData   налоговая форма
-     * @param userInfo          информация о пользователе, выполняющего операцию
-     * @param docDate           дата обновления декларации
-     * @param stateLogger       логгер для обновления статуса асинхронной задачи
+     * @param logger          объект журнала
+     * @param declarationData налоговая форма
+     * @param userInfo        информация о пользователе, выполняющего операцию
+     * @param docDate         дата обновления декларации
+     * @param stateLogger     логгер для обновления статуса асинхронной задачи
      */
     void identify(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
     /**
      * Консолидировать НФ
      *
-     * @param logger            объект журнала
-     * @param declarationData   налоговая форма
-     * @param userInfo          информация о пользователе, выполняющего операцию
-     * @param docDate           дата обновления декларации
-     * @param stateLogger       логгер для обновления статуса асинхронной задачи
+     * @param logger          объект журнала
+     * @param declarationData налоговая форма
+     * @param userInfo        информация о пользователе, выполняющего операцию
+     * @param docDate         дата обновления декларации
+     * @param stateLogger     логгер для обновления статуса асинхронной задачи
      */
     void consolidate(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
@@ -102,7 +101,7 @@ public interface DeclarationDataService {
      * Получить декларацию
      * @param declarationDataId      идентификатор декларации
      * @param userInfo               информация о пользователе, выполняющего действие
-     * @return                       объект декларации
+     * @return объект декларации
      * @throws AccessDeniedException если у пользователя нет прав на просмотр данной декларации
      */
 
@@ -114,7 +113,7 @@ public interface DeclarationDataService {
      * @param ddReportType
      * @param userInfo
      * @param stateLogger
-     * @return                  uuid записи с данными из таблицы BLOB_DATA
+     * @return uuid записи с данными из таблицы BLOB_DATA
      */
     String createSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, Map<String, String> viewParamValues, DataRow<Cell> selectedRecord, TAUserInfo userInfo, LockStateLogger stateLogger);
 
@@ -125,7 +124,7 @@ public interface DeclarationDataService {
      * @param declarationData
      * @param ddReportType
      * @param userInfo
-     * @return                  предварительные результаты для формирования спец. отчета
+     * @return предварительные результаты для формирования спец. отчета
      */
     PrepareSpecificReportResult prepareSpecificReport(Logger logger, DeclarationData declarationData, DeclarationDataReportType ddReportType, Map<String, Object> subreportParamValues, TAUserInfo userInfo);
 
@@ -133,7 +132,7 @@ public interface DeclarationDataService {
      * Получить декларацию
      *
      * @param declarationDataId идентификатор декларации
-     * @param userInfo пользователь
+     * @param userInfo          пользователь
      * @return объекты декларации
      */
     DeclarationData get(long declarationDataId, TAUserInfo userInfo);
@@ -149,14 +148,14 @@ public interface DeclarationDataService {
     /**
      * Удалить декларацию, при этом создается блокировка
      *
-     * @param declarationDataId      идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     ActionResult delete(long declarationDataId, TAUserInfo userInfo);
 
     /**
-     *  Удаление налоговой формы без использования асинхронной задачи
+     * Удаление налоговой формы без использования асинхронной задачи
      *
      * @param declarationDataId идентификатор НФ
      * @param userInfo          информация о пользователе, выполняющего действие
@@ -167,28 +166,28 @@ public interface DeclarationDataService {
     /**
      * Удалить налоговую форму, если она существует, при этом создается блокировка
      *
-     * @param declarationDataId         идентификатор налоговой формы
-     * @param userInfo                  информация о пользователе, выполняющем действие
-     * @throws AccessDeniedException    если у пользователя не хватает прав на удаление
+     * @param declarationDataId идентификатор налоговой формы
+     * @param userInfo          информация о пользователе, выполняющем действие
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     ActionResult deleteIfExists(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Удалить все налоговые формы из списка
      *
-     * @param userInfo              информация о пользователе, выполняющем действие
-     * @param declarationDataIds    список идентификаторов налоговых форм
-     * @return                      модель {@link ActionResult}, в которой содержатся данные о результате операции
+     * @param userInfo           информация о пользователе, выполняющем действие
+     * @param declarationDataIds список идентификаторов налоговых форм
+     * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     ActionResult deleteDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Метод запускает скрипты с событием проверить
      *
-     * @param declarationDataId         идентификатор декларации
-     * @param userInfo                  информация о пользователе, выполняющего действие
-     * @param logger                    объект журнала
-     * @throws AccessDeniedException    если у пользователя не хватает прав на удаление
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param logger            объект журнала
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
@@ -199,7 +198,7 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
-     * @return                  модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
+     * @return модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
      */
     RecalculateDeclarationResult identifyDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
 
@@ -210,23 +209,25 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param cancelTask        признак для отмены задачи
-     * @return                  модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
+     * @return модель {@link RecalculateDeclarationResult}, в которой содержатся данные о результате операции
      */
     RecalculateDeclarationResult consolidateDeclarationData(TAUserInfo userInfo, long declarationDataId, boolean force, boolean cancelTask);
 
     /**
      * Идентифицировать ФЛ в списке налоговых форм
-     * @param userInfo              информация о пользователе, выполняющем действие
-     * @param declarationDataIds    список идентификаторов налоговых форм
-     * @return                      модель {@link ActionResult}, в которой содержатся данные о результате операции
+     *
+     * @param userInfo           информация о пользователе, выполняющем действие
+     * @param declarationDataIds список идентификаторов налоговых форм
+     * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     ActionResult identifyDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
     /**
      * Консолидировать список налоговых форм
-     * @param userInfo              информация о пользователе, выполняющем действие
-     * @param declarationDataIds    список идентификаторов налоговых форм
-     * @return                      модель {@link ActionResult}, в которой содержатся данные о результате операции
+     *
+     * @param userInfo           информация о пользователе, выполняющем действие
+     * @param declarationDataIds список идентификаторов налоговых форм
+     * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     ActionResult consolidateDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
@@ -235,7 +236,7 @@ public interface DeclarationDataService {
      *
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
-     * @return                  модель {@link DeclarationResult}, в которой содержаться данные о декларации
+     * @return модель {@link DeclarationResult}, в которой содержаться данные о декларации
      */
     DeclarationResult fetchDeclarationData(TAUserInfo userInfo, long declarationDataId);
 
@@ -246,16 +247,16 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
-     * @return                  модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
+     * @return модель {@link CheckDeclarationResult}, в которой содержаться данные о результате проверки декларации
      */
     CheckDeclarationResult checkDeclaration(TAUserInfo userInfo, long declarationDataId, boolean force);
 
     /**
      * Проверить список деклараций
      *
-     * @param userInfo              информация о пользователе, выполняющем действие
-     * @param declarationDataIds    список идентификаторов налоговых форм
-     * @return                      модель {@link ActionResult}, в которой содержатся данные о результате операции
+     * @param userInfo           информация о пользователе, выполняющем действие
+     * @param declarationDataIds список идентификаторов налоговых форм
+     * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     ActionResult checkDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
 
@@ -263,8 +264,8 @@ public interface DeclarationDataService {
      * Получение дополнительной информации о файлах декларации с комментариями
      *
      * @param declarationDataId идентификатор декларации
-     * @return                  объект модели {@link DeclarationDataFileComment}, в которой содержаться данные о файлах
-     *                          и комментарий для текущей декларации.
+     * @return объект модели {@link DeclarationDataFileComment}, в которой содержаться данные о файлах
+     * и комментарий для текущей декларации.
      */
     DeclarationDataFileComment fetchFilesComments(long declarationDataId);
 
@@ -273,8 +274,8 @@ public interface DeclarationDataService {
      *
      * @param dataFileComment сохраняемый объект декларации, в котором содержаться
      *                        данные о файлах и комментарий для текущей декларации.
-     * @return                новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
-     *                        о файлах и комментарий для текущей декларации.
+     * @return новый объект модели {@link DeclarationDataFileComment}, в котором содержаться данные
+     * о файлах и комментарий для текущей декларации.
      */
     DeclarationDataFileComment saveDeclarationFilesComment(TAUserInfo userInfo, DeclarationDataFileComment dataFileComment);
 
@@ -283,7 +284,7 @@ public interface DeclarationDataService {
      * Получение источников и приемников декларации
      *
      * @param declarationDataId идентификатор декларации
-     * @return                  источники и приемники декларации {@link Relation}
+     * @return источники и приемники декларации {@link Relation}
      */
     List<Relation> getDeclarationSourcesAndDestinations(TAUserInfo userInfo, long declarationDataId);
 
@@ -301,7 +302,7 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор декларации
      * @param ndflPersonId      идентификатор данных о физическом лице {@link com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson}
      * @param ndflPersonFilter  заполненные поля при поиске
-     * @return                  источники и приемники декларации
+     * @return источники и приемники декларации
      */
     CreateDeclarationReportResult createReportRnu(TAUserInfo userInfo, long declarationDataId, long ndflPersonId, NdflPersonFilter ndflPersonFilter);
 
@@ -311,7 +312,7 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
-     * @return                  результат о формировании отчета
+     * @return результат о формировании отчета
      */
     CreateDeclarationReportResult createReportAllRnu(TAUserInfo userInfo, final long declarationDataId, boolean force);
 
@@ -322,7 +323,7 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
      * @param create            признак существования отчета
-     * @return                  результат с даннымми для представления об операции формирования отчета
+     * @return результат с даннымми для представления об операции формирования отчета
      */
     CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force, boolean create);
 
@@ -332,7 +333,7 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
-     * @return                  результат о формировании отчета
+     * @return результат о формировании отчета
      */
     CreateDeclarationReportResult createReportXlsx(TAUserInfo userInfo, long declarationDataId, boolean force);
 
@@ -341,7 +342,7 @@ public interface DeclarationDataService {
      *
      * @param userInfo          текущий пользователь
      * @param declarationDataId идентификатор декларации
-     * @return                  информация о доступности скачивания отчетов
+     * @return информация о доступности скачивания отчетов
      */
     ReportAvailableResult checkAvailabilityReports(TAUserInfo userInfo, long declarationDataId);
 
@@ -350,16 +351,16 @@ public interface DeclarationDataService {
      *
      * @param userInfo          текущий пользователь
      * @param declarationDataId идентификатор декларации
-     * @return                  результат с даннымми для представления о доступности отчетов для отчетной НФ
+     * @return результат с даннымми для представления о доступности отчетов для отчетной НФ
      */
     ReportAvailableReportDDResult checkAvailabilityReportDD(TAUserInfo userInfo, long declarationDataId);
 
     /**
      * Метод запускает скрипты с событием предрасчетные проверки
      *
-     * @param declarationDataId      идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @param logger                 объект журнала
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @param logger            объект журнала
      * @throws AccessDeniedException если у пользователя не хватает прав на удаление
      */
     void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo);
@@ -367,9 +368,9 @@ public interface DeclarationDataService {
     /**
      * Принятие декларации
      *
-     * @param logger                 объект журнала
-     * @param declarationDataId      идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
+     * @param logger            объект журнала
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
      * @throws AccessDeniedException если у пользователя нет прав на такое изменение статуса у декларации
      */
     void accept(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
@@ -377,9 +378,9 @@ public interface DeclarationDataService {
     /**
      * Принятие списка налоговых форм
      *
-     * @param userInfo               информация о пользователе, выполняющем действие
-     * @param declarationDataIds     идентификатор налоговых форм
-     * @return                       модель {@link ActionResult}, в которой содержатся данные о результате операции
+     * @param userInfo           информация о пользователе, выполняющем действие
+     * @param declarationDataIds идентификатор налоговых форм
+     * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      * @throws AccessDeniedException если у пользователя нет прав на такое изменение статуса у декларации
      */
     ActionResult acceptDeclarationList(TAUserInfo userInfo, List<Long> declarationDataIds);
@@ -401,20 +402,20 @@ public interface DeclarationDataService {
     /**
      * Отмена принятия декларации
      *
-     * @param logger                 объект журнала
-     * @param declarationDataId      идентификатор декларации
-     * @param note                   причина возврата
-     * @param userInfo               информация о пользователе, выполняющего действие     *
+     * @param logger            объект журнала
+     * @param declarationDataId идентификатор декларации
+     * @param note              причина возврата
+     * @param userInfo          информация о пользователе, выполняющего действие     *
      */
     void cancel(Logger logger, long declarationDataId, String note, TAUserInfo userInfo);
 
     /**
      * Отмена принятия списка налоговых форм
      *
-     * @param declarationDataIds     идентификаторы налоговых форм
-     * @param note                   причина
-     * @param userInfo               информация о пользователе, выполняющем действие
-     * @return                       модель {@link ActionResult}, в которой содержатся данные о результате операции
+     * @param declarationDataIds идентификаторы налоговых форм
+     * @param note               причина
+     * @param userInfo           информация о пользователе, выполняющем действие
+     * @return модель {@link ActionResult}, в которой содержатся данные о результате операции
      */
     ActionResult cancelDeclarationList(List<Long> declarationDataIds, String note, TAUserInfo userInfo);
 
@@ -424,16 +425,16 @@ public interface DeclarationDataService {
      * @param declarationDataId идентификатор декларации
      * @param logger            объект журнала
      * @param userInfo          информация о пользователе, выполняющего действие
-     * @return                  список ИД приемников  в состоянии Принята или Подготовлена
+     * @return список ИД приемников  в состоянии Принята или Подготовлена
      */
     List<Long> getReceiversAcceptedPrepared(long declarationDataId, Logger logger, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
      *
-     * @param declarationDataId      идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @return                       поток с данными
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @return поток с данными
      * @throws AccessDeniedException если у пользователя нет прав на просмотр данной декларации
      */
     InputStream getXmlDataAsStream(long declarationDataId, TAUserInfo userInfo);
@@ -441,9 +442,9 @@ public interface DeclarationDataService {
     /**
      * Получить печатное представление данных декларации в PDF формате
      *
-     * @param declarationId          идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @return                       файл Pdf в виде байтового массива
+     * @param declarationId идентификатор декларации
+     * @param userInfo      информация о пользователе, выполняющего действие
+     * @return файл Pdf в виде байтового массива
      * @throws AccessDeniedException если у пользователя нет прав на просмотр данной декларации
      */
     InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo);
@@ -451,9 +452,9 @@ public interface DeclarationDataService {
     /**
      * Получить имя файла в формате законодателя
      *
-     * @param declarationDataId      идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @return                       имя файла взятого из xml данных
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @return имя файла взятого из xml данных
      * @throws AccessDeniedException если у пользователя нет прав на просмотр данной декларации
      */
     String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo);
@@ -461,12 +462,12 @@ public interface DeclarationDataService {
     /**
      * Получить дату последнего изменения декларации
      *
-     * @param declarationDataId      идентификатор декларации
-     * @param userInfo               информация о пользователе, выполняющего действие
-     * @return                       дату последнего изменения декларации из xml данных
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo          информация о пользователе, выполняющего действие
+     * @return дату последнего изменения декларации из xml данных
      * @throws AccessDeniedException если у пользователя нет прав на просмотр данной декларации
      */
-    LocalDateTime getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
+    Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Поиск декларации
@@ -485,7 +486,7 @@ public interface DeclarationDataService {
      * @param declarationTypeId идентификатор типа декларации
      * @param departmentId      подразделение
      * @param logs              записи лога
-     * @return                  наличие форм декларации
+     * @return наличие форм декларации
      */
     boolean existDeclaration(int declarationTypeId, int departmentId, List<LogEntry> logs);
 
@@ -548,7 +549,7 @@ public interface DeclarationDataService {
      *
      * @param declarationId идентификатор декларации
      * @param ddReportType  тип отчета. Может быть null
-     * @return              название
+     * @return название
      */
     String getDeclarationFullName(long declarationId, DeclarationDataReportType ddReportType, String... args);
 
@@ -558,7 +559,7 @@ public interface DeclarationDataService {
      * @param declarationTypeId        тип декларации
      * @param departmentReportPeriodId идентификатор отчетного периода привязанного к подразделению
      * @param taskType                 тип асинхронной задачи, формирующей имя
-     * @return                         название
+     * @return название
      */
     String getDeclarationFullName(int declarationTypeId, int departmentReportPeriodId, AsyncTaskType taskType);
 
@@ -609,7 +610,7 @@ public interface DeclarationDataService {
      * @param xmlData       xml поток входных данных
      * @param jrxmlTemplate шаблон отчета
      * @param params        набор параметров отчета
-     * @return              сформированный отчет
+     * @return сформированный отчет
      */
     JasperPrint createJasperReport(InputStream xmlData, InputStream jrxmlTemplate, Map<String, Object> params);
 
@@ -657,7 +658,7 @@ public interface DeclarationDataService {
      */
     void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream is,
                                String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
-                               AttachFileType fileType, LocalDateTime createDateFile);
+                               AttachFileType fileType, Date createDateFile);
 
     /**
      * Получение данных по файлам для формы "Файлы и комментарии"
@@ -741,7 +742,7 @@ public interface DeclarationDataService {
      *
      * @param userInfo информация о пользователе
      * @param action   объект с параметрами для выполнения операции по принятию налоговой формы
-     * @return         объект с данными для представления об операции по принятию налоговой формы
+     * @return объект с данными для представления об операции по принятию налоговой формы
      */
     AcceptDeclarationResult createAcceptDeclarationTask(TAUserInfo userInfo, AcceptDeclarationDataAction action);
 
@@ -750,7 +751,7 @@ public interface DeclarationDataService {
      *
      * @param userInfo              информация о пользователе
      * @param declarationDataIdList список идентификаторов налоговых форм
-     * @return                      объект результат выполнения операции по выгрузке с отчетности с даннными для представления
+     * @return объект результат выполнения операции по выгрузке с отчетности с даннными для представления
      */
     ActionResult downloadReports(TAUserInfo userInfo, List<Long> declarationDataIdList);
 
@@ -759,16 +760,16 @@ public interface DeclarationDataService {
      *
      * @param userInfo информация о пользователе
      * @param action   объект с параметрами для создания отчета для отчетной налоговой формы
-     * @return         объект с результатом для представления об операции создания отчета для отчетной налоговой формы
+     * @return объект с результатом для представления об операции создания отчета для отчетной налоговой формы
      */
     CreateReportResult createReportForReportDD(TAUserInfo userInfo, CreateReportAction action);
 
     /**
      * Подготовка данных для спецотчета
      *
-     * @param userInfo  информация о пользователе
-     * @param action    объект с параметрами для подготовки даннных для спецотчета
-     * @return          объект с результатом для представления о подготовке данных для спецотчета
+     * @param userInfo информация о пользователе
+     * @param action   объект с параметрами для подготовки даннных для спецотчета
+     * @return объект с результатом для представления о подготовке данных для спецотчета
      */
     PrepareSubreportResult prepareSubreport(TAUserInfo userInfo, PrepareSubreportAction action);
 
@@ -778,7 +779,7 @@ public interface DeclarationDataService {
      * @param declarationDataId ид формы
      * @param userInfo          информация о пользователе
      * @param force             будет ли остановлена уже запущенная задача и запущена занова
-     * @return                  результат создания задачи
+     * @return результат создания задачи
      */
     CreateDeclarationExcelTemplateResult createTaskToCreateExcelTemplate(final long declarationDataId, TAUserInfo userInfo, boolean force);
 
@@ -787,7 +788,7 @@ public interface DeclarationDataService {
      *
      * @param declarationData форма
      * @param userInfo        информация о пользователе
-     * @return                uuid сформированного файла
+     * @return uuid сформированного файла
      */
     String createExcelTemplate(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) throws IOException;
 
@@ -799,7 +800,7 @@ public interface DeclarationDataService {
      * @param inputStream       данные файла
      * @param userInfo          информация о пользователе
      * @param force             будет ли остановлена уже запущенная задача и запущена занова
-     * @return                  результат создания задачи
+     * @return результат создания задачи
      */
     ImportDeclarationExcelResult createTaskToImportExcel(long declarationDataId, String fileName, InputStream inputStream, TAUserInfo userInfo, boolean force);
 

@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,6 @@ import java.util.Map;
 
 /**
  * @author lhaziev
- *
  */
 @Service
 @PreAuthorize("hasAnyRole('N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_OPER', 'F_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_NS')")
@@ -45,6 +45,13 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
     private BlobDataService blobDataService;
+
+    private static final ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        }
+    };
 
     public TimerSubreportDeclarationHandler() {
         super(TimerSubreportAction.class);
@@ -64,7 +71,7 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
         Map<String, TimerSubreportResult.Status> mapExistReport = new HashMap<String, TimerSubreportResult.Status>();
         DeclarationData declaration = declarationDataService.get(action.getDeclarationDataId(), userInfo);
         List<DeclarationSubreport> subreports = declarationTemplateService.get(declaration.getDeclarationTemplateId()).getSubreports();
-        for(DeclarationSubreport subreport: subreports) {
+        for (DeclarationSubreport subreport : subreports) {
             final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
             TimerSubreportResult.Status status = getStatus(userInfo, action.getDeclarationDataId(), ddReportType);
             mapExistReport.put(subreport.getAlias(), status);
@@ -81,7 +88,7 @@ public class TimerSubreportDeclarationHandler extends AbstractActionHandler<Time
                 return TimerSubreportResult.STATUS_NOT_EXIST;
             } else {
                 BlobData blobData = blobDataService.get(uuid);
-                return new TimerSubreportResult.Status(TimerSubreportResult.StatusReport.EXIST, blobData.getCreationDate().toString("dd.MM.yyyy HH:mm:ss"));
+                return new TimerSubreportResult.Status(TimerSubreportResult.StatusReport.EXIST, sdf.get().format(blobData.getCreationDate()));
             }
         }
         return TimerSubreportResult.STATUS_LOCKED;

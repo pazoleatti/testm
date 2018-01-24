@@ -14,7 +14,6 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,7 +30,7 @@ import java.util.*;
 @Transactional
 public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataService implements LoadDeclarationDataService {
 
-	private static final Log LOG = LogFactory.getLog(LoadDeclarationDataServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(LoadDeclarationDataServiceImpl.class);
     private static final String LOCK_MSG = "Обработка данных транспортного файла не выполнена, " +
             "т.к. в данный момент выполняется изменение данных налоговой формы \"%s\" " +
             "для подразделения \"%s\" " +
@@ -225,7 +224,7 @@ public class LoadDeclarationDataServiceImpl extends AbstractLoadTransportDataSer
 
     @Override
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, DeclarationData declarationData, InputStream inputStream,
-                                      String fileName, File dataFile, AttachFileType attachFileType, LocalDateTime createDateFile) {
+                                      String fileName, File dataFile, AttachFileType attachFileType, Date createDateFile) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(declarationData.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         DeclarationType declarationType = declarationTemplate.getType();

@@ -225,7 +225,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     /**
      * Создание декларации в заданном отчетном периоде подразделения
      *
-     * @param userInfo          Информация о текущем пользователе
+     * @param userInfo Информация о текущем пользователе
      * @param action
      * @return Модель {@link CreateResult}, в которой содержится ID налоговой формы
      */
@@ -859,7 +859,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         PagingResult<DeclarationDataJournalItem> page = new PagingResult<>();
 
-        if(filter != null) {
+        if (filter != null) {
             if (CollectionUtils.isEmpty(filter.getAsnuIds())) {
                 //Контролерам доступны все АСНУ, поэтому фильтрации по АСНУ нет, поэтому список для них пустой
                 //Операторам доступны только некоторые АСНУ. Если такие есть, добавить их в список. Если доступных АСНУ нет, то
@@ -1584,7 +1584,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public LocalDateTime getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
+    public Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
         String xmlUuid = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
         if (xmlUuid != null) {
             BlobData blobData = blobDataService.get(xmlUuid);
@@ -1974,7 +1974,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                     reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.XML_DEC));
                     reportService.createDec(declarationData.getId(),
-                            blobDataService.create(zipOutFile, decName + ".zip", new LocalDateTime(decDate)),
+                            blobDataService.create(zipOutFile, decName + ".zip", decDate),
                             DeclarationDataReportType.XML_DEC);
                     declarationDataDao.setFileName(declarationData.getId(), decName);
                 } finally {
@@ -2606,7 +2606,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void importDeclarationData(Logger logger, TAUserInfo userInfo, long declarationDataId, InputStream inputStream,
                                       String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger, File dataFile,
-                                      AttachFileType fileType, LocalDateTime createDateFile) {
+                                      AttachFileType fileType, Date createDateFile) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.CALCULATE);
         try {
             DeclarationData declarationData = get(declarationDataId, userInfo);
@@ -2636,7 +2636,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         stateLogger.updateState(AsyncTaskState.SAVING_XML);
                     }
 
-                    createDateFile = createDateFile == null ? new LocalDateTime() : createDateFile;
+                    createDateFile = createDateFile == null ? new Date() : createDateFile;
                     fileUuid = blobDataService.create(zipOutFile, getFileName(fileName) + ".zip", createDateFile);
 
                     reportService.deleteDec(declarationData.getId());
@@ -2647,7 +2647,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 }
             } else {
-                fileUuid = blobDataService.create(dataFile, fileName, new LocalDateTime());
+                fileUuid = blobDataService.create(dataFile, fileName, new Date());
             }
 
             TAUser user = userService.getSystemUserInfo().getUser();
@@ -2852,7 +2852,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public DeclarationDataExistenceAndKindResult fetchDeclarationDataExistenceAndKind(TAUserInfo userInfo, long declarationDataId) {
-        if(!declarationDataDao.existDeclarationData(declarationDataId)) {
+        if (!declarationDataDao.existDeclarationData(declarationDataId)) {
             return new DeclarationDataExistenceAndKindResult(false);
         } else {
             DeclarationData declarationData = get(declarationDataId, userInfo);
@@ -3092,7 +3092,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
         Date creationDate = new Date();
         String fileName = "Выгрузка отчетности " + new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(creationDate) + ".zip";
-        return blobDataService.create(reportFile, fileName, new LocalDateTime(creationDate));
+        return blobDataService.create(reportFile, fileName, creationDate);
     }
 
     @Override
@@ -3403,7 +3403,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
             String asnuName = asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue();
 
-           return String.format(", АСНУ: \"%s\"", asnuName);
+            return String.format(", АСНУ: \"%s\"", asnuName);
         }
         return "";
     }
@@ -3432,9 +3432,5 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
         reportService.deleteDec(declarationDataId);
-    }
-
-    private void performCancel(TAUserInfo userInfo, DeclarationData declarationData, Logger logger, Map<String, Object> exchangeParams) {
-
     }
 }

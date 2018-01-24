@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.google.common.io.ByteStreams;
-import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,8 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -55,7 +56,7 @@ public class BlobDataDaoTest {
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
         blobData.setName("hello.xls");
         blobData.setInputStream(new ByteArrayInputStream(bytes));
-        blobData.setCreationDate(new LocalDateTime());
+        blobData.setCreationDate(new Date());
 
         blobDataDao.create(blobData);
 
@@ -63,7 +64,21 @@ public class BlobDataDaoTest {
         assertEquals(blobData.getUuid(), fetchedBlobData.getUuid());
         assertEquals(blobData.getName(), fetchedBlobData.getName());
         assertArrayEquals(bytes, ByteStreams.toByteArray(fetchedBlobData.getInputStream()));
-        assertTrue(blobData.getCreationDate().toLocalDate().equals(fetchedBlobData.getCreationDate().toLocalDate()));
+
+        Calendar creationCalendar = Calendar.getInstance();
+        creationCalendar.setTime(blobData.getCreationDate());
+        creationCalendar.clear(Calendar.MILLISECOND);
+        creationCalendar.clear(Calendar.SECOND);
+        creationCalendar.clear(Calendar.MINUTE);
+        creationCalendar.clear(Calendar.HOUR);
+        Calendar fetchedCalendar = Calendar.getInstance();
+        fetchedCalendar.setTime(fetchedBlobData.getCreationDate());
+        fetchedCalendar.clear(Calendar.MILLISECOND);
+        fetchedCalendar.clear(Calendar.SECOND);
+        fetchedCalendar.clear(Calendar.MINUTE);
+        fetchedCalendar.clear(Calendar.HOUR);
+
+        assertTrue(creationCalendar.equals(fetchedCalendar));
     }
 
     @Test

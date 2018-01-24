@@ -2,9 +2,9 @@ package com.aplana.sbrf.taxaccounting.script.dao;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
-import org.joda.time.LocalDateTime;
 
 import java.io.File;
+import java.util.Date;
 
 /**
  * Интерфейс получения бинарных данных
@@ -28,5 +28,5 @@ public interface BlobDataService {
      * @param createDate дата (например, полученная из xml, как в декларациях)
      * @return uuid идентификатор
      */
-    String create(File file, String name, LocalDateTime createDate);
+    String create(File file, String name, Date createDate);
 }

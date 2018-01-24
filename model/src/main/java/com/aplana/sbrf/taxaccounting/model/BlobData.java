@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import org.joda.time.LocalDateTime;
-
 import java.io.InputStream;
+import java.util.Date;
 
 /**
  * Модель для работы с файловым хранилищем.
@@ -24,7 +23,7 @@ public class BlobData {
     /**
      * Дата создания
      */
-    private LocalDateTime creationDate;
+    private Date creationDate;
 
     public String getUuid() {
         return uuid;
@@ -50,11 +49,11 @@ public class BlobData {
         this.inputStream = inputStream;
     }
 
-    public LocalDateTime getCreationDate() {
+    public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
+    public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
 }

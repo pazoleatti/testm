@@ -8,12 +8,12 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import org.apache.commons.io.IOUtils;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +53,7 @@ public class BlobDataServiceImpl implements BlobDataService {
     }
 
     @Override
-    public String create(File file, String name, LocalDateTime createDate) {
+    public String create(File file, String name, Date createDate) {
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(file);
@@ -99,7 +99,7 @@ public class BlobDataServiceImpl implements BlobDataService {
         return blobDataDao.fetch(blobId);
     }
 
-    private static BlobData initBlob(String blobId, InputStream is, String name, LocalDateTime date) {
+    private static BlobData initBlob(String blobId, InputStream is, String name, Date date) {
         BlobData blobData = new BlobData();
         blobData.setName(name);
         try {
