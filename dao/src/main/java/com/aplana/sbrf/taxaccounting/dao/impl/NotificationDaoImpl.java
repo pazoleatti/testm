@@ -40,7 +40,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             notification.setRead(rs.getBoolean("IS_READ"));
             notification.setText(rs.getString("TEXT"));
             notification.setLogId(rs.getString("LOG_ID"));
-            notification.setCreateDate(rs.getTimestamp("CREATE_DATE"));
+            notification.setCreateDate(new Date(rs.getTimestamp("CREATE_DATE").getTime()));
             notification.setDeadline(rs.getDate("DEADLINE"));
             notification.setUserId(SqlUtils.getInteger(rs, "USER_ID"));
             notification.setRoleId(SqlUtils.getInteger(rs, "ROLE_ID"));
