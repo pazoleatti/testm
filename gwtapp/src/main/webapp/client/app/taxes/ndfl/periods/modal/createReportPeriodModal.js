@@ -61,6 +61,7 @@
                             }
                         }).then(function (response) {
                             if (response.data && response.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE) {
+                                // переоткрытие закрытого периода
                                 $dialogs.confirmDialog({
                                     title: $filter('translate')('title.confirm'),
                                     content: $filter('translate')('reportPeriod.confirm.openPeriod.reopenPeriod.text'),

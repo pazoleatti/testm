@@ -190,7 +190,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<Integer> departmentIds, List<LogEntry> logs) {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setDepartmentIdList(Collections.singletonList(departmentReportPeriod.getDepartmentId()));
+        filter.setDepartmentIdList(Collections.singletonList(departmentService.getBankDepartment().getId()));
         filter.setReportPeriodIdList(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
         filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 

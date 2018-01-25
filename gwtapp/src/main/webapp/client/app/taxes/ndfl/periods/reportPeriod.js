@@ -9,6 +9,8 @@
         ['ui.router',
             'app.logPanel',
             'app.rest',
+            'app.reportPeriodModal',
+            'app.deadlinePeriodModal',
             'app.openCorrectPeriodModal'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('reportPeriod', {
@@ -234,6 +236,7 @@
                  * @description Закрыть период
                  */
                 $scope.closePeriod = function () {
+                    // проверяем на наличие заблокированных форм на редактировании
                     $scope.checkHasBlocked().then(function (response) {
                         $scope.createLogPanel(response).then(function (response) {
                             if (response) {
@@ -241,6 +244,7 @@
                                     content: $filter('translate')('reportPeriod.error.closePeriod.hasBlocked.text')
                                 });
                             } else {
+                                // проверка на наличие форм в статусе отличном от "Принята"
                                 $scope.checkHasNotAccepted().then(function (response) {
                                     $scope.createLogPanel(response).then(function (response) {
                                         if (response) {
@@ -305,12 +309,14 @@
                 $scope.deletePeriod = function () {
 
                     if (!$scope.reportPeriodGrid.value[0].correctionDate) {
+                        // проверка на наличие корректирующего периода
                         $scope.hasCorrectionPeriod().then(function (response) {
                             if (response) {
                                 $dialogs.errorDialog({
                                     content: $filter('translate')('reportPeriod.error.deletePeriod.hasCorPeriod.text')
                                 });
                             } else {
+                                // подтверждение удаления
                                 $dialogs.confirmDialog({
                                     title: $filter('translate')('reportPeriod.confirm.deletePeriod.title'),
                                     content: $filter('translate')('reportPeriod.confirm.deletePeriod.text'),
@@ -335,12 +341,14 @@
                             }
                         });
                     } else {
+                        // проверка на наличие более позднего корректирующего периода
                         $scope.hasLaterCorrectionPeriod().then(function (response) {
                             if (response) {
                                 $dialogs.errorDialog({
                                     content: $filter('translate')('reportPeriod.error.deletePeriod.hasLaterCorPeriod.text')
                                 });
                             } else {
+                                // подтверждение удаления
                                 $dialogs.confirmDialog({
                                     title: $filter('translate')('reportPeriod.confirm.deletePeriod.title'),
                                     content: $filter('translate')('reportPeriod.confirm.deletePeriod.text'),
