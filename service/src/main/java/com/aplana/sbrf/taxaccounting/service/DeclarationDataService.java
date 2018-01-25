@@ -322,10 +322,9 @@ public interface DeclarationDataService {
      * @param userInfo          информация о пользователе, выполняющего действие
      * @param declarationDataId идентификатор декларации
      * @param force             признак для перезапуска задачи
-     * @param create            признак существования отчета
      * @return результат с даннымми для представления об операции формирования отчета
      */
-    CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force, boolean create);
+    CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, long declarationDataId, boolean force);
 
     /**
      * Формирование отчета в xlsx

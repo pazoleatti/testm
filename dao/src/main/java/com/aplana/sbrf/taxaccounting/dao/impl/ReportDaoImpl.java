@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +21,14 @@ import java.sql.Types;
 import java.util.*;
 
 @Repository
-@Transactional(readOnly=true)
+@Transactional(readOnly = true)
 public class ReportDaoImpl extends AbstractDao implements ReportDao {
 
-	private static final Log LOG = LogFactory.getLog(ReportDaoImpl.class);
+    private static final Log LOG = LogFactory.getLog(ReportDaoImpl.class);
 
     @Override
     public void createDec(final long declarationDataId, final String blobDataId, final DeclarationDataReportType type) {
-        try{
+        try {
             PreparedStatementCreator psc = new PreparedStatementCreator() {
                 @Override
                 public PreparedStatement createPreparedStatement(Connection con)
@@ -61,7 +62,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
 
     @Override
     public String getDec(final long declarationDataId, final DeclarationDataReportType type) {
-        try{
+        try {
             PreparedStatementData ps = new PreparedStatementData();
             ps.appendQuery("SELECT BLOB_DATA_ID FROM DECLARATION_REPORT " +
                     "WHERE DECLARATION_DATA_ID = ? AND TYPE = ?");
@@ -82,11 +83,11 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
 
     @Override
     public void deleteDec(long declarationDataId) {
-        try{
+        try {
             getJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID = ?",
                     new Object[]{declarationDataId},
                     new int[]{Types.INTEGER});
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DaoException(String.format("Не удалось удалить записи с declaration_data_id = %d", declarationDataId), e);
         }
     }
@@ -97,14 +98,27 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
             String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s", SqlUtils.transformToSqlInStatement("DECLARATION_DATA_ID", declarationDataIds));
             Map<String, Object> params = new HashMap<String, Object>();
             getNamedParameterJdbcTemplate().update(sql, params);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
+            throw new DaoException("Не удалось удалить записи", e);
+        }
+    }
+
+    @Override
+    public void deleteDec(long declarationDataId, DeclarationDataReportType type) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("declarationDataId", declarationDataId);
+            params.addValue("type", type.getReportType().getId());
+            getNamedParameterJdbcTemplate().update(
+                    "DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID = :declarationDataId AND TYPE = :type", params);
+        } catch (DataAccessException e) {
             throw new DaoException("Не удалось удалить записи", e);
         }
     }
 
     @Override
     public void deleteDec(Collection<Long> declarationDataIds, List<DeclarationDataReportType> ddReportTypes) {
-        try{
+        try {
             List<Integer> types = new ArrayList<Integer>();
             for (DeclarationDataReportType type : ddReportTypes) {
                 types.add(type.getReportType().getId());
@@ -114,19 +128,18 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     SqlUtils.transformToSqlInStatement("TYPE", types));
             Map<String, Object> params = new HashMap<String, Object>();
             getNamedParameterJdbcTemplate().update(sql, params);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DaoException("Не удалось удалить записи", e);
         }
     }
 
-
     @Override
     public void deleteDec(String uuid) {
-        try{
+        try {
             getJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE BLOB_DATA_ID = ?",
                     new Object[]{uuid},
                     new int[]{Types.VARCHAR});
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DaoException(String.format("Не удалось удалить записи с BLOB_DATA_ID = %s", uuid), e);
         }
     }
@@ -140,7 +153,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     "select declaration_data_id\n" +
                     "from declaration_report dr1\n" +
                     "where dr.declaration_data_id=dr1.declaration_data_id and type = 0)");
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DaoException(String.format("Ошибка при удалении ненужных записей таблицы DECLARATION_REPORT. %s.", e.getMessage()), e);
         }
     }

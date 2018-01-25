@@ -109,41 +109,37 @@
                  */
                 // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports() {
-                    if (!($scope.availableReports && $scope.availableXlsxReport && $scope.availableRnuNdflPersonAllDb && $scope.availableReportKppOktmo)) {
-                        DeclarationDataResource.query({
-                                declarationDataId: $stateParams.declarationDataId,
-                                projection: "availableReports",
-                                nooverlay: true
-                            },
-                            function (data) {
-                                if (data) {
-                                    if (!data.declarationDataExist) {
-                                        $interval.cancel($scope.intervalId);
-                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                        $dialogs.errorDialog({
-                                            content: message,
-                                            closeBtnClick: function () {
-                                                $state.go("/");
-                                            }
-                                        });
-                                        return;
-                                    }
-                                    $scope.availableReports = data.downloadXmlAvailable;
-                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
-                                    $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
-                                    $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
-                                    if (!$scope.intervalId) {
-                                        $scope.intervalId = $interval(function () {
-                                            updateAvailableReports();
-                                        }, 10000);
-                                    }
+                    DeclarationDataResource.query({
+                            declarationDataId: $stateParams.declarationDataId,
+                            projection: "availableReports",
+                            nooverlay: true
+                        },
+                        function (data) {
+                            if (data) {
+                                if (!data.declarationDataExist) {
+                                    $interval.cancel($scope.intervalId);
+                                    var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                    $dialogs.errorDialog({
+                                        content: message,
+                                        closeBtnClick: function () {
+                                            $state.go("/");
+                                        }
+                                    });
+                                    return;
+                                }
+                                $scope.availableReports = data.downloadXmlAvailable;
+                                $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                $scope.availableRnuNdflPersonAllDb = data.downloadRnuNdflPersonAllDb;
+                                $scope.availableReportKppOktmo = data.downloadReportKppOktmo;
+                                $scope.availableExcelTemplate = data.downloadExcelTemplateAvailable;
+                                if (!$scope.intervalId) {
+                                    $scope.intervalId = $interval(function () {
+                                        updateAvailableReports();
+                                    }, 10000);
                                 }
                             }
-                        );
-                    } else {
-                        $interval.cancel($scope.intervalId);
-                    }
+                        }
+                    );
                 }
 
                 updateAvailableReports();
@@ -248,14 +244,16 @@
                 };
 
                 /**
-                 * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
-                 * @param response
-                 * @param location
-                 * @param create
+                 * Обрабатывает результат формирования отчета
+                 * @param response результат
+                 * @param restartFunc функция повторного запуска формирования, если формирование уже запущено, то вызывается эта функция после подтверждения
+                 * @param reportAvailableModel модель отвечающая за доступность скачивания отчета
                  */
-                function performReportSuccessResponse(response, location, create) {
+                function performReportSuccessResponse(response, restartFunc, reportAvailableModel) {
                     if (response.uuid && response.uuid !== null) {
+                        // задача запустилась
                         $logPanel.open('log-panel-container', response.uuid);
+                        $scope[reportAvailableModel] = false;
                     } else {
                         if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
                             $dialogs.messageDialog({
@@ -268,11 +266,9 @@
                                 okBtnCaption: $filter('translate')('common.button.yes'),
                                 cancelBtnCaption: $filter('translate')('common.button.no'),
                                 okBtnClick: function () {
-                                    $scope.createPairKppOktmo(true, create);
+                                    restartFunc(true);
                                 }
                             });
-                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
-                            $window.location = location;
                         }
                     }
                 }
@@ -495,36 +491,6 @@
                 };
 
                 /**
-                 * Формирует запрос на создание шаблона Excel-файла для загрузки
-                 */
-                $scope.createExcelTemplate = function (force) {
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate",
-                        params: {
-                            force: !!force
-                        }
-                    }).then(function (response) {
-                        if (response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
-                        } else {
-                            if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED) {
-                                $dialogs.confirmDialog({
-                                    content: response.data.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick: function () {
-                                        $scope.createTemplate(true);
-                                    }
-                                });
-                            } else if (response.data.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
-                                $scope.downloadExcelTemplate();
-                            }
-                        }
-                    });
-                };
-
-                /**
                  * @description Запрос на подтверждение выполнения опрерации
                  */
                 $scope.confirmImport = function () {
@@ -594,6 +560,9 @@
                 $scope.downloadSpecific = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/rnu_ndfl_person_all_db";
                 };
+                $scope.downloadPairKppOktmo = function () {
+                    $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO;
+                };
                 $scope.downloadExcelTemplate = function () {
                     $window.location = "controller/rest/declarationData/" + $stateParams.declarationDataId + "/excelTemplate";
                 };
@@ -606,7 +575,7 @@
                             force: force ? force : false
                         }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx");
+                        performReportSuccessResponse(response, $scope.createReportXlsx, "availableXlsxReport");
                     });
                 };
 
@@ -615,9 +584,7 @@
                  * @param force
                  */
                 $scope.createReportAllRnu = function (force) {
-
                     force = typeof force !== 'undefined' ? force : false;
-
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/allRnuReport",
@@ -625,25 +592,38 @@
                             force: force ? force : false
                         }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.RNU_NDFL_PERSON_ALL_DB);
+                        performReportSuccessResponse(response, $scope.createReportAllRnu, "availableRnuNdflPersonAllDb");
                     });
                 };
 
                 /**+
                  * Создание спецотчета "Реестр сформированной отчетности"
                  * @param force
-                 * @param create
                  */
-                $scope.createPairKppOktmo = function (force, create) {
+                $scope.createPairKppOktmo = function (force) {
                     $http({
                         method: "POST",
                         url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pairKppOktmoReport",
                         params: {
-                            force: force,
-                            create: create
+                            force: force
                         }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/specific/" + APP_CONSTANTS.SUBREPORT_ALIAS_CONSTANTS.REPORT_KPP_OKTMO, create);
+                        performReportSuccessResponse(response, $scope.createPairKppOktmo, "availableReportKppOktmo");
+                    });
+                };
+
+                /**
+                 * Формирует запрос на создание шаблона Excel-файла для загрузки
+                 */
+                $scope.createExcelTemplate = function (force) {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/excelTemplate",
+                        params: {
+                            force: !!force
+                        }
+                    }).then(function (response) {
+                        performReportSuccessResponse(response.data, $scope.createExcelTemplate, "availableExcelTemplate");
                     });
                 };
 

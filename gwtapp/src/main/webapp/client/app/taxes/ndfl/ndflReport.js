@@ -114,14 +114,16 @@
                 });
 
                 /**
-                 * Метод инкапсулирующий действия в случае выполнение в случае успешного формирования отчета
-                 * @param response
-                 * @param location
-                 * @param create
+                 * Обрабатывает результат формирования отчета
+                 * @param response результат
+                 * @param restartFunc функция повторного запуска формирования, если формирование уже запущено, то вызывается эта функция после подтверждения
+                 * @param reportAvailableModel модель отвечающая за доступность скачивания отчета
                  */
-                function performReportSuccessResponse(response, location, create) {
+                function performReportSuccessResponse(response, restartFunc, reportAvailableModel) {
                     if (response.uuid && response.uuid !== null) {
+                        // задача запустилась
                         $logPanel.open('log-panel-container', response.uuid);
+                        $scope[reportAvailableModel] = false;
                     } else {
                         if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
                             $dialogs.messageDialog({
@@ -133,11 +135,9 @@
                                 okBtnCaption: $filter('translate')('common.button.yes'),
                                 cancelBtnCaption: $filter('translate')('common.button.no'),
                                 okBtnClick:function () {
-                                    $scope.createPairKppOktmo(true, create);
+                                    restartFunc(true);
                                 }
                             });
-                        } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST) {
-                            $window.location = location;
                         }
                     }
                 }
@@ -150,51 +150,47 @@
                  */
                 // TODO: Убрать использование постоянных запросов
                 function updateAvailableReports() {
-                    if (!($scope.availablePdf && $scope.availableReports && $scope.availableXlsxReport)) {
-                        DeclarationDataResource.query({
-                                declarationDataId: $stateParams.declarationDataId,
-                                projection: "availableNdflReports",
-                                nooverlay: true
-                            },
-                            function (data) {
-                                if (data) {
-                                    if (!data.declarationDataExist) {
-                                        $interval.cancel($scope.intervalId);
-                                        var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
-                                        $dialogs.errorDialog({
-                                            content: message,
-                                            closeBtnClick: function () {
-                                                $state.go("/");
-                                            }
-                                        });
-                                        return;
-                                    }
-                                    $scope.availablePdf = data.availablePdf;
-                                    $scope.availableReports = data.downloadXmlAvailable;
-                                    $scope.availableXlsxReport = data.downloadXlsxAvailable;
-                                    if (!$scope.pdfLoaded && data.availablePdf) {
-                                        $http({
-                                            method: "GET",
-                                            url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
-                                        }).success(function (response) {
-                                            $scope.pagesTotal = response;
-                                        });
-                                        $scope.pdfLoaded = true;
-                                    }
-                                    if (!$scope.availablePdf && !$scope.pdfLoading) {
-                                        $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Форма предварительного просмотра не сформирована";
-                                    }
-                                    if (!$scope.intervalId) {
-                                        $scope.intervalId = $interval(function () {
-                                            updateAvailableReports();
-                                        }, 10000);
-                                    }
+                    DeclarationDataResource.query({
+                            declarationDataId: $stateParams.declarationDataId,
+                            projection: "availableNdflReports",
+                            nooverlay: true
+                        },
+                        function (data) {
+                            if (data) {
+                                if (!data.declarationDataExist) {
+                                    $interval.cancel($scope.intervalId);
+                                    var message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
+                                    $dialogs.errorDialog({
+                                        content: message,
+                                        closeBtnClick: function () {
+                                            $state.go("/");
+                                        }
+                                    });
+                                    return;
+                                }
+                                $scope.availablePdf = data.availablePdf;
+                                $scope.availableReports = data.downloadXmlAvailable;
+                                $scope.availableXlsxReport = data.downloadXlsxAvailable;
+                                if (!$scope.pdfLoaded && data.availablePdf) {
+                                    $http({
+                                        method: "GET",
+                                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/pageCount"
+                                    }).success(function (response) {
+                                        $scope.pagesTotal = response;
+                                    });
+                                    $scope.pdfLoaded = true;
+                                }
+                                if (!$scope.availablePdf && !$scope.pdfLoading) {
+                                    $scope.pdfMessage = "Область предварительного просмотра. Расчет налоговой формы выполнен. Форма предварительного просмотра не сформирована";
+                                }
+                                if (!$scope.intervalId) {
+                                    $scope.intervalId = $interval(function () {
+                                        updateAvailableReports();
+                                    }, 10000);
                                 }
                             }
-                        );
-                    } else {
-                        $interval.cancel($scope.intervalId);
-                    }
+                        }
+                    );
                 }
 
                 updateAvailableReports();
@@ -300,7 +296,7 @@
                             force: force ? force : false
                         }
                     }).success(function (response) {
-                        performReportSuccessResponse(response, "controller/rest/declarationData/" + $stateParams.declarationDataId + "/xlsx");
+                        performReportSuccessResponse(response, $scope.createReportXlsx, "availableXlsxReport");
                     });
                 };
 

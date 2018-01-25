@@ -86,6 +86,17 @@ public class ReportDaoImplTest {
     @Transactional(readOnly = false)
     public void deleteDecTest4(){
         DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
+
+        reportDao.deleteDec(1l, DeclarationDataReportType.EXCEL_DEC);
+
+        String id = reportDao.getDec(1, type);
+        assertEquals(null, id);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    public void deleteDecTest5(){
+        DeclarationDataReportType type = new DeclarationDataReportType(AsyncTaskType.EXCEL_DEC, null);
         String id = reportDao.getDec(1, type);
         assertEquals("uuid_1", id);
 

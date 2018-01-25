@@ -602,15 +602,14 @@ public class DeclarationDataController {
     /**
      * Формирование реестра сформированной отчетности
      *
-     * @param declarationDataId
-     * @param force
-     * @param create
-     * @return
+     * @param declarationDataId идентификатор декларации
+     * @param force             признак для перезапуска задачи
+     * @return информация о создании отчета
      */
     @PostMapping(value = "/actions/declarationData/{declarationDataId}/pairKppOktmoReport")
-    public CreateDeclarationReportResult createPairKppOktmo(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force, @RequestParam boolean create) {
+    public CreateDeclarationReportResult createPairKppOktmo(@PathVariable("declarationDataId") long declarationDataId, @RequestParam boolean force) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.createPairKppOktmoReport(userInfo, declarationDataId, force, create);
+        return declarationService.createPairKppOktmoReport(userInfo, declarationDataId, force);
     }
 
     /**
@@ -692,9 +691,9 @@ public class DeclarationDataController {
      * @return
      */
     @PostMapping(value = "/actions/declarationData/downloadReports")
-    public ActionResult downloadReports(@RequestParam Long[] declarationDataIds) {
+    public ActionResult downloadReports(@RequestBody List<Long> declarationDataIds) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return declarationService.downloadReports(userInfo, Arrays.asList(declarationDataIds));
+        return declarationService.downloadReports(userInfo, declarationDataIds);
     }
 
     /**

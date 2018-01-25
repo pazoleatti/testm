@@ -943,54 +943,38 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 ndflPerson.setStatus("");
             }
 
-
             String uuidXml = reportService.getDec(declarationDataId, DeclarationDataReportType.XML_DEC);
             if (uuidXml == null) {
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             } else {
-                final String uuid = reportService.getDec(declarationDataId, ddReportType);
-                if (uuid != null) {
-                    result.setStatus(CreateAsyncTaskStatus.EXIST);
+                Logger logger = new Logger();
+                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
                 } else {
-                    Logger logger = new Logger();
-                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
-                    if (restartStatus != null && restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                        result.setRestartMsg(restartStatus.getSecond());
-                    } else if (restartStatus != null && !restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    } else {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        Map<String, Object> params = new HashMap<String, Object>(10);
-                        params.put("declarationDataId", declarationDataId);
-                        if (ddReportType.isSubreport()) {
-                            params.put("alias", ddReportType.getReportAlias());
-                            params.put("viewParamValues", new LinkedHashMap<String, String>());
-                            if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
-                                params.put("subreportParamValues", filterParams);
-
-                                if (ndflPerson != null) {
-                                    params.put("PERSON_ID", ndflPerson.getId());
-                                }
-                            }
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    reportService.deleteDec(declarationDataId, ddReportType);
+                    Map<String, Object> params = new HashMap<String, Object>(10);
+                    params.put("declarationDataId", declarationDataId);
+                    if (ddReportType.isSubreport()) {
+                        params.put("alias", ddReportType.getReportAlias());
+                        params.put("viewParamValues", new LinkedHashMap<String, String>());
+                        if (!ddReportType.getSubreport().getDeclarationSubreportParams().isEmpty()) {
+                            params.put("subreportParamValues", filterParams);
+                            params.put("PERSON_ID", ndflPerson.getId());
                         }
-                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-
-                            @Override
-                            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                                return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                        getDeclarationFullName(declarationDataId, ddReportType));
-                            }
-
-                            @Override
-                            public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
-                                if (uuid != null) {
-                                    reportService.deleteDec(uuid);
-                                }
-                            }
-                        });
                     }
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                        @Override
+                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    getDeclarationFullName(declarationDataId, ddReportType));
+                        }
+                    });
                     result.setUuid(logEntryService.save(logger.getEntries()));
                 }
             }
@@ -1017,45 +1001,29 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 for (DeclarationSubreport subreport : declarationTemplate.getSubreports()) {
                     final DeclarationDataReportType ddReportType = new DeclarationDataReportType(AsyncTaskType.SPECIFIC_REPORT_DEC, subreport);
 
-                    ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), "rnu_ndfl_person_all_db"));
-                    final String uuid = reportService.getDec(declarationDataId, ddReportType);
-                    if (uuid != null) {
-                        result.setStatus(CreateAsyncTaskStatus.EXIST);
-                        break;
+                    ddReportType.setSubreport(declarationTemplateService.getSubreportByAlias(declaration.getDeclarationTemplateId(), SubreportAliasConstants.RNU_NDFL_PERSON_ALL_DB));
+
+                    final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
+                    if (restartStatus != null && restartStatus.getFirst()) {
+                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                        result.setRestartMsg(restartStatus.getSecond());
+                    } else if (restartStatus != null && !restartStatus.getFirst()) {
+                        result.setStatus(CreateAsyncTaskStatus.CREATE);
                     } else {
-                        final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                        Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                        if (restartStatus != null && restartStatus.getFirst()) {
-                            result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                            result.setRestartMsg(restartStatus.getSecond());
-                        } else if (restartStatus != null && !restartStatus.getFirst()) {
-                            result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        } else {
-                            result.setStatus(CreateAsyncTaskStatus.CREATE);
-                            Map<String, Object> params = new HashMap<String, Object>();
-                            params.put("declarationDataId", declarationDataId);
-                            params.put("alias", ddReportType.getReportAlias());
-                            params.put("viewParamValues", new LinkedHashMap<String, String>());
+                        result.setStatus(CreateAsyncTaskStatus.CREATE);
+                        reportService.deleteDec(declarationDataId, ddReportType);
+                        Map<String, Object> params = new HashMap<String, Object>();
+                        params.put("declarationDataId", declarationDataId);
+                        params.put("alias", ddReportType.getReportAlias());
+                        params.put("viewParamValues", new LinkedHashMap<String, String>());
 
-                            asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                                @Override
-                                public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                                    return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
-                                }
-
-                                @Override
-                                public boolean checkExistTasks(AsyncTaskType taskType, TAUserInfo user, Logger logger) {
-                                    return false;
-                                }
-
-                                @Override
-                                public void interruptTasks(AsyncTaskType taskType, TAUserInfo user) {
-                                    if (uuid != null) {
-                                        reportService.deleteDec(uuid);
-                                    }
-                                }
-                            });
-                        }
+                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                            @Override
+                            public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
+                                return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
+                            }
+                        });
                     }
                 }
                 result.setUuid(logEntryService.save(logger.getEntries()));
@@ -1065,7 +1033,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, final long declarationDataId, boolean force, boolean create) {
+    public CreateDeclarationReportResult createPairKppOktmoReport(TAUserInfo userInfo, final long declarationDataId, boolean force) {
         CreateDeclarationReportResult result = new CreateDeclarationReportResult();
         if (!existDeclarationData(declarationDataId)) {
             result.setExistDeclarationData(false);
@@ -1078,41 +1046,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (uuidXml == null) {
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             } else {
-                final String uuid = reportService.getDec(declarationDataId, ddReportType);
-                if (uuid != null && !create) {
-                    result.setStatus(CreateAsyncTaskStatus.EXIST);
+                Logger logger = new Logger();
+                String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
                 } else {
-                    Logger logger = new Logger();
-                    String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                    if (restartStatus != null && restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                        result.setRestartMsg(restartStatus.getSecond());
-                    } else if (restartStatus != null && !restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    } else {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        Map<String, Object> params = new HashMap<>();
-                        params.put("declarationDataId", declarationDataId);
-                        params.put("alias", ddReportType.getReportAlias());
-                        params.put("viewParamValues", new LinkedHashMap<String, String>());
-                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                            @Override
-                            public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                                return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                        getDeclarationFullName(declarationDataId, ddReportType));
-                            }
-
-                            @Override
-                            public void interruptTasks(AsyncTaskType reportType, TAUserInfo userInfo) {
-                                if (uuid != null) {
-                                    reportService.deleteDec(uuid);
-                                }
-                            }
-                        });
-                    }
-                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    reportService.deleteDec(declarationDataId, ddReportType);
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("declarationDataId", declarationDataId);
+                    params.put("alias", ddReportType.getReportAlias());
+                    params.put("viewParamValues", new LinkedHashMap<String, String>());
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                        @Override
+                        public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                                    getDeclarationFullName(declarationDataId, ddReportType));
+                        }
+                    });
                 }
+                result.setUuid(logEntryService.save(logger.getEntries()));
             }
         }
         return result;
@@ -1131,39 +1088,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (uuidXml == null) {
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             } else {
-                final String uuid = reportService.getDec(declarationDataId, ddReportType);
-                if (uuid != null) {
-                    result.setStatus(CreateAsyncTaskStatus.EXIST);
+                Logger logger = new Logger();
+                final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
+                if (restartStatus != null && restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                    result.setRestartMsg(restartStatus.getSecond());
+                } else if (restartStatus != null && !restartStatus.getFirst()) {
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
                 } else {
-                    Logger logger = new Logger();
-                    final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, force, logger);
-                    if (restartStatus != null && restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                        result.setRestartMsg(restartStatus.getSecond());
-                    } else if (restartStatus != null && !restartStatus.getFirst()) {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    } else {
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("declarationDataId", declarationDataId);
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    reportService.deleteDec(declarationDataId, ddReportType);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("declarationDataId", declarationDataId);
 
-                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                            @Override
-                            public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                                return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
-                            }
-
-                            @Override
-                            public void interruptTasks(AsyncTaskType taskType, TAUserInfo user) {
-                                if (uuid != null) {
-                                    reportService.deleteDec(uuid);
-                                }
-                            }
-                        });
-                    }
-                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                        @Override
+                        public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
+                            return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
+                        }
+                    });
                 }
+                result.setUuid(logEntryService.save(logger.getEntries()));
             }
         }
         return result;
@@ -1971,7 +1917,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     LOG.info(String.format("Сохранение XML-файла в базе данных для налоговой формы %s", declarationData.getId()));
                     stateLogger.updateState(AsyncTaskState.SAVING_XML);
 
-                    reportService.deleteDec(Arrays.asList(declarationData.getId()), Arrays.asList(DeclarationDataReportType.XML_DEC));
+                    reportService.deleteDec(declarationData.getId(), DeclarationDataReportType.XML_DEC);
                     reportService.createDec(declarationData.getId(),
                             blobDataService.create(zipOutFile, decName + ".zip", decDate),
                             DeclarationDataReportType.XML_DEC);
@@ -3209,31 +3155,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         final TAUser user = userInfo.getUser();
         Logger logger = new Logger();
 
-        final String uuid = reportService.getDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
-        if (uuid != null) {
-            result.setStatus(CreateAsyncTaskStatus.EXIST);
+        String asyncLockKey = LockData.LockObjects.EXCEL_TEMPLATE_DECLARATION.name() + "_" + declarationDataId;
+        Pair<Boolean, String> restartStatus = asyncManager.restartTask(asyncLockKey, userInfo, force, logger);
+        if (restartStatus != null && restartStatus.getFirst()) {
+            result.setStatus(CreateAsyncTaskStatus.LOCKED);
+            result.setRestartMsg(restartStatus.getSecond());
+        } else if (restartStatus != null && !restartStatus.getFirst()) {
+            result.setStatus(CreateAsyncTaskStatus.CREATE);
+            // в логгере будет что задача запущена и вы добавлены в список получателей оповещения
         } else {
-            String asyncLockKey = LockData.LockObjects.EXCEL_TEMPLATE_DECLARATION.name() + "_" + declarationDataId;
-            Pair<Boolean, String> restartStatus = asyncManager.restartTask(asyncLockKey, userInfo, force, logger);
-            if (restartStatus != null && restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                result.setRestartMsg(restartStatus.getSecond());
-            } else if (restartStatus != null && !restartStatus.getFirst()) {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-                // в логгере будет что задача запущена и вы добавлены в список получателей оповещения
-            } else {
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
-                Map<String, Object> params = new HashMap<>();
-                params.put("declarationDataId", declarationDataId);
-                asyncManager.executeTask(asyncLockKey, AsyncTaskType.EXCEL_TEMPLATE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                    @Override
-                    public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
-                        return lockDataService.lockAsync(keyTask, user.getId());
-                    }
-                });
-            }
-            result.setUuid(logEntryService.save(logger.getEntries()));
+            result.setStatus(CreateAsyncTaskStatus.CREATE);
+            reportService.deleteDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+            Map<String, Object> params = new HashMap<>();
+            params.put("declarationDataId", declarationDataId);
+            asyncManager.executeTask(asyncLockKey, AsyncTaskType.EXCEL_TEMPLATE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                @Override
+                public LockData lockObject(String keyTask, AsyncTaskType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lockAsync(keyTask, user.getId());
+                }
+            });
         }
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
     }

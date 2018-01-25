@@ -35,8 +35,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void deleteDec(Collection<Long> declarationDataId) {
-        reportDao.deleteDec(declarationDataId);
+    public void deleteDec(Collection<Long> declarationDataIds) {
+        reportDao.deleteDec(declarationDataIds);
+    }
+
+    @Override
+    public void deleteDec(long declarationDataId, DeclarationDataReportType type) {
+        reportDao.deleteDec(declarationDataId, type);
     }
 
     @Override

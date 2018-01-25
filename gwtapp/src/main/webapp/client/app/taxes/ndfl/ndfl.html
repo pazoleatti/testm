@@ -48,10 +48,10 @@
                         <li role="menuitem"
                             ng-show="availableReports && declarationData.declarationType === APP_CONSTANTS.DECLARATION_TYPE.RNU_NDFL_CONSOLIDATED.id">
                             <div class="row menuitem">
-                                <a ng-click="createPairKppOktmo(false, true)">{{::'link.ndfl.reporting.formForKppOktmo'
+                                <a ng-click="createPairKppOktmo(false)">{{::'link.ndfl.reporting.formForKppOktmo'
                                     |
                                     translate}}</a>
-                                <a ng-click="createPairKppOktmo(false, false)" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
+                                <a ng-click="downloadPairKppOktmo()" ng-show="availableReportKppOktmo">{{::'link.ndfl.reporting.download'
                                     | translate}}</a>
                             </div>
                         </li>
