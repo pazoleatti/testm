@@ -30,7 +30,7 @@ public class DeclarationDataFileDaoTest {
 
     @Test
     public void getFilesTest() {
-        List<DeclarationDataFile> files = declarationDataFileDao.getFiles(1);
+        List<DeclarationDataFile> files = declarationDataFileDao.fetchByDeclarationDataId(1);
         assertEquals(2, files.size());
         assertEquals(1, files.get(0).getDeclarationDataId());
         assertEquals("uuid_1", files.get(0).getUuid());
@@ -54,7 +54,7 @@ public class DeclarationDataFileDaoTest {
     @Test
     public void saveFilesTest() {
         //проверка исходных данных
-        List<DeclarationDataFile> files = declarationDataFileDao.getFiles(2);
+        List<DeclarationDataFile> files = declarationDataFileDao.fetchByDeclarationDataId(2);
         assertEquals(2, files.size());
         Iterator<DeclarationDataFile> iterator = files.iterator();
         while (iterator.hasNext()) {
@@ -78,8 +78,8 @@ public class DeclarationDataFileDaoTest {
         }
 
         //проверка изменения комментария к файлу
-        declarationDataFileDao.saveFiles(2, files);
-        files = declarationDataFileDao.getFiles(2);
+        declarationDataFileDao.createOrUpdateList(2, files);
+        files = declarationDataFileDao.fetchByDeclarationDataId(2);
         assertEquals(2, files.size());
         iterator = files.iterator();
         while (iterator.hasNext()) {
@@ -111,8 +111,8 @@ public class DeclarationDataFileDaoTest {
         files.add(newFile);
 
         //проверка добавления и удаления файла, изменения комментария к файлу
-        declarationDataFileDao.saveFiles(2, files);
-        files = declarationDataFileDao.getFiles(2);
+        declarationDataFileDao.createOrUpdateList(2, files);
+        files = declarationDataFileDao.fetchByDeclarationDataId(2);
         assertEquals(2, files.size());
         iterator = files.iterator();
         while (iterator.hasNext()) {
@@ -147,9 +147,9 @@ public class DeclarationDataFileDaoTest {
         newFile.setNote("прим");
         newFile.setFileTypeId(21657400);
         files.add(newFile);
-        declarationDataFileDao.saveFiles(3, files);
+        declarationDataFileDao.createOrUpdateList(3, files);
 
-        files = declarationDataFileDao.getFiles(3);
+        files = declarationDataFileDao.fetchByDeclarationDataId(3);
         assertEquals(1, files.size());
         DeclarationDataFile file = files.get(0);
         assertEquals(3, file.getDeclarationDataId());
@@ -171,9 +171,9 @@ public class DeclarationDataFileDaoTest {
         newFile.setUserDepartmentName("Банк");
         newFile.setNote(null);
         newFile.setFileTypeId(21657700);
-        declarationDataFileDao.saveFile(newFile);
+        declarationDataFileDao.create(newFile);
 
-        List<DeclarationDataFile> files = declarationDataFileDao.getFiles(4);
+        List<DeclarationDataFile> files = declarationDataFileDao.fetchByDeclarationDataId(4);
         Assert.assertEquals(1, files.size());
         DeclarationDataFile file = files.get(0);
         assertEquals(4, file.getDeclarationDataId());
@@ -187,20 +187,20 @@ public class DeclarationDataFileDaoTest {
 
     @Test
     public void testFindFileWithMaxWeight() {
-        declarationDataFileDao.findFileWithMaxWeight(-1L);
+        declarationDataFileDao.fetchWithMaxWeight(-1L);
     }
 
     @Test
     public void testDeleteByDeclarationDataIdAndTypeSuccess() {
         long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.TYPE_1);
         assertEquals(1L, result);
-        assertEquals(1, declarationDataFileDao.getFiles(1).size());
+        assertEquals(1, declarationDataFileDao.fetchByDeclarationDataId(1).size());
     }
 
     @Test
     public void testDeleteByDeclarationDataIdAndTypeFail() {
         long result = declarationDataFileDao.deleteByDeclarationDataIdAndType(1, AttachFileType.TYPE_6);
         assertEquals(0L, result);
-        assertEquals(2, declarationDataFileDao.getFiles(1).size());
+        assertEquals(2, declarationDataFileDao.fetchByDeclarationDataId(1).size());
     }
 }

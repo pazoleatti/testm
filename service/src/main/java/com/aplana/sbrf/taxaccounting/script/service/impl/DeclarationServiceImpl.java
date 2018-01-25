@@ -399,7 +399,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public void saveFile(DeclarationDataFile file) {
-        declarationDataFileDao.saveFile(file);
+        declarationDataFileDao.create(file);
     }
 
     @Override
@@ -409,7 +409,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public DeclarationDataFile findFileWithMaxWeight(Long declarationDataId) {
-        return declarationDataFileDao.findFileWithMaxWeight(declarationDataId);
+        return declarationDataFileDao.fetchWithMaxWeight(declarationDataId);
     }
 
     @Override
@@ -435,7 +435,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
-        return declarationDataFileDao.findFilesWithSpecificType(declarationDataId, fileTypeName);
+        return declarationDataFileDao.fetchByAttachFileTypeName(declarationDataId, fileTypeName);
     }
 
     @Override

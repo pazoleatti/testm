@@ -55,7 +55,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public List<DeclarationDataFile> getFiles(long declarationDataId) {
+    public List<DeclarationDataFile> fetchByDeclarationDataId(long declarationDataId) {
         return getJdbcTemplate().query(
                 "select " +
                         "declaration_data_id, blob_data_id, user_name, user_department_name, note, " +
@@ -72,7 +72,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public void saveFiles(final long declarationDataId, List<DeclarationDataFile> files) {
+    public void createOrUpdateList(final long declarationDataId, List<DeclarationDataFile> files) {
         final List<DeclarationDataFile> newFiles = new LinkedList<DeclarationDataFile>();
         final List<DeclarationDataFile> oldFiles = new LinkedList<DeclarationDataFile>();
         final Set<String> removedFiles = new HashSet<String>(getJdbcTemplate().queryForList(
@@ -159,7 +159,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public void saveFile(DeclarationDataFile file) {
+    public void create(DeclarationDataFile file) {
         getJdbcTemplate().update(
                 "insert into declaration_data_file (declaration_data_id, blob_data_id, user_name, user_department_name, note, file_type_id) values (?, ?, ?, ?, ?, ?)",
                 file.getDeclarationDataId(),
@@ -181,7 +181,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public DeclarationDataFile findFileWithMaxWeight(Long declarationDataId) {
+    public DeclarationDataFile fetchWithMaxWeight(Long declarationDataId) {
         String sql =
                 "select " +
                         "t.name file_name, t.creation_date file_creation_date " +
@@ -221,7 +221,7 @@ public class DeclarationDataFileDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName) {
+    public List<DeclarationDataFile> fetchByAttachFileTypeName(Long declarationDataId, String fileTypeName) {
         String query = "select " +
                 "declaration_data_id, blob_data_id, user_name, user_department_name, note, " +
                 "bd.creation_date file_creation_date, bd.name file_name, ft.name file_type_name, ft.id file_type_id " +

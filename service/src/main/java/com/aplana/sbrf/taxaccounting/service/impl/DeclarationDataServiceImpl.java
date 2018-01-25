@@ -50,7 +50,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -2660,7 +2659,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataFile.setUserName(user.getName());
             declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
             declarationDataFile.setFileTypeId(fileTypeId);
-            declarationDataFileDao.saveFile(declarationDataFile);
+            declarationDataFileDao.create(declarationDataFile);
 
             InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
             try {
@@ -2688,7 +2687,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public List<DeclarationDataFile> getFiles(long formDataId) {
-        return declarationDataFileDao.getFiles(formDataId);
+        return declarationDataFileDao.fetchByDeclarationDataId(formDataId);
     }
 
     @Override
@@ -2699,7 +2698,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void saveFilesComments(long declarationDataId, String note, List<DeclarationDataFile> files) {
         declarationDataDao.updateNote(declarationDataId, note);
-        declarationDataFileDao.saveFiles(declarationDataId, files);
+        declarationDataFileDao.createOrUpdateList(declarationDataId, files);
     }
 
     /**
@@ -3360,7 +3359,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataFile.setUserName(userInfo.getUser().getName());
                 declarationDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
                 declarationDataFile.setFileTypeId(AttachFileType.TYPE_1.getId());
-                declarationDataFileDao.saveFile(declarationDataFile);
+                declarationDataFileDao.create(declarationDataFile);
 
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceException();

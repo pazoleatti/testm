@@ -11,42 +11,45 @@ import java.util.List;
 public interface DeclarationDataFileDao extends PermissionDao {
 
     /**
-     * Получение данных по файлам НФ(declaration)
-     * @param declarationDataId
-     * @return
+     * Получение по идентификатору налоговой формы
+     * @param declarationDataId идентификатор налоговой формы
+     * @return  список объектов хранящих информацию о файлах налоговой формы
      */
-    List<DeclarationDataFile> getFiles(long declarationDataId);
+    List<DeclarationDataFile> fetchByDeclarationDataId(long declarationDataId);
 
     /**
-     * Сохранение набора файлов НФ(declaration)
-     * @param files
+     * Создает или обновляет объекты хранящие информацию о файлах налоговой формы.
+     * @param declarationDataId идентификатор налоговой формы
+     * @param files             список объектов хранящих информацию о файлах налоговой формы
      */
-    void saveFiles(final long declarationDataId, List<DeclarationDataFile> files);
+    void createOrUpdateList(final long declarationDataId, List<DeclarationDataFile> files);
 
     /**
-     * Сохраняет отдельный файл
+     * Сохранение в БД объекта хранящего информацию о файлах налоговой формы
+     * @param file объект хранящий информацию о файлах налоговой формы
      */
-    void saveFile(DeclarationDataFile file);
+    void create(DeclarationDataFile file);
 
     /**
      * Удаляет у формы все файлы с указанным типом
-     * @param declarationDataId ид формы
-     * @param type тип файла
-     * @return кол-во удаленных файлов
+     * @param declarationDataId идентификатор налоговой формы
+     * @param type              тип файла
+     * @return кол-во удаленных объектов хранящих информацию о файлах налоговой формы
      */
     long deleteByDeclarationDataIdAndType(long declarationDataId, AttachFileType type);
 
     /**
-     * Находит файл с максимальным "весом"
-     * https://conf.aplana.com/pages/viewpage.action?pageId=27184983
+     * Находит файл с максимальным "весом" https://conf.aplana.com/pages/viewpage.action?pageId=27184983
+     * @param declarationDataId идентификатор налоговой формы
+     * @return объект хранящий информацию о файлах налоговой формы
      */
-    DeclarationDataFile findFileWithMaxWeight(Long declarationDataId);
+    DeclarationDataFile fetchWithMaxWeight(Long declarationDataId);
 
     /**
-     * Найти данные по файлам НФ имеющие указаныый тип
-     * @param declarationDataId
-     * @param fileTypeName
-     * @return
+     * Найти данные по файлам НФ имеющие указаный тип
+     * @param declarationDataId идентификатор налоговой формы
+     * @param fileTypeName      название типа
+     * @return список объектов хранящих информацию о файлах налоговой формы
      */
-    List<DeclarationDataFile> findFilesWithSpecificType(Long declarationDataId, String fileTypeName);
+    List<DeclarationDataFile> fetchByAttachFileTypeName(Long declarationDataId, String fileTypeName);
 }
