@@ -86,7 +86,7 @@ public enum ConfigurationParam {
     }
 
     public static List<ConfigurationParam> getParamsByGroup(ConfigurationParamGroup group){
-        List<ConfigurationParam> params = new ArrayList<>();
+        List<ConfigurationParam> params = new ArrayList<ConfigurationParam>();
         for (ConfigurationParam configurationParam : ConfigurationParam.values()){
             if (configurationParam.group.equals(group)){
                 params.add(configurationParam);
