@@ -624,10 +624,17 @@
         "async.title.queue": "Тип очереди",
         "async.title.state": "Состояние",
         "async.title.stateDate": "Дата изменения состояния",
+
+
+        "tab.configParam.commonParam" : "Общие параметры",
+        "tab.configParam.asyncParam" : "Параметры асинхронных заданий",
+
         "asyncParam.grid.columnName.taskType": "Тип задания",
         "asyncParam.grid.columnName.limitKind": "Вид ограничения",
         "asyncParam.grid.columnName.taskLimit": "Значение параметра \"Ограничение на выполнение задания\"",
-        "asyncParam.grid.columnName.shortQueueLimit": "Значение параметра \"Ограничение на выполнение задания в очереди быстрых заданий\""
+        "asyncParam.grid.columnName.shortQueueLimit": "Значение параметра \"Ограничение на выполнение задания в очереди быстрых заданий\"",
+        "commonParam.grid.columnName.code": "Параметр",
+        "commonParam.grid.columnName.value": "Значение"
 
     };
     /**
@@ -682,6 +689,7 @@
             'app.rest',
             'app.formatters',
             'app.reportPeriod',
+            'app.configParam',
             'app.declarationTypeAssignment'
         ])
         /**

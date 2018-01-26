@@ -143,4 +143,12 @@ public interface AsyncTaskDao {
      * @return задача существует?
      */
     boolean isTaskExists(long taskId);
+
+    /**
+     * Получение списка типов асинхронных задач
+     *
+     * @param pagingParams параметры пагинации
+     * @return страница {@link PagingResult} с данными {@link AsyncTaskTypeData}
+     */
+    PagingResult<AsyncTaskTypeData> fetchAllAsyncTaskTypeData(PagingParams pagingParams);
 }

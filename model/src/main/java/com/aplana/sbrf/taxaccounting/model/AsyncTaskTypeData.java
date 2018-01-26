@@ -27,6 +27,11 @@ public class AsyncTaskTypeData {
      */
     private long taskLimit;
 
+    /**
+     * Наименование вида ограничения
+     */
+    private String limitKind;
+
     public long getId() {
         return id;
     }
@@ -65,5 +70,13 @@ public class AsyncTaskTypeData {
 
     public void setTaskLimit(long taskLimit) {
         this.taskLimit = taskLimit;
+    }
+
+    public String getLimitKind() {
+        return limitKind;
+    }
+
+    public void setLimitKind(String limitKind) {
+        this.limitKind = limitKind;
     }
 }
