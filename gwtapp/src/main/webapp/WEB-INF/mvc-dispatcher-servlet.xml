@@ -27,5 +27,6 @@
             </beans:array>
         </beans:property>
         <beans:property name="modulesToInstall" value="com.fasterxml.jackson.datatype.joda.JodaModule"/>
+        <beans:property name="simpleDateFormat" value="yyyy-MM-dd'T'HH:mm:ss"/>
     </beans:bean>
 </beans:beans>
