@@ -77,4 +77,14 @@ public interface ConfigurationService {
      * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)
      */
     void setCommonParamsDefault(TAUserInfo userInfo);
+    
+    /**
+     * Получение списка типов асинхронных задач
+     *
+     * @param pagingParams параметры пагинации
+     * @return страница {@link PagingResult} с данными {@link AsyncTaskTypeData}
+     */
+    PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams);
+
+    PagingResult<CommonConfigurationParam> fetchAllCommonParam(PagingParams pagingParams);
 }

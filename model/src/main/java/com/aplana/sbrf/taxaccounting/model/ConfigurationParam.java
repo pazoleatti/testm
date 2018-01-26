@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Перечисление типов параметров приложения
  *
@@ -80,6 +83,16 @@ public enum ConfigurationParam {
             nameParamsForUser = "";
         }
         return nameParamsForUser;
+    }
+
+    public static List<ConfigurationParam> getParamsByGroup(ConfigurationParamGroup group){
+        List<ConfigurationParam> params = new ArrayList<>();
+        for (ConfigurationParam configurationParam : ConfigurationParam.values()){
+            if (configurationParam.group.equals(group)){
+                params.add(configurationParam);
+            }
+        }
+        return params;
     }
 
     /**

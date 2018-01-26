@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
@@ -64,6 +65,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private AuditService auditService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private AsyncTaskDao asyncTaskDao;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -552,6 +555,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         return result;
     }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams) {
+        return asyncTaskDao.fetchAllAsyncTaskTypeData(pagingParams);
+    }
+
+    @Override
+    public PagingResult<CommonConfigurationParam> fetchAllCommonParam(PagingParams pagingParams) {
+        return configurationDao.fetchAllCommonParam(pagingParams);
+    }
+
 
     private void checkConfig(Configuration config, Logger logger) {
         if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.getCaption())) {

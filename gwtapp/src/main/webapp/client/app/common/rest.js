@@ -272,5 +272,23 @@
             });
         }])
 
+        /**
+         * @description Получить данные о типах асинхронных задач
+         */
+        .factory('AsyncTaskResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/configuration/asyncParam', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Получить данные о типах асинхронных задач
+         */
+        .factory('CommonParamResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/configuration/commonParam', {}, {
+                query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
     ;
 }());

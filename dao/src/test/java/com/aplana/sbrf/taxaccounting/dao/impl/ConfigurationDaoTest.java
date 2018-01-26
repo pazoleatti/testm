@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,5 +104,11 @@ public class ConfigurationDaoTest {
         ConfigurationParamModel updateModel = dao.getAll();
         Assert.assertEquals("33333", updateModel.getFullStringValue(ConfigurationParam.NO_CODE, 1));
         Assert.assertEquals("44444", updateModel.getFullStringValue(ConfigurationParam.SBERBANK_INN, 1));
+    }
+
+    @Test
+    public void fetchAllCommonParamTest(){
+        PagingParams params = PagingParams.getInstance(1, 10);
+        Assert.assertNotEquals(0, dao.fetchAllCommonParam(params).size());
     }
 }
