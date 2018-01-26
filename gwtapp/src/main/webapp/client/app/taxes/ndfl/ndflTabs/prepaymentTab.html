@@ -1,16 +1,14 @@
 <div data-ng-controller="prepaymentCtrl">
-    <div style="height: 100%">
-        <div class='container-grid-top'>
+        <div class='container-grid-top tab4-top'>
             <span data-ng-include="'client/app/taxes/ndfl/prepaymentFilter.html'"></span>
         </div>
         <div data-aplana-grid
              data-grid-fill-space="true"
              data-grid-fill-space-container-selector=".form100"
-             data-grid-fill-space-container-selector-top=".container-grid-top"
+             data-grid-fill-space-container-selector-top=".tab4-top"
              data-grid-options="prepaymentGrid.options"
              data-init-grid="prepaymentGrid.init(ctrl)"
              data-grid-ctrl="prepaymentGrid.ctrl"
              data-ng-model="prepaymentGrid.value"
              id="prepaymentTable"></div>
-    </div>
 </div>

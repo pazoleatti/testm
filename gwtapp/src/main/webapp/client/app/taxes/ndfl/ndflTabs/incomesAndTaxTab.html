@@ -1,13 +1,12 @@
-<div data-ng-controller="incomesAndTaxCtrl">
-    <div style="height: 100%;">
-        <div class='container-grid-top'>
-            <span data-ng-include="'client/app/taxes/ndfl/incomesAndTaxFilter.html'"></span>
-        </div>
+<div data-ng-controller="incomesAndTaxCtrl" class="tb-wrap50" style="height: 50%; min-height: 300px;">
+
+    <div class='container-grid-top tab2-top'>
+        <span data-ng-include="'client/app/taxes/ndfl/incomesAndTaxFilter.html'"></span>
     </div>
     <div data-aplana-grid
          data-grid-fill-space="true"
          data-grid-fill-space-container-selector=".form100"
-         data-grid-fill-space-container-selector-top=".container-grid-top"
+         data-grid-fill-space-container-selector-top=".tab2-top"
          data-grid-options="incomesAndTaxGrid.options"
          data-init-grid="incomesAndTaxGrid.init(ctrl)"
          data-grid-ctrl="incomesAndTaxGrid.ctrl"
