@@ -1,20 +1,22 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.QBean;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQueryFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,20 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
             }
         }
     }
+
+    /**
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link CommonConfigurationParam}
+     */
+    private RowMapper<CommonConfigurationParam> commonConfigurationParamMapper = new RowMapper<CommonConfigurationParam>() {
+        @Override
+        public CommonConfigurationParam mapRow(ResultSet rs, int index) throws SQLException {
+            CommonConfigurationParam param = new CommonConfigurationParam();
+            param.setName(ConfigurationParam.valueOf(rs.getString("code")).getCaption());
+            param.setValue(rs.getString("value"));
+            return param;
+        }
+    };
+
 
     @Override
     public List<Configuration> getAllConfiguration() {
@@ -195,6 +211,26 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         for (Configuration config : listDefaultConfig) {
             update(config);
         }
+    }
+
+    @Override
+    public PagingResult<CommonConfigurationParam> fetchAllCommonParam(PagingParams pagingParams) {
+        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON));
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("start", pagingParams.getStartIndex() + 1);
+        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+        List<CommonConfigurationParam> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
+                "select * from (" +
+                        "   select rownum rn, ordered.* from (select code, value from configuration" + where + ") ordered " +
+                        ") numbered " +
+                        "where rn between :start and :end order by code",
+                params, commonConfigurationParamMapper
+        );
+        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select code, value from configuration" + where + ")", Integer.class);
+        return new PagingResult<>(asyncTaskTypeDataList, totalCount);
+
+
     }
 
     public void delete(Configuration config) {

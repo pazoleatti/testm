@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -60,4 +57,12 @@ public interface ConfigurationDao {
      * Установка общих параметров по умолчанию
      */
     void setCommonParamsDefault(List<Configuration> listdefaulConfig);
+
+    /**
+     * Получение конфигураций параметров "Общие параметры"
+     *
+     * @param pagingParams параметры пагинации
+     * @return список {@link CommonConfigurationParam} или пустой список
+     */
+    PagingResult<CommonConfigurationParam> fetchAllCommonParam(PagingParams pagingParams);
 }

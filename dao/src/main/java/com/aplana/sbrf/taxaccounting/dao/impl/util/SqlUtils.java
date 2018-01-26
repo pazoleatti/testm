@@ -120,6 +120,15 @@ public final class SqlUtils extends AbstractDao {
 		return transformToSqlInStatement(prefix, strings, IN_CAUSE_LIMIT);
 	}
 
+	public static String transformToSqlInStatementForStringFromObject(String prefix, Collection<?> collection) {
+		List<String> strings = new ArrayList<String>();
+		for (Object object : collection) {
+			strings.add("'" + object + "'");
+		}
+
+		return transformToSqlInStatement(prefix, strings, IN_CAUSE_LIMIT);
+	}
+
 	/**
 	 * Сохраняет коллекцию во временную таблицу, а затем формирует sql-условие in с этой таблицей вида "prefix in (select * from tmp)"
 	 *
