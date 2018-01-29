@@ -233,6 +233,20 @@
                 };
 
                 /**
+                 * Инициализировать список со всеми видами форм
+                 */
+                //Убрать фильтрацию data в рамках TODO: https://jira.aplana.com/browse/SBRFNDFL-2358
+                $scope.initSelectWithTaxAndReportDeclarationTypes = function () {
+                    $scope.declarationTypeSelect = GetSelectOption.getBasicMultipleSelectOptions(true);
+                    RefBookValuesResource.query({refBookId: APP_CONSTANTS.REFBOOK.DECLARATION_TYPE}, function (data) {
+                        data = data.filter(function (declarationType) {
+                            return isTaxForm(declarationType) || isReportForm(declarationType);
+                        });
+                        $scope.declarationTypeSelect.options.data.results = data;
+                    });
+                };
+
+                /**
                  * Инициализировать список с видами форм, которые можно создать
                  * @param declarationKind Тип налоговой формы
                  * @param periodObject Выражение из scope, по которому отслеживается изменение периода
@@ -373,6 +387,16 @@
                  */
                 $scope.initSelectWithBADepartments = function () {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=BADepartments", {}, {
+                        property: "fullPath",
+                        direction: "asc"
+                    }, "fullPathFormatter");
+                };
+
+                /**
+                 * Инициализировать список с загрузкой всех достуных для назначения исполнителями подразделений через ajax
+                 */
+                $scope.initSelectWithDestinationDepartments = function () {
+                    $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=destinationDepartments", {}, {
                         property: "fullPath",
                         direction: "asc"
                     }, "fullPathFormatter");

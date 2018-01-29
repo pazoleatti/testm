@@ -114,6 +114,10 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> VIEW_ADMINISTRATION_USERS = new ViewAdministrationUsersPermission(1 << 21);
 
+    /**
+     * Право "Назначение форм > Редактирование"
+     */
+    public static final Permission<TAUser> EDIT_DECLARATION_TYPES_ASSIGNMENT = new EditDeclarationTypesAssignmentPermission(1 << 22);
 
     public UserPermission(long mask) {
         super(mask);
@@ -149,6 +153,21 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
+        }
+    }
+
+    /**
+     * Право "Назначение форм > Редактирование"
+     */
+    public static final class EditDeclarationTypesAssignmentPermission extends UserPermission {
+
+        public EditDeclarationTypesAssignmentPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
 

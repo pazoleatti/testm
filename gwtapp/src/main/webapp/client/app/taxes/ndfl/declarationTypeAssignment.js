@@ -4,7 +4,8 @@
     /**
      * @description Модуль назначения налоговых форм
      */
-    angular.module('app.declarationTypeAssignment', ['ui.router', 'app.constants', 'app.rest', 'app.logPanel', 'app.formatters', 'app.select.common', 'app.filterUtils'])
+    angular.module('app.declarationTypeAssignment', ['ui.router', 'app.constants', 'app.rest', 'app.logPanel', 'app.formatters',
+        'app.select.common', 'app.filterUtils', 'app.createAssignment'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTypeAssignment', {
                 url: '/taxes/declarationTypeAssignment',
@@ -24,7 +25,7 @@
                     params: {},
                     ajaxFilter: [],
                     isClear: false,
-                    filterName: 'declarationTypeAssignmentsFilter',
+                    filterName: 'declarationTypeAssignmentsFilter'
                 };
 
                 $scope.declarationTypeAssignmentGrid = {
@@ -73,6 +74,7 @@
                  * @param page
                  */
                 $scope.refreshGrid = function (page) {
+                    console.log($scope.searchFilter.params);
                     $scope.declarationTypeAssignmentGrid.ctrl.refreshGrid(page);
                 };
 
@@ -89,6 +91,38 @@
                         }
                     });
                     $scope.searchFilter.isClear = needToClear;
+                };
+
+                $scope.showCreateAssignmentModal = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('declarationTypeAssignment.modal.create.title'),
+                        templateUrl: 'client/app/taxes/ndfl/createDeclarationTypeAssignment.html?v=${buildUuid}',
+                        controller: 'createDeclarationTypeAssignmentCtrl',
+                        windowClass: 'modal600'
+                    }).result.then(
+                        function (result) {
+                            var response = result.response;
+                            if(response && response.data) {
+                                if(response.data.creatingExistingRelations) {
+                                    $dialogs.warningDialog({
+                                        content: $filter('translate')('declarationTypeAssignment.message.existingRelations')
+                                    });
+                                    if (response.data.uuid && response.data.uuid !== null) {
+                                        $logPanel.open('log-panel-container', response.data.uuid);
+                                    }
+                                } else {
+                                    $dialogs.messageDialog({
+                                        content: $filter('translate')('declarationTypeAssignment.message.success')
+                                    });
+                                }
+                            }
+                            if(result.departments && result.departments.length > 0) {
+                                $scope.searchFilter.params.departments = result.departments;
+                                $scope.searchFilter.isClear = true;
+                                $scope.refreshGrid();
+                            }
+                        }
+                    );
                 };
             }])
 
