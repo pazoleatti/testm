@@ -44,21 +44,14 @@ new Calculate(this).run();
  * Скрипт отвечает за идентификацию физлиц. Результатом работы скрипта является создание или обновление записей
  * в справочнике физлиц на основе данных содержащихся в разделе Реквизиты налоговой формы.
  * Алгоритм имеет несколько этапов. Данные для кждого этапа определяются соответствующей процедурой в БД.
- * 1. На первом этапе определяются физлица, которые не имеют совпадений по важным критериям в справочнике ФЛ и
- * для них должны создаться новые записи в справочнике.
- * Сами физлица являются сущностями таблицы NDFL_PERSON, но для них используется
- * класс {@link #com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson}.
- * Также может возникнуть ситуация когда в реквизитах налоговой формы есть несколько записей, которые по своей сути
- * являются одним физлицом. Эта ситуация обрабатывается в {@link performPrimaryPersonDuplicates ( List < NaturalPerson )}.
- * 2. На втором этапе ищутся записи в справочнике физлиц, которые совпадают по всем ключевым параметам с записями из
+ * 1. На первом этапе ищутся записи в справочнике физлиц, которые совпадают по всем ключевым параметам с записями из
  * реквизитов налоговой формы. Считается что это одни и теже физлица. Если какие-то параметры отличаются, то они
  * обновляются.
- * 3. На третьем этапе ищутся физлица, которые совпадают хотя бы по одному ключевому параметру, тогда необходимо
+ * 2. На втором этапе ищутся физлица, которые совпадают хотя бы по одному ключевому параметру, тогда необходимо
  * провести сравнение физлица из реквизитов налоговй формы с отобранными физлицами из справочника физлиц.
  * Из этих физлиц выбирается одно физлицо с максимальным весом выше порога схожести. Значения в справочнике
  * обновляются свежими даннными.
- * Если все таки ни одно физлицо при сравнении по весам не прошло порог схожести, тогда создается новая запись в
- * справочнике физлиц.
+ * Для физлиц из формы, для которых не были найдены соответствия на шагах 1 и 2 создаются новые записи в справочнике физлиц.
  *
  * По результату работы скрипта каждое физлицо из налоговой формы раздела "Реквизиты" будет иметь ссылку на запись в
  * справочнике "Физические лица"
@@ -136,6 +129,8 @@ class Calculate extends AbstractScriptClass {
      */
     List<NaturalPerson> duplicatePersonList = []
 
+    List<NaturalPerson> primaryPersonDataList = []
+
     private Calculate() {
     }
 
@@ -192,10 +187,12 @@ class Calculate extends AbstractScriptClass {
                     refBookPersonService.clearRnuNdflPerson(declarationData.id)
 
                     //Получаем список всех ФЛ в первичной НФ
-                    List<NaturalPerson> primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper(false));
+                    primaryPersonDataList = refBookPersonService.findNaturalPersonPrimaryDataFromNdfl(declarationData.id, createPrimaryRowMapper(false));
                     if (logger.containsLevel(LogLevel.ERROR)) {
                         return
                     }
+
+                    insertPersonList.addAll(primaryPersonDataList)
 
                     logForDebug("В ПНФ номер " + declarationData.id + " получены записи о физ. лицах (" + primaryPersonDataList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
@@ -208,13 +205,7 @@ class Calculate extends AbstractScriptClass {
                     refBookPersonService.fillRecordVersions(getRefBookPersonVersionTo());
                     logForDebug("Заполнение таблицы версий (" + ScriptUtils.calcTimeMillis(time));
 
-                    //Шаг 1. список физлиц первичной формы для создания записей в справочниках
-                    time = System.currentTimeMillis();
-                    List<NaturalPerson> insertList = refBookPersonService.findPersonForInsertFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createPrimaryRowMapper(true))
-                    insertPersonList.addAll(insertList);
-                    logForDebug("Предварительная выборка новых данных (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
-
-                    //Шаг 2. идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
+                    // Идентификатор записи в первичной форме - список подходящих записей для идентификации по весам и обновления справочников
                     time = System.currentTimeMillis();
                     Map<Long, Map<Long, NaturalPerson>> similarityPersonMap = refBookPersonService.findPersonForUpdateFromPrimaryRnuNdfl(declarationData.id, declarationData.asnuId, getRefBookPersonVersionTo(), createRefbookHandler());
                     logForDebug("Предварительная выборка по значимым параметрам (" + similarityPersonMap.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
@@ -869,9 +860,6 @@ class Calculate extends AbstractScriptClass {
                             refBookPerson.getMiddleName()) + " " + buildRefreshNotice(addressAttrCnt, personAttrCnt, documentAttrCnt, taxpayerIdentityAttrCnt));
                     updCnt++;
                 }
-            } else {
-                //Если метод identificatePerson вернул null, то это означает что в списке сходных записей отсутствуют записи перевыщающие порог схожести
-                insertPersonList.add(primaryPerson);
             }
 
             if (msgCnt < maxMsgCnt) {
@@ -886,6 +874,7 @@ class Calculate extends AbstractScriptClass {
         time = System.currentTimeMillis();
         //println "crete and update reference"
 
+        insertPersonList.removeAll(updatePersonReferenceList)
         //update reference to ref book
         if (!updatePersonReferenceList.isEmpty()) {
             updatePrimaryToRefBookPersonReferences(updatePersonReferenceList);
