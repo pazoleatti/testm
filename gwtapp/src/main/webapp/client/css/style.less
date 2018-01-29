@@ -50,9 +50,11 @@ form label {
 form input[type="submit"], form input[type="button"] {
   margin-left: 10px;
 }
-input:focus{
+
+input:focus {
   outline: none;
 }
+
 form .row {
   margin: 10px 0;
 }
@@ -123,7 +125,7 @@ a {
   .nav {
     li {
       a {
-          text-shadow: none;
+        text-shadow: none;
       }
     }
   }
@@ -211,13 +213,16 @@ h6,
 .h6 {
   font-size: 12px;
 }
-.btn{
+
+.btn {
   text-shadow: none;
 }
-.btn.active{
+
+.btn.active {
   background: transparent;
   box-shadow: none;
 }
+
 .btn, .form-control {
   font-size: 12px;
 }
@@ -724,6 +729,7 @@ label.required:after {
 .w500 {
   width: 500px;
 }
+
 .w508 {
   width: 508px;
   margin: 0 21px 0 28px;
@@ -1068,7 +1074,7 @@ button.btn.btn-default.ng-binding {
       margin: 0 -20px 0 30px;
     }
   }
-  .control-label{
+  .control-label {
     widtH: 100%;
   }
   div [ui-view] {
@@ -1241,10 +1247,12 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
   bottom: 23px;
   max-height: 828px;
 }
-#log-panel .ui-jqgrid-bdiv{
+
+#log-panel .ui-jqgrid-bdiv {
   max-height: 166px;
   min-height: 166px;
 }
+
 #log-panel-header {
   position: relative;
   top: -18px;
@@ -1440,9 +1448,11 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
 .floatWindow-href:hover + div {
   display: block;
 }
-.report-content{
+
+.report-content {
   height: 550px;
 }
+
 /*------------------------------------------------------------------*/
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   .ui-jqgrid .ui-jqgrid-bdiv {
@@ -1459,30 +1469,49 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
     background: url('../img/sberbank_logo_white2.jpg') no-repeat;
     background-size: contain;
   }
-  .navbar-default .new-message{
+
+  .navbar-default .new-message {
     line-height: 14px;
   }
 }
-.date-from-label{
-  width: 100%!important;
+
+.date-from-label {
+  width: 100% !important;
   line-height: 15px;
 }
-@media (max-width: 1590px) {
-  .report-wrapper{
-    min-height: 521px!important;
+
+@media (max-width: 1622px) and (min-width: 1592px) {
+  .report-content {
+    height: 524px;
   }
-  #log-panel{
-    width: 96.5%!important;
+}
+
+@media (max-height: 950px) {
+  .report-content {
+    height: 486px;
+  }
+}
+
+@media (max-width: 1590px) {
+  .report-wrapper {
+    min-height: 521px !important;
+  }
+
+  #log-panel {
+    width: 96.5% !important;
     max-height: 780px;
   }
-  .report-content{
+
+  .report-content {
     height: 518px;
   }
 }
+
 @media (max-width: 1450px) {
   .grid-filter {
     min-width: 100% !important;
   }
+
   .info-wrapper {
     margin-bottom: 10px;
     padding-bottom: 10px;
@@ -1506,14 +1535,14 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
     }
     .datepicker-block {
       margin: 0 !important;
-      width: 319px!important;
+      width: 319px !important;
       .date-from-label {
         margin-bottom: -8px;
       }
       .date-to-block {
         margin-right: -11px !important;
       }
-      .row-fluid [class*="span"]{
+      .row-fluid [class*="span"] {
         margin-left: 7px;
       }
     }
@@ -1533,27 +1562,27 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
       top: 10px;
       text-align: right;
 
-      button{
+      button {
         margin: 4px 0 0 0;
       }
     }
-    div.cbr-picker{
+    div.cbr-picker {
       width: 150px;
-      .cbr-picker-button, .cbr-picker-input{
+      .cbr-picker-button, .cbr-picker-input {
         display: inline-block;
         vertical-align: top;
       }
-      .cbr-picker-button{
+      .cbr-picker-button {
         width: 37px;
       }
-      .cbr-picker-input{
+      .cbr-picker-input {
         width: 107px;
         margin: 0 0 0 -6px;
       }
 
     }
-    .date-to-label{
-      .control-label{
+    .date-to-label {
+      .control-label {
         width: 24px;
       }
     }
@@ -1562,32 +1591,40 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
       margin-bottom: -6px;
     }
   }
+
   .report-wrapper {
     min-height: 504px !important;
   }
-  #log-panel{
-    max-height: 716px!important;
+
+  #log-panel {
+    max-height: 716px !important;
   }
-  #log-panel .ui-jqgrid-bdiv{
-    max-height: 581px!important;
+
+  #log-panel .ui-jqgrid-bdiv {
+    max-height: 581px !important;
   }
-  .report-content{
+
+  .report-content {
     height: 496px;
   }
 }
+
 @media (max-width: 1290px) {
-  #log-panel{
-    max-height: 699px!important;
+  #log-panel {
+    max-height: 699px !important;
   }
-  #log-panel .ui-jqgrid-bdiv{
-    max-height: 508px!important;
+
+  #log-panel .ui-jqgrid-bdiv {
+    max-height: 508px !important;
   }
-  .report-content{
+
+  .report-content {
     height: 460px
   }
 }
+
 @media (max-width: 1190px) {
-  .report-content{
+  .report-content {
     height: 418px;
   }
 }
@@ -1628,50 +1665,56 @@ label[class="ng-binding"], label[class="w100 ng-binding"] {
   width: auto;
   height: auto;
 }
-.tab-wrapper .tab-content{
+
+.tab-wrapper .tab-content {
   background: transparent;
 }
-.btn-group{
-  .btn{
+
+.btn-group {
+  .btn {
     font-size: 12px;
-     .caret {
-        margin-top: 0;
-        margin-left: 9px;
+    .caret {
+      margin-top: 0;
+      margin-left: 9px;
     }
   }
-  .dropdown-menu{
+  .dropdown-menu {
     font-size: 12px;
   }
 }
+
 .cbr-picker {
-  .cbr-picker-button > button.btn{
-    width: 36px!important;
+  .cbr-picker-button > button.btn {
+    width: 36px !important;
     border-radius: 0;
   }
-  .icon-calendar{
+  .icon-calendar {
     margin-top: -4px;
   }
-  button.btn.btn-default:hover:not([disabled]):hover{
+  button.btn.btn-default:hover:not([disabled]):hover {
     border-top: 3px solid #6ec151;
   }
-  .cbr-picker-input input{
+  .cbr-picker-input input {
     height: 18px;
     background-color: #fff;
-    box-shadow: inset 2px 2px 0 0 rgba(0,0,0,0.2);
-    border: solid 1px rgba(0,0,0,0.2);
+    box-shadow: inset 2px 2px 0 0 rgba(0, 0, 0, 0.2);
+    border: solid 1px rgba(0, 0, 0, 0.2);
     border-radius: 0;
   }
-  .btn-sm{
+  .btn-sm {
     height: 28px;
   }
 }
-.btn-group .btn .caret{
+
+.btn-group .btn .caret {
   display: none;
 }
-.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a{
+
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a {
   color: #333333;
   background: #e7e7e7;
 }
-.modal-footer .button_panel .btn-toolbar{
+
+.modal-footer .button_panel .btn-toolbar {
   margin: 0;
 }
