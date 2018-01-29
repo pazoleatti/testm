@@ -29,15 +29,6 @@ public interface RefBookPersonDao {
     void fillRecordVersions(Date version);
 
     /**
-     * Найти всех новых ФЛ из РНУ-НДФЛ по которым будет создаваться запись в справочнике
-     *
-     * @param declarationDataId идентификатор НФ
-     * @param version           версия записи
-     * @return
-     */
-    List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, RowMapper<NaturalPerson> primaryRowMapper);
-
-    /**
      * Найти всех ФЛ по определяющим параметрам
      *
      * @param declarationDataId идентификатор НФ

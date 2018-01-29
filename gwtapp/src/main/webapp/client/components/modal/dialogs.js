@@ -56,15 +56,24 @@
             content: '',
             controller: 'MessageDlgDefaultCtrl'
         })
+        .constant('warningDialogDefaultOptions', {
+            title: 'Предупреждение',
+            titleIcon: 'icon-cbr-windows-to_user',
+            modalHeaderClass: 'modal-header-warning',
+            closeBtnCaption: 'Закрыть',
+            content: '',
+            controller: 'MessageDlgDefaultCtrl'
+        })
         .factory('$dialogs', [
             'AplanaTemplatePath',
             '$aplanaModal',
             'confirmDialogDefaultOptions',
+            'warningDialogDefaultOptions',
             'commentDialogDefaultOptions',
             'messageDialogDefaultOptions',
             'confirmQuestionDialogDefaultOptions',
             'errorDialogDefaultOptions',
-            function (AplanaTemplatePath, $aplanaModal, confirmDialogDefaultOptions,
+            function (AplanaTemplatePath, $aplanaModal, confirmDialogDefaultOptions, warningDialogDefaultOptions,
                       commentDialogDefaultOptions, messageDialogDefaultOptions, confirmQuestionDialogDefaultOptions, errorDialogDefaultOptions) {
                 return {
                     confirmDialog: function (dialogOptions) {
@@ -170,6 +179,27 @@
                     errorDialog: function (dialogOptions) {
                         var defaultOptions = angular.copy(errorDialogDefaultOptions);
                         defaultOptions.templateUrl = AplanaTemplatePath + 'modal/error.html';
+                        dialogOptions = angular.extend(defaultOptions, dialogOptions);
+                        dialogOptions.resolve = {
+                            options: function () {
+                                return dialogOptions;
+                            }
+                        };
+
+                        var modalInstance = $aplanaModal.open(dialogOptions);
+
+                        modalInstance.result.then(function () {
+                        }, function () {
+                            if (angular.isDefined(dialogOptions.closeBtnClick)) {
+                                dialogOptions.closeBtnClick();
+                            }
+                        });
+
+                        return modalInstance;
+                    },
+                    warningDialog: function (dialogOptions) {
+                        var defaultOptions = angular.copy(warningDialogDefaultOptions);
+                        defaultOptions.templateUrl = AplanaTemplatePath + 'modal/warning.html';
                         dialogOptions = angular.extend(defaultOptions, dialogOptions);
                         dialogOptions.resolve = {
                             options: function () {
