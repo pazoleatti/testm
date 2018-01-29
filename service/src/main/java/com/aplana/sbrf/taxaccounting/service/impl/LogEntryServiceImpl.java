@@ -38,7 +38,7 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Override
     public List<LogEntry> getAll(String uuid) {
-        return logEntryDao.get(uuid);
+        return logEntryDao.fetch(uuid);
     }
 
     @Override

@@ -29,7 +29,7 @@ public class LogEntryServiceTest {
         for (int i = 0; i < SIZE; i++) {
             logEntries.add(new LogEntry(i % 3 == 0 ? LogLevel.INFO : (i % 2 == 0 ? LogLevel.WARNING : LogLevel.ERROR), "item " + i));
         }
-        when(logEntryDao.get(UUID)).thenReturn(logEntries);
+        when(logEntryDao.fetch(UUID)).thenReturn(logEntries);
         ReflectionTestUtils.setField(logEntryService, "logEntryDao", logEntryDao);
     }
 

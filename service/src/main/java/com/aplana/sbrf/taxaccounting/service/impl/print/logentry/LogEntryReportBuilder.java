@@ -83,7 +83,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
     private String[] assemble(LogEntry item, int numberStr) {
         List<String> entries = new ArrayList<>(4);
         entries.add(String.valueOf(numberStr));
-        entries.add(DATE_DATA_FORMAT.get().format(item.getDate().toDate()));
+        entries.add(DATE_DATA_FORMAT.get().format(item.getDate()));
         switch (item.getLevel()) {
             case ERROR:
                 entries.add("ошибка");

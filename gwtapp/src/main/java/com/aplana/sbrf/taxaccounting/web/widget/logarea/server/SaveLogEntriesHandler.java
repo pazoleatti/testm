@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesRes
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
@@ -44,7 +43,7 @@ public class SaveLogEntriesHandler extends AbstractActionHandler<SaveLogEntriesA
                 logEntry.setObject(gwtLogEntry.getObject());
                 logEntry.setOrd(gwtLogEntry.getOrd());
                 logEntry.setType(gwtLogEntry.getType());
-                logEntry.setDate(LocalDateTime.fromDateFields(gwtLogEntry.getDate()));
+                logEntry.setDate(gwtLogEntry.getDate());
 
                 logEntries.add(logEntry);
             }

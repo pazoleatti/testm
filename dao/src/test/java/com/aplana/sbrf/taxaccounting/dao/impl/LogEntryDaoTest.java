@@ -65,7 +65,7 @@ public class LogEntryDaoTest {
         logger.warn("W1");
         logger.warnExp("W2", "type", "obj");
         logEntryDao.save(logger.getEntries(), UID_WITHOUT_LOG_ENTRY_2);
-        List<LogEntry> lel = logEntryDao.get(UID_WITHOUT_LOG_ENTRY_2);
+        List<LogEntry> lel = logEntryDao.fetch(UID_WITHOUT_LOG_ENTRY_2);
 
         Assert.assertEquals(lel.size(), 4);
         Assert.assertEquals(lel.get(0).getMessage(), "E1");
@@ -109,17 +109,17 @@ public class LogEntryDaoTest {
 
     @Test(expected = RuntimeException.class)
     public void testGetNull() {
-        logEntryDao.get(null);
+        logEntryDao.fetch(null);
     }
 
     @Test
     public void testGetEmpty1() {
-        Assert.assertNull(logEntryDao.get(""));
+        Assert.assertNull(logEntryDao.fetch(""));
     }
 
     @Test(expected = DaoException.class)
     public void testGetEmpty2() {
-        logEntryDao.get(UUID.randomUUID().toString().toLowerCase());
+        logEntryDao.fetch(UUID.randomUUID().toString().toLowerCase());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class LogEntryDaoTest {
         logEntryDao.update(before, UID_WITH_LOG_ENTRY_5, true);
         logEntryDao.update(after, UID_WITH_LOG_ENTRY_5, false);
 
-        List<LogEntry> logEntries = logEntryDao.get(UID_WITH_LOG_ENTRY_5);
+        List<LogEntry> logEntries = logEntryDao.fetch(UID_WITH_LOG_ENTRY_5);
 
         Assert.assertEquals(before.get(0).getMessage(), logEntries.get(0).getMessage());
         Assert.assertEquals(before.get(1).getMessage(), logEntries.get(1).getMessage());
@@ -169,7 +169,7 @@ public class LogEntryDaoTest {
         logDao.save(uuid);
         logEntryDao.save(logger.getEntries(), uuid);
 
-        List<LogEntry> logEntries = logEntryDao.get(uuid);
+        List<LogEntry> logEntries = logEntryDao.fetch(uuid);
         Assert.assertEquals(4, logEntries.size());
         Assert.assertEquals(StringUtils.repeat('\n', MAX_MESSAGE_SIZE), logEntries.get(0).getMessage());
         Assert.assertEquals(StringUtils.repeat('б', MAX_MESSAGE_SIZE), logEntries.get(1).getMessage());
@@ -199,7 +199,7 @@ public class LogEntryDaoTest {
         logEntryDao.save(entries, uuid);
         System.out.println("Saving logs..." + (double) (System.nanoTime() - start) / 1000000000.0);
         start = System.nanoTime();
-        List<LogEntry> logs = logEntryDao.get(uuid);
+        List<LogEntry> logs = logEntryDao.fetch(uuid);
         System.out.println("Getting logs..." + (double) (System.nanoTime() - start) / 1000000000.0);
         Assert.assertEquals(logs.size(), size + 1);
         LogEntry testEntry = logs.get(0);

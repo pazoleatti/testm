@@ -50,7 +50,7 @@ public class GetLogEntriesHandler extends AbstractActionHandler<GetLogEntriesAct
             gwtLogEntry.setObject(logEntry.getObject());
             gwtLogEntry.setOrd(logEntry.getOrd());
             gwtLogEntry.setType(logEntry.getType());
-            gwtLogEntry.setDate(logEntry.getDate().toDate());
+            gwtLogEntry.setDate(logEntry.getDate());
 
             listGwtLogEntries.add(gwtLogEntry);
         }

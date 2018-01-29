@@ -37,8 +37,9 @@ public interface LogEntryDao {
      * Получение списка логов по идентификатору группы
      *
      * @param logId идентификатор группы логов
+     * @return  список логов
      */
-    List<LogEntry> get(@NotNull String logId);
+    List<LogEntry> fetch(@NotNull String logId);
 
     /**
      * Получение страницы логов по идентификатору группы
@@ -68,6 +69,7 @@ public interface LogEntryDao {
      * Расчитывает количество сообщений на каждом уровне важности
      *
      * @param logId идентификатор группы логов
+     * @return  ключ - уровень важности, значение количество сообщений
      */
     Map<LogLevel, Integer> countLogLevel(@NotNull String logId);
 }

@@ -6,32 +6,20 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.querydsl.core.types.QBean;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QLogEntry.logEntry;
-import static com.querydsl.core.types.Projections.bean;
-
 @Repository
 public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
-
-    final private SQLQueryFactory sqlQueryFactory;
-
-    public LogEntryDaoImpl(SQLQueryFactory sqlQueryFactory) {
-        this.sqlQueryFactory = sqlQueryFactory;
-    }
-
-    final private QBean<LogEntry> logEntryBean = bean(LogEntry.class, logEntry.logId, logEntry.creationDate.as("date"),
-            logEntry.logLevel.as("level"), logEntry.message, logEntry.object, logEntry.ord, logEntry.type);
 
     /**
      * Максимальный размер сообщения
@@ -45,7 +33,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
             result.setLogId(rs.getString("log_id"));
             result.setOrd(rs.getInt("ord"));
-            result.setDate(new org.joda.time.LocalDateTime(rs.getTimestamp("creation_date")));
+            result.setDate(new Date(rs.getTimestamp("creation_date").getTime()));
             result.setLevel(LogLevel.fromId(rs.getInt("log_level")));
 
             String msg = rs.getString("message");
@@ -119,26 +107,33 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
     private void saveShift(List<LogEntry> logEntries, final String logId, final int shift) {
         final List<LogEntry> splitLogEntries = splitBigMessage(logEntries);
 
-        String id = logId;
-        int i = 0;
-        for (LogEntry aLogEntry : splitLogEntries) {
-            aLogEntry.setOrd(shift + i);
-            i++;
-            sqlQueryFactory.insert(logEntry)
-                    .set(logEntry.logId, id)
-                    .set(logEntry.creationDate, aLogEntry.getDate())
-                    .set(logEntry.logLevel, aLogEntry.getLevel())
-                    .set(logEntry.type, aLogEntry.getType())
-                    .set(logEntry.message, aLogEntry.getMessage())
-                    .set(logEntry.ord, aLogEntry.getOrd())
-                    .set(logEntry.object, aLogEntry.getObject())
-                    .execute();
+        getJdbcTemplate().batchUpdate(
+                "insert into log_entry (log_id, creation_date, log_level, type, message,  ord, object) values (?, ?, ?, ?, ?, ?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        LogEntry logEntry = splitLogEntries.get(i);
+                        logEntry.setLogId(logId);
+                        logEntry.setOrd(shift + i);
 
-        }
+                        ps.setString(1, logEntry.getLogId());
+                        ps.setTimestamp(2, new java.sql.Timestamp(logEntry.getDate().getTime()));
+                        ps.setInt(3, logEntry.getLevel().getId());
+                        ps.setString(4, logEntry.getType());
+                        ps.setString(5, logEntry.getMessage());
+                        ps.setInt(6, logEntry.getOrd());
+                        ps.setString(7, logEntry.getObject());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return splitLogEntries.size();
+                    }
+                });
     }
 
     @Override
-    public List<LogEntry> get(String logId) {
+    public List<LogEntry> fetch(String logId) {
         if (logId.isEmpty()) {
             return null;
         }
@@ -159,20 +154,22 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
 
     @Override
     public PagingResult<LogEntry> fetch(@NotNull String logId, PagingParams pagingParams) {
-        SQLQuery<LogEntry> queryBase = sqlQueryFactory
-                .select(logEntryBean)
-                .from(logEntry)
-                .where(logEntry.logId.eq(logId));
+        String query = "select * from (  select a.*, rownum rn from (   select le.log_id, " +
+                "le.creation_date, le.log_level, le.message, le.object, " +
+                "le.ord, le.type " +
+                "from log_entry le where le.log_id = :logId " +
+                "order by le.ord " +
+                "asc  ) a) " +
+                "where rn > :startIndex and rownum <= :count";
 
-        List<LogEntry> logEntryList = queryBase
-                .limit(pagingParams.getCount())
-                .offset(pagingParams.getStartIndex())
-                .orderBy(logEntry.ord.asc())
-                .fetch();
+        MapSqlParameterSource params = new MapSqlParameterSource("logId", logId);
+        params.addValue("startIndex", pagingParams.getStartIndex())
+                .addValue("count", pagingParams.getCount());
 
-        long count = queryBase.fetchCount();
 
-        return new PagingResult<>(logEntryList, (int) count);
+        List<LogEntry> result = getNamedParameterJdbcTemplate().query(query, params, new LogEntryMapper());
+
+        return new PagingResult<>(result, count(logId));
     }
 
     public int count(@NotNull String logId) {
