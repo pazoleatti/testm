@@ -67,18 +67,17 @@
                  * @param fieldName название поля
                  */
                 var checkDateField = function (date, fieldName) {
-                    var mindate = new Date();
-                    var maxdate = new Date();
-                    mindate.setFullYear(1900, 0, 1);
-                    maxdate.setFullYear(2099, 11, 31);
-                    if (date && !(date instanceof Date)) {
+                    if (date) {
                         date = new Date(date);
-                    }
+                        date.setHours(0);
+                        var mindate = new Date(1900, 0, 1);
+                        var maxdate = new Date(2099, 11, 31);
 
-                    if (date < mindate || date > maxdate) {
-                        var msg = $filter('translate')('reportPersonFace.error.attr') + fieldName +
-                            $filter('translate')('reportPersonFace.error.dateInterval');
-                        errorList.push(msg.split(" ").join("\u00a0"));
+                        if (date < mindate || date > maxdate) {
+                            var msg = $filter('translate')('reportPersonFace.error.attr') + fieldName +
+                                $filter('translate')('reportPersonFace.error.dateInterval');
+                            errorList.push(msg.split(" ").join("\u00a0"));
+                        }
                     }
                 };
 
