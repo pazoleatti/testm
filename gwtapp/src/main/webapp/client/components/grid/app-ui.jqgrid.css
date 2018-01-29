@@ -175,7 +175,7 @@ background-position: -40px 0;*/
 .ui-jqgrid .ui-pg-selbox {
     height: 25px;
     line-height: 26px;
-    width: 54px;
+    width: auto;
     margin-left: 16px;
     padding: 3px 0px 4px 3px;
 }
