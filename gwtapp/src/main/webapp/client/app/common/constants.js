@@ -33,7 +33,8 @@
                 EDIT_REF_BOOK: 1 << 18,
                 VIEW_NSI: 1 << 19,
                 VIEW_TAXES: 1 << 20,
-                VIEW_ADMINISTRATION_USERS: 1 << 21
+                VIEW_ADMINISTRATION_USERS: 1 << 21,
+                EDIT_DECLARATION_TYPES_ASSIGNMENT: 1 << 22
             },
             USER_ROLE: {
                 N_ROLE_OPER: "N_ROLE_OPER",

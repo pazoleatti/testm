@@ -5,8 +5,10 @@
 </div>
 <div id="declaration-type-assignment" class="container-grid box-shadow-block">
     <div class='container-grid-top' style="min-height: 50px; margin-bottom: -17px">
+
+        <!-- Фильтр -->
         <div data-ng-controller="CommonFilterCtrl">
-            <div class="grid-filter" style="margin: -6px 0 13px -19px; padding: 0 0 0 21px;">
+            <div class="grid-filter" style="margin: -6px 0 0 -19px; padding: 0 0 0 21px;">
                 <div data-aplana-collapse data-is-collapsed="false"
                      data-label="'filterPanelLabel' | translate">
                     <form class="form-horizontal info-wrapper" style="min-height: 70px;" role="form" novalidate>
@@ -14,7 +16,8 @@
                             <div class="filter-col w650">
                                 <div class="row-fluid form-group">
                                     <div class="span3">
-                                        <label class="control-label">{{::'declarationTypeAssignment.filter.department' | translate}}:</label>
+                                        <label class="control-label">{{::'declarationTypeAssignment.filter.department' |
+                                            translate}}:</label>
                                     </div>
                                     <div data-ng-controller="SelectDepartmentCtrl"
                                          data-ui-select2="departmentsSelect.options"
@@ -42,6 +45,19 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+
+        <!--Панель кнопок -->
+        <div class="button_panel" style="min-height: 52px; margin: -5px 0 -17px 0;">
+            <div class="btn-toolbar" role="toolbar">
+                <!-- Назначить -->
+                <span>
+                    <button type="button" class="btn btn-default" data-ng-click="showCreateAssignmentModal()"
+                            data-ng-disabled="!permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT)">
+                        <span data-translate-once="declarationTypeAssignment.button.createAssignment"></span>
+                    </button>
+                </span>
             </div>
         </div>
     </div>
