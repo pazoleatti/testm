@@ -210,6 +210,13 @@ public interface DepartmentService {
     List<Department> getDestinationDepartments(TaxType taxType, TAUser tAUser);
 
     /**
+     * Выборка id подразделений для назначения подразделений-исполнителей
+     * @param tAUser пользователь
+     * @return Список id подразделений для назначения исполнителей
+     */
+    List<Integer> getDestinationDepartmentIds(TAUser tAUser);
+
+    /**
      * 55 - Подразделения, доступные через назначение исполнителя
      * <a href = "http://conf.aplana.com/pages/viewpage.action?pageId=14814963">Аналитика</a>
      *

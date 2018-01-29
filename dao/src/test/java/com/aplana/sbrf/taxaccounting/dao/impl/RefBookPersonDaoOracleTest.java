@@ -95,12 +95,6 @@ public class RefBookPersonDaoOracleTest {
 
         int size = 0;
 
-        List<NaturalPerson> insertRecords = refBookPersonDao.findPersonForInsertFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonPrimaryRnuRowMapper());
-
-        size += insertRecords.size();
-
-        System.out.println("   insertRecords=" + insertRecords);
-
         Map<Long, Map<Long, NaturalPerson>> updateRecords = refBookPersonDao.findPersonForUpdateFromPrimaryRnuNdfl(decl_data_id, 1L, version, new NaturalPersonRefbookHandler());
 
         size += updateRecords.size();

@@ -95,6 +95,21 @@ public class RefBookValuesController {
     }
 
     /**
+     * Получение подразделений, доступных (согласно правам доступа пользователя) для назначения исполнителями, с фильтрацией по наименованию и пейджингом
+     *
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @GetMapping(value = "/rest/refBookValues/30", params = "projection=destinationDepartments")
+    public JqgridPagedList<RefBookDepartment> fetchDestinationDepartments(@RequestParam String name, @RequestParam PagingParams pagingParams) {
+        TAUser user = securityService.currentUserInfo().getUser();
+        PagingResult<RefBookDepartment> departments = refBookDepartmentDataService.fetchAvailableDestinationDepartments(user, name, pagingParams);
+        return JqgridPagedResourceAssembler.buildPagedList(departments, departments.getTotalCount(), pagingParams);
+    }
+
+    /**
      * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом
      *

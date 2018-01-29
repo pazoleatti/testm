@@ -92,6 +92,23 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     }
 
     /**
+     * Получение подразделений, доступных (согласно правам доступа пользователя) для назначения исполнителями, с фильтрацией по наименованию и пейджингом
+     *
+     * @param user         Пользователь
+     * @param name         Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
+     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     * @param pagingParams Параметры пейджинга
+     * @return Страница списка значений справочника
+     */
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
+    public PagingResult<RefBookDepartment> fetchAvailableDestinationDepartments(TAUser user, String name, PagingParams pagingParams) {
+        List<Integer> declarationDepartments = departmentService.getDestinationDepartmentIds(user);
+        return refBookDepartmentDataDao.fetchDepartments(declarationDepartments, name, pagingParams);
+    }
+
+    /**
      * Получение действующих доступных (согласно правам доступа пользователя) значений справочника, для которых открыт заданный период,
      * с фильтрацией по наименованию подразделения и пейджингом
      *

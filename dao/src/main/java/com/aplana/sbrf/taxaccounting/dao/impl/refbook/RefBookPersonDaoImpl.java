@@ -47,17 +47,6 @@ public class RefBookPersonDaoImpl extends AbstractDao implements RefBookPersonDa
     }
 
     @Override
-    public List<NaturalPerson> findPersonForInsertFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, RowMapper<NaturalPerson> primaryRnuRowMapper) {
-        SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForIns");
-        call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, primaryRnuRowMapper), new SqlParameter("p_declaration", Types.NUMERIC));
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("p_declaration", declarationDataId);
-        params.addValue("p_asnu", asnuId);
-        Map<String, Object> returnedResults = call.execute(params);
-        return (List<NaturalPerson>) returnedResults.get("ref_cursor");
-    }
-
-    @Override
     public Map<Long, Map<Long, NaturalPerson>> findPersonForUpdateFromPrimaryRnuNdfl(Long declarationDataId, Long asnuId, Date version, NaturalPersonRefbookHandler naturalPersonHandler) {
         SimpleJdbcCall call = new SimpleJdbcCall(getJdbcTemplate()).withCatalogName("person_pkg").withFunctionName("GetPersonForUpd");
         call.declareParameters(new SqlOutParameter("ref_cursor", CURSOR, naturalPersonHandler), new SqlParameter("p_declaration", Types.NUMERIC));

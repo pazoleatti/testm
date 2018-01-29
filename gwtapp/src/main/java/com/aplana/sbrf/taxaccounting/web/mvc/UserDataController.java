@@ -42,7 +42,7 @@ public class UserDataController {
                 UserPermission.VIEW_MANUAL_USER, UserPermission.VIEW_MANUAL_DESIGNER, UserPermission.VIEW_JOURNAL,
                 UserPermission.CREATE_DECLARATION_REPORT, UserPermission.CREATE_DECLARATION_PRIMARY, UserPermission.CREATE_DECLARATION_CONSOLIDATED,
                 UserPermission.CREATE_UPLOAD_REPORT, UserPermission.HANDLING_FILE, UserPermission.UPLOAD_FILE, UserPermission.EDIT_GENERAL_PARAMS,
-                UserPermission.VIEW_REF_BOOK, UserPermission.EDIT_REF_BOOK, UserPermission.VIEW_ADMINISTRATION_USERS);
+                UserPermission.VIEW_REF_BOOK, UserPermission.EDIT_REF_BOOK, UserPermission.VIEW_ADMINISTRATION_USERS, UserPermission.EDIT_DECLARATION_TYPES_ASSIGNMENT);
 
         return new UserDataModel(userInfo, department);
     }

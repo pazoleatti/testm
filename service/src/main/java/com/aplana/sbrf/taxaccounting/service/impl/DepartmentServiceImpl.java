@@ -339,6 +339,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public List<Integer> getDestinationDepartmentIds(TAUser tAUser) {
+        List<Integer> retList = new ArrayList<>();
+        if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
+            retList.addAll(departmentDao.fetchAllIds());
+        }
+        return retList;
+    }
+
+    @Override
     public Collection<Integer> getAppointmentDepartments(TAUser tAUser) {
         // Результат выборки должен содержать только уникальные подразделения
         HashSet<Integer> retList = new HashSet<Integer>();
