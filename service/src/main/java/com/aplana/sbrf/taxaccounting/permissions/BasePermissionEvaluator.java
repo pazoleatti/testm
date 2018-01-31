@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.permissions;
 import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.PermissionDaoFactory;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
+import com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.logging.Log;
@@ -54,7 +56,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
                 boolean result = true;
                 for (Object targetDomainObject : iterable) {
-                    result &= hasPermissionSingle(authentication, targetDomainObject, permission);
+                    result &= hasPermissionSingle(authentication, targetDomainObject, permission, null);
                 }
 
                 return result;
@@ -64,25 +66,27 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
                 boolean result = true;
                 for (Object targetDomainObject : array) {
-                    result &= hasPermissionSingle(authentication, targetDomainObject, permission);
+                    result &= hasPermissionSingle(authentication, targetDomainObject, permission, null);
                 }
 
                 return result;
             } else {
-                return hasPermissionSingle(authentication, object, permission);
+                return hasPermissionSingle(authentication, object, permission, null);
             }
         }
         return false;
     }
 
-    public boolean hasPermissionSingle(Authentication authentication, Object targetDomainObject, Object permission) {
-        return checkPermission(authentication, targetDomainObject, permission);
+    public boolean hasPermissionSingle(Authentication authentication, Object targetDomainObject, Object permission, Logger logger) {
+        return checkPermission(authentication, targetDomainObject, permission, logger);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean hasPermission(Authentication authentication, Serializable target,
                                  String targetType, Object permission) {
+        Logger logger = null;
+
         Class targetClass = target.getClass();
 
         if (Iterable.class.isAssignableFrom(targetClass)) {
@@ -90,7 +94,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
             boolean result = true;
             for (Serializable targetId : iterable) {
-                result &= hasPermissionSingleId(authentication, targetId, targetType, permission);
+                result &= hasPermissionSingleId(authentication, targetId, targetType, permission, logger);
             }
 
             return result;
@@ -100,7 +104,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
             boolean result = true;
             for (long targetId : array) {
-                result &= hasPermissionSingleId(authentication, targetId, targetType, permission);
+                result &= hasPermissionSingleId(authentication, targetId, targetType, permission, logger);
             }
 
             return result;
@@ -110,7 +114,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
             boolean result = true;
             for (int targetId : array) {
-                result &= hasPermissionSingleId(authentication, targetId, targetType, permission);
+                result &= hasPermissionSingleId(authentication, targetId, targetType, permission, logger);
             }
 
             return result;
@@ -120,17 +124,21 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
             boolean result = true;
             for (Serializable targetId : array) {
-                result &= hasPermissionSingleId(authentication, targetId, targetType, permission);
+                result &= hasPermissionSingleId(authentication, targetId, targetType, permission, logger);
             }
 
             return result;
+        }
+        if (targetClass.getName().equals("com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer")) {
+                logger = ((LoggerIdTransfer) target).getLogger();
+                return hasPermissionSingleId(authentication, ((LoggerIdTransfer)target).getDeclarationDataId(), "com.aplana.sbrf.taxaccounting.model.DeclarationData", permission, logger);
         } else {
-            return hasPermissionSingleId(authentication, target, targetType, permission);
+            return hasPermissionSingleId(authentication, target, targetType, permission, logger);
         }
     }
 
     private boolean hasPermissionSingleId(Authentication authentication, Serializable targetId,
-                                          String targetType, Object permission) {
+                                          String targetType, Object permission, Logger logger) {
         Class<SecuredEntity> targetClass;
         try {
             targetClass = (Class<SecuredEntity>) ClassUtils.getClass(targetType);
@@ -150,11 +158,11 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
             throw new RuntimeException("Object of type '" + targetType +
                     "' with identity '" + targetId + "' not found");
         }
-        return checkPermission(authentication, targetDomainObject, permission);
+        return checkPermission(authentication, targetDomainObject, permission, logger);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> boolean checkPermission(Authentication authentication, Object targetDomainObject, Object permission) {
+    private <T> boolean checkPermission(Authentication authentication, Object targetDomainObject, Object permission, Logger logger) {
         final boolean debug = LOG.isDebugEnabled();
         if (debug) {
             LOG.debug("Checking permission '" + permission + "' for object '" + targetDomainObject);
@@ -180,7 +188,7 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
         boolean granted = true;
         for (Permission<T> p : resolvePermission(permissionFactory, permission)) {
-            if (!p.isGranted((User) principal, (T) targetDomainObject)) {
+            if (!p.isGranted((User) principal, (T) targetDomainObject, logger)) {
                 granted = false;
                 break;
             }

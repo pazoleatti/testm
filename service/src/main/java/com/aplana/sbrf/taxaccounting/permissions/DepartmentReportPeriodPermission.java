@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
 
@@ -57,7 +58,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject, Logger logger) {
             return targetDomainObject.isActive() && targetDomainObject.getCorrectionDate() == null && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
@@ -72,7 +73,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
@@ -87,7 +88,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
@@ -102,7 +103,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject, Logger logger) {
             return targetDomainObject.isActive() && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
@@ -117,7 +118,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject, Logger logger) {
             return !targetDomainObject.isActive() && targetDomainObject.getCorrectionDate() == null && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
@@ -132,7 +133,7 @@ public abstract class DepartmentReportPeriodPermission extends AbstractPermissio
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DepartmentReportPeriod targetDomainObject, Logger logger) {
             return targetDomainObject.isActive() && targetDomainObject.getCorrectionDate() == null && PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }

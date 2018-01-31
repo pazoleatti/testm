@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.security.core.userdetails.User;
 
@@ -31,8 +32,8 @@ public abstract class AbstractPermission<T> implements Permission<T> {
      * Если пользователь имеет роль Суперпользователь - он имеет права на любые операции. Для всех других - выполняется проверка
      * {@code isGrantedInternal}
      */
-    public boolean isGranted(User user, T targetDomainObject) {
-        return isGrantedInternal(user, targetDomainObject);
+    public boolean isGranted(User user, T targetDomainObject, Logger logger) {
+        return isGrantedInternal(user, targetDomainObject, logger);
     }
 
     /**
@@ -42,7 +43,7 @@ public abstract class AbstractPermission<T> implements Permission<T> {
      * @param targetDomainObject объект, для которого проверяется право
      * @return {@code true}, если у пользователя есть право на объект; {@code false} в противном случае
      */
-    protected abstract boolean isGrantedInternal(User user, T targetDomainObject);
+    protected abstract boolean isGrantedInternal(User user, T targetDomainObject, Logger logger);
 
     @Override
     public boolean equals(Object o) {

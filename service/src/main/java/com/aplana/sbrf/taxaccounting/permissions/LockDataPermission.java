@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.permissions;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -43,7 +44,7 @@ public abstract class LockDataPermission extends AbstractPermission<LockData>{
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, LockData targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, LockData targetDomainObject, Logger logger) {
             TAUser taUser = taUserService.getUser(currentUser.getUsername());
             return PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN) || (targetDomainObject.getUserId() == taUser.getId());
         }
@@ -59,8 +60,8 @@ public abstract class LockDataPermission extends AbstractPermission<LockData>{
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, LockData targetDomainObject) {
-            return VIEW.isGranted(currentUser, targetDomainObject);
+        protected boolean isGrantedInternal(User currentUser, LockData targetDomainObject, Logger logger) {
+            return VIEW.isGranted(currentUser, targetDomainObject, logger);
         }
     }
 

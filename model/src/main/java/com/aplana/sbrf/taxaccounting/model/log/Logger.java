@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  * {@link #warn(String, Object...)}, {@link #error(String, Object...)}
  * Вся информация, записываемая в журал будет дублироваться в журнал сервера приложений средствами Commons.Logging
  */
-public class Logger {
+public class Logger implements Serializable {
 	private static final Log LOG = LogFactory.getLog(Logger.class);
 	private List<LogEntry> entries = new ArrayList<LogEntry>();
     //Добавили пока на пробу, поскольку необходимо логгирование в справочнике Подразделений

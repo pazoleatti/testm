@@ -3,12 +3,14 @@ package com.aplana.sbrf.taxaccounting.permissions;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -34,10 +36,6 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      * Право на просмотр декларации
      */
     public static final Permission<DeclarationData> VIEW = new ViewPermission(1 << 1);
-    /**
-     * Право на расчет декларации
-     */
-    public static final Permission<DeclarationData> CALCULATE = new CalculatePermission(1 << 2);
     /**
      * Право на проверку декларации
      */
@@ -74,8 +72,86 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final Permission<DeclarationData> IMPORT_EXCEL = new ImportExcelPermission(1 << 10);
 
+    /**
+     * Право на идентификацию ФЛ налоговой формы
+     */
+    public static final Permission<DeclarationData> IDENTIFY = new IdentifyPermission(1 << 11);
+
+    /**
+     * Право на консолидацию налоговой формы
+     */
+    public static final Permission<DeclarationData> CONSOLIDATE = new ConsolidatePermission(1 << 12);
+
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("dd.MM.yyyy");
+
     public DeclarationDataPermission(long mask) {
         super(mask);
+    }
+
+    private String getCorrPeriodMessage(DepartmentReportPeriod departmentReportPeriod) {
+        String result = "";
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            result = ", с датой сдачи корректировки " + FORMATTER.format(departmentReportPeriod.getCorrectionDate());
+        }
+        return result;
+    }
+
+    protected void logFormKindError(DepartmentReportPeriod departmentReportPeriod, String operationName,
+                                    DeclarationData declarationData, DeclarationFormKind declarationFormKind, Logger logger) {
+        if (logger != null) {
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            logger.error("Операция \"%s\" не выполнена для формы № %d, период: \"%s\", " +
+                            "подразделение \"%s\". %s не допустима для форм типа \"%s\".",
+                    operationName,
+                    declarationData.getId(),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    department.getName(),
+                    operationName,
+                    declarationFormKind.getTitle());
+        }
+
+    }
+
+    protected void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String operationName,
+                                  DeclarationData declarationData, Logger logger) {
+        if (logger != null) {
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            logger.error("Операция \"%s\" не выполнена для формы № %d, период: \"%s\"," +
+                            " подразделение \"%s\". Период формы закрыт.",
+                    operationName,
+                    declarationData.getId(),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    department.getName());
+        }
+
+    }
+
+    protected void logStateError(DepartmentReportPeriod departmentReportPeriod, String operationName,
+                                 DeclarationData declarationData, Logger logger) {
+        if (logger != null) {
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            logger.error("Операция \"%s\" не выполнена для формы № %d,  период: \"%s\", " +
+                            "подразделение: \"%s\". %s не допустима для форм в состоянии \"%s\".",
+                    operationName,
+                    declarationData.getId(),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    department.getName(),
+                    operationName,
+                    declarationData.getState().getTitle());
+        }
+    }
+
+    protected void logCredentialsError(DepartmentReportPeriod departmentReportPeriod, String operationName,
+                                       DeclarationData declarationData, Logger logger) {
+        if (logger != null) {
+            Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+            logger.error("Операция \"%s\" не выполнена для формы № %d, " +
+                            "период: \"%s\", подразделение \"%s\". Недостаточно прав для выполнения операции.",
+                    operationName,
+                    declarationData.getId(),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    department.getName());
+        }
     }
 
     /**
@@ -88,7 +164,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
             DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
             // Если тип формы "Консолидированная" или "Отчетная", то
@@ -123,7 +199,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
          * Дубликат в {@link com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataAccessServiceImpl#checkRolesForReading}
          */
         @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             // Выборка для доступа к экземплярам деклараций
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
 
@@ -195,22 +271,6 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     }
 
     /**
-     * Право на расчет декларации
-     */
-    public static final class CalculatePermission extends DeclarationDataPermission {
-
-        public CalculatePermission(long mask) {
-            super(mask);
-        }
-
-        @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
-            return departmentReportPeriod.isActive() && CHECK.isGranted(currentUser, targetDomainObject);
-        }
-    }
-
-    /**
      * Право на проверку декларации
      */
     public static final class CheckPermission extends DeclarationDataPermission {
@@ -220,8 +280,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
-            if (VIEW.isGranted(currentUser, targetDomainObject)) {
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
+            if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
                 if (targetDomainObject.getState() == State.CREATED || targetDomainObject.getState() == State.PREPARED) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
                         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
@@ -252,11 +312,11 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
 
             if (departmentReportPeriod.isActive()) {
-                if (VIEW.isGranted(currentUser, targetDomainObject)) {
+                if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
                     if (targetDomainObject.getState() == State.PREPARED) {
                         if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
                             return true;
@@ -279,9 +339,9 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             if (targetDomainObject.getState() == State.CREATED) {
-                if (VIEW.isGranted(currentUser, targetDomainObject)) {
+                if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
                     if (PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER)) {
                         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
                         if (departmentReportPeriod.isActive()) {
@@ -304,14 +364,14 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
 
             // Период формы открыт
             if (departmentReportPeriod.isActive()) {
 
                 // Пользователь имеет права на просмотр формы
-                if (VIEW.isGranted(currentUser, targetDomainObject)) {
+                if (VIEW.isGranted(currentUser, targetDomainObject, logger)) {
 
                     // Форма.Состояние = "Принята", "Подготовлена"
                     if (targetDomainObject.getState() == State.PREPARED || targetDomainObject.getState() == State.ACCEPTED) {
@@ -356,7 +416,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, DeclarationData targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
@@ -371,7 +431,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
             return targetDomainObject.getState() == State.ACCEPTED && PermissionUtils.hasRole(user,
                     TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
@@ -387,7 +447,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject) {
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(user, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS);
         }
     }
@@ -402,12 +462,99 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
         }
 
         @Override
-        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject) {
-            return DeclarationDataPermission.VIEW.isGranted(user, targetDomainObject) &&
-                    DeclarationDataPermission.CREATE.isGranted(user, targetDomainObject) &&
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+            return DeclarationDataPermission.VIEW.isGranted(user, targetDomainObject, logger) &&
+                    DeclarationDataPermission.CREATE.isGranted(user, targetDomainObject, logger) &&
                     declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId()).getDeclarationFormKind() == DeclarationFormKind.PRIMARY &&
                     targetDomainObject.getState() == State.CREATED &&
                     targetDomainObject.getManuallyCreated();
+        }
+    }
+
+    /**
+     * Право на идентификацию ФЛ налоговой формы
+     */
+    public static final class IdentifyPermission extends DeclarationDataPermission {
+
+        private final static String OPERATION_NAME = "Идентификация ФЛ";
+
+        public IdentifyPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
+            DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+            if (!declarationFormKind.equals(DeclarationFormKind.PRIMARY)) {
+                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationFormKind, logger);
+                return false;
+            }
+            if (!departmentReportPeriod.isActive()) {
+                logPeriodError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                return false;
+            }
+            if (!(targetDomainObject.getState().equals(State.CREATED) || targetDomainObject.getState().equals(State.PREPARED))) {
+                logStateError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                return false;
+            }
+            TAUser taUser = taUserService.getUser(user.getUsername());
+
+            boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
+
+            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
+                    TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.F_ROLE_OPER);
+
+            if (!canView || !hasRoles) {
+                logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * Право на консолидацию налоговой формы
+     */
+    public static final class ConsolidatePermission extends DeclarationDataPermission {
+
+        private final static String OPERATION_NAME = "Консолидация";
+
+        public ConsolidatePermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User user, DeclarationData targetDomainObject, Logger logger) {
+            DeclarationTemplate declarationTemplate = declarationTemplateDao.get(targetDomainObject.getDeclarationTemplateId());
+            DeclarationFormKind declarationFormKind = declarationTemplate.getDeclarationFormKind();
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.fetchOne(targetDomainObject.getDepartmentReportPeriodId());
+            if (!declarationFormKind.equals(DeclarationFormKind.CONSOLIDATED)) {
+                logFormKindError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, declarationFormKind, logger);
+                return false;
+            }
+            if (!departmentReportPeriod.isActive()) {
+                logPeriodError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                return false;
+            }
+            if (!(targetDomainObject.getState().equals(State.CREATED) || targetDomainObject.getState().equals(State.PREPARED))) {
+                logStateError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                return false;
+            }
+            TAUser taUser = taUserService.getUser(user.getUsername());
+
+            boolean canView = VIEW.isGranted(user, targetDomainObject, logger);
+
+            boolean hasRoles = taUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
+
+            if (!canView || !hasRoles) {
+                logCredentialsError(departmentReportPeriod, OPERATION_NAME, targetDomainObject, logger);
+                return false;
+            }
+
+            return true;
         }
     }
 }
