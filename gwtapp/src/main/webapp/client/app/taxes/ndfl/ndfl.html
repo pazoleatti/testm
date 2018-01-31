@@ -111,29 +111,29 @@
                             </div>
                             <div class="header-col w450">
                                 <div>
-                                    <label>{{::'title.formType' | translate}}:</label>
+                                    <label class="w138">{{::'title.formType' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.declarationFormKind}}</label>
                                 </div>
                                 <div>
-                                    <label>{{::'title.period' | translate}}:</label>
+                                    <label class="w138">{{::'title.period' | translate}}:</label>
                                     <label class="font-normal info-text200" data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
                                 </div>
                                 <div>
-                                    <label>{{::'title.state' | translate}}:</label>
+                                    <label class="w138">{{::'title.state' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.state}}</label>
                                 </div>
                             </div>
-                            <div class="header-col w450">
+                            <div class="header-col w500">
                                 <div ng-show="declarationData.declarationFormKind !== APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.name">
-                                    <label>{{::'title.nameAsnu' | translate}}:</label>
+                                    <label class="w200">{{::'title.nameAsnu' | translate}}:</label>
                                     <label class="font-normal info-text200">{{declarationData.asnuName}}</label>
                                 </div>
                                 <div>
-                                    <label style="width: 186px;">{{::'title.dateAndTimeCreate' | translate}}:</label>
+                                    <label class="w200">{{::'title.dateAndTimeCreate' | translate}}:</label>
                                     <label class="font-normal info-text200" style="width: 138px;">{{declarationData.creationDate}}</label>
                                 </div>
                                 <div>
-                                    <label style="width: 110px;">{{::'title.manuallyCreated' | translate}}:</label>
+                                    <label class="w200">{{::'title.manuallyCreated' | translate}}:</label>
                                     <label class="font-normal info-text200" style="width: 138px;">{{declarationData.manuallyCreated | yesNoFormatter}}</label>
                                 </div>
                             </div>
