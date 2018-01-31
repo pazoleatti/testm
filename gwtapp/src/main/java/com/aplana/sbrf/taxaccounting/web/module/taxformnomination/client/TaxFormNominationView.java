@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -21,7 +21,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeLayoutPanel;
@@ -53,9 +52,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	@UiField
 	LinkButton cancelAnchor;
 	@UiField
-	GenericDataGrid<FormTypeKind> formGrid;
+	GenericDataGrid<DeclarationTypeAssignment> formGrid;
 	@UiField
-	GenericDataGrid<FormTypeKind> decGrid;
+	GenericDataGrid<DeclarationTypeAssignment> decGrid;
 	@UiField
 	LinkButton editAnchor;
 	@UiField
@@ -87,14 +86,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 	// изменяемые колонки в таблице
 	private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
-	private TextColumn<FormTypeKind> departmentColumn;
+	private TextColumn<DeclarationTypeAssignment> departmentColumn;
 
-	private MultiSelectionModel<FormTypeKind> formSM = new MultiSelectionModel<FormTypeKind>();
-	private MultiSelectionModel<FormTypeKind> decSM = new MultiSelectionModel<FormTypeKind>();
+	private MultiSelectionModel<DeclarationTypeAssignment> formSM = new MultiSelectionModel<DeclarationTypeAssignment>();
+	private MultiSelectionModel<DeclarationTypeAssignment> decSM = new MultiSelectionModel<DeclarationTypeAssignment>();
 
-	private final AsyncDataProvider<FormTypeKind> formDataProvider = new AsyncDataProvider<FormTypeKind>() {
+	private final AsyncDataProvider<DeclarationTypeAssignment> formDataProvider = new AsyncDataProvider<DeclarationTypeAssignment>() {
 		@Override
-		protected void onRangeChanged(HasData<FormTypeKind> display) {
+		protected void onRangeChanged(HasData<DeclarationTypeAssignment> display) {
 			if (getUiHandlers() != null){
 				final Range range = display.getVisibleRange();
                 Pair<TaxNominationColumnEnum, Boolean> sort = getSort();
@@ -103,9 +102,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		}
 	};
 
-	private final AsyncDataProvider<FormTypeKind> decDataProvider = new AsyncDataProvider<FormTypeKind>() {
+	private final AsyncDataProvider<DeclarationTypeAssignment> decDataProvider = new AsyncDataProvider<DeclarationTypeAssignment>() {
 		@Override
-		protected void onRangeChanged(HasData<FormTypeKind> display) {
+		protected void onRangeChanged(HasData<DeclarationTypeAssignment> display) {
 			if (getUiHandlers() != null){
 				final Range range = display.getVisibleRange();
 				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT_FULL_NAME;
@@ -128,15 +127,15 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	public TaxFormNominationView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
 
-		DefaultSelectionEventManager<FormTypeKind> multiSelectManager = createCustomManager(
-				new DefaultSelectionEventManager.CheckboxEventTranslator<FormTypeKind>(0) {
+		DefaultSelectionEventManager<DeclarationTypeAssignment> multiSelectManager = createCustomManager(
+				new DefaultSelectionEventManager.CheckboxEventTranslator<DeclarationTypeAssignment>(0) {
 					@Override
-                    public boolean clearCurrentSelection(CellPreviewEvent<FormTypeKind> event) {
+                    public boolean clearCurrentSelection(CellPreviewEvent<DeclarationTypeAssignment> event) {
 						return false;
 					}
 
 					@Override
-                    public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<FormTypeKind> event) {
+                    public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<DeclarationTypeAssignment> event) {
 						return DefaultSelectionEventManager.SelectAction.TOGGLE;
 					}
 				});
@@ -179,37 +178,37 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	private void initFormGrid() {
 
 		// добавить колонку с чекбоксами
-		Column<FormTypeKind, Boolean> checkBoxColumn = new Column<FormTypeKind, Boolean>(new CheckboxCell(true, false)) {
+		Column<DeclarationTypeAssignment, Boolean> checkBoxColumn = new Column<DeclarationTypeAssignment, Boolean>(new CheckboxCell(true, false)) {
 			@Override
-			public Boolean getValue(FormTypeKind object) {
+			public Boolean getValue(DeclarationTypeAssignment object) {
 				return (object == null || object.getId() == null) ? null : formSM.isSelected(object);
 			}
 		};
 
-        TextColumn<FormTypeKind> receiverSourcesKindColumn = new TextColumn<FormTypeKind>() {
+        TextColumn<DeclarationTypeAssignment> receiverSourcesKindColumn = new TextColumn<DeclarationTypeAssignment>() {
 			@Override
-			public String getValue(FormTypeKind object) {
+			public String getValue(DeclarationTypeAssignment object) {
 				return object.getKind() != null ? object.getKind().getTitle() : "";
 			}
 		};
 
-        TextColumn<FormTypeKind> receiverSourcesTypeColumn = new TextColumn<FormTypeKind>() {
+        TextColumn<DeclarationTypeAssignment> receiverSourcesTypeColumn = new TextColumn<DeclarationTypeAssignment>() {
 			@Override
-			public String getValue(FormTypeKind object) {
+			public String getValue(DeclarationTypeAssignment object) {
 				return object != null && object.getId() != 0 ? object.getName() : "";
 			}
 		};
 
-        departmentColumn = new TextColumn<FormTypeKind>() {
+        departmentColumn = new TextColumn<DeclarationTypeAssignment>() {
             @Override
-            public String getValue(FormTypeKind object) {
+            public String getValue(DeclarationTypeAssignment object) {
                 return object.getDepartment().getFullName();
             }
         };
 
-        TextColumn<FormTypeKind> performerColumn = new TextColumn<FormTypeKind>() {
+        TextColumn<DeclarationTypeAssignment> performerColumn = new TextColumn<DeclarationTypeAssignment>() {
             @Override
-            public String getValue(FormTypeKind object) {
+            public String getValue(DeclarationTypeAssignment object) {
 				if (object.getPerformers() != null && !object.getPerformers().isEmpty()) {
 					StringBuilder performers = new StringBuilder();
 					for (Department performer : object.getPerformers()) {
@@ -254,30 +253,30 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	private void initDecGrid(){
 
 		// добавить колонку с чекбоксами
-		Column<FormTypeKind, Boolean> checkBoxColumn = new Column<FormTypeKind, Boolean>(new CheckboxCell(true, false)) {
+		Column<DeclarationTypeAssignment, Boolean> checkBoxColumn = new Column<DeclarationTypeAssignment, Boolean>(new CheckboxCell(true, false)) {
 			@Override
-			public Boolean getValue(FormTypeKind object) {
+			public Boolean getValue(DeclarationTypeAssignment object) {
 				return (object == null || object.getId() == null) ? null : decSM.isSelected(object);
 			}
 		};
 
-		departmentColumn = new TextColumn<FormTypeKind>(){
+		departmentColumn = new TextColumn<DeclarationTypeAssignment>(){
 			@Override
-			public String getValue(FormTypeKind object) {
+			public String getValue(DeclarationTypeAssignment object) {
 				return object.getDepartment().getFullName();
 			}
 		};
 
-        TextColumn<FormTypeKind> declarationType = new TextColumn<FormTypeKind>() {
+        TextColumn<DeclarationTypeAssignment> declarationType = new TextColumn<DeclarationTypeAssignment>() {
 			@Override
-			public String getValue(FormTypeKind object) {
+			public String getValue(DeclarationTypeAssignment object) {
 				return object != null && object.getId() != 0 ? object.getName() : "";
 			}
 		};
 
-        TextColumn<FormTypeKind> performerColumn = new TextColumn<FormTypeKind>() {
+        TextColumn<DeclarationTypeAssignment> performerColumn = new TextColumn<DeclarationTypeAssignment>() {
             @Override
-            public String getValue(FormTypeKind object) {
+            public String getValue(DeclarationTypeAssignment object) {
                 if (object.getPerformers() != null && !object.getPerformers().isEmpty()) {
                     StringBuilder performers = new StringBuilder();
                     for (Department performer : object.getPerformers()) {
@@ -396,21 +395,21 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	}
 
 	@Override
-	public List<FormTypeKind> getSelectedItemsOnDeclarationGrid() {
+	public List<DeclarationTypeAssignment> getSelectedItemsOnDeclarationGrid() {
 		return getSelectedItems(false);
 	}
 
 	@Override
-	public List<FormTypeKind> getSelectedItemsOnFormGrid() {
+	public List<DeclarationTypeAssignment> getSelectedItemsOnFormGrid() {
 		return getSelectedItems(true);
 	}
 
-	private List<FormTypeKind> getSelectedItems(boolean isForm) {
-		return new ArrayList<FormTypeKind>(isForm ? formSM.getSelectedSet() : decSM.getSelectedSet());
+	private List<DeclarationTypeAssignment> getSelectedItems(boolean isForm) {
+		return new ArrayList<DeclarationTypeAssignment>(isForm ? formSM.getSelectedSet() : decSM.getSelectedSet());
 	}
 
 	@Override
-	public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
+	public void setDataToFormTable(int start, int totalCount, List<DeclarationTypeAssignment> departmentFormTypes) {
         formSM.clear();
         if (departmentFormTypes.isEmpty()) {
             if (start != 0) {
@@ -437,7 +436,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
 	@Override
-	public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
+	public void setDataToDeclarationTable(int start, int totalCount, List<DeclarationTypeAssignment> departmentFormTypes) {
         decSM.clear();
         if (departmentFormTypes.isEmpty()) {
             if (start != 0) {

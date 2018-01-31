@@ -21,6 +21,9 @@
             '$scope', '$state', '$stateParams', '$filter', 'APP_CONSTANTS', '$aplanaModal', '$dialogs', '$logPanel', 'DeclarationTypeAssignmentResource',
             function ($scope, $state, $stateParams, $filter, APP_CONSTANTS, $aplanaModal, $dialogs, $logPanel, DeclarationTypeAssignmentResource) {
 
+                /**
+                 * Фильтр
+                 */
                 $scope.searchFilter = {
                     params: {},
                     ajaxFilter: [],
@@ -28,6 +31,9 @@
                     filterName: 'declarationTypeAssignmentsFilter'
                 };
 
+                /**
+                 * Грид с назначениями
+                 */
                 $scope.declarationTypeAssignmentGrid = {
                     ctrl: {},
                     options: {
@@ -74,7 +80,6 @@
                  * @param page
                  */
                 $scope.refreshGrid = function (page) {
-                    console.log($scope.searchFilter.params);
                     $scope.declarationTypeAssignmentGrid.ctrl.refreshGrid(page);
                 };
 
@@ -93,6 +98,9 @@
                     $scope.searchFilter.isClear = needToClear;
                 };
 
+                /**
+                 * Открыть МО создания назначения
+                 */
                 $scope.showCreateAssignmentModal = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('declarationTypeAssignment.modal.create.title'),
@@ -102,8 +110,8 @@
                     }).result.then(
                         function (result) {
                             var response = result.response;
-                            if(response && response.data) {
-                                if(response.data.creatingExistingRelations) {
+                            if (response && response.data) {
+                                if (response.data.creatingExistingRelations) {
                                     $dialogs.warningDialog({
                                         content: $filter('translate')('declarationTypeAssignment.message.existingRelations')
                                     });
@@ -116,7 +124,7 @@
                                     });
                                 }
                             }
-                            if(result.departments && result.departments.length > 0) {
+                            if (result.departments && result.departments.length > 0) {
                                 $scope.searchFilter.params.departments = result.departments;
                                 $scope.searchFilter.isClear = true;
                                 $scope.refreshGrid();
@@ -131,15 +139,10 @@
          * @param cellValue Значение ячейки
          * @param options Данные таблицы
          */
-        .filter('performersFormatter', function () {
+        .filter('performersFormatter', ['$filter', function ($filter) {
             return function (cellValue, options) {
-                var performersFullNames = [];
-                if (cellValue) {
-                    performersFullNames = cellValue.map(function (performer) {
-                        return performer.fullName;
-                    });
-                }
-                return performersFullNames.join(", ");
+                console.log(cellValue);
+                return $filter('joinObjectsPropFormatter')(cellValue, ', ', 'fullName');
             };
-        });
+        }]);
 }());

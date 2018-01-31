@@ -14,10 +14,13 @@
             '$modalInstance', '$http', '$dialogs',
             function ($scope, $state, $stateParams, $filter, APP_CONSTANTS, $aplanaModal, $modalInstance, $http, $dialogs) {
 
+                /**
+                 * Данные о создаваемом назначении
+                 */
                 $scope.assignmentData = {};
 
                 /**
-                 * Сохранение
+                 * Сохранение назначения
                  */
                 $scope.save = function () {
                     var params = {

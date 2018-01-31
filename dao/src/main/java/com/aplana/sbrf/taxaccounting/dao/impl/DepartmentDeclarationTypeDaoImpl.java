@@ -237,9 +237,9 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         }
     }
 
-    private static final RowMapper<FormTypeKind> ALL_DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+    private static final RowMapper<DeclarationTypeAssignment> ALL_DECLARATION_ASSIGN_MAPPER = new RowMapper<DeclarationTypeAssignment>() {
         @Override
-        public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public DeclarationTypeAssignment mapRow(ResultSet rs, int rowNum) throws SQLException {
             // Подразделение
             Department department = new Department();
             department.setId(SqlUtils.getInteger(rs, "department_id"));
@@ -257,12 +257,12 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             department.setCode(rs.getLong("department_code"));
             department.setGarantUse(rs.getBoolean("department_garant_use"));
 
-            FormTypeKind formTypeKind = new FormTypeKind();
-            formTypeKind.setId(SqlUtils.getLong(rs, "id"));
-            formTypeKind.setName(rs.getString("name"));
-            formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "type_id"));
-            formTypeKind.setDepartment(department);
-            return formTypeKind;
+            DeclarationTypeAssignment declarationTypeAssignment = new DeclarationTypeAssignment();
+            declarationTypeAssignment.setId(SqlUtils.getLong(rs, "id"));
+            declarationTypeAssignment.setName(rs.getString("name"));
+            declarationTypeAssignment.setFormTypeId(SqlUtils.getLong(rs, "type_id"));
+            declarationTypeAssignment.setDepartment(department);
+            return declarationTypeAssignment;
         }
     };
 
@@ -544,24 +544,24 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         return queryData;
     }
 
-    private void fillPerformers(Map<FormTypeKind, List<Department>> map, List<FormTypeKind> result, Department performer, FormTypeKind formTypeKind) {
+    private void fillPerformers(Map<DeclarationTypeAssignment, List<Department>> map, List<DeclarationTypeAssignment> result, Department performer, DeclarationTypeAssignment declarationTypeAssignment) {
         //Заполняет список исполнителей для назначения
-        if (map.containsKey(formTypeKind)) {
-            map.get(formTypeKind).add(performer);
+        if (map.containsKey(declarationTypeAssignment)) {
+            map.get(declarationTypeAssignment).add(performer);
         } else {
             List<Department> performers = new ArrayList<Department>();
             performers.add(performer);
-            map.put(formTypeKind, performers);
-            formTypeKind.setPerformers(performers);
-            result.add(formTypeKind);
+            map.put(declarationTypeAssignment, performers);
+            declarationTypeAssignment.setPerformers(performers);
+            result.add(declarationTypeAssignment);
         }
     }
 
     private class AllAssignCallBackHandler implements RowCallbackHandler {
-        private List<FormTypeKind> result;
-        private Map<FormTypeKind, List<Department>> map = new HashMap<FormTypeKind, List<Department>>();
+        private List<DeclarationTypeAssignment> result;
+        private Map<DeclarationTypeAssignment, List<Department>> map = new HashMap<DeclarationTypeAssignment, List<Department>>();
 
-        public AllAssignCallBackHandler(List<FormTypeKind> result) {
+        public AllAssignCallBackHandler(List<DeclarationTypeAssignment> result) {
             this.result = result;
         }
 
@@ -589,11 +589,11 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             Integer performerId = SqlUtils.getInteger(rs, "performer_id");
             Department performer = new Department();
 
-            FormTypeKind formTypeKind = new FormTypeKind();
-            formTypeKind.setId(SqlUtils.getLong(rs, "id"));
-            formTypeKind.setName(rs.getString("name"));
-            formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "type_id"));
-            formTypeKind.setDepartment(department);
+            DeclarationTypeAssignment declarationTypeAssignment = new DeclarationTypeAssignment();
+            declarationTypeAssignment.setId(SqlUtils.getLong(rs, "id"));
+            declarationTypeAssignment.setName(rs.getString("name"));
+            declarationTypeAssignment.setFormTypeId(SqlUtils.getLong(rs, "type_id"));
+            declarationTypeAssignment.setDepartment(department);
 
             if (performerId != null) {
                 performer.setId(SqlUtils.getInteger(rs, "performer_id"));
@@ -611,28 +611,35 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                 performer.setCode(rs.getLong("performer_code"));
                 department.setGarantUse(rs.getBoolean("department_garant_use"));
                 department.setSunrUse(rs.getBoolean("department_sunr_use"));
-                fillPerformers(map, result, performer, formTypeKind);
+                fillPerformers(map, result, performer, declarationTypeAssignment);
             } else {
-                result.add(formTypeKind);
+                result.add(declarationTypeAssignment);
             }
         }
     }
 
 
     @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
+    public List<DeclarationTypeAssignment> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentIds, taxType, queryParams, false);
-        List<FormTypeKind> result = new ArrayList<FormTypeKind>();
+        List<DeclarationTypeAssignment> result = new ArrayList<DeclarationTypeAssignment>();
         getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), new AllAssignCallBackHandler(result));
         return result;
     }
 
     @Override
-    public List<FormTypeKind> fetchAssignedDeclarationTypes(List<Long> departmentIds, PagingParams pagingParams) {
+    public List<DeclarationTypeAssignment> fetchDeclarationTypesAssignments(List<Long> departmentIds, PagingParams pagingParams) {
         QueryData assignedFormsQueryData = getAssignedDeclarationTypesQueryData(departmentIds, pagingParams, false);
-        List<FormTypeKind> result = new ArrayList<FormTypeKind>();
+        List<DeclarationTypeAssignment> result = new ArrayList<DeclarationTypeAssignment>();
         getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), new AllAssignCallBackHandler(result));
         return result;
+    }
+
+    @Override
+    public int fetchDeclarationTypesAssignmentsCount(List<Long> departmentsIds) {
+        QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentsIds, 'N', null, true);
+        String query = "SELECT count(*) FROM ( " + assignedFormsQueryData.getQuery() + " )";
+        return getNamedParameterJdbcTemplate().queryForObject(query, assignedFormsQueryData.getParameterSource(), Integer.class);
     }
 
     @Override

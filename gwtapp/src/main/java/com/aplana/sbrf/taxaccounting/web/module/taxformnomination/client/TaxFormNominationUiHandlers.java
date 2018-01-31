@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -16,7 +16,7 @@ public interface TaxFormNominationUiHandlers extends UiHandlers {
 //    void reloadFormTableData();
 //    void reloadDeclarationTableData();
 
-    void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds);
+    void onClickEditFormDestinations(List<DeclarationTypeAssignment> declarationTypeAssignments);
 
     void onClickOpenDeclarationDestinations();
 

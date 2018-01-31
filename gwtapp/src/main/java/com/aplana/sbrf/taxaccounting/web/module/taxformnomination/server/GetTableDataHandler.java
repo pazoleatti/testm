@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.aplana.sbrf.taxaccounting.model.QueryParams;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -58,7 +57,7 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
         queryParams.setFrom(action.getStartIndex());
         queryParams.setCount(action.getCount());
 
-        List<FormTypeKind> data = new ArrayList<FormTypeKind>();
+        List<DeclarationTypeAssignment> data = new ArrayList<DeclarationTypeAssignment>();
         // загрузка данных
         if (!departmentsIds.isEmpty()) {
             data.addAll(departmentFormTypeService.getAllDeclarationAssigned(departmentsIds, taxType, queryParams));

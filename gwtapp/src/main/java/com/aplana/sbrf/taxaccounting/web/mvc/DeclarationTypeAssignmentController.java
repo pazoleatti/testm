@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeAssignmentService;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Контроллер для работы с назначением налоговых форм
  */
-
 @RestController
 public class DeclarationTypeAssignmentController {
     private DeclarationTypeAssignmentService assignmentService;
@@ -38,16 +36,16 @@ public class DeclarationTypeAssignmentController {
     }
 
     /**
-     * Получение списка назначений
+     * Получение списка назначений налоговых форм подразделениям
      *
      * @param filter       Значения фильтра
      * @param pagingParams Параметры для пагинации
-     * @return Список назначений {@link FormTypeKind}
+     * @return Страница списка назначений налоговых форм подразделениям {@link DeclarationTypeAssignment}
      */
     @GetMapping(value = "/rest/declarationTypeAssignment")
-    public JqgridPagedList<FormTypeKind> fetchDeclarationTypeAssignments(@RequestParam DeclarationTypeAssignmentFilter filter, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<DeclarationTypeAssignment> fetchDeclarationTypeAssignments(@RequestParam DeclarationTypeAssignmentFilter filter, @RequestParam PagingParams pagingParams) {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        PagingResult<FormTypeKind> pagingResult = assignmentService.fetchDeclarationTypeAssignments(userInfo, filter, pagingParams);
+        PagingResult<DeclarationTypeAssignment> pagingResult = assignmentService.fetchDeclarationTypeAssignments(userInfo, filter, pagingParams);
 
         return JqgridPagedResourceAssembler.buildPagedList(
                 pagingResult,
@@ -59,8 +57,8 @@ public class DeclarationTypeAssignmentController {
     /**
      * Создание назначения налоговых форм подраздениям
      *
-     * @param action Модель с данными
-     * @return Результат операции
+     * @param action Модель с данными - объект, содержащий подразделения, исполнителей и виды налоговых форм {@link CreateDeclarationTypeAssignmentAction}
+     * @return Результат операции {@link CreateDeclarationTypeAssignmentResult} с uuid группы сообщений и информацией о повторном назначении
      */
     @PostMapping(value = "/actions/declarationTypeAssignment/create")
     public CreateDeclarationTypeAssignmentResult createDeclarationTypeAssignment(CreateDeclarationTypeAssignmentAction action) {

@@ -46,7 +46,7 @@
             });
         }])
         /**
-         * @description Данные по назначению налоговых форм
+         * @description Назначения налоговых форм
          */
         .factory('DeclarationTypeAssignmentResource', ['$resource', function ($resource) {
             return $resource('controller/rest/declarationTypeAssignment', {}, {

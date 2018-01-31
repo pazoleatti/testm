@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declar
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -41,7 +41,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
         // подготовить форму для создания
         void prepareCreationForm();
         // показать модальную форму редактирования
-        void prepareEditForm(List<FormTypeKind> formTypeKinds);
+        void prepareEditForm(List<DeclarationTypeAssignment> declarationTypeAssignments);
         // получить список поздазделений
         List<Integer> getDepartments();
         // получить список исполнителей
@@ -139,10 +139,10 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
     }
 
     @Override
-    public void onEdit(List<FormTypeKind> formTypeKinds){
+    public void onEdit(List<DeclarationTypeAssignment> declarationTypeAssignments){
         // Для каждого выбранного пользователем назначения, выполняется изменение / добавление исполнителя
         EditFormsAction action = new EditFormsAction();
-        action.setFormTypeKinds(formTypeKinds);
+        action.setDeclarationTypeAssignments(declarationTypeAssignments);
         action.setPerformers(getView().getPerformers());
         action.setForm(false);
 
@@ -171,8 +171,8 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
                 }, this));
     }
 
-    public void initAndShowEditDialog(final HasPopupSlot slotForMe, List<FormTypeKind> formTypeKinds, TaxType taxType){
-        getView().prepareEditForm(formTypeKinds);
+    public void initAndShowEditDialog(final HasPopupSlot slotForMe, List<DeclarationTypeAssignment> declarationTypeAssignments, TaxType taxType){
+        getView().prepareEditForm(declarationTypeAssignments);
         slotForMe.addToPopupSlot(DeclarationDestinationsPresenter.this);
         changeFilterElementNames(taxType);
     }

@@ -77,16 +77,16 @@ public interface DepartmentDeclarationTypeDao {
      * @param queryParams   параметры пейджинга и фильтрации
      * @return список назначенных налоговых форм для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
+    List<DeclarationTypeAssignment> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
 
     /**
      * Получение списка видов налоговых форм, назначенных подразделениям
      *
      * @param departmentIds Идентификаторы подразделений
      * @param pagingParams  Параметры пагинации
-     * @return Страница списка назначенных видов форм выбранным подразделениям
+     * @return Страница списка назначений {@link DeclarationTypeAssignment} видов форм выбранным подразделениям
      */
-    List<FormTypeKind> fetchAssignedDeclarationTypes(List<Long> departmentIds, PagingParams pagingParams);
+    List<DeclarationTypeAssignment> fetchDeclarationTypesAssignments(List<Long> departmentIds, PagingParams pagingParams);
 
     /**
      * Возвращает количество назначенных деклараций для выбранного налога и подразделений
@@ -96,6 +96,14 @@ public interface DepartmentDeclarationTypeDao {
      * @return список назначенных деклараций для выбранного налога и подразделений
      */
     int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType);
+
+    /**
+     * Возвращает количество назначенных деклараций для выбранного налога и подразделений
+     *
+     * @param departmentsIds Идентификаторы подразделений
+     * @return Количество назначений налоговых форм подразделениям
+     */
+    int fetchDeclarationTypesAssignmentsCount(List<Long> departmentsIds);
 
     void savePerformers(final long ddtId, final List<Integer> performerIds);
 
