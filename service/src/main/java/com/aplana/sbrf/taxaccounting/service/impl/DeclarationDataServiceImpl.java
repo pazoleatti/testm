@@ -5,8 +5,10 @@ import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
 import com.aplana.sbrf.taxaccounting.model.action.*;
 import com.aplana.sbrf.taxaccounting.model.result.*;
-import com.aplana.sbrf.taxaccounting.permissions.logging.LoggingPreauthorize;
-import com.aplana.sbrf.taxaccounting.permissions.logging.LoggingPreauthorizeType;
+import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.Permission;
+import com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
@@ -53,6 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,6 +170,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private NotificationService notificationService;
     @Autowired
     private MoveToCreateFacade moveToCreateFacade;
+    @Autowired
+    private BasePermissionEvaluator permissionEvaluator;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -381,27 +386,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Transactional
-    private void calculate(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        boolean createForm = calculateDeclaration(logger, declarationData, userInfo, docDate, exchangeParams, stateLogger);
+    public void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        boolean createForm = calculateDeclaration(logger, declarationDataId, userInfo, docDate, exchangeParams, stateLogger);
         if (createForm) {
-            declarationDataDao.setStatus(declarationData.getId(), State.CREATED);
+            declarationDataDao.setStatus(declarationDataId, State.CREATED);
         }
     }
 
     @Override
-    @LoggingPreauthorize(preauthorizeType = LoggingPreauthorizeType.IDENTIFY)
-    public void identify(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        calculate(logger, declarationData, userInfo, docDate, exchangeParams, stateLogger);
+    @PreAuthorize("hasPermission(#loggerIdTransfer, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IDENTIFY)")
+    public void identify(LoggerIdTransfer loggerIdTransfer, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        calculate(loggerIdTransfer.getLogger(), loggerIdTransfer.getDeclarationDataId(),
+                userInfo, docDate, exchangeParams, stateLogger);
     }
 
     @Override
-    @LoggingPreauthorize(preauthorizeType = LoggingPreauthorizeType.CONSOLIDATE)
-    public void consolidate(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        calculate(logger, declarationData, userInfo, docDate, exchangeParams, stateLogger);
+    @PreAuthorize("hasPermission(#loggerIdTransfer, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CONSOLIDATE)")
+    public void consolidate(LoggerIdTransfer loggerIdTransfer, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        calculate(loggerIdTransfer.getLogger(), loggerIdTransfer.getDeclarationDataId(),
+                userInfo, docDate, exchangeParams, stateLogger);
     }
 
-    private boolean calculateDeclaration(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        declarationDataAccessService.checkEvents(userInfo, declarationData.getId(), FormDataEvent.CALCULATE);
+    private boolean calculateDeclaration(Logger logger, Long declarationDataId, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
 
         //2. проверяет состояние XML отчета экземпляра декларации
         boolean createForm = setDeclarationBlobs(logger, declarationData, docDate, userInfo, exchangeParams, stateLogger);
@@ -543,16 +551,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public ActionResult identifyDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds) {
-        return recalculateDeclarationList(userInfo, DeclarationDataReportType.IDENTIFY_PERSON, declarationDataIds);
+        return recalculateDeclarationList(userInfo, DeclarationDataReportType.IDENTIFY_PERSON, declarationDataIds, DeclarationDataPermission.IDENTIFY);
     }
 
     @Override
     public ActionResult consolidateDeclarationDataList(TAUserInfo userInfo, List<Long> declarationDataIds) {
-        return recalculateDeclarationList(userInfo, DeclarationDataReportType.CONSOLIDATE, declarationDataIds);
+        return recalculateDeclarationList(userInfo, DeclarationDataReportType.CONSOLIDATE, declarationDataIds, DeclarationDataPermission.CONSOLIDATE);
     }
 
     @Transactional
-    private ActionResult recalculateDeclarationList(final TAUserInfo userInfo, final DeclarationDataReportType ddReportType, List<Long> declarationDataIds) {
+    private ActionResult recalculateDeclarationList(final TAUserInfo userInfo, final DeclarationDataReportType ddReportType, List<Long> declarationDataIds, Permission permission) {
         final ActionResult result = new ActionResult();
         final Logger logger = new Logger();
 
@@ -560,42 +568,46 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (existDeclarationData(declarationDataId)) {
                 final String prefix = String.format("Постановка операции \"Расчет налоговой формы\" для формы № %d в очередь на исполнение: ", declarationDataId);
                 try {
-                    try {
-                        preCalculationCheck(logger, declarationDataId, userInfo);
-                    } catch (Exception e) {
-                        logger.error(prefix + "Налоговая форма не может быть рассчитана");
-                    }
-                    final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
-                    Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
-                    if (restartStatus != null && restartStatus.getFirst()) {
-                        logger.warn(prefix + "Данная операция уже запущена");
-                    } else if (restartStatus != null && !restartStatus.getFirst()) {
-                        // задача уже была создана, добавляем пользователя в получатели
-                    } else {
-                        Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("declarationDataId", declarationDataId);
-                        params.put("docDate", new Date());
-                        asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
-                            @Override
-                            public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
-                                return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
-                            }
+                    if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
+                            new LoggerIdTransfer(declarationDataId, logger),
+                            "com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer", permission)) {
+                        try {
+                            preCalculationCheck(logger, declarationDataId, userInfo);
+                        } catch (Exception e) {
+                            logger.error(prefix + "Налоговая форма не может быть рассчитана");
+                        }
+                        final String keyTask = generateAsyncTaskKey(declarationDataId, ddReportType);
+                        Pair<Boolean, String> restartStatus = asyncManager.restartTask(keyTask, userInfo, false, logger);
+                        if (restartStatus != null && restartStatus.getFirst()) {
+                            logger.warn(prefix + "Данная операция уже запущена");
+                        } else if (restartStatus != null && !restartStatus.getFirst()) {
+                            // задача уже была создана, добавляем пользователя в получатели
+                        } else {
+                            Map<String, Object> params = new HashMap<String, Object>();
+                            params.put("declarationDataId", declarationDataId);
+                            params.put("docDate", new Date());
+                            asyncManager.executeTask(keyTask, ddReportType.getReportType(), userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
+                                @Override
+                                public LockData lockObject(String lockKey, AsyncTaskType taskType, TAUserInfo user) {
+                                    return lockDataService.lock(keyTask, userInfo.getUser().getId(), getDeclarationFullName(declarationDataId, ddReportType));
+                                }
 
-                            @Override
-                            public void postCheckProcessing() {
-                                logger.error(prefix + "Найдены запущенные задачи, которые блокирует выполнение операции.");
-                            }
+                                @Override
+                                public void postCheckProcessing() {
+                                    logger.error(prefix + "Найдены запущенные задачи, которые блокирует выполнение операции.");
+                                }
 
-                            @Override
-                            public boolean checkExistTasks(AsyncTaskType taskType, TAUserInfo user, Logger logger) {
-                                return checkExistAsyncTask(declarationDataId, taskType, logger);
-                            }
+                                @Override
+                                public boolean checkExistTasks(AsyncTaskType taskType, TAUserInfo user, Logger logger) {
+                                    return checkExistAsyncTask(declarationDataId, taskType, logger);
+                                }
 
-                            @Override
-                            public void interruptTasks(AsyncTaskType taskType, TAUserInfo user) {
-                                interruptAsyncTask(declarationDataId, userInfo, taskType, TaskInterruptCause.DECLARATION_RECALCULATION);
-                            }
-                        });
+                                @Override
+                                public void interruptTasks(AsyncTaskType taskType, TAUserInfo user) {
+                                    interruptAsyncTask(declarationDataId, userInfo, taskType, TaskInterruptCause.DECLARATION_RECALCULATION);
+                                }
+                            });
+                        }
                     }
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
@@ -2701,8 +2713,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Logger scriptLogger = new Logger();
             boolean createForm = true;
             try {
-                DeclarationData declarationData = get(entry.getKey(), userInfo);
-                createForm = calculateDeclaration(scriptLogger, declarationData, userInfo, new Date(), entry.getValue(), stateLogger);
+                createForm = calculateDeclaration(scriptLogger, entry.getKey(), userInfo, new Date(), entry.getValue(), stateLogger);
             } catch (Exception e) {
                 createForm = false;
                 if (e.getMessage() != null) {

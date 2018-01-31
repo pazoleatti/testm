@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.permissions;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.springframework.security.core.userdetails.User;
 
 /**
@@ -18,7 +19,8 @@ public interface Permission<T> {
      *
      * @param user               пользователь, для которого проверяется право
      * @param targetDomainObject объект, для которого проверяется право
+     * @param logger             объект {@link com.aplana.sbrf.taxaccounting.model.log.Logger} для записи результата
      * @return {@code true}, если у пользователя есть данное право на объект; {@code false} в противном случае
      */
-    boolean isGranted(User user, T targetDomainObject);
+    boolean isGranted(User user, T targetDomainObject, Logger logger);
 }

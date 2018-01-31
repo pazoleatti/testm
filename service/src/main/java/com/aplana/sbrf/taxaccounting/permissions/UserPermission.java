@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -133,7 +134,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
@@ -151,7 +152,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
@@ -166,7 +167,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
@@ -181,7 +182,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
@@ -196,7 +197,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
@@ -213,7 +214,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.ROLE_ADMIN);
         }
     }
@@ -229,7 +230,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.ROLE_ADMIN);
         }
     }
@@ -246,7 +247,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN);
         }
     }
@@ -261,7 +262,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONF);
         }
     }
@@ -276,7 +277,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER, TARole.ROLE_ADMIN);
         }
     }
@@ -291,7 +292,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONF);
         }
     }
@@ -306,7 +307,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
@@ -321,7 +322,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
@@ -336,7 +337,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
@@ -351,7 +352,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_OPER, TARole.N_ROLE_CONTROL_NS);
         }
     }
@@ -366,7 +367,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS);
         }
     }
@@ -381,7 +382,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.ROLE_ADMIN);
         }
     }
@@ -396,7 +397,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_OPER);
         }
     }
@@ -411,7 +412,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
@@ -426,7 +427,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.ROLE_ADMIN, TARole.N_ROLE_CONF);
         }
     }
@@ -441,7 +442,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
@@ -456,7 +457,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.isAuthentificated();
         }
     }
@@ -471,7 +472,7 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, TAUser entity) {
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.isAuthentificated();
         }
     }

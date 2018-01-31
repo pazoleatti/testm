@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -34,7 +35,7 @@ public abstract class ReportPeriodPermission extends AbstractPermission<ReportPe
         }
 
         @Override
-        protected boolean isGrantedInternal(User currentUser, ReportPeriod targetDomainObject) {
+        protected boolean isGrantedInternal(User currentUser, ReportPeriod targetDomainObject, Logger logger) {
             return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
