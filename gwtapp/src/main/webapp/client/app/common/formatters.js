@@ -114,9 +114,9 @@
          * @description Форматтер для получения полного пути
          * @param entity Сущность
          */
-        .filter('fullPathFormatter', function () {
+        .filter('fullNameFormatter', function () {
             return function (entity) {
-                return entity ? entity.fullPath : "";
+                return entity ? entity.fullName : "";
             };
         })
 
@@ -221,13 +221,24 @@
          * @param array массив объектов
          * @param separator разделитель (', ' по умолчанию)
          * @param path путь к полю, которое будет записано в строку через разделитель (name по-умолчанию)
+         * @param checkDistinction проверять уникальность значений свойств объектов (false по умолчанию)
          */
         .filter('joinObjectsPropFormatter', function () {
-            return function (array, separator, path) {
+            return function (array, separator, path, checkDistinction) {
                 if (array && array.length > 0) {
                     var nameArray = _.map(array, function (obj) {
                         return _.deep(obj, path || 'name');
                     });
+
+                    if(checkDistinction) {
+                        var distinctValues = [];
+                        angular.forEach(nameArray, function (value) {
+                            if(distinctValues.indexOf(value) === -1) {
+                                distinctValues.push(value);
+                            }
+                        });
+                        nameArray = distinctValues;
+                    }
 
                     return nameArray.join(separator || ', ');
                 }

@@ -26,8 +26,8 @@ public class RefBookDepartment extends RefBookSimple<Integer> {
     private boolean isActive;
     //Код подразделения
     private Long code;
-    //Полный путь до подразделения
-    private String fullPath;
+    //Полное имя подразделения
+    private String fullName;
 
     public String getName() {
         return name;
@@ -101,11 +101,11 @@ public class RefBookDepartment extends RefBookSimple<Integer> {
         this.code = code;
     }
 
-    public String getFullPath() {
-        return fullPath;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setFullPath(String fullPath) {
-        this.fullPath = fullPath;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }

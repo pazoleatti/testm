@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
+import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
@@ -105,6 +106,21 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         result.setCreatingExistingRelations(existingRelations);
 
         return result;
+    }
+
+    /**
+     * Редактирование назначений налоговых форм подраздениям. Выполняется изменение исполнителей у выбранных назначений
+     *
+     * @param userInfo Информация о пользователе
+     * @param action   Модель с данными: назначения и исполнители {@link EditDeclarationTypeAssignmentsAction}
+     * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
+     */
+    @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
+    public void editDeclarationTypeAssignments(TAUserInfo userInfo, EditDeclarationTypeAssignmentsAction action) {
+        for (Integer assignmentId : action.getAssignmentIds()) {
+            sourceService.updateDDTPerformers(assignmentId, action.getPerformerIds());
+        }
     }
 
     /**

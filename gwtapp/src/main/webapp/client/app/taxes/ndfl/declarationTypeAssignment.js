@@ -5,7 +5,7 @@
      * @description Модуль назначения налоговых форм
      */
     angular.module('app.declarationTypeAssignment', ['ui.router', 'app.constants', 'app.rest', 'app.logPanel', 'app.formatters',
-        'app.select.common', 'app.filterUtils', 'app.createAssignment'])
+        'app.select.common', 'app.filterUtils', 'app.createAssignment', 'app.editAssignment'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTypeAssignment', {
                 url: '/taxes/declarationTypeAssignment',
@@ -75,6 +75,10 @@
                     }
                 };
 
+                $scope.assignmentsAreSelected = function () {
+                    return $scope.declarationTypeAssignmentGrid && $scope.declarationTypeAssignmentGrid.value && $scope.declarationTypeAssignmentGrid.value.length > 0;
+                };
+
                 /**
                  * @description Обновление грида
                  * @param page
@@ -132,6 +136,33 @@
                         }
                     );
                 };
+
+                /**
+                 * Открыть МО редактирования назначения
+                 */
+                $scope.showEditAssignmentModal = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('declarationTypeAssignment.modal.edit.title'),
+                        templateUrl: 'client/app/taxes/ndfl/editDeclarationTypeAssignment.html?v=${buildUuid}',
+                        controller: 'editDeclarationTypeAssignmentCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    selectedAssignments: $scope.declarationTypeAssignmentGrid.value
+                                };
+                            }
+                        }
+                    }).result.then(
+                        function (result) {
+                            if (result.departments && result.departments.length > 0) {
+                                $scope.searchFilter.params.departments = result.departments;
+                                $scope.searchFilter.isClear = true;
+                                $scope.refreshGrid();
+                            }
+                        }
+                    );
+                };
             }])
 
         /**
@@ -141,7 +172,6 @@
          */
         .filter('performersFormatter', ['$filter', function ($filter) {
             return function (cellValue, options) {
-                console.log(cellValue);
                 return $filter('joinObjectsPropFormatter')(cellValue, ', ', 'fullName');
             };
         }]);

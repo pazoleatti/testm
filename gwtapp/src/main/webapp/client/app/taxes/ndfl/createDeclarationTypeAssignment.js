@@ -51,7 +51,7 @@
                     if ($scope.assignmentData.departments && $scope.assignmentData.departments.length > 0 || $scope.assignmentData.declarationTypes && $scope.assignmentData.declarationTypes.length > 0 ||
                         $scope.assignmentData.performers && $scope.assignmentData.performers.length > 0) {
                         $dialogs.confirmDialog({
-                            title: $filter('translate')('declarationTypeAssignment.modal.create.cancel.header'),
+                            title: $filter('translate')('declarationTypeAssignment.modal.cancel.header'),
                             content: $filter('translate')('declarationTypeAssignment.modal.create.cancel.text'),
                             okBtnCaption: $filter('translate')('common.button.yes'),
                             cancelBtnCaption: $filter('translate')('common.button.no'),
