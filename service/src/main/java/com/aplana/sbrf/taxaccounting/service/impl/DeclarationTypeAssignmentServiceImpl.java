@@ -116,6 +116,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
      * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
      */
     @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
     public void editDeclarationTypeAssignments(TAUserInfo userInfo, EditDeclarationTypeAssignmentsAction action) {
         for (Integer assignmentId : action.getAssignmentIds()) {
             sourceService.updateDDTPerformers(assignmentId, action.getPerformerIds());
