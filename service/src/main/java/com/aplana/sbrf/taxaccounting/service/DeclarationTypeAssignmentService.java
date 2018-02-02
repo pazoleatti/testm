@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
+import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
 
 /**
@@ -26,4 +27,13 @@ public interface DeclarationTypeAssignmentService {
      * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
      */
     CreateDeclarationTypeAssignmentResult createDeclarationTypeAssignment(TAUserInfo userInfo, CreateDeclarationTypeAssignmentAction action);
+
+    /**
+     * Редактирование назначений налоговых форм подраздениям. Выполняется изменение исполнителей у выбранных назначений
+     *
+     * @param userInfo Информация о пользователе
+     * @param action   Модель с данными: назначения и исполнители {@link EditDeclarationTypeAssignmentsAction}
+     * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
+     */
+    void editDeclarationTypeAssignments(TAUserInfo userInfo, EditDeclarationTypeAssignmentsAction action);
 }

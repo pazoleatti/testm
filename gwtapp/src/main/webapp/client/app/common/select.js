@@ -377,9 +377,9 @@
                  */
                 $scope.initSelectWithAllDepartments = function () {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
-                        property: "fullPath",
+                        property: "fullName",
                         direction: "asc"
-                    }, "fullPathFormatter");
+                    }, "fullNameFormatter");
                 };
 
                 /**
@@ -387,9 +387,9 @@
                  */
                 $scope.initSelectWithBADepartments = function () {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=BADepartments", {}, {
-                        property: "fullPath",
+                        property: "fullName",
                         direction: "asc"
-                    }, "fullPathFormatter");
+                    }, "fullNameFormatter");
                 };
 
                 /**
@@ -397,9 +397,9 @@
                  */
                 $scope.initSelectWithDestinationDepartments = function () {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(true, true, "controller/rest/refBookValues/30?projection=destinationDepartments", {}, {
-                        property: "fullPath",
+                        property: "fullName",
                         direction: "asc"
-                    }, "fullPathFormatter");
+                    }, "fullNameFormatter");
                 };
 
                 /**
@@ -407,9 +407,9 @@
                  */
                 $scope.initSingleSelectWithAllDepartments = function () {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=allDepartments", {}, {
-                        property: "fullPath",
+                        property: "fullName",
                         direction: "asc"
-                    }, "fullPathFormatter");
+                    }, "fullNameFormatter");
                 };
 
                 /**
@@ -418,9 +418,9 @@
                  */
                 $scope.initActiveDepartmentSelectWithOpenPeriod = function (periodObject) {
                     $scope.departmentsSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/refBookValues/30?projection=activeDepartmentsWithOpenPeriod", {}, {
-                        property: "fullPath",
+                        property: "fullName",
                         direction: "asc"
-                    }, "fullPathFormatter");
+                    }, "fullNameFormatter");
                     $scope.$watch(periodObject, function (period) {
                         if (period) {
                             $scope.departmentsSelect.options.dataFilter = {reportPeriodId: period.id};
@@ -433,7 +433,7 @@
                  * @param userTBDepartment Объект из scope, по которому проставляется ТБ пользователя
                  */
                 $scope.initActiveAvailableTBSelect = function (periodObject, userTBDepartment) {
-                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "fullPathFormatter");
+                    $scope.departmentsSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "fullNameFormatter");
                     RefBookValuesResource.query({
                         refBookId: APP_CONSTANTS.REFBOOK.DEPARTMENT,
                         projection: "activeAvailableTB"

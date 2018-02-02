@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
+import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeAssignmentService;
@@ -64,5 +65,16 @@ public class DeclarationTypeAssignmentController {
     public CreateDeclarationTypeAssignmentResult createDeclarationTypeAssignment(CreateDeclarationTypeAssignmentAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return assignmentService.createDeclarationTypeAssignment(userInfo, action);
+    }
+
+    /**
+     * Редактирование назначений налоговых форм подраздениям
+     *
+     * @param action Модель с данными - объект, содержащий существующие назначения налоговых форм и исполнителей {@link EditDeclarationTypeAssignmentsAction}
+     */
+    @PostMapping(value = "/actions/declarationTypeAssignment/edit")
+    public void createDeclarationTypeAssignment(EditDeclarationTypeAssignmentsAction action) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        assignmentService.editDeclarationTypeAssignments(userInfo, action);
     }
 }

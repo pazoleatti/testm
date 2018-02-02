@@ -1,0 +1,53 @@
+<div class="modal-body" style="min-height: 150px">
+    <div class="form-horizontal" data-ng-form="createDeclarationTypeAssignment">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
+               style="height: 100px;">
+            <tbody>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'declarationTypeAssignment.modal.field.department' | translate}}:</label>
+                </td>
+                <td>
+                    <label class="font-normal">{{departmentNames}}</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'declarationTypeAssignment.modal.field.declarationType' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <label class="font-normal">{{declarationTypes}}</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="control-label">{{::'declarationTypeAssignment.modal.field.performer' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <div style="width: 355px;"
+                             data-ng-controller="SelectDepartmentCtrl"
+                             data-ui-select2="departmentsSelect.options"
+                             data-ng-init="initSelectWithDestinationDepartments()"
+                             data-ng-model="editedAssignmentsData.performers"
+                             data-ng-required="false">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default iconed-btn" id="saveButton" data-ng-click="save()">
+        <span data-translate-once="button.change"></span>
+        <span class="btn-icon-ok"></span>
+    </button>
+    <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
+        <span data-translate-once="button.close"></span>
+        <span class="btn-icon-noneBg-close"></span>
+    </button>
+</div>

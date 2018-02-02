@@ -34,7 +34,7 @@ public class RefBookDepartmentDataDaoImpl implements RefBookDepartmentDataDao {
     }
 
     final private QBean<RefBookDepartment> refBookDepartmentBean = bean(RefBookDepartment.class, department.id, department.name, department.shortname.as("shortName"), department.parentId,
-            department.type, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code, departmentFullpath.shortname.as("fullPath"));
+            department.type, department.tbIndex, department.sbrfCode, department.regionId, department.isActive, department.code, departmentFullpath.shortname.as("fullName"));
 
     /**
      * Получение значения справочника по идентификатору
