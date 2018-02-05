@@ -178,7 +178,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
      * @param <T>    целевой класс для выборки {@link DepartmentReportPeriod} или {@link DepartmentReportPeriodJournalItem}
      * @return список объектов типа <T> или пустой список
      */
-    private <T> List<T> exequteFetchByFilter(final DepartmentReportPeriodFilter filter, RowMapper<T> mapper) {
+    private <T> List<T> executeFetchByFilter(final DepartmentReportPeriodFilter filter, RowMapper<T> mapper) {
         try {
             return getNamedParameterJdbcTemplate().query(String.format(QUERY_TEMPLATE_COMPOSITE_SORT, makeSqlWhereClause(filter)),
                     new HashMap<String, Object>(2) {{
@@ -193,7 +193,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
 
     @Override
     public List<DepartmentReportPeriod> fetchAllByFilter(final DepartmentReportPeriodFilter filter) {
-        return exequteFetchByFilter(filter, mapper);
+        return executeFetchByFilter(filter, mapper);
     }
 
     @Override
@@ -214,7 +214,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     @Override
     @Transactional(readOnly = true)
     public List<DepartmentReportPeriodJournalItem> fetchJournalItemByFilter(final DepartmentReportPeriodFilter filter) {
-        return exequteFetchByFilter(filter, mapperJournalItem);
+        return executeFetchByFilter(filter, mapperJournalItem);
     }
 
     @Override
