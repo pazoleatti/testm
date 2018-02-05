@@ -68,7 +68,7 @@ public class ConfigurationServiceTest {
     public static void init() {
         ConfigurationDao configurationDao = mock(ConfigurationDao.class);
         ReflectionTestUtils.setField(service, "configurationDao", configurationDao);
-        when(configurationDao.getAll()).thenReturn(model);
+        when(configurationDao.fetchAllAsModel()).thenReturn(model);
 
         DepartmentDao departmentDao = mock(DepartmentDao.class);
         when(departmentDao.getDepartment(eq(1))).thenReturn(testDepartment1);

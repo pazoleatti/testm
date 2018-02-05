@@ -167,12 +167,12 @@ public class SignServiceImpl implements SignService {
         String[] params = new String[4];
         int rootDepartmentId = departmentService.getBankDepartment().getId();
         // путь к библиотеке для проверки ЭП
-        List<String> encryptParams = configurationDao.getAll().get(ConfigurationParam.ENCRYPT_DLL, rootDepartmentId);
+        List<String> encryptParams = configurationDao.fetchAllAsModel().get(ConfigurationParam.ENCRYPT_DLL, rootDepartmentId);
         if (encryptParams == null) {
             throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.ENCRYPT_DLL.getCaption() + '"');
         }
         // загрузка БОК (база открытых ключей)
-        List<String> keys = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, rootDepartmentId);
+        List<String> keys = configurationDao.fetchAllAsModel().get(ConfigurationParam.KEY_FILE, rootDepartmentId);
         if (keys == null){
             throw new ServiceException("Ошибка доступа к файлу базы открытых ключей. БОК не заданы.");
         }

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.CommonConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
@@ -11,19 +10,17 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QConfiguration.configuration;
 
 
 /**
@@ -33,59 +30,52 @@ import static com.aplana.sbrf.taxaccounting.model.querydsl.QConfiguration.config
  * @since 10.10.13 11:41
  */
 @Repository
-@Transactional
 public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDao {
     private static final Log LOG = LogFactory.getLog(ConfigurationDaoImpl.class);
 
     class ConfigurationRowCallbackHandler implements RowCallbackHandler {
         final ConfigurationParamModel model;
+        ConfigurationParamGroup byGroup;
 
         public ConfigurationRowCallbackHandler(ConfigurationParamModel model) {
             this.model = model;
         }
 
+        public ConfigurationRowCallbackHandler(ConfigurationParamModel model, ConfigurationParamGroup byGroup) {
+            this.model = model;
+            this.byGroup = byGroup;
+        }
+
         @Override
         public void processRow(ResultSet rs) throws SQLException {
             try {
-                model.setFullStringValue(ConfigurationParam.valueOf(rs.getString("code")),
-                        rs.getInt("department_id"),
-                        rs.getString("value"));
+                ConfigurationParam param = ConfigurationParam.valueOf(rs.getString("code"));
+                if (byGroup == null || param.getGroup() != null && param.getGroup().equals(byGroup)) {
+                    model.setFullStringValue(param,
+                            rs.getInt("department_id"),
+                            rs.getString("value"));
+                }
             } catch (IllegalArgumentException e) {
-                // Если параметр не найден в ConfiguratioжnParam, то он просто пропускается (не виден на клиенте)
-            }
-        }
-    }
-
-    //метод преобразующий конфигурационные параметры в ConfigurationParamModel используемый в gwt
-    private void configInToConfigurationParamModel(List<Configuration> listConfig, ConfigurationParamModel configurationParamModel) {
-        for (Configuration config : listConfig) {
-            try {
-                configurationParamModel.setFullStringValue(ConfigurationParam.valueOf(config.getCode().toString()),
-                        config.getDepartmentId().intValue(), config.getValue());
-            } catch (Exception e) {
-                //пропускается
+                // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
             }
         }
     }
 
     /**
-     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link CommonConfigurationParam}
+     * Маппер для представления значений из {@link ResultSet} в виде объекта {@link Configuration}
      */
-    private RowMapper<CommonConfigurationParam> commonConfigurationParamMapper = new RowMapper<CommonConfigurationParam>() {
-        @Override
-        public CommonConfigurationParam mapRow(ResultSet rs, int index) throws SQLException {
-            CommonConfigurationParam param = new CommonConfigurationParam();
-            param.setName(ConfigurationParam.valueOf(rs.getString("code")).getCaption());
-            param.setValue(rs.getString("value"));
-            return param;
-        }
-    };
-
     private RowMapper<Configuration> configurationRowMapper = new RowMapper<Configuration>() {
         @Override
         public Configuration mapRow(ResultSet rs, int index) throws SQLException {
             Configuration param = new Configuration();
             param.setCode(rs.getString("code"));
+            param.setDescription(param.getCode());
+            try {
+                ConfigurationParam paramEnum = ConfigurationParam.valueOf(param.getCode());
+                param.setDescription(paramEnum.getCaption());
+            } catch (IllegalArgumentException e) {
+                // Если параметр не найден в ConfigurationParam, то пропускаем
+            }
             param.setDepartmentId(rs.getInt("department_id"));
             param.setValue(rs.getString("value"));
             return param;
@@ -93,78 +83,55 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     };
 
     @Override
-    public List<Configuration> getAllConfiguration() {
-        List<Configuration> configurations = getJdbcTemplate().query(
-                "select code, department_id, value from configuration", configurationRowMapper);
-        for (Configuration config : configurations) {
-            try {
-                config.setCode(ConfigurationParam.valueOf(config.getCode()).getCaption());
-            } catch (IllegalArgumentException e) {
-                // Если параметр не найден в result, то он просто пропускается (не виден на клиенте)
-            }
+    public Configuration fetchByEnum(ConfigurationParam param) {
+        try {
+            return getJdbcTemplate().queryForObject("select code, department_id, value from configuration where code = ?",
+                    new Object[]{param.name()}, configurationRowMapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        return configurations;
     }
 
     @Override
-    public ConfigurationParamModel getAll() {
+    public List<Configuration> fetchAll() {
+        return getJdbcTemplate().query("select code, department_id, value from configuration", configurationRowMapper);
+    }
+
+    @Override
+    public ConfigurationParamModel fetchAllAsModel() {
         final ConfigurationParamModel model = new ConfigurationParamModel();
         getJdbcTemplate().query("select code, value, department_id from configuration", new ConfigurationRowCallbackHandler(model));
         return model;
     }
 
     @Override
-    public ConfigurationParamModel getConfigByGroup(final ConfigurationParamGroup group) {
+    public ConfigurationParamModel fetchAllAsModelByGroup(final ConfigurationParamGroup group) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value, department_id from configuration", new RowCallbackHandler() {
-            @Override
-            public void processRow(ResultSet rs) throws SQLException {
-                try {
-                    ConfigurationParam configurationParam = ConfigurationParam.valueOf(rs.getString("code"));
-                    if (configurationParam.getGroup().equals(group)) {
-                        model.setFullStringValue(configurationParam, rs.getInt("department_id"), rs.getString("value"));
-                    }
-                } catch (IllegalArgumentException e) {
-                    // Если параметр не найден в ConfigurationParam, то он просто пропускается (не виден на клиенте)
-                }
-            }
-        });
+        getJdbcTemplate().query("select code, value, department_id from configuration", new ConfigurationRowCallbackHandler(model, group));
         return model;
     }
 
     @Override
-    public List<Configuration> getListConfigByGroup(final ConfigurationParamGroup group) {
-        List<Configuration> resultList = new LinkedList<>();
-        List<Configuration> listConfig = getJdbcTemplate().query(
-                "select code, department_id, value from configuration", configurationRowMapper);
-        for (Configuration config : listConfig) {
-            try {
-                ConfigurationParam configurationParam = ConfigurationParam.valueOf(config.getCode());
-                if (configurationParam.getGroup().equals(group)) {
-                    ConfigurationParam.valueOf(config.getCode());
-                    config.setCode(ConfigurationParam.valueOf(config.getCode()).getCaption());
-                    resultList.add(config);
-                }
-            } catch (IllegalArgumentException e) {
-                // Если параметр не найден в result, то он просто пропускается (не виден на клиенте)
-            }
-        }
-        return resultList;
+    public List<Configuration> fetchAllByGroup(final ConfigurationParamGroup group) {
+        return getJdbcTemplate().query(
+                "select code, department_id, value from configuration where " +
+                        SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(group)),
+                configurationRowMapper);
     }
 
     @Override
-    public ConfigurationParamModel getByDepartment(Integer departmentId) {
+    public ConfigurationParamModel fetchAllByDepartment(Integer departmentId) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
-        List<Configuration> listConfig = getJdbcTemplate().query(
+        getJdbcTemplate().query(
                 "select code, department_id, value from configuration where department_id = ?",
-                new Object[]{departmentId}, configurationRowMapper);
-        configInToConfigurationParamModel(listConfig, model);
+                new Object[]{departmentId},
+                new ConfigurationRowCallbackHandler(model));
         return model;
     }
 
     @Override
     public void save(ConfigurationParamModel model) {
-        ConfigurationParamModel oldModel = getAll();
+        ConfigurationParamModel oldModel = fetchAllAsModel();
         List<Object[]> insertParams = new LinkedList<>();
         List<Object[]> updateParams = new LinkedList<>();
         List<Object[]> deleteParams = new LinkedList<>();
@@ -204,17 +171,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         }
     }
 
-    public void create(Configuration config) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("code", ConfigurationParam.getNameValueAsDB(config.getCode()));
-        params.addValue("departmentId", config.getDepartmentId());
-        params.addValue("value", config.getValue());
-        getNamedParameterJdbcTemplate().update(
-                "insert into configuration(code, department_id, value) " +
-                        "values(:code, :departmentId, :value)",
-                params);
-    }
-
+    @Override
     public void update(Configuration config) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("code", ConfigurationParam.getNameValueAsDB(config.getCode()));
@@ -222,31 +179,32 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         params.addValue("value", config.getValue());
         getNamedParameterJdbcTemplate().update(
                 "update configuration set value = :value " +
-                        "where code = :code and department_id = :departmentId",
+                        "where code = :code " +
+                        (config.getDepartmentId() != null ? " and department_id = :departmentId" : ""),
                 params);
     }
 
     @Override
-    public void setCommonParamsDefault(List<Configuration> listDefaultConfig) {
+    public void update(List<Configuration> configurations) {
         //Общие параметры просто обновляются, так как не предусмотренно удаление общих параметров
-        for (Configuration config : listDefaultConfig) {
+        for (Configuration config : configurations) {
             update(config);
         }
     }
 
     @Override
-    public PagingResult<CommonConfigurationParam> fetchAllCommonParam(PagingParams pagingParams) {
-        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON));
+    public PagingResult<Configuration> fetchAllByGroupAndPaging(ConfigurationParamGroup group, PagingParams pagingParams) {
+        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(group));
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("start", pagingParams.getStartIndex() + 1);
         params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
-        List<CommonConfigurationParam> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
+        List<Configuration> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
                 "select * from (" +
-                        "   select rownum rn, ordered.* from (select code, value from configuration" + where + ") ordered " +
+                        "   select rownum rn, ordered.* from (select code, department_id, value from configuration" + where + ") ordered " +
                         ") numbered " +
                         "where rn between :start and :end order by code",
-                params, commonConfigurationParamMapper
+                params, configurationRowMapper
         );
         int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select code, value from configuration" + where + ")", Integer.class);
         return new PagingResult<>(asyncTaskTypeDataList, totalCount);
@@ -254,7 +212,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 
     @Override
     public void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId) {
-        List<Object[]> updateParams = new LinkedList<Object[]>();
+        List<Object[]> updateParams = new LinkedList<>();
 
         for (Map.Entry<ConfigurationParam, String> entry : configurationParamMap.entrySet()) {
             Object[] entity = new Object[]{

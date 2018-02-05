@@ -180,7 +180,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                         Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move,
                                         List<String> loadedFileNameList, long taskId, long maxFileSize) {
         // Получение пути к каталогу загрузки ТФ
-        ConfigurationParamModel model = configurationDao.getByDepartment(0);
+        ConfigurationParamModel model = configurationDao.fetchAllByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
         if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
             log(userInfo, LogData.L37, logger, taskId, refBookName);
@@ -526,7 +526,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * Путь к каталогу архива справочников
      */
     private String getRefBookArchivePath() {
-        ConfigurationParamModel model = configurationDao.getByDepartment(0);
+        ConfigurationParamModel model = configurationDao.fetchAllByDepartment(0);
         List<String> pathList = model.get(ConfigurationParam.REF_BOOK_ARCHIVE_DIRECTORY, 0);
         if (pathList == null || pathList.isEmpty()) {
             return null;
@@ -538,7 +538,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * Путь к каталогу ошибок справочников
      */
     private String getRefBookErrorPath() {
-        ConfigurationParamModel model = configurationDao.getByDepartment(0);
+        ConfigurationParamModel model = configurationDao.fetchAllByDepartment(0);
         List<String> pathList = model.get(ConfigurationParam.REF_BOOK_ERROR_DIRECTORY, 0);
         if (pathList == null || pathList.isEmpty()) {
             return null;

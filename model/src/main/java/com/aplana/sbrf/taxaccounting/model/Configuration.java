@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * Конфигурация
@@ -11,6 +10,8 @@ public class Configuration implements Serializable {
     private static final long serialVersionUID = -4129485177345542519L;
 
     private String code;
+
+    private String description;
 
     private Integer departmentId;
 
@@ -38,6 +39,14 @@ public class Configuration implements Serializable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Configuration() {
