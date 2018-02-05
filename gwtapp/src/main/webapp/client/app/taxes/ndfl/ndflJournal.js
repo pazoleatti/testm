@@ -19,9 +19,9 @@
          */
         .controller('ndflJournalCtrl', [
             '$scope', '$state', '$stateParams', '$filter', '$rootScope', 'DeclarationDataResource', 'APP_CONSTANTS',
-            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage',
+            '$aplanaModal', '$dialogs', '$logPanel', 'PermissionChecker', '$http', '$webStorage', '$timeout',
             function ($scope, $state, $stateParams, $filter, $rootScope, DeclarationDataResource, APP_CONSTANTS,
-                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage) {
+                      $aplanaModal, $dialogs, $logPanel, PermissionChecker, $http, $webStorage, $timeout) {
                 $rootScope.declarationPrimaryCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_PRIMARY);
                 $rootScope.declarationConsolidatedCreateAllowed = PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.CREATE_DECLARATION_CONSOLIDATED);
                 $rootScope.declarationCreateAllowed = $rootScope.declarationPrimaryCreateAllowed || $rootScope.declarationConsolidatedCreateAllowed;
@@ -253,9 +253,9 @@
                         url: "controller/actions/declarationData/accept",
                         data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
-                        //Обновить страницу и, если есть сообщения, показать их
-                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                        $state.go($state.current, params, {reload: true});
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 
@@ -269,9 +269,9 @@
                         url: "controller/actions/declarationData/check",
                         data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
-                        //Обновить страницу и, если есть сообщения, показать их
-                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                        $state.go($state.current, params, {reload: true});
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 
@@ -302,9 +302,9 @@
                                     reason: reason
                                 }
                             }).then(function (response) {
-                                //Обновить страницу и, если есть сообщения, показать их
-                                var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                                $state.go($state.current, params, {reload: true});
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
                             });
                         });
                 };
@@ -324,9 +324,9 @@
                                 url: "controller/actions/declarationData/delete",
                                 data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                             }).then(function (response) {
-                                //Обновить страницу и, если есть сообщения, показать их
-                                var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                                $state.go($state.current, params, {reload: true});
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
                             });
                         }
                     });
