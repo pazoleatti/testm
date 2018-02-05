@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
+import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
@@ -14,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 /**
- * Сервис для работы с назначением налоговых форм
+ * Сервис для работы с назначением налоговых форм {@link DeclarationTypeAssignment}
  */
 @Service
 @Transactional
@@ -24,40 +26,44 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     private LogEntryService logEntryService;
     private DeclarationTypeService declarationTypeService;
     private DepartmentReportPeriodService departmentReportPeriodService;
+    private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 
     public DeclarationTypeAssignmentServiceImpl(DepartmentService departmentService, SourceService sourceService, LogEntryService logEntryService,
-                                                DeclarationTypeService declarationTypeService, DepartmentReportPeriodService departmentReportPeriodService) {
+                                                DeclarationTypeService declarationTypeService, DepartmentReportPeriodService departmentReportPeriodService,
+                                                DepartmentDeclarationTypeDao departmentDeclarationTypeDao) {
         this.departmentService = departmentService;
         this.sourceService = sourceService;
         this.logEntryService = logEntryService;
         this.declarationTypeService = declarationTypeService;
         this.departmentReportPeriodService = departmentReportPeriodService;
+        this.departmentDeclarationTypeDao = departmentDeclarationTypeDao;
     }
 
     /**
-     * Получение списка назначений налоговых форм подразделениям, доступным пользователю
+     * Получение страницы списка назначений налоговых форм подразделениям, доступным пользователю
      *
      * @param filter       Параметры фильтрации
      * @param userInfo     Информация о пользователе
      * @param pagingParams Параметры пагинации
-     * @return Список назначений
+     * @return Список назначений налоговых форм подразделениям {@link DeclarationTypeAssignment}
      */
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).VIEW_TAXES_NDFL_SETTINGS)")
-    public PagingResult<FormTypeKind> fetchDeclarationTypeAssignments(TAUserInfo userInfo, DeclarationTypeAssignmentFilter filter, PagingParams pagingParams) {
-        List<Long> departmentsIds = new ArrayList<>();
+    public PagingResult<DeclarationTypeAssignment> fetchDeclarationTypeAssignments(TAUserInfo userInfo, DeclarationTypeAssignmentFilter filter, PagingParams pagingParams) {
+        List<Long> departmentIds = new ArrayList<>();
 
         if (filter.getDepartmentIds().isEmpty()) {
             for (Integer id : departmentService.getBADepartmentIds(userInfo.getUser())) {
-                departmentsIds.add(Long.valueOf(id));
+                departmentIds.add(Long.valueOf(id));
             }
         } else {
-            departmentsIds.addAll(filter.getDepartmentIds());
+            departmentIds.addAll(filter.getDepartmentIds());
         }
 
-        PagingResult<FormTypeKind> result = sourceService.fetchAssignedDeclarationTypes(departmentsIds, pagingParams);
+        List<DeclarationTypeAssignment> data = departmentDeclarationTypeDao.fetchDeclarationTypesAssignments(departmentIds, pagingParams);
+        int count = departmentDeclarationTypeDao.fetchDeclarationTypesAssignmentsCount(departmentIds);
 
-        return result;
+        return new PagingResult<>(data, count);
     }
 
     /**
@@ -65,7 +71,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
      *
      * @param userInfo Информация о пользователе
      * @param action   Модель с данными
-     * @return Результат операции
+     * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
      */
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
@@ -102,6 +108,26 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         return result;
     }
 
+    /**
+     * Редактирование назначений налоговых форм подраздениям. Выполняется изменение исполнителей у выбранных назначений
+     *
+     * @param userInfo Информация о пользователе
+     * @param action   Модель с данными: назначения и исполнители {@link EditDeclarationTypeAssignmentsAction}
+     * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
+     */
+    @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
+    public void editDeclarationTypeAssignments(TAUserInfo userInfo, EditDeclarationTypeAssignmentsAction action) {
+        for (Integer assignmentId : action.getAssignmentIds()) {
+            sourceService.updateDDTPerformers(assignmentId, action.getPerformerIds());
+        }
+    }
+
+    /**
+     * Создание периодов для подразделения
+     *
+     * @param depId ID подразделения
+     */
     private void addPeriod(int depId) {
         // Фильтр для проверки привязки подразделения к периоду
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
@@ -117,7 +143,8 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         List<DepartmentReportPeriod> drpForSave = new LinkedList<DepartmentReportPeriod>(drpList);
 
         // Удаляем периоды имеющиеся у текущего подразеления
-        outer: for (DepartmentReportPeriod drp : drpList) {
+        outer:
+        for (DepartmentReportPeriod drp : drpList) {
             for (DepartmentReportPeriod currDepDrp : currDepDrpList) {
                 if (currDepDrp.getReportPeriod().getId().equals(drp.getReportPeriod().getId())
                         && currDepDrp.isActive() == drp.isActive()

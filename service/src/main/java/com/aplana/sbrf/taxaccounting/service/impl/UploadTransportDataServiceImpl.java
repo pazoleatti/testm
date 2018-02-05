@@ -619,7 +619,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      */
     private String getUploadPath(TAUserInfo userInfo, String fileName, ConfigurationParam configurationParam,
                                  int departmentId, String refBookName, LogData logData, Logger logger) {
-        ConfigurationParamModel model = configurationDao.getByDepartment(departmentId);
+        ConfigurationParamModel model = configurationDao.fetchAllByDepartment(departmentId);
         List<String> uploadPathList = model.get(configurationParam, departmentId);
         if (uploadPathList == null || uploadPathList.isEmpty()) {
             if (logData == LogData.L34_1_1) {

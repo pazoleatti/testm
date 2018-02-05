@@ -84,7 +84,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (!userInfo.getUser().hasRoles(TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
-        return configurationDao.getAll();
+        return configurationDao.fetchAllAsModel();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
-        return configurationDao.getConfigByGroup(ConfigurationParamGroup.COMMON_PARAM);
+        return configurationDao.fetchAllAsModelByGroup(ConfigurationParamGroup.COMMON_PARAM);
     }
 
     @Override
@@ -138,11 +138,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo) {
+    public ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
-        return configurationDao.getByDepartment(departmentId);
+        return configurationDao.fetchAllByDepartment(departmentId);
     }
 
 
@@ -152,7 +152,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
-        return configurationDao.getListConfigByGroup(ConfigurationParamGroup.COMMON_PARAM);
+        return configurationDao.fetchAllByGroup(ConfigurationParamGroup.COMMON_PARAM);
     }
 
     @Override
@@ -409,7 +409,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
      * @param userInfo информация о пользователе
      */
     void saveAndLog(ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, TAUserInfo userInfo) {
-        ConfigurationParamModel oldModel = configurationDao.getAll();
+        ConfigurationParamModel oldModel = configurationDao.fetchAllAsModel();
         Map<String, Map<String, String>> oldEmailConfigMap = new HashMap<String, Map<String, String>>();
         Map<String, Map<String, String>> oldAsyncConfigMap = new HashMap<String, Map<String, String>>();
         for (Map<String, String> config : getEmailConfig()) {
@@ -538,7 +538,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public void setCommonParamsDefault(TAUserInfo userInfo) {
-        configurationDao.setCommonParamsDefault(defaultCommonParams());
+        configurationDao.update(defaultCommonParams());
     }
 
     @Override
@@ -563,8 +563,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public PagingResult<CommonConfigurationParam> fetchAllCommonParam(PagingParams pagingParams) {
-        return configurationDao.fetchAllCommonParam(pagingParams);
+    public PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams) {
+        return configurationDao.fetchAllByGroupAndPaging(ConfigurationParamGroup.COMMON, pagingParams);
     }
 
 

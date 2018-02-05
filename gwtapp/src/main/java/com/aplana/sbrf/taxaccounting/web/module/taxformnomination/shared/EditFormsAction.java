@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -10,16 +10,16 @@ import java.util.List;
  * @author auldanov
  */
 public class EditFormsAction extends UnsecuredActionImpl<EditFormResult> implements ActionName {
-    private List<FormTypeKind> formTypeKinds;
+    private List<DeclarationTypeAssignment> declarationTypeAssignments;
     private List<Integer> performers;
     private boolean isForm = true;
 
-    public List<FormTypeKind> getFormTypeKinds() {
-        return formTypeKinds;
+    public List<DeclarationTypeAssignment> getDeclarationTypeAssignments() {
+        return declarationTypeAssignments;
     }
 
-    public void setFormTypeKinds(List<FormTypeKind> formTypeKinds) {
-        this.formTypeKinds = formTypeKinds;
+    public void setDeclarationTypeAssignments(List<DeclarationTypeAssignment> declarationTypeAssignments) {
+        this.declarationTypeAssignments = declarationTypeAssignments;
     }
 
     public List<Integer> getPerformers() {

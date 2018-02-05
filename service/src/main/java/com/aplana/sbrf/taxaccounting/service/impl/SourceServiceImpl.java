@@ -919,16 +919,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
+    public List<DeclarationTypeAssignment> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
         return departmentDeclarationTypeDao.getAllDeclarationAssigned(departmentIds, taxType, queryParams);
-    }
-
-    @Override
-    public PagingResult<FormTypeKind> fetchAssignedDeclarationTypes(List<Long> departmentIds, PagingParams pagingParams) {
-        List<FormTypeKind> data = departmentDeclarationTypeDao.fetchAssignedDeclarationTypes(departmentIds, pagingParams);
-        int count = departmentDeclarationTypeDao.getAssignedDeclarationsCount(departmentIds, 'N');
-
-        return new PagingResult<>(data, count);
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -56,17 +56,17 @@ public class TaxFormNominationPresenter
         void init(TaxType nType, boolean canEdit);
 
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
-        void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes);
+        void setDataToFormTable(int start, int totalCount, List<DeclarationTypeAssignment> departmentFormTypes);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
-        void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes);
+        void setDataToDeclarationTable(int start, int totalCount, List<DeclarationTypeAssignment> departmentFormTypes);
 
         // получение данных
         boolean isForm();
 
         List<Integer> getDepartments();
 
-	    List<FormTypeKind> getSelectedItemsOnDeclarationGrid();
-        List<FormTypeKind> getSelectedItemsOnFormGrid();
+	    List<DeclarationTypeAssignment> getSelectedItemsOnDeclarationGrid();
+        List<DeclarationTypeAssignment> getSelectedItemsOnFormGrid();
 
         /**
          * Обновление достпности кнопок редактировать/отменить назначение
@@ -168,8 +168,8 @@ public class TaxFormNominationPresenter
      }
 
     @Override
-    public void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds) {
-        declarationDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds, taxType);
+    public void onClickEditFormDestinations(List<DeclarationTypeAssignment> declarationTypeAssignments) {
+        declarationDestinationsPresenter.initAndShowEditDialog(this, declarationTypeAssignments, taxType);
     }
 
     @Override

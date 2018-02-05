@@ -107,7 +107,7 @@ public class LoadRefBookDataServiceTest {
         model.put(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY, 0, Arrays.asList("file://" + uploadFolder.getPath() + "/"));
         model.put(ConfigurationParam.REF_BOOK_ARCHIVE_DIRECTORY, 0, Arrays.asList("file://" + archiveFolder.getPath() + "/"));
         model.put(ConfigurationParam.REF_BOOK_ERROR_DIRECTORY, 0, Arrays.asList("file://" + errorFolder.getPath() + "/"));
-        when(configurationDao.getByDepartment(anyInt())).thenReturn(model);
+        when(configurationDao.fetchAllByDepartment(anyInt())).thenReturn(model);
         ReflectionTestUtils.setField(service, "configurationDao", configurationDao);
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author sgoryachkin
  */
-public class FormTypeKind implements Serializable {
+public class DeclarationTypeAssignment implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
@@ -92,7 +92,7 @@ public class FormTypeKind implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        FormTypeKind that = (FormTypeKind) o;
+        DeclarationTypeAssignment that = (DeclarationTypeAssignment) o;
 
         return id != null ? id.equals(that.id) : that.id == null;
 

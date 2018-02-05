@@ -11,7 +11,7 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; left: 23px;min-height: 296px;'>" +
+                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; left: 21px;min-height: 296px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -150,27 +150,34 @@
                             updateLogPanelHeaderMessage(totalCount, fatalErrors);
                         });
 
+                        var appContainers = angular.element(document.querySelector('#app-content')).height();
                        angular.element(document.querySelector('#resize-button')).on('mousedown', function (e) {
-                            var $dragable = angular.element(document.querySelector('#log-panel')),
-                                startWidth = $dragable.height(),
-                                pY = e.pageY;
+                           var $dragable = angular.element(document.querySelector('#log-panel')),
+                               startHeight = $dragable.height(),
+                               pY = e.pageY,
+                               wrapper = angular.element('.cbr-page-layout__view');
 
-                           angular.element(document.querySelector('.cbr-page-layout__view')).on('mouseup', function () {
-                                angular.element('.cbr-page-layout__view').off('mouseup').off('mousemove');
-                            });
-                           angular.element(document.querySelector('.cbr-page-layout__view')).on('mousemove', function (me) {
-                                var my = (me.pageY - pY);
+                           angular.element(document.querySelector('.cbr-page')).on('mouseup', function () {
+                               wrapper.off('mouseup').off('mousemove');
+                           });
+                           angular.element(wrapper).on('mousemove', function (me) {
+                               var my = (me.pageY - pY);
+                               $dragable.find('.ui-jqgrid-bdiv').css({
+                                   height: startHeight - my - 136,
+                                   maxHeight: appContainers - 172
+                               });
 
-                                $dragable.css({
-                                    height: startWidth - my
-                                });
-                                angular.element(document.querySelector('#log-panel')).find('.ui-jqgrid-bdiv').css({
-                                    height: startWidth - my - 140,
-                                    maxHeight: 694
-                                });
-                            });
+                               $dragable.css({
+                                   height: startHeight - my,
+                                   maxHeight: appContainers - 34
+                               });
 
-                        });
+                               if(me.pageY  < 60 ){
+                                   wrapper.off('mouseup').off('mousemove');
+                                   console.log(me.pageY)
+                               }
+                           });
+                       });
                     }
                 };
 

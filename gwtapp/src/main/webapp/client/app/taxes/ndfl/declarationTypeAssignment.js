@@ -5,7 +5,7 @@
      * @description Модуль назначения налоговых форм
      */
     angular.module('app.declarationTypeAssignment', ['ui.router', 'app.constants', 'app.rest', 'app.logPanel', 'app.formatters',
-        'app.select.common', 'app.filterUtils', 'app.createAssignment'])
+        'app.select.common', 'app.filterUtils', 'app.createAssignment', 'app.editAssignment'])
         .config(['$stateProvider', function ($stateProvider) {
             $stateProvider.state('declarationTypeAssignment', {
                 url: '/taxes/declarationTypeAssignment',
@@ -21,6 +21,9 @@
             '$scope', '$state', '$stateParams', '$filter', 'APP_CONSTANTS', '$aplanaModal', '$dialogs', '$logPanel', 'DeclarationTypeAssignmentResource',
             function ($scope, $state, $stateParams, $filter, APP_CONSTANTS, $aplanaModal, $dialogs, $logPanel, DeclarationTypeAssignmentResource) {
 
+                /**
+                 * Фильтр
+                 */
                 $scope.searchFilter = {
                     params: {},
                     ajaxFilter: [],
@@ -28,6 +31,9 @@
                     filterName: 'declarationTypeAssignmentsFilter'
                 };
 
+                /**
+                 * Грид с назначениями
+                 */
                 $scope.declarationTypeAssignmentGrid = {
                     ctrl: {},
                     options: {
@@ -69,12 +75,15 @@
                     }
                 };
 
+                $scope.assignmentsAreSelected = function () {
+                    return $scope.declarationTypeAssignmentGrid && $scope.declarationTypeAssignmentGrid.value && $scope.declarationTypeAssignmentGrid.value.length > 0;
+                };
+
                 /**
                  * @description Обновление грида
                  * @param page
                  */
                 $scope.refreshGrid = function (page) {
-                    console.log($scope.searchFilter.params);
                     $scope.declarationTypeAssignmentGrid.ctrl.refreshGrid(page);
                 };
 
@@ -93,6 +102,9 @@
                     $scope.searchFilter.isClear = needToClear;
                 };
 
+                /**
+                 * Открыть МО создания назначения
+                 */
                 $scope.showCreateAssignmentModal = function () {
                     $aplanaModal.open({
                         title: $filter('translate')('declarationTypeAssignment.modal.create.title'),
@@ -102,8 +114,8 @@
                     }).result.then(
                         function (result) {
                             var response = result.response;
-                            if(response && response.data) {
-                                if(response.data.creatingExistingRelations) {
+                            if (response && response.data) {
+                                if (response.data.creatingExistingRelations) {
                                     $dialogs.warningDialog({
                                         content: $filter('translate')('declarationTypeAssignment.message.existingRelations')
                                     });
@@ -116,7 +128,34 @@
                                     });
                                 }
                             }
-                            if(result.departments && result.departments.length > 0) {
+                            if (result.departments && result.departments.length > 0) {
+                                $scope.searchFilter.params.departments = result.departments;
+                                $scope.searchFilter.isClear = true;
+                                $scope.refreshGrid();
+                            }
+                        }
+                    );
+                };
+
+                /**
+                 * Открыть МО редактирования назначения
+                 */
+                $scope.showEditAssignmentModal = function () {
+                    $aplanaModal.open({
+                        title: $filter('translate')('declarationTypeAssignment.modal.edit.title'),
+                        templateUrl: 'client/app/taxes/ndfl/editDeclarationTypeAssignment.html?v=${buildUuid}',
+                        controller: 'editDeclarationTypeAssignmentCtrl',
+                        windowClass: 'modal600',
+                        resolve: {
+                            $shareData: function () {
+                                return {
+                                    selectedAssignments: $scope.declarationTypeAssignmentGrid.value
+                                };
+                            }
+                        }
+                    }).result.then(
+                        function (result) {
+                            if (result.departments && result.departments.length > 0) {
                                 $scope.searchFilter.params.departments = result.departments;
                                 $scope.searchFilter.isClear = true;
                                 $scope.refreshGrid();
@@ -131,15 +170,9 @@
          * @param cellValue Значение ячейки
          * @param options Данные таблицы
          */
-        .filter('performersFormatter', function () {
+        .filter('performersFormatter', ['$filter', function ($filter) {
             return function (cellValue, options) {
-                var performersFullNames = [];
-                if (cellValue) {
-                    performersFullNames = cellValue.map(function (performer) {
-                        return performer.fullName;
-                    });
-                }
-                return performersFullNames.join(", ");
+                return $filter('joinObjectsPropFormatter')(cellValue, ', ', 'fullName');
             };
-        });
+        }]);
 }());

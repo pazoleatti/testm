@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public class DeleteDeclarationSourcesAction extends UnsecuredActionImpl<DeleteDeclarationSourcesResult> {
 	private int departmentId;
 	private int declarationTypeId;
-	List<FormTypeKind> kind;
+	List<DeclarationTypeAssignment> kind;
 
 	public int getDepartmentId() {
 		return departmentId;
@@ -26,11 +26,11 @@ public class DeleteDeclarationSourcesAction extends UnsecuredActionImpl<DeleteDe
 		this.declarationTypeId = declarationTypeId;
 	}
 
-	public List<FormTypeKind> getKind() {
+	public List<DeclarationTypeAssignment> getKind() {
 		return kind;
 	}
 
-	public void setKind(List<FormTypeKind> kind) {
+	public void setKind(List<DeclarationTypeAssignment> kind) {
 		this.kind = kind;
 	}
 }

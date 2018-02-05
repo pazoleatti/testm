@@ -702,7 +702,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //10 точка запроса
-        ConfigurationParamModel model = configurationService.getByDepartment(department.getId(), logger.getTaUserInfo());
+        ConfigurationParamModel model = configurationService.fetchAllByDepartment(department.getId(), logger.getTaUserInfo());
         if (!model.isEmpty())
             logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());
 

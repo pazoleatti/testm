@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTypeAssignment;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.DeleteDeclarationSourcesAction;
@@ -47,7 +47,7 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
         //TODO передавать данные с клиента
         Date periodStart = new Date();
         Date periodEnd = new Date();
-		for (FormTypeKind ddt : action.getKind()) {
+		for (DeclarationTypeAssignment ddt : action.getKind()) {
             // проверим наличие деклараций
             existDeclaration |= declarationDataService.existDeclaration(ddt.getFormTypeId().intValue(), ddt.getDepartment().getId(), logger.getEntries());
             // если есть, то проверки на связи не делаем

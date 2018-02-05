@@ -39,7 +39,7 @@ public interface ConfigurationService {
      * @param departmentId идентификатор подразделения
      * @return модель
      */
-    ConfigurationParamModel getByDepartment(Integer departmentId, TAUserInfo userInfo);
+    ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo);
 
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
@@ -77,7 +77,7 @@ public interface ConfigurationService {
      * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)
      */
     void setCommonParamsDefault(TAUserInfo userInfo);
-    
+
     /**
      * Получение списка типов асинхронных задач
      *
@@ -86,5 +86,11 @@ public interface ConfigurationService {
      */
     PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams);
 
-    PagingResult<CommonConfigurationParam> fetchAllCommonParam(PagingParams pagingParams);
+    /**
+     * Возвращяет страницу общих конфигурационных параметров
+     *
+     * @param pagingParams параметры пагинации
+     * @return страница {@link Configuration}
+     */
+    PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams);
 }

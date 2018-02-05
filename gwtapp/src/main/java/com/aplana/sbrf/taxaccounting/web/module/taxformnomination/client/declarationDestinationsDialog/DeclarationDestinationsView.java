@@ -61,7 +61,7 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
      * при открытии формы редактирования данных, теряется четкое сопостовление
      * типов, видов, и департаментов
      */
-    private List<FormTypeKind> selectedDFT;
+    private List<DeclarationTypeAssignment> selectedDFT;
 
     // количество полей обязательных для заполнения
     private final static int REQUIDED_FIELDS_COUNT = 2;
@@ -244,17 +244,17 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
     }
 
     @Override
-    public void prepareEditForm(List<FormTypeKind> formTypeKinds){
+    public void prepareEditForm(List<DeclarationTypeAssignment> declarationTypeAssignments){
         isEditForm = true;
         resetForm();
         modalWindowTitle.setTitle("Форма редактирования назначения");
         // установка выбранных строк
-        selectedDFT = formTypeKinds;
+        selectedDFT = declarationTypeAssignments;
 
         List<Integer> departmens = new ArrayList<Integer>();
-        Set<Long> types = new HashSet<Long>(formTypeKinds.size(), 1.1f);
+        Set<Long> types = new HashSet<Long>(declarationTypeAssignments.size(), 1.1f);
         Set<Integer> performers = new HashSet<Integer>();
-        for (FormTypeKind f: formTypeKinds){
+        for (DeclarationTypeAssignment f: declarationTypeAssignments){
             departmens.add(f.getDepartment().getId());
             types.add(f.getFormTypeId());
             if (f.getPerformers() != null && !f.getPerformers().isEmpty()) {

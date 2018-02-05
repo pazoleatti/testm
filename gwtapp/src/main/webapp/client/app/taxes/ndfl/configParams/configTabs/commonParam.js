@@ -27,7 +27,7 @@
                             $filter('translate')('commonParam.grid.columnName.value')
                         ],
                         colModel: [
-                            {name: 'name', index: 'name', width: 400},
+                            {name: 'description', index: 'code', width: 400},
                             {name: 'value', index: 'value', width: 250}
                         ]
                     },

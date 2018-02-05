@@ -61,16 +61,7 @@ public interface SourceService {
      * @param queryParams   параметры пейджинга и фильтра
      * @return список назначенных деклараций для выбранного налога и подразделений
      */
-    List<FormTypeKind> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
-
-    /**
-     * Получение списка видов налоговых форм, назначенных подразделениям
-     *
-     * @param departmentIds Идентификаторы подразделений
-     * @param pagingParams  Параметры пагинации
-     * @return Страница списка назначенных видов форм выбранным подразделениям
-     */
-    PagingResult<FormTypeKind> fetchAssignedDeclarationTypes(List<Long> departmentIds, PagingParams pagingParams);
+    List<DeclarationTypeAssignment> getAllDeclarationAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams);
 
     /**
      * Добавляет декларации, назначенные подразделению
