@@ -28,9 +28,30 @@ public interface ConfigurationDao {
     Configuration fetchByEnum(ConfigurationParam param);
 
     /**
+     * Возвращяет список всех конфигурационных параметров
+     */
+    List<Configuration> fetchAll();
+
+    /**
      * Возвращяет все параметры в виде {@link ConfigurationParamModel}
      */
     ConfigurationParamModel fetchAllAsModel();
+
+    /**
+     * Возвращает список конфигурационных параметров определенных групп
+     *
+     * @param group группа параметров {@link ConfigurationParamGroup}
+     * @return список параметров определенной группы
+     */
+    List<Configuration> fetchAllByGroup(final ConfigurationParamGroup group);
+
+    /**
+     * Возвращяет страницу конфигурационных параметров
+     *
+     * @param pagingParams параметры пагинации
+     * @return страница {@link Configuration}
+     */
+    PagingResult<Configuration> fetchAllByGroupAndPaging(ConfigurationParamGroup group, PagingParams pagingParams);
 
     /**
      * Возвращяет все параметры определенной группы в виде {@link ConfigurationParamModel}
@@ -60,33 +81,12 @@ public interface ConfigurationDao {
     void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId);
 
     /**
-     * Возвращает список конфигурационных параметров определенных групп
-     *
-     * @param group группа параметров {@link ConfigurationParamGroup}
-     * @return список параметров определенной группы
-     */
-    List<Configuration> fetchAllByGroup(final ConfigurationParamGroup group);
-
-    /**
      * Обновляет значение конфигурационного параметра
      */
     void update(Configuration config);
 
     /**
-     * Возвращяет список всех конфигурационных параметров
-     */
-    List<Configuration> fetchAll();
-
-    /**
      * Обновляет значения конфигурационных параметров
      */
     void update(List<Configuration> configurations);
-
-    /**
-     * Возвращяет страницу конфигурационных параметров
-     *
-     * @param pagingParams параметры пагинации
-     * @return страница {@link Configuration}
-     */
-    PagingResult<Configuration> fetchAllByGroupAndPaging(ConfigurationParamGroup group, PagingParams pagingParams);
 }

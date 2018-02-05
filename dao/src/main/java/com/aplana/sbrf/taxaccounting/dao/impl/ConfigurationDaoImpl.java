@@ -105,18 +105,36 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public ConfigurationParamModel fetchAllAsModelByGroup(final ConfigurationParamGroup group) {
-        final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value, department_id from configuration", new ConfigurationRowCallbackHandler(model, group));
-        return model;
-    }
-
-    @Override
     public List<Configuration> fetchAllByGroup(final ConfigurationParamGroup group) {
         return getJdbcTemplate().query(
                 "select code, department_id, value from configuration where " +
                         SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(group)),
                 configurationRowMapper);
+    }
+
+    @Override
+    public PagingResult<Configuration> fetchAllByGroupAndPaging(ConfigurationParamGroup group, PagingParams pagingParams) {
+        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(group));
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("start", pagingParams.getStartIndex() + 1);
+        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+        List<Configuration> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
+                "select * from (" +
+                        "   select rownum rn, ordered.* from (select code, department_id, value from configuration" + where + ") ordered " +
+                        ") numbered " +
+                        "where rn between :start and :end order by code",
+                params, configurationRowMapper
+        );
+        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select code, value from configuration" + where + ")", Integer.class);
+        return new PagingResult<>(asyncTaskTypeDataList, totalCount);
+    }
+
+    @Override
+    public ConfigurationParamModel fetchAllAsModelByGroup(final ConfigurationParamGroup group) {
+        final ConfigurationParamModel model = new ConfigurationParamModel();
+        getJdbcTemplate().query("select code, value, department_id from configuration", new ConfigurationRowCallbackHandler(model, group));
+        return model;
     }
 
     @Override
@@ -190,24 +208,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         for (Configuration config : configurations) {
             update(config);
         }
-    }
-
-    @Override
-    public PagingResult<Configuration> fetchAllByGroupAndPaging(ConfigurationParamGroup group, PagingParams pagingParams) {
-        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(group));
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("start", pagingParams.getStartIndex() + 1);
-        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
-        List<Configuration> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
-                "select * from (" +
-                        "   select rownum rn, ordered.* from (select code, department_id, value from configuration" + where + ") ordered " +
-                        ") numbered " +
-                        "where rn between :start and :end order by code",
-                params, configurationRowMapper
-        );
-        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select code, value from configuration" + where + ")", Integer.class);
-        return new PagingResult<>(asyncTaskTypeDataList, totalCount);
     }
 
     @Override
