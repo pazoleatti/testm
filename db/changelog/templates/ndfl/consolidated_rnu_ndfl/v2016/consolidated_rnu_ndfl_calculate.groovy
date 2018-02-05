@@ -18,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.MarkupBuilder
-import org.joda.time.LocalDateTime
 
 new Calculate(this).run()
 
@@ -487,7 +486,7 @@ class Calculate extends AbstractScriptClass {
         ndflPerson.lastName = personRecord.get("LAST_NAME")?.getStringValue()
         ndflPerson.firstName = personRecord.get("FIRST_NAME")?.getStringValue()
         ndflPerson.middleName = personRecord.get("MIDDLE_NAME")?.getStringValue()
-        ndflPerson.birthDay = new LocalDateTime(personRecord.get("BIRTH_DATE")?.getDateValue())
+        ndflPerson.birthDay = personRecord.get("BIRTH_DATE")?.getDateValue()
         ndflPerson.innNp = personRecord.get("INN")?.getStringValue()
         ndflPerson.innForeign = personRecord.get("INN_FOREIGN")?.getStringValue()
 

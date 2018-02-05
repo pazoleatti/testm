@@ -488,7 +488,7 @@ class ConsolidatedRnuNdfl extends AbstractScriptClass {
             row.snils = ndflPerson.snils
             row.innNp = ndflPerson.innNp
             row.inp = ndflPerson.inp
-            row.birthDay = new Date((Long) ndflPerson.birthDay.getLocalMillis())
+            row.birthDay = ndflPerson.birthDay
             row.idDocNumber = ndflPerson.idDocNumber
             row.statusNp = getPersonStatusName(ndflPerson.status)
             row.innForeign = ndflPerson.innForeign
@@ -1166,7 +1166,7 @@ class RequisitesSheetFiller implements SheetFiller {
             cell5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "");
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
-            cell6.setCellValue(np.birthDay?.toDate());
+            cell6.setCellValue(np.birthDay);
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyle)
             cell7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "");
@@ -1257,12 +1257,12 @@ class IncomesSheetFiller implements SheetFiller {
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
             if (npi.incomeAccruedDate != null) {
-                cell6.setCellValue(npi.incomeAccruedDate.toDate());
+                cell6.setCellValue(npi.incomeAccruedDate);
             }
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyleDate)
             if (npi.incomePayoutDate != null) {
-                cell7.setCellValue(npi.incomePayoutDate.toDate());
+                cell7.setCellValue(npi.incomePayoutDate);
             }
             Cell cell8 = row.createCell(8);
             cell8.setCellStyle(centeredStyle)
@@ -1298,7 +1298,7 @@ class IncomesSheetFiller implements SheetFiller {
             Cell cell15 = row.createCell(15);
             cell15.setCellStyle(centeredStyleDate)
             if (npi.taxDate != null) {
-                cell15.setCellValue(npi.taxDate.toDate());
+                cell15.setCellValue(npi.taxDate);
             }
 
             Cell cell16 = row.createCell(16);
@@ -1329,12 +1329,12 @@ class IncomesSheetFiller implements SheetFiller {
             Cell cell21 = row.createCell(21);
             cell21.setCellStyle(centeredStyleDate)
             if (npi.taxTransferDate != null) {
-                cell21.setCellValue(npi.taxTransferDate.toDate());
+                cell21.setCellValue(npi.taxTransferDate);
             }
             Cell cell22 = row.createCell(22);
             cell22.setCellStyle(centeredStyleDate)
             if (npi.paymentDate != null) {
-                cell22.setCellValue(npi.paymentDate.toDate());
+                cell22.setCellValue(npi.paymentDate);
             }
             Cell cell23 = row.createCell(23);
             cell23.setCellStyle(centeredStyle)
@@ -1383,7 +1383,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell5 = row.createCell(5);
             cell5.setCellStyle(centeredStyleDate)
             if (npd.notifDate != null) {
-                cell5.setCellValue(npd.notifDate.toDate());
+                cell5.setCellValue(npd.notifDate);
             }
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyle)
@@ -1402,7 +1402,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell10 = row.createCell(10);
             cell10.setCellStyle(centeredStyleDate)
             if (npd.incomeAccrued != null) {
-                cell10.setCellValue(npd.incomeAccrued.toDate());
+                cell10.setCellValue(npd.incomeAccrued);
             }
             Cell cell11 = row.createCell(11);
             cell11.setCellStyle(centeredStyle)
@@ -1415,7 +1415,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell13 = row.createCell(13);
             cell13.setCellStyle(centeredStyleDate)
             if (npd.periodPrevDate != null) {
-                cell13.setCellValue(npd.periodPrevDate.toDate());
+                cell13.setCellValue(npd.periodPrevDate);
             }
             Cell cell14 = row.createCell(14);
             cell14.setCellStyle(borderStyle)
@@ -1425,7 +1425,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell15 = row.createCell(15);
             cell15.setCellStyle(centeredStyleDate)
             if (npd.periodCurrDate != null) {
-                cell15.setCellValue(npd.periodCurrDate.toDate());
+                cell15.setCellValue(npd.periodCurrDate);
             }
             Cell cell16 = row.createCell(16);
             cell16.setCellStyle(borderStyle)
@@ -1476,7 +1476,7 @@ class PrepaymentSheetFiller implements SheetFiller {
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
             if (npp.notifDate != null) {
-                cell6.setCellValue(npp.notifDate.toDate());
+                cell6.setCellValue(npp.notifDate);
             }
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyle)

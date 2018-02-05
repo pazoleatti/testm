@@ -132,9 +132,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         final Logger logger = new Logger();
         final Date startDate = new Date();
 
-        ConfigurationParamModel paramModel = configurationDao.getConfigByGroup(ConfigurationParamGroup.COMMON_PARAM);
-        String showTiming = paramModel.get(ConfigurationParam.SHOW_TIMING).get(0).get(0);
-        final boolean isShowTiming = showTiming.equals("1");
+        Configuration shotTimingConfiguration = configurationDao.fetchByEnum(ConfigurationParam.SHOW_TIMING);
+        final boolean isShowTiming = "1".equals(shotTimingConfiguration.getValue());
         if (isShowTiming) {
             logger.info("Начало выполнения операции %s", sdf_time.get().format(startDate));
         }

@@ -38,7 +38,7 @@
                         ],
                         colModel: [
                             {name: 'departmentId', index: 'departmentId', hidden: true, key: true},
-                            {name: 'code', index: 'code', width: 500, key: true},
+                            {name: 'description', index: 'code', width: 500, key: true},
                             {name: 'value', index: 'value', width: 700, key: true}
                         ],
 

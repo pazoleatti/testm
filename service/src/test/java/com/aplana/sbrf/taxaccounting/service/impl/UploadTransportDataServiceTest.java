@@ -65,7 +65,7 @@ public class UploadTransportDataServiceTest {
         model.put(ConfigurationParam.KEY_FILE, TEST_DEPARTMENT_ID, asList("smb://", "/"));
         model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/error/", "smb://"));
 
-        when(configurationDao.getAll()).thenReturn(model);
+        when(configurationDao.fetchAllAsModel()).thenReturn(model);
         when(configurationDao.getByDepartment(TEST_DEPARTMENT_ID)).thenReturn(model);
 
         when(loadRefBookDataService.isDiasoftFile(anyString())).thenAnswer(new Answer<Object>() {

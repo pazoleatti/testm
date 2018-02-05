@@ -53,7 +53,6 @@ import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import org.joda.time.LocalDateTime
 
 new Report2Ndfl(this).run();
 
@@ -721,7 +720,7 @@ class Report2Ndfl extends AbstractScriptClass {
                     }
                     if (!refPersonIds.contains(np.personId)) {
                         refPersonIds << np.personId
-                        ndflReferencess << createRefBookAttributesForNdflReference(np.id, np.personId, nomSpr, np.lastName, np.firstName, np.middleName, new Date(np.birthDay.getLocalMillis()))
+                        ndflReferencess << createRefBookAttributesForNdflReference(np.id, np.personId, nomSpr, np.lastName, np.firstName, np.middleName, np.birthDay)
                     }
                 }
             }
@@ -977,14 +976,17 @@ class Report2Ndfl extends AbstractScriptClass {
  * @param ndflPersonDeductions
  * @return
  */
-    def filterDeductionsByIncomeCode(List<NdflPersonIncome> ndflPersonIncomes, List<NdflPersonDeduction> ndflPersonDeductions) {
+    List<NdflPersonDeduction> filterDeductionsByIncomeCode(List<NdflPersonIncome> ndflPersonIncomes, List<NdflPersonDeduction> ndflPersonDeductions) {
         def toReturn = []
         ndflPersonIncomes.each { NdflPersonIncome ndflPersonIncome ->
+            Calendar taxDateCalIncome = new GregorianCalendar();
+            taxDateCalIncome.setTime(ndflPersonIncome.incomeAccruedDate)
 
             for (NdflPersonDeduction d in ndflPersonDeductions) {
-
+                Calendar taxDateCalDeduction = new GregorianCalendar();
+                taxDateCalDeduction.setTime(d.incomeAccrued)
                 if (d.incomeCode == ndflPersonIncome.incomeCode && d.operationId == ndflPersonIncome.operationId &&
-                        ndflPersonIncome.incomeAccruedDate.getMonthOfYear() == d.incomeAccrued.getMonthOfYear() && !toReturn.contains(d)) toReturn << d
+                        taxDateCalIncome.get(Calendar.MONTH) == taxDateCalDeduction.get(Calendar.MONTH) && !toReturn.contains(d)) toReturn << d
 
             }
         }
@@ -997,13 +999,16 @@ class Report2Ndfl extends AbstractScriptClass {
  * @param ndflPersonDeductions
  * @return
  */
-    def filterDeductions(List<NdflPersonIncome> ndflPersonIncomes, List<NdflPersonDeduction> ndflPersonDeductions) {
+    List<NdflPersonDeduction> filterDeductions(List<NdflPersonIncome> ndflPersonIncomes, List<NdflPersonDeduction> ndflPersonDeductions) {
         def toReturn = []
         for (NdflPersonDeduction d in ndflPersonDeductions) {
+            Calendar taxDateCalDeduction = new GregorianCalendar();
+            taxDateCalDeduction.setTime(d.incomeAccrued)
             for (NdflPersonIncome ndflPersonIncome in ndflPersonIncomes) {
-
+                Calendar taxDateCalIncome = new GregorianCalendar();
+                taxDateCalIncome.setTime(ndflPersonIncome.incomeAccruedDate)
                 if (d.incomeCode == ndflPersonIncome.incomeCode && d.operationId == ndflPersonIncome.operationId &&
-                        ndflPersonIncome.incomeAccruedDate.getMonthOfYear() == d.incomeAccrued.getMonthOfYear() && !toReturn.contains(d)) {
+                        taxDateCalIncome.get(Calendar.MONTH) == taxDateCalDeduction.get(Calendar.MONTH) && !toReturn.contains(d)) {
                     toReturn << d
                     break
                 }
@@ -1068,7 +1073,9 @@ class Report2Ndfl extends AbstractScriptClass {
         List<Integer> monthes = []
         Map<Integer, Map<String, List<NdflPersonIncome>>> toReturn = [:]
         incomes.each { NdflPersonIncome income ->
-            Integer month = income.incomeAccruedDate.getMonthOfYear()
+            Calendar accruedDateCal = new GregorianCalendar();
+            accruedDateCal.setTime(income.incomeAccruedDate)
+            Integer month = accruedDateCal.get(Calendar.MONTH)
             if (!monthes.contains(month)) {
                 monthes.add(month)
             }
@@ -1077,7 +1084,9 @@ class Report2Ndfl extends AbstractScriptClass {
         monthes.each { Integer month ->
             List<NdflPersonIncome> pickedIncomes = []
             for (NdflPersonIncome income in incomes) {
-                if (month == income.incomeAccruedDate.getMonthOfYear()) {
+                Calendar accruedDateCal = new GregorianCalendar();
+                accruedDateCal.setTime(income.incomeAccruedDate)
+                if (month == accruedDateCal.get(Calendar.MONTH)) {
                     pickedIncomes.add(income)
                 }
                 groupByMonth.put(month, pickedIncomes)
@@ -1258,7 +1267,7 @@ class Report2Ndfl extends AbstractScriptClass {
             incomesGroupedByOperationId.each { String k, List<NdflPersonIncome> v ->
                 boolean correctDate = false
                 v.each { NdflPersonIncome income ->
-                    if (income.incomeAccruedDate >= new LocalDateTime(startDate) && income.incomePayoutDate < new LocalDateTime(endDate)) {
+                    if (income.incomeAccruedDate >= startDate && income.incomePayoutDate < endDate) {
                         correctDate = true
                     }
                 }
@@ -1283,7 +1292,7 @@ class Report2Ndfl extends AbstractScriptClass {
             incomesGroupedByOperationId.each { String k, List<NdflPersonIncome> v ->
                 boolean correctDate = false
                 v.each { NdflPersonIncome income ->
-                    if (income.incomeAccruedDate >= new LocalDateTime(startDate) && income.incomePayoutDate < new LocalDateTime(endDate)) {
+                    if (income.incomeAccruedDate >= startDate && income.incomePayoutDate < endDate) {
                         correctDate = true
                     }
                 }
@@ -1308,7 +1317,7 @@ class Report2Ndfl extends AbstractScriptClass {
             incomesGroupedByOperationId.each { String k, List<NdflPersonIncome> v ->
                 boolean correctDate = false
                 v.each { NdflPersonIncome income ->
-                    if (income.incomeAccruedDate >= new LocalDateTime(startDate) && income.incomePayoutDate < new LocalDateTime(endDate)) {
+                    if (income.incomeAccruedDate >= startDate && income.incomePayoutDate < endDate) {
                         correctDate = true
                     }
                 }
@@ -1333,7 +1342,7 @@ class Report2Ndfl extends AbstractScriptClass {
         incomesGroupedByOperationId.each { String k, List<NdflPersonIncome> v ->
             boolean correctDate = false
             v.each { NdflPersonIncome income ->
-                if (income.incomeAccruedDate >= new LocalDateTime(startDate) && income.incomePayoutDate < new LocalDateTime(endDate)) {
+                if (income.incomeAccruedDate >= startDate && income.incomePayoutDate < endDate) {
                     correctDate = true
                 }
             }
@@ -2808,7 +2817,7 @@ Boolean.TRUE, State.ACCEPTED.getId())*/
         String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
         String fio = lastname + firstname + middlename
         // Физическое лицо, к которому относится ошибочная строка. Дата рождения
-        Date birthDay = new Date((Long) ndflPerson.birthDay.getLocalMillis())
+        Date birthDay = ndflPerson.birthDay
 
         XSSFCell cell1 = row.createCell(0)
         cell1.setCellValue(periodName + ":" + year)

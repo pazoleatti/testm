@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
-import org.joda.time.LocalDateTime;
-
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author Andrey Drunk
@@ -17,7 +16,7 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     private String notifNum;
 
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Дата выдачи уведомления
-    private LocalDateTime notifDate;
+    private Date notifDate;
 
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Графа 7)
     private String notifSource;
@@ -62,11 +61,11 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
         this.notifNum = notifNum;
     }
 
-    public LocalDateTime getNotifDate() {
+    public Date getNotifDate() {
         return notifDate;
     }
 
-    public void setNotifDate(LocalDateTime notifDate) {
+    public void setNotifDate(Date notifDate) {
         this.notifDate = notifDate;
     }
 

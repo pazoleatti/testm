@@ -38,7 +38,6 @@ import com.aplana.sbrf.taxaccounting.script.service.ReportPeriodService
 import com.aplana.sbrf.taxaccounting.script.service.RefBookService
 import org.apache.commons.lang3.StringUtils
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import org.joda.time.LocalDateTime
 
 new Report6Ndfl(this).run();
 
@@ -382,7 +381,7 @@ class Report6Ndfl extends AbstractScriptClass {
                     }
                     // Отфилтьтруем строки у которых раздел 2.графа 6 не в этом отчетном периоде
                     def incomesWhithoutAccruedDateNotInCurrentPeriod = ndflPersonIncomeList.findAll {
-                        it.incomeAccruedDate == null || it.incomeAccruedDate.compareTo(new LocalDateTime(reportPeriod.startDate)) >= 0
+                        it.incomeAccruedDate == null || it.incomeAccruedDate.compareTo(reportPeriod.startDate) >= 0
                     }
 
                     // Сумма удержанная
@@ -494,7 +493,7 @@ class Report6Ndfl extends AbstractScriptClass {
                         }
                         for (def income : v) {
                             if (income.taxDate != null) {
-                                if (income.taxDate >= new LocalDateTime(reportPeriod.calendarStartDate) && income.taxDate <= new LocalDateTime(reportPeriod.endDate)) {
+                                if (income.taxDate >= reportPeriod.calendarStartDate && income.taxDate <= reportPeriod.endDate) {
                                     absentTaxDate = false
                                     break
                                 }
@@ -502,7 +501,7 @@ class Report6Ndfl extends AbstractScriptClass {
                         }
                         for (def income : v) {
                             if (income.taxTransferDate != null) {
-                                if (income.taxTransferDate >= new LocalDateTime(reportPeriod.calendarStartDate) && income.taxTransferDate <= new LocalDateTime(reportPeriod.endDate)) {
+                                if (income.taxTransferDate >= reportPeriod.calendarStartDate && income.taxTransferDate <= reportPeriod.endDate) {
                                     absentTransferDate = false
                                     break
                                 }
@@ -1831,7 +1830,7 @@ class Report6Ndfl extends AbstractScriptClass {
         String middlename = ndflPerson.middleName != null ? ndflPerson.middleName : ""
         String fio = lastname + firstname + middlename
         // Физическое лицо, к которому относится ошибочная строка. Дата рождения
-        Date birthDay = new Date((Long) ndflPerson.birthDay.getLocalMillis())
+        Date birthDay = ndflPerson.birthDay
 
         XSSFCell cell1 = row.createCell(0)
         cell1.setCellValue(periodName + ":" + year)
@@ -1922,11 +1921,7 @@ class Report6Ndfl extends AbstractScriptClass {
         ) as Throwable
     }
 
-    String formatDate(date) {
-        if (date instanceof LocalDateTime) {
-            return ((LocalDateTime) date).toString(DATE_FORMAT_DOTTED)
-        } else {
-            return ScriptUtils.formatDate((Date) date, DATE_FORMAT_DOTTED)
-        }
+    String formatDate(Date date) {
+        return ScriptUtils.formatDate(date, DATE_FORMAT_DOTTED)
     }
 }

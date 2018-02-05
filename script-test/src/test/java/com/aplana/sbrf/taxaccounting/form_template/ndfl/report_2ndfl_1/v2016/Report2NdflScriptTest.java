@@ -93,8 +93,8 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
     @Test
     public void validation_test() throws IOException, SAXException, XpathException {
 
-        LocalDateTime calTax = new LocalDateTime(2014, 6, 1, 0, 0);
-        LocalDateTime calPayment = new LocalDateTime(2014, 7, 1, 0, 0);
+        Date calTax = new Date(2014, 6, 1);
+        Date calPayment = new Date(2014, 7, 1);
         List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax, calPayment);
 
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
@@ -137,8 +137,8 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
 
     @Test
     public void check_selection_when_priznakF_equals_1() throws IOException, SAXException, XpathException {
-        LocalDateTime calTax = new LocalDateTime(2015, 6, 1, 0, 0);
-        LocalDateTime calPayment = new LocalDateTime(2015, 7, 1, 0, 0);
+        Date calTax = new Date(2015, 6, 1);
+        Date calPayment = new Date(2015, 7, 1);
         List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax, calPayment);
 
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
@@ -155,8 +155,8 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
 
     @Test
     public void check_selection_when_priznakF_equals_2() throws IOException, SAXException, XpathException {
-        LocalDateTime calTax = new LocalDateTime(2015, 6, 1, 0, 0);
-        LocalDateTime calPayment = new LocalDateTime(2015, 7, 1, 0, 0);
+        Date calTax = new Date(2015, 6, 1);
+        Date calPayment = new Date(2015, 7, 1);
         List<NdflPerson> ndflPersons = createNdflPersonMocks(calTax, calPayment);
 
         when(testHelper.getNdflPersonService().findNdflPersonByParameters(anyLong(), any(Map.class), anyInt(), anyInt())).thenReturn(new PagingResult<NdflPerson>(ndflPersons));
@@ -281,7 +281,7 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
         return v.isValid();
     }
 
-    private List<NdflPerson> createNdflPersonMocks(LocalDateTime taxDate, LocalDateTime paymentDate) {
+    private List<NdflPerson> createNdflPersonMocks(Date taxDate, Date paymentDate) {
         List<NdflPerson> ndflPersonList = new ArrayList<NdflPerson>();
         NdflPerson ndflPerson = null;
         int taxrate = 13;
@@ -292,7 +292,7 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
             ndflPerson.setInnForeign("111111111111");
             ndflPerson.setStatus("6");
 
-            ndflPerson.setBirthDay(new LocalDateTime(1985, 1, 1, 0, 0));
+            ndflPerson.setBirthDay(new Date(1985, 1, 1));
 
             ndflPerson.setCitizenship("643");
 
@@ -328,7 +328,7 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome1.setOverholdingTax(BigDecimal.valueOf(9000L));
             ndflPersonIncome1.setNotHoldingTax(BigDecimal.valueOf(4000L));
 
-            ndflPersonIncome1.setIncomeAccruedDate(new LocalDateTime(2014, 5, 1, 0, 0));
+            ndflPersonIncome1.setIncomeAccruedDate(new Date(2014, 5, 1));
 
             ndflPersonIncome1.setTaxDate(taxDate);
             ndflPersonIncome1.setPaymentDate(paymentDate);
@@ -347,7 +347,7 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
             ndflPersonIncome2.setOverholdingTax(BigDecimal.valueOf(9000L));
             ndflPersonIncome2.setNotHoldingTax(BigDecimal.valueOf(4000L));
 
-            LocalDateTime calAccrued = new LocalDateTime(2014, 6, 1, 0, 0);
+            Date calAccrued = new Date(2014, 6, 1);
             ndflPersonIncome2.setIncomeAccruedDate(calAccrued);
 
             ndflPersonIncome2.setTaxDate(taxDate);

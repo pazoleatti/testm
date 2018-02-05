@@ -53,7 +53,7 @@ public class LoadAllRefBookHandler extends AbstractActionHandler<LoadRefBookActi
         LoadRefBookResult result = new LoadRefBookResult();
         Logger logger = new Logger();
         // Проверки путей
-        ConfigurationParamModel model = configurationService.getByDepartment(0, securityService.currentUserInfo());
+        ConfigurationParamModel model = configurationService.fetchAllByDepartment(0, securityService.currentUserInfo());
         List<String> okatoList = model.get(ConfigurationParam.OKATO_UPLOAD_DIRECTORY, 0);
         List<String> regionList = model.get(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 0);
         List<String> diasoftList = model.get(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0);

@@ -8,9 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
 import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonPrepayment;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
@@ -31,7 +28,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
 
     @Override
     public NdflPerson findOne(long id) {
-        return ndflPersonDao.get(id);
+        return ndflPersonDao.fetchOne(id);
     }
 
     /**
@@ -42,7 +39,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public int findPersonCount(long declarationDataId) {
-        return ndflPersonDao.findPersonCount(declarationDataId);
+        return ndflPersonDao.getPersonCount(declarationDataId);
     }
 
     /**
@@ -54,7 +51,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public PagingResult<NdflPerson> findPersonByFilter(long declarationDataId, Map<String, Object> parameters, PagingParams pagingParams) {
-        return ndflPersonDao.findNdflPersonByParameters(declarationDataId, parameters, pagingParams);
+        return ndflPersonDao.fetchNdflPersonByParameters(declarationDataId, parameters, pagingParams);
     }
 
     /**
@@ -65,7 +62,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public PagingResult<NdflPerson> findPersonByFilter(NdflPersonFilter ndflPersonFilter, PagingParams pagingParams) {
-        return ndflPersonDao.findNdflPersonByParameters(ndflPersonFilter, pagingParams);
+        return ndflPersonDao.fetchNdflPersonByParameters(ndflPersonFilter, pagingParams);
     }
 
     /**
@@ -76,7 +73,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public int findPersonIncomeCount(long declarationDataId) {
-        return ndflPersonDao.findPersonIncomeCount(declarationDataId);
+        return ndflPersonDao.getPersonIncomeCount(declarationDataId);
     }
 
     /**
@@ -88,7 +85,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public PagingResult<NdflPersonIncomeDTO> findPersonIncomeByFilter(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams) {
-        return ndflPersonDao.findPersonIncomeByParameters(declarationDataId, ndflPersonIncomeFilter, pagingParams);
+        return ndflPersonDao.fetchPersonIncomeByParameters(declarationDataId, ndflPersonIncomeFilter, pagingParams);
     }
 
     /**
@@ -99,7 +96,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public int findPersonDeductionsCount(long declarationDataId) {
-        return ndflPersonDao.findPersonDeductionsCount(declarationDataId);
+        return ndflPersonDao.getPersonDeductionsCount(declarationDataId);
     }
 
     /**
@@ -111,7 +108,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public PagingResult<NdflPersonDeductionDTO> findPersonDeductionsByFilter(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams) {
-        return ndflPersonDao.findPersonDeductionByParameters(declarationDataId, ndflPersonDeductionFilter, pagingParams);
+        return ndflPersonDao.fetchPersonDeductionByParameters(declarationDataId, ndflPersonDeductionFilter, pagingParams);
     }
 
     /**
@@ -122,7 +119,7 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public int findPersonPrepaymentCount(long declarationDataId) {
-        return ndflPersonDao.findPersonPrepaymentCount(declarationDataId);
+        return ndflPersonDao.getPersonPrepaymentCount(declarationDataId);
     }
 
     /**
@@ -134,6 +131,6 @@ public class NdflPersonServiceImpl implements NdflPersonService{
      */
     @Override
     public PagingResult<NdflPersonPrepaymentDTO> findPersonPrepaymentByFilter(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams) {
-        return ndflPersonDao.findPersonPrepaymentByParameters(declarationDataId, ndflPersonPrepaymentFilter, pagingParams);
+        return ndflPersonDao.fetchPersonPrepaymentByParameters(declarationDataId, ndflPersonPrepaymentFilter, pagingParams);
     }
 }

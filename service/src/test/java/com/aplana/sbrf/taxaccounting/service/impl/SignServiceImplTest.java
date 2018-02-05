@@ -61,7 +61,7 @@ public class SignServiceImplTest {
         model.put(ConfigurationParam.ENCRYPT_DLL, 0, dlls);
 
 		configurationDao = Mockito.mock(ConfigurationDao.class);
-        when(configurationDao.getAll()).thenReturn(model);
+        when(configurationDao.fetchAllAsModel()).thenReturn(model);
 
 		signService = new SignServiceImpl();
 		ReflectionTestUtils.setField(signService, "configurationDao", configurationDao);

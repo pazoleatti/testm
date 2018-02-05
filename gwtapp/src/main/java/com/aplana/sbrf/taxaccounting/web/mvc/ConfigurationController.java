@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
 import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
-import com.aplana.sbrf.taxaccounting.model.CommonConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.Configuration;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
@@ -53,8 +53,8 @@ public class ConfigurationController {
     }
 
     @GetMapping(value = "rest/configuration/commonParam")
-    public JqgridPagedList<CommonConfigurationParam> fetchAllCommonParam(@RequestParam PagingParams pagingParams) {
-        PagingResult<CommonConfigurationParam> data = configurationService.fetchAllCommonParam(pagingParams);
+    public JqgridPagedList<Configuration> fetchAllCommonParam(@RequestParam PagingParams pagingParams) {
+        PagingResult<Configuration> data = configurationService.fetchAllCommonParam(pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 data,
                 data.getTotalCount(),
