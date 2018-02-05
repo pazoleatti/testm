@@ -13,6 +13,7 @@ import java.util.Map;
  */
 
 public interface ConfigurationDao {
+
     /**
      * Читает из БД значения всех параметров.
      */
@@ -29,9 +30,9 @@ public interface ConfigurationDao {
     void save(ConfigurationParamModel model);
 
     /**
-     * Сохраняет значения параметров в БД. Если параметр в БД отсутствует, то он создается.
+     * Создаёт параметр в БД.
      */
-    boolean save(Configuration configuration);
+    void create(Configuration config);
 
     /**
      * Обновляет параметр в БД у конкретных параметров
