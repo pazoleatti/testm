@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
-import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
-import org.joda.time.LocalDateTime;
-
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class NdflPersonIncomeDTO {
 
@@ -14,10 +12,10 @@ public class NdflPersonIncomeDTO {
     private String incomeType;
 
     // Доход.Дата.Начисление (Графа 6)
-    private LocalDateTime incomeAccruedDate;
+    private Date incomeAccruedDate;
 
     // Доход.Дата.Выплата (Графа 7)
-    private LocalDateTime incomePayoutDate;
+    private Date incomePayoutDate;
 
     // Доход.Источник выплаты.ОКТМО (Графа 8)
     private String oktmo;
@@ -41,7 +39,7 @@ public class NdflPersonIncomeDTO {
     private Integer taxRate;
 
     // НДФЛ.Расчет.Дата (Графа 15)
-    private LocalDateTime taxDate;
+    private Date taxDate;
 
     // НДФЛ.Расчет.Сумма.Исчисленный (Графа 16)
     private BigDecimal calculatedTax;
@@ -59,10 +57,10 @@ public class NdflPersonIncomeDTO {
     private Long refoundTax;
 
     // НДФЛ.Перечисление в бюджет.Срок (Графа 21)
-    private LocalDateTime taxTransferDate;
+    private Date taxTransferDate;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Дата (Графа 22)
-    private LocalDateTime paymentDate;
+    private Date paymentDate;
 
     // НДФЛ.Перечисление в бюджет.Платежное поручение.Номер (Графа 23)
     private String paymentNumber;
@@ -84,7 +82,10 @@ public class NdflPersonIncomeDTO {
 
     private String inp;
 
-    public NdflPersonIncomeDTO(String incomeCode, String incomeType, LocalDateTime incomeAccruedDate, LocalDateTime incomePayoutDate, String oktmo, String kpp, BigDecimal incomeAccruedSumm, BigDecimal incomePayoutSumm, BigDecimal totalDeductionsSumm, BigDecimal taxBase, Integer taxRate, LocalDateTime taxDate, BigDecimal calculatedTax, BigDecimal withholdingTax, BigDecimal notHoldingTax, BigDecimal overholdingTax, Long refoundTax, LocalDateTime taxTransferDate, LocalDateTime paymentDate, String paymentNumber, Long taxSumm, String operationId, Long sourceId, BigDecimal rowNum, String inp) {
+    public NdflPersonIncomeDTO() {
+    }
+
+    public NdflPersonIncomeDTO(String incomeCode, String incomeType, Date incomeAccruedDate, Date incomePayoutDate, String oktmo, String kpp, BigDecimal incomeAccruedSumm, BigDecimal incomePayoutSumm, BigDecimal totalDeductionsSumm, BigDecimal taxBase, Integer taxRate, Date taxDate, BigDecimal calculatedTax, BigDecimal withholdingTax, BigDecimal notHoldingTax, BigDecimal overholdingTax, Long refoundTax, Date taxTransferDate, Date paymentDate, String paymentNumber, Long taxSumm, String operationId, Long sourceId, BigDecimal rowNum, String inp) {
         this.incomeCode = incomeCode;
         this.incomeType = incomeType;
         this.incomeAccruedDate = incomeAccruedDate;
@@ -128,19 +129,19 @@ public class NdflPersonIncomeDTO {
         this.incomeType = incomeType;
     }
 
-    public LocalDateTime getIncomeAccruedDate() {
+    public Date getIncomeAccruedDate() {
         return incomeAccruedDate;
     }
 
-    public void setIncomeAccruedDate(LocalDateTime incomeAccruedDate) {
+    public void setIncomeAccruedDate(Date incomeAccruedDate) {
         this.incomeAccruedDate = incomeAccruedDate;
     }
 
-    public LocalDateTime getIncomePayoutDate() {
+    public Date getIncomePayoutDate() {
         return incomePayoutDate;
     }
 
-    public void setIncomePayoutDate(LocalDateTime incomePayoutDate) {
+    public void setIncomePayoutDate(Date incomePayoutDate) {
         this.incomePayoutDate = incomePayoutDate;
     }
 
@@ -200,11 +201,11 @@ public class NdflPersonIncomeDTO {
         this.taxRate = taxRate;
     }
 
-    public LocalDateTime getTaxDate() {
+    public Date getTaxDate() {
         return taxDate;
     }
 
-    public void setTaxDate(LocalDateTime taxDate) {
+    public void setTaxDate(Date taxDate) {
         this.taxDate = taxDate;
     }
 
@@ -248,19 +249,19 @@ public class NdflPersonIncomeDTO {
         this.refoundTax = refoundTax;
     }
 
-    public LocalDateTime getTaxTransferDate() {
+    public Date getTaxTransferDate() {
         return taxTransferDate;
     }
 
-    public void setTaxTransferDate(LocalDateTime taxTransferDate) {
+    public void setTaxTransferDate(Date taxTransferDate) {
         this.taxTransferDate = taxTransferDate;
     }
 
-    public LocalDateTime getPaymentDate() {
+    public Date getPaymentDate() {
         return paymentDate;
     }
 
-    public void setPaymentDate(LocalDateTime paymentDate) {
+    public void setPaymentDate(Date paymentDate) {
         this.paymentDate = paymentDate;
     }
 

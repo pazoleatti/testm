@@ -29,7 +29,6 @@ import groovy.util.slurpersupport.NodeChild
 import net.sf.jasperreports.engine.JasperPrint
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
-import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormat
 
 import javax.xml.namespace.QName
@@ -332,7 +331,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             row.snils = ndflPerson.snils
             row.innNp = ndflPerson.innNp
             row.inp = ndflPerson.inp
-            row.birthDay = new Date((Long) ndflPerson.birthDay.getLocalMillis())
+            row.birthDay = ndflPerson.birthDay
             row.idDocNumber = ndflPerson.idDocNumber
             row.statusNp = getPersonStatusName(ndflPerson.status)
             row.innForeign = ndflPerson.innForeign
@@ -983,22 +982,22 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     boolean isDatesInPeriod(NodeChild ndflPersonOperationsNode, NdflPerson ndflPerson, String kpp, String oktmo, String inp, String fio) {
 
         def operationId = toString((GPathResult) ndflPersonOperationsNode.getProperty('@ИдОпер'))
-        LocalDateTime incomeAccruedDate = null
+        Date incomeAccruedDate = null
         def incomeAccruedRowNum = null;
-        LocalDateTime incomePayoutDate = null
+        Date incomePayoutDate = null
         def incomePayoutRowNum = null;
         def allRowNums = new ArrayList<String>();
 
-
+        SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT)
         ndflPersonOperationsNode.childNodes().each { node ->
             def rowNum = node.attributes['НомСтр']
             allRowNums.add(rowNum)
             if (node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
-                incomeAccruedDate = LocalDateTime.parse(node.attributes['ДатаДохНач'], DateTimeFormat.forPattern(DATE_FORMAT));
+                incomeAccruedDate = formatter.parse(node.attributes['ДатаДохНач']);
                 incomeAccruedRowNum = rowNum
             }
             if (node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
-                incomePayoutDate = LocalDateTime.parse(node.attributes['ДатаДохВыпл'], DateTimeFormat.forPattern(DATE_FORMAT));
+                incomePayoutDate = formatter.parse(node.attributes['ДатаДохВыпл']);
                 incomePayoutRowNum = rowNum
             }
         }
@@ -1031,7 +1030,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    void logPeriodError(String pathError, LocalDateTime incomeAccruedDate, LocalDateTime incomePayoutDate, String inp, String fio, String operationId) {
+    void logPeriodError(String pathError, Date incomeAccruedDate, Date incomePayoutDate, String inp, String fio, String operationId) {
         DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(declarationData.departmentReportPeriodId)
 
         String errMsg = String.format("Значения гр. %s (\"%s\") и гр. %s (\"%s\") не входят в отчетный период налоговой формы (%s), операция %s не загружена в налоговую форму. ФЛ %s, ИНП: %s",
@@ -1048,9 +1047,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     // Проверка принадлежности даты к периоду формы
-    boolean dateRelateToCurrentPeriod(LocalDateTime date) {
+    boolean dateRelateToCurrentPeriod(Date date) {
         //https://jira.aplana.com/browse/SBRFNDFL-581 замена getReportPeriodCalendarStartDate() на getReportPeriodStartDate
-        if (date == null || (date.toDate() >= getReportPeriodStartDate() && date.toDate() <= getReportPeriodEndDate())) {
+        if (date == null || (date >= getReportPeriodStartDate() && date <= getReportPeriodEndDate())) {
             return true
         }
         return false
@@ -1090,9 +1089,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                                                Map<Long, Map<String, RefBookValue>> incomeCodeMap) {
         def operationNode = node.parent();
 
-        LocalDateTime incomeAccruedDate = toDate((GPathResult) node.getProperty('@ДатаДохНач'))
-        LocalDateTime incomePayoutDate = toDate((GPathResult) node.getProperty('@ДатаДохВыпл'))
-        LocalDateTime taxDate = toDate((GPathResult) node.getProperty('@ДатаНалог'))
+        Date incomeAccruedDate = toDate((GPathResult) node.getProperty('@ДатаДохНач'))
+        Date incomePayoutDate = toDate((GPathResult) node.getProperty('@ДатаДохВыпл'))
+        Date taxDate = toDate((GPathResult) node.getProperty('@ДатаНалог'))
 
         NdflPersonIncome personIncome = new NdflPersonIncome()
         personIncome.rowNum = toBigDecimal((GPathResult) node.getProperty('@НомСтр'))
@@ -1124,8 +1123,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         // Спр5 Код вида дохода (Необязательное поле)
         if (personIncome.incomeCode != null && personIncome.incomeAccruedDate != null && !incomeCodeMap.find { key, value ->
             value.CODE?.stringValue == personIncome.incomeCode &&
-                    personIncome.incomeAccruedDate >= new LocalDateTime(value.record_version_from?.dateValue) &&
-                    personIncome.incomeAccruedDate <= new LocalDateTime(value.record_version_to?.dateValue)
+                    personIncome.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                    personIncome.incomeAccruedDate <= value.record_version_to?.dateValue
         }) {
             String fioAndInpAndOperId = sprintf(TEMPLATE_PERSON_FL_OPER, [fio, ndflPerson.inp, personIncome.operationId])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG,
@@ -1221,11 +1220,12 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         }
     }
 
-    LocalDateTime toDate(GPathResult xmlNode) {
+    Date toDate(GPathResult xmlNode) {
         if (xmlNode != null && !xmlNode.isEmpty()) {
+            SimpleDateFormat format = new java.text.SimpleDateFormat(DATE_FORMAT)
             if (xmlNode.text() != null && !xmlNode.text().isEmpty()) {
-                LocalDateTime date = LocalDateTime.parse(xmlNode.text(), DateTimeFormat.forPattern(DATE_FORMAT));
-                if (date.toString(DATE_FORMAT) != xmlNode.text()) {
+                Date date = format.parse(xmlNode.text())
+                if (format.format(date) != xmlNode.text()) {
                     throw new ServiceException("Значения атрибута \"${xmlNode.name()}\": \"${xmlNode.text()}\" не существует.")
                 }
                 return date
@@ -1246,11 +1246,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
     String formatDate(date) {
-        if (date instanceof LocalDateTime) {
-            return ((LocalDateTime) date).toString(DATE_FORMAT)
-        } else {
-            return ScriptUtils.formatDate((Date) date, DATE_FORMAT)
-        }
+        return ScriptUtils.formatDate((Date) date, DATE_FORMAT)
     }
 
     //>------------------< REF BOOK >----------------------<
@@ -1571,7 +1567,7 @@ class RequisitesSheetFiller implements SheetFiller {
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
             if (np.birthDay != null) {
-                cell6.setCellValue(np.birthDay.toDate());
+                cell6.setCellValue(np.birthDay);
             }
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyle)
@@ -1663,12 +1659,12 @@ class IncomesSheetFiller implements SheetFiller {
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
             if (npi.incomeAccruedDate != null) {
-                cell6.setCellValue(npi.incomeAccruedDate.toDate());
+                cell6.setCellValue(npi.incomeAccruedDate);
             }
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyleDate)
             if (npi.incomePayoutDate != null) {
-                cell7.setCellValue(npi.incomePayoutDate.toDate());
+                cell7.setCellValue(npi.incomePayoutDate);
             }
             Cell cell8 = row.createCell(8);
             cell8.setCellStyle(centeredStyle)
@@ -1704,7 +1700,7 @@ class IncomesSheetFiller implements SheetFiller {
             Cell cell15 = row.createCell(15);
             cell15.setCellStyle(centeredStyleDate)
             if (npi.taxDate != null) {
-                cell15.setCellValue(npi.taxDate.toDate());
+                cell15.setCellValue(npi.taxDate);
             }
 
             Cell cell16 = row.createCell(16);
@@ -1735,12 +1731,12 @@ class IncomesSheetFiller implements SheetFiller {
             Cell cell21 = row.createCell(21);
             cell21.setCellStyle(centeredStyleDate)
             if (npi.taxTransferDate != null) {
-                cell21.setCellValue(npi.taxTransferDate.toDate());
+                cell21.setCellValue(npi.taxTransferDate);
             }
             Cell cell22 = row.createCell(22);
             cell22.setCellStyle(centeredStyleDate)
             if (npi.paymentDate != null) {
-                cell22.setCellValue(npi.paymentDate.toDate());
+                cell22.setCellValue(npi.paymentDate);
             }
             Cell cell23 = row.createCell(23);
             cell23.setCellStyle(centeredStyle)
@@ -1789,7 +1785,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell5 = row.createCell(5);
             cell5.setCellStyle(centeredStyleDate)
             if (npd.notifDate != null) {
-                cell5.setCellValue(npd.notifDate.toDate());
+                cell5.setCellValue(npd.notifDate);
             }
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyle)
@@ -1808,7 +1804,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell10 = row.createCell(10);
             cell10.setCellStyle(centeredStyleDate)
             if (npd.incomeAccrued != null) {
-                cell10.setCellValue(npd.incomeAccrued.toDate());
+                cell10.setCellValue(npd.incomeAccrued);
             }
             Cell cell11 = row.createCell(11);
             cell11.setCellStyle(centeredStyle)
@@ -1821,7 +1817,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell13 = row.createCell(13);
             cell13.setCellStyle(centeredStyleDate)
             if (npd.periodPrevDate != null) {
-                cell13.setCellValue(npd.periodPrevDate.toDate());
+                cell13.setCellValue(npd.periodPrevDate);
             }
             Cell cell14 = row.createCell(14);
             cell14.setCellStyle(borderStyle)
@@ -1831,7 +1827,7 @@ class DeductionsSheetFiller implements SheetFiller {
             Cell cell15 = row.createCell(15);
             cell15.setCellStyle(centeredStyleDate)
             if (npd.periodCurrDate != null) {
-                cell15.setCellValue(npd.periodCurrDate.toDate());
+                cell15.setCellValue(npd.periodCurrDate);
             }
             Cell cell16 = row.createCell(16);
             cell16.setCellStyle(borderStyle)
@@ -1882,7 +1878,7 @@ class PrepaymentSheetFiller implements SheetFiller {
             Cell cell6 = row.createCell(6);
             cell6.setCellStyle(centeredStyleDate)
             if (npp.notifDate != null) {
-                cell6.setCellValue(npp.notifDate.toDate());
+                cell6.setCellValue(npp.notifDate);
             }
             Cell cell7 = row.createCell(7);
             cell7.setCellStyle(centeredStyle)

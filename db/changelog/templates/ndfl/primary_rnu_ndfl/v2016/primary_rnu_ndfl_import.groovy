@@ -13,8 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory
 import com.aplana.sbrf.taxaccounting.script.service.*
-import org.joda.time.LocalDateTime
-import org.joda.time.format.DateTimeFormat
+
+import java.text.SimpleDateFormat
 
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkAndReadFile
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
@@ -377,8 +377,8 @@ class Import extends AbstractScriptClass {
     }
 
     boolean isIncomeDatesInPeriod(NdflPersonIncome income) {
-        def incomeAccruedDate = income.incomeAccruedDate?.toDate()
-        def incomePayoutDate = income.incomePayoutDate?.toDate()
+        def incomeAccruedDate = income.incomeAccruedDate
+        def incomePayoutDate = income.incomePayoutDate
         boolean incomeAccruedDateCorrect = checkIncomeDate(incomeAccruedDate)
         boolean incomePayoutDateCorrect = checkIncomeDate(incomePayoutDate)
         if (incomeAccruedDateCorrect || incomePayoutDateCorrect) {
@@ -440,8 +440,8 @@ class Import extends AbstractScriptClass {
         if (income.incomeCode && !incomeCodes.find { key, value ->
             value.CODE?.stringValue == income.incomeCode &&
                     (income.incomeAccruedDate == null ||
-                            income.incomeAccruedDate.toDate() >= value.record_version_from?.dateValue &&
-                            income.incomeAccruedDate.toDate() <= value.record_version_to?.dateValue)
+                            income.incomeAccruedDate >= value.record_version_from?.dateValue &&
+                            income.incomeAccruedDate <= value.record_version_to?.dateValue)
         }) {
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [(person as NdflPersonExt).fio, person.inp])
             String errMsg = String.format(LOG_TYPE_PERSON_MSG_2,
@@ -533,10 +533,11 @@ class Import extends AbstractScriptClass {
             return this
         }
 
-        LocalDateTime toDate() {
+        Date toDate() {
             if (value != null && !value.isEmpty()) {
                 try {
-                    return LocalDateTime.parse(value, DateTimeFormat.forPattern(DATE_FORMAT))
+                    SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT)
+                    return formatter.parse(value)
                 } catch (Exception ignored) {
                     logIncorrectTypeError("Дата")
                 }

@@ -170,7 +170,7 @@ public interface NdflPersonService {
     List<NdflPersonIncome> findIncomesByPeriodAndNdflPersonId(long ndflPersonId, Date startDate, Date endDate, boolean prFequals1);
 
     /**
-     * Метод делает то же что и findIncomesByPeriodAndNdflPersonId, только в рамках временного решения для https://conf.aplana.com/pages/viewpage.action?pageId=27176125 п.24.3
+     * Метод делает то же что и fetchNdflPersonIncomeByPeriodNdflPersonId, только в рамках временного решения для https://conf.aplana.com/pages/viewpage.action?pageId=27176125 п.24.3
      * нет обора по условию .Раздел 2.Графа 10 ≠ 0
      *
      * @param ndflPersonId

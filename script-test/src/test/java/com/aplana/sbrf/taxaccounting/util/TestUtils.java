@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.util;
 
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-
 import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author Andrey Drunk
  */
 public class TestUtils {
 
-    public static LocalDateTime toDate(String dateStr) {
+    public static Date toDate(String dateStr) {
         try {
-            return LocalDateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy"));
-        } catch (IllegalArgumentException e) {
+            return new SimpleDateFormat("dd.MM.yyyy").parse(dateStr);
+        } catch (ParseException e) {
             return null;
         }
     }

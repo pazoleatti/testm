@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.result;
 
-import org.joda.time.LocalDateTime;
-
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class NdflPersonPrepaymentDTO {
 
@@ -25,14 +24,17 @@ public class NdflPersonPrepaymentDTO {
     private String notifNum;
 
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Дата выдачи уведомления
-    private LocalDateTime notifDate;
+    private Date notifDate;
 
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Графа 7)
     private String notifSource;
 
     private String inp;
 
-    public NdflPersonPrepaymentDTO(String operationId, Long sourceId, BigDecimal rowNum, BigDecimal summ, String notifNum, LocalDateTime notifDate, String notifSource, String inp) {
+    public NdflPersonPrepaymentDTO() {
+    }
+
+    public NdflPersonPrepaymentDTO(String operationId, Long sourceId, BigDecimal rowNum, BigDecimal summ, String notifNum, Date notifDate, String notifSource, String inp) {
         this.operationId = operationId;
         this.sourceId = sourceId;
         this.rowNum = rowNum;
@@ -83,11 +85,11 @@ public class NdflPersonPrepaymentDTO {
         this.notifNum = notifNum;
     }
 
-    public LocalDateTime getNotifDate() {
+    public Date getNotifDate() {
         return notifDate;
     }
 
-    public void setNotifDate(LocalDateTime notifDate) {
+    public void setNotifDate(Date notifDate) {
         this.notifDate = notifDate;
     }
 

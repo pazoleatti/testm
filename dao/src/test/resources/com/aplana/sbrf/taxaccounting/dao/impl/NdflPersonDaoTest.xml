@@ -16,4 +16,20 @@
         <jdbc:script location="classpath:data/DepartmentReportPeriod.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/NdflPerson.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
+
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.model.PagingParams"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter"/>
+    </bean>
 </beans>

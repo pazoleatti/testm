@@ -14,7 +14,7 @@ import groovy.transform.TypeCheckingMode
 import groovy.util.slurpersupport.GPathResult
 
 import java.util.zip.ZipInputStream
-import org.joda.time.LocalDateTime
+
 
 new Check(this).run()
 
@@ -88,7 +88,7 @@ class Check extends AbstractScriptClass {
     private Check() {
     }
 
-    @TypeChecked (TypeCheckingMode.SKIP)
+    @TypeChecked(TypeCheckingMode.SKIP)
     Check(scriptClass) {
         super(scriptClass)
         if (scriptClass.getBinding().hasVariable("declarationData")) {
@@ -115,7 +115,7 @@ class Check extends AbstractScriptClass {
     public void run() {
         switch (formDataEvent) {
             case FormDataEvent.CHECK:
-            check()
+                check()
         }
     }
 
@@ -366,7 +366,7 @@ class Check extends AbstractScriptClass {
         def sumStavkaNodes6 = fileNode6Ndfl.depthFirst().grep { it.name() == NODE_NAME_SUM_STAVKA6 }
         sumStavkaNodes6.each { sumStavkaNode6 ->
             ScriptUtils.checkInterrupted()
-            def stavka6 = sumStavkaNode6.attributes()[TAX_RATE]  ? Integer.valueOf(sumStavkaNode6.attributes()[TAX_RATE]) : 0
+            def stavka6 = sumStavkaNode6.attributes()[TAX_RATE] ? Integer.valueOf(sumStavkaNode6.attributes()[TAX_RATE]) : 0
 
             // МежДок4
             def nachislDoh6 = ScriptUtils.round(Double.valueOf(sumStavkaNode6.attributes()[ATTR_NACHISL_DOH6]), 2) ?: 0
@@ -1024,7 +1024,7 @@ class Check extends AbstractScriptClass {
 
 /**
  * Компонент дерева представляющий атрибут
- * @param < T >                - Класс значения атрибута из xml, с которым будем работать
+ * @param < T >                  - Класс значения атрибута из xml, с которым будем работать
  */
     class Ndfl2Leaf<T> {
         String name;
@@ -1070,12 +1070,8 @@ class Check extends AbstractScriptClass {
         }
     }
 
-    String formatDate(date) {
-        if (date instanceof LocalDateTime) {
-            return ((LocalDateTime) date).toString(DATE_FORMAT_DOTTED)
-        } else {
-            return ScriptUtils.formatDate((Date) date, DATE_FORMAT_DOTTED)
-        }
+    String formatDate(Date date) {
+        return ScriptUtils.formatDate(date, DATE_FORMAT_DOTTED)
     }
 
     /**

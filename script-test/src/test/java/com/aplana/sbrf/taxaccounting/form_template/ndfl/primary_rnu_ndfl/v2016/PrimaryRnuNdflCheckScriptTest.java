@@ -198,10 +198,10 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
         String column4NotEmpty = "2000";
         String column5Empty = null;
         String column5NotEmpty = "01";
-        LocalDateTime column6Empty = null;
-        LocalDateTime column6NotEmpty = new LocalDateTime();
-        LocalDateTime column7Empty = null;
-        LocalDateTime column7NotEmpty = new LocalDateTime();
+        Date column6Empty = null;
+        Date column6NotEmpty = new Date();
+        Date column7Empty = null;
+        Date column7NotEmpty = new Date();
         BigDecimal column10Empty = null;
         BigDecimal column10NotEmpty = new BigDecimal(1);
         BigDecimal column11Empty = null;
@@ -212,8 +212,8 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
         BigDecimal column13NotEmpty = new BigDecimal(1);
         Integer column14Empty = null;
         Integer column14NotEmpty = 1;
-        LocalDateTime column15Empty = null;
-        LocalDateTime column15NotEmpty = new LocalDateTime();
+        Date column15Empty = null;
+        Date column15NotEmpty = new Date();
         BigDecimal column16Empty = null;
         BigDecimal column16NotEmpty = BigDecimal.valueOf(1L);
         BigDecimal column17Empty = null;
@@ -224,10 +224,10 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
         BigDecimal column19NotEmpty = BigDecimal.valueOf(1L);
         Long column20Empty = null;
         Long column20NotEmpty = 1L;
-        LocalDateTime column21Empty = null;
-        LocalDateTime column21NotEmpty = new LocalDateTime();
-        LocalDateTime column22Empty = null;
-        LocalDateTime column22NotEmpty = new LocalDateTime();
+        Date column21Empty = null;
+        Date column21NotEmpty = new Date();
+        Date column22Empty = null;
+        Date column22NotEmpty = new Date();
         String column23Empty = null;
         String column23NotEmpty = "1";
         Long column24Empty = null;
@@ -515,7 +515,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 .status("2")
 
                 .build();
-        LocalDateTime d = new LocalDateTime(2015, 12, 12, 0, 0);
+        Date d = new Date(2015, 12, 12);
         final NdflPersonIncome ndflPersonIncome1 = new NdflPersonIncomeBuilder.Builder()
                 .rowNum(new BigDecimal(1))
                 .ndflPersonId(ndflPerson1.getId())
@@ -524,7 +524,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 .incomeType("1010")
                 .incomeCode("1010")
                 .incomeAccruedDate(d)
-                .incomePayoutDate(new LocalDateTime(2015, 4, 12, 0, 0))
+                .incomePayoutDate(new Date(2015, 4, 12))
                 .incomeAccruedSumm(new BigDecimal(125))
                 .totalDeductionsSumm(new BigDecimal(125))
                 .incomePayoutSumm(new BigDecimal(1232))
@@ -571,7 +571,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 .incomeType("1010")
                 .incomeCode("1010")
                 .incomeAccruedDate(d)
-                .incomePayoutDate(new LocalDateTime(2015, 8, 12, 0, 0))
+                .incomePayoutDate(new Date(2015, 8, 12))
                 .incomeAccruedSumm(new BigDecimal(325))
                 .totalDeductionsSumm(new BigDecimal(125))
                 .incomePayoutSumm(new BigDecimal(132))
@@ -647,13 +647,13 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 .ndflPersonId(ndflPerson1.getId())
                 .taxRate(13)
                 .incomeCode("1010")
-                .incomeAccruedDate(new LocalDateTime(2015, 12, 12, 0, 0))
+                .incomeAccruedDate(new Date(2015,12,12))
                 .calculatedTax(new BigDecimal(12))
-                .incomePayoutDate(new LocalDateTime(2015, 12, 12, 0, 0))
-                .paymentDate(new LocalDateTime(2015, 12, 12, 0, 0))
-                .taxDate(new LocalDateTime(2015, 12, 12, 0, 0, 0))
+                .incomePayoutDate(new Date(2015,12,12))
+                .paymentDate(new Date(2015,12,12))
+                .taxDate(new Date(2015,12,12))
                 .incomeAccruedSumm(new BigDecimal(125))
-                .totalDeductionsSumm(new BigDecimal(6))
+                .totalDeductionsSumm( new BigDecimal(6 )  )
                 .calculatedTax(new BigDecimal(12))
 
                 .build();
@@ -668,7 +668,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 .typeCode("104")
                 // Применение вычета.Текущий период.Сумма (Графа 16 P3)
                 .periodCurrSumm(new BigDecimal(1212))
-                .incomeAccrued(new LocalDateTime(2012, 12, 12, 0, 0))
+                .incomeAccrued(new Date(2012,12,12))
                 .notifSumm(new BigDecimal(104))
                 .build();
 
@@ -860,8 +860,8 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
             protected Long ndflPersonId;
             private String incomeCode;
             private String incomeType;
-            private LocalDateTime incomeAccruedDate;
-            private LocalDateTime incomePayoutDate;
+            private Date incomeAccruedDate;
+            private Date incomePayoutDate;
             private String oktmo;
             private String kpp;
             private BigDecimal incomeAccruedSumm;
@@ -869,14 +869,14 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
             private BigDecimal totalDeductionsSumm;
             private BigDecimal taxBase;
             private Integer taxRate;
-            private LocalDateTime taxDate;
+            private Date taxDate;
             private BigDecimal calculatedTax;
             private BigDecimal withholdingTax;
             private BigDecimal notHoldingTax;
             private BigDecimal overholdingTax;
             private Long refoundTax;
-            private LocalDateTime taxTransferDate;
-            private LocalDateTime paymentDate;
+            private Date taxTransferDate;
+            private Date paymentDate;
             private String paymentNumber;
             private Long taxSumm;
 
@@ -905,12 +905,12 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder incomeAccruedDate(LocalDateTime incomeAccruedDate) {
+            public Builder incomeAccruedDate(Date incomeAccruedDate) {
                 this.incomeAccruedDate = incomeAccruedDate;
                 return this;
             }
 
-            public Builder incomePayoutDate(LocalDateTime incomePayoutDate) {
+            public Builder incomePayoutDate(Date incomePayoutDate) {
                 this.incomePayoutDate = incomePayoutDate;
                 return this;
             }
@@ -955,7 +955,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder taxDate(LocalDateTime taxDate) {
+            public Builder taxDate(Date taxDate) {
                 this.taxDate = taxDate;
                 return this;
             }
@@ -985,12 +985,12 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder taxTransferDate(LocalDateTime taxTransferDate) {
+            public Builder taxTransferDate(Date taxTransferDate) {
                 this.taxTransferDate = taxTransferDate;
                 return this;
             }
 
-            public Builder paymentDate(LocalDateTime paymentDate) {
+            public Builder paymentDate(Date paymentDate) {
                 this.paymentDate = paymentDate;
                 return this;
             }
@@ -1049,16 +1049,16 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
             private BigDecimal rowNum;
             private String typeCode;
             private String notifType;
-            private LocalDateTime notifDate;
+            private Date notifDate;
             private String notifNum;
             private String notifSource;
             private BigDecimal notifSumm;
-            private LocalDateTime incomeAccrued;
+            private Date incomeAccrued;
             private String incomeCode;
             private BigDecimal incomeSumm;
-            private LocalDateTime periodPrevDate;
+            private Date periodPrevDate;
             private BigDecimal periodPrevSumm;
-            private LocalDateTime periodCurrDate;
+            private Date periodCurrDate;
             private BigDecimal periodCurrSumm;
             private String operationId;
 
@@ -1082,7 +1082,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder notifDate(LocalDateTime notifDate) {
+            public Builder notifDate(Date notifDate) {
                 this.notifDate = notifDate;
                 return this;
             }
@@ -1102,7 +1102,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder incomeAccrued(LocalDateTime incomeAccrued) {
+            public Builder incomeAccrued(Date incomeAccrued) {
                 this.incomeAccrued = incomeAccrued;
                 return this;
             }
@@ -1117,7 +1117,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder periodPrevDate(LocalDateTime periodPrevDate) {
+            public Builder periodPrevDate(Date periodPrevDate) {
                 this.periodPrevDate = periodPrevDate;
                 return this;
             }
@@ -1127,7 +1127,7 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
                 return this;
             }
 
-            public Builder periodCurrDate(LocalDateTime periodCurrDate) {
+            public Builder periodCurrDate(Date periodCurrDate) {
                 this.periodCurrDate = periodCurrDate;
                 return this;
             }
@@ -1535,10 +1535,10 @@ public class PrimaryRnuNdflCheckScriptTest extends DeclarationScriptTestBase {
      */
     private NdflPersonIncome createNdflPersonIncome(Long ndflPersonId, BigDecimal rowNum,
                                                     String column4, String column5,
-                                                    LocalDateTime column6, LocalDateTime column7, BigDecimal column10, BigDecimal column11,
-                                                    BigDecimal column12, BigDecimal column13, Integer column14, LocalDateTime column15,
+                                                    Date column6, Date column7, BigDecimal column10, BigDecimal column11,
+                                                    BigDecimal column12, BigDecimal column13, Integer column14, Date column15,
                                                     BigDecimal column16, BigDecimal column17, BigDecimal column18, BigDecimal column19, Long column20,
-                                                    LocalDateTime column21, LocalDateTime column22, String column23, Long column24
+                                                    Date column21, Date column22, String column23, Long column24
     ) {
         NdflPersonIncome ndflPersonIncome = new NdflPersonIncome();
 

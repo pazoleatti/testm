@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.ndfl;
 
-import org.joda.time.LocalDateTime;
-
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * Стандартные, социальные и имущественные налоговые вычеты (Раздел 3)
@@ -17,7 +16,7 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     private String notifType;
 
     // Документ о праве на налоговый вычет.Дата (Графа 5)
-    private LocalDateTime notifDate;
+    private Date notifDate;
 
     // Документ о праве на налоговый вычет.Номер (Графа 6)
     private String notifNum;
@@ -29,7 +28,7 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     private BigDecimal notifSumm;
 
     // Начисленный доход.Дата (Графа 10)
-    private LocalDateTime incomeAccrued;
+    private Date incomeAccrued;
 
     // Начисленный доход.Код дохода (Графа 11)
     private String incomeCode;
@@ -38,13 +37,13 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     private BigDecimal incomeSumm;
 
     // Применение вычета.Предыдущий период.Дата (Графа 13)
-    private LocalDateTime periodPrevDate;
+    private Date periodPrevDate;
 
     // Применение вычета.Предыдущий период.Сумма (Графа 14)
     private BigDecimal periodPrevSumm;
 
     // Применение вычета.Текущий период.Дата (Графа 15)
-    private LocalDateTime periodCurrDate;
+    private Date periodCurrDate;
 
     // Применение вычета.Текущий период.Сумма (Графа 16)
     private BigDecimal periodCurrSumm;
@@ -99,11 +98,11 @@ public class NdflPersonDeduction extends NdflPersonOperation {
         this.notifType = notifType;
     }
 
-    public LocalDateTime getNotifDate() {
+    public Date getNotifDate() {
         return notifDate;
     }
 
-    public void setNotifDate(LocalDateTime notifDate) {
+    public void setNotifDate(Date notifDate) {
         this.notifDate = notifDate;
     }
 
@@ -131,11 +130,11 @@ public class NdflPersonDeduction extends NdflPersonOperation {
         this.notifSumm = notifSumm;
     }
 
-    public LocalDateTime getIncomeAccrued() {
+    public Date getIncomeAccrued() {
         return incomeAccrued;
     }
 
-    public void setIncomeAccrued(LocalDateTime incomeAccrued) {
+    public void setIncomeAccrued(Date incomeAccrued) {
         this.incomeAccrued = incomeAccrued;
     }
 
@@ -155,11 +154,11 @@ public class NdflPersonDeduction extends NdflPersonOperation {
         this.incomeSumm = incomeSumm;
     }
 
-    public LocalDateTime getPeriodPrevDate() {
+    public Date getPeriodPrevDate() {
         return periodPrevDate;
     }
 
-    public void setPeriodPrevDate(LocalDateTime periodPrevDate) {
+    public void setPeriodPrevDate(Date periodPrevDate) {
         this.periodPrevDate = periodPrevDate;
     }
 
@@ -171,11 +170,11 @@ public class NdflPersonDeduction extends NdflPersonOperation {
         this.periodPrevSumm = periodPrevSumm;
     }
 
-    public LocalDateTime getPeriodCurrDate() {
+    public Date getPeriodCurrDate() {
         return periodCurrDate;
     }
 
-    public void setPeriodCurrDate(LocalDateTime periodCurrDate) {
+    public void setPeriodCurrDate(Date periodCurrDate) {
         this.periodCurrDate = periodCurrDate;
     }
 
