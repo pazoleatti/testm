@@ -579,5 +579,50 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             alter table ASYNC_TASK modify (DESCRIPTION VARCHAR2(400 CHAR));
         </sql>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3524 Обновить данные справочников кодов видов дохода и вычетов по НДФЛ-->
+	<!--
+	<changeSet id="2.2-rnurgaleev-4" author="rnurgaleev">
+        <sql splitStatements="false">
+            begin
+				update ref_book_income_type set name='Проценты (за исключением процентов по облигациям с ипотечным покрытием, эмитированным до 01.01.2007, доходов в виде процентов, получаемых по вкладам в банках, и доходов, получаемых при погашении векселя), включая дисконт, полученный по долговому обязательству любого вида, за исключением сумм дохода в виде процента (купона), получаемого налогоплательщиком по обращающимся облигациям российских организаций, номинированным в рублях и эмитированным после 1 января 2017 года'
+				where code='1011' ans status=0;
+				
+				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2013','Сумма компенсации за неиспользованный отпуск');
+				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2014','Сумма выплаты в виде выходного пособия, среднего месячного заработка на период трудоустройства, компенсации руководителю, заместителям руководителя и главному бухгалтеру организации в части, превышающей в целом трехкратный размер среднего месячного заработка или шестикратный размер среднего месячного заработка для работников, уволенных из организаций, расположенных в районах Крайнего Севера и приравненных к ним местностях');
+				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2301','Суммы штрафов и неустойки, выплачиваемые организацией на основании решения суда за несоблюдение в добровольном порядке удовлетворения требований потребителей в соответствии с Законом Российской Федерации от 07.02.1992 N 2300-1 "О защите прав потребителей"');
+				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2611','Сумма списанного в установленном порядке безнадежного долга с баланса организации');
+				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'3023','Сумма дохода в виде процента (купона), получаемого налогоплательщиком по обращающимся облигациям российских организаций, номинированным в рублях и эмитированным после 1 января 2017 года');
+			
+				insert into ref_book_deduction_type (id,record_id,version,status,code,name,deduction_mark) 
+				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','dd.mm.yyyy'),0,'619','Вычет в сумме положительного финансового результата, полученного по операциям, учитываемым на индивидуальном инвестиционном счете',(select id from ref_book_deduction_mark where code='3'));
+				
+			end;
+        </sql>
+    </changeSet>
+	-->
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3452 Изменение разделителей при сравнении ДУЛ-->
+	<changeSet id="2.2-rnurgaleev-5" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg5.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
+    <changeSet id="2.2-rnurgaleev-6" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body5.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
