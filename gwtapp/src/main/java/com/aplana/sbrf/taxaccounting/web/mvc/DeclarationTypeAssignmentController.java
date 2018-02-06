@@ -5,12 +5,15 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmen
 import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeleteDeclarationTypeAssignmentsResult;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeAssignmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedResourceAssembler;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Контроллер для работы с назначением налоговых форм
@@ -73,8 +76,20 @@ public class DeclarationTypeAssignmentController {
      * @param action Модель с данными - объект, содержащий существующие назначения налоговых форм и исполнителей {@link EditDeclarationTypeAssignmentsAction}
      */
     @PostMapping(value = "/actions/declarationTypeAssignment/edit")
-    public void createDeclarationTypeAssignment(EditDeclarationTypeAssignmentsAction action) {
+    public void editDeclarationTypeAssignment(EditDeclarationTypeAssignmentsAction action) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         assignmentService.editDeclarationTypeAssignments(userInfo, action);
+    }
+
+    /**
+     * Отмена назначений налоговых форм подразденениям
+     *
+     * @param assignments Список упрощенных моделей назначений {@link DeclarationTypeAssignmentIdModel}
+     * @return Результат выполнения операции {@link DeleteDeclarationTypeAssignmentsResult}
+     */
+    @PostMapping(value = "/actions/declarationTypeAssignment/delete")
+    public DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignment(@RequestBody List<DeclarationTypeAssignmentIdModel> assignments) {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        return assignmentService.deleteDeclarationTypeAssignments(userInfo, assignments);
     }
 }

@@ -67,6 +67,14 @@
                         <span data-translate-once="declarationTypeAssignment.button.editAssignment"></span>
                     </button>
                 </span>
+
+                <!-- Отменить назначение -->
+                <span>
+                    <button type="button" class="btn btn-default" data-ng-click="deleteAssignments()"
+                            data-ng-disabled="!(assignmentsAreSelected() && permissionChecker.check(user, APP_CONSTANTS.USER_PERMISSION.EDIT_DECLARATION_TYPES_ASSIGNMENT))">
+                        <span data-translate-once="declarationTypeAssignment.button.deleteAssignment"></span>
+                    </button>
+                </span>
             </div>
         </div>
     </div>

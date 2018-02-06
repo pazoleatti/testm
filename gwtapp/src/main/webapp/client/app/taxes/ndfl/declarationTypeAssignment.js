@@ -18,8 +18,8 @@
          * @description Контроллер назначения налоговых форм
          */
         .controller('declarationTypeAssignmentCtrl', [
-            '$scope', '$state', '$stateParams', '$filter', 'APP_CONSTANTS', '$aplanaModal', '$dialogs', '$logPanel', 'DeclarationTypeAssignmentResource',
-            function ($scope, $state, $stateParams, $filter, APP_CONSTANTS, $aplanaModal, $dialogs, $logPanel, DeclarationTypeAssignmentResource) {
+            '$scope', '$http', '$state', '$stateParams', '$filter', 'APP_CONSTANTS', '$aplanaModal', '$dialogs', '$logPanel', 'DeclarationTypeAssignmentResource',
+            function ($scope, $http, $state, $stateParams, $filter, APP_CONSTANTS, $aplanaModal, $dialogs, $logPanel, DeclarationTypeAssignmentResource) {
 
                 /**
                  * Фильтр
@@ -162,6 +162,39 @@
                             }
                         }
                     );
+                };
+
+                function createAssignmentIdModels(assignments) {
+                    var result = assignments.map(function (assignment) {
+                        var idModel = {};
+                        if (assignment && assignment.department) {
+                            idModel.id = assignment.id;
+                            idModel.declarationTypeId = assignment.formTypeId;
+                            idModel.departmentId = assignment.department.id;
+                        }
+                        return idModel;
+                    });
+                    return result;
+                }
+
+                /**
+                 * Отмена назначений налоговых форм подразделениям
+                 */
+                $scope.deleteAssignments = function () {
+                    var params = {
+                        assignments: createAssignmentIdModels($scope.declarationTypeAssignmentGrid.value)
+                    };
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/declarationTypeAssignment/delete",
+                        data: createAssignmentIdModels($scope.declarationTypeAssignmentGrid.value)
+                    }).then(function (response) {
+                        console.log(response);
+                        if (response.data && response.data.deletingAssignmentsWithDeclarations && response.data.uuid) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
+                        $scope.refreshGrid();
+                    });
                 };
             }])
 

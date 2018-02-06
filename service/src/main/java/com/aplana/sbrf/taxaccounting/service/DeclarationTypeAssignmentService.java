@@ -4,6 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
 import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeleteDeclarationTypeAssignmentsResult;
+
+import java.util.List;
 
 /**
  * Сервис для работы с назначением налоговых форм {@link DeclarationTypeAssignment}
@@ -33,7 +36,15 @@ public interface DeclarationTypeAssignmentService {
      *
      * @param userInfo Информация о пользователе
      * @param action   Модель с данными: назначения и исполнители {@link EditDeclarationTypeAssignmentsAction}
-     * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
      */
     void editDeclarationTypeAssignments(TAUserInfo userInfo, EditDeclarationTypeAssignmentsAction action);
+
+    /**
+     * Отмена назначений налоговых форм подраздениям
+     *
+     * @param userInfo    Информация о пользователе
+     * @param assignments Список упрощенных моделей назначений {@link DeclarationTypeAssignmentIdModel}
+     * @return Результат отмены назначения {@link DeleteDeclarationTypeAssignmentsResult}
+     */
+    DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignments(TAUserInfo userInfo, List<DeclarationTypeAssignmentIdModel> assignments);
 }

@@ -492,7 +492,7 @@ class Report2Ndfl extends AbstractScriptClass {
                             ФИО(Фамилия: signatorySurname,
                                     Имя: signatoryFirstname,
                                     Отчество: signatoryLastname) {}
-                            if (prPodp == 2) {
+                            if (prPodp == "2") {
                                 СвПред(НаимДок: naimDoc,
                                         НаимОрг: naimOrgApprove) {}
                             }

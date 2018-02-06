@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmen
 import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
+import com.aplana.sbrf.taxaccounting.model.result.DeleteDeclarationTypeAssignmentsResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,16 +27,18 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     private SourceService sourceService;
     private LogEntryService logEntryService;
     private DeclarationTypeService declarationTypeService;
+    private DeclarationDataService declarationDataService;
     private DepartmentReportPeriodService departmentReportPeriodService;
     private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 
     public DeclarationTypeAssignmentServiceImpl(DepartmentService departmentService, SourceService sourceService, LogEntryService logEntryService,
-                                                DeclarationTypeService declarationTypeService, DepartmentReportPeriodService departmentReportPeriodService,
-                                                DepartmentDeclarationTypeDao departmentDeclarationTypeDao) {
+                                                DeclarationTypeService declarationTypeService, DeclarationDataService declarationDataService,
+                                                DepartmentReportPeriodService departmentReportPeriodService, DepartmentDeclarationTypeDao departmentDeclarationTypeDao) {
         this.departmentService = departmentService;
         this.sourceService = sourceService;
         this.logEntryService = logEntryService;
         this.declarationTypeService = declarationTypeService;
+        this.declarationDataService = declarationDataService;
         this.departmentReportPeriodService = departmentReportPeriodService;
         this.departmentDeclarationTypeDao = departmentDeclarationTypeDao;
     }
@@ -113,7 +117,6 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
      *
      * @param userInfo Информация о пользователе
      * @param action   Модель с данными: назначения и исполнители {@link EditDeclarationTypeAssignmentsAction}
-     * @return Результат назначения {@link CreateDeclarationTypeAssignmentResult}
      */
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
@@ -121,6 +124,32 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         for (Integer assignmentId : action.getAssignmentIds()) {
             sourceService.updateDDTPerformers(assignmentId, action.getPerformerIds());
         }
+    }
+
+    /**
+     * Отмена назначений налоговых форм подраздениям
+     *
+     * @param userInfo    Информация о пользователе
+     * @param assignments Список упрощенных моделей назначений {@link DeclarationTypeAssignmentIdModel}
+     * @return Результат отмены назначения {@link DeleteDeclarationTypeAssignmentsResult}
+     */
+    @Override
+    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
+    public DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignments(TAUserInfo userInfo,  List<DeclarationTypeAssignmentIdModel> assignments) {
+        DeleteDeclarationTypeAssignmentsResult result = new DeleteDeclarationTypeAssignmentsResult();
+        Logger logger = new Logger();
+        boolean declarationsExist = false;
+
+        for (DeclarationTypeAssignmentIdModel assignment : assignments) {
+            declarationsExist |= declarationDataService.existDeclaration(assignment.getDeclarationTypeId(), assignment.getDepartmentId(), logger.getEntries());
+            if (!declarationsExist) {
+                sourceService.deleteDDT(Arrays.asList(assignment.getId()));
+            }
+        }
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        result.setDeletingAssignmentsWithDeclarations(declarationsExist);
+        return result;
     }
 
     /**
