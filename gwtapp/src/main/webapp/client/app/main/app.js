@@ -199,6 +199,7 @@
         "declarationTypeAssignment.message.success": "Назначения налоговых форм подразделениям выполнены успешно",
         "declarationTypeAssignment.button.editAssignment": "Редактировать",
         "declarationTypeAssignment.modal.edit.title": "Форма редактирования назначения",
+        "declarationTypeAssignment.button.deleteAssignment": "Отменить назначение",
 
         "ndflReport.label.page": "Стр.",
         "ndflReport.label.from": "из",
