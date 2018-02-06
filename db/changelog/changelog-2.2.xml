@@ -538,4 +538,19 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3521 -->
+    <changeSet id="2.2-ytrofimov-40" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=102</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2-ytrofimov-41" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id=104</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
