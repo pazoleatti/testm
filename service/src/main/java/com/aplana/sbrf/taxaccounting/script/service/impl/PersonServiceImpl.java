@@ -23,4 +23,9 @@ public class PersonServiceImpl implements PersonService{
     public List<Long> getDuplicate(Set<Long> originalRecordIds) {
         return personDao.getDuplicateIds(originalRecordIds);
     }
+
+    @Override
+    public int getCountOfUniqueEntries(long declarationDataId) {
+        return personDao.getCountOfUniqueEntries(declarationDataId);
+    }
 }

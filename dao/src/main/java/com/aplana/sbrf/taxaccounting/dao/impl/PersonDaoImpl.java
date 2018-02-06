@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +17,8 @@ import java.util.Set;
 
 /**
  * Интерфейс для работы со справочником физ. лиц, для специфики по дубликатам.
- * @author lhaziev
  *
+ * @author lhaziev
  */
 
 @Repository
@@ -25,7 +26,7 @@ public class PersonDaoImpl extends AbstractDao implements PersonDao {
 
     @Override
     public void setDuplicate(List<Long> recordIds, Long originalId) {
-        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        Map<String, Object> valueMap = new HashMap<String, Object>();
         valueMap.put("originalId", originalId);
         getNamedParameterJdbcTemplate().update(String.format("update ref_book_person set record_id = :originalId, old_id = record_id, old_status = status, status = -1 " +
                 "where old_id is null and %s", SqlUtils.transformToSqlInStatement("record_id", recordIds)), valueMap);
@@ -35,7 +36,7 @@ public class PersonDaoImpl extends AbstractDao implements PersonDao {
 
     @Override
     public void changeRecordId(List<Long> recordIds, Long originalId) {
-        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        Map<String, Object> valueMap = new HashMap<String, Object>();
         valueMap.put("originalId", originalId);
         getNamedParameterJdbcTemplate().update(String.format("update ref_book_person set record_id = :originalId " +
                 "where old_id is not null and %s", SqlUtils.transformToSqlInStatement("old_id", recordIds)), valueMap);
@@ -52,27 +53,27 @@ public class PersonDaoImpl extends AbstractDao implements PersonDao {
 
     @Override
     public Long getOriginal(Long recordId) {
-        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        Map<String, Object> valueMap = new HashMap<String, Object>();
         valueMap.put("recordId", recordId);
         return getNamedParameterJdbcTemplate().queryForObject("select id from ref_book_person where record_id = :recordId and old_id is null and status = 0", valueMap, Long.class);
     }
 
     @Override
     public List<Long> getDuplicate(Long recordId) {
-        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        Map<String, Object> valueMap = new HashMap<String, Object>();
         valueMap.put("recordId", recordId);
         return getNamedParameterJdbcTemplate().query(
                 "with version as (select old_id, max(version) version from ref_book_person \n" +
-                "where record_id = :recordId and old_id is not null and old_status = 0 \n" +
-                "group by old_id) \n" +
-                "select id \n" +
-                "from ref_book_person rbp \n" +
-                "join version on version.version = rbp.version and version.old_id = rbp.old_id and old_status = 0", valueMap, new RowMapper<Long>() {
-            @Override
-            public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return rs.getLong("id");
-            }
-        });
+                        "where record_id = :recordId and old_id is not null and old_status = 0 \n" +
+                        "group by old_id) \n" +
+                        "select id \n" +
+                        "from ref_book_person rbp \n" +
+                        "join version on version.version = rbp.version and version.old_id = rbp.old_id and old_status = 0", valueMap, new RowMapper<Long>() {
+                    @Override
+                    public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getLong("id");
+                    }
+                });
     }
 
     @Override
@@ -90,4 +91,15 @@ public class PersonDaoImpl extends AbstractDao implements PersonDao {
                 Long.class);
     }
 
+    @Override
+    public int getCountOfUniqueEntries(long declarationDataId) {
+        return getJdbcTemplate().queryForObject("select count(DISTINCT rbp.id) " +
+                        "from ref_book_person rbp " +
+                        "join ndfl_person np " +
+                        "on np.person_id = rbp.id " +
+                        "where np.declaration_data_id = ? and rbp.status = 0",
+                new Object[]{declarationDataId},
+                new int[]{Types.NUMERIC},
+                Integer.class);
+    }
 }

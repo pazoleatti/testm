@@ -226,7 +226,7 @@ class Calculate extends AbstractScriptClass {
                     createNaturalPersonRefBookRecords();
                     logForDebug("Создание (" + insertPersonList.size() + " записей, " + ScriptUtils.calcTimeMillis(time));
 
-                    countTotalAndUniquePerson(primaryPersonMap.values())
+                    countTotalAndUniquePerson()
                     logForDebug("Завершение расчета ПНФ (" + ScriptUtils.calcTimeMillis(timeFull));
             }
         })
@@ -250,20 +250,10 @@ class Calculate extends AbstractScriptClass {
     }
 
     // Вывод информации о количестве обработынных физлиц всего и уникальных
-    void countTotalAndUniquePerson(Collection<NaturalPerson> persons) {
-        def personIds = persons.collect { NaturalPerson person -> return person.id }
-        int countOfNulls = personIds.count { Long id -> return id == null }.intValue()
-        personIds.removeAll([null])
-        def personIdSet = personIds.toSet()
-        if (!personIdSet.isEmpty()) {
-            Set<Long> duplicateIdSet = personService.getDuplicate(personIdSet).toSet()
-            for (Long duplicateId : duplicateIdSet) {
-                if (personIdSet.contains(duplicateId)) {
-                    personIdSet.remove(duplicateId)
-                }
-            }
-        }
-        logger.info("Записей физических лиц обработано: ${personIds.size() + countOfNulls}, всего уникальных записей физических лиц: ${personIdSet.size() + countOfNulls}")
+    void countTotalAndUniquePerson() {
+        int countInDeclarationData = ndflPersonService.getCountNdflPerson(declarationData.id)
+        int countOfUniqueEntries = personService.getCountOfUniqueEntries(declarationData.id)
+        logger.info("Записей физических лиц обработано: $countInDeclarationData, всего уникальных записей физических лиц: $countOfUniqueEntries")
     }
 
     NaturalPersonPrimaryRnuRowMapper createPrimaryRowMapper(boolean isLog) {

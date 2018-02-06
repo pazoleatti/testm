@@ -10,4 +10,11 @@ public interface PersonService {
 
     List<Long> getDuplicate(Set<Long> originalRecordId);
 
+    /**
+     * Получить количество уникальных записей в справочнике физлиц, которые не являются дублями для налоговой формы.
+     * @param declarationDataId идентификатор налоговой формы
+     * @return  количество записей
+     */
+    int getCountOfUniqueEntries(long declarationDataId);
+
 }

@@ -490,7 +490,7 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
                     valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
             <where>id=6</where>
         </update>
-    </changeSet>.
+    </changeSet>
 
     <changeSet id="2.2-ytrofimov-34" author="ytrofimov">
         <update tableName="DECLARATION_TEMPLATE">
@@ -526,6 +526,15 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <column name="script"
                     valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfll_check.groovy"/>
             <where>id=12</where>
+        </update>
+    </changeSet>
+
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3269 -->
+    <changeSet id="2.2-ytrofimov-39" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
         </update>
     </changeSet>
 

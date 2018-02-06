@@ -33,4 +33,11 @@ public interface PersonDao {
     List<Long> getDuplicate(Long originalRecordId);
 
     List<Long> getDuplicateIds(Set<Long> originalRecordIds);
+
+    /**
+     * Получить количество уникальных записей в справочнике физлиц, которые не являются дублями для налоговой формы.
+     * @param declarationDataId идентификатор налоговой формы
+     * @return  количество записей
+     */
+    int getCountOfUniqueEntries(long declarationDataId);
 }
