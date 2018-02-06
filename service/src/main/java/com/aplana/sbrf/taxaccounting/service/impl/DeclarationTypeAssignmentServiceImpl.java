@@ -80,13 +80,19 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
     public CreateDeclarationTypeAssignmentResult createDeclarationTypeAssignment(TAUserInfo userInfo, CreateDeclarationTypeAssignmentAction action) {
-        List<LogEntry> logs = new ArrayList<LogEntry>();
+        List<LogEntry> logs = new ArrayList<>();
+
+        // Пользователь пытается создать назначения, которые уже существуют
         boolean existingRelations = false;
 
+        // Создание назначений для всех указанных подразделений и видов налоговых форм
         for (Integer depId : action.getDepartmentIds()) {
             for (Long dt : action.getDeclarationTypeIds()) {
+                // Можно ли создать назначение
                 boolean canAssign = true;
 
+                // Выполняется поиск назначений для подразделения. Если среди найденных назначений есть назначение формы типа, который
+                // в данный момент пытаемся назначить, то это назначение не выполнять и сообщить пользователю, что назначение существует
                 for (DepartmentDeclarationType ddt : sourceService.getDDTByDepartment(depId.intValue(), TaxType.NDFL, new Date(), new Date())) {
                     if (ddt.getDeclarationTypeId() == dt) {
                         existingRelations = true;
@@ -95,7 +101,10 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
                                 "\" уже существует назначение \"" + declarationTypeService.get(ddt.getDeclarationTypeId()).getName() + "\""));
                     }
                 }
+
+                // Существующих назначений не найдено, назначить
                 if (canAssign) {
+                    // Создать дочерним подразделениям отчетные периоды, которых у них нет, но есть у ПАО "Сбербанк"
                     List<Integer> childrenDepartmentIdList = departmentService.getAllChildrenIds(depId);
                     for (Integer childrenDepartmentId : childrenDepartmentIdList) {
                         addPeriod(childrenDepartmentId);
@@ -135,7 +144,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
      */
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
-    public DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignments(TAUserInfo userInfo,  List<DeclarationTypeAssignmentIdModel> assignments) {
+    public DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignments(TAUserInfo userInfo, List<DeclarationTypeAssignmentIdModel> assignments) {
         DeleteDeclarationTypeAssignmentsResult result = new DeleteDeclarationTypeAssignmentsResult();
         Logger logger = new Logger();
         boolean declarationsExist = false;
@@ -153,41 +162,59 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
     }
 
     /**
-     * Создание периодов для подразделения
+     * Создание отчетных периодов для подразделения. Создаются периоды, которые есть у ПАО "Сбербанк", но которых нет у заданного подразделения
      *
      * @param depId ID подразделения
      */
     private void addPeriod(int depId) {
-        // Фильтр для проверки привязки подразделения к периоду
+        // Поиск периодов заданного подразделения
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setDepartmentIdList(Arrays.asList(depId));
+        List<DepartmentReportPeriod> depDrpList = departmentReportPeriodService.fetchAllByFilter(filter);
 
-        List<DepartmentReportPeriod> currDepDrpList = departmentReportPeriodService.fetchAllByFilter(filter);
-
-        // Находим все периоды для ПАО "Сбербанк"
+        // Поиск периодов ПАО "Сбербанк"
         DepartmentReportPeriodFilter filterAll = new DepartmentReportPeriodFilter();
         filterAll.setDepartmentIdList(Arrays.asList(0));
-        List<DepartmentReportPeriod> drpList = departmentReportPeriodService.fetchAllByFilter(filterAll);
+        List<DepartmentReportPeriod> bankDrpList = departmentReportPeriodService.fetchAllByFilter(filterAll);
 
-        List<DepartmentReportPeriod> drpForSave = new LinkedList<DepartmentReportPeriod>(drpList);
+        // Список отчетных периодов подразделения для добавления заданному подразделению
+        // Строится на основе списка периодов ПАО "Сбербанк", из него исключаются те периоды,
+        // которые уже есть у заданного подразделения
+        List<DepartmentReportPeriod> drpForCreate = new LinkedList<>(bankDrpList);
 
-        // Удаляем периоды имеющиеся у текущего подразеления
-        outer:
-        for (DepartmentReportPeriod drp : drpList) {
-            for (DepartmentReportPeriod currDepDrp : currDepDrpList) {
-                if (currDepDrp.getReportPeriod().getId().equals(drp.getReportPeriod().getId())
-                        && currDepDrp.isActive() == drp.isActive()
-                        && ((currDepDrp.getCorrectionDate() == null && drp.getCorrectionDate() == null) || (currDepDrp.getCorrectionDate() != null && currDepDrp.getCorrectionDate().equals(drp.getCorrectionDate())))) {
-                    drpForSave.remove(drp);
-                    continue outer;
+        // Удаление периодов, имеющихся у заданного подразеления. Чтобы не создавалось то, что уже существует
+        // Перебираются все периоды ПАО "Сбербанк", если у заданного подразделения находится равный ему период,
+        // то он удаляется из списка периодов для создания
+        for (Iterator<DepartmentReportPeriod> bankDrpIterator = bankDrpList.iterator(); bankDrpIterator.hasNext(); ) {
+            DepartmentReportPeriod bankDrp = bankDrpIterator.next();
+            boolean equalPeriodFound = false;
+            for (Iterator<DepartmentReportPeriod> depDrpIterator = depDrpList.iterator(); depDrpIterator.hasNext() && !equalPeriodFound; ) {
+                DepartmentReportPeriod depDrp = depDrpIterator.next();
+                if (periodsAreEqual(depDrp, bankDrp)) {
+                    drpForCreate.remove(bankDrp);
+                    equalPeriodFound = true;
                 }
             }
         }
 
-        for (DepartmentReportPeriod drp : drpForSave) {
+        //Создание отчетных периодов у заданного подразделения
+        for (DepartmentReportPeriod drp : drpForCreate) {
             drp.setId(null);
             drp.setDepartmentId(depId);
             departmentReportPeriodService.create(drp);
         }
+    }
+
+    /**
+     * Отчетные периоды подразделений совпадают по id отчетных периодов, активности, дате сдачи корректировки
+     *
+     * @param period1 Отчетный период 1-го подразделения
+     * @param period2 Отчетный период 2-го подразделения
+     * @return
+     */
+    private boolean periodsAreEqual(DepartmentReportPeriod period1, DepartmentReportPeriod period2) {
+        return period1.getReportPeriod().getId().equals(period2.getReportPeriod().getId())
+                && period1.isActive() == period2.isActive()
+                && ((period1.getCorrectionDate() == null && period2.getCorrectionDate() == null) || (period1.getCorrectionDate() != null && period1.getCorrectionDate().equals(period2.getCorrectionDate())));
     }
 }
