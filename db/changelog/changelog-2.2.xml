@@ -538,4 +538,25 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <changeSet id="2.2-dnovikov-4" author="dnovikov">
+        <update tableName="REPORT_PERIOD_TYPE">
+            <column name="NAME" value="первый квартал при реорганизации (ликвидации) организации"/>
+            <where>code='51'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2-dnovikov-5" author="dnovikov">
+        <update tableName="REPORT_PERIOD_TYPE">
+            <column name="NAME" value="полугодие при реорганизации (ликвидации) организации"/>
+            <where>code='52'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2-dnovikov-6" author="dnovikov">
+        <update tableName="REPORT_PERIOD_TYPE">
+            <column name="NAME" value="9 месяцев при реорганизации (ликвидации) организации"/>
+            <where>code='53'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
