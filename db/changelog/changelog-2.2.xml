@@ -574,4 +574,10 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <changeSet id="2.2-dnovikov-7" author="dnovikov">
+        <sql>
+            alter table ASYNC_TASK modify (DESCRIPTION VARCHAR2(400 CHAR));
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
