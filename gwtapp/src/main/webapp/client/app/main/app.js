@@ -507,6 +507,8 @@
         "reportPeriod.error.openPeriod.alreadyOpen": "Период уже открыт!",
         "reportPeriod.error.openPeriod.hasCorrectionPeriod": "Для указанного периода существуют корректирующие периоды, его переоткрытие невозможно!",
         "reportPeriod.error.openCorrectionPeriod.smallCorrectionYear": "Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!",
+        "reportPeriod.error.openCorrectionPeriod.last.text" : "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. открыт более ранний корректирующий период!",
+        "reportPeriod.error.openCorrectionPeriod.before.text" : "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. открыт более поздний корректирующий период!",
         "reportPeriod.error.editPeriod.alreadyClose.text": "Закрытый период не может быть отредактирован!",
         "reportPeriod.error.editPeriod.noChange.text": "Ни одни параметр не был изменен!",
         "reportPeriod.error.editPeriod.hasCorPeriod.text":"Перед изменением периода необходимо удалить все связанные корректирующие периоды!",

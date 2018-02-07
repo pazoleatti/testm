@@ -185,6 +185,18 @@ public class DepartmentReportPeriodController {
     }
 
     /**
+     * Проверка статуса отчетного периода для подразделения
+     *
+     * @param departmentReportPeriod проверяемый коррекционный период
+     * @return статус искомого отчетного периода {@link PeriodStatusBeforeOpen}
+     */
+    @PostMapping(value = "rest/departmentReportPeriod/status", params = "projection=checkCorrectPeriod")
+    public String fetchStatusCorrectPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
+        return periodService.checkPeriodStatusBeforeOpen(departmentReportPeriod.getReportPeriod(), departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getCorrectionDate()).name();
+    }
+
+
+    /**
      * Открыть коррекционный период для подразделения
      *
      * @param departmentReportPeriod открываемый коррекционный период

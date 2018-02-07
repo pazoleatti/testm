@@ -275,7 +275,6 @@ public interface PeriodService {
      * @param term         срок сдачи отчетности
      * @return статус периода
      */
-    @Deprecated
     PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, int departmentId, Date term);
 
     /**

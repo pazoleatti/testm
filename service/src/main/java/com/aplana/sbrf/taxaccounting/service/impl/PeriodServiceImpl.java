@@ -631,6 +631,11 @@ public class PeriodServiceImpl implements PeriodService {
         List<LogEntry> logs = new ArrayList<LogEntry>();
         DepartmentReportPeriod periodInDb = departmentReportPeriodDao.fetchOne(period.getId());
         period.setCorrectionDate(SimpleDateUtils.toStartOfDay(period.getCorrectionDate()));
+        if (checkPeriodStatusBeforeOpen(period.getReportPeriod(), period.getDepartmentId(), period.getCorrectionDate()).equals(PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN)){
+            logs.add(new LogEntry(LogLevel.ERROR, "Корректирующий период с датой корректировки "  + new SimpleDateFormat("dd.MM.yyyy").format(period.getCorrectionDate())
+                    +"  не может быть открыт, т.к. открыт более ранний корректирующий период!"));
+            return logEntryService.save(logs);
+        }
         if (periodInDb.getCorrectionDate() == null) {
             for (Integer depId : getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN)) {
                 period.setIsActive(true);
@@ -662,7 +667,7 @@ public class PeriodServiceImpl implements PeriodService {
                         return i == drpList.size() - 1 ? PeriodStatusBeforeOpen.OPEN : PeriodStatusBeforeOpen.INVALID;
                     }
                 } else if (period.getCorrectionDate().after(term)) {
-                    return PeriodStatusBeforeOpen.INVALID;
+                    return drpLast.isActive() ? PeriodStatusBeforeOpen.CORRECTION_PERIOD_BEFORE_OPEN : PeriodStatusBeforeOpen.INVALID;
 
                 }
             }

@@ -174,7 +174,8 @@
                 CORRECTION_PERIOD_ALREADY_EXIST: "CORRECTION_PERIOD_ALREADY_EXIST", // Существуют корректирующие периоды
                 INVALID: "INVALID",
                 CORRECTION_PERIOD_LAST_OPEN: "CORRECTION_PERIOD_LAST_OPEN",//есть более поздний открытый корректирующий период
-                CORRECTION_PERIOD_NOT_CLOSE: "CORRECTION_PERIOD_NOT_CLOSE"//текущий не закрыт
+                CORRECTION_PERIOD_NOT_CLOSE: "CORRECTION_PERIOD_NOT_CLOSE", //текущий не закрыт
+                CORRECTION_PERIOD_BEFORE_OPEN: "CORRECTION_PERIOD_BEFORE_OPEN" // есть более ранний открытый корректирующий период
             },
             CONFIGURATION_PARAM_TAB: {
                 COMMON_PARAM: "commonParam",
