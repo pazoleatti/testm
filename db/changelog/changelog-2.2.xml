@@ -581,12 +581,12 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
     </changeSet>
 	
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3524 Обновить данные справочников кодов видов дохода и вычетов по НДФЛ-->
-	<!--
+	
 	<changeSet id="2.2-rnurgaleev-4" author="rnurgaleev">
         <sql splitStatements="false">
             begin
 				update ref_book_income_type set name='Проценты (за исключением процентов по облигациям с ипотечным покрытием, эмитированным до 01.01.2007, доходов в виде процентов, получаемых по вкладам в банках, и доходов, получаемых при погашении векселя), включая дисконт, полученный по долговому обязательству любого вида, за исключением сумм дохода в виде процента (купона), получаемого налогоплательщиком по обращающимся облигациям российских организаций, номинированным в рублях и эмитированным после 1 января 2017 года'
-				where code='1011' ans status=0;
+				where code='1011' and status=0;
 				
 				insert into ref_book_income_type (id,record_id,version,status,code,name) 
 				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2013','Сумма компенсации за неиспользованный отпуск');
@@ -605,7 +605,7 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
 			end;
         </sql>
     </changeSet>
-	-->
+	
 	
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3452 Изменение разделителей при сравнении ДУЛ-->
 	<changeSet id="2.2-rnurgaleev-5" author="rnurgaleev">
