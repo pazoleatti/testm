@@ -136,4 +136,13 @@ public enum ConfigurationParam {
     public Boolean isFolder() {
         return folder;
     }
+
+    public static ConfigurationParam getValueByCaption(String caption) {
+        for (ConfigurationParam configurationParam: ConfigurationParam.values()){
+            if (configurationParam.getCaption().equals(caption)){
+                return configurationParam;
+            }
+        }
+        return null;
+    }
 }

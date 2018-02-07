@@ -2,12 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -18,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +81,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     @Override
     public Configuration fetchByEnum(ConfigurationParam param) {
         try {
-            return getJdbcTemplate().queryForObject("select code, department_id, value from configuration where code = ?",
+            return getJdbcTemplate().queryForObject("SELECT code, department_id, value FROM configuration WHERE code = ?",
                     new Object[]{param.name()}, configurationRowMapper);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -94,13 +90,13 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
 
     @Override
     public List<Configuration> fetchAll() {
-        return getJdbcTemplate().query("select code, department_id, value from configuration", configurationRowMapper);
+        return getJdbcTemplate().query("SELECT code, department_id, value FROM configuration", configurationRowMapper);
     }
 
     @Override
     public ConfigurationParamModel fetchAllAsModel() {
         final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value, department_id from configuration", new ConfigurationRowCallbackHandler(model));
+        getJdbcTemplate().query("SELECT code, value, department_id FROM configuration", new ConfigurationRowCallbackHandler(model));
         return model;
     }
 
@@ -133,7 +129,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     @Override
     public ConfigurationParamModel fetchAllAsModelByGroup(final ConfigurationParamGroup group) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
-        getJdbcTemplate().query("select code, value, department_id from configuration", new ConfigurationRowCallbackHandler(model, group));
+        getJdbcTemplate().query("SELECT code, value, department_id FROM configuration", new ConfigurationRowCallbackHandler(model, group));
         return model;
     }
 
@@ -141,7 +137,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     public ConfigurationParamModel fetchAllByDepartment(Integer departmentId) {
         final ConfigurationParamModel model = new ConfigurationParamModel();
         getJdbcTemplate().query(
-                "select code, department_id, value from configuration where department_id = ?",
+                "SELECT code, department_id, value FROM configuration WHERE department_id = ?",
                 new Object[]{departmentId},
                 new ConfigurationRowCallbackHandler(model));
         return model;
@@ -208,6 +204,58 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         for (Configuration config : configurations) {
             update(config);
         }
+    }
+
+    @Override
+    public PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams) {
+        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON));
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("start", pagingParams.getStartIndex() + 1);
+        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
+        List<Configuration> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
+                "select * from (" +
+                        "   select rownum rn, ordered.* from (select code, department_id, value from configuration" + where + ") ordered " +
+                        ") numbered " +
+                        "where rn between :start and :end order by code",
+                params, configurationRowMapper
+        );
+        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select code, value from configuration" + where + ")", Integer.class);
+        return new PagingResult<>(asyncTaskTypeDataList, totalCount);
+
+
+    }
+
+    @Override
+    public void createCommonParam(ConfigurationParam param, String value) {
+        getJdbcTemplate().update("INSERT INTO CONFIGURATION VALUES (?, 0, ?) ",
+                new Object[]{param.name(), value},
+                new int[]{Types.VARCHAR, Types.VARCHAR});
+
+    }
+
+    @Override
+    public void remove(List<ConfigurationParam> params) {
+        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", params);
+        getJdbcTemplate().update("DELETE FROM CONFIGURATION" + where);
+    }
+
+    @Override
+    public void updateCommonParam(ConfigurationParam commonParam, String value) {
+        getJdbcTemplate().update("UPDATE CONFIGURATION SET VALUE=" + value + " WHERE CODE='" + commonParam.name() + "'");
+    }
+
+    @Override
+    public void updateAsyncParam(AsyncTaskTypeData asyncParam) {
+        getJdbcTemplate().update("UPDATE ASYNC_TASK_TYPE SET TASK_LIMIT=?, SHORT_QUEUE_LIMIT=? WHERE ID=?",
+                new Object[]{
+                        (asyncParam.getTaskLimit() == 0 ? null : asyncParam.getTaskLimit()),
+                        (asyncParam.getShortQueueLimit() == 0 ? null : asyncParam.getShortQueueLimit()),
+                        asyncParam.getId()
+                },
+                new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
+        );
+
     }
 
     @Override

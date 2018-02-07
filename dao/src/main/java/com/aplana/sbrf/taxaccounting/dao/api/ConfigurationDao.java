@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -89,4 +84,42 @@ public interface ConfigurationDao {
      * Обновляет значения конфигурационных параметров
      */
     void update(List<Configuration> configurations);
+
+    /**
+     * Получение конфигураций параметров "Общие параметры"
+     *
+     * @param pagingParams параметры пагинации
+     * @return список {@link Configuration} или пустой список
+     */
+    PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams);
+
+    /**
+     * Создание нового значения для конфигураций параметров "Общие параметры"
+     *
+     * @param param создаваемый параметр
+     * @param value значение создаваемого параметра
+     */
+    void createCommonParam(ConfigurationParam param, String value);
+
+    /**
+     * Удаление значенией параметров конфигураций
+     *
+     * @param params список удаляемых параметров
+     */
+    void remove(List<ConfigurationParam> params);
+
+    /**
+     * Обновление записи конфигурационного параметра "Общие параметры"
+     *
+     * @param commonParam обновляемый параметр
+     * @param value
+     */
+    void updateCommonParam(ConfigurationParam commonParam, String value);
+
+    /**
+     * Обновление записи конфигурационного параметра "Параметры асинхронных задач"
+     *
+     * @param asyncParam обновляемый параметр
+     */
+    void updateAsyncParam(AsyncTaskTypeData asyncParam);
 }

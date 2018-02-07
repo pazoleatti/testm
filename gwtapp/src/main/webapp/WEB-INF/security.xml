@@ -1,178 +1,199 @@
 <beans:beans xmlns="http://www.springframework.org/schema/security"
-			 xmlns:beans="http://www.springframework.org/schema/beans"
-			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xsi:schemaLocation="
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
 	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
 	">
 
-	<!-- Exclude some URL's from spring security. See also web.xml. -->
-	<http pattern="/login" security="none"/>
-	<http pattern="/logout" security="none"/>
-	<http pattern="/resources/**" security="none"/>
-	<http pattern="/j_security_check" security="none"/>
+    <!-- Exclude some URL's from spring security. See also web.xml. -->
+    <http pattern="/login" security="none"/>
+    <http pattern="/logout" security="none"/>
+    <http pattern="/resources/**" security="none"/>
+    <http pattern="/j_security_check" security="none"/>
     <http pattern="/controller/actions/cache/clear-cache" security="none"/>
     <http pattern="/controller/actions/clearAuthenticationCache" security="none"/>
 
-	<!--
-		А вот здесь мы уже определяем фильтры аутентификации.
-		http://docs.spring.io/spring-security/site/docs/3.1.4.RELEASE/reference/ns-config.html
-	-->
-	<http create-session="never" use-expressions="true" auto-config="false"
-		  entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
-		<intercept-url pattern="/**" access="isAuthenticated()"/>
-		<custom-filter position="LOGOUT_FILTER" ref="logoutFilter"/>
-		<custom-filter position="PRE_AUTH_FILTER" ref="j2eePreAuthFilter"/>
-		<form-login login-processing-url="/j_security_check" default-target-url="/Main.jsp"/>
-	</http>
+    <!--
+        А вот здесь мы уже определяем фильтры аутентификации.
+        http://docs.spring.io/spring-security/site/docs/3.1.4.RELEASE/reference/ns-config.html
+    -->
+    <http create-session="never" use-expressions="true" auto-config="false"
+          entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
+        <custom-filter position="LOGOUT_FILTER" ref="logoutFilter"/>
+        <custom-filter position="PRE_AUTH_FILTER" ref="j2eePreAuthFilter"/>
+        <form-login login-processing-url="/j_security_check" default-target-url="/Main.jsp"/>
+    </http>
 
-	<global-method-security pre-post-annotations="enabled">
-		<expression-handler ref="expressionHandler"/>
-	</global-method-security>
+    <global-method-security pre-post-annotations="enabled">
+        <expression-handler ref="expressionHandler"/>
+    </global-method-security>
 
-	<beans:bean id="expressionHandler"
-				class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
+    <beans:bean id="expressionHandler"
+                class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
 
-	<!-- Фильтр, отвечающий за логаут. -->
-	<beans:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
-		<beans:constructor-arg>
-			<beans:bean class="com.aplana.sbrf.taxaccounting.web.handlers.SUDIRRedirectLogoutSuccessHandler"/>
-		</beans:constructor-arg>
-		<beans:constructor-arg>
-			<beans:list>
-				<beans:bean class="com.aplana.sbrf.taxaccounting.web.handlers.LogSystemLogoutHandler"/>
-				<beans:bean	class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
-			</beans:list>
-		</beans:constructor-arg>
-	</beans:bean>
+    <!-- Фильтр, отвечающий за логаут. -->
+    <beans:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+        <beans:constructor-arg>
+            <beans:bean class="com.aplana.sbrf.taxaccounting.web.handlers.SUDIRRedirectLogoutSuccessHandler"/>
+        </beans:constructor-arg>
+        <beans:constructor-arg>
+            <beans:list>
+                <beans:bean class="com.aplana.sbrf.taxaccounting.web.handlers.LogSystemLogoutHandler"/>
+                <beans:bean
+                        class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+            </beans:list>
+        </beans:constructor-arg>
+    </beans:bean>
 
-	<beans:bean id="preAuthenticatedProcessingFilterEntryPoint"
-				class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
+    <beans:bean id="preAuthenticatedProcessingFilterEntryPoint"
+                class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
 
-	<beans:bean id="j2eePreAuthFilter"
-				class="org.springframework.security.web.authentication.preauth.j2ee.J2eePreAuthenticatedProcessingFilter">
-		<beans:property name="authenticationManager" ref="appControlAuthenticationManager"/>
-		<beans:property name="authenticationDetailsSource">
-			<beans:bean	class="org.springframework.security.web.authentication.preauth.j2ee.J2eeBasedPreAuthenticatedWebAuthenticationDetailsSource">
-				<beans:property name="mappableRolesRetriever">
-					<beans:bean	class="org.springframework.security.web.authentication.preauth.j2ee.WebXmlMappableAttributesRetriever"/>
-				</beans:property>
-				<beans:property name="userRoles2GrantedAuthoritiesMapper">
-					<beans:bean	class="org.springframework.security.core.authority.mapping.SimpleAttributes2GrantedAuthoritiesMapper">
-						<beans:property name="convertAttributeToUpperCase" value="true"/>
-					</beans:bean>
-				</beans:property>
-			</beans:bean>
-		</beans:property>
-	</beans:bean>
+    <beans:bean id="j2eePreAuthFilter"
+                class="org.springframework.security.web.authentication.preauth.j2ee.J2eePreAuthenticatedProcessingFilter">
+        <beans:property name="authenticationManager" ref="appControlAuthenticationManager"/>
+        <beans:property name="authenticationDetailsSource">
+            <beans:bean
+                    class="org.springframework.security.web.authentication.preauth.j2ee.J2eeBasedPreAuthenticatedWebAuthenticationDetailsSource">
+                <beans:property name="mappableRolesRetriever">
+                    <beans:bean
+                            class="org.springframework.security.web.authentication.preauth.j2ee.WebXmlMappableAttributesRetriever"/>
+                </beans:property>
+                <beans:property name="userRoles2GrantedAuthoritiesMapper">
+                    <beans:bean
+                            class="org.springframework.security.core.authority.mapping.SimpleAttributes2GrantedAuthoritiesMapper">
+                        <beans:property name="convertAttributeToUpperCase" value="true"/>
+                    </beans:bean>
+                </beans:property>
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
 
-	<!--Настройка фильтра для события удаления сессии-->
-	<beans:bean id="sessionAuthStrategy"
-				class="org.springframework.security.web.session.SimpleRedirectInvalidSessionStrategy">
-		<beans:constructor-arg name="invalidSessionUrl" value="/pkmslogout"/>
-	</beans:bean>
+    <!--Настройка фильтра для события удаления сессии-->
+    <beans:bean id="sessionAuthStrategy"
+                class="org.springframework.security.web.session.SimpleRedirectInvalidSessionStrategy">
+        <beans:constructor-arg name="invalidSessionUrl" value="/pkmslogout"/>
+    </beans:bean>
 
-	<authentication-manager alias="appControlAuthenticationManager">
-		<authentication-provider ref="preAuthenticatedAuthenticationProvider"/>
-	</authentication-manager>
+    <authentication-manager alias="appControlAuthenticationManager">
+        <authentication-provider ref="preAuthenticatedAuthenticationProvider"/>
+    </authentication-manager>
 
-	<beans:bean id="preAuthenticatedAuthenticationProvider"
-				class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
-		<beans:property name="preAuthenticatedUserDetailsService">
-			<beans:bean class="com.aplana.sbrf.taxaccounting.web.main.api.server.AuthenticationUserDetailsServiceImpl"/>
-		</beans:property>
-	</beans:bean>
+    <beans:bean id="preAuthenticatedAuthenticationProvider"
+                class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+        <beans:property name="preAuthenticatedUserDetailsService">
+            <beans:bean class="com.aplana.sbrf.taxaccounting.web.main.api.server.AuthenticationUserDetailsServiceImpl"/>
+        </beans:property>
+    </beans:bean>
 
-	<beans:bean id="permissionEvaluator"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator">
-		<beans:property name="permissionFactoryRegistry">
-			<beans:map>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.TAUser" value-ref="userPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationData" value-ref="declarationDataPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.ReportPeriod" value-ref="reportPeriodPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod" value-ref="departmentReportPeriodPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.Department" value-ref="departmentPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.LockData" value-ref="lockDataPermissionFactory"/>
-				<beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationDataFile" value-ref="declarationDataFilePermissionFactory"/>
-			</beans:map>
-		</beans:property>
-	</beans:bean>
+    <beans:bean id="permissionEvaluator"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator">
+        <beans:property name="permissionFactoryRegistry">
+            <beans:map>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.TAUser" value-ref="userPermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationData"
+                             value-ref="declarationDataPermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.ReportPeriod"
+                             value-ref="reportPeriodPermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod"
+                             value-ref="departmentReportPeriodPermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.Department"
+                             value-ref="departmentPermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.LockData" value-ref="lockDataPermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.DeclarationDataFile"
+                             value-ref="declarationDataFilePermissionFactory"/>
+                <beans:entry key="com.aplana.sbrf.taxaccounting.model.Configuration"
+                             value-ref="configurationPermissionFactory"/>
+            </beans:map>
+        </beans:property>
+    </beans:bean>
 
-	<!--Фабрики системы расчета прав-->
-	<beans:bean id="userPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.UserPermission"/>
-	</beans:bean>
-	<beans:bean id="declarationDataPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission"/>
-	</beans:bean>
-	<beans:bean id="reportPeriodPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.ReportPeriodPermission"/>
-	</beans:bean>
-	<beans:bean id="departmentReportPeriodPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission"/>
-	</beans:bean>
-	<beans:bean id="departmentPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.DepartmentPermission"/>
-	</beans:bean>
-	<beans:bean id="lockDataPermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.LockDataPermission"/>
-	</beans:bean>
-	<beans:bean id="declarationDataFilePermissionFactory"
-				class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
-		<beans:constructor-arg
-				value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission"/>
-	</beans:bean>
+    <!--Фабрики системы расчета прав-->
+    <beans:bean id="userPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.UserPermission"/>
+    </beans:bean>
+    <beans:bean id="declarationDataPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission"/>
+    </beans:bean>
+    <beans:bean id="reportPeriodPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.ReportPeriodPermission"/>
+    </beans:bean>
+    <beans:bean id="departmentReportPeriodPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermission"/>
+    </beans:bean>
+    <beans:bean id="departmentPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.DepartmentPermission"/>
+    </beans:bean>
+    <beans:bean id="lockDataPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.LockDataPermission"/>
+    </beans:bean>
+    <beans:bean id="declarationDataFilePermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermission"/>
+    </beans:bean>
+    <beans:bean id="configurationPermissionFactory"
+                class="com.aplana.sbrf.taxaccounting.permissions.BasePermissionFactory">
+        <beans:constructor-arg
+                value="com.aplana.sbrf.taxaccounting.permissions.ConfigurationPermission"/>
+    </beans:bean>
 
-	<!--Объекты расчета прав-->
-	<beans:bean id="userPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.UserPermissionSetter">
-		<beans:property name="permissionFactory" ref="userPermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
+    <!--Объекты расчета прав-->
+    <beans:bean id="userPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.UserPermissionSetter">
+        <beans:property name="permissionFactory" ref="userPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
 
-	<beans:bean id="declarationDataPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter">
-		<beans:property name="permissionFactory" ref="declarationDataPermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
+    <beans:bean id="declarationDataPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermissionSetter">
+        <beans:property name="permissionFactory" ref="declarationDataPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
 
-	<beans:bean id="reportPeriodPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.ReportPeriodPermissionSetter">
-		<beans:property name="permissionFactory" ref="reportPeriodPermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
-	<beans:bean id="departmentReportPeriodPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter">
-		<beans:property name="permissionFactory" ref="departmentReportPeriodPermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
-	<beans:bean id="departmentPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.DepartmentPermissionSetter">
-		<beans:property name="permissionFactory" ref="departmentPermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
-	<beans:bean id="lockDataPermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.LockDataPermissionSetter">
-		<beans:property name="permissionFactory" ref="lockDataPermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
-	<beans:bean id="declarationDataFilePermissionSetter"
-				class="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter">
-		<beans:property name="permissionFactory" ref="declarationDataFilePermissionFactory"/>
-		<beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
-	</beans:bean>
+    <beans:bean id="reportPeriodPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.ReportPeriodPermissionSetter">
+        <beans:property name="permissionFactory" ref="reportPeriodPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
+    <beans:bean id="departmentReportPeriodPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.DepartmentReportPeriodPermissionSetter">
+        <beans:property name="permissionFactory" ref="departmentReportPeriodPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
+    <beans:bean id="departmentPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.DepartmentPermissionSetter">
+        <beans:property name="permissionFactory" ref="departmentPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
+    <beans:bean id="lockDataPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.LockDataPermissionSetter">
+        <beans:property name="permissionFactory" ref="lockDataPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
+    <beans:bean id="declarationDataFilePermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.DeclarationDataFilePermissionSetter">
+        <beans:property name="permissionFactory" ref="declarationDataFilePermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
+    <beans:bean id="configurationPermissionSetter"
+                class="com.aplana.sbrf.taxaccounting.permissions.ConfigurationPermissionSetter">
+        <beans:property name="permissionFactory" ref="configurationPermissionFactory"/>
+        <beans:property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </beans:bean>
 </beans:beans>
