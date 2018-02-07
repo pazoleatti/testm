@@ -199,6 +199,7 @@
         "declarationTypeAssignment.message.success": "Назначения налоговых форм подразделениям выполнены успешно",
         "declarationTypeAssignment.button.editAssignment": "Редактировать",
         "declarationTypeAssignment.modal.edit.title": "Форма редактирования назначения",
+        "declarationTypeAssignment.button.deleteAssignment": "Отменить назначение",
 
         "ndflReport.label.page": "Стр.",
         "ndflReport.label.from": "из",
@@ -506,6 +507,8 @@
         "reportPeriod.error.openPeriod.alreadyOpen": "Период уже открыт!",
         "reportPeriod.error.openPeriod.hasCorrectionPeriod": "Для указанного периода существуют корректирующие периоды, его переоткрытие невозможно!",
         "reportPeriod.error.openCorrectionPeriod.smallCorrectionYear": "Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!",
+        "reportPeriod.error.openCorrectionPeriod.last.text" : "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. открыт более ранний корректирующий период!",
+        "reportPeriod.error.openCorrectionPeriod.before.text" : "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. открыт более поздний корректирующий период!",
         "reportPeriod.error.editPeriod.alreadyClose.text": "Закрытый период не может быть отредактирован!",
         "reportPeriod.error.editPeriod.noChange.text": "Ни одни параметр не был изменен!",
         "reportPeriod.error.editPeriod.hasCorPeriod.text":"Перед изменением периода необходимо удалить все связанные корректирующие периоды!",
@@ -639,15 +642,26 @@
         "async.title.stateDate": "Дата изменения состояния",
 
 
+        "configParam.title": "Администрирование - Конфигурационные параметры",
         "tab.configParam.commonParam" : "Общие параметры",
         "tab.configParam.asyncParam" : "Параметры асинхронных заданий",
-
+        "configParam.button.createRecord" : "Добавить запись",
+        "configParam.button.editRecord" : "Редактировать запись",
+        "configParam.button.removeRecord" : "Удалить запись",
         "asyncParam.grid.columnName.taskType": "Тип задания",
         "asyncParam.grid.columnName.limitKind": "Вид ограничения",
         "asyncParam.grid.columnName.taskLimit": "Значение параметра \"Ограничение на выполнение задания\"",
         "asyncParam.grid.columnName.shortQueueLimit": "Значение параметра \"Ограничение на выполнение задания в очереди быстрых заданий\"",
+        "asyncParam.modal.field.taskType": "Тип задания",
+        "asyncParam.modal.field.limitKind": "Вид ограничения",
+        "asyncParam.modal.field.taskLimit": "Ограничение на выполнение задания",
+        "asyncParam.modal.field.shortQueueLimit": "Ограничение на выполнение задания в очереди быстрых заданий",
         "commonParam.grid.columnName.code": "Параметр",
-        "commonParam.grid.columnName.value": "Значение"
+        "commonParam.grid.columnName.value": "Значение",
+        "asyncParam.validate.checkLimit" : "{{taskTitle}}: Значение параметра \"Ограничение на выполнение задания\" ({{taskLimit}}) " +
+            "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" ({{shortQueueLimit}})",
+        "asyncParam.validate.checkNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым (больше нуля)!",
+        "asyncParam.validate.tooMuch": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым, меньше или равно 1 500 000"
 
     };
     /**

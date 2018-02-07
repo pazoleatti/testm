@@ -178,19 +178,19 @@
                                     url: "controller/rest/departmentReportPeriod/" + $shareData.period.id + "?projection=checkHasNotAccepted"
                                 }).then(function (logger) {
                                     LogEntryResource.query({
-                                            uuid: logger,
+                                            uuid: logger.data,
                                             projection: 'count'
                                         },
                                         function (data) {
-                                            if ((data.ERROR + data.WARNING) !== 0) {
-                                                $logPanel.open('log-panel-container', logger);
+                                            if ((data.ERROR + data.WARNING) > 0) {
+                                                $logPanel.open('log-panel-container', logger.data);
                                                 $dialogs.errorDialog({
                                                     content: $filter('translate')('reportPeriod.error.editPeriod.text')
                                                 });
                                             } else {
                                                 // Сохраняем отредактированный период
                                                 $http({
-                                                    method: "PUT",
+                                                    method: "POST ",
                                                     url: "controller/rest/departmentReportPeriod/" + $scope.period.id,
                                                     params: {
                                                         departmentReportPeriod: JSON.stringify({
@@ -204,10 +204,22 @@
                                                         })
                                                     }
                                                 }).then(function (response) {
-                                                    if (response.data) {
-                                                        $logPanel.open('log-panel-container', response.data);
-                                                        $modalInstance.close();
-                                                    }
+                                                    // Проверяем на наличие ошибок при сохранении
+                                                    LogEntryResource.query({
+                                                            uuid: response.data,
+                                                            projection: 'count'
+                                                        }, function (data) {
+                                                            if ((data.ERROR + data.WARNING) > 0) {
+                                                                $logPanel.open('log-panel-container', response.data);
+                                                                $dialogs.errorDialog({
+                                                                    content: $filter('translate')('reportPeriod.error.editPeriod.text')
+                                                                });
+                                                            } else {
+                                                                $logPanel.open('log-panel-container', response.data);
+                                                                $modalInstance.close();
+                                                            }
+                                                        }
+                                                    );
                                                 });
                                             }
                                         });

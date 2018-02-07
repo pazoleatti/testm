@@ -52,8 +52,18 @@ public interface ConfigurationService {
     void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger);
 
     /**
+     * Проверка доступности путей для чтения или записи в указанном параметре
+     *
+     * @param userInfo информация о пользователе
+     * @param param конфигурационный параметр
+     * @return uuid идентификатор логгера
+     */
+    String checkReadWriteAccess(TAUserInfo userInfo, Configuration param);
+
+    /**
      * Проверка доступности путей в указанных конфигурационных параметрах (табл. CONFIGURATION)
      */
+    @Deprecated
     void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger);
 
     /**
@@ -93,4 +103,48 @@ public interface ConfigurationService {
      * @return страница {@link Configuration}
      */
     PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams);
+
+    /**
+     * Создание нового значения конфигурацинного параметра
+     *
+     * @param commonParam конфигурационный параметр типа "Общие параметры"
+     * @param userInfo информация текущего польователя
+     * @return uuid идентификатор логгера
+     */
+    String create(Configuration commonParam, TAUserInfo userInfo);
+
+    /**
+     * Полученние зачений параметров "Общие параметры", которых нет в БД
+     *
+     * @param pagingParams параметры пагинации
+     * @return страница {@link PagingResult} с данными {@link Configuration}
+     */
+    PagingResult<Configuration> fetchAllNonChangedCommonParam(PagingParams pagingParams);
+
+    /**
+     * Удаление записей конфигураций "Общие параметры"
+     *
+     * @param names названия удаляемых параметров
+     * @param userInfo информация о текущем пользователе
+     * @return uuid идентификатор логгера
+     */
+    String remove(List<String> names, TAUserInfo userInfo);
+
+    /**
+     * Обновление записей конфигурационных параметров
+     *
+     * @param commonParam конфигурационные параметры "Общие параметры"
+     * @param userInfo
+     * @return uuid идентификатор логгера
+     */
+    String updateCommonParam(Configuration commonParam, TAUserInfo userInfo);
+
+    /**
+     * Обновление записей конфигурационных параметров
+     *
+     * @param asyncParam конфигурационные параметры "Параметры асинхронных задач"
+     * @param userInfo
+     * @return uuid идентификатор логгера
+     */
+    String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo);
 }

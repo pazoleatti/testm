@@ -324,8 +324,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> getDestinationDepartments(TaxType taxType, TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
-        if (tAUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS) ||
-                tAUser.hasRoles(taxType, TARole.F_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_NS)) {
+        if (tAUser.hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.N_ROLE_CONTROL_NS)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
         }

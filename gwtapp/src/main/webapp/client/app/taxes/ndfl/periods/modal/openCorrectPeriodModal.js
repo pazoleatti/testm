@@ -10,8 +10,8 @@
     /**
      * @description  Контроллер модального окна открытия корректирующего перода
      */
-        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter',
-            function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter) {
+        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter', 'APP_CONSTANTS',
+            function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter, APP_CONSTANTS) {
 
                 $scope.department = $shareData.department;
                 $scope.departmentReportPeriod = angular.copy($shareData.period);
@@ -34,7 +34,7 @@
                     if (ValidationUtils.checkYearInterval($scope.correctPeriod.reportPeriod.taxPeriod.year, $scope.departmentReportPeriod.correctionDate.substr(0, 4))) {
                         $http({
                             method: "POST",
-                            url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
+                            url: "controller/rest/departmentReportPeriod/status?projection=checkCorrectPeriod",
                             params: {
                                 departmentReportPeriod: JSON.stringify({
                                     id: $scope.departmentReportPeriod.id,
@@ -43,10 +43,37 @@
                                     departmentId: $scope.department.id
                                 })
                             }
-                        }).then(function (response) {
-                            if (response.data) {
-                                $logPanel.open('log-panel-container', response.data);
-                                $modalInstance.close();
+                        }).then(function (status) {
+                            if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_LAST_OPEN) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.last.text', {
+                                        correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
+                                    })
+                                });
+                            } else if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_BEFORE_OPEN) {
+                                $dialogs.errorDialog({
+                                    content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.before.text', {
+                                        correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
+                                    })
+                                });
+                            } else {
+                                $http({
+                                    method: "POST",
+                                    url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
+                                    params: {
+                                        departmentReportPeriod: JSON.stringify({
+                                            id: $scope.departmentReportPeriod.id,
+                                            reportPeriod: $scope.correctPeriod.reportPeriod,
+                                            correctionDate: $scope.departmentReportPeriod.correctionDate,
+                                            departmentId: $scope.department.id
+                                        })
+                                    }
+                                }).then(function (response) {
+                                    if (response.data) {
+                                        $logPanel.open('log-panel-container', response.data);
+                                        $modalInstance.close();
+                                    }
+                                });
                             }
                         });
                     } else {

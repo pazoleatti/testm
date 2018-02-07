@@ -119,7 +119,7 @@ public class DepartmentReportPeriodController {
      * @param departmentReportPeriod открываемый период
      * @return идентификатор uuid для логов
      */
-    @PutMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}")
+    @PostMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}")
     public String editPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
         return periodService.editPeriod(departmentReportPeriod, securityService.currentUserInfo());
     }
@@ -183,6 +183,18 @@ public class DepartmentReportPeriodController {
     public String fetchStatus(@RequestParam Integer departmentId, @RequestParam Long dictTaxPeriodId, @RequestParam Integer year) {
         return periodService.checkPeriodStatus(year, departmentId, dictTaxPeriodId).name();
     }
+
+    /**
+     * Проверка статуса отчетного периода для подразделения
+     *
+     * @param departmentReportPeriod проверяемый коррекционный период
+     * @return статус искомого отчетного периода {@link PeriodStatusBeforeOpen}
+     */
+    @PostMapping(value = "rest/departmentReportPeriod/status", params = "projection=checkCorrectPeriod")
+    public String fetchStatusCorrectPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
+        return periodService.checkPeriodStatusBeforeOpen(departmentReportPeriod.getReportPeriod(), departmentReportPeriod.getDepartmentId(), departmentReportPeriod.getCorrectionDate()).name();
+    }
+
 
     /**
      * Открыть коррекционный период для подразделения

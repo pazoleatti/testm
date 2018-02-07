@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.substring;
+
 /**
  * Дао для работы с асинхронными задачами
  *
@@ -142,7 +144,7 @@ public class AsyncTaskDaoImpl extends AbstractDao implements AsyncTaskDao {
         long id = dbUtils.getNextIds(DBUtils.Sequence.ASYNC_TASK, 1).get(0);
 
         getJdbcTemplate().update("insert into async_task (id, type_id, user_id, description, queue, priority_node, serialized_params) values (?, ?, ?, ?, ?, ?, ?)",
-                id, taskTypeId, userId, description, queue.getId(), priorityNode, serializedParams);
+                id, taskTypeId, userId, substring(description, 0, 400), queue.getId(), priorityNode, serializedParams);
         return getTaskData(id);
     }
 

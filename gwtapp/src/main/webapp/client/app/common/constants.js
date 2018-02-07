@@ -45,7 +45,8 @@
                 F_ROLE_OPER: "F_ROLE_OPER",
                 F_ROLE_CONTROL_UNP: "F_ROLE_CONTROL_UNP",
                 F_ROLE_CONTROL_NS: "F_ROLE_CONTROL_NS",
-                F_ROLE_CONF: "F_ROLE_CONF"
+                F_ROLE_CONF: "F_ROLE_CONF",
+                ROLE_ADMIN: "ROLE_ADMIN"
             },
             REFBOOK: {
                 DEPARTMENT: 30,
@@ -100,6 +101,11 @@
                 VIEW: 1 << 0,
                 DELETE: 1 << 1
             },
+            CONFIGURATION_PERMISSION: {
+                EDIT: 1 << 0,
+                CREATE: 1 << 1,
+                DELETE: 1 << 2
+            },
             NDFL_DECLARATION_KIND: {
                 ADDITIONAL: {id: 1, name: "Выходная"},
                 CONSOLIDATED: {id: 2, name: "Консолидированная"},
@@ -141,25 +147,25 @@
                     LAST_SELECTED_PERIOD: "LAST_SELECTED_PERIOD"
                 }
             },
-            ATTACHE_FILE_TYPE : {
-                DEFAULT_TYPE_ID : 21657700
+            ATTACHE_FILE_TYPE: {
+                DEFAULT_TYPE_ID: 21657700
             },
-            PERSON_SEARCH_FIELDS : {
-                LAST_NAME : {alias: "lastName", length: 36, label: "Фамилия"},
-                FIRST_NAME : {alias: "firstName", length: 36, label: "Имя"},
-                MIDDLE_NAME : {alias: "middleName", length: 36, label: "Отчество"},
-                INN : {alias: "inn", length: 50, label: "ИНН"},
-                ID_DOC : {alias: "idDocNumber", length: 25, label: "№ ДУЛ"},
-                REF_NUMBER : {alias: "refNumber", length: 10, label: "Номер справки"}
+            PERSON_SEARCH_FIELDS: {
+                LAST_NAME: {alias: "lastName", length: 36, label: "Фамилия"},
+                FIRST_NAME: {alias: "firstName", length: 36, label: "Имя"},
+                MIDDLE_NAME: {alias: "middleName", length: 36, label: "Отчество"},
+                INN: {alias: "inn", length: 50, label: "ИНН"},
+                ID_DOC: {alias: "idDocNumber", length: 25, label: "№ ДУЛ"},
+                REF_NUMBER: {alias: "refNumber", length: 10, label: "Номер справки"}
             },
-            PERSON_SEARCH_FIELDS_RNU : {
-                INP : {alias: "inp", length: 25, label: "ИНП"},
+            PERSON_SEARCH_FIELDS_RNU: {
+                INP: {alias: "inp", length: 25, label: "ИНП"},
                 SNILS: {alias: "snils", length: 14, label: "СНИЛС"},
-                LAST_NAME : {alias: "lastName", length: 36, label: "Фамилия"},
-                FIRST_NAME : {alias: "firstName", length: 36, label: "Имя"},
-                MIDDLE_NAME : {alias: "middleName", length: 36, label: "Отчество"},
-                INN : {alias: "inn", length: 50, label: "ИНН"},
-                ID_DOC : {alias: "idDocNumber", length: 25, label: "№ ДУЛ"}
+                LAST_NAME: {alias: "lastName", length: 36, label: "Фамилия"},
+                FIRST_NAME: {alias: "firstName", length: 36, label: "Имя"},
+                MIDDLE_NAME: {alias: "middleName", length: 36, label: "Отчество"},
+                INN: {alias: "inn", length: 50, label: "ИНН"},
+                ID_DOC: {alias: "idDocNumber", length: 25, label: "№ ДУЛ"}
             },
             REPORT_PERIOD_STATUS: {
                 OPEN: "OPEN", // Открыт
@@ -168,7 +174,15 @@
                 CORRECTION_PERIOD_ALREADY_EXIST: "CORRECTION_PERIOD_ALREADY_EXIST", // Существуют корректирующие периоды
                 INVALID: "INVALID",
                 CORRECTION_PERIOD_LAST_OPEN: "CORRECTION_PERIOD_LAST_OPEN",//есть более поздний открытый корректирующий период
-                CORRECTION_PERIOD_NOT_CLOSE: "CORRECTION_PERIOD_NOT_CLOSE"//текущий не закрыт
+                CORRECTION_PERIOD_NOT_CLOSE: "CORRECTION_PERIOD_NOT_CLOSE", //текущий не закрыт
+                CORRECTION_PERIOD_BEFORE_OPEN: "CORRECTION_PERIOD_BEFORE_OPEN" // есть более ранний открытый корректирующий период
+            },
+            CONFIGURATION_PARAM_TAB: {
+                COMMON_PARAM: "commonParam",
+                ASYNC_PARAM: "asyncParam"
+            },
+            ASYNC_HANDLER_CLASS_NAME: {
+                UPLOAD_REFBOOK_ASYNC_TASK: "UploadRefBookAsyncTask"
             }
         });
 }());
