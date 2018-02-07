@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookAsnuDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
-import com.querydsl.core.types.QBean;
-import com.querydsl.sql.SQLQueryFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -14,21 +12,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QRefBookAsnu.refBookAsnu;
-import static com.querydsl.core.types.Projections.bean;
-
 /**
  * Реализация дао для работы со справочником АСНУ
  */
 @Repository
 public class RefBookAsnuDaoImpl extends AbstractDao implements RefBookAsnuDao {
-    final private SQLQueryFactory sqlQueryFactory;
-
-    public RefBookAsnuDaoImpl(SQLQueryFactory sqlQueryFactory) {
-        this.sqlQueryFactory = sqlQueryFactory;
-    }
-
-    final private QBean<RefBookAsnu> refBookAsnuBean = bean(RefBookAsnu.class, refBookAsnu.all());
 
     /**
      * Получение всех значений справочника
