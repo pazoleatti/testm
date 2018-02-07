@@ -18,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import net.sf.jasperreports.web.actions.ActionException;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -631,18 +630,29 @@ public class PeriodServiceImpl implements PeriodService {
         List<LogEntry> logs = new ArrayList<LogEntry>();
         DepartmentReportPeriod periodInDb = departmentReportPeriodDao.fetchOne(period.getId());
         period.setCorrectionDate(SimpleDateUtils.toStartOfDay(period.getCorrectionDate()));
+
         if (checkPeriodStatusBeforeOpen(period.getReportPeriod(), period.getDepartmentId(), period.getCorrectionDate()).equals(PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN)){
             logs.add(new LogEntry(LogLevel.ERROR, "Корректирующий период с датой корректировки "  + new SimpleDateFormat("dd.MM.yyyy").format(period.getCorrectionDate())
                     +"  не может быть открыт, т.к. открыт более ранний корректирующий период!"));
             return logEntryService.save(logs);
         }
-        if (periodInDb.getCorrectionDate() == null) {
-            for (Integer depId : getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN)) {
-                period.setIsActive(true);
-                period.setDepartmentId(depId);
-                saveOrOpen(period, logs);
+
+        // Поиск последнего отчетного периода данного подразделения для того же отчетного периода
+        DepartmentReportPeriod lastDrp = departmentReportPeriodService.fetchLast(periodInDb.getDepartmentId(), periodInDb.getReportPeriod().getId());
+
+        // Открываемый корректирующий период должен быть самым поздним
+        if(lastDrp.getCorrectionDate() == null || lastDrp.getCorrectionDate().before(period.getCorrectionDate())) {
+            if (periodInDb.getCorrectionDate() == null) {
+                for (Integer depId : getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN)) {
+                    period.setIsActive(true);
+                    period.setDepartmentId(depId);
+                    saveOrOpen(period, logs);
+                }
             }
+        } else {
+            throw new ServiceException("Корректирующий период с датой корректировки " + sdf.get().format(period.getCorrectionDate()) + " не может быть открыт, т.к. существует более поздний корректирующий период!");
         }
+
         return logEntryService.save(logs);
     }
 
