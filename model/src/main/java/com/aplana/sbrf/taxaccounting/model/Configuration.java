@@ -5,9 +5,11 @@ import java.io.Serializable;
 /**
  * Конфигурация
  */
-public class Configuration implements Serializable {
+public class Configuration implements Serializable, SecuredEntity {
 
     private static final long serialVersionUID = -4129485177345542519L;
+
+    private int id;
 
     private String code;
 
@@ -16,6 +18,16 @@ public class Configuration implements Serializable {
     private Integer departmentId;
 
     private String value;
+
+    private long permissions;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getCode() {
         return code;
@@ -49,6 +61,16 @@ public class Configuration implements Serializable {
         this.description = description;
     }
 
+    @Override
+    public long getPermissions() {
+        return permissions;
+    }
+
+    @Override
+    public void setPermissions(long permissions) {
+        this.permissions = permissions;
+    }
+
     public Configuration() {
 
     }
@@ -57,5 +79,10 @@ public class Configuration implements Serializable {
         this.code = code;
         this.departmentId = departmentId;
         this.value = value;
+    }
+
+    public Configuration(int id, String description) {
+        this.id = id;
+        this.description = description;
     }
 }

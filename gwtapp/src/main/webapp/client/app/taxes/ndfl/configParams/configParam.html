@@ -1,12 +1,42 @@
 <div id="ndfl" style="height: 100%;">
     <div class="row">
         <div class="header-col" style="margin: 14px 0 0 28px;">
-            <h1>{{::'reportPeriod.title' | translate}}</h1>
+            <h1>{{::'configParam.title' | translate}}</h1>
         </div>
     </div>
     <div class="box-shadow-block">
 
-        <div class="form100 tab-wrapper" style=" height: 90%; padding: 10px 12px 14px;"
+        <!--Панель кнопок -->
+        <div class="button_panel" style="padding: 10px 12px 0;">
+            <div class="btn-toolbar" role="toolbar">
+                <!--Добавить запись -->
+                <span>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="!permissionCheckerGridValue(APP_CONSTANTS.CONFIGURATION_PERMISSION.CREATE)"
+                            data-ng-click="createRecord()">
+                        <span data-translate-once="configParam.button.createRecord"></span>
+                    </button>
+                </span>
+                <!--Редактировать запись -->
+                <span>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="!permissionCheckerGridValue(APP_CONSTANTS.CONFIGURATION_PERMISSION.EDIT)"
+                            data-ng-click="editRecord()">
+                        <span data-translate-once="configParam.button.editRecord"></span>
+                    </button>
+                </span>
+                <!--Удалить запись -->
+                <span>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="!permissionCheckerGridValue(APP_CONSTANTS.CONFIGURATION_PERMISSION.DELETE)"
+                            data-ng-click="removeRecord()">
+                        <span data-translate-once="configParam.button.removeRecord"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+
+        <div class="form100 tab-wrapper" style="height: 80%; padding: 10px 12px 14px;"
              data-aplana-tabs="configParamTabsCtrl"
              data-tab-model="configParamTabs">
         </div>

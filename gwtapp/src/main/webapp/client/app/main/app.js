@@ -640,15 +640,26 @@
         "async.title.stateDate": "Дата изменения состояния",
 
 
+        "configParam.title": "Администрирование - Конфигурационные параметры",
         "tab.configParam.commonParam" : "Общие параметры",
         "tab.configParam.asyncParam" : "Параметры асинхронных заданий",
-
+        "configParam.button.createRecord" : "Добавить запись",
+        "configParam.button.editRecord" : "Редактировать запись",
+        "configParam.button.removeRecord" : "Удалить запись",
         "asyncParam.grid.columnName.taskType": "Тип задания",
         "asyncParam.grid.columnName.limitKind": "Вид ограничения",
         "asyncParam.grid.columnName.taskLimit": "Значение параметра \"Ограничение на выполнение задания\"",
         "asyncParam.grid.columnName.shortQueueLimit": "Значение параметра \"Ограничение на выполнение задания в очереди быстрых заданий\"",
+        "asyncParam.modal.field.taskType": "Тип задания",
+        "asyncParam.modal.field.limitKind": "Вид ограничения",
+        "asyncParam.modal.field.taskLimit": "Ограничение на выполнение задания",
+        "asyncParam.modal.field.shortQueueLimit": "Ограничение на выполнение задания в очереди быстрых заданий",
         "commonParam.grid.columnName.code": "Параметр",
-        "commonParam.grid.columnName.value": "Значение"
+        "commonParam.grid.columnName.value": "Значение",
+        "asyncParam.validate.checkLimit" : "{{taskTitle}}: Значение параметра \"Ограничение на выполнение задания\" ({{taskLimit}}) " +
+            "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" ({{shortQueueLimit}})",
+        "asyncParam.validate.checkNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым (больше нуля)!",
+        "asyncParam.validate.tooMuch": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым, меньше или равно 1 500 000"
 
     };
     /**

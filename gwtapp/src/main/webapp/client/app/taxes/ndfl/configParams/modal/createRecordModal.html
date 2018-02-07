@@ -1,0 +1,133 @@
+<form class="form-horizontal" data-aplana-submit-valid="save()">
+    <div class="modal-body">
+        <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table tetete">
+            <tbody>
+
+            <!-- "Параметр" для "Общие параметры"-->
+            <tr data-ng-if="commonParamTabActive">
+                <td>
+                    <label class="control-label">{{::'commonParam.grid.columnName.code' |
+                        translate}}:</label>
+                </td>
+                <td data-ng-if="isCreate">
+                    <div data-aplana-field>
+                        <div style="width: 355px;" data-ng-controller="SelectConfigParamCtrl"
+                             data-ui-select2="commonParamSelect.options"
+                             data-ng-init="initCommonParam()"
+                             data-ng-model="commonParam.param"
+                             data-ng-required="true">
+                        </div>
+                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            translate}}
+                        </div>
+                    </div>
+                </td>
+
+                <td data-ng-if="!isCreate">
+                    <span data-ng-bind="commonParam.param.description"></span>
+                </td>
+            </tr>
+
+            <!-- "Значение" для "Общие параметры" -->
+            <tr data-ng-if="commonParamTabActive">
+                <td>
+                    <label class="control-label" for="commonParamValue">{{::'commonParam.grid.columnName.value' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <input data-ng-model="commonParam.value"
+                               type="text"
+                               id="commonParamValue"
+                               class="form-control"
+                               data-ng-maxlength="500"
+                               data-ng-required="true"
+                               style="width: 450px"
+                        />
+                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            translate}}
+                        </div>
+                        <div data-aplana-validator data-key='maxlength'>{{::'field.ndfl.tooLongMessage'
+                            |translate}} 500
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+
+            <!-- "Тип задания" для "Параметры асинхронных заданий"-->
+            <tr data-ng-if="asyncParamTabActive">
+                <td>
+                    <label class="control-label">{{::'asyncParam.modal.field.taskType' |
+                        translate}}:</label>
+                </td>
+                <td data-ng-if="asyncParam.param.name">
+                    <span data-ng-bind="asyncParam.param.name"></span>
+                </td>
+
+            </tr>
+
+            <!-- "Вид ограничения" для "Параметры асинхронных заданий" -->
+            <tr data-ng-if="asyncParamTabActive">
+                <td>
+                    <label class="control-label">{{::'asyncParam.modal.field.limitKind' |
+                        translate}}:</label>
+                </td>
+                <td data-ng-if="asyncParam.param.limitKind">
+                    <span data-ng-bind="asyncParam.param.limitKind"></span>
+                </td>
+            </tr>
+
+            <!-- "Значение параметра "Ограничение на выполнение задания"" для "Параметры асинхронных заданий" -->
+            <tr data-ng-if="asyncParamTabActive">
+                <td>
+                    <label class="control-label" for="asyncParamTaskLimit">{{::'asyncParam.modal.field.taskLimit' |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <input data-ng-model="asyncParam.taskLimit"
+                               type="text"
+                               id="asyncParamTaskLimit"
+                               class="form-control"
+                               style="width: 450px"
+                        />
+                    </div>
+                </td>
+            </tr>
+
+            <!-- "Значение параметра "Ограничение на выполнение задания в очереди быстрых заданий"" для "Параметры асинхронных заданий" -->
+            <tr data-ng-if="asyncParamTabActive">
+                <td>
+                    <label class="control-label" for="asyncParamShortQueueLimit">{{::'asyncParam.modal.field.shortQueueLimit'
+                        |
+                        translate}}:</label>
+                </td>
+                <td>
+                    <div data-aplana-field>
+                        <input data-ng-model="asyncParam.shortQueueLimit"
+                               type="text"
+                               id="asyncParamShortQueueLimit"
+                               class="form-control"
+                               style="width: 450px"
+                        />
+                    </div>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default" id="openButton" data-ng-if="isCreate">
+            <span data-translate-once="button.save"></span>
+        </button>
+        <button type="submit" class="btn btn-default" id="editButton" data-ng-if="!isCreate">
+            <span data-translate-once="button.edit"></span>
+        </button>
+        <button type="button" class="btn btn-default" id="closeButton" ng-click="close()">
+            <span data-translate-once="button.cancel"></span>
+        </button>
+    </div>
+</form>

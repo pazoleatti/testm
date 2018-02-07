@@ -246,5 +246,23 @@
                 return '';
             };
         })
+
+        /**
+         * @description Форматирует конфигурационный параметр для отображения описания сущности
+         */
+        .filter('configParamFormatter', function () {
+            return function (entity) {
+                return entity.description ? entity.description : "";
+            };
+        })
+
+        /**
+         * @description Форматирует значение асинхронного параметра. Если значение 0 - то на выход "", иначе, значение
+         */
+        .filter('asyncLimitFormatter', function () {
+            return function (value) {
+                return value === 0 ? "" : value;
+            };
+        })
     ;
 }());

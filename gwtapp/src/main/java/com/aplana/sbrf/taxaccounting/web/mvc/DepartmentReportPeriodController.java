@@ -119,7 +119,7 @@ public class DepartmentReportPeriodController {
      * @param departmentReportPeriod открываемый период
      * @return идентификатор uuid для логов
      */
-    @PutMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}")
+    @PostMapping(value = "/rest/departmentReportPeriod/{departmentReportPeriodId}")
     public String editPeriod(@RequestParam DepartmentReportPeriod departmentReportPeriod) {
         return periodService.editPeriod(departmentReportPeriod, securityService.currentUserInfo());
     }
