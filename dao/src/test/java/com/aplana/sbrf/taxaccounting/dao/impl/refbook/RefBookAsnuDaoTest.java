@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -38,5 +40,11 @@ public class RefBookAsnuDaoTest {
     public void testFetchByIds() {
         List<RefBookAsnu> asnuList = refBookAsnuDao.fetchByIds(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L));
         assertTrue(asnuList.size() == ASNU_BY_IDS_COUNT);
+    }
+
+    public void testFetchById() {
+        RefBookAsnu refBookAsnu = refBookAsnuDao.fetchById(1L);
+        assertNotNull(refBookAsnu);
+        assertEquals("1000", refBookAsnu.getCode());
     }
 }
