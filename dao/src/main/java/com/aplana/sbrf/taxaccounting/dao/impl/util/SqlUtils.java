@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -15,12 +14,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Вспомогательные методы для работы с SQL в DAO
@@ -310,18 +304,6 @@ public final class SqlUtils extends AbstractDao {
 	public static Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException{
 		Integer ret = resultSet.getInt(columnIndex);
 		return resultSet.wasNull()?null:ret;
-	}
-
-	/**
-	 * Возвращает значение даты/времени в виде {@link LocalDateTime}. Если значения нет, то вернет null
-	 * @param resultSet набор данных
-	 * @param columnLabel название столбца
-	 * @return {@link LocalDateTime}, либо null
-	 * @throws SQLException
-	 */
-	public static LocalDateTime getLocalDateTime(ResultSet resultSet, String columnLabel) throws SQLException {
-		Date date = resultSet.getDate(columnLabel);
-		return resultSet.wasNull()? null : new LocalDateTime(date);
 	}
 
 	/**

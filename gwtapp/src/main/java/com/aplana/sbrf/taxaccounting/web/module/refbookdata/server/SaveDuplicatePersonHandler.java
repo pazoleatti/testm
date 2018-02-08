@@ -49,6 +49,8 @@ public class SaveDuplicatePersonHandler extends AbstractActionHandler<SaveDuplic
         RefBookDataProvider dulDataProvider = refBookFactory.getDataProvider(RefBook.Id.ID_DOC.getId());
         RefBook refBook = refBookFactory.get(RefBook.Id.PERSON.getId());
 
+        //TODO: (dloshkarev) ниже начинается какой то ужас, надо это переписать
+
         List<RefBookDataRow> duplicateRecords = action.getDuplicateRecords();
         Map<String, RefBookValue> originalMap;
         if (action.getOriginalRecord() != null) {
