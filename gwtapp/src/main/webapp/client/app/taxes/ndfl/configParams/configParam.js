@@ -49,7 +49,7 @@
                  */
                 $scope.createRecord = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('reportPeriod.pils.openPeriod'),
+                        tittle: $filter('translate')('configParam.modal.createParam.title'),
                         templateUrl: 'client/app/taxes/ndfl/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
                         windowClass: $scope.commonParam.active ? 'modal600' : 'modal1000',
@@ -111,7 +111,7 @@
                 });
 
                 $scope.permissionCheckerGridValue = function (permission) {
-                    if ($rootScope.user.roles[0].alias !== APP_CONSTANTS.USER_ROLE.ROLE_ADMIN){
+                    if ($rootScope.user.roles[0].alias !== APP_CONSTANTS.USER_ROLE.ROLE_ADMIN) {
                         return false;
                     }
                     if (permission === APP_CONSTANTS.CONFIGURATION_PERMISSION.DELETE || permission === APP_CONSTANTS.CONFIGURATION_PERMISSION.CREATE) {
