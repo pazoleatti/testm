@@ -12,6 +12,7 @@ public interface ConfigurationService {
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
+    @Deprecated
     ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
 
     /**
@@ -24,6 +25,7 @@ public interface ConfigurationService {
      *
      * @return настройки почты - список <Столбец, Значение>
      */
+    @Deprecated
     List<Map<String, String>> getEmailConfig();
 
     /**
@@ -31,6 +33,7 @@ public interface ConfigurationService {
      *
      * @return настройки асинхронных задач - список <Столбец, Значение>
      */
+    @Deprecated
     List<Map<String, String>> getAsyncConfig();
 
     /**
@@ -49,13 +52,14 @@ public interface ConfigurationService {
     /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
      */
+    @Deprecated
     void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger);
 
     /**
      * Проверка доступности путей для чтения или записи в указанном параметре
      *
      * @param userInfo информация о пользователе
-     * @param param конфигурационный параметр
+     * @param param    конфигурационный параметр
      * @return uuid идентификатор логгера
      */
     String checkReadWriteAccess(TAUserInfo userInfo, Configuration param);
@@ -71,11 +75,13 @@ public interface ConfigurationService {
      *
      * @return список параметров с ошибками
      */
+    @Deprecated
     List<ConfigurationParam> checkCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, Logger logger);
 
     /**
      * Сохранение общих параметров {@link ConfigurationParamGroup#COMMON_PARAM}
      */
+    @Deprecated
     void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo);
 
     /**
@@ -108,7 +114,7 @@ public interface ConfigurationService {
      * Создание нового значения конфигурацинного параметра
      *
      * @param commonParam конфигурационный параметр типа "Общие параметры"
-     * @param userInfo информация текущего польователя
+     * @param userInfo    информация текущего польователя
      * @return uuid идентификатор логгера
      */
     String create(Configuration commonParam, TAUserInfo userInfo);
@@ -124,7 +130,7 @@ public interface ConfigurationService {
     /**
      * Удаление записей конфигураций "Общие параметры"
      *
-     * @param names названия удаляемых параметров
+     * @param names    названия удаляемых параметров
      * @param userInfo информация о текущем пользователе
      * @return uuid идентификатор логгера
      */

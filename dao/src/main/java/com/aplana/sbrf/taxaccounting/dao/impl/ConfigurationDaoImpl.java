@@ -222,8 +222,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         );
         int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select code, value from configuration" + where + ")", Integer.class);
         return new PagingResult<>(asyncTaskTypeDataList, totalCount);
-
-
     }
 
     @Override
@@ -231,7 +229,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
         getJdbcTemplate().update("INSERT INTO CONFIGURATION VALUES (?, 0, ?) ",
                 new Object[]{param.name(), value},
                 new int[]{Types.VARCHAR, Types.VARCHAR});
-
     }
 
     @Override
@@ -255,7 +252,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                 },
                 new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
         );
-
     }
 
     @Override

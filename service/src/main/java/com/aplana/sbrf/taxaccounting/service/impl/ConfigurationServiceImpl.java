@@ -645,6 +645,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public PagingResult<Configuration> fetchAllNonChangedCommonParam(PagingParams pagingParams) {
         return notContainsInDB(configurationDao.fetchAllCommonParam(pagingParams), ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON));
     }
@@ -668,6 +669,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public String updateCommonParam(Configuration commonParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         ConfigurationParam param = ConfigurationParam.getValueByCaption(commonParam.getDescription());
@@ -682,6 +684,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public String updateAsyncParam(AsyncTaskTypeData asyncParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
         AsyncTaskTypeData oldAsyncParam = asyncTaskDao.getTaskTypeData(asyncParam.getId());
@@ -695,11 +698,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : ""))), null);
 
 
-        logger.info( "Изменён параметр \"" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
+        logger.info("Изменён параметр \"" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
                 "\" для задания \"" + oldAsyncParam.getName() + "\":" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? asyncParam.getTaskLimit() :
                 (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "")));
 
-        if (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) && !Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit())){
+        if (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) && !Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit())) {
 
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
                     userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.ASYNC.getCaption() +
@@ -707,7 +710,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             "\" для задания \"" + oldAsyncParam.getName() + "\":" + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : ""), null);
 
 
-            logger.info( "Изменён параметр \"" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? SHORT_QUEUE_LIMIT : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
+            logger.info("Изменён параметр \"" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? SHORT_QUEUE_LIMIT : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
                     "\" для задания \"" + oldAsyncParam.getName() + "\":" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? asyncParam.getTaskLimit() :
                     (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "")));
 

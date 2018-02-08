@@ -63,7 +63,6 @@ public class ConfigurationController {
         );
     }
 
-
     /**
      * Получение страницы с данными конфигураций "Общие параметры"
      *
@@ -155,8 +154,8 @@ public class ConfigurationController {
      *
      * @param params список параметров
      */
-    private void setCommonConfigParamPermission(List<Configuration> params){
-        for (Configuration param : params){
+    private void setCommonConfigParamPermission(List<Configuration> params) {
+        for (Configuration param : params) {
             configurationPermissionSetter.setPermissions(param, null);
         }
     }
@@ -167,9 +166,9 @@ public class ConfigurationController {
      * @param pagingResult список параметров
      * @return список {@link PagingResult} с элементами {@link Configuration}
      */
-    private PagingResult<Configuration> setIds(PagingResult<Configuration> pagingResult){
+    private PagingResult<Configuration> setIds(PagingResult<Configuration> pagingResult) {
         int id = 0;
-        for (Configuration configuration : pagingResult){
+        for (Configuration configuration : pagingResult) {
             configuration.setId(id++);
         }
         return pagingResult;

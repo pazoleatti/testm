@@ -24,6 +24,8 @@ public interface ConfigurationDao {
 
     /**
      * Возвращяет список всех конфигурационных параметров
+     *
+     * @return список {@link Configuration} или пустой список
      */
     List<Configuration> fetchAll();
 
@@ -36,7 +38,7 @@ public interface ConfigurationDao {
      * Возвращает список конфигурационных параметров определенных групп
      *
      * @param group группа параметров {@link ConfigurationParamGroup}
-     * @return список параметров определенной группы
+     * @return список параметров определенной группы или пустой список
      */
     List<Configuration> fetchAllByGroup(final ConfigurationParamGroup group);
 
@@ -67,21 +69,30 @@ public interface ConfigurationDao {
     /**
      * Сохраняет значения параметров в БД. Если параметр в БД отсутствует, то он создается.
      * Если в модели нет какого-либо параметра, но он есть в БД, то параметр удаляется из БД.
+     *
+     * @param model модель-хранилище мапы конфигурационных параметров
      */
     void save(ConfigurationParamModel model);
 
     /**
      * Обновляет параметр в БД у конкретных параметров
+     *
+     * @param configurationParamMap мапа обновляемых парметров (параметр - значение)
+     * @param departmentId          идентификатор подразделения
      */
     void update(Map<ConfigurationParam, String> configurationParamMap, long departmentId);
 
     /**
      * Обновляет значение конфигурационного параметра
+     *
+     * @param config обновляемый параметр
      */
     void update(Configuration config);
 
     /**
      * Обновляет значения конфигурационных параметров
+     *
+     * @param configurations список обновляемых параметров
      */
     void update(List<Configuration> configurations);
 
@@ -112,7 +123,7 @@ public interface ConfigurationDao {
      * Обновление записи конфигурационного параметра "Общие параметры"
      *
      * @param commonParam обновляемый параметр
-     * @param value
+     * @param value       значение параметра
      */
     void updateCommonParam(ConfigurationParam commonParam, String value);
 
