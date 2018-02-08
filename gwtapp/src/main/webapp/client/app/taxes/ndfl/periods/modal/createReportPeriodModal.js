@@ -149,6 +149,13 @@
                                     return;
                                 }
                             }
+                            if ($scope.period.reportPeriod.dictPeriod.id === $shareData.period.dictTaxPeriodId && $scope.period.reportPeriod.taxPeriod.year === $shareData.period.year) {
+                                $dialogs.errorDialog({
+                                    title: $filter('translate')('reportPeriod.error.editPeriod.noChange.title'),
+                                    content: $filter('translate')('reportPeriod.error.editPeriod.noChange.text')
+                                });
+                                return;
+                            }
                             // Проверяем наличие периода в системе
                             $http({
                                 method: "POST",
@@ -181,12 +188,6 @@
                                                     content: $filter('translate')('reportPeriod.error.editPeriod.text')
                                                 });
                                             } else {
-                                                if ($scope.period.reportPeriod.dictPeriod.id === $shareData.period.dictTaxPeriodId && $scope.period.reportPeriod.taxPeriod.year === $shareData.period.year) {
-                                                    $dialogs.errorDialog({
-                                                        content: $filter('translate')('reportPeriod.error.editPeriod.noChange.text')
-                                                    });
-                                                    return;
-                                                }
                                                 // Сохраняем отредактированный период
                                                 $http({
                                                     method: "POST ",
