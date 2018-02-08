@@ -641,4 +641,15 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id = '64536272-05bc-42e8-82c5-347faf22da20'</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-2670 Проверка адресов по ФИАС. Обязательно наличие краткого наименования района-->
+	<changeSet id="2.2-rnurgaleev-7" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg_body10.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>
