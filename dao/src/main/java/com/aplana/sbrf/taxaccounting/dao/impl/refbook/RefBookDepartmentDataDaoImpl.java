@@ -138,7 +138,7 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
 
         if (!StringUtils.isBlank(name)) {
             queryBuilder.append("and (lower(dep.name) like concat('%', :name, '%') or lower(full_name) like ('%', :name, '%')) ");
-            params.addValue("name", name);
+            params.addValue("name", name.toLowerCase());
         }
         if (activeOnly) {
             queryBuilder.append("and dep.is_active = 1 ");
@@ -169,7 +169,7 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
 
             refBookDepartment.setId(SqlUtils.getInteger(resultSet, "id"));
             refBookDepartment.setName(resultSet.getString("name"));
-            refBookDepartment.setName(resultSet.getString("shortname"));
+            refBookDepartment.setShortName(resultSet.getString("shortname"));
             refBookDepartment.setParentId(SqlUtils.getInteger(resultSet, "parent_id"));
             refBookDepartment.setType(DepartmentType.fromCode(resultSet.getInt("type")));
             refBookDepartment.setTbIndex(resultSet.getString("tb_index"));
