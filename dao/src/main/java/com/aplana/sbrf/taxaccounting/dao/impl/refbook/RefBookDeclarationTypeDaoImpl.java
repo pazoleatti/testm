@@ -1,37 +1,25 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDeclarationType;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.QBean;
-import com.querydsl.sql.SQLExpressions;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
-import org.apache.commons.lang3.time.DateUtils;
-import org.joda.time.LocalDateTime;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationTemplate.declarationTemplate;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDeclarationType.declarationType;
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QDepartmentDeclarationType.departmentDeclarationType;
-import static com.querydsl.core.types.Projections.bean;
 
 /**
  * Реализация дао для работы со справочником Виды форм
  */
 @Repository
-public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao {
-    final private SQLQueryFactory sqlQueryFactory;
-
-    public RefBookDeclarationTypeDaoImpl(SQLQueryFactory sqlQueryFactory) {
-        this.sqlQueryFactory = sqlQueryFactory;
-    }
-
-    final private QBean<RefBookDeclarationType> refBookDeclarationTypeBean = bean(RefBookDeclarationType.class, declarationType.id,
-            declarationType.ifrsName, declarationType.isIfrs, declarationType.name, declarationType.status.as("versionStatusId"));
+public class RefBookDeclarationTypeDaoImpl extends AbstractDao implements RefBookDeclarationTypeDao {
 
     /**
      * Получение всех значений справочника
@@ -40,14 +28,11 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
      */
     @Override
     public List<RefBookDeclarationType> fetchAll() {
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(declarationType.status.eq((byte) 0));
-        return sqlQueryFactory
-                .select(refBookDeclarationTypeBean)
-                .from(declarationType)
-                .where(where)
-                .orderBy(declarationType.name.asc())
-                .fetch();
+        return getJdbcTemplate().query("select dt.id, dt.name " +
+                        "from declaration_type dt " +
+                        "where dt.status = 0 " +
+                        "order by dt.name asc",
+                new RefBookDeclarationTypeRowMapper());
     }
 
     /**
@@ -64,27 +49,38 @@ public class RefBookDeclarationTypeDaoImpl implements RefBookDeclarationTypeDao 
      */
     @Override
     public List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, Date periodStartDate) {
-        BooleanBuilder subqueryWhere = new BooleanBuilder();
-        subqueryWhere.and(declarationTemplate.status.eq((byte) 0));
-        subqueryWhere.and(declarationTemplate.formKind.eq(declarationKind));
-        subqueryWhere.andNot(SQLExpressions.date(declarationTemplate.version).after(LocalDateTime.fromCalendarFields(DateUtils.toCalendar(periodStartDate))));
+        String query = "select dt.id, dt.name " +
+                "from declaration_type dt " +
+                "join department_declaration_type ddt " +
+                "on dt.id = ddt.declaration_type_id " +
+                "where dt.status = 0 " +
+                "and dt.id in " +
+                "(select distinct dtemplate.declaration_type_id " +
+                "from declaration_template dtemplate " +
+                "where dtemplate.status = 0 " +
+                "and dtemplate.form_kind = :declarationKind " +
+                "and not trunc(dtemplate.version) > :periodStartDate) and ddt.department_id = :departmentId " +
+                "order by dt.name asc";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("declarationKind", declarationKind)
+                .addValue("departmentId", departmentId)
+                .addValue("periodStartDate", periodStartDate);
+        try {
+            return getNamedParameterJdbcTemplate().query(query, params, new RefBookDeclarationTypeRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<>();
+        }
+    }
 
-        SQLQuery<Long> declarationTypesWithTemplates = sqlQueryFactory.select(declarationTemplate.declarationTypeId)
-                .distinct()
-                .from(declarationTemplate)
-                .where(subqueryWhere);
+    private static final class RefBookDeclarationTypeRowMapper implements RowMapper<RefBookDeclarationType> {
+        @Override
+        public RefBookDeclarationType mapRow(ResultSet resultSet, int i) throws SQLException {
+            RefBookDeclarationType refBookDeclarationType = new RefBookDeclarationType();
 
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(declarationType.status.eq((byte) 0));
-        where.and(declarationType.id.in(declarationTypesWithTemplates));
-        where.and(departmentDeclarationType.departmentId.eq(departmentId));
+            refBookDeclarationType.setId(SqlUtils.getLong(resultSet, "id"));
+            refBookDeclarationType.setName(resultSet.getString("name"));
 
-        return sqlQueryFactory
-                .select(refBookDeclarationTypeBean)
-                .from(declarationType)
-                .join(departmentDeclarationType).on(declarationType.id.eq(departmentDeclarationType.declarationTypeId))
-                .where(where)
-                .orderBy(declarationType.name.asc())
-                .fetch();
+            return refBookDeclarationType;
+        }
     }
 }

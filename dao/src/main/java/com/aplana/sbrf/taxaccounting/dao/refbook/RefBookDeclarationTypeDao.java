@@ -12,7 +12,7 @@ public interface RefBookDeclarationTypeDao {
     /**
      * Получение всех значений справочника
      *
-     * @return Список значений справочника
+     * @return список значений справочника
      */
     List<RefBookDeclarationType> fetchAll();
 
@@ -23,10 +23,10 @@ public interface RefBookDeclarationTypeDao {
      * формы с заданным типом формы, "действующим" статусом версии и версией не более поздней, чем заданное начало
      * отчетного периода
      *
-     * @param declarationKind Тип налоговой формы
-     * @param departmentId    ID подразделения
-     * @param periodStartDate Начало отчетного периода
-     * @return Список значений справочника
+     * @param declarationKind тип налоговой формы
+     * @param departmentId    id подразделения
+     * @param periodStartDate начало отчетного периода
+     * @return список значений справочника
      */
     List<RefBookDeclarationType> fetchDeclarationTypes(Long declarationKind, Integer departmentId, Date periodStartDate);
 }
