@@ -65,7 +65,7 @@
                  */
                 $scope.updateRecord = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('reportPeriod.pils.openPeriod'),
+                        tittle: $filter('translate')('configParam.modal.editParam.title'),
                         templateUrl: 'client/app/taxes/ndfl/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
                         windowClass: 'modal1000',
@@ -90,7 +90,5 @@
                     $rootScope.configParamGridLength = $scope.asyncParamGrid.value.length;
                 });
 
-            }])
-
-    ;
+            }]);
 }());

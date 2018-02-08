@@ -110,7 +110,15 @@
                  * @description закрытие модального окна
                  */
                 $scope.close = function () {
-                    $modalInstance.close(false);
+                    $dialogs.confirmDialog({
+                        title: ($scope.isCreate ? $filter('translate')('configParam.confirm.rejectCreatingConfig.title') : $filter('translate')('configParam.confirm.rejectEditingConfig.title')),
+                        content: ($scope.isCreate ? $filter('translate')('configParam.confirm.rejectCreatingConfig.text') : $filter('translate')('configParam.confirm.rejectEditingConfig.text')),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $modalInstance.close(false);
+                        }
+                    });
                 };
 
                 /**
