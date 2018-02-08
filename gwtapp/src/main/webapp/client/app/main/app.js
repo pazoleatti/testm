@@ -515,6 +515,7 @@
         "reportPeriod.error.editPeriod.noChange.text": "Ни одни параметр не был изменен!",
         "reportPeriod.error.editPeriod.hasCorPeriod.text":"Перед изменением периода необходимо удалить все связанные корректирующие периоды!",
         "reportPeriod.error.editPeriod.alreadyExist.text": "Указанный период уже заведён в Системе!",
+        "reportPeriod.error.deletePeriod.text": "Удаление периода невозможно!",
 
 
 
