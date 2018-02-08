@@ -126,51 +126,51 @@
                             }
                         });
                     } else {
-                        if ($scope.period.reportPeriod.dictPeriod.id === $shareData.period.dictTaxPeriodId && $scope.period.reportPeriod.taxPeriod.year === $shareData.period.year) {
-                            $dialogs.errorDialog({
-                                content: $filter('translate')('reportPeriod.error.editPeriod.noChange.text')
-                            });
-                            return;
-                        }
-
-                        // Проверяем наличие периода в системе
+                        // Проверяем статус редактируемого периода
                         $http({
                             method: "POST",
                             url: "controller/rest/departmentReportPeriod/status",
                             params: {
-                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
-                                year: $scope.period.reportPeriod.taxPeriod.year,
+                                dictTaxPeriodId: $shareData.period.dictTaxPeriodId,
+                                year: $shareData.period.year,
                                 departmentId: $scope.department.id
                             }
                         }).then(function (status) {
-                            if (status.data && status.data !== APP_CONSTANTS.REPORT_PERIOD_STATUS.NOT_EXIST) {
+                            if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE) {
                                 $dialogs.errorDialog({
-                                    content: $filter('translate')('reportPeriod.error.editPeriod.alreadyExist.text')
+                                    content: $filter('translate')('reportPeriod.error.editPeriod.alreadyClose.text')
+                                });
+                                return;
+                            } else {
+                                if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_ALREADY_EXIST) {
+                                    $dialogs.errorDialog({
+                                        content: $filter('translate')('reportPeriod.error.editPeriod.hasCorPeriod.text')
+                                    });
+                                    return;
+                                }
+                            }
+                            if ($scope.period.reportPeriod.dictPeriod.id === $shareData.period.dictTaxPeriodId && $scope.period.reportPeriod.taxPeriod.year === $shareData.period.year) {
+                                $dialogs.errorDialog({
+                                    title: $filter('translate')('reportPeriod.error.editPeriod.noChange.title'),
+                                    content: $filter('translate')('reportPeriod.error.editPeriod.noChange.text')
                                 });
                                 return;
                             }
-                            // Проверяем статус редактируемого периода
+                            // Проверяем наличие периода в системе
                             $http({
                                 method: "POST",
                                 url: "controller/rest/departmentReportPeriod/status",
                                 params: {
-                                    dictTaxPeriodId: $shareData.period.dictTaxPeriodId,
-                                    year: $shareData.period.year,
+                                    dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                    year: $scope.period.reportPeriod.taxPeriod.year,
                                     departmentId: $scope.department.id
                                 }
                             }).then(function (status) {
-                                if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE) {
+                                if (status.data && status.data !== APP_CONSTANTS.REPORT_PERIOD_STATUS.NOT_EXIST) {
                                     $dialogs.errorDialog({
-                                        content: $filter('translate')('reportPeriod.error.editPeriod.alreadyClose.text')
+                                        content: $filter('translate')('reportPeriod.error.editPeriod.alreadyExist.text')
                                     });
                                     return;
-                                } else {
-                                    if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_ALREADY_EXIST) {
-                                        $dialogs.errorDialog({
-                                            content: $filter('translate')('reportPeriod.error.editPeriod.hasCorPeriod.text')
-                                        });
-                                        return;
-                                    }
                                 }
                                 // Проверяем наличие связанных объектов
                                 $http({

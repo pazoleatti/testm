@@ -87,7 +87,15 @@
                  * @description Обработчик кнопки "Закрыть"
                  **/
                 $scope.close = function () {
-                    $modalInstance.dismiss();
+                    $dialogs.confirmDialog({
+                        title: $filter('translate')('reportPeriod.confirm.openCorrectionPeriod.title'),
+                        content: $filter('translate')('reportPeriod.confirm.openCorrectionPeriod.text'),
+                        okBtnCaption: $filter('translate')('common.button.yes'),
+                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                        okBtnClick: function () {
+                            $modalInstance.dismiss();
+                        }
+                    });
                 };
 
             }]);

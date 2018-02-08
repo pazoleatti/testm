@@ -331,10 +331,21 @@
 
                                             }
                                         }).then(function (response) {
-                                            if (response.data) {
-                                                $logPanel.open('log-panel-container', response.data);
-                                                $scope.refreshGrid();
-                                            }
+                                            LogEntryResource.query({
+                                                    uuid: response.data,
+                                                    projection: 'count'
+                                                }, function (data) {
+                                                    if ((data.ERROR + data.WARNING) > 0) {
+                                                        $logPanel.open('log-panel-container', response.data);
+                                                        $dialogs.errorDialog({
+                                                            content: $filter('translate')('reportPeriod.error.deletePeriod.text')
+                                                        });
+                                                    } else {
+                                                        $logPanel.open('log-panel-container', response.data);
+                                                        $scope.refreshGrid();
+                                                    }
+                                                }
+                                            );
                                         });
                                     }
                                 });
@@ -363,10 +374,21 @@
 
                                             }
                                         }).then(function (response) {
-                                            if (response.data) {
-                                                $logPanel.open('log-panel-container', response.data);
-                                                $scope.refreshGrid();
-                                            }
+                                            LogEntryResource.query({
+                                                    uuid: response.data,
+                                                    projection: 'count'
+                                                }, function (data) {
+                                                    if ((data.ERROR + data.WARNING) > 0) {
+                                                        $logPanel.open('log-panel-container', response.data);
+                                                        $dialogs.errorDialog({
+                                                            content: $filter('translate')('reportPeriod.error.deletePeriod.text')
+                                                        });
+                                                    } else {
+                                                        $logPanel.open('log-panel-container', response.data);
+                                                        $scope.refreshGrid();
+                                                    }
+                                                }
+                                            );
                                         });
                                     }
                                 });

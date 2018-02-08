@@ -148,10 +148,9 @@
                 };
 
                 $scope.$watch('filter.deadline', function () {
-                    $scope.isEdit = ((!deadline && $scope.filter.deadline) || (new Date($scope.filter.deadline.toString()).toString() !== deadline.toString()));
+                    if ($scope.filter.deadline) {
+                        $scope.isEdit = ((!deadline && $scope.filter.deadline) || (new Date($scope.filter.deadline.toString()).toString() !== deadline.toString()));
+                    }
                 });
-            }])
-
-
-    ;
+            }]);
 }());

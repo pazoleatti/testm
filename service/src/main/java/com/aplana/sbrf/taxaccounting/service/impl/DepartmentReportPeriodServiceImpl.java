@@ -219,13 +219,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
         dataFilter.setFormState(State.PREPARED);
         declarations.addAll(declarationDataService.getDeclarationData(dataFilter, DeclarationDataSearchOrdering.ID, false));
         for (DeclarationData dd : declarations) {
-            String msg = "Налоговая форма: №: " +
-                    dd.getId() + ", Вид: " +
-                    "\"" + declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName() + "\"" +
-                    ", Подразделение: " +
-                    "\"" + departmentService.getDepartment(dd.getDepartmentId()).getName() + "\"" +
-                    ", находится в состоянии отличном от \"Принята\"";
-
+            DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            String msg = MessageGenerator.getFDMsg("Форма находится в состоянии отличном от \"Принята\":", template.getType().getName(), template.getDeclarationFormKind().getTitle(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
+                    null, dd.getManuallyCreated(), departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    departmentReportPeriod.getCorrectionDate(), null);
             logger.warn(msg);
         }
 
@@ -275,13 +272,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
         for (LockDataItem lockDataItem : lockDataItems) {
             DeclarationData dd = keysBlocker.get(lockDataItem.getKey());
-            String msg = "Налоговая форма: №: " +
-                    dd.getId() + ", Вид: " +
-                    "\"" + declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName() + "\"" +
-                    ", Подразделение: " +
-                    "\"" + departmentService.getDepartment(dd.getDepartmentId()).getName() + "\"" +
-                    ", редактируется пользователем " + lockDataItem.getUser();
-
+            DeclarationTemplate template = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            String msg = MessageGenerator.getFDMsg("Форма редактируется пользователем " + lockDataItem.getUser() + " ", template.getType().getName(), template.getDeclarationFormKind().getTitle(), departmentService.getDepartment(dd.getDepartmentId()).getName(),
+                    null, dd.getManuallyCreated(), departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    departmentReportPeriod.getCorrectionDate(), null);
             logger.error(msg);
         }
         return logEntryService.save(logger.getEntries());
