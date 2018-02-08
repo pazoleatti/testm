@@ -13,7 +13,7 @@ public interface ConfigurationService {
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
     @Deprecated
-    ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
+    ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo);
 
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
@@ -50,7 +50,7 @@ public interface ConfigurationService {
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
-    List<Configuration> getCommonParameter(TAUserInfo userInfo);
+    List<Configuration> fetchCommonParameter(TAUserInfo userInfo);
 
     /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)

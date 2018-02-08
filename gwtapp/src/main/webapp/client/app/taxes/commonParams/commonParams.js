@@ -63,7 +63,7 @@
                         okBtnClick: function () {
                             $http({
                                 method: "POST",
-                                url: "controller/actions/changeToDefaultCommonParams"
+                                url: "controller/actions/commonParams/changeToDefaultCommonParams"
                             }).then(function () {
                                 $scope.commonParamsGrid.ctrl.refreshGrid();
                             });

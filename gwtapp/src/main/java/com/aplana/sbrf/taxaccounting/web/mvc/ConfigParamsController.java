@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 //TODO Необходимо сделать ревью и рефакторинг бэкенда и фронтенда по работе с Общими параметрами. https://jira.aplana.com/browse/SBRFNDFL-3174
@@ -40,10 +39,10 @@ public class ConfigParamsController {
     /**
      * Возвращает список общих параметров
      */
-    @GetMapping(value = "/rest/fetchCommonParams")
-    public List<Configuration> fetchCommonParams(HttpServletResponse response) {
+    @GetMapping(value = "/rest/commonParams/fetchCommonParams")
+    public List<Configuration> fetchCommonParams() {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        return configurationService.getCommonParameter(userInfo);
+        return configurationService.fetchCommonParameter(userInfo);
     }
 
     /**
@@ -51,7 +50,7 @@ public class ConfigParamsController {
      *
      * @param config редактируемый параметр
      */
-    @PostMapping(value = "/actions/editCommonParams")
+    @PostMapping(value = "/actions/commonParams/editCommonParams")
     public ActionResult editCommonParams(@RequestParam Configuration config) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return configurationService.update(userInfo, config);
@@ -60,7 +59,7 @@ public class ConfigParamsController {
     /**
      * Установка значений общих параметров по умолчанию
      */
-    @PostMapping(value = "/actions/changeToDefaultCommonParams")
+    @PostMapping(value = "/actions/commonParams/changeToDefaultCommonParams")
     public void setCommonParamsDefault() {
         TAUserInfo userInfo = securityService.currentUserInfo();
         configurationService.setCommonParamsDefault(userInfo);

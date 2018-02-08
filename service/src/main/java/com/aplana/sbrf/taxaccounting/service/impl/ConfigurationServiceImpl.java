@@ -17,7 +17,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -53,11 +53,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
     private static final String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
     private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
-    private static final String NO_CODE_ERROR = "Код НО (пром.) (\"%s\") не найден в справочнике \"СОНО\"";
+    private static final String NO_CODE_ERROR = "Код НО (пром.) (\"%s\") не найден в справочнике \"Налоговые инспекции\"";
     private static final String INN_JUR_ERROR = "Введен некорректный номер ИНН «%s»";
     private static final String NO_ENUM_CONSTANT = "Введен неверное название конфигурационного параметра";
     private static final String TASK_LIMIT_FIELD = "Ограничение на выполнение задачи";
     private static final String SHORT_QUEUE_LIMIT = "Ограничение на выполнение задачи в очереди быстрых задач";
+    private static final String LIMIT_IDENT_ERROR = "Значение параметра должно быть от \"0\" до \"1\" и иметь не более 2-х знаков после запятой";
+    private static final String SHOW_TIMING_ERROR = "Допустимые значения параметра \"0\" и \"1\"";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -71,8 +73,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private LogEntryService logEntryService;
     @Autowired
     private AsyncTaskDao asyncTaskDao;
-    @Autowired
-    private TAUserService userService;
 
     //Значение конфигурационных параметров по умолчанию
     private List<Configuration> defaultCommonParams() {
@@ -85,7 +85,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
+    public ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRoles(TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
@@ -150,7 +150,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return configurationDao.fetchAllByDepartment(departmentId);
     }
 
-    public List<Configuration> getCommonParameter(TAUserInfo userInfo) {
+    public List<Configuration> fetchCommonParameter(TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
                 TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                 TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
@@ -727,11 +727,50 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkSberbankInn(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.NO_CODE.getCaption())) {
             checkNoCode(config.getValue(), logger);
+        } else if (config.getCode().equals(ConfigurationParam.LIMIT_IDENT.name())) {
+            checkLimitIdent(config.getValue(), logger);
+        } else if (config.getCode().equals(ConfigurationParam.SHOW_TIMING.name())) {
+            checkShowTiming(config.getValue(), logger);
+        }
+    }
+
+    /**
+     * Проверка значения параметра {@link ConfigurationParam#SHOW_TIMING}
+     *
+     * @param value  значение параметра
+     * @param logger логгер
+     */
+    private void checkShowTiming(String value, Logger logger) {
+        try {
+            Double doubleValue = new Double(value);
+            if (!Objects.equals(doubleValue, 1d) || !Objects.equals(doubleValue, 0d)) {
+                logger.error(SHOW_TIMING_ERROR);
+            }
+        } catch (NumberFormatException e) {
+            logger.error(SHOW_TIMING_ERROR);
+        }
+    }
+
+    /**
+     * Проверка значения параметра {@link ConfigurationParam#LIMIT_IDENT}
+     *
+     * @param value  значение параметра
+     * @param logger логгер
+     */
+    private void checkLimitIdent(String value, Logger logger) {
+        try {
+            BigDecimal decimal = new BigDecimal(value);
+            if ((decimal.precision() > 2) || (decimal.doubleValue() < 0) || (decimal.doubleValue() > 1)) {
+                logger.error(LIMIT_IDENT_ERROR);
+            }
+        } catch (NumberFormatException e) {
+            logger.error(LIMIT_IDENT_ERROR);
         }
     }
 
     /**
      * Проверка значения параметра {@link ConfigurationParam#NO_CODE}
+     *
      * @param noCode код параметра
      * @param logger логгер
      */
@@ -745,7 +784,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     /**
      * Проверка значения параметра {@link ConfigurationParam#SBERBANK_INN}
      *
-     * @param inn ИНН
+     * @param inn    ИНН
      * @param logger логгер
      */
     private void checkSberbankInn(String inn, Logger logger) {
