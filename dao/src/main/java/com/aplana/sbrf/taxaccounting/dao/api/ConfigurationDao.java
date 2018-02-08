@@ -117,7 +117,7 @@ public interface ConfigurationDao {
      *
      * @param params список удаляемых параметров
      */
-    void remove(List<ConfigurationParam> params);
+    void removeCommonParam(List<ConfigurationParam> params);
 
     /**
      * Обновление записи конфигурационного параметра "Общие параметры"

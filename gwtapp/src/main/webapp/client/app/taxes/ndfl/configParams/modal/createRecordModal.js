@@ -4,9 +4,7 @@
     /**
      * @description Модуль для создания и редактирования записей конфигураций
      */
-
     angular.module('app.createRecordModal', ['ui.router', 'app.rest'])
-
 
     /**
      * @description Контроллер создания и редактирования записей конфигураций
@@ -52,6 +50,7 @@
                     $scope.checkAccess().then(function (accept) {
                         if (accept) {
                             if ($scope.commonParamTabActive){
+                                // активна вкладка "Общие параметры"
                                 $http({
                                     method: "POST",
                                     url: "controller/action/configuration/commonParam/" + ($scope.isCreate ? "create" : "update"),
@@ -76,6 +75,7 @@
                                     }
                                 });
                             }else if ($scope.asyncParamTabActive){
+                                // активна вкладка "Параметры асинхронных задач"
                                 $http({
                                     method: "POST",
                                     url: "controller/action/configuration/asyncParam/update",
@@ -101,7 +101,6 @@
                                     }
                                 });
                             }
-
                         }
                     });
                 };
@@ -172,6 +171,7 @@
                             checkAccessQDefer.resolve(false);
                             return checkAccessQDefer.promise;
                         }
+                        // проверка, что значения параметра "Загрузка данных из файла в справочник" меньше, чем 1500000
                         if($scope.asyncParam.shortQueueLimit && $scope.asyncParam.param.handlerClassName === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)){
                             $dialogs.errorDialog({
                                 content: $filter('translate')('asyncParam.validate.tooMuch', {
@@ -196,21 +196,12 @@
                             checkAccessQDefer.resolve(false);
                             return checkAccessQDefer.promise;
                         }
-
                         checkAccessQDefer.resolve(true);
                     }
                     return checkAccessQDefer.promise;
-
                 };
-
-                $scope.checkLimitValue = function (taskLimit, shortQueueLimit) {
-                    return (taskLimit && !shortQueueLimit) || (taskLimit && shortQueueLimit && taskLimit > shortQueueLimit);
-                };
-
-
             }
-        ])
-    ;
+        ]);
 
 
 }());

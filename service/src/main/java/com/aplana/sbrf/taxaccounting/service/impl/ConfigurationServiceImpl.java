@@ -84,7 +84,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return defaultCommonConfig;
     }
 
-
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRoles(TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
@@ -150,7 +149,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         return configurationDao.fetchAllByDepartment(departmentId);
     }
-
 
     public List<Configuration> getCommonParameter(TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
@@ -664,7 +662,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 logger.info("Удален параметр \"" + param.getCaption() + "\"");
             }
         }
-        configurationDao.remove(params);
+        configurationDao.removeCommonParam(params);
         return logEntryService.save(logger.getEntries());
     }
 
@@ -681,7 +679,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         return logEntryService.save(logger.getEntries());
     }
-
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -719,7 +716,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return logEntryService.save(logger.getEntries());
     }
 
-
+    /**
+     * Проверка параметра на пренадлежность к {@link ConfigurationParam#NO_CODE} или {@link ConfigurationParam#SBERBANK_INN}
+     *
+     * @param config проверяемый параметр
+     * @param logger логгер
+     */
     private void checkConfig(Configuration config, Logger logger) {
         if (config.getCode().equals(ConfigurationParam.SBERBANK_INN.getCaption())) {
             checkSberbankInn(config.getValue(), logger);
@@ -730,6 +732,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     /**
      * Проверка значения параметра {@link ConfigurationParam#NO_CODE}
+     * @param noCode код параметра
+     * @param logger логгер
      */
     private void checkNoCode(String noCode, Logger logger) {
         RefBookDataProvider taxInspectionDataProvider = refBookFactory.getDataProvider(RefBook.Id.TAX_INSPECTION.getId());
@@ -740,6 +744,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     /**
      * Проверка значения параметра {@link ConfigurationParam#SBERBANK_INN}
+     *
+     * @param inn ИНН
+     * @param logger логгер
      */
     private void checkSberbankInn(String inn, Logger logger) {
         if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
