@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
@@ -210,7 +211,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String alias = pagingParams.getProperty().equals("inp") ? "np." : "npi.";
 
         String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rowNum <= :count",
-                alias.concat(convertToUnderlineStyle(pagingParams.getProperty())),
+                alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
                 pagingParams.getDirection())
                 .toString();
 
@@ -348,7 +349,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String alias = pagingParams.getProperty().equals("inp") ? "np." : "npd.";
 
         String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rownum <= :count",
-                alias.concat(convertToUnderlineStyle(pagingParams.getProperty())),
+                alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
                 pagingParams.getDirection())
                 .toString();
 
@@ -459,7 +460,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         String alias = pagingParams.getProperty().equals("inp") ? "np." : "npp.";
 
         String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rownum <= :count",
-                alias.concat(convertToUnderlineStyle(pagingParams.getProperty())),
+                alias.concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
                 pagingParams.getDirection())
                 .toString();
 
@@ -799,7 +800,7 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         }
 
         String endQuery = new Formatter().format("order by %s %s) a) where rn > :startIndex and rownum <= :count",
-                "np.".concat(convertToUnderlineStyle(pagingParams.getProperty())),
+                "np.".concat(FormatUtils.convertToUnderlineStyle(pagingParams.getProperty())),
                 pagingParams.getDirection())
                 .toString();
 
@@ -1666,23 +1667,5 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         params.addValue("p_declaration", declarationDataId);
         Integer personCnt = (Integer) call.execute(params).get("personCnt");
         return personCnt != null ? personCnt : 0;
-    }
-
-    private static String convertToUnderlineStyle(String camelCaseString) {
-        StringBuilder underlineBuilder = new StringBuilder();
-        char[] asArray = camelCaseString.toCharArray();
-        underlineBuilder.append(String.valueOf(asArray[0]).toLowerCase());
-        for (int i = 1; i < asArray.length; i++) {
-            if (Character.isUpperCase(asArray[i])) {
-                underlineBuilder.append('_');
-                underlineBuilder.append(String.valueOf(asArray[i]).toLowerCase());
-            } else if (Character.isDigit(asArray[i])) {
-                underlineBuilder.append('_');
-                underlineBuilder.append(asArray[i]);
-            } else {
-                underlineBuilder.append(asArray[i]);
-            }
-        }
-        return underlineBuilder.toString();
     }
 }
