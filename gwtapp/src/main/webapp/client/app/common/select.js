@@ -476,15 +476,14 @@
         ])
 
         /**
-         * Контроллер для выбора периода корректировки
+         * Контроллер для выбора конфигурационного параметра
          */
         .controller('SelectConfigParamCtrl', ['$scope', 'GetSelectOption',
             function ($scope, GetSelectOption) {
                 $scope.commonParamSelect = {};
-                $scope.asyncParamSelect = {};
 
                 /**
-                 * Инициализация списка с загрузкой доступных периодов корректировки
+                 * Инициализация списка с загрузкой доступных конфигурационных параметров
                  */
                 $scope.initCommonParam = function () {
                     $scope.commonParamSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/configuration/commonParam?projection=selectNonChanged", {}, {}, "configParamFormatter");
