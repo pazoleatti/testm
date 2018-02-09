@@ -1,55 +1,56 @@
-<div class="row">
-    <div class="header-col" style="margin: 14px 0 0 28px;">
-        <h1>{{::'reportPeriod.title' | translate}}</h1>
-    </div>
-</div>
-<div id="locks" class="container-grid box-shadow-block">
-    <div class="top-wrapper" style="min-height: 50px;">
-
-        <div class='container-grid-top'>
-            <span data-ng-include="'client/app/taxes/ndfl/periods/reportPeriodFilter.html'"></span>
+<div class="flex-column">
+    <div class="row">
+        <div class="header-col" style="margin: 14px 0 0 28px;">
+            <h1>{{::'reportPeriod.title' | translate}}</h1>
         </div>
-        <div class="button_panel" style="min-height: 52px;margin: -5px 0 -17px 0;">
-            <div class="btn-toolbar" role="toolbar">
-                <button type="button" class="btn btn-default" data-ng-click="openPeriod()"
-                        data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN)">
-                    {{::'reportPeriod.pils.openPeriod' | translate}}
-                </button>
-                <button type="button" class="btn btn-default" data-ng-click="closePeriod()"
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE))">
-                    {{:: 'reportPeriod.pils.closePeriod' | translate}}
-                </button>
-                <button type="button" class="btn btn-default" data-ng-click="editPeriod()"
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT)) ">
-                    {{:: 'reportPeriod.pils.editPeriod' | translate}}
-                </button>
-                <button type="button" class="btn btn-default" data-ng-click="openCorrectPeriod()"
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT))">
-                    {{:: 'reportPeriod.pils.correctPeriod' | translate}}
-                </button>
-                <button type="button" class="btn btn-default" data-ng-click="deletePeriod()"
+    </div>
+    <div id="reportPeriodGridContainer" class="container-grid box-shadow-block flex-fill">
+        <div id="reportPeriodGridTop" style="min-height: 50px;">
+            <div>
+                <span data-ng-include="'client/app/taxes/ndfl/periods/reportPeriodFilter.html'"></span>
+            </div>
+            <div class="button_panel" style="min-height: 52px;margin: -5px 0 -17px 0;">
+                <div class="btn-toolbar" role="toolbar">
+                    <button type="button" class="btn btn-default" data-ng-click="openPeriod()"
+                            data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN)">
+                        {{::'reportPeriod.pils.openPeriod' | translate}}
+                    </button>
+                    <button type="button" class="btn btn-default" data-ng-click="closePeriod()"
+                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE))">
+                        {{:: 'reportPeriod.pils.closePeriod' | translate}}
+                    </button>
+                    <button type="button" class="btn btn-default" data-ng-click="editPeriod()"
+                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT)) ">
+                        {{:: 'reportPeriod.pils.editPeriod' | translate}}
+                    </button>
+                    <button type="button" class="btn btn-default" data-ng-click="openCorrectPeriod()"
+                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT))">
+                        {{:: 'reportPeriod.pils.correctPeriod' | translate}}
+                    </button>
+                    <button type="button" class="btn btn-default" data-ng-click="deletePeriod()"
 
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DELETE))">
-                    {{:: 'reportPeriod.pils.deletePeriod' | translate}}
-                </button>
-                <button type="button" class="btn btn-default" data-ng-click="deadlinePeriod()"
-                        data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE))">
-                    {{:: 'reportPeriod.pils.deadline' | translate}}
-                </button>
+                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DELETE))">
+                        {{:: 'reportPeriod.pils.deletePeriod' | translate}}
+                    </button>
+                    <button type="button" class="btn btn-default" data-ng-click="deadlinePeriod()"
+                            data-ng-disabled="!(checkPermissionForGridValue(APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE))">
+                        {{:: 'reportPeriod.pils.deadline' | translate}}
+                    </button>
+                </div>
             </div>
         </div>
+
+        <div data-aplana-grid
+             data-grid-fill-space="true"
+             data-grid-fill-space-container-selector="#reportPeriodGridContainer"
+             data-grid-fill-space-container-selector-top="#reportPeriodGridTop"
+             data-grid-options="reportPeriodGrid.options"
+             data-grid-ctrl="reportPeriodGrid.ctrl"
+             data-ng-model="reportPeriodGrid.value"
+             data-grid-data="periodGridData"
+             data-init-grid="initGrid()"
+             id="reportPeriodGrid"
+             style="float: left; width: 100%;"></div>
+
     </div>
-
-    <div data-aplana-grid
-         data-grid-fill-space="true"
-         data-grid-fill-space-container-selector=".container-grid"
-         data-grid-fill-space-container-selector-top=".top-wrapper"
-         data-grid-options="reportPeriodGrid.options"
-         data-grid-ctrl="reportPeriodGrid.ctrl"
-         data-ng-model="reportPeriodGrid.value"
-         data-grid-data="periodGridData"
-         data-init-grid="initGrid()"
-         id="reportPeriodGrid"
-         style="float: left; width: 100%;"></div>
-
 </div>

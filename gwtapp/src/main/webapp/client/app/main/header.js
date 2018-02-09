@@ -21,6 +21,12 @@
                 controller: 'MainMenuController'
             };
         })
+        .directive('appFooter', function () {
+            return {
+                templateUrl: 'client/app/main/footer.html?v=${buildUuid}',
+                controller: 'MainMenuController'
+            };
+        })
         .controller('MainMenuController', [
             '$scope', '$state', '$translate', '$http', '$rootScope', 'deviceDetector', '$filter', 'ConfigResource', 'NotificationResource', '$aplanaModal', 'amountCasesFormatterFilter',
             function ($scope, $state, $translate, $http, $rootScope, deviceDetector, $filter, ConfigResource, NotificationResource, $aplanaModal, amountCasesFormatterFilter) {

@@ -1,12 +1,12 @@
-<div id="ndfl" style="height:96%;">
+<div class="flex-column">
     <!--Заголовок-->
     <div class="row" style="min-width: 1000px;">
         <div class="header-col" style="margin: 14px 0 0 28px;">
             <h1>{{::'taskList.title.taskManager' | translate}} - {{::'taskList.title.listTasks' | translate}}</h1>
         </div>
     </div>
-    <div class="form100 container-grid box-shadow-block" style="height: 94%">
-        <div class="row container-grid-top" style="min-width: 1400px; margin: 0; height: 30px;">
+    <div id="taskListGridContainer" class="container-grid box-shadow-block flex-fill">
+        <div id="taskListGridTop" style="min-width: 1400px; margin: 0; height: 30px;">
             <!--Запустить выполнение по расписанию-->
             <button type="button" class="btn btn-default"
                     data-ng-click="activate()" data-ng-disabled="taskListGrid.value.length == 0">
@@ -25,8 +25,8 @@
          </div>
         <div data-aplana-grid
              data-grid-fill-space="true"
-             data-grid-fill-space-container-selector="#ndfl"
-             data-grid-fill-space-container-selector-top=".container-grid-top"
+             data-grid-fill-space-container-selector="#taskListGridContainer"
+             data-grid-fill-space-container-selector-top="#taskListGridTop"
              data-grid-options="taskListGrid.options"
              data-grid-ctrl="taskListGrid.ctrl"
              data-ng-model="taskListGrid.value"
