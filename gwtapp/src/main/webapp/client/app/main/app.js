@@ -110,6 +110,11 @@
 
         "filter.placeholder.all": "-Все-",
         "filterPanelLabel": "Фильтр",
+        "filterPanelLabel.set": "Фильтр (установлен)",
+        "ndfl.filter.FL": "По реквизитам физического лица",
+        "ndfl.filter.incomes": "По сведениям о доходах и НДФЛ",
+        "ndfl.filter.deductions": "По сведениям о вычетах",
+        "ndfl.filter.prepayments": "По сведениям о доходах в виде авансовых платежей",
         "infoPanelLabel": "Информация",
         "filter.placeholder.search": "Введите строку",
         "filter.placeholder.empty": "",

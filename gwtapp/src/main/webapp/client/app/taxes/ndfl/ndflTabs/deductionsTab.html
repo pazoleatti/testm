@@ -1,11 +1,8 @@
-<div data-ng-controller="deductionCtrl">
-        <div class='container-grid-top tab3-top'>
-            <span data-ng-include="'client/app/taxes/ndfl/deductionFilter.html'"></span>
-        </div>
+<div id="deductionsGridContainer" data-ng-controller="deductionCtrl" style="position: absolute; height: 100%; width: 100%;">
         <div data-aplana-grid
              data-grid-fill-space="true"
-             data-grid-fill-space-container-selector=".form100"
-             data-grid-fill-space-container-selector-top=".tab3-top"
+             data-grid-fill-space-container-selector="#deductionsGridContainer"
+             data-grid-fill-space-container-selector-top="none"
              data-grid-options="deductionGrid.options"
              data-init-grid="deductionGrid.init(ctrl)"
              data-grid-ctrl="deductionGrid.ctrl"

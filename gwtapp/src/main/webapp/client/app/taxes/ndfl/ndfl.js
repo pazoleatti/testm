@@ -91,7 +91,7 @@
                                 $scope.declarationData = data;
                                 $scope.declarationDataId = $stateParams.declarationDataId;
                                 if (isRefreshGridNeeded) {
-                                    $rootScope.$broadcast('refreshDeclarationGrid');
+                                    $scope.refreshGrid(1);
                                 }
                             }
                         }
@@ -148,6 +148,11 @@
                     $interval.cancel($scope.intervalId);
                 });
 
+                // Чтобы положение datepicker менялось при скроллинге
+                angular.element('#ndflScrollPanel').scroll(function () {
+                    $rootScope.$broadcast('WINDOW_SCROLLED_MSG');
+                });
+
                 $scope.showToDoDialog = function () {
                     $showToDoDialog();
                 };
@@ -157,7 +162,7 @@
                 $scope.ndflTabsCtrl = {};
                 $scope.ndfFLTab = {
                     title: $filter('translate')('tab.ndfl.requisites'),
-                        contentUrl: 'client/app/taxes/ndfl/ndflTabs/ndfFLTab.html?v=${buildUuid}',
+                    contentUrl: 'client/app/taxes/ndfl/ndflTabs/ndfFLTab.html?v=${buildUuid}',
                     fetchTab: true,
                     active: true
                 };
@@ -178,6 +183,247 @@
                 };
                 $scope.ndflTabs = [$scope.ndfFLTab, $scope.incomesAndTaxTab, $scope.deductionsTab, $scope.prepaymentTab];
 
+                $scope.refreshGrid = function (page) {
+                    $scope.ndflTabsCtrl.getActiveTab().refreshGrid(page);
+                };
+
+                $scope.searchFilter = {
+                    ajaxFilter: [],
+                    params: {},
+                    isClear: false,
+                    filterName: 'ndflFilter'
+                };
+
+                /**
+                 * @description Поиск по фильтру
+                 */
+                $scope.submitSearch = function () {
+                    $scope.searchFilter.ajaxFilter = [];
+                    $scope.searchFilter.fillFilterParams();
+                    $scope.refreshGrid(1);
+                    $scope.searchFilter.isClear = !_.isEmpty($scope.searchFilter.ajaxFilter);
+                };
+
+                /**
+                 * @description сброс фильтра
+                 */
+                $scope.resetFilter = function () {
+                    /* очистка всех инпутов на форме */
+                    $scope.searchFilter.params = {};
+
+                    /* убираем надпись "Сброс" */
+                    $scope.isClear = false;
+
+                    $scope.submitSearch();
+                };
+
+                /**
+                 * @description Заполнение ajaxFilter
+                 */
+                $scope.searchFilter.fillFilterParams = function () {
+                    if ($scope.searchFilter.params.inp) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "inp",
+                            value: $scope.searchFilter.params.inp
+                        });
+                    }
+                    if ($scope.searchFilter.params.operationId) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "operationId",
+                            value: $scope.searchFilter.params.operationId
+                        });
+                    }
+                    // По реквизитам физического лица
+                    if ($scope.searchFilter.params.snils) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "snils",
+                            value: $scope.searchFilter.params.snils
+                        });
+                    }
+                    if ($scope.searchFilter.params.innNp) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "innNp",
+                            value: $scope.searchFilter.params.innNp
+                        });
+                    }
+                    if ($scope.searchFilter.params.innForeign) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "innForeign",
+                            value: $scope.searchFilter.params.innForeign
+                        });
+                    }
+                    if ($scope.searchFilter.params.idDocNumber) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "idDocNumber",
+                            value: $scope.searchFilter.params.idDocNumber
+                        });
+                    }
+                    if ($scope.searchFilter.params.lastName) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "lastName",
+                            value: $scope.searchFilter.params.lastName
+                        });
+                    }
+                    if ($scope.searchFilter.params.firstName) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "firstName",
+                            value: $scope.searchFilter.params.firstName
+                        });
+                    }
+                    if ($scope.searchFilter.params.middleName) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "middleName",
+                            value: $scope.searchFilter.params.middleName
+                        });
+                    }
+                    if ($scope.searchFilter.params.dateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "birthDay",
+                            value: $scope.searchFilter.params.dateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.dateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "birthDay",
+                            value: $scope.searchFilter.params.dateTo
+                        });
+                    }
+                    // По сведениям о доходах и НДФЛ
+                    if ($scope.searchFilter.params.kpp) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "kpp",
+                            value: $scope.searchFilter.params.kpp
+                        });
+                    }
+                    if ($scope.searchFilter.params.oktmo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "oktmo",
+                            value: $scope.searchFilter.params.oktmo
+                        });
+                    }
+                    if ($scope.searchFilter.params.incomeCode) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "incomeCode",
+                            value: $scope.searchFilter.params.incomeCode
+                        });
+                    }
+                    if ($scope.searchFilter.params.incomeType) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "incomeType",
+                            value: $scope.searchFilter.params.incomeType
+                        });
+                    }
+                    if ($scope.searchFilter.params.taxRate) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "taxRate",
+                            value: $scope.searchFilter.params.taxRate
+                        });
+                    }
+                    if ($scope.searchFilter.params.numberPaymentOrder) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "paymentNumber",
+                            value: $scope.searchFilter.params.numberPaymentOrder
+                        });
+                    }
+                    if ($scope.searchFilter.params.transferDateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "taxTransferDate",
+                            value: $scope.searchFilter.params.transferDateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.transferDateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "taxTransferDate",
+                            value: $scope.searchFilter.params.transferDateTo
+                        });
+                    }
+                    if ($scope.searchFilter.params.calculationDateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "taxDate",
+                            value: $scope.searchFilter.params.calculationDateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.calculationDateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "taxDate",
+                            value: $scope.searchFilter.params.calculationDateTo
+                        });
+                    }
+                    if ($scope.searchFilter.params.paymentDateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "paymentDate",
+                            value: $scope.searchFilter.params.paymentDateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.paymentDateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "paymentDate",
+                            value: $scope.searchFilter.params.paymentDateTo
+                        });
+                    }
+                    // По сведениям о вычетах
+                    if ($scope.searchFilter.params.deductionCode) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "typeCode",
+                            value: $scope.searchFilter.params.deductionCode
+                        });
+                    }
+                    if ($scope.searchFilter.params.incomeCode) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "incomeCode",
+                            value: $scope.searchFilter.params.incomeCode
+                        });
+                    }
+                    if ($scope.searchFilter.params.calculationDateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "incomeAccrued",
+                            value: $scope.searchFilter.params.calculationDateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.calculationDateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "incomeAccrued",
+                            value: $scope.searchFilter.params.calculationDateTo
+                        });
+                    }
+                    if ($scope.searchFilter.params.deductionDateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "periodCurrDate",
+                            value: $scope.searchFilter.params.deductionDateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.deductionDateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "periodCurrDate",
+                            value: $scope.searchFilter.params.deductionDateTo
+                        });
+                    }
+                    // По сведениям о доходах в виде авансовых платежей
+                    if ($scope.searchFilter.params.notifNum) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "notifNum",
+                            value: $scope.searchFilter.params.notifNum
+                        });
+                    }
+                    if ($scope.searchFilter.params.notifSource) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "notifSource",
+                            value: $scope.searchFilter.params.notifSource
+                        });
+                    }
+                    if ($scope.searchFilter.params.notifDateFrom) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "notifDate",
+                            value: $scope.searchFilter.params.notifDateFrom
+                        });
+                    }
+                    if ($scope.searchFilter.params.notifDateTo) {
+                        $scope.searchFilter.ajaxFilter.push({
+                            property: "notifDate",
+                            value: $scope.searchFilter.params.notifDateTo
+                        });
+                    }
+                };
 
                 $scope.openHistoryOfChange = function () {
                     $aplanaModal.open({
