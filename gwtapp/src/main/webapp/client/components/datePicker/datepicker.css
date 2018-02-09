@@ -1,0 +1,11 @@
+.cbr-picker-button .btn-popover {
+    padding: 3px !important;
+    border-left: 1px solid #187d48 !important;
+    border-right: 1px solid #187d48 !important;
+}
+
+.cbr-picker-button [class^="icon-"],
+.cbr-picker-button [class*=" icon-"] {
+    margin: 0;
+    background-image: url("../../img/glyphicons-halflings-white.png");
+}

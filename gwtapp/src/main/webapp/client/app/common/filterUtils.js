@@ -114,11 +114,7 @@
                     };
 
                     // Выполнение поиска
-                    $scope.submitSearch = function (pageName) {
-                        if (pageName && pageName === "ndfl") {
-                            $rootScope.$broadcast('INP_CHANGED', $scope.searchFilter.params.inp);
-                            $rootScope.$broadcast('OPERATION_ID_CHANGED', $scope.searchFilter.params.operationId);
-                        }
+                    $scope.submitSearch = function () {
                         $scope.fillSearchFilter();
 
                         if($scope.searchFilter.onSearchSubmit) {
@@ -127,11 +123,7 @@
                     };
 
                     // Сброс фильтра
-                    $scope.resetFilter = function (pageName) {
-                        if (pageName && pageName === "ndfl") {
-                            $rootScope.$broadcast('INP_CHANGED', $scope.searchFilter.params.inp);
-                            $rootScope.$broadcast('OPERATION_ID_CHANGED', $scope.searchFilter.params.operationId);
-                        }
+                    $scope.resetFilter = function () {
                         // Очищаем фильтр
                         $scope.searchFilter.ajaxFilter = [];
                         $scope.searchFilter.params = {};

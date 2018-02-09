@@ -154,8 +154,9 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public void unlockAll(TAUserInfo userInfo, List<String> keys) {
+        boolean unlockForced = userInfo.getUser().hasRole(TARole.ROLE_ADMIN);
         for (String key : keys) {
-            unlock(key, userInfo.getUser().getId(), userInfo.getUser().hasRole(TARole.ROLE_ADMIN));
+            unlock(key, userInfo.getUser().getId(), unlockForced);
         }
     }
 
