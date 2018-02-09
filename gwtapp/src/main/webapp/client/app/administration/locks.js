@@ -74,26 +74,12 @@
                         method: "POST",
                         url: "controller/actions/lock/delete",
                         params: {
-                            keys: $filter('keyExtractor')($scope.locksGrid.value)
+                            keys: $filter('idExtractor')($scope.locksGrid.value)
                         }
                     }).then(function () {
                         $scope.refreshGrid(1);
                     });
                 };
             }])
-        .filter('keyExtractor', function () {
-            return function (items, property) {
-                if (!property) {
-                    property = 'key';
-                }
-
-                var result = [];
-                angular.forEach(items, function (item) {
-                    result.push(_.property(property)(item));
-                });
-
-                return result;
-            };
-        })
 
 }());
