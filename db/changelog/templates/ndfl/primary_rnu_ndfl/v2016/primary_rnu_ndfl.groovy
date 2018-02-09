@@ -1023,7 +1023,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 rowNums = allRowNums
             }
             for (String rowNum : rowNums) {
-                String pathError = String.format(SECTION_LINE_RANGE_MSG, T_PERSON_INCOME, rowNum)
+                String pathError = String.format(SECTION_LINE_MSG, T_PERSON_INCOME, rowNum)
                 logPeriodError(pathError, incomeAccruedDate, incomePayoutDate, inp, fio, operationId)
             }
             return false

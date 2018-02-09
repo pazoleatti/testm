@@ -1,4 +1,4 @@
-<div id="ndfl" style="height: 100%;">
+<div id="ndflReport" class="flex-column">
     <!--Заголовок-->
     <div class="row">
         <div class="header-col" style="margin: 14px 0 0 28px;">
@@ -45,9 +45,9 @@
         </div>
     </div>
 
-    <div class="box-shadow-block">
+    <div class="box-shadow-block flex-fill flex-column">
         <div class="grid-filter"
-             style="min-width: 100%; background: #ffffff;padding-bottom: 1px;margin: -10px 0 0 0;">
+             style="min-width: 100%; background: #ffffff; padding-bottom: 1px;">
             <div class="header-col " style="float: right; margin-top: 10px;">
                 <!-- ссылка на модальное окно измениий по налоговой форме -->
                 <button type="button" class="btn btn-default-nonBg" style="float: right;"
@@ -65,67 +65,107 @@
                 </button>
             </div>
             <div data-aplana-collapse data-is-collapsed="false" data-label="'infoPanelLabel' | translate"
-                 style="padding: 0 0 0 12px;">
+                 style="padding: 0 12px 0 12px;">
                 <!--Основная информация-->
-                <div class="header-details">
-                    <div class="row">
-                        <div class="info-wrapper">
-                            <div class="header-col group-title-panel">
-                                <div>
-                                    <label class="label-title-panel w100">{{::'title.department' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.department}}</label>
+                <div class="header-details pull-control-label-right">
+                    <div class="row-fluid info-wrapper">
+                        <div class="span3">
+                            <div class="row-fluid">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.department' | translate}}:</label>
                                 </div>
-                                <div>
-                                    <label class="label-title-panel w100">{{::'title.formNumber' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationDataId}}</label>
-                                </div>
-                                <div>
-                                    <label class="label-title-panel w100">{{::'title.creator' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.creationUserName}}</label>
+                                <div class="span8">
+                                    <label class="font-normal info-text">{{declarationData.department}}</label>
                                 </div>
                             </div>
-                            <div class="header-col group-title-panel">
-                                <div>
-                                    <label class="label-title-panel w150">{{::'title.formType' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.declarationFormKind}}</label>
+                            <div class="row-fluid">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.formNumber' | translate}}:</label>
                                 </div>
-                                <div>
-                                    <label class="label-title-panel w150">{{::'title.period' | translate}}:</label>
-                                    <label class="font-normal info-text30" data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
-                                </div>
-                                <div>
-                                    <label class="label-title-panel w150">{{::'title.state' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.state}}</label>
-                                </div>
-
-                            </div>
-                            <div class="header-col group-title-panel">
-                                <div>
-                                    <label class="label-title-panel w100">{{::'title.stateDoc' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.docState}}</label>
-                                </div>
-                                <div>
-                                    <label class="label-title-panel w100">{{::'title.kpp' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.kpp}}</label>
-                                </div>
-                                <div>
-                                    <label class="label-title-panel w100">{{::'title.oktmo' | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.oktmo}}</label>
+                                <div class="span8">
+                                    <label class="font-normal info-text">{{declarationDataId}}</label>
                                 </div>
                             </div>
-                            <div class="header-col group-title-panel">
-                                <div style="padding: 0px">
-                                    <label class="label-title-panel " style="width: 200px;">{{::'title.dateAndTimeCreate'
-                                        | translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.creationDate}}</label>
+                            <div class="row-fluid">
+                                <div class="span4">
+                                    <label class="control-label">{{::'title.creator' | translate}}:</label>
                                 </div>
-                                <div style="padding: 0px">
-                                    <label class="label-title-panel" style="width: 200px;">{{::'title.codeNO' |
-                                        translate}}:</label>
-                                    <label class="font-normal info-text30">{{declarationData.taxOrganCode}}</label>
+                                <div class="span8">
+                                    <label class="font-normal info-text">{{declarationData.creationUserName}}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span3">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.formType' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.declarationFormKind}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.period' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text"
+                                           data-ng-bind-html="declarationData | ndflPeriodFormatter"></label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.state' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.state}}</label>
                                 </div>
                             </div>
 
+                        </div>
+                        <div class="span3">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.stateDoc' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.docState}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.kpp' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.kpp}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.oktmo' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.oktmo}}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span3">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.dateAndTimeCreate' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.creationDate}}</label>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <label class="control-label">{{::'title.codeNO' | translate}}:</label>
+                                </div>
+                                <div class="span6">
+                                    <label class="font-normal info-text">{{declarationData.taxOrganCode}}</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,13 +215,16 @@
                         </span>
                 </div>
             </div>
+        </div>
+        <div class="flex-fill">
             <div ng-if="!availablePdf">
-                <div style="min-height: 600px;text-align:center" class="report-wrapper">
+                <div style="min-height: 600px; text-align: center" class="report-wrapper">
                     <h1>{{pdfMessage}}</h1>
                 </div>
             </div>
-            <div ng-if="availablePdf">
-                <div style="overflow: auto;width: 100%; padding: 10px 12px 0;background-color: lightgray;text-align:center" class="report-content">
+            <div ng-if="availablePdf" class="flex-column">
+                <div class="flex-fill"
+                     style="overflow: auto; width: 100%; padding: 10px 12px 0; background-color: lightgray; text-align: center">
                     <img id="pdfImage" style="width: 793px; height: auto;" ng-src="{{reportImage}}">
                 </div>
                 <div style="position: relative; text-align: center; border-top: 1px solid #ccc; padding-top: 7px;">

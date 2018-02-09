@@ -1,13 +1,13 @@
-<div data-ng-controller="asyncParamController">
-    <div class="container-grid box-shadow-block">
-        <div data-aplana-grid
-             data-grid-fill-space="true"
-             data-grid-fill-space-container-selector=".form100"
-             data-grid-fill-space-container-selector-top=".top-wrapper"
-             data-grid-options="asyncParamGrid.options"
-             data-grid-ctrl="asyncParamGrid.ctrl"
-             data-ng-model="asyncParamGrid.value"
-             id="asyncParamGrid"
-             style="float: left; width: 100%;"></div>
+<div id="asyncParamGridContainer" class="container-grid box-shadow-block"
+     data-ng-controller="asyncParamController" style="position: absolute; height: 100%; width: 100%;">
+    <div data-aplana-grid
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector="#asyncParamGridContainer"
+         data-grid-fill-space-container-selector-top="none"
+         data-grid-options="asyncParamGrid.options"
+         data-grid-ctrl="asyncParamGrid.ctrl"
+         data-ng-model="asyncParamGrid.value"
+         id="asyncParamGrid"
+         style="float: left; width: 100%;">
     </div>
 </div>

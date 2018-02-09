@@ -195,12 +195,12 @@
                     };
 
                     scope.ctrl.getActiveTab = function () {
-                        angular.forEach(scope.tabModel, function (item, index) {
-                            if (scope.tabModel[index].active) {
-                                return scope.tabModel[index];
-                            }
-                            return null;
-                        });
+                        if (scope.tabModel) {
+                            return _.find(scope.tabModel, function (elem) {
+                                return elem.active;
+                            });
+                        }
+                        return null;
                     };
 
                     scope.ctrl.removeTabByIndex = function ($index) {
@@ -344,12 +344,12 @@
                         };
 
                         scope.ctrl.getActiveTab = function () {
-                            angular.forEach(scope.tabModel, function (item, index) {
-                                if (scope.tabModel[index].active) {
-                                    return scope.tabModel[index];
-                                }
-                                return null;
-                            });
+                            if (scope.tabModel) {
+                                return _.find(scope.tabModel, function (elem) {
+                                    return elem.active;
+                                });
+                            }
+                            return null;
                         };
 
                         scope.ctrl.removeTabByIndex = function ($index) {

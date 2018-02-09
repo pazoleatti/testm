@@ -189,8 +189,7 @@
                         url: "controller/actions/declarationTypeAssignment/delete",
                         data: createAssignmentIdModels($scope.declarationTypeAssignmentGrid.value)
                     }).then(function (response) {
-                        console.log(response);
-                        if (response.data && response.data.deletingAssignmentsWithDeclarations && response.data.uuid) {
+                        if (response.data && response.data.uuid) {
                             $logPanel.open('log-panel-container', response.data.uuid);
                         }
                         $scope.refreshGrid();

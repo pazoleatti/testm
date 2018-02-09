@@ -7,7 +7,7 @@
     </div>
     <hr>
     <div class="form100" style="height:66%;margin-top:-10px">
-        <div class="row container-grid-top" style="min-width: 1400px; margin: 0;">
+        <div style="min-width: 1400px; margin: 0;">
             <!--Сохранить изменения параметра-->
             <button type="button" class="btn btn-default"
                     data-ng-click="actionsUpdateSchedulerfunction()">
@@ -41,14 +41,14 @@
                                 <label class="control-label">{{::'taskList.title.schedule' |
                                     translate}}:</label>
                             </div>
-                            <div class="span9">
+                            <div class="span9" style="position: relative;">
                                 <input type="text" class="form-control"
                                        value="{{updateSchedulerTask.schedule}}"
                                        ng-model="updateSchedulerTask.schedule"/>
                                 <img src="resources/img/question_mark.png" class="floatWindow-href"
-                                     style="position:absolute; text-align:right; top: 0; bottom: 0; margin: auto;">
+                                     style="position:absolute; text-align: right; top: 0; bottom: 0; margin: auto;">
                                 <div class="floatWindow-element" ng-bind-html="taskScheduleHelpUpdateParam"
-                                     style="font-size: 8pt; width: 460px; position:absolute;margin-top:-30px; margin-left:400px"/>
+                                     style="font-size: 8pt; width: 460px; position: absolute; margin-top: -30px; margin-left: 400px"></div>
                             </div>
                             <div>
                             </div>

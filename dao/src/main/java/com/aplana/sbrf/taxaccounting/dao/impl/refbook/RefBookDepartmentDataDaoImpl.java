@@ -137,8 +137,8 @@ public class RefBookDepartmentDataDaoImpl extends AbstractDao implements RefBook
         MapSqlParameterSource params = new MapSqlParameterSource("ids", ids);
 
         if (!StringUtils.isBlank(name)) {
-            queryBuilder.append("and (lower(dep.name) like concat('%', :name, '%') or lower(full_name) like ('%', :name, '%')) ");
-            params.addValue("name", name.toLowerCase());
+            queryBuilder.append("and (lower(dep.name) like :name or lower(df.shortname) like :name) ");
+            params.addValue("name", "%" + name.toLowerCase() + "%");
         }
         if (activeOnly) {
             queryBuilder.append("and dep.is_active = 1 ");

@@ -661,6 +661,14 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3025 -->
+    <changeSet id="2.2-dloshkarev-3" author="dloshkarev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-3430 -->
     <changeSet id="2.2-ytrofimov-45" author="ytrofimov">
         <update tableName="BLOB_DATA">

@@ -174,6 +174,15 @@ a.collapse-link {
   vertical-align: top;
 }
 
+#ndfl_group_filter a.collapse-link {
+  background: url('../img/expand.png') no-repeat;
+  background-position: left;
+  padding: 6px 0 0 27px;
+  border-bottom-style: dashed;
+  border-bottom-width: thin;
+  width: 100%;
+}
+
 .accordion-heading a.accordion-toggle.collapsed,
 a.collapse-link.collapsed {
   background: url('../img/arrow-double.png') no-repeat;
@@ -181,6 +190,13 @@ a.collapse-link.collapsed {
   width: min-content;
   padding: 6px 27px 0 0;
   height: 26px;
+}
+
+#ndfl_group_filter a.collapse-link.collapsed {
+  background: url('../img/collapse.png') no-repeat;
+  background-position: left;
+  padding: 6px 0 0 27px;
+  color: grey;
 }
 
 //TODO для bootstrap найти исходники less, управлять переменными, а не переопределять стили
@@ -253,7 +269,7 @@ input::-ms-clear {
   box-shadow: inset 3px -4px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
-.nav-tabs > li:first-child {
+.nav-tabs > li:nth-child(2) {
   margin: 0 0 0 20px;
 }
 
@@ -668,18 +684,6 @@ input[type="checkbox"] {
   background-color: @grayMoreLighter;
 }
 
-/* Панель для отображения информации о версии приложения и его сборке */
-.build_info {
-  position: fixed; /* Фиксированное положение */
-  left: 24px;
-  bottom: 5px; /* Левый нижний угол */
-  font-size: 12px;
-  line-height: 1.33;
-  text-align: left;
-  color: rgba(0, 0, 0, 0.5);
-  z-index: 18;
-}
-
 /* Признак обязательности поля */
 label.required:after {
   content: "*";
@@ -779,7 +783,6 @@ hr {
 /*-------new-style----------*/
 .navbar-default {
   background: @greenDark;
-  height: 56px;
   background-image: linear-gradient(to right, @greenDark, #187c48);
   //background-image: linear-gradient(to right, var(--main-green), var(--dark-green));
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.3);
@@ -1082,7 +1085,6 @@ button.btn.btn-default.ng-binding {
     widtH: 100%;
   }
   div [ui-view] {
-    height: 100%;
     .controls {
       margin-top: 21px;
     }
@@ -1116,28 +1118,54 @@ button.btn.btn-default.ng-binding {
 
 .container-grid {
   overflow: hidden;
-  height: 92%;
+  height: 100%;
   position: relative;
   padding: 6px;
   background: @white;
-  margin: 16px 11px 0;
 }
 
 div [ui-view] {
   height: 100%;
 }
 
+.cbr-page {
+  position: absolute;
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  width: 100%;
+}
+
+// Header
+#app-header {
+  width: 100%;
+  height: 56px;
+  min-width: 1300px;
+}
+
 /**
- * 2-х-колночная структура
+ * Content
  */
 .cbr-page-layout {
-  position: absolute;
-  top: 20px;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  min-width: 1300px;
   overflow: hidden;
+  padding: 12px 12px 0 12px;
   z-index: 10;
+}
+
+/* Footer. Панель для отображения информации о версии приложения и его сборке */
+.build_info {
+  height: 25px;
+  line-height: 25px;
+  margin-left: 24px;
+  font-size: 12px;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.5);
+  z-index: 18;
 }
 
 .cbr-page-layout:after {
@@ -1202,7 +1230,6 @@ div [ui-view] {
   position: relative;
   height: 100%;
   box-sizing: border-box;
-  padding: 12px;
   overflow: hidden;
   min-width: 1100px;
 }
@@ -1212,10 +1239,6 @@ div [ui-view] {
 }*/
 .ui-jqgrid {
   width: 100% !important;
-}
-
-.cbr-page-layout {
-  top: 46px;
 }
 
 .select2-choice {
@@ -1247,8 +1270,8 @@ input.ng-invalid, .ui-select-container.ng-invalid .ui-select-match > span {
   width: 100%;
   margin: 0 auto;
   border: 1px solid #d8d8d8;
-  position: fixed;
-  bottom: 23px;
+  position: absolute;
+  bottom: 0;
 }
 
 #log-panel .ui-jqgrid-bdiv {
@@ -1354,31 +1377,17 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   text-align: right;
 }
 
+.info-text {
+  vertical-align: middle;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .info-text200 {
   width: 296px;
   vertical-align: middle;
   font-size: 12px;
   font-weight: 700;
-}
-
-.info-text30 {
-  width: 130px;
-  vertical-align: middle;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.label-title-panel {
-  text-align: right;
-  margin-right: 2px;
-  font-size: 12px;
-  vertical-align: middle;
-}
-
-.group-title-panel {
-  width: 380px;
-  margin: 0;
-  padding: 0;
 }
 
 .menuitem {
@@ -1404,8 +1413,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
 .info-wrapper {
   background-color: rgba(245, 237, 225, 0.8);
-  margin: 0 0 0 17px;
-  width: 97.6%;
+  width: 100%;
   border-top: 2px solid rgba(0, 0, 0, 0.3);
   padding: 10px 12px 0;
   min-height: 100px;
@@ -1418,8 +1426,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 }
 
 .box-shadow-block {
-  height: 91%;
-  margin: 16px 11px 0;
   box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.1);
   border: solid 1px rgba(0, 0, 0, 0.1);
   background: #fff;
@@ -1457,10 +1463,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   display: block;
 }
 
-.report-content {
-  height: 550px;
-}
-
 /*------------------------------------------------------------------*/
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   .ui-jqgrid .ui-jqgrid-bdiv {
@@ -1486,32 +1488,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 .date-from-label {
   width: 100% !important;
   line-height: 15px;
-}
-
-@media (max-width: 1622px) and (min-width: 1592px) {
-  .report-content {
-    height: 524px;
-  }
-}
-
-@media (max-height: 950px) {
-  .report-content {
-    height: 486px;
-  }
-}
-
-@media (max-width: 1590px) {
-  .report-wrapper {
-    min-height: 521px !important;
-  }
-
-  #log-panel {
-    width: 97.5% !important;
-  }
-
-  .report-content {
-    height: 518px;
-  }
 }
 
 @media (max-width: 1450px) {
@@ -1593,10 +1569,6 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
         width: 24px;
       }
     }
-    .row-fluid [class*="span"]:first-child {
-      margin-left: 7px;
-      margin-bottom: -6px;
-    }
   }
 
   .report-wrapper {
@@ -1661,6 +1633,14 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   background: transparent;
 }
 
+.tab-content {
+  position: absolute;
+  top: 46px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
 .btn-group {
   .btn {
     font-size: 12px;
@@ -1676,11 +1656,7 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
 
 .cbr-picker {
   .cbr-picker-button > button.btn {
-    width: 36px !important;
     border-radius: 0;
-  }
-  .icon-calendar {
-    margin-top: -4px;
   }
   button.btn.btn-default:hover:not([disabled]):hover {
     border-top: 3px solid #6ec151;
@@ -1710,8 +1686,38 @@ label[class="ng-binding"], label[class="w100 ng-binding"], label[class="w138 ng-
   margin: 0;
 }
 
+/* исправление ситуации, когда в гриде нет данных и из-за этого не отображается горизонтальная полоса прокрутки */
 .ui-jqgrid tr.jqgfirstrow td {
   height: 1px !important;
   border-color: white !important;
   background-color: white !important;
+}
+
+.vertical-btn-group .btn-default {
+  height: 25px;
+  text-align: center;
+  width: 100%;
+}
+
+.vertical-btn-group div {
+  margin-top: 10px;
+}
+
+.vertical-btn-group div:first-child {
+  margin-top: 0;
+}
+
+.pull-control-label-right .control-label {
+  width: 100%;
+  text-align: right;
+}
+
+.flex-column {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.flex-fill {
+  flex: 1;
 }

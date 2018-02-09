@@ -4,8 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
 import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeleteDeclarationTypeAssignmentsResult;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeAssignmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.paging.JqgridPagedList;
@@ -85,10 +85,10 @@ public class DeclarationTypeAssignmentController {
      * Отмена назначений налоговых форм подразденениям
      *
      * @param assignments Список упрощенных моделей назначений {@link DeclarationTypeAssignmentIdModel}
-     * @return Результат выполнения операции {@link DeleteDeclarationTypeAssignmentsResult}
+     * @return Результат выполнения операции {@link ActionResult}
      */
     @PostMapping(value = "/actions/declarationTypeAssignment/delete")
-    public DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignment(@RequestBody List<DeclarationTypeAssignmentIdModel> assignments) {
+    public ActionResult deleteDeclarationTypeAssignment(@RequestBody List<DeclarationTypeAssignmentIdModel> assignments) {
         TAUserInfo userInfo = securityService.currentUserInfo();
         return assignmentService.deleteDeclarationTypeAssignments(userInfo, assignments);
     }

@@ -7,8 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignments
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeleteDeclarationTypeAssignmentsResult;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -140,12 +140,12 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
      *
      * @param userInfo    Информация о пользователе
      * @param assignments Список упрощенных моделей назначений {@link DeclarationTypeAssignmentIdModel}
-     * @return Результат отмены назначения {@link DeleteDeclarationTypeAssignmentsResult}
+     * @return Результат отмены назначения {@link ActionResult}
      */
     @Override
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_DECLARATION_TYPES_ASSIGNMENT)")
-    public DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignments(TAUserInfo userInfo, List<DeclarationTypeAssignmentIdModel> assignments) {
-        DeleteDeclarationTypeAssignmentsResult result = new DeleteDeclarationTypeAssignmentsResult();
+    public ActionResult deleteDeclarationTypeAssignments(TAUserInfo userInfo, List<DeclarationTypeAssignmentIdModel> assignments) {
+        ActionResult result = new ActionResult();
         Logger logger = new Logger();
         boolean declarationsExist = false;
 
@@ -157,7 +157,7 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         }
 
         result.setUuid(logEntryService.save(logger.getEntries()));
-        result.setDeletingAssignmentsWithDeclarations(declarationsExist);
+
         return result;
     }
 
@@ -186,8 +186,8 @@ public class DeclarationTypeAssignmentServiceImpl implements DeclarationTypeAssi
         // Удаление периодов, имеющихся у заданного подразеления. Чтобы не создавалось то, что уже существует
         // Перебираются все периоды ПАО "Сбербанк", если у заданного подразделения находится равный ему период,
         // то он удаляется из списка периодов для создания
-        for(DepartmentReportPeriod bankDrp : bankDrpList) {
-            for(DepartmentReportPeriod depDrp : depDrpList) {
+        for (DepartmentReportPeriod bankDrp : bankDrpList) {
+            for (DepartmentReportPeriod depDrp : depDrpList) {
                 if (periodsAreEqual(depDrp, bankDrp)) {
                     drpForCreate.remove(bankDrp);
                     break;

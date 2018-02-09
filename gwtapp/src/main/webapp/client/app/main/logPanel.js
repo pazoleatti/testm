@@ -11,7 +11,7 @@
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' style=' background: #fff;height: 300px; width: 97.7%; left: 21px;min-height: 296px;'>" +
+                        "<div id='log-panel' style=' background: #fff;height: 300px; min-height: 296px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -34,9 +34,9 @@
                         "            </div>" +
                         "        </div>" +
                         "        <div data-aplana-grid" +
-                        "             data-grid-fill-space='true' " +
+                        "             data-grid-fill-space='false' " +
                         "             data-grid-options='logEntryGrid.options' " +
-                        "              data-grid-fill-space-container-selector='#log-panel' " +
+                        "             data-grid-fill-space-container-selector='#log-panel' " +
                         "             data-grid-ctrl='logEntryGrid.ctrl'" +
                         "             data-ng-model='logEntryGrid.value'" +
                         "             style='float: left; width: 100%;'" +
