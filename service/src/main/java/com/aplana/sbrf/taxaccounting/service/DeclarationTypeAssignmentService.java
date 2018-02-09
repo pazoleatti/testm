@@ -3,8 +3,8 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationTypeAssignmentAction;
 import com.aplana.sbrf.taxaccounting.model.action.EditDeclarationTypeAssignmentsAction;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.result.CreateDeclarationTypeAssignmentResult;
-import com.aplana.sbrf.taxaccounting.model.result.DeleteDeclarationTypeAssignmentsResult;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public interface DeclarationTypeAssignmentService {
      *
      * @param userInfo    Информация о пользователе
      * @param assignments Список упрощенных моделей назначений {@link DeclarationTypeAssignmentIdModel}
-     * @return Результат отмены назначения {@link DeleteDeclarationTypeAssignmentsResult}
+     * @return Результат отмены назначения {@link ActionResult}
      */
-    DeleteDeclarationTypeAssignmentsResult deleteDeclarationTypeAssignments(TAUserInfo userInfo, List<DeclarationTypeAssignmentIdModel> assignments);
+    ActionResult deleteDeclarationTypeAssignments(TAUserInfo userInfo, List<DeclarationTypeAssignmentIdModel> assignments);
 }
