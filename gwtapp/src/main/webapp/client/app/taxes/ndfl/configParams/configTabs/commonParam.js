@@ -13,7 +13,6 @@
         .controller('commonParamController', ['$scope', '$filter', 'CommonParamResource', 'APP_CONSTANTS', '$http', '$logPanel', 'LogEntryResource', '$rootScope', '$aplanaModal',
             function ($scope, $filter, CommonParamResource, APP_CONSTANTS, $http, $logPanel, LogEntryResource, $rootScope, $aplanaModal) {
 
-
                 $scope.commonParamGrid = {
                     ctrl: {},
                     value: [],
@@ -61,6 +60,13 @@
                 });
 
                 /**
+                 * @description отлавливает событие пересчета количества выбранных записей на вкладке "Общие параметры"
+                 */
+                $scope.$on("UPDATE_INFO_COMMON_GRID_DATA", function () {
+                    $rootScope.configParamGridLength = $scope.commonParamGrid.value.length;
+                });
+
+                /**
                  * @description Удаление выбраных в гриде записей
                  */
                 $scope.removeRecords = function () {
@@ -80,19 +86,14 @@
                             }
                         });
                     });
-
                 };
-
-                $scope.$on("UPDATE_INFO_COMMON_GRID_DATA", function () {
-                    $rootScope.configParamGridLength = $scope.commonParamGrid.value.length;
-                });
 
                 /**
                  * @description открытие модального окна обовления записи
                  */
                 $scope.updateRecord = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('reportPeriod.pils.openPeriod'),
+                        tittle: $filter('translate')('configParam.modal.editParam.title'),
                         templateUrl: 'client/app/taxes/ndfl/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
                         windowClass: 'modal600',
@@ -105,7 +106,6 @@
                                 };
                             }
                         }
-
                     }).result.then(function (resolve) {
                         if (resolve){
                             $scope.commonParamGrid.ctrl.refreshGrid(1);

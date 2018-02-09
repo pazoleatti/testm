@@ -647,6 +647,12 @@
 
 
         "configParam.title": "Администрирование - Конфигурационные параметры",
+        "configParam.confirm.rejectCreatingConfig.title" : "Отмена операции создания параметра",
+        "configParam.confirm.rejectEditingConfig.title" : "Отмена операции редактирования параметра",
+        "configParam.confirm.rejectCreatingConfig.text" : "Отменить операцию создания параметра?",
+        "configParam.confirm.rejectEditingConfig.text" : "Отменить операцию редактирования параметра?",
+        "configParam.modal.createParam.title": "Создание конфигурационного параметра",
+        "configParam.modal.editParam.title": "Редактирование конфигурационного параметра",
         "tab.configParam.commonParam" : "Общие параметры",
         "tab.configParam.asyncParam" : "Параметры асинхронных заданий",
         "configParam.button.createRecord" : "Добавить запись",

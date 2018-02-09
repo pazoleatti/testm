@@ -13,10 +13,13 @@ public interface ConfigurationService {
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
     @Deprecated
-    ConfigurationParamModel getAllConfig(TAUserInfo userInfo);
+    ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo);
 
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
+     *
+     * @param userInfo информация о текущем пользователе
+     * @return модель {@link ConfigurationParamModel} содержащаяя информацию о всех конфигурационных параметрах
      */
     ConfigurationParamModel getCommonConfig(TAUserInfo userInfo);
 
@@ -47,7 +50,7 @@ public interface ConfigurationService {
     /**
      * Получение конфигурационных параметров (табл. CONFIGURATION)
      */
-    List<Configuration> getCommonParameter(TAUserInfo userInfo);
+    List<Configuration> fetchCommonParameter(TAUserInfo userInfo);
 
     /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
@@ -86,11 +89,17 @@ public interface ConfigurationService {
 
     /**
      * Обновление общего параметра в табл. CONFIGURATION
+     *
+     * @param userInfo информация о пользователе
+     * @param config изменяемый конфигурационный параметр
+     * @return Результат операции {@link ActionResult}. Содержит uuid, по которому можно получить сообщения в журнале
      */
     ActionResult update(TAUserInfo userInfo, Configuration config);
 
     /**
      * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)
+     *
+     * @param userInfo информация о пользователе
      */
     void setCommonParamsDefault(TAUserInfo userInfo);
 

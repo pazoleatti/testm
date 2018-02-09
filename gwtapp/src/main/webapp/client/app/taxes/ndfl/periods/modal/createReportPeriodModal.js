@@ -7,7 +7,6 @@
 
     angular.module('app.reportPeriodModal', ['ui.router', 'app.rest'])
 
-
     /**
      * @description Контроллер создания и редактирования отчетных периодов
      */

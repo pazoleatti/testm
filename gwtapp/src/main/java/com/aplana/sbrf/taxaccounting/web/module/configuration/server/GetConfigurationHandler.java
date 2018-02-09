@@ -41,7 +41,7 @@ public class GetConfigurationHandler extends
 
         GetConfigurationResult result = new GetConfigurationResult();
         // Параметры
-        result.setModel(configurationService.getAllConfig(securityService.currentUserInfo()));
+        result.setModel(configurationService.fetchAllConfig(securityService.currentUserInfo()));
         result.setEmailConfigs(configurationService.getEmailConfig());
         result.setAsyncConfigs(configurationService.getAsyncConfig());
         // Разыменование подразделений

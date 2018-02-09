@@ -232,7 +232,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public void remove(List<ConfigurationParam> params) {
+    public void removeCommonParam(List<ConfigurationParam> params) {
         String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", params);
         getJdbcTemplate().update("DELETE FROM CONFIGURATION" + where);
     }

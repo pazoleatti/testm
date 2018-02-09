@@ -20,7 +20,7 @@
 
                     $http({
                         method: "POST",
-                        url: "controller/actions/editCommonParams",
+                        url: "controller/actions/commonParams/editCommonParams",
                         params: {
                             config: $scope.parameter
                         }
@@ -33,7 +33,7 @@
                 };
 
                 /**
-                 * @description Переменная содержащая значения редактируемое значение
+                 * @description Переменная содержащая редактируемое значение
                  */
                 $scope.parameter = angular.copy(parameter);
 

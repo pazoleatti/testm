@@ -14,8 +14,6 @@
 		<constructor-arg index="0" ref="dataSource"/>
 	</bean>
 
-	<bean class="com.aplana.sbrf.taxaccounting.dao.impl.QueryDSLConfiguration"/>
-
 	<tx:annotation-driven mode="aspectj"/>
 	<!-- JDBC-based DAOs -->
 	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.dao.impl"/>

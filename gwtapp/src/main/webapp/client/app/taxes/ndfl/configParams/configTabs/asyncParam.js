@@ -13,7 +13,6 @@
         .controller('asyncParamController', ['$scope', '$filter', 'AsyncTaskResource', 'APP_CONSTANTS', '$aplanaModal', '$rootScope',
             function ($scope, $filter, AsyncTaskResource, APP_CONSTANTS, $aplanaModal, $rootScope) {
 
-
                 $scope.asyncParamGrid = {
                     ctrl: {},
                     value: [],
@@ -61,11 +60,18 @@
                 });
 
                 /**
+                 * @description отлавливает событие пересчета количества выбранных записей на вкладке "Параметры асинхронных заданий"
+                 */
+                $scope.$on("UPDATE_INFO_ASYNC_GRID_DATA", function () {
+                    $rootScope.configParamGridLength = $scope.asyncParamGrid.value.length;
+                });
+
+                /**
                  * @description открытие модального окна обовления записи
                  */
                 $scope.updateRecord = function () {
                     $aplanaModal.open({
-                        tittle: $filter('translate')('reportPeriod.pils.openPeriod'),
+                        tittle: $filter('translate')('configParam.modal.editParam.title'),
                         templateUrl: 'client/app/taxes/ndfl/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
                         windowClass: 'modal1000',
@@ -85,12 +91,5 @@
                         }
                     });
                 };
-
-                $scope.$on("UPDATE_INFO_ASYNC_GRID_DATA", function () {
-                    $rootScope.configParamGridLength = $scope.asyncParamGrid.value.length;
-                });
-
-            }])
-
-    ;
+            }]);
 }());

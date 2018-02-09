@@ -17,8 +17,6 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.*;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonDeductionDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonIncomeDTO;
 import com.aplana.sbrf.taxaccounting.model.result.NdflPersonPrepaymentDTO;
-import com.querydsl.core.BooleanBuilder;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -41,9 +39,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
-
-import static com.aplana.sbrf.taxaccounting.model.querydsl.QNdflPerson.ndflPerson;
-import static com.querydsl.core.types.Projections.bean;
 
 /**
  * @author Andrey Drunk
@@ -306,9 +301,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         MapSqlParameterSource params = new MapSqlParameterSource("declarationDataId", declarationDataId);
 
-
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(ndflPerson.declarationDataId.eq(declarationDataId));
 
         if (ndflPersonDeductionFilter != null) {
             if (ndflPersonDeductionFilter.getInp() != null) {
@@ -749,8 +741,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 "left join ref_book_person rbp " +
                 "on np.person_id = rbp.id " +
                 "where np.declaration_data_id = :declarationDataId ";
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(ndflPerson.declarationDataId.eq(ndflPersonFilter.getDeclarationDataId()));
 
         StringBuilder queryBuilder = new StringBuilder(query);
 
@@ -1076,21 +1066,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
     }
 
-    class BeanPropertySqlParameterSourceExt extends BeanPropertySqlParameterSource {
-        public BeanPropertySqlParameterSourceExt(Object object) {
-            super(object);
-        }
-
-        @Override
-        public Object getValue(String paramName) throws IllegalArgumentException {
-            Object value = super.getValue(paramName);
-            if (value instanceof LocalDateTime) {
-                value = ((LocalDateTime) value).toDate();
-            }
-            return value;
-        }
-    }
-
     @Override
     public void save(final Collection<NdflPerson> ndflPersons) {
         saveNewObjects(ndflPersons, NdflPerson.TABLE_NAME, NdflPerson.SEQ, NdflPerson.COLUMNS, NdflPerson.FIELDS);
@@ -1156,11 +1131,11 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
     private <E extends IdentityObject> void saveNewObjects(Collection<E> identityObjects, String table, String seq, String[] columns, String[] fields) {
         List<Long> ids = dbUtils.getNextIds(seq, identityObjects.size());
         String insert = createInsert(table, columns, fields);
-        BeanPropertySqlParameterSourceExt[] batchArgs = new BeanPropertySqlParameterSourceExt[identityObjects.size()];
+        BeanPropertySqlParameterSource[] batchArgs = new BeanPropertySqlParameterSource[identityObjects.size()];
         int i = 0;
         for (E identityObject : identityObjects) {
             identityObject.setId(ids.get(i));
-            batchArgs[i] = new BeanPropertySqlParameterSourceExt(identityObject);
+            batchArgs[i] = new BeanPropertySqlParameterSource(identityObject);
             i++;
         }
         getNamedParameterJdbcTemplate().batchUpdate(insert, batchArgs);
@@ -1322,9 +1297,6 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
         for (String paramName : defaultSource.getReadablePropertyNames()) {
             if (fieldsSet.contains(paramName)) {
                 Object value = defaultSource.getValue(paramName);
-                if (value instanceof LocalDateTime) {
-                    value = ((LocalDateTime) value).toDate();
-                }
                 result.addValue(paramName, value);
             }
         }

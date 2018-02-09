@@ -12,7 +12,6 @@
 
     <modules>
         <module>model</module>
-        <module>querydsl</module>
         <module>dao</module>
         <module>service</module>
         <module>gwtapp</module>
@@ -44,7 +43,6 @@
         <java.version>1.7</java.version>
         <releasePostfix>-${project.version}</releasePostfix>
         <releaseName>ndfl${releasePostfix}</releaseName>
-        <querydsl.version>4.1.4</querydsl.version>
         <jackson.version>2.6.5</jackson.version>
         <ttddyy.version>1.4.4</ttddyy.version>
     </properties>
@@ -468,69 +466,6 @@
                 <artifactId>reflections</artifactId>
                 <version>0.9.10</version>
             </dependency>
-
-            <!-- QueryDSL -->
-            <dependency>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-sql</artifactId>
-                <version>${querydsl.version}</version>
-                <exclusions>
-                    <!--
-                        Фикс проблемы с запуском сборки на вебсфере
-                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
-                    -->
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-core</artifactId>
-                <version>${querydsl.version}</version>
-                <exclusions>
-                    <!--
-                        Фикс проблемы с запуском сборки на вебсфере
-                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
-                    -->
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-sql-spring</artifactId>
-                <version>${querydsl.version}</version>
-                <exclusions>
-                    <!--
-                        Фикс проблемы с запуском сборки на вебсфере
-                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
-                    -->
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-sql-codegen</artifactId>
-                <version>${querydsl.version}</version>
-                <exclusions>
-                    <!--
-                        Фикс проблемы с запуском сборки на вебсфере
-                        https://stackoverflow.com/questions/20235435/exception-starting-application-on-webspere-8-5
-                    -->
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
