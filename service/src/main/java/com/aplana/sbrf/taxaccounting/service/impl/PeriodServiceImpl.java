@@ -650,7 +650,12 @@ public class PeriodServiceImpl implements PeriodService {
                 }
             }
         } else {
-            throw new ServiceException("Корректирующий период с датой корректировки " + sdf.get().format(period.getCorrectionDate()) + " не может быть открыт, т.к. существует более поздний корректирующий период!");
+            // если открываемый период существует, последний и закрыт - переоткрываем его
+            if (lastDrp.getCorrectionDate() != null && lastDrp.getCorrectionDate().equals(period.getCorrectionDate())){
+                saveOrOpen(period, getAvailableDepartments(userService.getCurrentUser(), Operation.OPEN), logs);
+            }else {
+                throw new ServiceException("Корректирующий период с датой корректировки " + sdf.get().format(period.getCorrectionDate()) + " не может быть открыт, т.к. существует более поздний корректирующий период!");
+            }
         }
 
         return logEntryService.save(logs);
@@ -658,6 +663,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, int departmentId, Date term) {
+        term = SimpleDateUtils.toStartOfDay(term);
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setDepartmentId(departmentId);
         filter.setReportPeriod(reportPeriod);
@@ -677,7 +683,7 @@ public class PeriodServiceImpl implements PeriodService {
                         return i == drpList.size() - 1 ? PeriodStatusBeforeOpen.OPEN : PeriodStatusBeforeOpen.INVALID;
                     }
                 } else if (period.getCorrectionDate().after(term)) {
-                    return drpLast.isActive() ? PeriodStatusBeforeOpen.CORRECTION_PERIOD_BEFORE_OPEN : PeriodStatusBeforeOpen.INVALID;
+                    return drpLast.isActive() ? PeriodStatusBeforeOpen.EXISTS_OPEN_CORRECTION_PERIOD_BEFORE : PeriodStatusBeforeOpen.INVALID;
 
                 }
             }

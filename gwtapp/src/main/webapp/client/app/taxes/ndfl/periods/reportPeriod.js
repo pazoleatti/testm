@@ -529,7 +529,7 @@
 
                 /**
                  * @description Проверяет на наличие корректирующего периода
-                 * @return признак корректировки
+                 * @return (Promise) признак корректировки
                  */
                 $scope.hasCorrectionPeriod = function () {
                     $scope.hasCorrectionPeriodDefer = $q.defer();

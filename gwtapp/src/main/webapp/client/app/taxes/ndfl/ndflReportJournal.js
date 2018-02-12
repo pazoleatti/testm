@@ -217,9 +217,9 @@
                         url: "controller/actions/declarationData/accept",
                         data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
-                        //Обновить страницу и, если есть сообщения, показать их
-                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                        $state.go($state.current, params, {reload: true});
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 
@@ -233,9 +233,9 @@
                         url: "controller/actions/declarationData/check",
                         data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
-                        //Обновить страницу и, если есть сообщения, показать их
-                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                        $state.go($state.current, params, {reload: true});
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 
@@ -265,9 +265,9 @@
                                 reason: reason
                             }
                         }).then(function (response) {
-                            //Обновить страницу и, если есть сообщения, показать их
-                            var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                            $state.go($state.current, params, {reload: true});
+                            if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.data.uuid);
+                            }
                         });
                     });
                 };
@@ -282,9 +282,9 @@
                         url: "controller/actions/declarationData/downloadReports",
                         data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                     }).then(function (response) {
-                        //Обновить страницу и, если есть сообщения, показать их
-                        var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                        $state.go($state.current, params, {reload: false});
+                        if (response.data && response.data.uuid && response.data.uuid !== null) {
+                            $logPanel.open('log-panel-container', response.data.uuid);
+                        }
                     });
                 };
 
@@ -303,9 +303,9 @@
                                 url: "controller/actions/declarationData/delete",
                                 data: $filter('idExtractor')(selectedItems, 'declarationDataId')
                             }).then(function (response) {
-                                //Обновить страницу и, если есть сообщения, показать их
-                                var params = (response.data && response.data.uuid && response.data.uuid !== null) ? {uuid: response.data.uuid} : {};
-                                $state.go($state.current, params, {reload: true});
+                                if (response.data && response.data.uuid && response.data.uuid !== null) {
+                                    $logPanel.open('log-panel-container', response.data.uuid);
+                                }
                             });
                         }
                     });

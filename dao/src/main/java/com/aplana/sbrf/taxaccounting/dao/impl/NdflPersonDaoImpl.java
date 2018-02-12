@@ -146,36 +146,36 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (ndflPersonIncomeFilter != null) {
             if (ndflPersonIncomeFilter.getInp() != null) {
-                queryBuilder.append("and lower(np.inp) like concat('%', :inp, '%') ");
-                params.addValue("inp", ndflPersonIncomeFilter.getInp());
+                queryBuilder.append("and lower(np.inp) like concat(concat('%', :inp), '%') ");
+                params.addValue("inp", ndflPersonIncomeFilter.getInp().toLowerCase());
             }
             if (ndflPersonIncomeFilter.getOperationId() != null) {
-                queryBuilder.append("and lower(npi.operation_id) like concat('%', :operationId, '%') ");
-                params.addValue("operationId", ndflPersonIncomeFilter.getOperationId());
+                queryBuilder.append("and lower(npi.operation_id) like concat(concat('%', :operationId), '%') ");
+                params.addValue("operationId", ndflPersonIncomeFilter.getOperationId().toLowerCase());
             }
             if (ndflPersonIncomeFilter.getKpp() != null) {
-                queryBuilder.append("and lower(npi.kpp) like concat('%', :kpp, '%') ");
-                params.addValue("kpp", ndflPersonIncomeFilter.getKpp());
+                queryBuilder.append("and lower(npi.kpp) like concat(concat('%', :kpp), '%') ");
+                params.addValue("kpp", ndflPersonIncomeFilter.getKpp().toLowerCase());
             }
             if (ndflPersonIncomeFilter.getOktmo() != null) {
-                queryBuilder.append("and lower(npi.oktmo) like concat('%', :oktmo, '%') ");
-                params.addValue("oktmo", ndflPersonIncomeFilter.getOktmo());
+                queryBuilder.append("and lower(npi.oktmo) like concat(concat('%', :oktmo), '%') ");
+                params.addValue("oktmo", ndflPersonIncomeFilter.getOktmo().toLowerCase());
             }
             if (ndflPersonIncomeFilter.getIncomeCode() != null) {
-                queryBuilder.append("and lower(npi.income_code) like concat('%', :incomeCode, '%') ");
-                params.addValue("incomeCode", ndflPersonIncomeFilter.getIncomeCode());
+                queryBuilder.append("and lower(npi.income_code) like concat(concat('%', :incomeCode), '%') ");
+                params.addValue("incomeCode", ndflPersonIncomeFilter.getIncomeCode().toLowerCase());
             }
             if (ndflPersonIncomeFilter.getIncomeAttr() != null) {
-                queryBuilder.append("and lower(npi.income_type) like concat('%', :incomeType, '%') ");
-                params.addValue("incomeType", ndflPersonIncomeFilter.getIncomeAttr());
+                queryBuilder.append("and lower(npi.income_type) like concat(concat('%', :incomeType), '%') ");
+                params.addValue("incomeType", ndflPersonIncomeFilter.getIncomeAttr().toLowerCase());
             }
             if (ndflPersonIncomeFilter.getTaxRate() != null) {
                 queryBuilder.append("and npi.tax_rate = :taxRate ");
                 params.addValue("taxRate", Integer.valueOf(ndflPersonIncomeFilter.getTaxRate()));
             }
             if (ndflPersonIncomeFilter.getNumberPaymentOrder() != null) {
-                queryBuilder.append("and lower(npi.payment_number) like concat('%', :paymentNumber, '%') ");
-                params.addValue("paymentNumber", ndflPersonIncomeFilter.getNumberPaymentOrder());
+                queryBuilder.append("and lower(npi.payment_number) like concat(concat('%', :paymentNumber), '%') ");
+                params.addValue("paymentNumber", ndflPersonIncomeFilter.getNumberPaymentOrder().toLowerCase());
             }
             if (ndflPersonIncomeFilter.getTransferDateFrom() != null) {
                 queryBuilder.append("and (npi.tax_transfer_date is null or npi.tax_transfer_date >= trunc(:taxTransferDateFrom)) ");
@@ -304,20 +304,20 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (ndflPersonDeductionFilter != null) {
             if (ndflPersonDeductionFilter.getInp() != null) {
-                queryBuilder.append("and lower(np.inp) like concat('%', :inp, '%') ");
-                params.addValue("inp", ndflPersonDeductionFilter.getInp());
+                queryBuilder.append("and lower(np.inp) like concat(concat('%', :inp), '%') ");
+                params.addValue("inp", ndflPersonDeductionFilter.getInp().toLowerCase());
             }
             if (ndflPersonDeductionFilter.getOperationId() != null) {
-                queryBuilder.append("and lower(npd.operation_id) like concat('%', :operationId, '%') ");
-                params.addValue("operationId", ndflPersonDeductionFilter.getOperationId());
+                queryBuilder.append("and lower(npd.operation_id) like concat(concat('%', :operationId), '%') ");
+                params.addValue("operationId", ndflPersonDeductionFilter.getOperationId().toLowerCase());
             }
             if (ndflPersonDeductionFilter.getDeductionCode() != null) {
-                queryBuilder.append("and lower(npd.type_code) like concat('%', :typeCode, '%') ");
-                params.addValue("typeCode", ndflPersonDeductionFilter.getDeductionCode());
+                queryBuilder.append("and lower(npd.type_code) like concat(concat('%', :typeCode), '%') ");
+                params.addValue("typeCode", ndflPersonDeductionFilter.getDeductionCode().toLowerCase());
             }
             if (ndflPersonDeductionFilter.getIncomeCode() != null) {
-                queryBuilder.append("and lower(npd.income_code) like concat('%', :incomeCode, '%') ");
-                params.addValue("incomeCode", ndflPersonDeductionFilter.getIncomeCode());
+                queryBuilder.append("and lower(npd.income_code) like concat(concat('%', :incomeCode), '%') ");
+                params.addValue("incomeCode", ndflPersonDeductionFilter.getIncomeCode().toLowerCase());
             }
             if (ndflPersonDeductionFilter.getCalculationDateFrom() != null) {
                 queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued >= trunc(:calculationDateFrom)) ");
@@ -424,19 +424,19 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (ndflPersonPrepaymentFilter != null) {
             if (ndflPersonPrepaymentFilter.getInp() != null) {
-                queryBuilder.append("and lower(np.inp) like concat('%', :inp, '%') ");
-                params.addValue("inp", ndflPersonPrepaymentFilter.getInp());
+                queryBuilder.append("and lower(np.inp) like concat(concat('%', :inp), '%') ");
+                params.addValue("inp", ndflPersonPrepaymentFilter.getInp().toLowerCase());
             }
             if (ndflPersonPrepaymentFilter.getOperationId() != null) {
-                queryBuilder.append("and lower(npp.operation_id) like concat('%', :operationId, '%') ");
-                params.addValue("operationId", ndflPersonPrepaymentFilter.getOperationId());
+                queryBuilder.append("and lower(npp.operation_id) like concat(concat('%', :operationId), '%') ");
+                params.addValue("operationId", ndflPersonPrepaymentFilter.getOperationId().toLowerCase());
             }
             if (ndflPersonPrepaymentFilter.getNotifNum() != null) {
-                queryBuilder.append("and lower(npp.notif_num) like concat('%', :notifNum, '%') ");
-                params.addValue("notifNum", ndflPersonPrepaymentFilter.getNotifNum());
+                queryBuilder.append("and lower(npp.notif_num) like concat(concat('%', :notifNum), '%') ");
+                params.addValue("notifNum", ndflPersonPrepaymentFilter.getNotifNum().toLowerCase());
             }
             if (ndflPersonPrepaymentFilter.getNotifSource() != null) {
-                queryBuilder.append("and lower(npp.notif_source) like concat('%', :notifSource, '%') ");
+                queryBuilder.append("and lower(npp.notif_source) like concat(concat('%', :notifSource), '%') ");
                 params.addValue("notifSource", ndflPersonPrepaymentFilter.getNotifSource().toLowerCase());
             }
             if (ndflPersonPrepaymentFilter.getNotifDateFrom() != null) {
@@ -748,35 +748,35 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
 
         if (ndflPersonFilter != null) {
             if (ndflPersonFilter.getInp() != null) {
-                queryBuilder.append("and lower(np.inp) like concat('%', :inp, '%') ");
+                queryBuilder.append("and lower(np.inp) like concat(concat('%', :inp), '%') ");
                 params.addValue("inp", ndflPersonFilter.getInp().toLowerCase());
             }
             if (ndflPersonFilter.getInnNp() != null) {
-                queryBuilder.append("and lower(np.inn_np) like concat('%', :innNp, '%') ");
+                queryBuilder.append("and lower(np.inn_np) like concat(concat('%', :innNp), '%') ");
                 params.addValue("innNp", ndflPersonFilter.getInnNp().toLowerCase());
             }
             if (ndflPersonFilter.getInnForeign() != null) {
-                queryBuilder.append("and lower(np.inn_foreign) like concat('%', :innForeign, '%') ");
+                queryBuilder.append("and lower(np.inn_foreign) like concat(concat('%', :innForeign), '%') ");
                 params.addValue("innForeign", ndflPersonFilter.getInnForeign().toLowerCase());
             }
             if (ndflPersonFilter.getSnils() != null) {
-                queryBuilder.append("and lower(np.snils) like concat('%', :snils, '%') ");
+                queryBuilder.append("and lower(np.snils) like concat(concat('%', :snils), '%') ");
                 params.addValue("snils", ndflPersonFilter.getSnils().toLowerCase());
             }
             if (ndflPersonFilter.getIdDocNumber() != null) {
-                queryBuilder.append("and lower(np.id_doc_number) like concat('%', :idDocNumber, '%') ");
+                queryBuilder.append("and lower(np.id_doc_number) like concat(concat('%', :idDocNumber), '%') ");
                 params.addValue("idDocNumber", ndflPersonFilter.getIdDocNumber().toLowerCase());
             }
             if (ndflPersonFilter.getLastName() != null) {
-                queryBuilder.append("and lower(np.last_name) like concat('%', :lastName, '%') ");
+                queryBuilder.append("and lower(np.last_name) like concat(concat('%', :lastName), '%') ");
                 params.addValue("lastName", ndflPersonFilter.getLastName().toLowerCase());
             }
             if (ndflPersonFilter.getFirstName() != null) {
-                queryBuilder.append("and lower(np.first_name) like concat('%', :firstName, '%') ");
+                queryBuilder.append("and lower(np.first_name) like concat(concat('%', :firstName), '%') ");
                 params.addValue("firstName", ndflPersonFilter.getFirstName().toLowerCase());
             }
             if (ndflPersonFilter.getMiddleName() != null) {
-                queryBuilder.append("and lower(np.middle_name) like concat('%', :middleName, '%') ");
+                queryBuilder.append("and lower(np.middle_name) like concat(concat('%', :middleName), '%') ");
                 params.addValue("middleName", ndflPersonFilter.getMiddleName().toLowerCase());
             }
             if (ndflPersonFilter.getDateFrom() != null) {
