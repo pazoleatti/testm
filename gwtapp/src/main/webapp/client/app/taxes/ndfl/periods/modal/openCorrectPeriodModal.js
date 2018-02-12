@@ -10,8 +10,8 @@
     /**
      * @description  Контроллер модального окна открытия корректирующего перода
      */
-        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter', 'APP_CONSTANTS',
-            function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter, APP_CONSTANTS) {
+        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter', 'APP_CONSTANTS', '$rootScope',
+            function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter, APP_CONSTANTS, $rootScope) {
 
                 $scope.department = $shareData.department;
                 $scope.departmentReportPeriod = angular.copy($shareData.period);
@@ -44,36 +44,46 @@
                                 })
                             }
                         }).then(function (status) {
-                            if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_LAST_OPEN) {
-                                $dialogs.errorDialog({
-                                    content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.last.text', {
-                                        correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
-                                    })
-                                });
-                            } else if (status.data && status.data === APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_BEFORE_OPEN) {
-                                $dialogs.errorDialog({
-                                    content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.before.text', {
-                                        correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
-                                    })
-                                });
-                            } else {
-                                $http({
-                                    method: "POST",
-                                    url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
-                                    params: {
-                                        departmentReportPeriod: JSON.stringify({
-                                            id: $scope.departmentReportPeriod.id,
-                                            reportPeriod: $scope.correctPeriod.reportPeriod,
-                                            correctionDate: $scope.departmentReportPeriod.correctionDate,
-                                            departmentId: $scope.department.id
-                                        })
-                                    }
-                                }).then(function (response) {
-                                    if (response.data) {
-                                        $logPanel.open('log-panel-container', response.data);
-                                        $modalInstance.close();
-                                    }
-                                });
+                            if (status.data){
+                                switch (status.data){
+                                    case APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_LAST_OPEN:
+                                        $dialogs.errorDialog({
+                                            content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.last.text', {
+                                                correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
+                                            })
+                                        });
+                                        break;
+                                    case APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_BEFORE_OPEN:
+                                        $dialogs.errorDialog({
+                                            content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.before.text', {
+                                                correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
+                                            })
+                                        });
+                                        break;
+                                    case APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE:
+                                        var aaa = $dialogs.confirmDialog({
+                                            title: $filter('translate')('reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.title'),
+                                            content: $filter('translate')('reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.text', {
+                                                correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
+                                            }),
+                                            okBtnCaption: $filter('translate')('common.button.yes'),
+                                            cancelBtnCaption: $filter('translate')('common.button.no'),
+                                            okBtnClick: function () {
+                                                aaa.close();
+                                                $scope.openCorrectPeriod();
+                                            }
+                                        });
+                                        break;
+                                    case APP_CONSTANTS.REPORT_PERIOD_STATUS.OPEN:
+                                        $dialogs.errorDialog({
+                                            content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.alreadyOpen.text', {
+                                                correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
+                                            })
+                                        });
+                                        break;
+                                    default:
+                                        $scope.openCorrectPeriod();
+                                }
                             }
                         });
                     } else {
@@ -94,6 +104,29 @@
                         cancelBtnCaption: $filter('translate')('common.button.no'),
                         okBtnClick: function () {
                             $modalInstance.dismiss();
+                        }
+                    });
+                };
+
+                /**
+                 * @description метод, выполняющий запрос на сервер для открытия коррекционного периода
+                 */
+                $scope.openCorrectPeriod = function () {
+                    $http({
+                        method: "POST",
+                        url: "controller/actions/departmentReportPeriod/openCorrectPeriod",
+                        params: {
+                            departmentReportPeriod: JSON.stringify({
+                                id: $scope.departmentReportPeriod.id,
+                                reportPeriod: $scope.correctPeriod.reportPeriod,
+                                correctionDate: $scope.departmentReportPeriod.correctionDate,
+                                departmentId: $scope.department.id
+                            })
+                        }
+                    }).then(function (response) {
+                        if (response.data) {
+                            $logPanel.open('log-panel-container', response.data);
+                            $modalInstance.close();
                         }
                     });
                 };
