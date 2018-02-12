@@ -39,8 +39,10 @@ public abstract class AbstractPermission<T> implements Permission<T> {
     /**
      * Внутренняя проверка права заданного пользователю на объект.
      *
-     * @param user               пользователь, для которого проверяется право
-     * @param targetDomainObject объект, для которого проверяется право
+     * @param user                  пользователь, для которого проверяется право
+     * @param targetDomainObject    объект, для которого проверяется право
+     * @param logger                объект {@link com.aplana.sbrf.taxaccounting.model.log.Logger} для записи результата,
+     *                              может быть {@code null} если не требуется логгирование
      * @return {@code true}, если у пользователя есть право на объект; {@code false} в противном случае
      */
     protected abstract boolean isGrantedInternal(User user, T targetDomainObject, Logger logger);

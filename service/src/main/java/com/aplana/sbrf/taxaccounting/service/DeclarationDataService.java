@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.result.*;
-import com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer;
+import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 
@@ -60,22 +60,22 @@ public interface DeclarationDataService {
     /**
      * Идентифицировать ФЛ
      *
-     * @param loggerIdTransfer   объект журнала
+     * @param targetIdAndLogger   объект журнала
      * @param userInfo                          информация о пользователе, выполняющего операцию
      * @param docDate                           дата обновления декларации
      * @param stateLogger                       логгер для обновления статуса асинхронной задачи
      */
-    void identify(LoggerIdTransfer loggerIdTransfer, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
+    void identify(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
     /**
      * Консолидировать НФ
      *
-     * @param loggerIdTransfer   объект журнала
+     * @param targetIdAndLogger   объект журнала
      * @param userInfo                          информация о пользователе, выполняющего операцию
      * @param docDate                           дата обновления декларации
      * @param stateLogger                       логгер для обновления статуса асинхронной задачи
      */
-    void consolidate(LoggerIdTransfer loggerIdTransfer, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
+    void consolidate(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger);
 
     /**
      * Формирование Pdf отчета

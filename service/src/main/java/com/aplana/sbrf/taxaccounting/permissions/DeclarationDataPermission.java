@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -82,20 +81,20 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
      */
     public static final Permission<DeclarationData> CONSOLIDATE = new ConsolidatePermission(1 << 12);
 
-    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("dd.MM.yyyy");
+    private static final String DATE_FORMAT = "dd.MM.yyyy";
 
     public DeclarationDataPermission(long mask) {
         super(mask);
     }
 
-    private String getCorrPeriodMessage(DepartmentReportPeriod departmentReportPeriod) {
-        String result = "";
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            result = ", с датой сдачи корректировки " + FORMATTER.format(departmentReportPeriod.getCorrectionDate());
-        }
-        return result;
-    }
-
+    /**
+     * Добавляет в логгер ошибку о недопустимом типе формы
+     * @param departmentReportPeriod    отчетный период подразделения
+     * @param operationName             название операции
+     * @param declarationData           налоговая форма
+     * @param declarationFormKind       тип налоговой формы
+     * @param logger                    объект для логгирования информации
+     */
     protected void logFormKindError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                     DeclarationData declarationData, DeclarationFormKind declarationFormKind, Logger logger) {
         if (logger != null) {
@@ -104,7 +103,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "подразделение \"%s\". %s не допустима для форм типа \"%s\".",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
                     department.getName(),
                     operationName,
                     declarationFormKind.getTitle());
@@ -112,6 +111,13 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
 
     }
 
+    /**
+     * Добавляет в логгер ошибку о закрытом периоде
+     * @param departmentReportPeriod    отчетный период подразделения
+     * @param operationName             название операции
+     * @param declarationData           налоговая форма
+     * @param logger                    объект для логгирования информации
+     */
     protected void logPeriodError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                   DeclarationData declarationData, Logger logger) {
         if (logger != null) {
@@ -120,12 +126,19 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             " подразделение \"%s\". Период формы закрыт.",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
                     department.getName());
         }
 
     }
 
+    /**
+     *  Добавляет в логгер ошибку о недопустимом состоянии
+     * @param departmentReportPeriod    отчетный период подразделения
+     * @param operationName             название операции
+     * @param declarationData           налоговая форма
+     * @param logger                    объект для логгирования информации
+     */
     protected void logStateError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                  DeclarationData declarationData, Logger logger) {
         if (logger != null) {
@@ -134,13 +147,20 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "подразделение: \"%s\". %s не допустима для форм в состоянии \"%s\".",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
                     department.getName(),
                     operationName,
                     declarationData.getState().getTitle());
         }
     }
 
+    /**
+     *  Добавляет в логгер ошибку о недостаточности прав для выполнения операции
+     * @param departmentReportPeriod    отчетный период подразделения
+     * @param operationName             название операции
+     * @param declarationData           налоговая форма
+     * @param logger                    объект для логгирования информации
+     */
     protected void logCredentialsError(DepartmentReportPeriod departmentReportPeriod, String operationName,
                                        DeclarationData declarationData, Logger logger) {
         if (logger != null) {
@@ -149,7 +169,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "период: \"%s\", подразделение \"%s\". Недостаточно прав для выполнения операции.",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + getCorrPeriodMessage(departmentReportPeriod),
+                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
                     department.getName());
         }
     }
