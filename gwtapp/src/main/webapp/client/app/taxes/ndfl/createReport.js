@@ -50,7 +50,7 @@
                             departmentId: $scope.reportData.department.id,
                             periodId: $scope.reportData.period.id
                         }
-                    }).then(function (response) {
+                    }).finally(function (response) {
                         $modalInstance.close(response);
                     });
                 };
