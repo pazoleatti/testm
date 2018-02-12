@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
 import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
 import com.aplana.sbrf.taxaccounting.permissions.Permission;
-import com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer;
+import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
@@ -394,16 +394,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#loggerIdTransfer, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IDENTIFY)")
-    public void identify(LoggerIdTransfer loggerIdTransfer, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        calculate(loggerIdTransfer.getLogger(), loggerIdTransfer.getDeclarationDataId(),
+    @PreAuthorize("hasPermission(#targetIdAndLogger, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).IDENTIFY)")
+    public void identify(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        calculate(targetIdAndLogger.getLogger(), targetIdAndLogger.getId(),
                 userInfo, docDate, exchangeParams, stateLogger);
     }
 
     @Override
-    @PreAuthorize("hasPermission(#loggerIdTransfer, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CONSOLIDATE)")
-    public void consolidate(LoggerIdTransfer loggerIdTransfer, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
-        calculate(loggerIdTransfer.getLogger(), loggerIdTransfer.getDeclarationDataId(),
+    @PreAuthorize("hasPermission(#targetIdAndLogger, 'com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer', T(com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission).CONSOLIDATE)")
+    public void consolidate(TargetIdAndLogger targetIdAndLogger, TAUserInfo userInfo, Date docDate, Map<String, Object> exchangeParams, LockStateLogger stateLogger) {
+        calculate(targetIdAndLogger.getLogger(), targetIdAndLogger.getId(),
                 userInfo, docDate, exchangeParams, stateLogger);
     }
 
@@ -569,8 +569,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 final String prefix = String.format("Постановка операции \"Расчет налоговой формы\" для формы № %d в очередь на исполнение: ", declarationDataId);
                 try {
                     if (permissionEvaluator.hasPermission(SecurityContextHolder.getContext().getAuthentication(),
-                            new LoggerIdTransfer(declarationDataId, logger),
-                            "com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer", permission)) {
+                            new TargetIdAndLogger(declarationDataId, logger),
+                            "com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger", permission)) {
                         try {
                             preCalculationCheck(logger, declarationDataId, userInfo);
                         } catch (Exception e) {

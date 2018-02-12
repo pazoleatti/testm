@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -87,5 +88,20 @@ public class DepartmentReportPeriod implements Serializable, SecuredEntity {
 
 	public void setIsActive(boolean active) {
 		this.isActive = active;
+	}
+
+	/**
+	 * Формирует сообщение о корректировочном периоде
+	 * @param formatExp	шаблон форматирования даты
+	 * @return строка с сообщением о корректировочномм приоде, если период не корректировочный возвращается пустая
+	 * строка
+	 */
+	public String createCorrPeriodMessage(String formatExp) {
+		String result = "";
+		SimpleDateFormat formatter = new SimpleDateFormat(formatExp);
+		if (this.getCorrectionDate() != null) {
+			result = ", с датой сдачи корректировки " + formatter.format(this.getCorrectionDate());
+		}
+		return result;
 	}
 }

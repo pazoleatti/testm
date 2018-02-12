@@ -2,8 +2,9 @@ package com.aplana.sbrf.taxaccounting.permissions;
 
 import com.aplana.sbrf.taxaccounting.dao.PermissionDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.PermissionDaoFactory;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
-import com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer;
+import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.ClassUtils;
@@ -129,9 +130,11 @@ public class BasePermissionEvaluator implements PermissionEvaluator {
 
             return result;
         }
-        if (targetClass.getName().equals("com.aplana.sbrf.taxaccounting.permissions.logging.LoggerIdTransfer")) {
-                logger = ((LoggerIdTransfer) target).getLogger();
-                return hasPermissionSingleId(authentication, ((LoggerIdTransfer)target).getDeclarationDataId(), "com.aplana.sbrf.taxaccounting.model.DeclarationData", permission, logger);
+        if (targetClass.equals(TargetIdAndLogger.class)) {
+            logger = ((TargetIdAndLogger) target).getLogger();
+            PermissionDao permissionDao = permissionDaoFactory.getPermissionDao(DeclarationData.class);
+            SecuredEntity targetDomainObject = permissionDao.getSecuredEntity(((TargetIdAndLogger) target).getId());
+            return hasPermissionSingle(authentication, targetDomainObject, permission, logger);
         } else {
             return hasPermissionSingleId(authentication, target, targetType, permission, logger);
         }
