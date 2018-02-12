@@ -678,4 +678,13 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3436 -->
+    <changeSet id="2.2-ytrofimov-46" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/report.jrxml"/>
+            <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -9266,7 +9266,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{НачислДохДив}.charAt(6)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{НачислДохДив}.charAt(5)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="406" y="79" width="14" height="19" isPrintWhenDetailOverflows="true" uuid="bab73465-90e2-4e49-a2c9-9cc9e5bb50af"/>
@@ -9350,7 +9350,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{НачислДохДив}.charAt(5)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{НачислДохДив}.charAt(6)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="336" y="79" width="14" height="19" isPrintWhenDetailOverflows="true" uuid="07ff3384-ae5a-4b3d-8804-cba764391a31"/>
