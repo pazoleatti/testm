@@ -601,6 +601,7 @@
         "createReport.period": "Период",
         "createReport.department": "Подразделение",
         "createReport.reportType": "Вид отчетности",
+        "createReport.correctionMessage": "Отчетности будут созданы в корректирующем периоде, дата сдачи корректировки: ",
 
         "createDeclaration.title": "Создание налоговой формы",
         "createDeclaration.period": "Период",

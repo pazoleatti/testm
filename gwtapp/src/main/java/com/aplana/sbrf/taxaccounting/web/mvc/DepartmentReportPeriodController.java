@@ -86,6 +86,17 @@ public class DepartmentReportPeriodController {
     }
 
     /**
+     * Получение последнего отчетного периода подразделения по ID подразделения и ID отчетного периода
+     * @param departmentId ID подразделения
+     * @param reportPeriodId ID отчетного периода
+     * @return Последний отчетный период подразделения
+     */
+    @GetMapping(value = "/rest/departmentReportPeriod",  params = "projection=fetchLast")
+    public DepartmentReportPeriod fetchLastPeriod(int departmentId, int reportPeriodId) {
+        return departmentReportPeriodService.fetchLast(departmentId, reportPeriodId);
+    }
+
+    /**
      * Устанавливает права на каждый элемент страницы списка периодов {@link DepartmentReportPeriodJournalItem}
      *
      * @param page страница с установленными правами на элементы периодов
