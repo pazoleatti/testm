@@ -886,5 +886,15 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3574 Оптимизация процедур идентификации-->
+    <changeSet id="2.2-rnurgaleev-9" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body6.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
 </databaseChangeLog>
