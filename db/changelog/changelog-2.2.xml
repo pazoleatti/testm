@@ -677,5 +677,205 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3524 Обновить данные справочников кодов видов дохода и вычетов по НДФЛ-->
+	
+	<changeSet id="2.2-rnurgaleev-8" author="rnurgaleev">
+        <sql splitStatements="false">
+            begin
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1532' and status=0 order by version desc) where rownum=1),'01','Начисление дохода при выводе денежных средств с брокерского счёта');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1532' and status=0 order by version desc) where rownum=1),'02','Начисление дохода при выводе ценных бумаг с торгового раздела счёта депо');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1532' and status=0 order by version desc) where rownum=1),'03','Начисление дохода при расторжении договора брокерского обслуживания');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1532' and status=0 order by version desc) where rownum=1),'04','Начисление дохода по окончанию налогового периода за который начислен доход');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1),'05','Процентная надбавка');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1),'06','Процентная надбавка при увольнении');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1),'07','Разовая премия');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1),'08','Ежемесячная премия');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1),'09','Ежеквартальная премия');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1),'10','Премия по итогам года');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2013' and status=0 order by version desc) where rownum=1),'13','Выплата дохода в денежной форме');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2014' and status=0 order by version desc) where rownum=1),'13','Выплата дохода в денежной форме');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2520' and status=0 order by version desc) where rownum=1),'13','Выплата дохода в денежной форме');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1),'00','-');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2301' and status=0 order by version desc) where rownum=1),'00','-');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='2611' and status=0 order by version desc) where rownum=1),'00','-');
+
+				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
+				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='3023' and status=0 order by version desc) where rownum=1),'00','-');
+				
+				delete from REF_BOOK_INCOME_KIND where
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) and mark='01')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1545' and status=0 order by version desc) where rownum=1) and mark='01')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) and mark='01')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1547' and status=0 order by version desc) where rownum=1) and mark='01')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) and mark='01')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1549' and status=0 order by version desc) where rownum=1) and mark='01')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1) and mark='01')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) and mark='02')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1545' and status=0 order by version desc) where rownum=1) and mark='02')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) and mark='02')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1547' and status=0 order by version desc) where rownum=1) and mark='02')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) and mark='02')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1549' and status=0 order by version desc) where rownum=1) and mark='02')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1) and mark='02')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) and mark='03')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1545' and status=0 order by version desc) where rownum=1) and mark='03')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) and mark='03')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1547' and status=0 order by version desc) where rownum=1) and mark='03')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) and mark='03')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1549' and status=0 order by version desc) where rownum=1) and mark='03')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1) and mark='03')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) and mark='04')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1545' and status=0 order by version desc) where rownum=1) and mark='04')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1546' and status=0 order by version desc) where rownum=1) and mark='04')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1547' and status=0 order by version desc) where rownum=1) and mark='04')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1548' and status=0 order by version desc) where rownum=1) and mark='04')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1549' and status=0 order by version desc) where rownum=1) and mark='04')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1552' and status=0 order by version desc) where rownum=1) and mark='04')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2000' and status=0 order by version desc) where rownum=1) and mark='07')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2000' and status=0 order by version desc) where rownum=1) and mark='08')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2000' and status=0 order by version desc) where rownum=1) and mark='09')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2000' and status=0 order by version desc) where rownum=1) and mark='10')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2003' and status=0 order by version desc) where rownum=1) and mark='13')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1120' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1200' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1201' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1202' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1203' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1211' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1212' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1213' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1215' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1219' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1220' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1240' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1300' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1301' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1532' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1538' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1540' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1550' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1553' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2201' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2202' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2203' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2204' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2205' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2206' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2207' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2208' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2209' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2210' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2400' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2510' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2530' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2630' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2730' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='2761' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='3010' and status=0 order by version desc) where rownum=1) and mark='00')
+				or
+				(income_type_id=(select id from (select id,version from ref_book_income_type where code='3022' and status=0 order by version desc) where rownum=1) and mark='00');
+			end;
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
