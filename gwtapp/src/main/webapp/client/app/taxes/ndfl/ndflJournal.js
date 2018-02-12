@@ -151,7 +151,7 @@
                         disableAutoLoad: true,
                         ondblClickRow: function (rowId) {
                             $state.go("ndfl", {
-                                declarationId: rowId
+                                declarationDataId: rowId
                             });
                         }
                     }
