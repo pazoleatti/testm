@@ -31,11 +31,10 @@
                                        data-ng-model="searchFilter.params.yearStart"
                                        id="searchfilter_params_yearstart"
                                        name="searchfilter_params_yearstart"
-                                       data-ng-required="true"
+                                       data-required
                                        max="2099"
-                                       min="1900"
-                                />
-                                <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                       min="1900"/>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key='min'>
@@ -61,11 +60,10 @@
                                        data-ng-model="searchFilter.params.yearEnd"
                                        id="searchfilter_params_yearend"
                                        name="searchfilter_params_yearend"
-                                       data-ng-required="true"
+                                       data-required
                                        max="2099"
-                                       min="1900"
-                                />
-                                <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                                       min="1900"/>
+                                <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                     translate}}
                                 </div>
                                 <div data-aplana-validator data-key='min'>
@@ -85,8 +83,7 @@
                         <td>
                             <button type="submit"
                                     class="btn btn-default"
-                                    id="searchButton"
-                                    style="width: 83px;text-align: center;">
+                                    id="searchButton">
                                 <span data-translate-once="common.button.search"></span>
                             </button>
                         </td>

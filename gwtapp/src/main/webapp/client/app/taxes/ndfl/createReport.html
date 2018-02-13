@@ -13,9 +13,9 @@
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
                              data-ng-model="reportData.period"
-                             data-ng-required="true">
+                             data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>
@@ -33,9 +33,9 @@
                                  data-ui-select2="departmentsSelect.options"
                                  data-ng-init="initActiveAvailableTBSelect('reportData.period',userTBDepartment)"
                                  data-ng-model="reportData.department"
-                                 data-ng-required="true">
+                                 data-required>
                             </div>
-                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                 translate}}
                             </div>
                         </div>
@@ -55,9 +55,9 @@
                                  data-ui-select2="declarationTypeSelect.options"
                                  data-ng-model="reportData.declarationType"
                                  data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
-                                 data-ng-required="true">
+                                 data-required>
                             </div>
-                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                 translate}}
                             </div>
                         </div>

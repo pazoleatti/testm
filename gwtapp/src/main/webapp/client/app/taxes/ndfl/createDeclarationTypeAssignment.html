@@ -1,11 +1,12 @@
-<div class="modal-body" style="min-height: 150px">
-    <div class="form-horizontal" data-ng-form="createDeclarationTypeAssignment">
+<form class="form-horizontal" name="createDeclarationTypeAssignment" data-aplana-submit-valid="save()">
+    <div class="modal-body" style="min-height: 150px">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
                style="height: 100px;">
             <tbody>
             <tr>
                 <td>
-                    <label class="control-label">{{::'declarationTypeAssignment.modal.field.department' | translate}}:</label>
+                    <label class="control-label">{{::'declarationTypeAssignment.modal.field.department' |
+                        translate}}:</label>
                 </td>
                 <td>
                     <div data-aplana-field id="field-outer">
@@ -14,9 +15,11 @@
                              data-ui-select2="departmentsSelect.options"
                              data-ng-init="initSelectWithBADepartments()"
                              data-ng-model="assignmentData.departments"
-                             data-ng-required="true">
+                             class="required"
+                             data-ui-validate="{requiredMultiple : 'assignmentData.departments.length>0'}"
+                             data-ui-validate-watch="['assignmentData.departments']">
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='requiredMultiple'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>
@@ -34,9 +37,11 @@
                              data-ui-select2="declarationTypeSelect.options"
                              data-ng-init="initSelectWithTaxAndReportDeclarationTypes()"
                              data-ng-model="assignmentData.declarationTypes"
-                             data-ng-required="true">
+                             class="required"
+                             data-ui-validate="{requiredMultiple : 'assignmentData.declarationTypes.length>0'}"
+                             data-ui-validate-watch="['assignmentData.declarationTypes']">
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='requiredMultiple'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>
@@ -54,7 +59,12 @@
                              data-ui-select2="departmentsSelect.options"
                              data-ng-init="initSelectWithDestinationDepartments()"
                              data-ng-model="assignmentData.performers"
-                             data-ng-required="false">
+                             class="required"
+                             data-ui-validate="{requiredMultiple : 'assignmentData.performers.length>0'}"
+                             data-ui-validate-watch="['assignmentData.performers']">
+                        </div>
+                        <div data-aplana-validator data-key='requiredMultiple'>{{::'common.validation.required' |
+                            translate}}
                         </div>
                     </div>
                 </td>
@@ -62,14 +72,14 @@
             </tbody>
         </table>
     </div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-default iconed-btn" id="saveButton" data-ng-click="save()" data-ng-disabled="!requiredFieldsAreFilled()">
-        <span data-translate-once="button.create"></span>
-        <span class="btn-icon-ok"></span>
-    </button>
-    <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
-        <span data-translate-once="button.close"></span>
-        <span class="btn-icon-noneBg-close"></span>
-    </button>
-</div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn" id="saveButton">
+            <span data-translate-once="button.create"></span>
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="closeButton" data-ng-click="close()">
+            <span data-translate-once="button.close"></span>
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>
