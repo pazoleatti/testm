@@ -911,7 +911,8 @@ button.btn.btn-default:hover:not([disabled]):hover,
   border: 1px solid rgba(255,255,255,0);;
   box-shadow: none;
 }
-button.btn.btn-default-nonBg:hover:not([disabled]):hover{
+button.btn.btn-default-nonBg:hover:not([disabled]):hover,
+a.btn.btn-default-nonBg:hover:not([disabled]):hover{
   color: @greenDarker;
   border: 1px solid @greenDarker;
 }
@@ -1056,3 +1057,6 @@ button.btn-default-close-green::before{
 .btn-default-nonBg:disabled .btn-icon-noneBg-add {
   background-position: 0 -165px;
 }
+  .btn-icon-noneBg-add {
+    background-position: 0 -100px;
+  }

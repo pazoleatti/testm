@@ -1,5 +1,5 @@
-<div class="modal-body">
-    <div class="form-horizontal" data-ng-form="createReportForm">
+<form class="form-horizontal" name="createReportForm" data-aplana-submit-valid="save()">
+    <div class="modal-body">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
                style="height: 100px;">
             <tbody>
@@ -13,9 +13,9 @@
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
                              data-ng-model="reportData.period"
-                             data-ng-required="true">
+                             data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>
@@ -33,9 +33,9 @@
                                  data-ui-select2="departmentsSelect.options"
                                  data-ng-init="initActiveAvailableTBSelect('reportData.period',userTBDepartment)"
                                  data-ng-model="reportData.department"
-                                 data-ng-required="true">
+                                 data-required>
                             </div>
-                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                 translate}}
                             </div>
                         </div>
@@ -55,9 +55,9 @@
                                  data-ui-select2="declarationTypeSelect.options"
                                  data-ng-model="reportData.declarationType"
                                  data-ng-init="initSelectWithReportDeclarationTypesForCreate(reportFormKind, 'reportData.period', 'reportData.department')"
-                                 data-ng-required="true">
+                                 data-required>
                             </div>
-                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                 translate}}
                             </div>
                         </div>
@@ -67,16 +67,17 @@
             </tbody>
         </table>
 
-        <label data-ng-show="correctionPeriod">{{::'createReport.correctionMessage' | translate}} {{correctionDate | dateFormatter}}</label>
+        <label data-ng-show="correctionPeriod">{{::'createReport.correctionMessage' | translate}} {{correctionDate |
+            dateFormatter}}</label>
     </div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-default iconed-btn" ng-click="save()">
-        {{"DIALOGS_CREATE" | translate}}
-        <span class="btn-icon-ok"></span>
-    </button>
-    <button type="button" class="btn btn-default-nonBg iconed-btn" id="cancelButton" ng-click="cancel()">
-        {{"DIALOGS_CLOSE" | translate}}
-        <span class="btn-icon-noneBg-close"></span>
-    </button>
-</div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-default iconed-btn">
+            {{"DIALOGS_CREATE" | translate}}
+            <span class="btn-icon-ok"></span>
+        </button>
+        <button type="button" class="btn btn-default-nonBg iconed-btn" id="cancelButton" ng-click="cancel()">
+            {{"DIALOGS_CLOSE" | translate}}
+            <span class="btn-icon-noneBg-close"></span>
+        </button>
+    </div>
+</form>

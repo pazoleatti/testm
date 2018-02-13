@@ -38,13 +38,6 @@
                 };
 
                 /**
-                 * Проверка, все ли необходимые поля заполнены
-                 */
-                $scope.requiredFieldsAreFilled = function () {
-                    return $scope.assignmentData.departments && $scope.assignmentData.departments.length > 0 && $scope.assignmentData.declarationTypes && $scope.assignmentData.declarationTypes.length > 0;
-                };
-
-                /**
                  * Закрытие окна
                  */
                 $scope.close = function () {
