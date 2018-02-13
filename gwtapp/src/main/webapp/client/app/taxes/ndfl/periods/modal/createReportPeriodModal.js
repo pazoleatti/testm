@@ -171,57 +171,38 @@
                                     });
                                     return;
                                 }
-                                // Проверяем наличие связанных объектов
+                                // Сохраняем отредактированный период
                                 $http({
                                     method: "POST",
-                                    url: "controller/rest/departmentReportPeriod/" + $shareData.period.id + "?projection=checkHasNotAccepted"
-                                }).then(function (logger) {
+                                    url: "controller/rest/departmentReportPeriod/" + $scope.period.id,
+                                    params: {
+                                        departmentReportPeriod: JSON.stringify({
+                                            id: $scope.period.id,
+                                            reportPeriod: {
+                                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
+                                                taxPeriod: {
+                                                    year: $scope.period.reportPeriod.taxPeriod.year
+                                                }
+                                            }
+                                        })
+                                    }
+                                }).then(function (response) {
+                                    // Проверяем на наличие ошибок при сохранении
                                     LogEntryResource.query({
-                                            uuid: logger.data,
+                                            uuid: response.data,
                                             projection: 'count'
-                                        },
-                                        function (data) {
+                                        }, function (data) {
                                             if ((data.ERROR + data.WARNING) > 0) {
-                                                $logPanel.open('log-panel-container', logger.data);
+                                                $logPanel.open('log-panel-container', response.data);
                                                 $dialogs.errorDialog({
                                                     content: $filter('translate')('reportPeriod.error.editPeriod.text')
                                                 });
                                             } else {
-                                                // Сохраняем отредактированный период
-                                                $http({
-                                                    method: "POST ",
-                                                    url: "controller/rest/departmentReportPeriod/" + $scope.period.id,
-                                                    params: {
-                                                        departmentReportPeriod: JSON.stringify({
-                                                            id: $scope.period.id,
-                                                            reportPeriod: {
-                                                                dictTaxPeriodId: $scope.period.reportPeriod.dictPeriod.id,
-                                                                taxPeriod: {
-                                                                    year: $scope.period.reportPeriod.taxPeriod.year
-                                                                }
-                                                            }
-                                                        })
-                                                    }
-                                                }).then(function (response) {
-                                                    // Проверяем на наличие ошибок при сохранении
-                                                    LogEntryResource.query({
-                                                            uuid: response.data,
-                                                            projection: 'count'
-                                                        }, function (data) {
-                                                            if ((data.ERROR + data.WARNING) > 0) {
-                                                                $logPanel.open('log-panel-container', response.data);
-                                                                $dialogs.errorDialog({
-                                                                    content: $filter('translate')('reportPeriod.error.editPeriod.text')
-                                                                });
-                                                            } else {
-                                                                $logPanel.open('log-panel-container', response.data);
-                                                                $modalInstance.close();
-                                                            }
-                                                        }
-                                                    );
-                                                });
+                                                $logPanel.open('log-panel-container', response.data);
+                                                $modalInstance.close();
                                             }
-                                        });
+                                        }
+                                    );
                                 });
                             });
                         });
