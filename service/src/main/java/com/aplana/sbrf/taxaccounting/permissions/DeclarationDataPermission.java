@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.User;
@@ -26,6 +27,8 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
     protected DepartmentService departmentService;
     @Autowired
     protected TAUserService taUserService;
+    @Autowired
+    DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     /**
      * Право на создание декларации вручную
@@ -103,7 +106,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "подразделение \"%s\". %s не допустима для форм типа \"%s\".",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
+                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName(),
                     operationName,
                     declarationFormKind.getTitle());
@@ -126,7 +129,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             " подразделение \"%s\". Период формы закрыт.",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
+                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName());
         }
 
@@ -147,7 +150,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "подразделение: \"%s\". %s не допустима для форм в состоянии \"%s\".",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
+                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName(),
                     operationName,
                     declarationData.getState().getTitle());
@@ -169,7 +172,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "период: \"%s\", подразделение \"%s\". Недостаточно прав для выполнения операции.",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " + departmentReportPeriod.getReportPeriod().getName() + departmentReportPeriod.createCorrPeriodMessage(DATE_FORMAT),
+                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName());
         }
     }
