@@ -10,8 +10,8 @@
     /**
      * @description  Контроллер модального окна открытия корректирующего перода
      */
-        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter', 'APP_CONSTANTS', '$rootScope',
-            function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter, APP_CONSTANTS, $rootScope) {
+        .controller('openCorrectCtrlModal', ['$scope', '$shareData', '$http', '$modalInstance', '$logPanel', 'ValidationUtils', '$dialogs', '$filter', 'APP_CONSTANTS',
+            function ($scope, $shareData, $http, $modalInstance, $logPanel, ValidationUtils, $dialogs, $filter, APP_CONSTANTS) {
 
                 $scope.department = $shareData.department;
                 $scope.departmentReportPeriod = angular.copy($shareData.period);
@@ -61,7 +61,7 @@
                                         });
                                         break;
                                     case APP_CONSTANTS.REPORT_PERIOD_STATUS.CLOSE:
-                                        var aaa = $dialogs.confirmDialog({
+                                        var confirmDialogModalInstance = $dialogs.confirmDialog({
                                             title: $filter('translate')('reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.title'),
                                             content: $filter('translate')('reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.text', {
                                                 correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
@@ -69,7 +69,7 @@
                                             okBtnCaption: $filter('translate')('common.button.yes'),
                                             cancelBtnCaption: $filter('translate')('common.button.no'),
                                             okBtnClick: function () {
-                                                aaa.close();
+                                                confirmDialogModalInstance.close();
                                                 $scope.openCorrectPeriod();
                                             }
                                         });
