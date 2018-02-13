@@ -53,7 +53,7 @@
                                             })
                                         });
                                         break;
-                                    case APP_CONSTANTS.REPORT_PERIOD_STATUS.CORRECTION_PERIOD_BEFORE_OPEN:
+                                    case APP_CONSTANTS.REPORT_PERIOD_STATUS.EXISTS_OPEN_CORRECTION_PERIOD_BEFORE:
                                         $dialogs.errorDialog({
                                             content: $filter('translate')('reportPeriod.error.openCorrectionPeriod.before.text', {
                                                 correctDate: new Date($scope.departmentReportPeriod.correctionDate).format("dd.mm.yyyy")
