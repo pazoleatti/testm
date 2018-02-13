@@ -924,4 +924,12 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3544 -->
+    <changeSet id="2.2-ytrofimov-49" author="ytrofimov">
+        <update tableName="REF_BOOK">
+            <column name="READ_ONLY" value="0"/>
+            <where>id in (8, 922, 933)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
