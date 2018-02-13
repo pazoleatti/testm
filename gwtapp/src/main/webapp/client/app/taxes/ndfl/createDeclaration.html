@@ -14,9 +14,9 @@
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initSelectWithOpenPeriods(latestReportPeriod)"
                              data-ng-model="declarationData.period"
-                             data-ng-required="true">
+                             data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>
@@ -34,9 +34,9 @@
                                  data-ui-select2="departmentsSelect.options"
                                  data-ng-init="initActiveDepartmentSelectWithOpenPeriod('declarationData.period')"
                                  data-ng-model="declarationData.department"
-                                 data-ng-required="true">
+                                 data-required>
                             </div>
-                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                 translate}}
                             </div>
                         </div>
@@ -56,9 +56,9 @@
                                  data-ui-select2="declarationTypeSelect.options"
                                  data-ng-init="initSelectWithDeclarationTypesForCreate(declarationKind, 'declarationData.period', 'declarationData.department')"
                                  data-ng-model="declarationData.declarationType"
-                                 data-ng-required="true">
+                                 data-required>
                             </div>
-                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                 translate}}
                             </div>
                         </div>
@@ -77,9 +77,9 @@
                                  data-ui-select2="asnuSelect.options"
                                  data-ng-init="initSingleSelectAsnu()"
                                  data-ng-model="declarationData.asnu"
-                                 data-ng-required="true">
+                                 data-required>
                             </div>
-                            <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                            <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                                 translate}}
                             </div>
                         </div>

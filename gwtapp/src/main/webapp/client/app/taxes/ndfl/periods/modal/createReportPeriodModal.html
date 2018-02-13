@@ -24,11 +24,11 @@
                                class="form-control"
                                style="width: 75px"
                                id="period.reportPeriod.taxPeriod.year"
-                               data-ng-required="true"
+                               data-required
                                max="2099"
                                min="1900"
                         />
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                         <div data-aplana-validator data-key="pattern">{{::'common.validation.year' |
@@ -56,9 +56,9 @@
                              data-ui-select2="periodSelect.options"
                              data-ng-init="initReportPeriodType()"
                              data-ng-model="period.reportPeriod.dictPeriod"
-                             data-ng-required="true">
+                             data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>

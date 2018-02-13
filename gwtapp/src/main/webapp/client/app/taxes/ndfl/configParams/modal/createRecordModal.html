@@ -15,9 +15,9 @@
                              data-ui-select2="commonParamSelect.options"
                              data-ng-init="initCommonParam()"
                              data-ng-model="commonParam.param"
-                             data-ng-required="true">
+                             data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>
@@ -41,10 +41,10 @@
                                id="commonParamValue"
                                class="form-control"
                                data-ng-maxlength="500"
-                               data-ng-required="true"
+                               data-required
                                style="width: 450px"
                         />
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                         <div data-aplana-validator data-key='maxlength'>{{::'field.ndfl.tooLongMessage'

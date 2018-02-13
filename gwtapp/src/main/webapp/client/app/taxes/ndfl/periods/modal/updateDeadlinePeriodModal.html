@@ -11,9 +11,9 @@
                     <div data-aplana-field>
                         <div data-aplana-datepicker
                              data-ng-model="filter.deadline"
-                             data-ng-required="true"></div>
+                             data-required></div>
                         <div data-aplana-validator data-key='required'>
-                            {{:: 'field.ndfl.requiredField' | translate}}
+                            {{:: 'common.validation.required' | translate}}
                         </div>
                     </div>
                 </td>
@@ -30,9 +30,9 @@
                              data-ng-init="initSingleSelectWithAllDepartments()"
                              data-ng-model="filter.department"
                              style="width:220px;"
-                             data-ng-required="true">
+                             data-required>
                         </div>
-                        <div data-aplana-validator data-key='required'>{{::'field.ndfl.requiredField' |
+                        <div data-aplana-validator data-key='required'>{{::'common.validation.required' |
                             translate}}
                         </div>
                     </div>
