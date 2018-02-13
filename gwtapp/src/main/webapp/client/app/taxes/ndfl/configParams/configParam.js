@@ -18,8 +18,8 @@
                 url: '/taxes/configParam/',
                 templateUrl: 'client/app/taxes/ndfl/configParams/configParam.html',
                 controller: 'configParamController',
-                onEnter: ['$state', '$rootScope', 'PermissionChecker', 'APP_CONSTANTS', 'UserDataResource',
-                    function ($state, $rootScope, PermissionChecker, APP_CONSTANTS, UserDataResource) {
+                onEnter: ['$state', 'PermissionChecker', 'APP_CONSTANTS', 'UserDataResource',
+                    function ($state, PermissionChecker, APP_CONSTANTS, UserDataResource) {
                     UserDataResource.query({
                         projection: "user"
                     }, function (data) {
