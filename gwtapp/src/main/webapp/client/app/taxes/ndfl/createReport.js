@@ -10,8 +10,8 @@
      * @description Контроллер окна "Создание отчетности"
      */
         .controller('createReportCtrl', [
-            '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData', '$webStorage',
-            function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage) {
+            '$http', '$scope', '$rootScope', '$filter', '$dialogs', '$modalInstance', 'APP_CONSTANTS', '$shareData', '$webStorage', 'DepartmentReportPeriodResource',
+            function ($http, $scope, $rootScope, $filter, $dialogs, $modalInstance, APP_CONSTANTS, $shareData, $webStorage, DepartmentReportPeriodResource) {
                 $scope.reportFormKind = [APP_CONSTANTS.NDFL_DECLARATION_KIND.REPORTS.id];
 
                 //Отчетный период из списка периодов в выпадающем списке, у которого самая поздняя дата окончания
@@ -33,6 +33,27 @@
                 $scope.$watch("userTBDepartment.department", function (department) {
                     $scope.reportData.department = department;
                 });
+
+                /**
+                 * Проверка, является ли выбранный период корректирующим
+                 */
+                $scope.$watchGroup(['reportData.period', 'reportData.department'], function (newValues) {
+                    if ($scope.reportData.period && $scope.reportData.department) {
+                        $http({
+                            method: "GET",
+                            url: "controller//rest/departmentReportPeriod",
+                            params: {
+                                projection: "fetchLast",
+                                departmentId: $scope.reportData.department.id,
+                                reportPeriodId: $scope.reportData.period.id
+                            }
+                        }).success(function (departmentPeportPeriod) {
+                            $scope.correctionDate = departmentPeportPeriod.correctionDate;
+                            $scope.correctionPeriod = departmentPeportPeriod.correctionDate !== undefined && departmentPeportPeriod.correctionDate !== null;
+                        });
+                    }
+                });
+
                 /**
                  * Создание отчётности
                  */
