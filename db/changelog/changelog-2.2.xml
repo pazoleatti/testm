@@ -896,5 +896,14 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+	
+	<changeSet id="2.2-rnurgaleev-10" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/person_pkg_body7.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 
 </databaseChangeLog>
