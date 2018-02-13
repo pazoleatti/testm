@@ -59,7 +59,7 @@
                     $dialogs.confirmDialog({
                         content: $filter('translate')('title.acceptCommonParamsDefault'),
                         okBtnCaption: $filter('translate')('common.button.yes'),
-                        cancelBtnCaption: $filter('translate')('DIALOGS_CANCELLATION'),
+                        cancelBtnCaption: $filter('translate')('DIALOGS_CLOSE'),
                         okBtnClick: function () {
                             $http({
                                 method: "POST",

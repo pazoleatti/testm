@@ -743,7 +743,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private void checkShowTiming(String value, Logger logger) {
         try {
             Double doubleValue = new Double(value);
-            if (!Objects.equals(doubleValue, 1d) || !Objects.equals(doubleValue, 0d)) {
+            if (!Objects.equals(doubleValue, 1d) && !Objects.equals(doubleValue, 0d)) {
                 logger.error(SHOW_TIMING_ERROR);
             }
         } catch (NumberFormatException e) {

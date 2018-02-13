@@ -46,10 +46,10 @@
                     } else {
                         //Если внесены изменения предупреждаем пользователя о потери данных при закрытии
                         $dialogs.confirmDialog({
-                            title: $filter('translate')('title.cancelChanges'),
-                            content: $filter('translate')('commonParams.notSavedData'),
+                            title: $filter('translate')('taxes.commonParams.confirm.cancel.title'),
+                            content: $filter('translate')('taxes.commonParams.confirm.cancel.text'),
                             okBtnCaption: $filter('translate')('common.button.yes'),
-                            cancelBtnCaption: $filter('translate')('DIALOGS_CANCELLATION'),
+                            cancelBtnCaption: $filter('translate')('DIALOGS_CLOSE'),
                             okBtnClick: function () {
                                 $modalInstance.dismiss();
                             }
