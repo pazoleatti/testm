@@ -84,7 +84,7 @@
                                         }).then(function (response) {
                                             if (response.data) {
                                                 $logPanel.open('log-panel-container', response.data);
-                                                $modalInstance.close();
+                                                $modalInstance.close($scope.period.reportPeriod.taxPeriod.year);
                                             }
                                         });
                                     }
@@ -117,7 +117,7 @@
                                         }).then(function (response) {
                                             if (response.data) {
                                                 $logPanel.open('log-panel-container', response.data);
-                                                $modalInstance.close();
+                                                $modalInstance.close($scope.period.reportPeriod.taxPeriod.year);
                                             }
                                         });
                                     }
@@ -199,7 +199,7 @@
                                                 });
                                             } else {
                                                 $logPanel.open('log-panel-container', response.data);
-                                                $modalInstance.close();
+                                                $modalInstance.close($scope.period.reportPeriod.taxPeriod.year);
                                             }
                                         }
                                     );

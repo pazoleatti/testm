@@ -204,7 +204,9 @@
                                 };
                             }
                         }
-                    }).result.then(function () {
+                    }).result.then(function (res) {
+                        $scope.searchFilter.params.yearStart = res;
+                        $scope.searchFilter.params.yearEnd = res;
                         $scope.refreshGrid();
                     });
                 };
