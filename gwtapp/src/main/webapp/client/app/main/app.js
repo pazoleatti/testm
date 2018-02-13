@@ -210,7 +210,6 @@
         "ndflReport.label.from": "из",
 
         "field.ndfl.tooLongMessage": "Количество символов для комментария превысило допустимое значение",
-        "field.ndfl.requiredField": "Обязательное поле",
         "field.ndfl.isNumber": "В поле должны вводиться только цифры",
         "title.comParams.param": "Параметр",
         "title.comParams.paramValue": "Значение параметра",
