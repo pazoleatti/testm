@@ -34,6 +34,7 @@
 		<field name="ФактДоход" class="java.lang.String">
 			<fieldDescription><![CDATA[@ФактДоход]]></fieldDescription>
 		</field>
+		<sortField name="ДатаУдержНал"/>
 		<variable name="ФактДоход" class="java.lang.String">
 			<variableExpression><![CDATA[(
     (
