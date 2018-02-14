@@ -370,8 +370,7 @@ public class ScriptUtilsTest {
     @Test
     public void checkDul() {
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 01 12345\") не соответствует формату \"99 99 999999\", где 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("21", "00 01 12345", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 01 000000\") не должно быть нулевым", ScriptUtils.checkDul("21", "00 01 000000", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 00 000100\") не должно быть нулевым", ScriptUtils.checkDul("21", "00 00 000100", "dulNumber"));
+        Assert.assertEquals("Значение гр. \"dulNumber\" (\"00 00 000000\") не должно быть нулевым", ScriptUtils.checkDul("21", "00 00 000000", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("21", "80 00 010006", "dulNumber"));
 
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП 12345678\") не соответствует формату \"ББ 0999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная), 0 - любая десятичная цифра (необязательная, может отсутствовать)" , ScriptUtils.checkDul("07", "АП 12345678", "dulNumber"));
@@ -385,9 +384,6 @@ public class ScriptUtilsTest {
 
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-012 12345678\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "АП-012 12345678", "dulNumber"));
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"Ап-012 1234567\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "Ап-012 1234567", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП- 012 1234567\") не соответствует формату \"ББ-999 9999999\", где Б - любая русская заглавная буква, 9 - любая десятичная цифра (обязательная)" , ScriptUtils.checkDul("18", "АП- 012 1234567", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-000 1234567\") не должно быть нулевым", ScriptUtils.checkDul("18", "АП-000 1234567", "dulNumber"));
-        Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-012 0000000\") не должно быть нулевым", ScriptUtils.checkDul("18", "АП-012 0000000", "dulNumber"));
         Assert.assertEquals("Значение гр. \"dulNumber\" (\"АП-000 0000000\") не должно быть нулевым", ScriptUtils.checkDul("18", "АП-000 0000000", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("18", "АП-012 1234567", "dulNumber"));
         Assert.assertNull(ScriptUtils.checkDul("18", "УУ-900 9999999", "dulNumber"));
