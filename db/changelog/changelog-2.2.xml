@@ -940,4 +940,12 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3025 -->
+    <changeSet id="2.2-ytrofimov-51" author="ytrofimov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd"/>
+            <where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
