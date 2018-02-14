@@ -992,11 +992,11 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         ndflPersonOperationsNode.childNodes().each { node ->
             def rowNum = node.attributes['НомСтр']
             allRowNums.add(rowNum)
-            if (node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
+            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохНач') && node.attributes['ДатаДохНач'] != null) {
                 incomeAccruedDate = formatter.parse(node.attributes['ДатаДохНач']);
                 incomeAccruedRowNum = rowNum
             }
-            if (node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
+            if (node.name() == "СведДохНал" && node.attributes.containsKey('ДатаДохВыпл') && node.attributes['ДатаДохВыпл'] != null) {
                 incomePayoutDate = formatter.parse(node.attributes['ДатаДохВыпл']);
                 incomePayoutRowNum = rowNum
             }
