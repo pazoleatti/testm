@@ -67,7 +67,7 @@
                                 top: $scope.splitterStart + 'px',
                                 height: $scope.splitterThick
                             });
-                            angular.element('#' + $scope.splitterLeftTop).height($scope.splitterStart);
+                            //angular.element('#' + $scope.splitterLeftTop).height($scope.splitterStart);
                         }
                     }
 
@@ -146,7 +146,7 @@
                             if ($scope.splitterMin && y < $scope.splitterMin) {
                                 y = parseInt($scope.splitterMin);
                             }
-                            angular.element('#' + $scope.splitterLeftTop).css({height: y + 'px'});
+                            //angular.element('#' + $scope.splitterLeftTop).css({height: y + 'px'});
                         }
                     }
 

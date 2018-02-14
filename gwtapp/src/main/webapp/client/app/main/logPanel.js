@@ -4,14 +4,14 @@
      * @description Модуль панели уведомлений
      */
     angular.module('app.logPanel', ['aplana.splitter', 'ui.router'])
-        .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource', 'APP_CONSTANTS', '$transitions',
-            function ($compile, $rootScope, $filter, LogEntryResource, APP_CONSTANTS, $transitions) {
+        .factory('$logPanel', ['$compile', '$rootScope', '$filter', 'LogEntryResource', 'APP_CONSTANTS', '$transitions', '$document',
+            function ($compile, $rootScope, $filter, LogEntryResource, APP_CONSTANTS, $transitions, $document) {
                 var logPanel = {};
 
                 //TODO:https://jira.aplana.com/browse/SBRFNDFL-1637
                 function createLogPanel(uuid) {
                     return $compile("" +
-                        "<div id='log-panel' style=' background: #fff;height: 300px; min-height: 296px;'>" +
+                        "<div id='log-panel' class='flex-column' style=' background: #fff;height: 300px; min-height: 296px;'>" +
                         "    <div data-aplana-splitter" +
                         "         data-splitter='horizontal'" +
                         "         data-splitter-thick='30'" +
@@ -20,9 +20,8 @@
                         "         data-splitter-max='994' data-splitter-min='12'" +
                         "         data-splitter-start='540'" +
                         "         data-splitter-resizing='true'" +
-                        "         id='resize-button'"+
-                        "    ></div>" +
-                        "    <div id='log-entry-list'>" +
+                        "         id='resize-button'></div>" +
+                        "    <div id='log-entry-list' class='flex-fill'>" +
                         "        <div id='log-panel-header'>" +
                         "            <div id='log-panel-header-message'></div>" +
                         "            <div style='float: right; margin: -7px 6px 0 4px;'>" +
@@ -34,9 +33,10 @@
                         "            </div>" +
                         "        </div>" +
                         "        <div data-aplana-grid" +
-                        "             data-grid-fill-space='false' " +
+                        "             data-grid-fill-space='true' " +
                         "             data-grid-options='logEntryGrid.options' " +
-                        "             data-grid-fill-space-container-selector='#log-panel' " +
+                        "             data-grid-fill-space-container-selector='#log-entry-list' " +
+                        "             data-grid-fill-space-container-selector-top='#log-panel-header' " +
                         "             data-grid-ctrl='logEntryGrid.ctrl'" +
                         "             data-ng-model='logEntryGrid.value'" +
                         "             style='float: left; width: 100%;'" +
@@ -150,34 +150,39 @@
                             updateLogPanelHeaderMessage(totalCount, fatalErrors);
                         });
 
-                        var appContainers = angular.element(document.querySelector('#app-content')).height();
-                       angular.element(document.querySelector('#resize-button')).on('mousedown', function (e) {
-                           var $dragable = angular.element(document.querySelector('#log-panel')),
-                               startHeight = $dragable.height(),
-                               pY = e.pageY,
-                               wrapper = angular.element('.cbr-page-layout__view');
+                        var container = angular.element('.cbr-page-layout__view');
+                        var topDiv = angular.element('#app-content');
+                        var resizeButton = angular.element('#resize-button');
+                        var bottomDiv = angular.element('#log-panel');
 
-                           angular.element(document.querySelector('.cbr-page')).on('mouseup', function () {
-                               wrapper.off('mouseup').off('mousemove');
-                           });
-                           angular.element(wrapper).on('mousemove', function (me) {
-                               var my = (me.pageY - pY);
-                               $dragable.find('.ui-jqgrid-bdiv').css({
-                                   height: startHeight - my - 136,
-                                   maxHeight: appContainers - 172
-                               });
+                        resizeButton.on('mousedown', function (e) {
+                            var startHeight = bottomDiv.height(),
+                                pY = e.pageY;
 
-                               $dragable.css({
-                                   height: startHeight - my,
-                                   maxHeight: appContainers - 34
-                               });
+                            $document.on('mouseup', unbindEvents);
+                            $document.on('mousemove', mouseMove);
 
-                               if(me.pageY  < 60 ){
-                                   wrapper.off('mouseup').off('mousemove');
-                                   console.log(me.pageY)
-                               }
-                           });
-                       });
+                            function mouseMove(me) {
+                                var my = (me.pageY - pY);
+
+                                // тут стоит делать $rootScope.$broadcast('UPDATE_GIRD_HEIGHT'), но он тормозит
+                                bottomDiv.find('.ui-jqgrid-bdiv').css({
+                                    height: startHeight - my - 136,
+                                    maxHeight: topDiv.height() - 172,
+                                    minHeight: 166
+                                });
+
+                                bottomDiv.css({
+                                    height: startHeight - my,
+                                    maxHeight: container.height() - 34
+                                });
+                            }
+
+                            function unbindEvents() {
+                                $document.unbind('mouseup', unbindEvents);
+                                $document.unbind('mousemove', mouseMove);
+                            }
+                        });
                     }
                 };
 
@@ -194,7 +199,7 @@
                     logPanel.close();
                 };
 
-                $transitions.onSuccess({}, function() {
+                $transitions.onSuccess({}, function () {
                     logPanel.close();
                 });
 

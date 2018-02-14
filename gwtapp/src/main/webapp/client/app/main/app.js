@@ -45,7 +45,7 @@
         "no": "Нет",
         "common.select.formatSearching": "Идет поиск...",
         "common.select.formatNoMatches": "По вашему запросу ничего не найдено",
-        "common.select.formatLoadMore" : "Подождите, идет загрузка данных...",
+        "common.select.formatLoadMore": "Подождите, идет загрузка данных...",
         "common.placeholder.notSelected": "Значение не выбрано",
         "common.validation.required": "Необходимо заполнить поле",
 
@@ -92,7 +92,7 @@
         "common.validation.number": "В поле могут вводиться только цифры",
         "common.validation.min.value": "Число должно быть не меньше {{minValue}}",
         "common.validation.max.value": "Число должно быть не больше {{maxValue}}",
-        "common.validation.interval.year" : "Интервал периода поиска указан неверно!",
+        "common.validation.interval.year": "Интервал периода поиска указан неверно!",
         "common.validation.year": "Значение поля \"Год\" должно соответствовать формату \"ХХХХ\"",
         "common.validation.dateInterval": "Значение поля должно входить в интервал дат от 01.01.1900 до 31.12.2099.",
 
@@ -122,7 +122,6 @@
         "title.redactParametr": "Редактировать параметр",
         "commonParams.default": "Восстановить значения по умолчанию",
         "title.commonParams.default": "Восстановление значений по умолчанию",
-        "commonParams.notSavedData": "На форме общих параметров системы имеются несохраненные данные. Выйти без сохранения?",
         "menu.taxes": "Налоги",
         "menu.taxes.ndfl": "НДФЛ",
         "menu.taxes.ndfl.details": "НДФЛ детализация",
@@ -214,7 +213,6 @@
         "title.comParams.param": "Параметр",
         "title.comParams.paramValue": "Значение параметра",
 
-        "title.cancelChanges": "Отмена операции",
         "title.period": "Период",
         "title.period.value": "{{year}}, {{periodName}}{{correctionString}}",
         "title.period.value.correctionString": ", кор. ({{correctionDate}})",
@@ -362,8 +360,8 @@
         "logBusiness.title.note": "Текст события",
         "rnuPersonFace.title": "РНУ НДФЛ по физическому лицу",
         "rnuPersonFace.": "РНУ НДФЛ по физическому лицу",
-        "rnuPersonFace.error.dateInterval":"Дата начала интервала должна быть меньше даты конца",
-        "rnuPersonFace.error.dateIntervalOutOfBounds":"Значение поля \"Дата рождения\" должно входить в интервал дат \"от 01.01.1900 до 31.12.2099\".",
+        "rnuPersonFace.error.dateInterval": "Дата начала интервала должна быть меньше даты конца",
+        "rnuPersonFace.error.dateIntervalOutOfBounds": "Значение поля \"Дата рождения\" должно входить в интервал дат \"от 01.01.1900 до 31.12.2099\".",
         "reportPersonFace.title": "2-НДФЛ (1) по физическому лицу",
         "reportPersonFace.title2": "2-НДФЛ (2) по физическому лицу",
         "reportPersonFace.error.fieldsAreEmpty": "Для поиска физического лица необходимо выбрать хотя бы один критерий поиска",
@@ -469,14 +467,14 @@
         "ndflJournal.table.titleYear": "Календарный год ",
 
         "reportPeriod.title": "Ведение периодов",
-        "reportPeriod.deadline.title":"Срок сдачи отчетности для периода: ",
+        "reportPeriod.deadline.title": "Срок сдачи отчетности для периода: ",
         "reportPeriod.department": "Подразделение",
         "reportPeriod.pils.openPeriod": "Открыть период",
         "reportPeriod.pils.closePeriod": "Закрыть период",
         "reportPeriod.pils.editPeriod": "Редактировать период",
         "reportPeriod.pils.correctPeriod": "Открыть корректирующий период",
         "reportPeriod.pils.deletePeriod": "Удалить период",
-        "reportPeriod.pils.deadline":"Назначить срок сдачи отчетности",
+        "reportPeriod.pils.deadline": "Назначить срок сдачи отчетности",
         "reportPeriod.filter.periodFrom": "Период, с",
         "reportPeriod.filter.periodTo": "по",
         "reportPeriod.grid.deadline": "Срок сдачи отчетности",
@@ -512,20 +510,19 @@
         "reportPeriod.error.openPeriod.hasCorrectionPeriod": "Для указанного периода существуют корректирующие периоды, его переоткрытие невозможно!",
         "reportPeriod.confirm.openCorrectionPeriod.text": "Отменить операцию корректирования периода?",
         "reportPeriod.confirm.openCorrectionPeriod.title": "Отмена операции корректирование периода",
-        "reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.text":"Корректирующий период с датой корректировки {{correctDate}} закрыт, выполнить переоткрытие?",
-        "reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.title":"Корректирование периода",
+        "reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.text": "Корректирующий период с датой корректировки {{correctDate}} закрыт, выполнить переоткрытие?",
+        "reportPeriod.confirm.openCorrectionPeriod.reopenPeriod.title": "Корректирование периода",
         "reportPeriod.error.openCorrectionPeriod.smallCorrectionYear": "Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!",
-        "reportPeriod.error.openCorrectionPeriod.last.text" : "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. открыт более ранний корректирующий период!",
-        "reportPeriod.error.openCorrectionPeriod.before.text" : "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. существует более поздний корректирующий период!",
-        "reportPeriod.error.openCorrectionPeriod.alreadyOpen.text" : "Корректирующий с датой корректировки {{correctDate}} период уже открыт!",
+        "reportPeriod.error.openCorrectionPeriod.last.text": "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. открыт более ранний корректирующий период!",
+        "reportPeriod.error.openCorrectionPeriod.before.text": "Корректирующий период с датой корректировки {{correctDate}} не может быть открыт, т.к. существует более поздний корректирующий период!",
+        "reportPeriod.error.openCorrectionPeriod.alreadyOpen.text": "Корректирующий с датой корректировки {{correctDate}} период уже открыт!",
 
         "reportPeriod.error.editPeriod.alreadyClose.text": "Закрытый период не может быть отредактирован!",
         "reportPeriod.error.editPeriod.noChange.title": "Редактирование параметров",
         "reportPeriod.error.editPeriod.noChange.text": "Ни один параметр не был изменен!",
-        "reportPeriod.error.editPeriod.hasCorPeriod.text":"Перед изменением периода необходимо удалить все связанные корректирующие периоды!",
+        "reportPeriod.error.editPeriod.hasCorPeriod.text": "Перед изменением периода необходимо удалить все связанные корректирующие периоды!",
         "reportPeriod.error.editPeriod.alreadyExist.text": "Указанный период уже заведён в Системе!",
         "reportPeriod.error.deletePeriod.text": "Удаление периода невозможно!",
-
 
 
         "ndflFL.title.numberpp": "Гр. 1 №п/п",
@@ -656,17 +653,17 @@
 
 
         "configParam.title": "Администрирование - Конфигурационные параметры",
-        "configParam.confirm.rejectCreatingConfig.title" : "Отмена операции создания параметра",
-        "configParam.confirm.rejectEditingConfig.title" : "Отмена операции редактирования параметра",
-        "configParam.confirm.rejectCreatingConfig.text" : "Отменить операцию создания параметра?",
-        "configParam.confirm.rejectEditingConfig.text" : "Отменить операцию редактирования параметра?",
+        "configParam.confirm.rejectCreatingConfig.title": "Отмена операции создания параметра",
+        "configParam.confirm.rejectEditingConfig.title": "Отмена операции редактирования параметра",
+        "configParam.confirm.rejectCreatingConfig.text": "Отменить операцию создания параметра?",
+        "configParam.confirm.rejectEditingConfig.text": "Отменить операцию редактирования параметра?",
         "configParam.modal.createParam.title": "Создание конфигурационного параметра",
         "configParam.modal.editParam.title": "Редактирование конфигурационного параметра",
-        "tab.configParam.commonParam" : "Общие параметры",
-        "tab.configParam.asyncParam" : "Параметры асинхронных заданий",
-        "configParam.button.createRecord" : "Добавить запись",
-        "configParam.button.editRecord" : "Редактировать запись",
-        "configParam.button.removeRecord" : "Удалить запись",
+        "tab.configParam.commonParam": "Общие параметры",
+        "tab.configParam.asyncParam": "Параметры асинхронных заданий",
+        "configParam.button.createRecord": "Добавить запись",
+        "configParam.button.editRecord": "Редактировать запись",
+        "configParam.button.removeRecord": "Удалить запись",
         "asyncParam.grid.columnName.taskType": "Тип задания",
         "asyncParam.grid.columnName.limitKind": "Вид ограничения",
         "asyncParam.grid.columnName.taskLimit": "Значение параметра \"Ограничение на выполнение задания\"",
@@ -677,10 +674,13 @@
         "asyncParam.modal.field.shortQueueLimit": "Ограничение на выполнение задания в очереди быстрых заданий",
         "commonParam.grid.columnName.code": "Параметр",
         "commonParam.grid.columnName.value": "Значение",
-        "asyncParam.validate.checkLimit" : "{{taskTitle}}: Значение параметра \"Ограничение на выполнение задания\" ({{taskLimit}}) " +
-            "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" ({{shortQueueLimit}})",
+        "asyncParam.validate.checkLimit": "{{taskTitle}}: Значение параметра \"Ограничение на выполнение задания\" ({{taskLimit}}) " +
+        "должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" ({{shortQueueLimit}})",
         "asyncParam.validate.checkNumber": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым (больше нуля)!",
-        "asyncParam.validate.tooMuch": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым, меньше или равно 1 500 000"
+        "asyncParam.validate.tooMuch": "{{taskTitle}}: {{limitName}} ({{limitValue}}) должно быть числовым, меньше или равно 1 500 000",
+
+        "taxes.commonParams.confirm.cancel.title": "Отмена операции",
+        "taxes.commonParams.confirm.cancel.text": "На форме общих параметров системы имеются несохраненные данные. Выйти без сохранения?"
 
     };
     /**
@@ -771,7 +771,7 @@
             }
         ])
 
-        .run(['$rootScope', 'ValidationUtils','$overlayService', '$alertService', '$filter', 'uiSelect2Config', 'PermissionChecker', '$window',
+        .run(['$rootScope', 'ValidationUtils', '$overlayService', '$alertService', '$filter', 'uiSelect2Config', 'PermissionChecker', '$window',
             function ($rootScope, ValidationUtils, $overlayService, $alertService, $filter, uiSelect2Config, PermissionChecker, $window) {
 
                 //Регистрируем глобальные сервисы

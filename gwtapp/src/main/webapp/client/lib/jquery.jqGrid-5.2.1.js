@@ -921,7 +921,7 @@
                     headerBox : "ui-state-default",
                     rowTable : "",
                     rowBox : "ui-widget-content",
-                    stripedTable : "ui-jqgrid-table-striped",
+                    stripedTable : "ui-jqgrid-table-striped table-hover",
                     footerTable : "",
                     footerBox : "ui-widget-content",
                     headerDiv : "ui-state-default",
@@ -1051,7 +1051,7 @@
                     headerBox : "",
                     rowTable : "table table-bordered",
                     rowBox : "",
-                    stripedTable : "table-striped",
+                    stripedTable : "table-striped table-hover",
                     footerTable : "table table-bordered",
                     footerBox : "",
                     headerDiv : "",
@@ -3744,7 +3744,7 @@
             tbody = document.createElement("tbody");
             //$(this).append(firstr);
             this.appendChild(tbody);
-            $(this).addClass(getstyle(stylemodule,"rowTable", true, 'ui-jqgrid-btable ui-common-table table-striped')).append(firstr);
+            $(this).addClass(getstyle(stylemodule,"rowTable", true, 'ui-jqgrid-btable ui-common-table table-striped table-hover')).append(firstr);
             if(ts.p.altRows) {
                 $(this).addClass(getstyle(stylemodule,"stripedTable", true, ''));
             }
