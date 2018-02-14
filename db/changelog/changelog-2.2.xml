@@ -948,4 +948,11 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <changeSet id="2.2-ytrofimov-52" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
+            <where>id in (102, 104)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
