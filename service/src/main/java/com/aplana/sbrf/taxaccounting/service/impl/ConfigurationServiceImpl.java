@@ -42,8 +42,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String LIMIT_IDENT_DEFAULT = "0.65";
     private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
-    private static final String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
-    private static final String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
     private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
     private static final String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
     private static final String LOAD_WRITE_ERROR = "«%s» для «%s»: отсутствует доступ на запись!";
@@ -84,20 +82,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
     public ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRoles(TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-            throw new AccessDeniedException(ACCESS_READ_ERROR);
-        }
         return configurationDao.fetchAllAsModel();
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'F_ROLE_OPER')")
     public ConfigurationParamModel getCommonConfig(TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            throw new AccessDeniedException(ACCESS_READ_ERROR);
-        }
         return configurationDao.fetchAllAsModelByGroup(ConfigurationParamGroup.COMMON_PARAM);
     }
 
@@ -142,24 +134,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
     public ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-            throw new AccessDeniedException(ACCESS_READ_ERROR);
-        }
         return configurationDao.fetchAllByDepartment(departmentId);
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger) {
         if (model == null) {
             return;
         }
-
-        // Права
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
-            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
-        }
-
         // Длина
         for (ConfigurationParam parameter : model.keySet()) {
             Map<Integer, List<String>> map = model.get(parameter);
@@ -328,14 +313,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
         if (model == null) {
             return;
-        }
-
-        // Права
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
-            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
         }
 
         // Проверки общих параметров
@@ -439,12 +420,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'F_ROLE_OPER')")
     public void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
-        }
         configurationDao.update(configurationParamMap, COMMON_PARAM_DEPARTMENT_ID);
     }
 
