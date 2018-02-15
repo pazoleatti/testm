@@ -955,4 +955,100 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <changeSet id="2.2-ytrofimov-53" author="ytrofimov">
+        <sql splitStatements="false">
+            begin
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '22', 'Загранпаспорт гражданина Российской Федерации', '4');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '09', 'Дипломатический паспорт', '5');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '28', 'Служебный паспорт гражданина Российской Федерации', '6');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '26', 'Паспорт моряка', '7');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '19', 'Свидетельство о предоставлении временного убежища на территории Российской Федерации', '15');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '27', 'Военный билет офицера запаса', '18');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '05', 'Справка об освобождении из места лишения свободы', '19');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '81', 'Свидетельство о смерти', '20');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '60', 'Документы, подтверждающие факт регистрации по месту жительства (пребывания)', '21');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '61', 'Свидетельство о регистрации по месту жительства', '22');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '62', 'Вид на жительство иностранного гражданина', '23');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '63', 'Свидетельство о регистрации по месту пребывания', '24');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '01', 'Паспорт гражданина СССР', '25');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '02', 'Загранпаспорт гражданина СССР', '26');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '04', 'Удостоверение личности офицера', '28');
+
+            insert into ref_book_doc_type(id, record_id, status, version, code, name, priority)
+            values(seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, 0, to_date('01.01.2016','DD.MM.YYYY'), '06', 'Паспорт Минморфлота', '29');
+
+            update ref_book_doc_type set priority=1
+            where code='21';
+
+            update ref_book_doc_type set priority=2
+            where code='03';
+
+            update ref_book_doc_type set priority=3
+            where code='07';
+
+            update ref_book_doc_type set priority=8
+            where code='08';
+
+            update ref_book_doc_type set priority=9
+            where code='10';
+
+            update ref_book_doc_type set priority=10
+            where code='11';
+
+            update ref_book_doc_type set priority=11
+            where code='12';
+
+            update ref_book_doc_type set priority=12
+            where code='13';
+
+            update ref_book_doc_type set priority=13
+            where code='14';
+
+            update ref_book_doc_type set priority=14
+            where code='15';
+
+            update ref_book_doc_type set priority=16
+            where code='23';
+
+            update ref_book_doc_type set priority=17
+            where code='24';
+
+            update ref_book_doc_type set priority=27, name='Свидетельство о предоставлении временного убежища на территории Российской Федерации (до 01.01.2013)'
+            where code='18';
+
+            update ref_book_doc_type set priority=30
+            where code='91';
+            end;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
