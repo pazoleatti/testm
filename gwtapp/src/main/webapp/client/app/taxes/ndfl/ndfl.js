@@ -657,28 +657,6 @@
                                 $window.alert($filter('translate')('title.checkImpossible'));
                             }
                         }
-                    }).then(function (response) {
-                        calculateResult(response, force, cancelTask);
-                    });
-                };
-
-                /**
-                 * @description Событие, которое возникает по нажатию на кнопку "Консолидировать"
-                 */
-                $scope.consolidate = function (force, cancelTask) {
-                    {
-                        force = typeof force !== 'undefined' ? force : false;
-                        cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
-                    }
-                    $http({
-                        method: "POST",
-                        url: "controller/actions/declarationData/" + $stateParams.declarationDataId + "/consolidate",
-                        params: {
-                            force: force ? force : false,
-                            cancelTask: cancelTask ? cancelTask : false
-                        }
-                    }).then(function (response) {
-                        calculateResult(response, force, cancelTask);
                     });
                 };
 
