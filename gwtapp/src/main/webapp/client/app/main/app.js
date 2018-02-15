@@ -608,7 +608,7 @@
         "createDeclaration.department": "Подразделение",
         "createDeclaration.declarationType": "Вид налоговой формы",
         "createDeclaration.asnu": "АСНУ",
-        "createDeclaration.periodMessage": "Налоговая форма будет создана в корректирующем периоде, дата сдачи корректировки: ",
+        "createDeclaration.correctionMessage": "Налоговая форма будет создана в корректирующем периоде, дата сдачи корректировки: ",
         "createDeclaration.errorMessage": "Заполнены не все поля отчетности",
         "createDeclaration.cancel.header": "Отмена создания",
         "createDeclaration.cancel.text": "Отменить создание?",
