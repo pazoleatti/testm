@@ -1,5 +1,5 @@
 <form class="form-horizontal" name="createReportForm" data-aplana-submit-valid="save()">
-    <div class="modal-body">
+    <div class="modal-body" style="min-height: 155px">
         <table class="horizontal-input-table gray-label-table auto-width-uneditable-input-table nowrap-label-table"
                style="height: 100px;">
             <tbody>
@@ -67,7 +67,7 @@
             </tbody>
         </table>
 
-        <label data-ng-show="correctionPeriod">{{::'createReport.correctionMessage' | translate}} {{correctionDate |
+        <label class="control-label correction-message" data-ng-show="correctionPeriod">{{::'createReport.correctionMessage' | translate}} {{correctionDate |
             dateFormatter}}</label>
     </div>
     <div class="modal-footer">

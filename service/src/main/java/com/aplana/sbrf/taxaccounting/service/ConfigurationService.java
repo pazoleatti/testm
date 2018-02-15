@@ -48,11 +48,6 @@ public interface ConfigurationService {
     ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo);
 
     /**
-     * Получение конфигурационных параметров (табл. CONFIGURATION)
-     */
-    List<Configuration> fetchCommonParameter(TAUserInfo userInfo);
-
-    /**
      * Сохранение конфигурационных параметров (табл. CONFIGURATION)
      */
     @Deprecated
@@ -88,15 +83,6 @@ public interface ConfigurationService {
     void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo);
 
     /**
-     * Обновление общего параметра в табл. CONFIGURATION
-     *
-     * @param userInfo информация о пользователе
-     * @param config изменяемый конфигурационный параметр
-     * @return Результат операции {@link ActionResult}. Содержит uuid, по которому можно получить сообщения в журнале
-     */
-    ActionResult update(TAUserInfo userInfo, Configuration config);
-
-    /**
      * Установить значение общих конфигурационных параметров по умолчанию (табл. CONFIGURATION)
      *
      * @param userInfo информация о пользователе
@@ -115,9 +101,10 @@ public interface ConfigurationService {
      * Возвращяет страницу общих конфигурационных параметров
      *
      * @param pagingParams параметры пагинации
+     * @param configurationParamGroup
      * @return страница {@link Configuration}
      */
-    PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams);
+    PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup);
 
     /**
      * Создание нового значения конфигурацинного параметра

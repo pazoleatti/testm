@@ -102,9 +102,11 @@
                 DELETE: 1 << 1
             },
             CONFIGURATION_PERMISSION: {
-                EDIT: 1 << 0,
-                CREATE: 1 << 1,
-                DELETE: 1 << 2
+                VIEW: 1 << 0,
+                EDIT: 1 << 1,
+                REMOVE: 1 << 2,
+                DEFAULT: 1 << 3,
+                CREATE: 1 << 4
             },
             NDFL_DECLARATION_KIND: {
                 ADDITIONAL: {id: 1, name: "Выходная"},

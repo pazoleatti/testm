@@ -48,6 +48,26 @@
                 }
 
                 /**
+                 * Проверка, является ли выбранный период корректирующим
+                 */
+                $scope.$watchGroup(['declarationData.period', 'declarationData.department'], function (newValues) {
+                    if ($scope.declarationData.period && $scope.declarationData.department) {
+                        $http({
+                            method: "GET",
+                            url: "controller//rest/departmentReportPeriod",
+                            params: {
+                                projection: "fetchLast",
+                                departmentId: $scope.declarationData.department.id,
+                                reportPeriodId: $scope.declarationData.period.id
+                            }
+                        }).success(function (departmentPeportPeriod) {
+                            $scope.correctionDate = departmentPeportPeriod.correctionDate;
+                            $scope.correctionPeriod = departmentPeportPeriod.correctionDate !== undefined && departmentPeportPeriod.correctionDate !== null;
+                        });
+                    }
+                });
+
+                /**
                  * Сохранение
                  */
                 $scope.save = function () {
