@@ -46,7 +46,7 @@
         "common.select.formatSearching": "Идет поиск...",
         "common.select.formatNoMatches": "По вашему запросу ничего не найдено",
         "common.select.formatLoadMore": "Подождите, идет загрузка данных...",
-        "common.placeholder.notSelected": "Значение не выбрано",
+        "common.placeholder.notSelected": "Не выбрано",
         "common.validation.required": "Необходимо заполнить поле",
 
         "common.undefined": "Не задано",
@@ -108,7 +108,6 @@
         "resizer.scaleUp": "Увеличить масштаб",
         "resizer.fitToWidth": "По ширине",
 
-        "filter.placeholder.all": "-Все-",
         "filterPanelLabel": "Фильтр",
         "filterPanelLabel.set": "Фильтр (установлен)",
         "ndfl.filter.FL": "По реквизитам физического лица",
@@ -116,8 +115,7 @@
         "ndfl.filter.deductions": "По сведениям о вычетах",
         "ndfl.filter.prepayments": "По сведениям о доходах в виде авансовых платежей",
         "infoPanelLabel": "Информация",
-        "filter.placeholder.search": "Введите строку",
-        "filter.placeholder.empty": "",
+        "filter.placeholder.search": "Введите значение",
         "theNumberOfSelectedItems": "Выбрано значений:",
         "title.redactParametr": "Редактировать параметр",
         "commonParams.default": "Восстановить значения по умолчанию",
