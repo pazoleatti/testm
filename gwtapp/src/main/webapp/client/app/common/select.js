@@ -478,15 +478,31 @@
         /**
          * Контроллер для выбора конфигурационного параметра
          */
-        .controller('SelectConfigParamCtrl', ['$scope', 'GetSelectOption',
-            function ($scope, GetSelectOption) {
+        .controller('SelectConfigParamCtrl', ['$scope', 'GetSelectOption', 'CommonParamResource',
+            function ($scope, GetSelectOption, CommonParamResource) {
                 $scope.commonParamSelect = {};
 
                 /**
                  * Инициализация списка с загрузкой доступных конфигурационных параметров
                  */
                 $scope.initCommonParam = function () {
-                    $scope.commonParamSelect = GetSelectOption.getAjaxSelectOptions(false, true, "controller/rest/configuration/commonParam?projection=selectNonChanged", {}, {}, "configParamFormatter");
+                    $scope.commonParamSelect = GetSelectOption.getBasicSingleSelectOptions(true, true, "configParamFormatter");
+                    CommonParamResource.query({
+                        projection: 'selectNonChanged',
+                        pagingParams: {
+                            page: 1,
+                            count: 10000
+                        }
+                    }, function (data) {
+                        if(data && data.rows){
+                            var id = 0;
+                            angular.forEach(data.rows, function (item) {
+                                item.id = id;
+                                id++;
+                            });
+                            $scope.commonParamSelect.options.data.results = data.rows;
+                        }
+                    });
                 };
             }
 

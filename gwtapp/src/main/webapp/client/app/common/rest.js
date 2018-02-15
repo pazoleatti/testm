@@ -282,11 +282,20 @@
         }])
 
         /**
-         * @description Получить данные о типах асинхронных задач
+         * @description Получить данные об общих параметрах (isArray: false)
          */
         .factory('CommonParamResource', ['$resource', function ($resource) {
-            return $resource('controller/rest/configuration/commonParam', {}, {
+            return $resource('controller/rest/configuration/commonParam?projection=:projection', {}, {
                 query: {method: 'GET', isArray: false, cache: false}
+            });
+        }])
+
+        /**
+         * @description Получить данные об общих параметрах (isArray: true)
+         */
+        .factory('CommonParamSelectResource', ['$resource', function ($resource) {
+            return $resource('controller/rest/configuration/commonParam?projection=:projection', {}, {
+                query: {method: 'GET', isArray: true, cache: false}
             });
         }])
 

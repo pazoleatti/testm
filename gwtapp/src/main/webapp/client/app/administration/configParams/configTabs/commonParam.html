@@ -1,0 +1,44 @@
+<div id="commonParamGridContainer" class="container-grid box-shadow-block"
+     data-ng-controller="commonParamController" style="position: absolute; height: 100%; width: 100%;">
+
+    <!--Панель кнопок -->
+    <div class="button_panel" style="padding: 10px 12px 0;">
+        <div class="btn-toolbar" role="toolbar">
+            <!--Добавить запись -->
+            <span>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.CONFIGURATION_PERMISSION.CREATE)"
+                            data-ng-click="createRecord()">
+                        <span data-translate-once="configParam.button.createRecord"></span>
+                    </button>
+                </span>
+            <!--Редактировать запись -->
+            <span>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.CONFIGURATION_PERMISSION.EDIT)"
+                            data-ng-click="updateRecord()">
+                        <span data-translate-once="configParam.button.editRecord"></span>
+                    </button>
+                </span>
+            <!--Удалить запись -->
+            <span>
+                    <button type="button" class="btn btn-default"
+                            data-ng-disabled="!checkPermissionForGridValue(APP_CONSTANTS.CONFIGURATION_PERMISSION.REMOVE)"
+                            data-ng-click="removeRecords()">
+                        <span data-translate-once="configParam.button.removeRecord"></span>
+                    </button>
+                </span>
+        </div>
+    </div>
+
+    <div data-aplana-grid
+         data-grid-fill-space="true"
+         data-grid-fill-space-container-selector="#commonParamGridContainer"
+         data-grid-fill-space-container-selector-top="none"
+         data-grid-options="commonParamGrid.options"
+         data-grid-ctrl="commonParamGrid.ctrl"
+         data-ng-model="commonParamGrid.value"
+         id="commonParamGrid"
+         style="float: left; width: 100%;">
+    </div>
+</div>

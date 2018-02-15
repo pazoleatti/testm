@@ -20,13 +20,13 @@
 
                     $http({
                         method: "POST",
-                        url: "controller/actions/commonParams/editCommonParams",
+                        url: "controller/action/configuration/commonParam/update",
                         params: {
-                            config: $scope.parameter
+                            commonParam: $scope.parameter
                         }
                     }).then(function (response) {
-                        if (response.data && response.data.uuid && response.data.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.data.uuid);
+                        if (response.data) {
+                            $logPanel.open('log-panel-container', response.data);
                         }
                         $modalInstance.close();
                     });
