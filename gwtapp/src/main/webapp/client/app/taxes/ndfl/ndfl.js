@@ -377,13 +377,13 @@
                     if ($scope.searchFilter.params.calculationDateFrom) {
                         $scope.searchFilter.ajaxFilter.push({
                             property: "incomeAccrued",
-                            value: $scope.searchFilter.params.calculationDateFrom
+                            value: $scope.searchFilter.params.incomeAccruedDateFrom
                         });
                     }
                     if ($scope.searchFilter.params.calculationDateTo) {
                         $scope.searchFilter.ajaxFilter.push({
                             property: "incomeAccrued",
-                            value: $scope.searchFilter.params.calculationDateTo
+                            value: $scope.searchFilter.params.incomeAccruedDateTo
                         });
                     }
                     if ($scope.searchFilter.params.deductionDateFrom) {

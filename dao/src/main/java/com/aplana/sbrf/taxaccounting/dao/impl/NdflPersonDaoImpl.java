@@ -319,13 +319,13 @@ public class NdflPersonDaoImpl extends AbstractDao implements NdflPersonDao {
                 queryBuilder.append("and lower(npd.income_code) like concat(concat('%', :incomeCode), '%') ");
                 params.addValue("incomeCode", ndflPersonDeductionFilter.getIncomeCode().toLowerCase());
             }
-            if (ndflPersonDeductionFilter.getCalculationDateFrom() != null) {
-                queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued >= trunc(:calculationDateFrom)) ");
-                params.addValue("calculationDateFrom", ndflPersonDeductionFilter.getCalculationDateFrom());
+            if (ndflPersonDeductionFilter.getIncomeAccruedDateFrom() != null) {
+                queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued >= trunc(:incomeAccruedDateFrom)) ");
+                params.addValue("incomeAccruedDateFrom", ndflPersonDeductionFilter.getIncomeAccruedDateFrom());
             }
-            if (ndflPersonDeductionFilter.getCalculationDateTo() != null) {
-                queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued <= trunc(:calculationDateTo)) ");
-                params.addValue("calculationDateTo", ndflPersonDeductionFilter.getCalculationDateTo());
+            if (ndflPersonDeductionFilter.getIncomeAccruedDateTo() != null) {
+                queryBuilder.append("and (npd.income_accrued is null or npd.income_accrued <= trunc(:incomeAccruedDateTo)) ");
+                params.addValue("incomeAccruedDateTo", ndflPersonDeductionFilter.getIncomeAccruedDateTo());
             }
             if (ndflPersonDeductionFilter.getDeductionDateFrom() != null) {
                 queryBuilder.append("and (npd.period_curr_date is null or npd.period_curr_date >= trunc(:deductionDateFrom)) ");

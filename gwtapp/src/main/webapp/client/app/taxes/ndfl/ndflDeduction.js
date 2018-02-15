@@ -43,8 +43,8 @@
                                     operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
                                     deductionCode: $filter('requestParamsFormatter')($scope.searchFilter.params.deductionCode),
                                     incomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeCode),
-                                    calculationDateFrom: $scope.searchFilter.params.calculationDateFrom,
-                                    calculationDateTo: $scope.searchFilter.params.calculationDateTo,
+                                    incomeAccruedDateFrom: $scope.searchFilter.params.incomeAccruedDateFrom,
+                                    incomeAccruedDateTo: $scope.searchFilter.params.incomeAccruedDateTo,
                                     deductionDateFrom: $scope.searchFilter.params.deductionDateFrom,
                                     deductionDateTo: $scope.searchFilter.params.deductionDateTo
                                 })

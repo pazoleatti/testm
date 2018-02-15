@@ -29,11 +29,11 @@ public class NdflPersonDeductionFilter {
     /**
      * Дата начисления дохода с
      */
-    private Date calculationDateFrom;
+    private Date incomeAccruedDateFrom;
     /**
      * Дата начисления дохода по
      */
-    private Date calculationDateTo;
+    private Date incomeAccruedDateTo;
     /**
      * Дата текущего вычета с
      */
@@ -83,20 +83,20 @@ public class NdflPersonDeductionFilter {
         this.incomeCode = incomeCode;
     }
 
-    public Date getCalculationDateFrom() {
-        return calculationDateFrom;
+    public Date getIncomeAccruedDateFrom() {
+        return incomeAccruedDateFrom;
     }
 
-    public void setCalculationDateFrom(Date calculationDateFrom) {
-        this.calculationDateFrom = calculationDateFrom;
+    public void setIncomeAccruedDateFrom(Date incomeAccruedDateFrom) {
+        this.incomeAccruedDateFrom = incomeAccruedDateFrom;
     }
 
-    public Date getCalculationDateTo() {
-        return calculationDateTo;
+    public Date getIncomeAccruedDateTo() {
+        return incomeAccruedDateTo;
     }
 
-    public void setCalculationDateTo(Date calculationDateTo) {
-        this.calculationDateTo = calculationDateTo;
+    public void setIncomeAccruedDateTo(Date incomeAccruedDateTo) {
+        this.incomeAccruedDateTo = incomeAccruedDateTo;
     }
 
     public Date getDeductionDateFrom() {

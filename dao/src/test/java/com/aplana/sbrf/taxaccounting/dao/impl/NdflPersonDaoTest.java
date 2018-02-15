@@ -20,8 +20,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -550,7 +548,7 @@ public class NdflPersonDaoTest {
     @Test
     public void testFindPersonDeductionByParametersCalculationDateFrom() {
         NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getCalculationDateFrom()).thenReturn(new Date(1L));
+        when(filter.getIncomeAccruedDateFrom()).thenReturn(new Date(1L));
         when(pagingParams.getCount()).thenReturn(100);
         when(pagingParams.getPage()).thenReturn(1);
         when(pagingParams.getDirection()).thenReturn("asc");
@@ -563,7 +561,7 @@ public class NdflPersonDaoTest {
     @Test
     public void testFindPersonDeductionByParametersCalculationDateTo() {
         NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getCalculationDateTo()).thenReturn(new Date(30000000000000L));
+        when(filter.getIncomeAccruedDateTo()).thenReturn(new Date(30000000000000L));
         when(pagingParams.getCount()).thenReturn(100);
         when(pagingParams.getPage()).thenReturn(1);
         when(pagingParams.getDirection()).thenReturn("asc");
