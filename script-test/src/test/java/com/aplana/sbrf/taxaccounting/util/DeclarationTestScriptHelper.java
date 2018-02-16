@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.script.service.*;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -48,6 +49,7 @@ public class DeclarationTestScriptHelper {
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
     private DeclarationService declarationService;
+    private ConfigurationService configurationService;
     private RefBookPersonService refBookPersonService;
     private FiasRefBookService fiasRefBookService;
     private TransactionHelper transactionHelper;
@@ -168,6 +170,7 @@ public class DeclarationTestScriptHelper {
         refBookPersonService = mockHelper.mockRefBookPersonService();
         fiasRefBookService = mockHelper.mockFiasRefBookService();
         declarationService = mockHelper.mockDeclarationService();
+        configurationService = mockHelper.mockConfigurationService();
         transactionHelper = mockHelper.mockTransactionHelper();
         ndflPersonService = mockHelper.mockNdflPersonService();
 
@@ -197,6 +200,7 @@ public class DeclarationTestScriptHelper {
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("refBookDataProvider", refBookDataProvider);
         bindings.put("declarationService", declarationService);
+        bindings.put("configurationService", configurationService);
         bindings.put("ndflPersonService", ndflPersonService);
         bindings.put("departmentReportPeriodService", departmentReportPeriodService);
 
@@ -378,6 +382,10 @@ public class DeclarationTestScriptHelper {
 
     public DeclarationService getDeclarationService() {
         return declarationService;
+    }
+
+    public ConfigurationService getConfigurationService() {
+        return configurationService;
     }
 
     public FormSources getSources() {

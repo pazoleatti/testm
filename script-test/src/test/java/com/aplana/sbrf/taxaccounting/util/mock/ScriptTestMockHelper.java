@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.script.service.*;
+import com.aplana.sbrf.taxaccounting.service.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.service.TransactionHelper;
 
 import java.util.Map;
@@ -32,6 +33,8 @@ public interface ScriptTestMockHelper {
     DepartmentReportPeriodService mockDepartmentReportPeriodService();
 
     DeclarationService mockDeclarationService();
+
+    ConfigurationService mockConfigurationService();
 
     TransactionHelper mockTransactionHelper();
 
