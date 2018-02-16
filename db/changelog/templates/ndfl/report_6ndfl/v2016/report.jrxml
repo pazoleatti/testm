@@ -1035,15 +1035,6 @@
 			<rectangle>
 				<reportElement x="115" y="10" width="13" height="13" backcolor="#000000" uuid="de9e90f7-8936-4332-8615-182f98c3eb9e"/>
 			</rectangle>
-			<staticText>
-				<reportElement x="409" y="10" width="154" height="37" uuid="20cbe342-7f57-48cf-80a8-78d268d772ad"/>
-				<textElement>
-					<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
-				</textElement>
-				<text><![CDATA[Приложение № 1
-к приказу ФНС России
-от 14.10.2015 № ММВ-7-11/450@]]></text>
-			</staticText>
 		</band>
 	</pageHeader>
 	<detail>
