@@ -1035,15 +1035,6 @@
 			<rectangle>
 				<reportElement x="115" y="10" width="13" height="13" backcolor="#000000" uuid="de9e90f7-8936-4332-8615-182f98c3eb9e"/>
 			</rectangle>
-			<staticText>
-				<reportElement x="409" y="10" width="154" height="37" uuid="20cbe342-7f57-48cf-80a8-78d268d772ad"/>
-				<textElement>
-					<font fontName="Arial" size="7" pdfEncoding="Identity-H"/>
-				</textElement>
-				<text><![CDATA[Приложение № 1
-к приказу ФНС России
-от 14.10.2015 № ММВ-7-11/450@]]></text>
-			</staticText>
 		</band>
 	</pageHeader>
 	<detail>
@@ -9206,7 +9197,7 @@
 				<textFieldExpression><![CDATA[$V{НачислДох}.charAt(17)]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement mode="Transparent" x="238" y="79" width="12" height="20" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="aa886381-2169-4a02-9e83-67851b7b00ab"/>
+				<reportElement mode="Transparent" x="238" y="79" width="12" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="aa886381-2169-4a02-9e83-67851b7b00ab"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
 					<font fontName="Courier New" size="16" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -9446,7 +9437,7 @@
 в виде дивидендов]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="518" y="79" width="12" height="20" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="02ec017d-22a5-403a-96de-d526128332c1"/>
+				<reportElement mode="Transparent" x="518" y="79" width="12" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="02ec017d-22a5-403a-96de-d526128332c1"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
 					<font fontName="Courier New" size="16" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
@@ -9749,7 +9740,7 @@
 				<text><![CDATA[040]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Transparent" x="238" y="118" width="12" height="20" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="17bf69ac-0b6e-48b1-a5d4-15c090fd32a4"/>
+				<reportElement mode="Transparent" x="238" y="118" width="12" height="19" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF" uuid="17bf69ac-0b6e-48b1-a5d4-15c090fd32a4"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
 					<font fontName="Courier New" size="16" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Identity-H" isPdfEmbedded="false"/>
 					<paragraph lineSpacing="Single"/>
