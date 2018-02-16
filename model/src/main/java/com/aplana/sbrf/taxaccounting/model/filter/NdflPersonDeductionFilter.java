@@ -7,14 +7,6 @@ import java.util.Date;
  */
 public class NdflPersonDeductionFilter {
     /**
-     * id формы
-     */
-    private long declarationDataId;
-    /**
-     * ИНП
-     */
-    private String inp;
-    /**
      * id операции
      */
     private String operationId;
@@ -42,22 +34,6 @@ public class NdflPersonDeductionFilter {
      * Дата текущего вычета по
      */
     private Date deductionDateTo;
-
-    public long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
 
     public String getOperationId() {
         return operationId;

@@ -5,10 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.SubreportAliasConstants;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonIncome;
@@ -25,7 +22,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
@@ -36,10 +32,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Andrey Drunk
@@ -59,9 +59,6 @@ public class NdflPersonDaoTest {
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private PagingParams pagingParams;
 
     @Test
     public void buildQueryTest() {
@@ -124,945 +121,749 @@ public class NdflPersonDaoTest {
         Assert.assertEquals(3, result.size());
     }
 
-   /* @Test
-    public void testUpdatePersonRefBookReferences() {
-
-        List<NaturalPerson> ndflPersonList = ndflPersonDao.fetchByDeclarationData(2);
-        assertEquals(10, ndflPersonList.size());
-
-        for (NaturalPerson person : ndflPersonList) {
-            person.setPersonId(Long.valueOf(new Random().nextInt(1000)));
-        }
-
-        ndflPersonDao.updatePersonRefBookReferences(ndflPersonList);
-
-        List<NdflPerson> updatedList = ndflPersonDao.fetchByDeclarationData(2);
-        assertEquals(10, updatedList.size());
-
-        for (NdflPerson person : updatedList) {
-            assertNotNull(person.getPersonId());
-        }
-    }*/
-
-    @Test
-    public void testPersonCount() {
-        int result = ndflPersonDao.getPersonCount(1);
-        assertEquals(3, result);
-    }
-
-    @Test
-    public void testIncomeCount() {
-        int result = ndflPersonDao.getPersonIncomeCount(1);
-        assertEquals(3, result);
-    }
-
-    @Test
-    public void testDeductionCount() {
-        int result = ndflPersonDao.getPersonDeductionsCount(1);
-        assertEquals(2, result);
-    }
-
-    @Test
-    public void testPrepaymentCount() {
-        int result = ndflPersonDao.getPersonPrepaymentCount(1);
-        assertEquals(2, result);
+    private PagingParams pagingParams(int page, int count, String direction, String property) {
+        PagingParams pagingParams = PagingParams.getInstance(page, count);
+        pagingParams.setDirection(direction);
+        pagingParams.setProperty(property);
+        return pagingParams;
     }
 
     @Test
     public void testFindPersonIncomeByParametersInp() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getInp()).thenReturn("100500");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("inp");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPerson().setInp("100500");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersOperationId() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getOperationId()).thenReturn("1");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("operationId");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setOperationId("1");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "operationId");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(1, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersKpp() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getKpp()).thenReturn("2222");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("kpp");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setKpp("2222");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "kpp");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersOktmo() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getOktmo()).thenReturn("111222333");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("oktmo");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setOktmo("111222333");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "oktmo");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersIncomeCode() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getIncomeCode()).thenReturn("1010");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("incomeCode");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setIncomeCode("1010");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeCode");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersIncomeType() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getIncomeAttr()).thenReturn("00");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("incomeType");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setIncomeAttr("00");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeType");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersTaxRate() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getTaxRate()).thenReturn("13");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("taxRate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRate("13");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "taxRate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersIncomePaymentNumber() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getNumberPaymentOrder()).thenReturn("0");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("paymentNumber");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setNumberPaymentOrder("0");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "paymentNumber");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersTransferDateFrom() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getTransferDateFrom()).thenReturn(new Date(1L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("taxTransferDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTransferDateFrom(new Date(1L));
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "taxTransferDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersTransferDateTo() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getTransferDateTo()).thenReturn(new Date(30000000000000L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTransferDateTo(new Date(30000000000000L));
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "taxTransferDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersCalculationDateFrom() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getCalculationDateFrom()).thenReturn(new Date(1L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("taxDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setCalculationDateFrom(new Date(1L));
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "taxDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersCalculationDateTo() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getCalculationDateTo()).thenReturn(new Date(30000000000000L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("taxDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setCalculationDateTo(new Date(30000000000000L));
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "taxDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersPaymentDateFrom() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getPaymentDateFrom()).thenReturn(new Date(1L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("paymentDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setPaymentDateFrom(new Date(1L));
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "paymentDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersPaymentDateTo() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(filter.getPaymentDateTo()).thenReturn(new Date(30000000000000L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("paymentDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setPaymentDateTo(new Date(30000000000000L));
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "paymentDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
         assertEquals(3, result.size());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByAccruedDate() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("incomeAccruedDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRate("13");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "incomeAccruedDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByPayoutDate() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("incomePayoutDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "incomePayoutDate");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByAccruedSumm() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("incomeAccruedSumm");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "incomeAccruedSumm");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByPayoutSumm() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("incomePayoutSumm");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "incomePayoutSumm");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByTotalDeductionsSumm() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("totalDeductionsSumm");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getIncome().setTaxRate("13");
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "totalDeductionsSumm");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByTaxBase() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("taxBase");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "taxBase");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByCalculatedTax() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("calculatedTax");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "calculatedTax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByWithholdingTax() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("withholdingTax");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "withholdingTax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByNotHoldingTax() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("notHoldingTax");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "notHoldingTax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByNotOverholdingTax() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("overholdingTax");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "overholdingTax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByRefoundTax() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("refoundTax");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "refoundTax");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonIncomeByParametersSortByTaxSumm() {
-        NdflPersonIncomeFilter filter = Mockito.mock(NdflPersonIncomeFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("taxSumm");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "taxSumm");
+        List<NdflPersonIncomeDTO> result = ndflPersonDao.fetchPersonIncomeByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonDeductionByParametersInp() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getInp()).thenReturn("100500");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("inp");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPerson().setInp("100500");
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersOperationId() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getOperationId()).thenReturn("1");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("operationId");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getDeduction().setOperationId("1");
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "operationId");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(1, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersTypeCode() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getDeductionCode()).thenReturn("100");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("typeCode");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getDeduction().setDeductionCode("100");
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "typeCode");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersIncomeCode() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getIncomeCode()).thenReturn("0000");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("incomeCode");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getDeduction().setIncomeCode("0000");
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeCode");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersCalculationDateFrom() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getIncomeAccruedDateFrom()).thenReturn(new Date(1L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("incomeAccrued");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getDeduction().setIncomeAccruedDateFrom(new Date(1L));
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeAccrued");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersCalculationDateTo() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getIncomeAccruedDateTo()).thenReturn(new Date(30000000000000L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("incomeAccrued");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getDeduction().setIncomeAccruedDateTo(new Date(30000000000000L));
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "incomeAccrued");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersPeriodCurrDateFrom() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getDeductionDateFrom()).thenReturn(new Date(1L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("periodCurrDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getDeduction().setDeductionDateFrom(new Date(1L));
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "periodCurrDate");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersPeriodCurrDateTo() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(filter.getDeductionDateTo()).thenReturn(new Date(30000000000000L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("periodCurrDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getDeduction().setDeductionDateTo(new Date(30000000000000L));
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "periodCurrDate");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortByNotifType() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("notifType");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "notifType");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortByNotifDate() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("notifDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "notifDate");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortByNotifNum() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("notifNum");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "notifNum");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortByNotifSource() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("notifSource");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "notifSource");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortByNotifSumm() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("notifSumm");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "notifSumm");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortByIncomeSumm() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("incomeSumm");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "incomeSumm");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortByPeriodPrevDate() {
-        NdflPersonDeductionFilter filter = Mockito.mock(NdflPersonDeductionFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("periodPrevDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "periodPrevDate");
+        List<NdflPersonDeductionDTO> result = ndflPersonDao.fetchPersonDeductionByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
     public void testFindpersonPrepaymentByParametersInp() {
-        NdflPersonPrepaymentFilter filter = Mockito.mock(NdflPersonPrepaymentFilter.class);
-        when(filter.getInp()).thenReturn("100500");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("inp");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPerson().setInp("100500");
 
-        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
+        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindpersonPrepaymentByParametersOperationId() {
-        NdflPersonPrepaymentFilter filter = Mockito.mock(NdflPersonPrepaymentFilter.class);
-        when(filter.getOperationId()).thenReturn("1");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("operationId");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPrepayment().setOperationId("1");
 
-        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "operationId");
+        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
         assertEquals(1, result.size());
     }
 
     @Test
     public void testFindpersonPrepaymentByParametersNotifNum() {
-        NdflPersonPrepaymentFilter filter = Mockito.mock(NdflPersonPrepaymentFilter.class);
-        when(filter.getNotifNum()).thenReturn("1");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("notifNum");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPrepayment().setNotifNum("1");
 
-        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "notifNum");
+        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindpersonPrepaymentByParametersNotifSource() {
-        NdflPersonPrepaymentFilter filter = Mockito.mock(NdflPersonPrepaymentFilter.class);
-        when(filter.getNotifSource()).thenReturn("01");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("notifSource");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPrepayment().setNotifSource("01");
 
-        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "notifSource");
+        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonPrepaymentByParametersNotifDateFrom() {
-        NdflPersonPrepaymentFilter filter = Mockito.mock(NdflPersonPrepaymentFilter.class);
-        when(filter.getNotifDateFrom()).thenReturn(new Date(1L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("notifDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPrepayment().setNotifDateFrom(new Date(1L));
 
-        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "notifDate");
+        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonPrepaymentByParametersNotifDateTo() {
-        NdflPersonPrepaymentFilter filter = Mockito.mock(NdflPersonPrepaymentFilter.class);
-        when(filter.getNotifDateTo()).thenReturn(new Date(30000000000000L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("notifDate");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
+        filter.getPrepayment().setNotifDateTo(new Date(30000000000000L));
 
-        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(1, filter, pagingParams);
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "notifDate");
+        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
     public void testFindPersonDeductionByParametersSortBySumm() {
-        NdflPersonPrepaymentFilter filter = Mockito.mock(NdflPersonPrepaymentFilter.class);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("desc");
-        when(pagingParams.getProperty()).thenReturn("summ");
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(1);
 
-        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(1, filter, pagingParams);
-        assertEquals(   "2", result.get(0).getOperationId());
+        PagingParams pagingParams = pagingParams(1, 100, "desc", "summ");
+        List<NdflPersonPrepaymentDTO> result = ndflPersonDao.fetchPersonPrepaymentByParameters(filter, pagingParams);
+        assertEquals("2", result.get(0).getOperationId());
     }
 
     @Test
-    public void testFindNdflPersonByParametersInp(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getInp()).thenReturn("1234567890");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("inp");
+    public void testFindNdflPersonByParametersInp() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setInp("1234567890");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "inp");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(9, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersInnNp(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getInnNp()).thenReturn("123456780");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("innNp");
+    public void testFindNdflPersonByParametersInnNp() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setInnNp("123456780");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "innNp");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(9, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersInnForeign(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getInnForeign()).thenReturn("123456770");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("innForeign");
+    public void testFindNdflPersonByParametersInnForeign() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setInnForeign("123456770");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "innForeign");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(8, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSnils(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getSnils()).thenReturn("123456760");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("snils");
+    public void testFindNdflPersonByParametersSnils() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setSnils("123456760");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "snils");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(7, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersIdDocNumber(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getIdDocNumber()).thenReturn("0000");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("idDocNumber");
+    public void testFindNdflPersonByParametersIdDocNumber() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setIdDocNumber("0000");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "idDocNumber");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(10, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersLastName(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getLastName()).thenReturn("Иванов");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("lastName");
+    public void testFindNdflPersonByParametersLastName() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setLastName("Иванов");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "lastName");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(8, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersFirstName(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getFirstName()).thenReturn("Ivan");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("firstName");
+    public void testFindNdflPersonByParametersFirstName() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setFirstName("Ivan");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "firstName");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(2, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersMiddleName(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getMiddleName()).thenReturn("Петрович");
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("middleName");
+    public void testFindNdflPersonByParametersMiddleName() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setMiddleName("Петрович");
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "middleName");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(10, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersDateFrom(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getDateFrom()).thenReturn(new Date(1L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("birthDay");
+    public void testFindNdflPersonByParametersDateFrom() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setDateFrom(new Date(1L));
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "birthDay");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(10, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersDateTo(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(filter.getDateTo()).thenReturn(new Date(30000000000000L));
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("birthDay");
+    public void testFindNdflPersonByParametersDateTo() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
+        filter.getPerson().setDateTo(new Date(30000000000000L));
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "birthDay");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals(10, result.size());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByCitizenship(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("citizenship");
+    public void testFindNdflPersonByParametersSortByCitizenship() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "citizenship");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
-        assertEquals(   "001", result.get(0).getCitizenship());
+        assertEquals("001", result.get(0).getCitizenship());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByIdDocType(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("idDocType");
+    public void testFindNdflPersonByParametersSortByIdDocType() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "idDocType");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("11", result.get(0).getIdDocType());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByStatus(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("status");
+    public void testFindNdflPersonByParametersSortByStatus() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "status");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("1", result.get(0).getStatus());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByRegionCode(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("regionCode");
+    public void testFindNdflPersonByParametersSortByRegionCode() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "regionCode");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("01", result.get(0).getRegionCode());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByPostIndex(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("postIndex");
+    public void testFindNdflPersonByParametersSortByPostIndex() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "postIndex");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("123456", result.get(0).getPostIndex());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByArea(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("area");
+    public void testFindNdflPersonByParametersSortByArea() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "area");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("Область1", result.get(0).getArea());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByCity(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("city");
+    public void testFindNdflPersonByParametersSortByCity() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "city");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("Город1", result.get(0).getCity());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByLocality(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("locality");
+    public void testFindNdflPersonByParametersSortByLocality() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "locality");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("Район1", result.get(0).getLocality());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByStreet(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("street");
+    public void testFindNdflPersonByParametersSortByStreet() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "street");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("Улица1", result.get(0).getStreet());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByHouse(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("house");
+    public void testFindNdflPersonByParametersSortByHouse() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "house");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("1", result.get(0).getHouse());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByBuilding(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("building");
+    public void testFindNdflPersonByParametersSortByBuilding() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "building");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("2", result.get(0).getBuilding());
     }
 
     @Test
-    public void testFindNdflPersonByParametersSortByFlat(){
-        NdflPersonFilter filter = Mockito.mock(NdflPersonFilter.class);
-        when(filter.getDeclarationDataId()).thenReturn(2L);
-        when(pagingParams.getCount()).thenReturn(100);
-        when(pagingParams.getPage()).thenReturn(1);
-        when(pagingParams.getDirection()).thenReturn("asc");
-        when(pagingParams.getProperty()).thenReturn("flat");
+    public void testFindNdflPersonByParametersSortByFlat() {
+        NdflFilter filter = new NdflFilter();
+        filter.setDeclarationDataId(2);
 
+        PagingParams pagingParams = pagingParams(1, 100, "asc", "flat");
         List<NdflPerson> result = ndflPersonDao.fetchNdflPersonByParameters(filter, pagingParams);
         assertEquals("3", result.get(0).getFlat());
     }

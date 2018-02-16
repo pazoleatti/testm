@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.ndfl;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonDeductionFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonIncomeFilter;
-import com.aplana.sbrf.taxaccounting.model.filter.NdflPersonPrepaymentFilter;
+import com.aplana.sbrf.taxaccounting.model.filter.NdflFilter;
 import com.aplana.sbrf.taxaccounting.model.identification.NaturalPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPersonDeduction;
@@ -77,14 +74,6 @@ public interface NdflPersonDao {
     List<NdflPerson> fetchByDeclarationData(long declarationDataId);
 
     /**
-     * Найти количество записей данных НДФЛ ФЛ привязанных к налоговой форме
-     *
-     * @param declarationDataId идентификатор налоговой формы
-     * @return количество записей в списке заполненном данными из таблицы NDFL_PERSON
-     */
-    int getPersonCount(long declarationDataId);
-
-    /**
      * Найти все "Сведения о доходах физического лица" привязанные к налоговой форме
      *
      * @param declarationDataId идентификатор налоговой формы
@@ -93,22 +82,13 @@ public interface NdflPersonDao {
     List<NdflPersonIncome> fetchNdflPersonIncomeByDeclarationData(long declarationDataId);
 
     /**
-     * Найти количество записей данных о доходах и НДФЛ привязанных к декларации
-     *
-     * @param declarationDataId идентификатор декларации
-     * @return количество записей в списке заполненном данными из таблиц NDFL_PERSON и NDFL_PERSON_INCOME
-     */
-    int getPersonIncomeCount(long declarationDataId);
-
-    /**
      * Найти все NdflPersonIncome по заданным параметрам
      *
-     * @param declarationDataId      идентификатор декларации
-     * @param ndflPersonIncomeFilter параметры фильтра
+     * @param ndflFilter параметры фильтра
      * @param pagingParams           параметры вывода результата
      * @return список объектов DTO доходов
      */
-    public PagingResult<NdflPersonIncomeDTO> fetchPersonIncomeByParameters(long declarationDataId, NdflPersonIncomeFilter ndflPersonIncomeFilter, PagingParams pagingParams);
+    public PagingResult<NdflPersonIncomeDTO> fetchPersonIncomeByParameters(NdflFilter ndflFilter, PagingParams pagingParams);
 
     /**
      * Найти все "Стандартные, социальные и имущественные налоговые вычеты" привязанные к декларации
@@ -119,22 +99,13 @@ public interface NdflPersonDao {
     List<NdflPersonDeduction> fetchNdflPersonDeductionByDeclarationData(long declarationDataId);
 
     /**
-     * Найти количество записей данных о вычетах привязанных к декларации
-     *
-     * @param declarationDataId идентификатор декларации
-     * @return количество записей в списке заполненном данными из таблиц NDFL_PERSON и NDFL_PERSON_DEDUCTION
-     */
-    int getPersonDeductionsCount(long declarationDataId);
-
-    /**
      * Найти все NdflPersonDeduction по заданным параметрам
      *
-     * @param declarationDataId         идентификатор декларации
-     * @param ndflPersonDeductionFilter параметры фильтра
+     * @param ndflFilter параметры фильтра
      * @param pagingParams              параметры вывода результата
      * @return список DTO вычетов.
      */
-    public PagingResult<NdflPersonDeductionDTO> fetchPersonDeductionByParameters(long declarationDataId, NdflPersonDeductionFilter ndflPersonDeductionFilter, PagingParams pagingParams);
+    public PagingResult<NdflPersonDeductionDTO> fetchPersonDeductionByParameters(NdflFilter ndflFilter, PagingParams pagingParams);
 
     /**
      * Найти все "Cведения о доходах в виде авансовых платежей" привязанные к декларации
@@ -145,22 +116,13 @@ public interface NdflPersonDao {
     List<NdflPersonPrepayment> fetchNdflPersonPrepaymentByDeclarationData(long declarationDataId);
 
     /**
-     * Найти количество записей данных о доходах в виде авансовых платежей привязанные к декларации
-     *
-     * @param declarationDataId идентификатор декларации
-     * @return количество записей в списке заполненном данными из таблиц NDFL_PERSON и NDFL_PERSON_PREPAYMENT
-     */
-    int getPersonPrepaymentCount(long declarationDataId);
-
-    /**
      * Найти все NdflPersonPrepayment по заданным параметрам
      *
-     * @param declarationDataId          идентификатор декларации
-     * @param ndflPersonPrepaymentFilter параметры фильтра
+     * @param ndflFilter параметры фильтра
      * @param pagingParams               параметры вывода результата
      * @return список DTO авансов
      */
-    public PagingResult<NdflPersonPrepaymentDTO> fetchPersonPrepaymentByParameters(long declarationDataId, NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter, PagingParams pagingParams);
+    public PagingResult<NdflPersonPrepaymentDTO> fetchPersonPrepaymentByParameters(NdflFilter ndflFilter, PagingParams pagingParams);
 
     /**
      * Найти данные о доходах ФЛ
@@ -292,11 +254,11 @@ public interface NdflPersonDao {
     /**
      * Найти все NdflPerson по заданным параметрам
      *
-     * @param ndflPersonFilter значения фильтра
+     * @param ndflFilter значения фильтра
      * @param pagingParams     параметры вывода результата
      * @return результат запроса
      */
-    public PagingResult<NdflPerson> fetchNdflPersonByParameters(NdflPersonFilter ndflPersonFilter, PagingParams pagingParams);
+    public PagingResult<NdflPerson> fetchNdflPersonByParameters(NdflFilter ndflFilter, PagingParams pagingParams);
 
     /**
      * Найти количество NdflPerson по заданным параметрам

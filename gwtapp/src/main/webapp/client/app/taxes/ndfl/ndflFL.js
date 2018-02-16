@@ -37,19 +37,7 @@
                         requestParameters: function () {
                             return {
                                 projection: "ndflPersons",
-                                ndflPersonFilter: JSON.stringify({
-                                    declarationDataId: $stateParams.declarationDataId,
-                                    inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
-                                    innNp: $filter('requestParamsFormatter')($scope.searchFilter.params.innNp),
-                                    innForeign: $filter('requestParamsFormatter')($scope.searchFilter.params.innForeign),
-                                    snils: $filter('requestParamsFormatter')($scope.searchFilter.params.snils),
-                                    idDocNumber: $filter('requestParamsFormatter')($scope.searchFilter.params.idDocNumber),
-                                    lastName: $filter('requestParamsFormatter')($scope.searchFilter.params.lastName),
-                                    firstName: $filter('requestParamsFormatter')($scope.searchFilter.params.firstName),
-                                    middleName: $filter('requestParamsFormatter')($scope.searchFilter.params.middleName),
-                                    dateFrom: $scope.searchFilter.params.dateFrom,
-                                    dateTo: $scope.searchFilter.params.dateTo
-                                })
+                                ndflFilter: JSON.stringify($scope.getNdflFilter())
                             };
                         },
                         height: 250,

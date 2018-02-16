@@ -37,15 +37,7 @@
                         requestParameters: function () {
                             return {
                                 projection: "personsPrepayment",
-                                ndflPersonPrepaymentFilter: JSON.stringify({
-                                    declarationDataId: $stateParams.declarationDataId,
-                                    inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
-                                    operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
-                                    notifNum: $filter('requestParamsFormatter')($scope.searchFilter.params.notifNum),
-                                    notifSource: $filter('requestParamsFormatter')($scope.searchFilter.params.notifSource),
-                                    notifDateFrom: $scope.searchFilter.params.notifDateFrom,
-                                    notifDateTo: $scope.searchFilter.params.notifDateTo
-                                })
+                                ndflFilter: JSON.stringify($scope.getNdflFilter())
                             };
                         },
                         height: 250,

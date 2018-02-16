@@ -8,11 +8,6 @@ import java.util.Date;
 public class NdflPersonFilter {
 
     /**
-     * id формы
-     */
-    private long declarationDataId;
-
-    /**
      * ИНП
      */
     private String inp;
@@ -52,14 +47,6 @@ public class NdflPersonFilter {
      * Дата рождения по
      */
     private  Date dateTo;
-
-    public long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
 
     public String getInp() {
         return inp;

@@ -32,12 +32,12 @@
                                     projection: "existenceAndKind"
                                 },
                                 function (data) {
-                                    if(data.exists && (data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.id || data.declarationKindId ===APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.id)) {
+                                    if (data.exists && (data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.PRIMARY.id || data.declarationKindId === APP_CONSTANTS.NDFL_DECLARATION_KIND.CONSOLIDATED.id)) {
                                         d.resolve();
                                     } else {
                                         d.reject();
                                         var message;
-                                        if(data.exists) {
+                                        if (data.exists) {
                                             message = $filter('translate')('ndfl.notPersonalOrConsolidatedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.notPersonalOrConsolidatedDeclarationDataEnd');
                                         } else {
                                             message = $filter('translate')('ndfl.removedDeclarationDataBegin') + $stateParams.declarationDataId + $filter('translate')('ndfl.removedDeclarationDataEnd');
@@ -85,7 +85,7 @@
                             if (data) {
                                 var isRefreshGridNeeded = false;
                                 if ($scope.declarationData && $scope.declarationData.actualDataDate &&
-                                        $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
+                                    $scope.declarationData.actualDataDate < data.lastDataModifiedDate) {
                                     isRefreshGridNeeded = true;
                                 }
                                 $scope.declarationData = data;
@@ -215,6 +215,58 @@
                     $scope.isClear = false;
 
                     $scope.submitSearch();
+                };
+
+                /**
+                 * @description возвращяет фильтр, который будет отправлен на сервер для составления запросов
+                 */
+                $scope.getNdflFilter = function () {
+                    return {
+                        declarationDataId: $stateParams.declarationDataId,
+                        person: {
+                            inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
+                            innNp: $filter('requestParamsFormatter')($scope.searchFilter.params.innNp),
+                            innForeign: $filter('requestParamsFormatter')($scope.searchFilter.params.innForeign),
+                            snils: $filter('requestParamsFormatter')($scope.searchFilter.params.snils),
+                            idDocNumber: $filter('requestParamsFormatter')($scope.searchFilter.params.idDocNumber),
+                            lastName: $filter('requestParamsFormatter')($scope.searchFilter.params.lastName),
+                            firstName: $filter('requestParamsFormatter')($scope.searchFilter.params.firstName),
+                            middleName: $filter('requestParamsFormatter')($scope.searchFilter.params.middleName),
+                            dateFrom: $scope.searchFilter.params.dateFrom,
+                            dateTo: $scope.searchFilter.params.dateTo
+                        },
+                        income: {
+                            operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
+                            kpp: $filter('requestParamsFormatter')($scope.searchFilter.params.kpp),
+                            oktmo: $filter('requestParamsFormatter')($scope.searchFilter.params.oktmo),
+                            incomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeCode),
+                            incomeAttr: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeAttr),
+                            taxRate: $filter('requestParamsFormatter')($scope.searchFilter.params.taxRate),
+                            numberPaymentOrder: $filter('requestParamsFormatter')($scope.searchFilter.params.numberPaymentOrder),
+                            transferDateFrom: $scope.searchFilter.params.transferDateFrom,
+                            transferDateTo: $scope.searchFilter.params.transferDateTo,
+                            calculationDateFrom: $scope.searchFilter.params.calculationDateFrom,
+                            calculationDateTo: $scope.searchFilter.params.calculationDateTo,
+                            paymentDateFrom: $scope.searchFilter.params.paymentDateFrom,
+                            paymentDateTo: $scope.searchFilter.params.paymentDateTo
+                        },
+                        deduction: {
+                            operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
+                            deductionCode: $filter('requestParamsFormatter')($scope.searchFilter.params.deductionCode),
+                            deductionIncomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.deductionIncomeCode),
+                            incomeAccruedDateFrom: $scope.searchFilter.params.incomeAccruedDateFrom,
+                            incomeAccruedDateTo: $scope.searchFilter.params.incomeAccruedDateTo,
+                            deductionDateFrom: $scope.searchFilter.params.deductionDateFrom,
+                            deductionDateTo: $scope.searchFilter.params.deductionDateTo
+                        },
+                        prepayment: {
+                            operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
+                            notifNum: $filter('requestParamsFormatter')($scope.searchFilter.params.notifNum),
+                            notifSource: $filter('requestParamsFormatter')($scope.searchFilter.params.notifSource),
+                            notifDateFrom: $scope.searchFilter.params.notifDateFrom,
+                            notifDateTo: $scope.searchFilter.params.notifDateTo
+                        }
+                    }
                 };
 
                 /**
@@ -368,10 +420,10 @@
                             value: $scope.searchFilter.params.deductionCode
                         });
                     }
-                    if ($scope.searchFilter.params.incomeCode) {
+                    if ($scope.searchFilter.params.deductionIncomeCode) {
                         $scope.searchFilter.ajaxFilter.push({
-                            property: "incomeCode",
-                            value: $scope.searchFilter.params.incomeCode
+                            property: "deductionIncomeCode",
+                            value: $scope.searchFilter.params.deductionIncomeCode
                         });
                     }
                     if ($scope.searchFilter.params.calculationDateFrom) {
@@ -596,35 +648,37 @@
                         force = typeof force !== 'undefined' ? force : false;
                         cancelTask = typeof cancelTask !== 'undefined' ? cancelTask : false;
                     }
-                    acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId },{
-                        taxType: 'NDFL',
-                            force: force ,
+                    acceptDeclarationData.query({declarationDataId: $stateParams.declarationDataId}, {
+                            taxType: 'NDFL',
+                            force: force,
                             cancelTask: cancelTask
                         },
-                    function (response) {
-                        if (response.uuid && response.uuid !== null) {
-                            $logPanel.open('log-panel-container', response.uuid);
-                            initPage();
-                        } else {
-                            if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
-                                $dialogs.confirmDialog({
-                                    content: response.restartMsg,
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick:function () {
-                                        $scope.accept(true, cancelTask);
-                                    }
-                            });
-                            } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST_TASK && !cancelTask) {
-                                $dialogs.confirmDialog({
-                                    content:$filter('translate')('title.returnExistTask'),
-                                    okBtnCaption: $filter('translate')('common.button.yes'),
-                                    cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick:function () {
-                                        $scope.accept(force, true);}
+                        function (response) {
+                            if (response.uuid && response.uuid !== null) {
+                                $logPanel.open('log-panel-container', response.uuid);
+                                initPage();
+                            } else {
+                                if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
+                                    $dialogs.confirmDialog({
+                                        content: response.restartMsg,
+                                        okBtnCaption: $filter('translate')('common.button.yes'),
+                                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                                        okBtnClick: function () {
+                                            $scope.accept(true, cancelTask);
+                                        }
                                     });
-                            } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
-                                $window.alert($filter('translate')('title.acceptImpossible'));}
+                                } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.EXIST_TASK && !cancelTask) {
+                                    $dialogs.confirmDialog({
+                                        content: $filter('translate')('title.returnExistTask'),
+                                        okBtnCaption: $filter('translate')('common.button.yes'),
+                                        cancelBtnCaption: $filter('translate')('common.button.no'),
+                                        okBtnClick: function () {
+                                            $scope.accept(force, true);
+                                        }
+                                    });
+                                } else if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.NOT_EXIST_XML) {
+                                    $window.alert($filter('translate')('title.acceptImpossible'));
+                                }
                             }
                         }
                     );
@@ -646,10 +700,10 @@
                         } else {
                             if (response.status === APP_CONSTANTS.CREATE_ASYNC_TASK_STATUS.LOCKED && !force) {
                                 $dialogs.confirmDialog({
-                                    content:response.restartMsg,
+                                    content: response.restartMsg,
                                     okBtnCaption: $filter('translate')('common.button.yes'),
                                     cancelBtnCaption: $filter('translate')('common.button.no'),
-                                    okBtnClick:function () {
+                                    okBtnClick: function () {
                                         $scope.check(true);
                                     }
                                 });

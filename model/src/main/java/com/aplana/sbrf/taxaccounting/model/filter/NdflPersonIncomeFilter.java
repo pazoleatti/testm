@@ -7,14 +7,6 @@ import java.util.Date;
  */
 public class NdflPersonIncomeFilter {
     /**
-     * id формы
-     */
-    private long declarationDataId;
-    /**
-     * ИНП
-     */
-    private String inp;
-    /**
      * id операции
      */
     private String operationId;
@@ -66,22 +58,6 @@ public class NdflPersonIncomeFilter {
      * Дата платежного поручения по
      */
     private Date paymentDateTo;
-
-    public long getDeclarationDataId() {
-        return declarationDataId;
-    }
-
-    public void setDeclarationDataId(long declarationDataId) {
-        this.declarationDataId = declarationDataId;
-    }
-
-    public String getInp() {
-        return inp;
-    }
-
-    public void setInp(String inp) {
-        this.inp = inp;
-    }
 
     public String getOperationId() {
         return operationId;
