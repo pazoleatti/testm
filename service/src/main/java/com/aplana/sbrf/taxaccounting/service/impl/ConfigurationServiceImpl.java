@@ -29,7 +29,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 
 //TODO Необходимо организовать проверку прав доступа в ConfigurationServiceImpl, через com.aplana.sbrf.taxaccounting.permissions.Permission. https://jira.aplana.com/browse/SBRFNDFL-3173
-@Service
+@Service("configurationService")
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
     private static final int INN_JUR_LENGTH = 10;
@@ -90,6 +90,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'F_ROLE_OPER')")
     public ConfigurationParamModel getCommonConfig(TAUserInfo userInfo) {
+        return getCommonConfigUnsafe();
+    }
+
+    @Override
+    public ConfigurationParamModel getCommonConfigUnsafe() {
         return configurationDao.fetchAllAsModelByGroup(ConfigurationParamGroup.COMMON_PARAM);
     }
 
