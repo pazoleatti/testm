@@ -207,24 +207,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     }
 
     @Override
-    public PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams) {
-        String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON));
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("start", pagingParams.getStartIndex() + 1);
-        params.addValue("end", pagingParams.getStartIndex() + pagingParams.getCount());
-        List<Configuration> asyncTaskTypeDataList = getNamedParameterJdbcTemplate().query(
-                "select * from (" +
-                        "   select rownum rn, ordered.* from (select code, department_id, value from configuration" + where + ") ordered " +
-                        ") numbered " +
-                        "where rn between :start and :end order by code",
-                params, configurationRowMapper
-        );
-        int totalCount = getJdbcTemplate().queryForObject("select count(*) from (select code, value from configuration" + where + ")", Integer.class);
-        return new PagingResult<>(asyncTaskTypeDataList, totalCount);
-    }
-
-    @Override
     public void createCommonParam(ConfigurationParam param, String value) {
         getJdbcTemplate().update("INSERT INTO CONFIGURATION VALUES (?, 0, ?) ",
                 new Object[]{param.name(), value},
@@ -235,11 +217,6 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
     public void removeCommonParam(List<ConfigurationParam> params) {
         String where = " where " + SqlUtils.transformToSqlInStatementForStringFromObject("code", params);
         getJdbcTemplate().update("DELETE FROM CONFIGURATION" + where);
-    }
-
-    @Override
-    public void updateCommonParam(ConfigurationParam commonParam, String value) {
-        getJdbcTemplate().update("UPDATE CONFIGURATION SET VALUE=" + value + " WHERE CODE='" + commonParam.name() + "'");
     }
 
     @Override

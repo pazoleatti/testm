@@ -2,7 +2,7 @@
     'use strict';
 
     /**
-     * @description Модуль для работы окном 'Общие параметры'
+     * @description Модуль для работы с формой 'Налоги - Общие параметры'
      */
 
     angular.module('app.commonParams', ['ui.router', 'app.rest', 'app.editParams'])
@@ -18,8 +18,8 @@
         /**
          * @description Контроллер для общих параметров
          */
-        .controller('commonParamsCtrl', ['$scope', 'CommonParams', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS', '$dialogs',
-            function ($scope, CommonParams, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs) {
+        .controller('commonParamsCtrl', ['$scope', 'CommonParamResource', '$filter', '$http', '$aplanaModal', 'APP_CONSTANTS', '$dialogs',
+            function ($scope, CommonParamResource, $filter, $http, $aplanaModal, APP_CONSTANTS, $dialogs) {
 
                 /**
                  * @description Создание и заполнение грида
@@ -29,7 +29,12 @@
                     value: [],
                     options: {
                         datatype: "angularResource",
-                        angularResource: CommonParams,
+                        angularResource: CommonParamResource,
+                        requestParameters : function () {
+                            return {
+                                 projection: 'taxesCommonParam'
+                            };
+                        },
                         height: 280,
                         colNames: [
                             "",
@@ -63,7 +68,7 @@
                         okBtnClick: function () {
                             $http({
                                 method: "POST",
-                                url: "controller/actions/commonParams/changeToDefaultCommonParams"
+                                url: "controller/actions/configuration/commonParams/changeToDefaultCommonParams"
                             }).then(function () {
                                 $scope.commonParamsGrid.ctrl.refreshGrid();
                             });

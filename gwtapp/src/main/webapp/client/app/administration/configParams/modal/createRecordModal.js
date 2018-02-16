@@ -35,8 +35,8 @@
                             $scope.asyncParam = {};
                         } else {
                             $scope.asyncParam.param = $shareData.asyncParam;
-                            $scope.asyncParam.taskLimit = $shareData.asyncParam.taskLimit;
-                            $scope.asyncParam.shortQueueLimit = $shareData.asyncParam.shortQueueLimit;
+                            $scope.asyncParam.taskLimit = $shareData.asyncParam.taskLimit === 0 ? "" : $shareData.asyncParam.taskLimit;
+                            $scope.asyncParam.shortQueueLimit = $shareData.asyncParam.shortQueueLimit === 0 ? "" : $shareData.asyncParam.shortQueueLimit;
                         }
                         break;
                     default:
@@ -56,6 +56,7 @@
                                     url: "controller/action/configuration/commonParam/" + ($scope.isCreate ? "create" : "update"),
                                     params: {
                                         commonParam: JSON.stringify({
+                                            code: $scope.commonParam.param.code,
                                             description: $scope.commonParam.param.description,
                                             value: $scope.commonParam.value
                                         })
@@ -172,7 +173,7 @@
                             return checkAccessQDefer.promise;
                         }
                         // проверка, что значения параметра "Загрузка данных из файла в справочник" меньше, чем 1500000
-                        if($scope.asyncParam.shortQueueLimit && $scope.asyncParam.param.handlerClassName === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)){
+                        if($scope.asyncParam.param.handlerClassName === APP_CONSTANTS.ASYNC_HANDLER_CLASS_NAME.UPLOAD_REFBOOK_ASYNC_TASK && (Number($scope.asyncParam.taskLimit) > 1500000 || Number($scope.asyncParam.shortQueueLimit) > 1500000)){
                             $dialogs.errorDialog({
                                 content: $filter('translate')('asyncParam.validate.tooMuch', {
                                     taskTitle: $scope.asyncParam.param.name,

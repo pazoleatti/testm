@@ -46,7 +46,7 @@ public interface ConfigurationDao {
      * Возвращяет страницу конфигурационных параметров
      *
      * @param pagingParams параметры пагинации
-     * @return страница {@link Configuration}
+     * @return страница {@link Configuration} или пустой список
      */
     PagingResult<Configuration> fetchAllByGroupAndPaging(ConfigurationParamGroup group, PagingParams pagingParams);
 
@@ -96,13 +96,6 @@ public interface ConfigurationDao {
      */
     void update(List<Configuration> configurations);
 
-    /**
-     * Получение конфигураций параметров "Общие параметры"
-     *
-     * @param pagingParams параметры пагинации
-     * @return список {@link Configuration} или пустой список
-     */
-    PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams);
 
     /**
      * Создание нового значения для конфигураций параметров "Общие параметры"
@@ -118,14 +111,6 @@ public interface ConfigurationDao {
      * @param params список удаляемых параметров
      */
     void removeCommonParam(List<ConfigurationParam> params);
-
-    /**
-     * Обновление записи конфигурационного параметра "Общие параметры"
-     *
-     * @param commonParam обновляемый параметр
-     * @param value       значение параметра
-     */
-    void updateCommonParam(ConfigurationParam commonParam, String value);
 
     /**
      * Обновление записи конфигурационного параметра "Параметры асинхронных задач"

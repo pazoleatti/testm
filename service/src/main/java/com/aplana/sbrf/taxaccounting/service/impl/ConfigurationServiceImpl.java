@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -43,8 +42,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String LIMIT_IDENT_DEFAULT = "0.65";
     private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
-    private static final String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
-    private static final String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
     private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
     private static final String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
     private static final String LOAD_WRITE_ERROR = "«%s» для «%s»: отсутствует доступ на запись!";
@@ -85,20 +82,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
     public ConfigurationParamModel fetchAllConfig(TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRoles(TARole.ROLE_ADMIN, TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-            throw new AccessDeniedException(ACCESS_READ_ERROR);
-        }
         return configurationDao.fetchAllAsModel();
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'F_ROLE_OPER')")
     public ConfigurationParamModel getCommonConfig(TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            throw new AccessDeniedException(ACCESS_READ_ERROR);
-        }
         return configurationDao.fetchAllAsModelByGroup(ConfigurationParamGroup.COMMON_PARAM);
     }
 
@@ -143,33 +134,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP')")
     public ConfigurationParamModel fetchAllByDepartment(Integer departmentId, TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
-            throw new AccessDeniedException(ACCESS_READ_ERROR);
-        }
         return configurationDao.fetchAllByDepartment(departmentId);
     }
 
-    public List<Configuration> fetchCommonParameter(TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            throw new AccessDeniedException(ACCESS_READ_ERROR);
-        }
-        return configurationDao.fetchAllByGroup(ConfigurationParamGroup.COMMON_PARAM);
-    }
-
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger) {
         if (model == null) {
             return;
         }
-
-        // Права
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
-            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
-        }
-
         // Длина
         for (ConfigurationParam parameter : model.keySet()) {
             Map<Integer, List<String>> map = model.get(parameter);
@@ -338,14 +313,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void checkReadWriteAccess(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
         if (model == null) {
             return;
-        }
-
-        // Права
-        if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN)) {
-            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
         }
 
         // Проверки общих параметров
@@ -449,12 +420,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('N_ROLE_CONTROL_UNP', 'F_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS', 'F_ROLE_CONTROL_NS', 'N_ROLE_OPER', 'F_ROLE_OPER')")
     public void saveCommonConfigurationParams(Map<ConfigurationParam, String> configurationParamMap, TAUserInfo userInfo) {
-        if (!userInfo.getUser().hasRoles(TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP,
-                TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
-                TARole.N_ROLE_OPER, TARole.F_ROLE_OPER)) {
-            throw new AccessDeniedException(ACCESS_WRITE_ERROR);
-        }
         configurationDao.update(configurationParamMap, COMMON_PARAM_DEPARTMENT_ID);
     }
 
@@ -598,30 +565,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
-    public ActionResult update(TAUserInfo userInfo, Configuration config) {
-        ActionResult result = new ActionResult();
-        Logger logger = new Logger();
-
-        checkConfig(config, logger);
-
-        result.setUuid(logEntryService.save(logger.getEntries()));
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            configurationDao.update(config);
-        }
-        return result;
-    }
-
-    @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public PagingResult<AsyncTaskTypeData> fetchAllAsyncParam(PagingParams pagingParams) {
         return asyncTaskDao.fetchAllAsyncTaskTypeData(pagingParams);
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams) {
-        return configurationDao.fetchAllByGroupAndPaging(ConfigurationParamGroup.COMMON, pagingParams);
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_OPER', 'N_ROLE_CONTROL_UNP', 'N_ROLE_CONTROL_NS')")
+    public PagingResult<Configuration> fetchAllCommonParam(PagingParams pagingParams, ConfigurationParamGroup configurationParamGroup) {
+        return configurationDao.fetchAllByGroupAndPaging(configurationParamGroup, pagingParams);
     }
 
 
@@ -633,9 +585,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             ConfigurationParam param = ConfigurationParam.getValueByCaption(commonParam.getDescription());
             if (param != null) {
                 configurationDao.createCommonParam(param, commonParam.getValue());
+                String message = ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\": " + commonParam.getValue();
                 auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo, userInfo.getUser().getDepartmentId(), null, null,
-                        null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Добавлен параметр \"" + param.getCaption() + "\":" + commonParam.getValue(), null);
-                logger.info("Добавлен параметр " + param.getCaption() + "\":" + commonParam.getValue());
+                        null, null, message, null);
+                logger.info(message);
             }
 
         }
@@ -645,7 +598,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public PagingResult<Configuration> fetchAllNonChangedCommonParam(PagingParams pagingParams) {
-        return notContainsInDB(configurationDao.fetchAllCommonParam(pagingParams), ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON));
+        List<Configuration> result = new ArrayList<>();
+        for (ConfigurationParam param : ConfigurationParam.getParamsByGroup(ConfigurationParamGroup.COMMON)) {
+            result.add(new Configuration(param.name(), param.getCaption()));
+            for (Configuration commonParam : configurationDao.fetchAllByGroupAndPaging(ConfigurationParamGroup.COMMON, pagingParams)) {
+                if (param.name().equals(commonParam.getCode())) {
+                    result.remove(result.size() - 1);
+                    break;
+                }
+            }
+        }
+        return new PagingResult<>(result, result.size());
     }
 
     @Override
@@ -657,9 +620,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             ConfigurationParam param = ConfigurationParam.getValueByCaption(name);
             if (param != null) {
                 params.add(param);
+                String message = ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption();
                 auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                        userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Удален параметр \"" + param.getCaption(), null);
-                logger.info("Удален параметр \"" + param.getCaption() + "\"");
+                        userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+                logger.info(message);
             }
         }
         configurationDao.removeCommonParam(params);
@@ -667,16 +631,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'N_ROLE_CONTROL_UNP')")
     public String updateCommonParam(Configuration commonParam, TAUserInfo userInfo) {
         Logger logger = new Logger();
-        ConfigurationParam param = ConfigurationParam.getValueByCaption(commonParam.getDescription());
-        if (param != null) {
-            configurationDao.updateCommonParam(param, commonParam.getValue());
-            auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                    userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + param.getCaption() + "\": " + commonParam.getValue(), null);
-            logger.info("Изменён параметр \"" + param.getCaption() + "\": " + commonParam.getValue());
-        }
+        checkConfig(commonParam, logger);
+        configurationDao.update(commonParam);
+        String message = ConfigurationParamGroup.COMMON.getCaption() + ". Изменён параметр \"" + commonParam.getDescription() + "\": " + commonParam.getValue();
+        auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
+                userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+        logger.info(message);
+
         return logEntryService.save(logger.getEntries());
     }
 
@@ -687,29 +651,24 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         AsyncTaskTypeData oldAsyncParam = asyncTaskDao.getTaskTypeData(asyncParam.getId());
         configurationDao.updateAsyncParam(asyncParam);
 
+        String message = ConfigurationParamGroup.ASYNC.getCaption() +
+                ". Изменён параметр \"" + ((!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
+                "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? asyncParam.getTaskLimit() :
+                (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "")));
 
         auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.ASYNC.getCaption() +
-                        ". Изменён параметр \"" + ((!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
-                        "\" для задания \"" + oldAsyncParam.getName() + "\":" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? asyncParam.getTaskLimit() :
-                        (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : ""))), null);
-
-
-        logger.info("Изменён параметр \"" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? TASK_LIMIT_FIELD : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
-                "\" для задания \"" + oldAsyncParam.getName() + "\":" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? asyncParam.getTaskLimit() :
-                (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "")));
+                userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+        logger.info(message);
 
         if (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) && !Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit())) {
 
+            message = ConfigurationParamGroup.ASYNC.getCaption() +
+                    ". Изменён параметр \"" + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "") +
+                    "\" для задания \"" + oldAsyncParam.getName() + "\": " + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "");
+
             auditService.add(FormDataEvent.EDIT_CONFIG_PARAMS, userInfo,
-                    userInfo.getUser().getDepartmentId(), null, null, null, null, ConfigurationParamGroup.ASYNC.getCaption() +
-                            ". Изменён параметр \"" + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "") +
-                            "\" для задания \"" + oldAsyncParam.getName() + "\":" + (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : ""), null);
-
-
-            logger.info("Изменён параметр \"" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? SHORT_QUEUE_LIMIT : (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? SHORT_QUEUE_LIMIT : "")) +
-                    "\" для задания \"" + oldAsyncParam.getName() + "\":" + (!Objects.equals(asyncParam.getTaskLimit(), oldAsyncParam.getTaskLimit()) ? asyncParam.getTaskLimit() :
-                    (!Objects.equals(asyncParam.getShortQueueLimit(), oldAsyncParam.getShortQueueLimit()) ? asyncParam.getShortQueueLimit() : "")));
+                    userInfo.getUser().getDepartmentId(), null, null, null, null, message, null);
+            logger.info(message);
 
         }
 
@@ -717,7 +676,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     /**
-     * Проверка параметра на пренадлежность к {@link ConfigurationParam#NO_CODE} или {@link ConfigurationParam#SBERBANK_INN}
+     * Проверка параметра на пренадлежность к {@link ConfigurationParamGroup#COMMON_PARAM}
      *
      * @param config проверяемый параметр
      * @param logger логгер
@@ -791,28 +750,5 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (inn.length() != INN_JUR_LENGTH || !RefBookUtils.checkControlSumInn(inn)) {
             logger.error(INN_JUR_ERROR, inn);
         }
-    }
-
-    /**
-     * Получение конфигураций "Общие параметры", значений которых нет в БД
-     *
-     * @param allCommonParam значения параметров в БД
-     * @param configParams   доступные конфигураций "Общие параметры"
-     * @return страница {@link PagingResult} объектов {@link Configuration}
-     */
-    private PagingResult<Configuration> notContainsInDB(List<Configuration> allCommonParam, List<ConfigurationParam> configParams) {
-        List<Configuration> result = new ArrayList<>();
-        for (ConfigurationParam param : configParams) {
-            boolean contais = false;
-            for (Configuration commonParam : allCommonParam) {
-                if (param.name().equals(commonParam.getCode())) {
-                    contais = true;
-                }
-            }
-            if (!contais) {
-                result.add(new Configuration(result.size() - 1, param.getCaption()));
-            }
-        }
-        return new PagingResult<>(result, result.size());
     }
 }

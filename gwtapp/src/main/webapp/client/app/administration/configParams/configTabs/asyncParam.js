@@ -10,8 +10,8 @@
     /**
      * @description контроллер вкладки "Параметры асинхронных заданий"
      */
-        .controller('asyncParamController', ['$scope', '$filter', 'AsyncTaskResource', 'APP_CONSTANTS', '$aplanaModal', '$rootScope',
-            function ($scope, $filter, AsyncTaskResource, APP_CONSTANTS, $aplanaModal, $rootScope) {
+        .controller('asyncParamController', ['$scope', '$filter', 'AsyncTaskResource', 'APP_CONSTANTS', '$aplanaModal', 'PermissionChecker', '$rootScope',
+            function ($scope, $filter, AsyncTaskResource, APP_CONSTANTS, $aplanaModal, PermissionChecker, $rootScope) {
 
                 $scope.asyncParamGrid = {
                     ctrl: {},
@@ -31,8 +31,18 @@
                         colModel: [
                             {name: 'name', index: 'name', width: 400},
                             {name: 'limitKind', index: 'limitKind', width: 250},
-                            {name: 'taskLimit', index: 'taskLimit', width: 400, formatter: $filter('asyncLimitFormatter')},
-                            {name: 'shortQueueLimit', index: 'shortQueueLimit', width: 650, formatter: $filter('asyncLimitFormatter')}
+                            {
+                                name: 'taskLimit',
+                                index: 'taskLimit',
+                                width: 400,
+                                formatter: $filter('asyncLimitFormatter')
+                            },
+                            {
+                                name: 'shortQueueLimit',
+                                index: 'shortQueueLimit',
+                                width: 650,
+                                formatter: $filter('asyncLimitFormatter')
+                            }
 
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
@@ -46,33 +56,12 @@
                 };
 
                 /**
-                 * @description отлавливает событие обновления грида
-                 */
-                $scope.$on("UPDATE_CONFIG_GRID_DATA", function () {
-                    $scope.asyncParamGrid.ctrl.refreshGrid(1);
-                });
-
-                /**
-                 * @description отлавливает событие редактирования записи
-                 */
-                $scope.$on("EDIT_ASYNC_PARAM", function () {
-                    $scope.updateRecord();
-                });
-
-                /**
-                 * @description отлавливает событие пересчета количества выбранных записей на вкладке "Параметры асинхронных заданий"
-                 */
-                $scope.$on("UPDATE_INFO_ASYNC_GRID_DATA", function () {
-                    $rootScope.configParamGridLength = $scope.asyncParamGrid.value.length;
-                });
-
-                /**
                  * @description открытие модального окна обовления записи
                  */
                 $scope.updateRecord = function () {
                     $aplanaModal.open({
                         tittle: $filter('translate')('configParam.modal.editParam.title'),
-                        templateUrl: 'client/app/taxes/ndfl/configParams/modal/createRecordModal.html?v=${buildUuid}',
+                        templateUrl: 'client/app/administration/configParams/modal/createRecordModal.html?v=${buildUuid}',
                         controller: 'createRecordModalCtrl',
                         windowClass: 'modal1000',
                         resolve: {
@@ -86,10 +75,18 @@
                         }
 
                     }).result.then(function (resolve) {
-                        if (resolve){
+                        if (resolve) {
                             $scope.asyncParamGrid.ctrl.refreshGrid(1);
                         }
                     });
+                };
+
+                /**
+                 * @description проверка прав для записи грида
+                 */
+                $scope.checkPermissionForGridValue = function () {
+                    return PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG) && $scope.asyncParamGrid.value.length === 1;
+
                 };
             }]);
 }());

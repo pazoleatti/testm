@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
-import com.aplana.sbrf.taxaccounting.model.Configuration;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.filter.RequestParamEditor;
 import com.aplana.sbrf.taxaccounting.permissions.ConfigurationPermissionSetter;
 import com.aplana.sbrf.taxaccounting.permissions.Permission;
@@ -64,16 +61,15 @@ public class ConfigurationController {
     }
 
     /**
-     * Получение страницы с данными конфигураций "Общие параметры"
+     * Получение страницы с данными конфигураций "Администрирование - Конфигурационные параметры - Общие параметры"
      *
      * @param pagingParams параметры пагинации
      * @return страница {@link JqgridPagedList} с данными {@link Configuration}
      */
-    @GetMapping(value = "rest/configuration/commonParam")
+    @GetMapping(value = "rest/configuration/commonParam", params = "projection=adminCommonParam")
     public JqgridPagedList<Configuration> fetchAllCommonParam(@RequestParam PagingParams pagingParams) {
-        PagingResult<Configuration> data = configurationService.fetchAllCommonParam(pagingParams);
+        PagingResult<Configuration> data = configurationService.fetchAllCommonParam(pagingParams, ConfigurationParamGroup.COMMON);
         setCommonConfigParamPermission(data);
-        setIds(data);
         return JqgridPagedResourceAssembler.buildPagedList(
                 data,
                 data.getTotalCount(),
@@ -82,9 +78,24 @@ public class ConfigurationController {
     }
 
     /**
-     * Полученние зачений параметров "Общие параметры", для которых не указано значеие
+     * Получение списка с данными конфигураций "Налоги - Общие параметры"
      *
-     * @param pagingParams параметры пагинации
+     * @return список {@link Configuration}
+     */
+    @GetMapping(value = "rest/configuration/commonParam" , params = "projection=taxesCommonParam")
+    public JqgridPagedList<Configuration> fetchCommonParams(@RequestParam PagingParams pagingParams) {
+        PagingResult<Configuration> data = configurationService.fetchAllCommonParam(pagingParams, ConfigurationParamGroup.COMMON_PARAM);
+        setCommonConfigParamPermission(data);
+        return JqgridPagedResourceAssembler.buildPagedList(
+                data,
+                data.getTotalCount(),
+                pagingParams
+        );
+    }
+
+    /**
+     * Полученние зачений параметров "Администрирование - Конфигурационные параметры - Общие параметры", для которых не указано значеие
+     *
      * @return страница {@link JqgridPagedList} с данными {@link Configuration}
      */
     @GetMapping(value = "rest/configuration/commonParam", params = "projection=selectNonChanged")
@@ -150,6 +161,15 @@ public class ConfigurationController {
     }
 
     /**
+     * Установка значений общих параметров по умолчанию
+     */
+    @PostMapping(value = "/actions/configuration/commonParams/changeToDefaultCommonParams")
+    public void setCommonParamsDefault() {
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        configurationService.setCommonParamsDefault(userInfo);
+    }
+
+    /**
      * Устанавливаются права доступа для конфигураций "Общие параметры" через {@link Permission}
      *
      * @param params список параметров
@@ -158,19 +178,5 @@ public class ConfigurationController {
         for (Configuration param : params) {
             configurationPermissionSetter.setPermissions(param, null);
         }
-    }
-
-    /**
-     * Установка id для конфигураций "Общие параметры" для коректного отображения в селекте
-     *
-     * @param pagingResult список параметров
-     * @return список {@link PagingResult} с элементами {@link Configuration}
-     */
-    private PagingResult<Configuration> setIds(PagingResult<Configuration> pagingResult) {
-        int id = 0;
-        for (Configuration configuration : pagingResult) {
-            configuration.setId(id++);
-        }
-        return pagingResult;
     }
 }

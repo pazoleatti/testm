@@ -105,6 +105,13 @@ public final class SqlUtils extends AbstractDao {
 		return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
 	}
 
+	/**
+	 * Сохраняет коллекцию во временную таблицу, а затем формирует sql-условие in с этой таблицей вида "prefix in (...)"
+	 *
+	 * @param prefix     значение, которое будет соединяться со значениями из коллекции
+	 * @param collection коллекция строк
+	 * @return sql-условие вида "prefix in (...)"
+	 */
 	public static String transformToSqlInStatementForString(String prefix, Collection<String> collection) {
 		List<String> strings = new ArrayList<String>();
 		for (String s : collection) {
@@ -114,6 +121,13 @@ public final class SqlUtils extends AbstractDao {
 		return transformToSqlInStatement(prefix, strings, IN_CAUSE_LIMIT);
 	}
 
+	/**
+	 * Сохраняет коллекцию во временную таблицу, а затем формирует sql-условие in с этой таблицей вида "prefix in (...)"
+	 *
+	 * @param prefix     значение, которое будет соединяться со значениями из коллекции
+	 * @param collection коллекция объектов, строковое значение которых используется в запросе (enum)
+	 * @return sql-условие вида "prefix in (...)"
+	 */
 	public static String transformToSqlInStatementForStringFromObject(String prefix, Collection<?> collection) {
 		List<String> strings = new ArrayList<String>();
 		for (Object object : collection) {
