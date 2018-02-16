@@ -128,19 +128,6 @@ public class ConfigurationServiceTest {
         when(providerTax.getRecordsCount(any(Date.class), eq("code = '1'"))).thenReturn(1);
     }
 
-    // Нет прав на сохранение
-    @Test(expected = AccessDeniedException.class)
-    public void saveAllConfig1Test() {
-        TAUserInfo userInfo = new TAUserInfo();
-        TAUser user = new TAUser();
-        userInfo.setUser(user);
-        TARole role = new TARole();
-        role.setAlias(TARole.N_ROLE_CONF);
-        user.setRoles(asList(role));
-        Logger logger = new Logger();
-        service.saveAllConfig(userInfo, new ConfigurationParamModel(), new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
-    }
-
     // Сохранение без ошибок
     @Test
     public void saveAllConfig2Test() throws IOException {
