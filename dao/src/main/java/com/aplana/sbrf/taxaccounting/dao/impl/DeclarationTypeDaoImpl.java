@@ -35,8 +35,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 			res.setId(SqlUtils.getInteger(rs, "id"));
 			res.setName(rs.getString("name"));
             res.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
-            res.setIsIfrs(rs.getBoolean("is_ifrs"));
-            res.setIfrsName(rs.getString("ifrs_name"));
 			return res;
 		}
 	}
@@ -109,8 +107,8 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
     public void updateDT(DeclarationType type) {
         try {
             getJdbcTemplate().update(
-                    "update declaration_type set name = ?, is_ifrs = ?, ifrs_name = ? where id = ?",
-                    type.getName(), type.getIsIfrs(), type.getIfrsName(), type.getId());
+                    "update declaration_type set name = ? where id = ?",
+                    type.getName(), type.getId());
         } catch (DataAccessException e){
 			LOG.error("", e);
             throw new DaoException("", e);
@@ -162,9 +160,5 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
                 new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE},
                 new DeclarationTypeRowMapper()
         );
-    }
-    @Override
-    public List<Integer> getIfrsDeclarationTypes() {
-        return getJdbcTemplate().queryForList("SELECT id FROM declaration_type where status = 0 and is_ifrs = 1", Integer.class);
     }
 }

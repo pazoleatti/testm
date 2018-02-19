@@ -155,14 +155,6 @@ public interface DeclarationDataDao extends PermissionDao {
     DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
 
     /**
-     * Поиск декларации необходимых для формирования отчетности для МСФО
-     *
-     * @param reportPeriodId
-     * @return
-     */
-    List<DeclarationData> getIfrs(int reportPeriodId);
-
-    /**
      * Находим декларации, относящиеся к отчетным периодам, с которыми новый период актуальности версии макета не пересекается
      *
      * @param decTemplateId идентификатор версии макета НФ

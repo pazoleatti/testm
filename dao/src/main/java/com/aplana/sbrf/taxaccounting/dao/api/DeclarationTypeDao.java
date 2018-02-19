@@ -59,9 +59,4 @@ public interface DeclarationTypeDao {
 	 */
 	List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds);
 
-    /**
-     * Получить список налоговых форм для отчетности МСФО
-     * @return список видов налоговых форм
-     */
-    List<Integer> getIfrsDeclarationTypes();
 }
