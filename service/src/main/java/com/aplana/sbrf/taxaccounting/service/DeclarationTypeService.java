@@ -18,9 +18,4 @@ public interface DeclarationTypeService {
     List<DeclarationType> listAll();
     List<DeclarationType> getByFilter(TemplateFilter filter);
 	List<DeclarationType> getTypes(int departmentId, int reportPeriod, TaxType taxType, List<DeclarationFormKind> declarationFormKinds);
-    /**
-     * Получить список налоговых форм для отчетности МСФО
-     * @return список видов налоговых форм
-     */
-    List<Integer> getIfrsDeclarationTypes();
 }
