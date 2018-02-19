@@ -1107,4 +1107,23 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             comment on table declaration_type is ' Виды деклараций';
         </sql>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3105 ФИАС. Удаление параметра p_check_type (правки по БД)-->
+	<changeSet id="2.2-rnurgaleev-14" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg11.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
+	<changeSet id="2.2-rnurgaleev-15" author="rnurgaleev">
+        <sqlFile dbms="oracle"
+                 encoding="utf8"
+                 endDelimiter=""
+                 path="/scripts/fias_pkg_body11.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
 </databaseChangeLog>
