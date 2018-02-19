@@ -10,31 +10,17 @@ import static com.aplana.generatorTF.Dictionary.regionsDictionary;
 class Utils {
 
     static String generateSnils(Random r) {
-        String snils = "";
-        int controlSum = 0;
-        int tmp = 0;
+        int group1 = r.nextInt(1000), group2 = r.nextInt(1000), group3 = r.nextInt(1000);
+        int controlSum = 9 * (group1 / 100) + 8 * (group1 / 10 % 10) + 7 * (group1 % 10) +
+                6 * (group2 / 100) + 5 * (group2 / 10 % 10) + 4 * (group2 % 10) +
+                3 * (group3 / 100) + 2 * (group3 / 10 % 10) + (group3 % 10);
+        int controlSumMod = controlSum % 101;
 
-        int k = 7;
-        for (int i = 0; i < 2; i++) {
-            tmp = r.nextInt(2);
-            controlSum += tmp * k;
-            snils += "00" + tmp + "-";
-            k -= 3;
+        if (controlSumMod == 100) {
+            controlSumMod = 0;
         }
 
-        tmp = 100 + r.nextInt(899);
-        controlSum += 3 * tmp / 100 + 2 * (tmp / 10 % 10) + tmp % 100;
-        snils += tmp + "-";
-
-        String strControlSum = String.valueOf(controlSum % 101);
-        if (strControlSum.length() == 1) {
-            snils += "0" + strControlSum;
-        } else {
-            snils += strControlSum.charAt(strControlSum.length() - 2);
-            snils += strControlSum.charAt(strControlSum.length() - 1);
-        }
-
-        return snils;
+        return String.format("%03d-%03d-%03d-%02d", group1, group2, group3, controlSumMod);
     }
 
     static String generateNumberDul(Random r) {
@@ -120,7 +106,7 @@ class Utils {
         } else {
             for (int i = 0; i < innSplited.length; i++) {
                 if (!innSplited[i].equals("")) {
-                    innAsArray[i-1] = innSplited[i];
+                    innAsArray[i - 1] = innSplited[i];
                 }
             }
         }
