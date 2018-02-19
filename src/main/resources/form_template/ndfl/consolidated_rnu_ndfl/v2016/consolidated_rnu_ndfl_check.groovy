@@ -2938,7 +2938,7 @@ class Check extends AbstractScriptClass {
 
     Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
         if (fiasAddressIdsCache.isEmpty()) {
-            fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id, 1);
+            fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id);
         }
         return fiasAddressIdsCache;
     }

@@ -20,22 +20,12 @@ public class FiasRefBookServiceImpl implements FiasRefBookService {
 
     @Override
     public Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationDataId) {
-        return fiasRefBookDao.checkAddressByFias(declarationDataId, 0);
-    }
-
-    @Override
-    public Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationDataId, int p_check_type) {
-        return fiasRefBookDao.checkAddressByFias(declarationDataId, p_check_type);
+        return fiasRefBookDao.checkAddressByFias(declarationDataId);
     }
 
     @Override
     public Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationDataId) {
-        return fiasRefBookDao.checkExistsAddressByFias(declarationDataId, 0);
-    }
-
-    @Override
-    public Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationDataId, int p_check_type) {
-        return fiasRefBookDao.checkExistsAddressByFias(declarationDataId, p_check_type);
+        return fiasRefBookDao.checkExistsAddressByFias(declarationDataId);
     }
 
     @Override

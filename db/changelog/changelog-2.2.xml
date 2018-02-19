@@ -296,6 +296,22 @@
         </insert>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3103 -->
+    <changeSet id="2.2-ytrofimov-20" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_check.groovy"/>
+            <where>id=2</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="2.2-ytrofimov-21" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_check.groovy"/>
+            <where>id=6</where>
+        </update>
+    </changeSet>
+
     <!--https://jira.aplana.com/browse/SBRFNDFL-3062 -->
     <changeSet id="2.2-ytrofimov-22" author="ytrofimov">
         <update tableName="DECLARATION_TEMPLATE">
@@ -330,9 +346,9 @@
         <update tableName="DECLARATION_TEMPLATE">
             <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_2ndfl_1/v2016/report_2ndfl.groovy"/>
             <where>id=104</where>
-        </update> 
+        </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3361 ФИАС: не находит адрес в справочнике-->
 	<changeSet id="2.2-rnurgaleev-3" author="rnurgaleev">
         <sql splitStatements="false">
@@ -353,7 +369,7 @@
     REFRESH COMPLETE ON DEMAND
     USING DEFAULT LOCAL ROLLBACK SEGMENT
     USING ENFORCED CONSTRAINTS DISABLE QUERY REWRITE
-    AS select distinct f.id, f.aoid, f.formalname, f.shortname, f.regioncode, f.livestatus, f.currstatus, f.aolevel, f.postalcode, 
+    AS select distinct f.id, f.aoid, f.formalname, f.shortname, f.regioncode, f.livestatus, f.currstatus, f.aolevel, f.postalcode,
     nvl(d.parentguid,f.parentguid) parentguid,
        replace(lower(f.formalname),'' '','''') fname,
        trim(lower(f.shortname)) ftype,
@@ -362,7 +378,7 @@
     left join fias_addrobj d on (f.parentguid=d.aoid and d.currstatus=0 and d.aolevel=5)
     where f.currstatus=0
     and f.aolevel in (6,90)';
-	
+
 					execute immediate 'CREATE INDEX IDX_MV_FIAS_LOCALITY_AOID ON MV_FIAS_LOCALITY_ACT (AOID)';
 					execute immediate 'CREATE INDEX IDX_MV_FIAS_LOCALITY_FNAME ON MV_FIAS_LOCALITY_ACT (FNAME)';
 					execute immediate 'CREATE INDEX IDX_MV_FIAS_LOCALITY_PGUID ON MV_FIAS_LOCALITY_ACT (PARENTGUID)';
@@ -399,7 +415,7 @@
     REFRESH COMPLETE ON DEMAND
     USING DEFAULT LOCAL ROLLBACK SEGMENT
     USING ENFORCED CONSTRAINTS DISABLE QUERY REWRITE
-    AS select distinct f.id, f.aoid, f.formalname, f.shortname, f.regioncode, f.livestatus, f.currstatus, f.aolevel, f.postalcode, 
+    AS select distinct f.id, f.aoid, f.formalname, f.shortname, f.regioncode, f.livestatus, f.currstatus, f.aolevel, f.postalcode,
 coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
        replace(lower(f.formalname),'' '','''') fname,
        trim(lower(f.shortname)) ftype,
@@ -579,34 +595,34 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             alter table ASYNC_TASK modify (DESCRIPTION VARCHAR2(400 CHAR));
         </sql>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3524 Обновить данные справочников кодов видов дохода и вычетов по НДФЛ-->
-	
+
 	<changeSet id="2.2-rnurgaleev-4" author="rnurgaleev">
         <sql splitStatements="false">
             begin
 				update ref_book_income_type set name='Проценты (за исключением процентов по облигациям с ипотечным покрытием, эмитированным до 01.01.2007, доходов в виде процентов, получаемых по вкладам в банках, и доходов, получаемых при погашении векселя), включая дисконт, полученный по долговому обязательству любого вида, за исключением сумм дохода в виде процента (купона), получаемого налогоплательщиком по обращающимся облигациям российских организаций, номинированным в рублях и эмитированным после 1 января 2017 года'
 				where code='1011' and status=0;
-				
-				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+
+				insert into ref_book_income_type (id,record_id,version,status,code,name)
 				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2013','Сумма компенсации за неиспользованный отпуск');
-				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				insert into ref_book_income_type (id,record_id,version,status,code,name)
 				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2014','Сумма выплаты в виде выходного пособия, среднего месячного заработка на период трудоустройства, компенсации руководителю, заместителям руководителя и главному бухгалтеру организации в части, превышающей в целом трехкратный размер среднего месячного заработка или шестикратный размер среднего месячного заработка для работников, уволенных из организаций, расположенных в районах Крайнего Севера и приравненных к ним местностях');
-				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				insert into ref_book_income_type (id,record_id,version,status,code,name)
 				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2301','Суммы штрафов и неустойки, выплачиваемые организацией на основании решения суда за несоблюдение в добровольном порядке удовлетворения требований потребителей в соответствии с Законом Российской Федерации от 07.02.1992 N 2300-1 "О защите прав потребителей"');
-				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				insert into ref_book_income_type (id,record_id,version,status,code,name)
 				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'2611','Сумма списанного в установленном порядке безнадежного долга с баланса организации');
-				insert into ref_book_income_type (id,record_id,version,status,code,name) 
+				insert into ref_book_income_type (id,record_id,version,status,code,name)
 				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','DD.MM.YYYY'),0,'3023','Сумма дохода в виде процента (купона), получаемого налогоплательщиком по обращающимся облигациям российских организаций, номинированным в рублях и эмитированным после 1 января 2017 года');
-			
-				insert into ref_book_deduction_type (id,record_id,version,status,code,name,deduction_mark) 
+
+				insert into ref_book_deduction_type (id,record_id,version,status,code,name,deduction_mark)
 				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval,to_date('24.10.2017','dd.mm.yyyy'),0,'619','Вычет в сумме положительного финансового результата, полученного по операциям, учитываемым на индивидуальном инвестиционном счете',(select id from ref_book_deduction_mark where code='3'));
-				
+
 			end;
         </sql>
     </changeSet>
-	
-	
+
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3452 Изменение разделителей при сравнении ДУЛ-->
 	<changeSet id="2.2-rnurgaleev-5" author="rnurgaleev">
         <sqlFile dbms="oracle"
@@ -641,7 +657,7 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id = '64536272-05bc-42e8-82c5-347faf22da20'</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-2670 Проверка адресов по ФИАС. Обязательно наличие краткого наименования района-->
 	<changeSet id="2.2-rnurgaleev-7" author="rnurgaleev">
         <sqlFile dbms="oracle"
@@ -677,9 +693,9 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3524 Обновить данные справочников кодов видов дохода и вычетов по НДФЛ-->
-	
+
 	<changeSet id="2.2-rnurgaleev-8" author="rnurgaleev">
         <sql splitStatements="false">
             begin
@@ -733,7 +749,7 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
 
 				insert into REF_BOOK_INCOME_KIND(id,income_type_id,mark,name)
 				values(seq_ref_book_record.nextval,(select id from (select id,version from ref_book_income_type where code='3023' and status=0 order by version desc) where rownum=1),'00','-');
-				
+
 				delete from REF_BOOK_INCOME_KIND where
 				(income_type_id=(select id from (select id,version from ref_book_income_type where code='1544' and status=0 order by version desc) where rownum=1) and mark='01')
 				or
@@ -886,7 +902,7 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id in (select jrxml from declaration_template dt where dt.id = 103)</where>
         </update>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3574 Оптимизация процедур идентификации-->
     <changeSet id="2.2-rnurgaleev-9" author="rnurgaleev">
         <sqlFile dbms="oracle"
@@ -896,7 +912,7 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
-	
+
 	<changeSet id="2.2-rnurgaleev-10" author="rnurgaleev">
         <sqlFile dbms="oracle"
                  encoding="utf8"
@@ -1088,20 +1104,20 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <column name="updated_by" type="varchar2(255 char)" />
         </addColumn>
     </changeSet>
-	
+
 	<!--https://jira.aplana.com/browse/SBRFNDFL-3380 DECLARATION_TYPE. Удалить IS_IFRS, IFRS_NAME изменения по БД-->
 	<changeSet id="2.2-rnurgaleev-11" author="rnurgaleev">
         <dropColumn
                 columnName="IS_IFRS"
                 tableName="DECLARATION_TYPE"/>
     </changeSet>
-	
+
 	<changeSet id="2.2-rnurgaleev-12" author="rnurgaleev">
         <dropColumn
                 columnName="IFRS_NAME"
                 tableName="DECLARATION_TYPE"/>
     </changeSet>
-	
+
 	<changeSet id="2.2-rnurgaleev-13" author="rnurgaleev">
         <sql>
             comment on table declaration_type is ' Виды деклараций';

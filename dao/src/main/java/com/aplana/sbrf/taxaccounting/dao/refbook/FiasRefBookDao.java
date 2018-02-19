@@ -29,15 +29,14 @@ public interface FiasRefBookDao {
     /**
      * Найти идентификаторы всех адресообразующих обектов в справочнике ФИАС соответствующие адресам указанным в РНУ-НДФЛ
      *
-     * @param declarationId идентификатор декларации
      * @return карта идентификатор записи РНУ-НДФЛ - результат проверки адреса (идентификатор адреса в справочнике ФИАС и поля chk_*)
      */
-    Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationId, int p_check_type);
+    Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationId);
 
     /**
      * Выполнить проверку на наличие/отсутствие в ФИАС элементов адресов, указанных в декларации
      */
-    Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId, int p_check_type);
+    Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationId);
 
     /**
      * Вызывает процедуру обновляющую материальные представления после импорта в ФИАС

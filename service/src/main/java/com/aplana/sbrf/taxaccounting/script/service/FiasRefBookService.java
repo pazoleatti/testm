@@ -21,28 +21,12 @@ public interface FiasRefBookService {
     Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationDataId);
 
     /**
-     * Возвращает все найденные в справочнике адреса по записям НФ
-     *
-     * @param declarationDataId
-     * @return
-     */
-    Map<Long, FiasCheckInfo> checkAddressByFias(Long declarationDataId, int p_check_type);
-
-    /**
      * Возврашает найденые елементы адреса, используется для определения какой элемент не найден в справочнике
      *
      * @param declarationDataId
      * @return
      */
     Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationDataId);
-
-    /**
-     * Возврашает найденые елементы адреса, используется для определения какой элемент не найден в справочнике
-     *
-     * @param declarationDataId
-     * @return
-     */
-    Map<Long, CheckAddressResult> checkExistsAddressByFias(Long declarationDataId, int p_check_type);
 
     /**
      * Вызывает процедуру обновляющую материальные представления после импорта в ФИАС

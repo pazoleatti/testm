@@ -30,7 +30,7 @@ public class FiasRefBookDaoOracleTest {
 
     @Test
     public void testCheckAddressByFias() {
-        Map<Long, FiasCheckInfo> result = fiasRefBookDao.checkAddressByFias(15563L, 0);
+        Map<Long, FiasCheckInfo> result = fiasRefBookDao.checkAddressByFias(15563L);
 
         int i = 0;
         for (Long key : result.keySet()) {
@@ -48,7 +48,7 @@ public class FiasRefBookDaoOracleTest {
 
     @Test
     public void testExistAddressByFias() {
-        Map<Long, CheckAddressResult> result = fiasRefBookDao.checkExistsAddressByFias(15563L, 0);
+        Map<Long, CheckAddressResult> result = fiasRefBookDao.checkExistsAddressByFias(15563L);
         System.out.println(result);
     }
 
