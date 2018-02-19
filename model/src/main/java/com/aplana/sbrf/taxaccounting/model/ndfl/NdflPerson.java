@@ -109,6 +109,12 @@ public class NdflPerson extends IdentityObject<Long> {
     // Cведения о доходах в виде авансовых платежей
     private List<NdflPersonPrepayment> prepayments;
 
+    // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
+    private Date editingDate;
+
+    // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
+    private String updatedBy;
+
     public NdflPerson(List<NdflPersonIncome> incomes, List<NdflPersonDeduction> deductions, List<NdflPersonPrepayment> prepayments) {
         super();
         this.incomes = incomes;
@@ -127,12 +133,18 @@ public class NdflPerson extends IdentityObject<Long> {
     public static final String SEQ = "seq_ndfl_person";
 
 
-    public static final String[] COLUMNS = {"id", "declaration_data_id", "person_id", "row_num", "inp", "snils", "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign", "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality", "street", "house", "building", "flat", "country_code", "address", "additional_data"};
+    public static final String[] COLUMNS = {"id", "declaration_data_id", "person_id", "row_num", "inp", "snils",
+            "last_name", "first_name", "middle_name", "birth_day", "citizenship", "inn_np", "inn_foreign",
+            "id_doc_type", "id_doc_number", "status", "post_index", "region_code", "area", "city", "locality",
+            "street", "house", "building", "flat", "country_code", "address", "additional_data", "editing_date", "updated_by"};
 
     /**
      * Список полей бина значения которых передаются в запрос. Порядок соответсвует порядку наименований столбцов в COLUMNS
      */
-    public static final String[] FIELDS = {"id", "declarationDataId", "personId", "rowNum", "inp", "snils", "lastName", "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber", "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat", "countryCode", "address", "additionalData"};
+    public static final String[] FIELDS = {"id", "declarationDataId", "personId", "rowNum", "inp", "snils", "lastName",
+            "firstName", "middleName", "birthDay", "citizenship", "innNp", "innForeign", "idDocType", "idDocNumber",
+            "status", "postIndex", "regionCode", "area", "city", "locality", "street", "house", "building", "flat",
+            "countryCode", "address", "additionalData", "editingDate", "updatedBy"};
 
     public Long getDeclarationDataId() {
         return declarationDataId;
@@ -380,6 +392,22 @@ public class NdflPerson extends IdentityObject<Long> {
 
     public void setRecordId(Long recordId) {
         this.recordId = recordId;
+    }
+
+    public Date getEditingDate() {
+        return editingDate;
+    }
+
+    public void setEditingDate(Date editingDate) {
+        this.editingDate = editingDate;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     @Override

@@ -48,19 +48,25 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     // Применение вычета.Текущий период.Сумма (Графа 16)
     private BigDecimal periodCurrSumm;
 
+    // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
+    private Date editingDate;
+
+    // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
+    private String updatedBy;
+
     public static final String TABLE_NAME = "ndfl_person_deduction";
     public static final String SEQ = "seq_ndfl_person_deduction";
     public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "type_code",
             "notif_type", "notif_date", "notif_num", "notif_source",
             "notif_summ", "income_accrued", "income_code", "income_summ",
             "period_prev_date", "period_prev_summ",
-            "period_curr_date", "period_curr_summ", "source_id"};
+            "period_curr_date", "period_curr_summ", "source_id", "editing_date", "updated_by"};
 
     public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "typeCode",
             "notifType", "notifDate", "notifNum", "notifSource",
             "notifSumm", "incomeAccrued", "incomeCode", "incomeSumm",
             "periodPrevDate", "periodPrevSumm",
-            "periodCurrDate", "periodCurrSumm", "sourceId"};
+            "periodCurrDate", "periodCurrSumm", "sourceId", "editingDate", "updatedBy"};
 
     @Override
     public String getTableName() {
@@ -184,6 +190,22 @@ public class NdflPersonDeduction extends NdflPersonOperation {
 
     public void setPeriodCurrSumm(BigDecimal periodCurrSumm) {
         this.periodCurrSumm = periodCurrSumm;
+    }
+
+    public Date getEditingDate() {
+        return editingDate;
+    }
+
+    public void setEditingDate(Date editingDate) {
+        this.editingDate = editingDate;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     @Override

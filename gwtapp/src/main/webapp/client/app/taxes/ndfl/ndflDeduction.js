@@ -57,7 +57,10 @@
                             $filter('translate')('ndflDeduction.title.periodPrevDate'),
                             $filter('translate')('ndflDeduction.title.periodPrevSumm'),
                             $filter('translate')('ndflDeduction.title.periodCurrDate'),
-                            $filter('translate')('ndflDeduction.title.periodCurrSumm')],
+                            $filter('translate')('ndflDeduction.title.periodCurrSumm'),
+                            $filter('translate')('ndflDeduction.title.id'),
+                            $filter('translate')('ndflDeduction.title.editingDate'),
+                            $filter('translate')('ndflDeduction.title.updatedBy')],
                         colModel: [
                             {name: 'rowNum', index: 'rowNum', width: 60, key: true},
                             {name: 'inp', index: 'inp', width: 170},
@@ -94,7 +97,10 @@
                                 width: 205,
                                 formatter: $filter('dateFormatter')
                             },
-                            {name: 'periodCurrSumm', index: 'periodCurrSumm', width: 170}
+                            {name: 'periodCurrSumm', index: 'periodCurrSumm', width: 170},
+                            {name: 'id', index: 'id', width: 200},
+                            {name: 'editingDate', index: 'editingDate', width: 230, formatter: $filter('dateTimeFormatter')},
+                            {name: 'updatedBy', index: 'updatedBy', width: 170}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,

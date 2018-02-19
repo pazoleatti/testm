@@ -21,10 +21,18 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     // Уведомление, подтверждающее право на уменьшение налога на фиксированные авансовые платежи.Код налогового органа, выдавшего уведомление (Графа 7)
     private String notifSource;
 
+    // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
+    private Date editingDate;
+
+    // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
+    private String updatedBy;
+
     public static final String TABLE_NAME = "ndfl_person_prepayment";
     public static final String SEQ = "seq_ndfl_person_prepayment";
-    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "summ", "notif_num", "notif_date", "notif_source", "source_id"};
-    public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "summ", "notifNum", "notifDate", "notifSource", "sourceId"};
+    public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "summ", "notif_num",
+            "notif_date", "notif_source", "source_id", "editing_date", "updated_by"};
+    public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "summ", "notifNum",
+            "notifDate", "notifSource", "sourceId", "editingDate", "updatedBy"};
 
     @Override
     public String getTableName() {
@@ -75,6 +83,22 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
 
     public void setNotifSource(String notifSource) {
         this.notifSource = notifSource;
+    }
+
+    public Date getEditingDate() {
+        return editingDate;
+    }
+
+    public void setEditingDate(Date editingDate) {
+        this.editingDate = editingDate;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     @Override
