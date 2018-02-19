@@ -303,16 +303,12 @@ create sequence seq_report_period start with 100;
 create table declaration_type (
   id        number(9)           not null,
   name      varchar2(1000)      not null,
-  status    number(1) default 0 not null,
-  is_ifrs   number(1) default 0 not null,
-  ifrs_name varchar2(200)
+  status    number(1) default 0 not null
 );
-comment on table declaration_type is ' Виды налоговых форм';
+comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.name is 'Наименование';
 comment on column declaration_type.status is 'Статус версии (-1 -удаленная версия, 0 -действующая версия, 1 - черновик версии, 2 - фиктивная версия)';
-comment on column declaration_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
-comment on column declaration_type.ifrs_name is 'Наименование формы для файла данного макета, включаемого в архив с отчетностью для МСФО';
 
 create sequence seq_declaration_type start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
