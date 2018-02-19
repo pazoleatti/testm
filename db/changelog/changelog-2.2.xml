@@ -1069,4 +1069,24 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3689 Редактирование данных НФ через загрузку ТФ (Excel). Правки по БД РНУ НДФЛ.-->
+    <changeSet id="2.2-ytrofimov-56" author="ytrofimov">
+        <addColumn tableName="ndfl_person">
+            <column name="editing_date" type="date"/>
+            <column name="updated_by" type="varchar2(255 char)" />
+        </addColumn>
+        <addColumn tableName="ndfl_person_income" >
+            <column name="editing_date" type="date"/>
+            <column name="updated_by" type="varchar2(255 char)" />
+        </addColumn>
+        <addColumn tableName="ndfl_person_deduction" >
+            <column name="editing_date" type="date"/>
+            <column name="updated_by" type="varchar2(255 char)" />
+        </addColumn>
+        <addColumn tableName="ndfl_person_prepayment" >
+            <column name="editing_date" type="date"/>
+            <column name="updated_by" type="varchar2(255 char)" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
