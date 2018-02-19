@@ -1126,4 +1126,12 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3380 DECLARATION_TYPE. Удалить IS_IFRS, IFRS_NAME изменения по БД. Лишний пробел в комментарии-->
+	<changeSet id="2.2-rnurgaleev-16" author="rnurgaleev">
+        <sql>
+            comment on table declaration_type is 'Виды деклараций';
+        </sql>
+    </changeSet>
+	
 </databaseChangeLog>
