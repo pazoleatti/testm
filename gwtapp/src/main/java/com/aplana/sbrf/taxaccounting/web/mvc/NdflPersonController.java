@@ -57,6 +57,7 @@ public class NdflPersonController {
         dateFormat.setLenient(false);
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
         binder.registerCustomEditor(PagingParams.class, new RequestParamEditor(PagingParams.class));
+        binder.registerCustomEditor(NdflFilter.class, new RequestParamEditor(NdflFilter.class));
         binder.registerCustomEditor(NdflPersonFilter.class, new RequestParamEditor(NdflPersonFilter.class));
         binder.registerCustomEditor(NdflPersonIncomeFilter.class, new RequestParamEditor(NdflPersonIncomeFilter.class));
         binder.registerCustomEditor(NdflPersonDeductionFilter.class, new RequestParamEditor(NdflPersonDeductionFilter.class));
@@ -66,18 +67,18 @@ public class NdflPersonController {
     /**
      * Найти все данные НДФЛ ФЛ привязанные к декларации
      *
-     * @param ndflPersonFilter параметры фильтра
-     * @param pagingParams     параметры для пагинации
+     * @param ndflFilter   параметры фильтра
+     * @param pagingParams параметры для пагинации
      * @return список данных типа {@link NdflPerson}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=ndflPersons")
-    public JqgridPagedList<NdflPerson> fetchPersonData(@RequestParam NdflPersonFilter ndflPersonFilter,
+    public JqgridPagedList<NdflPerson> fetchPersonData(@RequestParam NdflFilter ndflFilter,
                                                        @RequestParam PagingParams pagingParams) {
 
-        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter, pagingParams);
+        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersons,
-                ndflPersonService.findPersonCount(ndflPersonFilter.getDeclarationDataId()),
+                ndflPersons.getTotalCount(),
                 pagingParams
         );
     }
@@ -85,18 +86,18 @@ public class NdflPersonController {
     /**
      * Найти все данные о доходах и НДФЛ привязанные к декларации
      *
-     * @param ndflPersonIncomeFilter параметры фильтра
+     * @param ndflFilter параметры фильтра
      * @param pagingParams           параметры для пагинации
      * @return список данных типа {@link NdflPersonIncomeFilter}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsIncome")
-    public JqgridPagedList<NdflPersonIncomeDTO> fetchPersonIncomeData(@RequestParam NdflPersonIncomeFilter ndflPersonIncomeFilter,
-                                                                   @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<NdflPersonIncomeDTO> fetchPersonIncomeData(@RequestParam NdflFilter ndflFilter,
+                                                                      @RequestParam PagingParams pagingParams) {
 
-        PagingResult<NdflPersonIncomeDTO> ndflPersonsIncome = ndflPersonService.findPersonIncomeByFilter(ndflPersonIncomeFilter.getDeclarationDataId(), ndflPersonIncomeFilter, pagingParams);
+        PagingResult<NdflPersonIncomeDTO> ndflPersonsIncome = ndflPersonService.findPersonIncomeByFilter(ndflFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersonsIncome,
-                ndflPersonService.findPersonIncomeCount(ndflPersonIncomeFilter.getDeclarationDataId()),
+                ndflPersonsIncome.getTotalCount(),
                 pagingParams
         );
     }
@@ -104,18 +105,18 @@ public class NdflPersonController {
     /**
      * Найти все данные о вычетах привязанные к декларации
      *
-     * @param ndflPersonDeductionFilter параметры фильтра
-     * @param pagingParams              параметры для пагинации
+     * @param ndflFilter   параметры фильтра
+     * @param pagingParams параметры для пагинации
      * @return список данных типа {@link NdflPersonDeduction}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsDeduction")
-    public JqgridPagedList<NdflPersonDeductionDTO> fetchPersonDeductionsData(@RequestParam NdflPersonDeductionFilter ndflPersonDeductionFilter,
-                                                                          @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<NdflPersonDeductionDTO> fetchPersonDeductionsData(@RequestParam NdflFilter ndflFilter,
+                                                                             @RequestParam PagingParams pagingParams) {
 
-        PagingResult<NdflPersonDeductionDTO> ndflPersonsDeduction = ndflPersonService.findPersonDeductionsByFilter(ndflPersonDeductionFilter.getDeclarationDataId(), ndflPersonDeductionFilter, pagingParams);
+        PagingResult<NdflPersonDeductionDTO> ndflPersonsDeduction = ndflPersonService.findPersonDeductionsByFilter(ndflFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersonsDeduction,
-                ndflPersonService.findPersonDeductionsCount(ndflPersonDeductionFilter.getDeclarationDataId()),
+                ndflPersonsDeduction.getTotalCount(),
                 pagingParams
         );
     }
@@ -123,18 +124,18 @@ public class NdflPersonController {
     /**
      * Найти все данные о вычетах привязанные к декларации
      *
-     * @param ndflPersonPrepaymentFilter параметры фильтра
-     * @param pagingParams               параметры для пагинации
+     * @param ndflFilter   параметры фильтра
+     * @param pagingParams параметры для пагинации
      * @return список данных типа {@link NdflPersonDeduction}
      */
     @GetMapping(value = "/rest/ndflPerson", params = "projection=personsPrepayment")
-    public JqgridPagedList<NdflPersonPrepaymentDTO> fetchPersonPrepaymentData(@RequestParam NdflPersonPrepaymentFilter ndflPersonPrepaymentFilter,
+    public JqgridPagedList<NdflPersonPrepaymentDTO> fetchPersonPrepaymentData(@RequestParam NdflFilter ndflFilter,
                                                                               @RequestParam PagingParams pagingParams) {
 
-        PagingResult<NdflPersonPrepaymentDTO> ndflPersonsPrepayment = ndflPersonService.findPersonPrepaymentByFilter(ndflPersonPrepaymentFilter.getDeclarationDataId(), ndflPersonPrepaymentFilter, pagingParams);
+        PagingResult<NdflPersonPrepaymentDTO> ndflPersonsPrepayment = ndflPersonService.findPersonPrepaymentByFilter(ndflFilter, pagingParams);
         return JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersonsPrepayment,
-                ndflPersonService.findPersonPrepaymentCount(ndflPersonPrepaymentFilter.getDeclarationDataId()),
+                ndflPersonsPrepayment.getTotalCount(),
                 pagingParams
         );
     }
@@ -148,13 +149,14 @@ public class NdflPersonController {
      */
 
     @GetMapping(value = "/rest/getListPerson/rnuPerson", params = "projection=rnuPersons")
-    public JqgridPagedList<NdflPerson> getPersonList(@RequestParam NdflPersonFilter ndflPersonFilter, @RequestParam PagingParams pagingParams) {
+    public JqgridPagedList<NdflPerson> getPersonList(@RequestParam Long declarationDataId,
+                                                     @RequestParam NdflPersonFilter ndflPersonFilter, @RequestParam PagingParams pagingParams) {
 
-        if (ndflPersonFilter.getDeclarationDataId() == 0){
+        if (declarationDataId == 0) {
             return null;
         }
 
-        if (pagingParams == null){
+        if (pagingParams == null) {
             pagingParams = new PagingParams();
         }
 
@@ -190,7 +192,7 @@ public class NdflPersonController {
             filterParams.put(SubreportAliasConstants.TO_BIRTHDAY, ndflPersonFilter.getDateTo());
         }
 
-        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(ndflPersonFilter.getDeclarationDataId(), filterParams, PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount() + 1));
+        PagingResult<NdflPerson> ndflPersons = ndflPersonService.findPersonByFilter(declarationDataId, filterParams, PagingParams.getInstance(pagingParams.getPage(), pagingParams.getCount() + 1));
         JqgridPagedList<NdflPerson> resultPerson = JqgridPagedResourceAssembler.buildPagedList(
                 ndflPersons,
                 ndflPersons.getTotalCount(),

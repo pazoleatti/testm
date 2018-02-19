@@ -37,23 +37,7 @@
                         requestParameters: function () {
                             return {
                                 projection: "personsIncome",
-                                ndflPersonIncomeFilter: JSON.stringify({
-                                    declarationDataId: $stateParams.declarationDataId,
-                                    inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
-                                    operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
-                                    kpp: $filter('requestParamsFormatter')($scope.searchFilter.params.kpp),
-                                    oktmo: $filter('requestParamsFormatter')($scope.searchFilter.params.oktmo),
-                                    incomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeCode),
-                                    incomeAttr: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeAttr),
-                                    taxRate: $filter('requestParamsFormatter')($scope.searchFilter.params.taxRate),
-                                    numberPaymentOrder: $filter('requestParamsFormatter')($scope.searchFilter.params.numberPaymentOrder),
-                                    transferDateFrom: $scope.searchFilter.params.transferDateFrom,
-                                    transferDateTo: $scope.searchFilter.params.transferDateTo,
-                                    calculationDateFrom: $scope.searchFilter.params.calculationDateFrom,
-                                    calculationDateTo: $scope.searchFilter.params.calculationDateTo,
-                                    paymentDateFrom: $scope.searchFilter.params.paymentDateFrom,
-                                    paymentDateTo: $scope.searchFilter.params.paymentDateTo
-                                })
+                                ndflFilter: JSON.stringify($scope.getNdflFilter())
                             };
                         },
                         height: 250,

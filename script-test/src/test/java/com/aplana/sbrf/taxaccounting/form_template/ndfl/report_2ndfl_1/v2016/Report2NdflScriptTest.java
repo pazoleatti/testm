@@ -269,7 +269,7 @@ public class Report2NdflScriptTest extends DeclarationScriptTestBase {
         taxOCode.put(0, Arrays.asList(new String[]{"1234"}));
         configurationParamModel.put(configurationParamInn, inn);
         configurationParamModel.put(configurationParamTaxOrganCode, taxOCode);
-        when(testHelper.getDeclarationService().getAllConfig(any(TAUserInfo.class))).thenReturn(configurationParamModel);
+        when(testHelper.getConfigurationService().getCommonConfigUnsafe()).thenReturn(configurationParamModel);
     }
 
     private boolean validateResultBySchema(String xml) throws SAXException, UnsupportedEncodingException {

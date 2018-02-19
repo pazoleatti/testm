@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import java.util.List;
 import java.util.Map;
 
+@ScriptExposed
 public interface ConfigurationService {
 
     /**
@@ -22,6 +23,11 @@ public interface ConfigurationService {
      * @return модель {@link ConfigurationParamModel} содержащаяя информацию о всех конфигурационных параметрах
      */
     ConfigurationParamModel getCommonConfig(TAUserInfo userInfo);
+
+    /**
+     * То же что {@link #getCommonConfig(TAUserInfo)}, но без проверки прав
+     */
+    ConfigurationParamModel getCommonConfigUnsafe();
 
     /**
      * Получает настройки почты
@@ -100,7 +106,7 @@ public interface ConfigurationService {
     /**
      * Возвращяет страницу общих конфигурационных параметров
      *
-     * @param pagingParams параметры пагинации
+     * @param pagingParams            параметры пагинации
      * @param configurationParamGroup
      * @return страница {@link Configuration}
      */

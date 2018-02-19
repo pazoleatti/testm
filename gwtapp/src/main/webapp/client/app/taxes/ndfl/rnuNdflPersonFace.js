@@ -100,8 +100,8 @@
                 var totalCountResult = function () {
                     RnuPerson.query({
                         projection: 'rnuPersons',
+                        declarationDataId: $shareData.declarationDataId,
                         ndflPersonFilter: JSON.stringify({
-                            declarationDataId: $shareData.declarationDataId,
                             lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
                             firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
                             middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
@@ -154,7 +154,6 @@
                         url: "controller/actions/declarationData/" + $shareData.declarationDataId + "/rnuDoc",
                         params: {
                             ndflPersonFilter: JSON.stringify({
-                                declarationDataId: $shareData.declarationDataId,
                                 lastName: $scope.searchFilter.params.lastName,
                                 firstName: $scope.searchFilter.params.firstName,
                                 middleName: $scope.searchFilter.params.middleName,
@@ -197,8 +196,8 @@
                             if (!$scope.isEmptySearchParams) {
                                 return {
                                     projection: 'rnuPersons',
+                                    declarationDataId: $shareData.declarationDataId,
                                     ndflPersonFilter: JSON.stringify({
-                                        declarationDataId: $shareData.declarationDataId,
                                         lastName: (typeof($scope.searchFilter.params.lastName) !== 'undefined') ? '%' + $scope.searchFilter.params.lastName + '%' : $scope.searchFilter.params.lastName,
                                         firstName: (typeof($scope.searchFilter.params.firstName) !== 'undefined') ? '%' + $scope.searchFilter.params.firstName + '%' : $scope.searchFilter.params.firstName,
                                         middleName: (typeof($scope.searchFilter.params.middleName) !== 'undefined') ? '%' + $scope.searchFilter.params.middleName + '%' : $scope.searchFilter.params.middleName,
@@ -213,6 +212,7 @@
                             } else {
                                 return {
                                     projection: 'rnuPersons',
+                                    declarationDataId: 0,
                                     ndflPersonFilter: {}
                                 };
                             }

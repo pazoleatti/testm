@@ -37,17 +37,7 @@
                         requestParameters: function () {
                             return {
                                 projection: "personsDeduction",
-                                ndflPersonDeductionFilter: JSON.stringify({
-                                    declarationDataId: $stateParams.declarationDataId,
-                                    inp: $filter('requestParamsFormatter')($scope.searchFilter.params.inp),
-                                    operationId: $filter('requestParamsFormatter')($scope.searchFilter.params.operationId),
-                                    deductionCode: $filter('requestParamsFormatter')($scope.searchFilter.params.deductionCode),
-                                    incomeCode: $filter('requestParamsFormatter')($scope.searchFilter.params.incomeCode),
-                                    calculationDateFrom: $scope.searchFilter.params.calculationDateFrom,
-                                    calculationDateTo: $scope.searchFilter.params.calculationDateTo,
-                                    deductionDateFrom: $scope.searchFilter.params.deductionDateFrom,
-                                    deductionDateTo: $scope.searchFilter.params.deductionDateTo
-                                })
+                                ndflFilter: JSON.stringify($scope.getNdflFilter())
                             };
                         },
                         height: 250,

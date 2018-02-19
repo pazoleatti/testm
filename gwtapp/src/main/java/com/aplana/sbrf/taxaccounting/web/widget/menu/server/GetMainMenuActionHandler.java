@@ -78,8 +78,7 @@ public class GetMainMenuActionHandler extends
                         menu.getSubMenu().add(new MenuItem("Формы", "index.html#/taxes/ndflJournal"));
 
                         // ведение периодов
-                        menu.getSubMenu().add(new MenuItem("Ведение периодов", NUMBER_SIGN + PeriodsTokens.PERIODS
-                                + ";" + TYPE + "=" + menu.getMeta()));
+                        menu.getSubMenu().add(new MenuItem("Ведение периодов", "index.html#/taxes/reportPeriod"));
 
                         // настройки подразделений
                         // настройки форм и подразделений, назначение источников-приемников
@@ -87,9 +86,7 @@ public class GetMainMenuActionHandler extends
                                 + DepartmentConfigPropertyTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
                         menu.getSubMenu().add(
                                 new MenuItem("Назначение форм",
-                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                                + TYPE + "=" + menu.getMeta() + ";"
-                                                + TaxFormNominationToken.isForm + "=" + false));
+                                        "index.html#/taxes/declarationTypeAssignment"));
                         if (currentUser.hasRoles(taxType, TARole.N_ROLE_CONTROL_NS, TARole.F_ROLE_CONTROL_NS,
                                 TARole.N_ROLE_CONTROL_UNP, TARole.F_ROLE_CONTROL_UNP)) {
                             if (taxType.equals(TaxType.NDFL)) {
