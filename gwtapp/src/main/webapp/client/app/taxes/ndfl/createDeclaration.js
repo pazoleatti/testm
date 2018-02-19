@@ -42,8 +42,10 @@
                         method: "POST",
                         url: "controller/actions/declarationData/create",
                         params: params
-                    }).finally(function (response) {
+                    }).then(function (response) {
                         $modalInstance.close(response);
+                    }).catch(function() {
+                        $modalInstance.close();
                     });
                 }
 

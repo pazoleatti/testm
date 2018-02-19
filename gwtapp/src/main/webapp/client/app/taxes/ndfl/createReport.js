@@ -71,8 +71,10 @@
                             departmentId: $scope.reportData.department.id,
                             periodId: $scope.reportData.period.id
                         }
-                    }).finally(function (response) {
+                    }).then(function (response) {
                         $modalInstance.close(response);
+                    }).catch(function() {
+                        $modalInstance.close();
                     });
                 };
                 /**
