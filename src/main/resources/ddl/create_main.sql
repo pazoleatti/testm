@@ -971,7 +971,9 @@ create table ndfl_person (
   flat                varchar2(10 char),
   country_code        varchar2(10 char),
   address             varchar2(255 char),
-  additional_data     varchar2(4000 char)
+  additional_data     varchar2(4000 char),
+  editing_date        date,
+  updated_by          varchar2(255 char)
 );
 
 comment on table ndfl_person is 'Данные о физическом лице - получателе дохода';
@@ -1034,7 +1036,9 @@ create table ndfl_person_income
   tax_transfer_date     date,
   payment_date          date,
   payment_number        varchar2(20 char),
-  tax_summ              number(10)
+  tax_summ              number(10),
+  editing_date          date,
+  updated_by            varchar2(255 char)
 );
 
 
@@ -1085,7 +1089,9 @@ create table ndfl_person_deduction
   period_prev_date date,
   period_prev_summ number(22, 2),
   period_curr_date date,
-  period_curr_summ number(22, 2)
+  period_curr_summ number(22, 2),
+  editing_date     date,
+  updated_by       varchar2(255 char)
 );
 
 comment on table ndfl_person_deduction is 'Стандартные, социальные и имущественные налоговые вычеты';
@@ -1120,7 +1126,9 @@ create table ndfl_person_prepayment
   summ           number(20),
   notif_num      varchar2(20 char),
   notif_date     date,
-  notif_source   varchar2(20 char)
+  notif_source   varchar2(20 char),
+  editing_date   date,
+  updated_by     varchar2(255 char)
 );
 
 comment on table ndfl_person_prepayment is 'Cведения о доходах в виде авансовых платежей';
