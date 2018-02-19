@@ -120,6 +120,11 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
      */
     public static final Permission<TAUser> EDIT_DECLARATION_TYPES_ASSIGNMENT = new EditDeclarationTypesAssignmentPermission(1 << 22);
 
+    /**
+     * Право "Ведение периодов > Открыть период"
+     */
+    public static final Permission<TAUser> OPEN_DEPARTMENT_REPORT_PERIOD = new OpenDepartmentReportPeriodPermission(1 << 23);
+
     public UserPermission(long mask) {
         super(mask);
     }
@@ -474,6 +479,21 @@ public abstract class UserPermission extends AbstractPermission<TAUser> {
         @Override
         protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
             return PermissionUtils.isAuthentificated();
+        }
+    }
+
+    /**
+     * Право "Ведение периодов > Открыть период"
+     */
+    public static final class OpenDepartmentReportPeriodPermission extends UserPermission {
+
+        public OpenDepartmentReportPeriodPermission(long mask) {
+            super(mask);
+        }
+
+        @Override
+        protected boolean isGrantedInternal(User currentUser, TAUser entity, Logger logger) {
+            return PermissionUtils.hasRole(currentUser, TARole.N_ROLE_CONTROL_UNP);
         }
     }
 }

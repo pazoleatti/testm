@@ -10,8 +10,9 @@
     /**
      * @description Контроллер модального откна "Назначить срок сдачи отчетности"
      */
-        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs', 'ValidationUtils', '$q',
-            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, $q) {
+        .controller('deadlinePeriodController', ['$scope', '$filter', '$shareData', '$http', '$modalInstance', '$dialogs',
+            'ValidationUtils', '$q', 'AplanaUtils',
+            function ($scope, $filter, $shareData, $http, $modalInstance, $dialogs, ValidationUtils, $q, AplanaUtils) {
 
                 /** в $shareData.period.deadline используется дата в фомате ISO,
                  * а для date-picker нужна дата в формате UTC
@@ -149,7 +150,7 @@
 
                 $scope.$watch('filter.deadline', function () {
                     if ($scope.filter.deadline) {
-                        $scope.isEdit = ((!deadline && $scope.filter.deadline) || (new Date($scope.filter.deadline.toString()).toString() !== deadline.toString()));
+                        $scope.isEdit = AplanaUtils.floorDate(new Date($scope.filter.deadline)).getTime() !== AplanaUtils.floorDate(new Date(deadline)).getTime();
                     }
                 });
             }]);

@@ -313,16 +313,11 @@
                  */
                 $scope.checkPermissionForGridValue = function (permission) {
                     if ($scope.reportPeriodGrid.value && $scope.reportPeriodGrid.value.length > 0) {
-                        if ((permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.EDIT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.DEADLINE ||
-                            permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN_CORRECT || permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.CLOSE) &&
-                            $scope.reportPeriodGrid.value.length !== 1) {
-                            return false;
-                        }
                         return PermissionChecker.check($scope.reportPeriodGrid.value[0], permission);
                     } else {
                         if (permission === APP_CONSTANTS.DEPARTMENT_REPORT_PERIOD_PERMISSION.OPEN) {
                             // проверяем роль авторизованного пользователя для операции открытия периода
-                            return $rootScope.user.roles[0].alias === APP_CONSTANTS.USER_ROLE.N_ROLE_CONTROL_UNP;
+                            return PermissionChecker.check($rootScope.user, APP_CONSTANTS.USER_PERMISSION.OPEN_DEPARTMENT_REPORT_PERIOD);
                         }
                     }
                 };

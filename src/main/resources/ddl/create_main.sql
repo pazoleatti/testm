@@ -305,7 +305,7 @@ create table declaration_type (
   name      varchar2(1000)      not null,
   status    number(1) default 0 not null
 );
-comment on table declaration_type is ' Виды деклараций';
+comment on table declaration_type is 'Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.name is 'Наименование';
 comment on column declaration_type.status is 'Статус версии (-1 -удаленная версия, 0 -действующая версия, 1 - черновик версии, 2 - фиктивная версия)';

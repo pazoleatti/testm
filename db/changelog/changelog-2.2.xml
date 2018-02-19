@@ -1088,5 +1088,23 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <column name="updated_by" type="varchar2(255 char)" />
         </addColumn>
     </changeSet>
-
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3380 DECLARATION_TYPE. Удалить IS_IFRS, IFRS_NAME изменения по БД-->
+	<changeSet id="2.2-rnurgaleev-11" author="rnurgaleev">
+        <dropColumn
+                columnName="IS_IFRS"
+                tableName="DECLARATION_TYPE"/>
+    </changeSet>
+	
+	<changeSet id="2.2-rnurgaleev-12" author="rnurgaleev">
+        <dropColumn
+                columnName="IFRS_NAME"
+                tableName="DECLARATION_TYPE"/>
+    </changeSet>
+	
+	<changeSet id="2.2-rnurgaleev-13" author="rnurgaleev">
+        <sql>
+            comment on table declaration_type is ' Виды деклараций';
+        </sql>
+    </changeSet>
 </databaseChangeLog>
