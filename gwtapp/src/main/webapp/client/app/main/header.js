@@ -128,7 +128,7 @@
                         if ($scope.permissionChecker.check($scope.security.user, $scope.APP_CONSTANTS.USER_PERMISSION.VIEW_ADMINISTRATION_CONFIG)) {
                             $scope.treeAdministration.push({
                                 name: $filter('translate')('menu.administration.configParams'),
-                                href: $state.href('configParam')
+                                href: "Main.jsp" + $scope.gwtMode + "#!configuration"
                             }, {
                                 name: $filter('translate')('menu.administration.schedulerTaskList'),
                                 href: $state.href('schedulerTaskList')
