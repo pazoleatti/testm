@@ -1149,5 +1149,14 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             comment on table declaration_type is 'Виды деклараций';
         </sql>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3103 -->
+    <changeSet id="2.2-ytrofimov-57" author="ytrofimov">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl_calculate.groovy"/>
+            <where>id=1</where>
+        </update>
+    </changeSet>
 	
 </databaseChangeLog>

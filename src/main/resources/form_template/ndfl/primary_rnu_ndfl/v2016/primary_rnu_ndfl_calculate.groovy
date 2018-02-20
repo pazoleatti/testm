@@ -62,7 +62,6 @@ class Calculate extends AbstractScriptClass {
     DeclarationData declarationData
     Map<String, Object> calculateParams
     RefBookPersonService refBookPersonService
-    FiasRefBookService fiasRefBookService
     NdflPersonService ndflPersonService
     ReportPeriodService reportPeriodService
     RefBookFactory refBookFactory
@@ -99,7 +98,7 @@ class Calculate extends AbstractScriptClass {
     List<Country> countryRefBookCache = []
     List<DocType> docTypeRefBookCache = [];
     List<TaxpayerStatus> taxpayerStatusRefBookCache = [];
-    Map<Long, FiasCheckInfo> fiasAddressIdsCache = [:];
+
     Map<Long, Map<String, String>> refBookAttrCache = new HashMap<Long, Map<String, String>>();
     // Кэш провайдеров cправочников
     Map<Long, RefBookDataProvider> providerCache = [:]
@@ -145,9 +144,6 @@ class Calculate extends AbstractScriptClass {
         }
         if (scriptClass.getBinding().hasVariable("refBookPersonService")) {
             this.refBookPersonService = (RefBookPersonService) scriptClass.getProperty("refBookPersonService");
-        }
-        if (scriptClass.getBinding().hasVariable("fiasRefBookService")) {
-            this.fiasRefBookService = (FiasRefBookService) scriptClass.getProperty("fiasRefBookService");
         }
         if (scriptClass.getBinding().hasVariable("ndflPersonService")) {
             this.ndflPersonService = (NdflPersonService) scriptClass.getProperty("ndflPersonService");
@@ -351,13 +347,6 @@ class Calculate extends AbstractScriptClass {
             }
         }
         return taxpayerStatusRefBookCache;
-    }
-
-    Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
-        if (fiasAddressIdsCache.isEmpty()) {
-            fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id, 1);
-        }
-        return fiasAddressIdsCache;
     }
 
     //---------------- Identification ----------------
