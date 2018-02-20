@@ -75,7 +75,7 @@ public class SignServiceImplTest {
 
     @Test
     public void testRNU() throws IOException, URISyntaxException {
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
         Pair<Boolean, Set<String>> pair = signService.checkSign("dataFile.data", copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger());
         Assert.assertTrue(pair.getFirst());
@@ -85,7 +85,7 @@ public class SignServiceImplTest {
 
     @Test
     public void testXls() throws IOException {
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
         Pair<Boolean, Set<String>> pair = signService.checkSign("dataXlsFile.data", copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0, new Logger());
         Assert.assertTrue(pair.getFirst());
@@ -95,7 +95,7 @@ public class SignServiceImplTest {
 
     @Test
     public void testNonEncrypt() throws IOException {
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
         Pair<Boolean, Set<String>> pair = signService.checkSign("non_enc.data", copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0, new Logger());
         Assert.assertFalse(pair.getFirst());
@@ -106,7 +106,7 @@ public class SignServiceImplTest {
     //Тест с новым подписанным архивом. False, нормальный результат, так как нет такой подписи в нашей БОК
     @Test
     public void testZip() throws IOException {
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
         Pair<Boolean, Set<String>> pair = signService.checkSign("zip.data", copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0, new Logger());
         Assert.assertFalse(pair.getFirst());
@@ -116,7 +116,7 @@ public class SignServiceImplTest {
 
     @Test
     public void testBadSign() throws IOException {
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
         Pair<Boolean, Set<String>> pair = signService.checkSign("dataFile.data", copyTmp(DATA_FILE_BAD_SIGN, "dataFile", ".data").getAbsolutePath(), 0, new Logger());
         Assert.assertFalse(pair.getFirst());

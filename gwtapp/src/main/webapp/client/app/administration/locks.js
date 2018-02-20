@@ -74,7 +74,7 @@
                         method: "POST",
                         url: "controller/actions/lock/delete",
                         params: {
-                            keys: $filter('idExtractor')($scope.locksGrid.value)
+                            keys: $filter('idExtractor')($scope.locksGrid.value, 'key')
                         }
                     }).then(function () {
                         $scope.refreshGrid(1);
