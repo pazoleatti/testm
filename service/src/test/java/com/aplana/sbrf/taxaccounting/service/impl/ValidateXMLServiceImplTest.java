@@ -77,7 +77,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     @Test
     public void validateTestSampleSuccess(){
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
 
         String uuidXsd1 = UUID.randomUUID().toString();
@@ -135,8 +135,9 @@ public class ValidateXMLServiceImplTest implements Runnable {
         when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);
 
         Logger logger = new Logger();
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
             return;
+        }
         TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
@@ -146,8 +147,9 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     @Test
     public void validateDiffThreads(){
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
             return;
+        }
 
         for (int i=1; i<=3; i++){
             new Thread(this).run();
@@ -156,7 +158,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     //@Test
     public void validateLargeXml() throws IOException {
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
         String uuidXsd2 = UUID.randomUUID().toString();
         DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
@@ -209,7 +211,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     @Test
     public void fileInfoTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
-        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        if (!System.getProperty("os.name").toLowerCase().contains("windows"))
             return;
 
         File fileVSAX = File.createTempFile("VSAX3",".exe");
