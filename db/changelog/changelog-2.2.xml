@@ -1180,4 +1180,14 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             end;
         </sql>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3672 Обновить состав справочника "Коды места представления расчета". У записей с 212 кодом разный record_id-->
+	<changeSet id="2.2-rnurgaleev-18" author="rnurgaleev">
+        <sql splitStatements="false">
+            begin
+				update ref_book_present_place set record_id=(select max(record_id) from ref_book_present_place where code='212' and status=0)
+				where code='212' and status=2;
+            end;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
