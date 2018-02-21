@@ -43,14 +43,6 @@ select,
 textarea {
   #font > .shorthand(@baseFontSize, normal, @baseLineHeight); // Set size, weight, line-height here
 }
-
-/*input,
-button,
-select,
-textarea {
-  font-family: @baseFontFamily; // And only set font-family here for those that need it (note the missing label element)
-}*/
-
 // Identify controls by their labels
 label {
   display: inline-block;
@@ -59,37 +51,6 @@ label {
 
 // Form controls
 // -------------------------
-
-// Shared size and type resets
-//select,
-//textarea,
-//input[type="text"],
-//input[type="float"],
-//input[type="password"],
-//input[type="datetime"],
-//input[type="datetime-local"],
-//input[type="date"],
-//input[type="month"],
-//input[type="time"],
-//input[type="week"],
-//input[type="number"],
-//input[type="email"],
-//input[type="url"],
-//input[type="search"],
-//input[type="tel"],
-//input[type="color"],
-//.uneditable-input {
-//  display: inline-block;
-//  height: @baseLineHeight;
-//  padding: 3px 6px;
-  /*margin-bottom: 2px;*/
-//  font-size: @baseFontSize;
-//  line-height: @baseLineHeight;
-//  color: black;
-//  .border-radius(@inputBorderRadius);
-//  vertical-align: middle;
-//}
-
 // Reset appearance properties for textual inputs and textarea
 // Declare width for legacy (can't be on input[type=*] selectors or it's too specific)
 input,
@@ -430,12 +391,7 @@ select:focus:invalid {
   margin-bottom: @baseLineHeight / 2;
 }
 
-.help-inline {
-  /*display: inline-block;
-  .ie7-inline-block();
-  vertical-align: middle;
-  padding-left: 5px;*/
-}
+.help-inline {}
 
 // INPUT GROUPS
 // ------------
@@ -676,7 +632,6 @@ legend + .control-group {
     float: left;
     width: @horizontalComponentOffset - 24;
     padding-top: 5px;
-    //text-align: right;
   }
   // Move over all input controls and content
   .controls {
@@ -739,7 +694,6 @@ button.btn.btn-default.ng-binding {
     box-shadow: inset 2px 2px 0 0 #fff;
     &:focus {
       background-color: #fff;
-      /*box-shadow: inset 2px 2px 0 0 rgba(39, 146, 56, 0.26);*/
       border: solid 1px #6ec151;
     }
   }
@@ -768,11 +722,6 @@ button.btn.btn-default.ng-binding {
     color: hsla(0, 0%, 100%, .85);
     border-color: #1a9f29;
   }
-/*  &:hover {
-    background: #59bf57;
-    color: hsla(0, 0%, 100%, .85);
-    border-color: #1a9f29;
-  }*/
   &:active, &.active {
     background: #59bf57;
     color: hsla(0, 0%, 100%, .85);
@@ -857,11 +806,6 @@ button.btn.btn-default.ng-binding {
   }
 }
 
-/*.btn-default{
-  &:hover, &:active:hover{
-    background-color: #FFF;
-  }
-}*/
 .border-none{
   border:none!important;
 }
@@ -928,13 +872,6 @@ a.btn.btn-default-nonBg:hover:not([disabled]):hover{
 .btn-default-nonBg:disabled{
   color: #cccccc;
 }
-/*.icon-ok{
-  background: url("/client/img/ok.png") no-repeat;
-  background-size: contain;
-  width: 24px;
-  height: 24px;
-  margin-top: -3px;
-}*/
 button.btn-default-ok,
 button.btn-default-close,
 button.btn-default-ok-green,
