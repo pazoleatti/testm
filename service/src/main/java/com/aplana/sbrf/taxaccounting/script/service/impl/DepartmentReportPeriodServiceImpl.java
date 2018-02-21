@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.script.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.utils.DepartmentReportPeriodFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -19,6 +20,9 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
 
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
+
+    @Autowired
+    private DepartmentReportPeriodFormatter departmentReportPeriodFormatter;
 
     @Override
     public DepartmentReportPeriod get(int id) {
@@ -48,5 +52,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Override
     public List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId) {
         return departmentReportPeriodDao.fetchIdsByDepartmentTypeAndReportPeriod(departmentTypeCode, departmentReportPeriodId);
+    }
+
+    @Override
+    public String createPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp) {
+        return departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, formatExp);
     }
 }

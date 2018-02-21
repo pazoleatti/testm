@@ -788,7 +788,7 @@ public interface DeclarationDataService {
      * @param userInfo        информация о пользователе
      * @return uuid сформированного файла
      */
-    String createExcelTemplate(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) throws IOException;
+    String createExcelTemplate(DeclarationData declarationData, TAUserInfo userInfo, Logger logger, LockStateLogger lockStateLogger) throws IOException;
 
     /**
      * Создаёт задачу на загрузку данных из Excel-файла в форму

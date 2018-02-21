@@ -1158,5 +1158,13 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id=1</where>
         </update>
     </changeSet>
+
+    <!-- https://jira.aplana.com/browse/SBRFNDFL-3691 -->
+    <changeSet id="2.2-ytrofimov-58" author="ytrofimov">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="create_script" valueClobFile="templates/ndfl/primary_rnu_ndfl/v2016/primary_rnu_ndfl.groovy"/>
+            <where>id=100</where>
+        </update>
+    </changeSet>
 	
 </databaseChangeLog>

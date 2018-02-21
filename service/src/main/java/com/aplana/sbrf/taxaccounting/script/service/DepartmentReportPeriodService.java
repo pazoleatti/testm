@@ -73,4 +73,13 @@ public interface DepartmentReportPeriodService {
      * @return список идентификаторов или пустой список
      */
     List<Integer> getIdsByDepartmentTypeAndReportPeriod(int departmentTypeCode, int departmentReportPeriodId);
+
+    /**
+     * Формирует название периода с учетом того, является ли период корректировочным
+     * @param departmentReportPeriod    период для которого формируется название
+     * @param formatExp	                шаблон форматирования даты
+     * @return строка с сообщением о корректировочномм приоде, если период не корректировочный возвращается пустая
+     * строка
+     */
+    String createPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp);
 }

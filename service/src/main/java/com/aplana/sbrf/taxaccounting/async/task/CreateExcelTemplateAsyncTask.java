@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +25,9 @@ public class CreateExcelTemplateAsyncTask extends AbstractDeclarationAsyncTask {
     @Autowired
     private ReportService reportService;
 
+    @Autowired
+    private AsyncManager asyncManager;
+
     @Override
     protected AsyncTaskType getAsyncTaskType() {
         return AsyncTaskType.EXCEL_TEMPLATE_DEC;
@@ -42,8 +44,12 @@ public class CreateExcelTemplateAsyncTask extends AbstractDeclarationAsyncTask {
         if (declarationData != null) {
             String uuid;
             try {
-                uuid = declarationDataService.createExcelTemplate(declarationData, userInfo, logger);
-                reportService.createDec(declarationDataId, uuid, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+                uuid = declarationDataService.createExcelTemplate(declarationData, userInfo, logger, new LockStateLogger() {
+                    @Override
+                    public void updateState(AsyncTaskState state) {
+                        asyncManager.updateState(taskData.getId(), state);
+                    }
+                });
             } catch (Exception e) {
                 throw new ServiceException(String.format("Выгрузка шаблона ТФ (Excel) для Налоговой формы %s не может быть выполнена: %s",
                         getDeclarationDescription(taskData.getUserId(), params),

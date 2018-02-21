@@ -2,8 +2,10 @@ package form_template.ndfl.primary_rnu_ndfl.v2016
 
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.VerticalAlignment
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -141,6 +143,9 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
             case FormDataEvent.CREATE_SPECIFIC_REPORT:
                 // Формирование спецотчета
                 createSpecificReport()
+                break
+            case FormDataEvent.UPLOAD_DECLARATION_DATA_TO_EXCEL:
+                uploadDeclarationDataToExcel()
                 break
         }
     }
@@ -699,7 +704,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
     }
 
 /**
- * Выгрузка в Excel РНУ-НДФЛ
+ * Спецотчет РНУ-НДФЛ по всем ФЛ
  */
     public void loadAllDeclarationDataToExcel() {
 
@@ -777,6 +782,73 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         BlobData blobData = blobDataService.get(blobDataId)
         return new XSSFWorkbook(blobData.getInputStream())
     }
+
+    void uploadDeclarationDataToExcel() {
+
+        SheetFillerContext context = createSheetFillerContext()
+        XSSFWorkbook xssfWorkbook = createWorkbook(context)
+
+        Workbook sxssfWorkbook = new SXSSFWorkbook(xssfWorkbook, 100, true)
+
+        new UploadDeclarationDataSheetFiller().fillSheet(sxssfWorkbook, context)
+        OutputStream writer = scriptSpecificReportHolder.getFileOutputStream()
+        sxssfWorkbook.write(writer)
+        scriptSpecificReportHolder.setFileName(createUploadDeclarationDataToExcelFileName())
+    }
+
+    String createUploadDeclarationDataToExcelFileName() {
+        Department department = departmentService.get(declarationData.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
+        String asnuName = "";
+        if (declarationData.getAsnuId() != null) {
+            RefBookDataProvider asnuProvider = refBookFactory.getDataProvider(RefBook.Id.ASNU.getId());
+            asnuName = asnuProvider.getRecordData(declarationData.getAsnuId()).get("NAME").getStringValue();
+        }
+        return String.format("ТФ_%s_%s %s%s_%s_%s.xlsx",
+                declarationData.getId(),
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getReportPeriod().getName(),
+                departmentReportPeriodService.createPeriodName(reportPeriod, DATE_FORMAT),
+                department.getCode(),
+                asnuName);
+    }
+
+    SheetFillerContext createSheetFillerContext() {
+        List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
+        List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
+        List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
+        List<NdflPersonPrepayment> ndflPersonPrepaymentList = ndflPersonService.findNdflPersonPrepayment(declarationData.id)
+        SheetFillerContext context = new SheetFillerContext(ndflPersonList, ndflPersonIncomeList, ndflPersonDeductionList, ndflPersonPrepaymentList)
+        for (NdflPersonIncome ndflPersonIncome : ndflPersonIncomeList) {
+            context.getIdNdflPersonMap().get(ndflPersonIncome.ndflPersonId).incomes << ndflPersonIncome
+        }
+        for (NdflPersonDeduction ndflPersonDeduction : ndflPersonDeductionList) {
+            context.getIdNdflPersonMap().get(ndflPersonDeduction.ndflPersonId).deductions << ndflPersonDeduction
+        }
+        for (NdflPersonPrepayment ndflPersonPrepayment : ndflPersonPrepaymentList) {
+            context.getIdNdflPersonMap().get(ndflPersonPrepayment.ndflPersonId).prepayments << ndflPersonPrepayment
+        }
+        return context
+    }
+
+    XSSFWorkbook createWorkbook(SheetFillerContext context) {
+        int counter = 0
+        int listNumber = 1
+        XSSFWorkbook workbook = new XSSFWorkbook(scriptSpecificReportHolder.fileInputStream)
+        for (NdflPerson ndflPerson : context.getNdflPersonList()) {
+            int maxOperationSize = [ndflPerson.incomes.size(), ndflPerson.deductions.size(), ndflPerson.prepayments.size()].max()
+            counter += maxOperationSize
+            if (counter >= 1_000_000) {
+                counter = 0
+                listNumber++
+                workbook.cloneSheet(1)
+                workbook.setSheetName(listNumber, "РНУ НДФЛ (" + listNumber - 1 + ")")
+            }
+        }
+        return workbook
+    }
+
+
 
     //------------------ Import Data ----------------------
     @TypeChecked(TypeCheckingMode.SKIP)
@@ -1445,6 +1517,13 @@ public class SheetFillerContext {
         this.ndflPersonPrepaymentList = ndflPersonPrepaymentList
     }
 
+    SheetFillerContext(List<NdflPerson> ndflPersonList, List<NdflPersonIncome> ndflPersonIncomeList, List<NdflPersonDeduction> ndflPersonDeductionList, List<NdflPersonPrepayment> ndflPersonPrepaymentList) {
+        this.ndflPersonList = ndflPersonList
+        this.ndflPersonIncomeList = ndflPersonIncomeList
+        this.ndflPersonDeductionList = ndflPersonDeductionList
+        this.ndflPersonPrepaymentList = ndflPersonPrepaymentList
+    }
+
     String getDepartmentName() {
         return departmentName
     }
@@ -1888,6 +1967,312 @@ class PrepaymentSheetFiller implements SheetFiller {
     }
 }
 
+@TypeChecked
+class UploadDeclarationDataSheetFiller implements SheetFiller {
+    @Override
+    void fillSheet(Workbook wb, SheetFillerContext context) {
+        int counter = 0
+        final int OFFSET = 2
+        int pointer = OFFSET
+        final int MAX_ROWS = 1_000_000
+        int sheetIndex = 1
+        Sheet sheet = wb.getSheetAt(sheetIndex)
+        Styler styler = new Styler(wb)
+        CellStyle centeredStyle =  styler.getVerticalByTopHorizontalByCenter()
+        CellStyle centeredStyleDate = styler.getVerticalByTopHorizontalByCenterDate()
+        for (NdflPerson np : context.getNdflPersonList()) {
+            ScriptUtils.checkInterrupted()
+            int maxOperationSize = [np.incomes.size(), np.deductions.size(), np.prepayments.size()].max()
+            counter += maxOperationSize
+            if (counter > MAX_ROWS) {
+                counter = maxOperationSize
+                pointer = OFFSET
+                sheetIndex++
+                sheet = wb.createSheet("РНУ НДФЛ (" + (sheetIndex - 1) + ")")
+            }
+
+            Collections.sort(np.incomes, new Comparator<NdflPersonIncome>() {
+                @Override
+                int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
+                    return o1.rowNum.compareTo(o2.rowNum)
+                }
+            })
+            Collections.sort(np.deductions, new Comparator<NdflPersonDeduction>() {
+                @Override
+                int compare(NdflPersonDeduction o1, NdflPersonDeduction o2) {
+                    return o1.rowNum.compareTo(o2.rowNum)
+                }
+            })
+            Collections.sort(np.prepayments, new Comparator<NdflPersonPrepayment>() {
+                @Override
+                int compare(NdflPersonPrepayment o1, NdflPersonPrepayment o2) {
+                    return o1.rowNum.compareTo(o2.rowNum)
+                }
+            })
+            for(int i = 0; i < maxOperationSize; i++) {
+                Row row = sheet.createRow(pointer)
+                Cell cell_0 = row.createCell(0)
+                cell_0.setCellStyle(centeredStyle)
+                Cell cell_1 = row.createCell(1)
+                cell_1.setCellStyle(centeredStyle)
+                if (i < np.incomes.size()) {
+                    cell_1.setCellValue(np.incomes.get(i).rowNum)
+                }
+                Cell cell_2 = row.createCell(2);
+                cell_2.setCellStyle(centeredStyle)
+                cell_2.setCellValue(np.getInp() != null ? np.getInp() : "");
+                Cell cell_3 = row.createCell(3);
+                cell_3.setCellStyle(centeredStyle)
+                cell_3.setCellValue(np.getLastName() != null ? np.getLastName() : "");
+                Cell cell_4 = row.createCell(4);
+                cell_4.setCellStyle(centeredStyle)
+                cell_4.setCellValue(np.getFirstName() != null ? np.getFirstName() : "");
+                Cell cell_5 = row.createCell(5);
+                cell_5.setCellStyle(centeredStyle)
+                cell_5.setCellValue(np.getMiddleName() != null ? np.getMiddleName() : "");
+                Cell cell_6 = row.createCell(6);
+                cell_6.setCellStyle(centeredStyleDate)
+                if (np.birthDay != null) {
+                    cell_6.setCellValue(np.birthDay);
+                }
+                Cell cell_7 = row.createCell(7);
+                cell_7.setCellStyle(centeredStyle)
+                cell_7.setCellValue(np.getCitizenship() != null ? np.getCitizenship() : "");
+                Cell cell_8 = row.createCell(8);
+                cell_8.setCellStyle(centeredStyle)
+                cell_8.setCellValue(np.getInnNp() != null ? np.getInnNp() : "");
+                Cell cell_9 = row.createCell(9);
+                cell_9.setCellStyle(centeredStyle)
+                cell_9.setCellValue(np.getInnForeign() != null ? np.getInnForeign() : "");
+                Cell cell_10 = row.createCell(10);
+                cell_10.setCellStyle(centeredStyle)
+                cell_10.setCellValue(np.getIdDocType() != null ? np.getIdDocType() : "");
+                Cell cell_11 = row.createCell(11);
+                cell_11.setCellStyle(centeredStyle)
+                cell_11.setCellValue(np.getIdDocNumber() != null ? np.getIdDocNumber() : "");
+                Cell cell_12 = row.createCell(12);
+                cell_12.setCellStyle(centeredStyle)
+                cell_12.setCellValue(np.getStatus() != null ? np.getStatus() : "");
+                Cell cell_13 = row.createCell(13);
+                cell_13.setCellStyle(centeredStyle)
+                cell_13.setCellValue(np.getRegionCode() != null ? np.getRegionCode() : "");
+                Cell cell_14 = row.createCell(14);
+                cell_14.setCellStyle(centeredStyle)
+                cell_14.setCellValue(np.getPostIndex() != null ? np.getPostIndex() : "");
+                Cell cell_15 = row.createCell(15);
+                cell_15.setCellStyle(centeredStyle)
+                cell_15.setCellValue(np.getArea() != null ? np.getArea() : "");
+                Cell cell_16 = row.createCell(16);
+                cell_16.setCellStyle(centeredStyle)
+                cell_16.setCellValue(np.getCity() != null ? np.getCity() : "");
+                Cell cell_17 = row.createCell(17);
+                cell_17.setCellStyle(centeredStyle)
+                cell_17.setCellValue(np.getLocality() != null ? np.getLocality() : "");
+                Cell cell_18 = row.createCell(18);
+                cell_18.setCellStyle(centeredStyle)
+                cell_18.setCellValue(np.getStreet() != null ? np.getStreet() : "");
+                Cell cell_19 = row.createCell(19);
+                cell_19.setCellStyle(centeredStyle)
+                cell_19.setCellValue(np.getHouse() != null ? np.getHouse() : "");
+                Cell cell_20 = row.createCell(20);
+                cell_20.setCellStyle(centeredStyle)
+                cell_20.setCellValue(np.getBuilding() != null ? np.getBuilding() : "");
+                Cell cell_21 = row.createCell(21);
+                cell_21.setCellStyle(centeredStyle)
+                cell_21.setCellValue(np.getFlat() != null ? np.getFlat() : "");
+                Cell cell_22 = row.createCell(22)
+                cell_22.setCellStyle(centeredStyle)
+                cell_22.setCellValue(np.snils != null ? np.snils : "")
+                Cell cell_23 = row.createCell(23);
+                cell_23.setCellStyle(centeredStyle)
+                Cell cell_24 = row.createCell(24);
+                cell_24.setCellStyle(centeredStyle)
+                Cell cell_25 = row.createCell(25);
+                cell_25.setCellStyle(centeredStyle)
+                Cell cell_26 = row.createCell(26);
+                cell_26.setCellStyle(centeredStyleDate)
+                Cell cell_27 = row.createCell(27);
+                cell_27.setCellStyle(centeredStyleDate)
+                Cell cell_28 = row.createCell(28);
+                cell_28.setCellStyle(centeredStyle)
+                Cell cell_29 = row.createCell(29);
+                cell_29.setCellStyle(centeredStyle)
+                Cell cell_30 = row.createCell(30);
+                cell_30.setCellStyle(centeredStyle)
+                Cell cell_31 = row.createCell(31);
+                cell_31.setCellStyle(centeredStyle)
+                Cell cell_32 = row.createCell(32);
+                cell_32.setCellStyle(centeredStyle)
+                Cell cell_33 = row.createCell(33);
+                cell_33.setCellStyle(centeredStyle)
+                Cell cell_34 = row.createCell(34);
+                cell_34.setCellStyle(centeredStyle)
+                Cell cell_35 = row.createCell(35);
+                cell_35.setCellStyle(centeredStyleDate)
+                Cell cell_36 = row.createCell(36);
+                cell_36.setCellStyle(centeredStyle)
+                Cell cell_37 = row.createCell(37);
+                cell_37.setCellStyle(centeredStyle)
+                Cell cell_38 = row.createCell(38);
+                cell_38.setCellStyle(centeredStyle)
+                Cell cell_39 = row.createCell(39);
+                cell_39.setCellStyle(centeredStyle)
+                Cell cell_40 = row.createCell(40);
+                cell_40.setCellStyle(centeredStyle)
+                Cell cell_41 = row.createCell(41);
+                cell_41.setCellStyle(centeredStyleDate)
+                Cell cell_42 = row.createCell(42);
+                cell_42.setCellStyle(centeredStyleDate)
+                Cell cell_43 = row.createCell(43);
+                cell_43.setCellStyle(centeredStyle)
+                Cell cell_44 = row.createCell(44);
+                cell_44.setCellStyle(centeredStyle)
+                if (i < np.incomes.size()) {
+                    NdflPersonIncome npi = np.incomes.get(i)
+                    cell_23.setCellValue(npi.getOperationId() != null ? npi.getOperationId() : "")
+                    cell_24.setCellValue(npi.getIncomeCode() != null ? npi.getIncomeCode() : "")
+                    cell_25.setCellValue(npi.getIncomeType() != null ? npi.getIncomeType() : "")
+                    if (npi.incomeAccruedDate != null) {
+                        cell_26.setCellValue(npi.incomeAccruedDate);
+                    }
+                    if (npi.incomePayoutDate != null) {
+                        cell_27.setCellValue(npi.incomePayoutDate)
+                    }
+                    cell_28.setCellValue(npi.getKpp() != null ? npi.getKpp() : "")
+                    cell_29.setCellValue(npi.getOktmo() != null ? npi.getOktmo() : "")
+                    if (npi.incomeAccruedSumm != null) {
+                        cell_30.setCellValue(npi.incomeAccruedSumm.doubleValue())
+                    }
+                    if (npi.incomePayoutSumm != null) {
+                        cell_31.setCellValue(npi.incomePayoutSumm.doubleValue());
+                    }
+                    if (npi.totalDeductionsSumm != null) {
+                        cell_32.setCellValue(npi.totalDeductionsSumm.doubleValue());
+                    }
+                    if (npi.taxBase != null) {
+                        cell_33.setCellValue(npi.taxBase.doubleValue());
+                    }
+                    if (npi.taxRate != null) {
+                        cell_34.setCellValue(npi.taxRate);
+                    }
+                    if (npi.taxDate != null) {
+                        cell_35.setCellValue(npi.taxDate);
+                    }
+                    if (npi.calculatedTax != null) {
+                        cell_36.setCellValue(npi.calculatedTax.doubleValue())
+                    }
+                    if (npi.withholdingTax != null) {
+                        cell_37.setCellValue(npi.withholdingTax.doubleValue());
+                    }
+                    if (npi.notHoldingTax != null) {
+                        cell_38.setCellValue(npi.notHoldingTax.doubleValue());
+                    }
+                    if (npi.overholdingTax != null) {
+                        cell_39.setCellValue(npi.overholdingTax.doubleValue());
+                    }
+                    if (npi.refoundTax != null) {
+                        cell_40.setCellValue(npi.refoundTax.doubleValue());
+                    }
+                    if (npi.taxTransferDate != null) {
+                        cell_41.setCellValue(npi.taxTransferDate);
+                    }
+                    if (npi.paymentDate != null) {
+                        cell_42.setCellValue(npi.paymentDate);
+                    }
+                    cell_43.setCellValue(npi.getPaymentNumber() != null ? npi.getPaymentNumber() : "");
+                    if (npi.taxSumm != null) {
+                        cell_44.setCellValue(npi.taxSumm.intValue());
+                    }
+                }
+                Cell cell_45 = row.createCell(45);
+                cell_45.setCellStyle(centeredStyle)
+                Cell cell_46 = row.createCell(46);
+                cell_46.setCellStyle(centeredStyle)
+                Cell cell_47 = row.createCell(47);
+                cell_47.setCellStyle(centeredStyleDate)
+                Cell cell_48 = row.createCell(48);
+                cell_48.setCellStyle(centeredStyle)
+                Cell cell_49 = row.createCell(49);
+                cell_49.setCellStyle(centeredStyle)
+                Cell cell_50 = row.createCell(50);
+                cell_50.setCellStyle(centeredStyle)
+                Cell cell_51 = row.createCell(51);
+                cell_51.setCellStyle(centeredStyle)
+                Cell cell_52 = row.createCell(52);
+                cell_52.setCellStyle(centeredStyleDate)
+                Cell cell_53 = row.createCell(53);
+                cell_53.setCellStyle(centeredStyle)
+                Cell cell_54 = row.createCell(54);
+                cell_54.setCellStyle(centeredStyle)
+                Cell cell_55 = row.createCell(55);
+                cell_55.setCellStyle(centeredStyleDate)
+                Cell cell_56 = row.createCell(56);
+                cell_56.setCellStyle(centeredStyle)
+                Cell cell_57 = row.createCell(57);
+                cell_57.setCellStyle(centeredStyleDate)
+                Cell cell_58 = row.createCell(58);
+                cell_58.setCellStyle(centeredStyle)
+                if (i < np.deductions.size()) {
+                    NdflPersonDeduction npd = np.deductions.get(i)
+                    cell_45.setCellValue(npd.getTypeCode() != null ? npd.getTypeCode() : "");
+                    cell_46.setCellValue(npd.getNotifType() != null ? npd.getNotifType() : "");
+                    if (npd.notifDate != null) {
+                        cell_47.setCellValue(npd.notifDate);
+                    }
+                    cell_48.setCellValue(npd.getNotifNum() != null ? npd.getNotifNum() : "");
+                    cell_49.setCellValue(npd.getNotifSource() != null ? npd.getNotifSource() : "");
+                    if (npd.notifSumm != null) {
+                        cell_50.setCellValue(npd.notifSumm.doubleValue());
+                    }
+                    cell_51.setCellValue(npd.getOperationId() != null ? npd.getOperationId() : "");
+                    if (npd.incomeAccrued != null) {
+                        cell_52.setCellValue(npd.incomeAccrued);
+                    }
+                    cell_53.setCellValue(npd.getIncomeCode() != null ? npd.getIncomeCode() : "");
+                    if (npd.incomeSumm != null) {
+                        cell_54.setCellValue(npd.incomeSumm.doubleValue());
+                    }
+                    if (npd.periodPrevDate != null) {
+                        cell_55.setCellValue(npd.periodPrevDate);
+                    }
+                    if (npd.periodPrevSumm != null) {
+                        cell_56.setCellValue(npd.periodPrevSumm.doubleValue());
+                    }
+                    if (npd.periodCurrDate != null) {
+                        cell_57.setCellValue(npd.periodCurrDate);
+                    }
+                    if (npd.periodCurrSumm != null) {
+                        cell_58.setCellValue(npd.periodCurrSumm.doubleValue());
+                    }
+                }
+                Cell cell_59 = row.createCell(59);
+                cell_59.setCellStyle(centeredStyle)
+                Cell cell_60 = row.createCell(60);
+                cell_60.setCellStyle(centeredStyle)
+                Cell cell_61 = row.createCell(61);
+                cell_61.setCellStyle(centeredStyle)
+                Cell cell_62 = row.createCell(62);
+                cell_62.setCellStyle(centeredStyleDate)
+                Cell cell_63 = row.createCell(63);
+                cell_63.setCellStyle(centeredStyle)
+                if (i < np.prepayments.size()) {
+                    NdflPersonPrepayment npp = np.prepayments.get(i)
+                    cell_59.setCellValue(npp.getOperationId() != null ? npp.getOperationId() : "");
+                    if (npp.summ != null) {
+                        cell_60.setCellValue(npp.summ.doubleValue());
+                    }
+                    cell_61.setCellValue(npp.getNotifNum() != null ? npp.getNotifNum() : "");
+                    if (npp.notifDate != null) {
+                        cell_62.setCellValue(npp.notifDate);
+                    }
+                    cell_63.setCellValue(npp.getNotifSource() != null ? npp.getNotifSource() : "");
+                }
+                pointer++
+            }
+        }
+    }
+}
+
 class Styler {
 
     Workbook workbook
@@ -1947,6 +2332,29 @@ class Styler {
         style.setBorderLeft(CellStyle.BORDER_THIN)
         style.setBorderRight(CellStyle.BORDER_THIN)
         return style
+    }
+
+    /**
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру по горизонтали о по верху
+     * по вериткали
+     * @return
+     */
+    CellStyle getVerticalByTopHorizontalByCenter() {
+        CellStyle style = workbook.createCellStyle()
+        style.setAlignment(HorizontalAlignment.CENTER)
+        style.setVerticalAlignment(VerticalAlignment.TOP)
+        thinBorderStyle(style)
+        return style
+    }
+
+    /**
+     * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру по горизонтали о по верху
+     * по вериткали
+     * @return
+     */
+    CellStyle getVerticalByTopHorizontalByCenterDate() {
+        CellStyle style = getVerticalByTopHorizontalByCenter()
+        return addDateFormat(style)
     }
 }
 

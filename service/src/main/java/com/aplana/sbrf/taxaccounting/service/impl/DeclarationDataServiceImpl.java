@@ -3176,7 +3176,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             // в логгере будет что задача запущена и вы добавлены в список получателей оповещения
         } else {
             result.setStatus(CreateAsyncTaskStatus.CREATE);
-            reportService.deleteDec(declarationDataId, DeclarationDataReportType.EXCEL_TEMPLATE_DEC);
+
             Map<String, Object> params = new HashMap<>();
             params.put("declarationDataId", declarationDataId);
             asyncManager.executeTask(asyncLockKey, AsyncTaskType.EXCEL_TEMPLATE_DEC, userInfo, params, logger, false, new AbstractStartupAsyncTaskHandler() {
@@ -3192,13 +3192,31 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger) throws IOException {
-        try (InputStream inputStream = this.getClass().getResourceAsStream("/template/excel_template_dec.xlsx")) {
-            if (inputStream == null) {
-                throw new ServiceException("Файл не найден");
-            }
-
-            return blobDataService.create(inputStream, getExcelTemplateFileName(declaration));
+    public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) throws IOException {
+        Map<String, Object> params = new HashMap<String, Object>();
+        ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
+            File reportFile = File.createTempFile("report", ".dat");
+            try (InputStream inputStream = this.getClass().getResourceAsStream("/template/excel_template_dec.xlsx");
+                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile))) {
+                if (inputStream == null) {
+                    throw new ServiceException("Файл не найден");
+                }
+                scriptSpecificReportHolder.setFileOutputStream(outputStream);
+                scriptSpecificReportHolder.setFileInputStream(inputStream);
+                scriptSpecificReportHolder.setFileName("report.xlsx");
+                params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+                stateLogger.updateState(AsyncTaskState.FILLING_XLSX_REPORT);
+                declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.UPLOAD_DECLARATION_DATA_TO_EXCEL, logger, params);
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
+                }
+                stateLogger.updateState(AsyncTaskState.SAVING_XLSX);
+                return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
+            } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            if (reportFile != null)
+                reportFile.delete();
         }
     }
 

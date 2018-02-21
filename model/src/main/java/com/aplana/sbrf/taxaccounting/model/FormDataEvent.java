@@ -41,6 +41,7 @@ public enum FormDataEvent implements Serializable {
 
     CREATE_EXCEL_REPORT(27, "Сформировать Excel отчет"),
 	CREATE_PDF_REPORT(28, "Сформировать PDF отчет"),
+	UPLOAD_DECLARATION_DATA_TO_EXCEL(29, "Выгрузить данные формы вида РНУ НДФЛ"),
 
 	MOVE_CREATED_TO_ACCEPTED(105, "Принять из \"Создана\""),
 	MOVE_ACCEPTED_TO_CREATED(106, "Возврат в \"Создана\""),
