@@ -1217,5 +1217,20 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         <renameColumn tableName="ndfl_person_prepayment" oldColumnName="editing_date" newColumnName="modified_date" remarks="Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
         <renameColumn tableName="ndfl_person_prepayment" oldColumnName="updated_by" newColumnName="modified_by" remarks="Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
     </changeSet>
+
+    <changeSet id="2.2-ytrofimov-60" author="ytrofimov">
+        <sql splitStatements="false">
+            begin
+            execute immediate 'comment on column ndfl_person.modified_date is ''Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            execute immediate 'comment on column ndfl_person.modified_by is ''Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            execute immediate 'comment on column ndfl_person_income.modified_date is ''Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            execute immediate 'comment on column ndfl_person_income.modified_by is ''Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            execute immediate 'comment on column ndfl_person_deduction.modified_date is ''Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            execute immediate 'comment on column ndfl_person_deduction.modified_by is ''Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            execute immediate 'comment on column ndfl_person_prepayment.modified_date is ''Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            execute immediate 'comment on column ndfl_person_prepayment.modified_by is ''Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла''';
+            end;
+        </sql>
+    </changeSet>
 	
 </databaseChangeLog>
