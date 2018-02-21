@@ -1190,4 +1190,13 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             end;
         </sql>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3513 2.2 Справочник "коды периодов": неверная календарная дата начала периода: год при реорганизации (ликвидации)-->
+    <changeSet id="2.2-rnurgaleev-19" author="rnurgaleev">
+        <update tableName="REPORT_PERIOD_TYPE">
+            <column name="CALENDAR_START_DATE" valueDate="1970-01-01"/>
+            <where>code='90'</where>
+        </update>
+    </changeSet>
+	
 </databaseChangeLog>
