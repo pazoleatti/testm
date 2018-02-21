@@ -12,6 +12,8 @@ public class RefBookAsnu extends RefBookSimple<Long> {
     private String code;
     //Тип дохода
     private String type;
+    //Приоритет
+    private Integer priority;
 
     public String getName() {
         return name;
@@ -35,5 +37,13 @@ public class RefBookAsnu extends RefBookSimple<Long> {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 }

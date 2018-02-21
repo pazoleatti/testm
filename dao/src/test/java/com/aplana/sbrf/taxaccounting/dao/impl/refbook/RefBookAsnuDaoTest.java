@@ -47,4 +47,11 @@ public class RefBookAsnuDaoTest {
         assertNotNull(refBookAsnu);
         assertEquals("1000", refBookAsnu.getCode());
     }
+
+    @Test
+    public void fetchByName() {
+        RefBookAsnu refBookAsnu = refBookAsnuDao.fetchByName("АИС \"Дивиденд\"");
+        assertNotNull(refBookAsnu);
+        assertEquals("2000", refBookAsnu.getCode());
+    }
 }
