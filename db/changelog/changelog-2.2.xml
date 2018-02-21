@@ -1167,4 +1167,44 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3672 Обновить состав справочника "Коды места представления расчета"-->
+	<changeSet id="2.2-rnurgaleev-17" author="rnurgaleev">
+        <sql splitStatements="false">
+            begin
+				merge into ref_book_present_place a using
+				(select 0 as status, to_date('01.01.2018','DD.MM.YYYY') as version, '124' as code, 'По месту жительства члена (главы) крестьянского (фермерского) хозяйства' as name from dual
+				union all
+				select 2 as status, to_date('01.01.2018','DD.MM.YYYY') as version, '212' as code, 'по месту учета российской организации' as name from dual
+				union all
+				select 0 as status, to_date('01.01.2018','DD.MM.YYYY') as version, '214' as code, 'По месту нахождения российской организации, не являющейся крупнейшим налогоплательщиком ' as name from dual
+				union all
+				select 0 as status, to_date('01.01.2018','DD.MM.YYYY') as version, '215' as code, 'По месту нахождения правопреемника, не являющегося крупнейшим налогоплательщиком' as name from dual
+				union all
+				select 0 as status, to_date('01.01.2018','DD.MM.YYYY') as version, '216' as code, 'По месту учета правопреемника, являющегося крупнейшим налогоплательщиком' as name from dual) b
+				on (a.status=b.status and a.version=b.version and a.code=b.code and a.name=b.name)
+				when not matched then
+				insert (id, record_id, status, version, code, name)
+				values (seq_ref_book_record.nextval,seq_ref_book_record_row_id.nextval, b.status, b.version, b.code, b.name);
+            end;
+        </sql>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3672 Обновить состав справочника "Коды места представления расчета". У записей с 212 кодом разный record_id-->
+	<changeSet id="2.2-rnurgaleev-18" author="rnurgaleev">
+        <sql splitStatements="false">
+            begin
+				update ref_book_present_place set record_id=(select max(record_id) from ref_book_present_place where code='212' and status=0)
+				where code='212' and status=2;
+            end;
+        </sql>
+    </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3513 2.2 Справочник "коды периодов": неверная календарная дата начала периода: год при реорганизации (ликвидации)-->
+    <changeSet id="2.2-rnurgaleev-19" author="rnurgaleev">
+        <update tableName="REPORT_PERIOD_TYPE">
+            <column name="CALENDAR_START_DATE" valueDate="1970-01-01"/>
+            <where>code='90'</where>
+        </update>
+    </changeSet>
+	
 </databaseChangeLog>
