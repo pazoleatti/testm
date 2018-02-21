@@ -22,17 +22,17 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
     private String notifSource;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private Date editingDate;
+    private Date modifiedDate;
 
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private String updatedBy;
+    private String modifiedBy;
 
     public static final String TABLE_NAME = "ndfl_person_prepayment";
     public static final String SEQ = "seq_ndfl_person_prepayment";
     public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "summ", "notif_num",
-            "notif_date", "notif_source", "source_id", "editing_date", "updated_by"};
+            "notif_date", "notif_source", "source_id", "modified_date", "modified_by"};
     public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "summ", "notifNum",
-            "notifDate", "notifSource", "sourceId", "editingDate", "updatedBy"};
+            "notifDate", "notifSource", "sourceId", "modifiedDate", "modifiedBy"};
 
     @Override
     public String getTableName() {
@@ -85,20 +85,20 @@ public class NdflPersonPrepayment extends NdflPersonOperation {
         this.notifSource = notifSource;
     }
 
-    public Date getEditingDate() {
-        return editingDate;
+    public Date getModifiedDate() {
+        return modifiedDate;
     }
 
-    public void setEditingDate(Date editingDate) {
-        this.editingDate = editingDate;
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
-    public String getUpdatedBy() {
-        return updatedBy;
+    public String getModifiedBy() {
+        return modifiedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
     @Override

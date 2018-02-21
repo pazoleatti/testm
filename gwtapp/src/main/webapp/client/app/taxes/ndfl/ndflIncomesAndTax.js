@@ -67,8 +67,8 @@
                             $filter('translate')('incomesAndTax.title.paymentNumber'),
                             $filter('translate')('incomesAndTax.title.taxSumm'),
                             $filter('translate')('incomesAndTax.title.id'),
-                            $filter('translate')('incomesAndTax.title.editingDate'),
-                            $filter('translate')('incomesAndTax.title.updatedBy')],
+                            $filter('translate')('incomesAndTax.title.modifiedDate'),
+                            $filter('translate')('incomesAndTax.title.modifiedBy')],
                         colModel: [
                             {name: 'rowNum', index: 'rowNum', width: 60, key: true},
                             {name: 'inp', index: 'inp', width: 170},
@@ -115,8 +115,8 @@
                             {name: 'paymentNumber', index: 'paymentNumber', width: 205},
                             {name: 'taxSumm', index: 'taxSumm', width: 205},
                             {name: 'id', index: 'id', width: 200},
-                            {name: 'editingDate', index: 'editingDate', width: 230, formatter: $filter('dateTimeFormatter')},
-                            {name: 'updatedBy', index: 'updatedBy', width: 170}
+                            {name: 'modifiedDate', index: 'modifiedDate', width: 230, formatter: $filter('dateTimeFormatter')},
+                            {name: 'modifiedBy', index: 'modifiedBy', width: 170}
                         ],
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,

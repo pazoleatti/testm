@@ -61,10 +61,10 @@ public class NdflPersonDeductionDTO {
     private Long id;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private Date editingDate;
+    private Date modifiedDate;
 
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private String updatedBy;
+    private String modifiedBy;
 
     public NdflPersonDeductionDTO() {
     }
@@ -225,27 +225,27 @@ public class NdflPersonDeductionDTO {
         this.inp = inp;
     }
 
-    public Date getEditingDate() {
-        return editingDate;
-    }
-
-    public void setEditingDate(Date editingDate) {
-        this.editingDate = editingDate;
-    }
-
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 }

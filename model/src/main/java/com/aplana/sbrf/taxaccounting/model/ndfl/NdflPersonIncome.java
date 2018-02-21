@@ -74,22 +74,22 @@ public class NdflPersonIncome extends NdflPersonOperation {
     private Long taxSumm;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private Date editingDate;
+    private Date modifiedDate;
 
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private String updatedBy;
+    private String modifiedBy;
 
     public static final String TABLE_NAME = "ndfl_person_income";
     public static final String SEQ = "seq_ndfl_person_income";
     public static final String[] COLUMNS = {"id", "ndfl_person_id", "row_num", "operation_id", "oktmo", "kpp", "income_code", "income_type",
             "income_accrued_date", "income_payout_date", "income_accrued_summ", "income_payout_summ", "total_deductions_summ",
             "tax_base", "tax_rate", "tax_date", "calculated_tax", "withholding_tax", "not_holding_tax", "overholding_tax",
-            "refound_tax", "tax_transfer_date", "payment_date", "payment_number", "tax_summ", "source_id", "editing_date", "updated_by"};
+            "refound_tax", "tax_transfer_date", "payment_date", "payment_number", "tax_summ", "source_id", "modified_date", "modified_by"};
 
     public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "oktmo", "kpp", "incomeCode", "incomeType",
             "incomeAccruedDate", "incomePayoutDate", "incomeAccruedSumm", "incomePayoutSumm", "totalDeductionsSumm",
             "taxBase", "taxRate", "taxDate", "calculatedTax", "withholdingTax", "notHoldingTax", "overholdingTax",
-            "refoundTax", "taxTransferDate", "paymentDate", "paymentNumber", "taxSumm", "sourceId", "editingDate", "updatedBy"};
+            "refoundTax", "taxTransferDate", "paymentDate", "paymentNumber", "taxSumm", "sourceId", "modifiedDate", "modifiedBy"};
 
     @Override
     public String getTableName() {
@@ -280,20 +280,20 @@ public class NdflPersonIncome extends NdflPersonOperation {
         this.taxSumm = taxSumm;
     }
 
-    public Date getEditingDate() {
-        return editingDate;
+    public Date getModifiedDate() {
+        return modifiedDate;
     }
 
-    public void setEditingDate(Date editingDate) {
-        this.editingDate = editingDate;
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
-    public String getUpdatedBy() {
-        return updatedBy;
+    public String getModifiedBy() {
+        return modifiedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
     @Override

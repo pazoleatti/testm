@@ -1206,5 +1206,16 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>code='90'</where>
         </update>
     </changeSet>
+
+    <changeSet id="2.2-ytrofimov-59" author="ytrofimov">
+        <renameColumn tableName="ndfl_person" oldColumnName="editing_date" newColumnName="modified_date" remarks="Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+        <renameColumn tableName="ndfl_person" oldColumnName="updated_by" newColumnName="modified_by" remarks="Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+        <renameColumn tableName="ndfl_person_income" oldColumnName="editing_date" newColumnName="modified_date" remarks="Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+        <renameColumn tableName="ndfl_person_income" oldColumnName="updated_by" newColumnName="modified_by" remarks="Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+        <renameColumn tableName="ndfl_person_deduction" oldColumnName="editing_date" newColumnName="modified_date" remarks="Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+        <renameColumn tableName="ndfl_person_deduction" oldColumnName="updated_by" newColumnName="modified_by" remarks="Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+        <renameColumn tableName="ndfl_person_prepayment" oldColumnName="editing_date" newColumnName="modified_date" remarks="Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+        <renameColumn tableName="ndfl_person_prepayment" oldColumnName="updated_by" newColumnName="modified_by" remarks="Значение имени пользователя и логин из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла"/>
+    </changeSet>
 	
 </databaseChangeLog>

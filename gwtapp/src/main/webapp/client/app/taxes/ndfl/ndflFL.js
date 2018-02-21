@@ -65,8 +65,8 @@
                             $filter('translate')('ndflFL.title.flat'),
                             $filter('translate')('ndflFL.title.snils'),
                             $filter('translate')('ndflFL.title.id'),
-                            $filter('translate')('ndflFL.title.editingDate'),
-                            $filter('translate')('ndflFL.title.updatedBy')],
+                            $filter('translate')('ndflFL.title.modifiedDate'),
+                            $filter('translate')('ndflFL.title.modifiedBy')],
                         colModel: [
                             {name: 'rowNum', index: 'rowNum', width: 80, key: true},
                             {name: 'inp', index: 'inp', width: 150},
@@ -96,8 +96,8 @@
                             {name: 'flat', index: 'flat', width: 205},
                             {name: 'snils', index: 'snils', width: 190, sortable: false},
                             {name: 'id', index: 'id', width: 200},
-                            {name: 'editingDate', index: 'editingDate', width: 230, formatter: $filter('dateTimeFormatter')},
-                            {name: 'updatedBy', index: 'updatedBy', width: 170}],
+                            {name: 'modifiedDate', index: 'modifiedDate', width: 230, formatter: $filter('dateTimeFormatter')},
+                            {name: 'modifiedBy', index: 'modifiedBy', width: 170}],
 
                         rowNum: APP_CONSTANTS.COMMON.PAGINATION[0],
                         rowList: APP_CONSTANTS.COMMON.PAGINATION,

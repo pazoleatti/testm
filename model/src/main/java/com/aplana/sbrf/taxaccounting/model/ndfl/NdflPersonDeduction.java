@@ -49,10 +49,10 @@ public class NdflPersonDeduction extends NdflPersonOperation {
     private BigDecimal periodCurrSumm;
 
     // Дата и время редактирования. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private Date editingDate;
+    private Date modifiedDate;
 
     // Значение имени пользователя из Справочника пользователей системы. Заполняется при редактировании данных НФ через загрузку Excel файла
-    private String updatedBy;
+    private String modifiedBy;
 
     public static final String TABLE_NAME = "ndfl_person_deduction";
     public static final String SEQ = "seq_ndfl_person_deduction";
@@ -60,13 +60,13 @@ public class NdflPersonDeduction extends NdflPersonOperation {
             "notif_type", "notif_date", "notif_num", "notif_source",
             "notif_summ", "income_accrued", "income_code", "income_summ",
             "period_prev_date", "period_prev_summ",
-            "period_curr_date", "period_curr_summ", "source_id", "editing_date", "updated_by"};
+            "period_curr_date", "period_curr_summ", "source_id", "modified_date", "modified_by"};
 
     public static final String[] FIELDS = {"id", "ndflPersonId", "rowNum", "operationId", "typeCode",
             "notifType", "notifDate", "notifNum", "notifSource",
             "notifSumm", "incomeAccrued", "incomeCode", "incomeSumm",
             "periodPrevDate", "periodPrevSumm",
-            "periodCurrDate", "periodCurrSumm", "sourceId", "editingDate", "updatedBy"};
+            "periodCurrDate", "periodCurrSumm", "sourceId", "modifiedDate", "modifiedBy"};
 
     @Override
     public String getTableName() {
@@ -192,20 +192,20 @@ public class NdflPersonDeduction extends NdflPersonOperation {
         this.periodCurrSumm = periodCurrSumm;
     }
 
-    public Date getEditingDate() {
-        return editingDate;
+    public Date getModifiedDate() {
+        return modifiedDate;
     }
 
-    public void setEditingDate(Date editingDate) {
-        this.editingDate = editingDate;
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
-    public String getUpdatedBy() {
-        return updatedBy;
+    public String getModifiedBy() {
+        return modifiedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
     @Override

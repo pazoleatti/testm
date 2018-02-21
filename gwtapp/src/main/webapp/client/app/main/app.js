@@ -546,8 +546,8 @@
         "ndflFL.title.flat": "Гр. 21 Квартира",
         "ndflFL.title.snils": "Гр. 22 СНИЛС",
         "ndflFL.title.id": "Гр. 23 Идентификатор строки",
-        "ndflFL.title.editingDate": "Гр. 24 Дата и время редактирования",
-        "ndflFL.title.updatedBy": "Гр. 25 Обновил",
+        "ndflFL.title.modifiedDate": "Гр. 24 Дата и время редактирования",
+        "ndflFL.title.modifiedBy": "Гр. 25 Обновил",
 
         "incomesAndTax.title.numberpp": "Гр. 1 №п/п",
         "incomesAndTax.title.inp": "Гр. 2 ИНП",
@@ -574,8 +574,8 @@
         "incomesAndTax.title.paymentNumber": "Гр. 23 Номер платежного поручения",
         "incomesAndTax.title.taxSumm": "Гр. 24 Сумма платежного поручения",
         "incomesAndTax.title.id": "Гр. 25 Идентификатор строки",
-        "incomesAndTax.title.editingDate": "Гр. 26 Дата и время редактирования",
-        "incomesAndTax.title.updatedBy": "Гр. 27 Обновил",
+        "incomesAndTax.title.modifiedDate": "Гр. 26 Дата и время редактирования",
+        "incomesAndTax.title.modifiedBy": "Гр. 27 Обновил",
 
         "ndflDeduction.title.numberpp": "Гр. 1 №п/п",
         "ndflDeduction.title.inp": "Гр. 2 ИНП",
@@ -594,8 +594,8 @@
         "ndflDeduction.title.periodCurrDate": "Гр. 15 Вычет. Текущий период. Дата",
         "ndflDeduction.title.periodCurrSumm": "Гр. 16 Вычет. Текущий период. Сумма",
         "ndflDeduction.title.id": "Гр. 17 Идентификатор строки",
-        "ndflDeduction.title.editingDate": "Гр. 18 Дата и время редактирования",
-        "ndflDeduction.title.updatedBy": "Гр. 19 Обновил",
+        "ndflDeduction.title.modifiedDate": "Гр. 18 Дата и время редактирования",
+        "ndflDeduction.title.modifiedBy": "Гр. 19 Обновил",
 
         "ndlfPrepayment.title.numberpp": "Гр. 1 №п/п",
         "ndlfPrepayment.title.inp": "Гр. 2 ИНП",
@@ -605,8 +605,8 @@
         "ndlfPrepayment.title.notifDate": "Гр. 6 Дата выдачи уведомления",
         "ndlfPrepayment.title.notifSource": "Гр. 7 Код налогового органа, выдавшего уведомление",
         "ndlfPrepayment.title.id": "Гр. 8 Идентификатор строки",
-        "ndlfPrepayment.title.editingDate": "Гр. 9 Дата и время редактирования",
-        "ndlfPrepayment.title.updatedBy": "Гр. 10 Обновил",
+        "ndlfPrepayment.title.modifiedDate": "Гр. 9 Дата и время редактирования",
+        "ndlfPrepayment.title.modifiedBy": "Гр. 10 Обновил",
 
         "createReport.period": "Период",
         "createReport.department": "Подразделение",
