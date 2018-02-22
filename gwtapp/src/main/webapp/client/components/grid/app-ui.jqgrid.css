@@ -40,7 +40,7 @@
 }
 
 .ui-jqgrid .ui-jqgrid-htable th div.ui-jqgrid-sortable {
-    white-space: nowrap;
+    white-space: pre-wrap;
     border-right: 2px dotted rgba(0, 0, 0, 0.2);
     text-align: center;
     font-weight: 100;
