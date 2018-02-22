@@ -11,7 +11,8 @@ public enum DescriptionTemplate {
     DECLARATION_TEMPLATE("Редактирование версии макета налоговой формы \"%s\" (%s) за период с %s по %s"),
     CONFIGURATION_PARAMS("Блокировка конфигурационных параметров при загрузке ТФ"),
     LOAD_TRANSPORT_DATA("Импорт ТФ из каталога загрузки"),
-    IMPORT_TRANSPORT_DATA("Загрузка файла \"%s\"");
+    IMPORT_TRANSPORT_DATA("Загрузка файла \"%s\""),
+    IMPORT_TRANSPORT_DATA_PERSON_XML("Загрузка файла \"%s\" в справочник ФЛ");
 
     private String text;
 

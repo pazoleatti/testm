@@ -56,8 +56,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     DropdownButton printAnchor;
     @UiField
-    LinkButton upload;
-    @UiField
     Label lockInformation;
     @UiField
     SplitLayoutPanel tablePanel;
@@ -195,13 +193,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
-    @UiHandler("upload")
-    void showUploadDialog(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().showUploadDialogClicked();
-        }
-    }
-
     @UiHandler("cancelEdit")
     void cancelEditButtonClicked(ClickEvent event) {
         if (getUiHandlers().isFormModified()) {
@@ -269,7 +260,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(false);
-                upload.setVisible(uploadAvailable);
                 duplicate.setVisible(false);
                 break;
             case READ:
@@ -282,7 +272,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
-                upload.setVisible(false);
                 duplicate.setVisible(false);
                 break;
             case VIEW:
@@ -295,7 +284,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 printAnchor.setVisible(true);
-                upload.setVisible(false);
                 duplicate.setVisible(getUiHandlers().getRefBookId().equals(RefBook.Id.PERSON.getId()));
                 break;
             case CREATE:
@@ -307,7 +295,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
                 printAnchor.setVisible(false);
-                upload.setVisible(false);
                 duplicate.setVisible(false);
                 break;
         }

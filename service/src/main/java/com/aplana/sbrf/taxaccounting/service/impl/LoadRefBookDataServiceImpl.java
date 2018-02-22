@@ -13,10 +13,13 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.result.ActionResult;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LockDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.impl.validator.XsdValidator;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
@@ -72,6 +75,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private AsyncManager asyncManager;
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private BlobDataService blobDataService;
+    @Autowired
+    private LogEntryService logEntryService;
 
     /**
      * Максимальное количество попыток создания временной директории
@@ -585,6 +592,47 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         // Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.
         Collections.sort(retVal);
         return retVal;
+    }
+
+    @Override
+    public ActionResult createTaskToImportXml(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
+        final ActionResult result = new ActionResult();
+        long refBookId = RefBook.Id.PERSON.getId();
+
+        Configuration isImportEnabledConfiguration = configurationDao.fetchByEnum(ConfigurationParam.ENABLE_IMPORT_PERSON);
+        if (isImportEnabledConfiguration != null && "1".equals(isImportEnabledConfiguration.getValue())) {
+            final TAUser user = userInfo.getUser();
+            RefBook refBook = refBookFactory.get(refBookId);
+
+            String refBookLockKey = refBookFactory.generateTaskKey(refBookId);
+            LockData refBookLockData = lockService.getLock(refBookLockKey);
+            if (refBookLockData != null && refBookLockData.getUserId() != user.getId()) {
+                logger.error(refBookFactory.getRefBookLockDescription(refBookLockData, refBook.getId()));
+                logger.error("Загрузка файла \"%s\" не может быть выполнена.", fileName);
+            } else {
+                String uuid = blobDataService.create(inputStream, fileName);
+                String asyncLockKey = LockData.LockObjects.IMPORT_REF_BOOK_XML.name() + "_" + refBookId;
+                LockData asyncLock = lockService.lock(asyncLockKey, user.getId(), String.format(DescriptionTemplate.IMPORT_TRANSPORT_DATA_PERSON_XML.getText(), fileName));
+                if (asyncLock != null) {
+                    logger.error("Не удалось запустить задачу. Возможно загрузка в справочник ФЛ уже выполняется");
+                } else {
+                    try {
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("refBookId", refBookId);
+                        params.put("blobDataId", uuid);
+                        asyncManager.executeTask(asyncLockKey, AsyncTaskType.IMPORT_REF_BOOK_XML, userInfo, params);
+                        logger.info("Задача поставлена в очередь на исполнение");
+                    } catch (Exception e) {
+                        logger.error(e);
+                    }
+                }
+            }
+        } else {
+            logger.error("Загрузка файлов справочника ФЛ отключена. Обратитесь к администратору");
+        }
+
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
     }
 
     @Override

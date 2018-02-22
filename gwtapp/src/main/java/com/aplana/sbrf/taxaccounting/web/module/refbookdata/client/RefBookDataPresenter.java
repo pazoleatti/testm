@@ -21,7 +21,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchB
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.person.PersonPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.upload.UploadDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.event.BackEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -100,7 +99,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private final RefBookVersionPresenter versionPresenter;
     private final DialogPresenter dialogPresenter;
     private final RefBookLinearPresenter refBookLinearPresenter;
-    private final UploadDialogPresenter uploadDialogPresenter;
     private final PersonPresenter personPresenter;
 
     private final HandlerRegistration[] registrations = new HandlerRegistration[2];
@@ -154,7 +152,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Inject
     public RefBookDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
                                 RefBookVersionPresenter versionPresenter, DialogPresenter dialogPresenter,
-                                RefBookLinearPresenter refBookLinearPresenter, UploadDialogPresenter uploadDialogPresenter,
+                                RefBookLinearPresenter refBookLinearPresenter,
                                 PersonPresenter personPresenter,
                                 PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
@@ -170,7 +168,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         this.versionPresenter = versionPresenter;
         this.dialogPresenter = dialogPresenter;
         this.refBookLinearPresenter = refBookLinearPresenter;
-        this.uploadDialogPresenter = uploadDialogPresenter;
         this.personPresenter = personPresenter;
         getView().setUiHandlers(this);
         this.timer = new Timer() {
@@ -532,34 +529,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     Dialog.errorMessage("Ошибка", result.getErrorMsg());
                             }
                         }, RefBookDataPresenter.this));
-    }
-
-    @Override
-    public void showUploadDialogClicked() {
-        if (eventScriptStatus.get(FormDataEvent.IMPORT)) {
-            if (!editFormPresenter.isFormModified()) {
-                uploadDialogPresenter.open(refBookId, isVersioned);
-            } else {
-                editFormPresenter.checkModified(new CheckModifiedHandler() {
-                    @Override
-                    public void openLoadDialog() {
-                        uploadDialogPresenter.open(refBookId, isVersioned);
-                    }
-
-                    @Override
-                    public String getTitle() {
-                        return "Подтверждение изменений";
-                    }
-
-                    @Override
-                    public String getText() {
-                        return "Выбранная запись была изменена. Сохранить изменения и загрузить файл? \"Да\" - загрузить с сохранением. \"Нет\" - загрузить без сохранения.";
-                    }
-                });
-            }
-        } else {
-            Dialog.infoMessage(NOT_EXIST_EVENT_MSG + "\"" + refBookName + "\"");
-        }
     }
 
     @Override
