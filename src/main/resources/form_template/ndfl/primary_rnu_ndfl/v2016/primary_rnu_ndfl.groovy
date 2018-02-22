@@ -848,17 +848,17 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
      * @return  объект книги
      */
     XSSFWorkbook createExportDeclarationDataWorkbook(SheetFillerContext context) {
-        int counter = 0
-        int listNumber = 1
+        int counter = 2
+        int sheetIndex = 1
         XSSFWorkbook workbook = new XSSFWorkbook(scriptSpecificReportHolder.fileInputStream)
         for (NdflPerson ndflPerson : context.getNdflPersonList()) {
             int maxOperationSize = [ndflPerson.incomes.size(), ndflPerson.deductions.size(), ndflPerson.prepayments.size()].max()
             counter += maxOperationSize
-            if (counter >= 1_000_000) {
-                counter = 0
-                listNumber++
+            if (counter >= 20) {
+                counter = 2
+                sheetIndex++
                 workbook.cloneSheet(1)
-                workbook.setSheetName(listNumber, "РНУ НДФЛ (" + listNumber - 1 + ")")
+                workbook.setSheetName(sheetIndex, "РНУ НДФЛ (" + (sheetIndex - 1) + ")")
             }
         }
         return workbook
@@ -1997,7 +1997,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
         // Указатель на индекс позиции строки
         int pointer = OFFSET
         // Максимальное количество строк для заполнеиния на одном листе
-        final int MAX_ROWS = 1_000_000
+        final int MAX_ROWS = 20
         // Индекс листа
         int sheetIndex = 1
         Sheet sheet = wb.getSheetAt(sheetIndex)
@@ -2015,7 +2015,7 @@ class ExportDeclarationDataSheetFiller implements SheetFiller {
                 counter = OFFSET + maxOperationSize
                 pointer = OFFSET
                 sheetIndex++
-                sheet = wb.createSheet("РНУ НДФЛ (" + (sheetIndex - 1) + ")")
+                sheet = wb.getSheetAt(sheetIndex - 1)
             }
             // Сортировка каждого вида операции по № пп
             Collections.sort(np.incomes, new Comparator<NdflPersonIncome>() {
