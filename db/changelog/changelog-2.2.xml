@@ -1281,4 +1281,13 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3742 -->
+    <changeSet id="2.2-dloshkarev-6" author="dloshkarev">
+        <update tableName="DECL_TEMPLATE_EVENT_SCRIPT">
+            <column name="script"
+                    valueClobFile="templates/ndfl/consolidated_rnu_ndfl/v2016/consolidated_rnu_ndfl_calculate.groovy"/>
+            <where>id=5</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
