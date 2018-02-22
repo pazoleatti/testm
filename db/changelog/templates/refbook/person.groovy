@@ -1,9 +1,8 @@
-package refbook.person
+package refbook.person // person_ref комментарий для локального поиска скрипта
 
 import com.aplana.sbrf.taxaccounting.AbstractScriptClass
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
-// person_ref комментарий для локального поиска скрипта
 import com.aplana.sbrf.taxaccounting.model.IdentityObject
 import com.aplana.sbrf.taxaccounting.model.PagingResult
 import com.aplana.sbrf.taxaccounting.model.identification.*
@@ -15,12 +14,14 @@ import com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
-import org.apache.commons.lang3.StringUtils
 
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
 import java.text.SimpleDateFormat
 
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.NUMBER
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.REFERENCE
+import static com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType.STRING
 import static com.aplana.sbrf.taxaccounting.script.service.util.ScriptUtils.checkInterrupted
 
 /**
@@ -108,7 +109,7 @@ class Person extends AbstractScriptClass {
         List<NaturalPerson> parsedPersons = []
 
         parseXml(parsedPersons)
-        def validPersons = checkPersons(parsedPersons)
+        def validPersons = validatePersons(parsedPersons)
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             save(validPersons)
@@ -271,14 +272,13 @@ class Person extends AbstractScriptClass {
         }
     }
 
-    List<NaturalPerson> checkPersons(List<NaturalPerson> persons) {
+    List<NaturalPerson> validatePersons(List<NaturalPerson> persons) {
         List<NaturalPerson> validPersons = []
         for (def person : persons) {
-            List<String> errors = []
+            List<String> errors = [] // фатальные (локальные), т.е. не будут созданы записи
             addIfNotNull(errors, ScriptUtils.checkName(person.lastName, "Фамилия"))
-            addIfNotNull(errors, ScriptUtils.checkName(person.lastName, "Имя"))
-            addIfNotNull(errors, ScriptUtils.checkName(person.lastName, "Отчество"))
-            addIfNotNull(errors, ScriptUtils.checkInn(person.inn))
+            addIfNotNull(errors, ScriptUtils.checkName(person.firstName, "Имя"))
+            warnIfNotNull(ScriptUtils.checkInn(person.inn))
             for (def document : person.personDocumentList) {
                 if (document.docType) {
                     addIfNotNull(errors, ScriptUtils.checkDul(document.docType.getCode(), document.documentNumber, "ДУЛ Номер"))
@@ -289,14 +289,14 @@ class Person extends AbstractScriptClass {
             } else {
                 if (1 == errors.size()) {
                     logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\"" +
-                            ", \"${person.personDocument?.documentNumber}\", \"${person.source?.name}\". " +
+                            ", \"${person.majorDocument?.documentNumber}\", \"${person.source?.name}\". " +
                             "Не пройдены проверки: " + errors[0])
                 } else {
                     logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\"" +
-                            ", \"${person.personDocument?.documentNumber}\", \"${person.source?.name}\". " +
+                            ", \"${person.majorDocument?.documentNumber}\", \"${person.source?.name}\". " +
                             "Не пройдены проверки:")
-                    for (int i = 1; i < errors.size(); i++) {
-                        logger.warn("${i}. ${errors[i]}")
+                    for (int i = 0; i < errors.size(); i++) {
+                        logger.warn("${i + 1}. ${errors[i]}")
                     }
                 }
             }
@@ -307,6 +307,12 @@ class Person extends AbstractScriptClass {
     void addIfNotNull(Collection collection, Object object) {
         if (object) {
             collection.add(object)
+        }
+    }
+
+    void warnIfNotNull(String message) {
+        if (message) {
+            logger.warn(message)
         }
     }
 
@@ -360,54 +366,54 @@ class Person extends AbstractScriptClass {
 
     Map<String, RefBookValue> mapAddressAttr(Address address) {
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "ADDRESS_TYPE", RefBookAttributeType.NUMBER, address.getAddressType() ?: 0)
-        putValue(values, "COUNTRY_ID", RefBookAttributeType.REFERENCE, address.getCountry()?.getId())
-        putValue(values, "REGION_CODE", RefBookAttributeType.STRING, address.getRegionCode())
-        putValue(values, "DISTRICT", RefBookAttributeType.STRING, address.getDistrict())
-        putValue(values, "CITY", RefBookAttributeType.STRING, address.getCity())
-        putValue(values, "LOCALITY", RefBookAttributeType.STRING, address.getLocality())
-        putValue(values, "STREET", RefBookAttributeType.STRING, address.getStreet())
-        putValue(values, "HOUSE", RefBookAttributeType.STRING, address.getHouse())
-        putValue(values, "BUILD", RefBookAttributeType.STRING, address.getBuild())
-        putValue(values, "APPARTMENT", RefBookAttributeType.STRING, address.getAppartment())
-        putValue(values, "POSTAL_CODE", RefBookAttributeType.STRING, address.getPostalCode())
-        putValue(values, "ADDRESS", RefBookAttributeType.STRING, address.getAddressIno())
+        putValue(values, "ADDRESS_TYPE", NUMBER, address.getAddressType() ?: 0)
+        putValue(values, "COUNTRY_ID", REFERENCE, address.getCountry()?.getId())
+        putValue(values, "REGION_CODE", STRING, address.getRegionCode())
+        putValue(values, "DISTRICT", STRING, truncateIfNeeded(address.getDistrict(), 50, "Район"))
+        putValue(values, "CITY", STRING, truncateIfNeeded(address.getCity(), 50, "Город"))
+        putValue(values, "LOCALITY", STRING, truncateIfNeeded(address.getLocality(), 50, "НаселПункт"))
+        putValue(values, "STREET", STRING, truncateIfNeeded(address.getStreet(), 50, "Улица"))
+        putValue(values, "HOUSE", STRING, address.getHouse())
+        putValue(values, "BUILD", STRING, address.getBuild())
+        putValue(values, "APPARTMENT", STRING, address.getAppartment())
+        putValue(values, "POSTAL_CODE", STRING, address.getPostalCode())
+        putValue(values, "ADDRESS", STRING, address.getAddressIno())
         return values
     }
 
     Map<String, RefBookValue> mapPersonAttr(NaturalPerson person) {
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "LAST_NAME", RefBookAttributeType.STRING, person.getLastName())
-        putValue(values, "FIRST_NAME", RefBookAttributeType.STRING, person.getFirstName())
-        putValue(values, "MIDDLE_NAME", RefBookAttributeType.STRING, person.getMiddleName())
-        putValue(values, "INN", RefBookAttributeType.STRING, person.getInn())
-        putValue(values, "INN_FOREIGN", RefBookAttributeType.STRING, person.getInnForeign())
-        putValue(values, "SNILS", RefBookAttributeType.STRING, person.getSnils())
+        putValue(values, "LAST_NAME", STRING, person.getLastName())
+        putValue(values, "FIRST_NAME", STRING, person.getFirstName())
+        putValue(values, "MIDDLE_NAME", STRING, person.getMiddleName())
+        putValue(values, "INN", STRING, person.getInn())
+        putValue(values, "INN_FOREIGN", STRING, person.getInnForeign())
+        putValue(values, "SNILS", STRING, person.getSnils())
         putValue(values, "BIRTH_DATE", RefBookAttributeType.DATE, person.getBirthDate())
-        putValue(values, "BIRTH_PLACE", RefBookAttributeType.STRING, null)
-        putValue(values, "ADDRESS", RefBookAttributeType.REFERENCE, person.getAddress()?.getId())
-        putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2)
-        putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId())
-        putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId())
-        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, person.source?.id)
+        putValue(values, "BIRTH_PLACE", STRING, null)
+        putValue(values, "ADDRESS", REFERENCE, person.getAddress()?.getId())
+        putValue(values, "EMPLOYEE", NUMBER, person.getEmployee() ?: 2)
+        putValue(values, "CITIZENSHIP", REFERENCE, person.getCitizenship()?.getId())
+        putValue(values, "TAXPAYER_STATE", REFERENCE, person.getTaxPayerStatus()?.getId())
+        putValue(values, "SOURCE_ID", REFERENCE, person.source?.id)
         return values
     }
 
     Map<String, RefBookValue> mapPersonDocumentAttr(PersonDocument personDocument) {
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "PERSON_ID", RefBookAttributeType.REFERENCE, personDocument.getNaturalPerson().getId())
-        putValue(values, "DOC_NUMBER", RefBookAttributeType.STRING, personDocument.getDocumentNumber())
+        putValue(values, "PERSON_ID", REFERENCE, personDocument.getNaturalPerson().getId())
+        putValue(values, "DOC_NUMBER", STRING, personDocument.getDocumentNumber())
         def incRepVal = personDocument.getIncRep() != null ? personDocument.getIncRep() : 1
-        putValue(values, "INC_REP", RefBookAttributeType.NUMBER, incRepVal)
-        putValue(values, "DOC_ID", RefBookAttributeType.REFERENCE, personDocument.getDocType()?.getId())
+        putValue(values, "INC_REP", NUMBER, incRepVal)
+        putValue(values, "DOC_ID", REFERENCE, personDocument.getDocType()?.getId())
         return values
     }
 
     Map<String, RefBookValue> mapPersonIdentifierAttr(PersonIdentifier personIdentifier) {
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>()
-        putValue(values, "PERSON_ID", RefBookAttributeType.REFERENCE, personIdentifier.getNaturalPerson().getId())
-        putValue(values, "INP", RefBookAttributeType.STRING, personIdentifier.getInp())
-        putValue(values, "AS_NU", RefBookAttributeType.REFERENCE, personIdentifier.asnu.id)
+        putValue(values, "PERSON_ID", REFERENCE, personIdentifier.getNaturalPerson().getId())
+        putValue(values, "INP", STRING, personIdentifier.getInp())
+        putValue(values, "AS_NU", REFERENCE, personIdentifier.asnu.id)
         return values
     }
 
@@ -415,12 +421,20 @@ class Person extends AbstractScriptClass {
         values.put(attrName, new RefBookValue(type, value))
     }
 
+    String truncateIfNeeded(String stringToTruncate, int maxLength, String fieldName) {
+        if (stringToTruncate && stringToTruncate.length() > maxLength) {
+            logger.warn("Обрезано значение графы \"${fieldName}\" (\"${stringToTruncate}\") до ${maxLength} символов.")
+            return stringToTruncate.substring(0, maxLength)
+        }
+        return stringToTruncate
+    }
+
     /**
      * Создание новой записи справочника
      */
     RefBookRecord createRefBookRecord(Map<String, RefBookValue> values) {
         RefBookRecord record = new RefBookRecord()
-        putValue(values, "RECORD_ID", RefBookAttributeType.NUMBER, null)
+        putValue(values, "RECORD_ID", NUMBER, null)
         record.setValues(values)
         return record
     }
@@ -494,13 +508,13 @@ class Person extends AbstractScriptClass {
      * @return
      */
     def fillIdentityDocAttr(Map<String, RefBookValue> values, Map<String, RefBookValue> oldRefDul) {
-        putOrUpdate(values, "PERSON_ID", RefBookAttributeType.REFERENCE, uniqueRecordId)
-        putOrUpdate(values, "DOC_NUMBER", RefBookAttributeType.STRING, oldRefDul?.DOC_NUMBER?.stringValue)
-        putOrUpdate(values, "ISSUED_BY", RefBookAttributeType.STRING, oldRefDul?.ISSUED_BY?.stringValue)
+        putOrUpdate(values, "PERSON_ID", REFERENCE, uniqueRecordId)
+        putOrUpdate(values, "DOC_NUMBER", STRING, oldRefDul?.DOC_NUMBER?.stringValue)
+        putOrUpdate(values, "ISSUED_BY", STRING, oldRefDul?.ISSUED_BY?.stringValue)
         putOrUpdate(values, "ISSUED_DATE", RefBookAttributeType.DATE, oldRefDul?.ISSUED_DATE?.dateValue)
         //Признак включения в отчет, при создании ставиться 1, при обновлении надо выбрать с минимальным приоритетом
-        putOrUpdate(values, "INC_REP", RefBookAttributeType.NUMBER, 1)
-        putOrUpdate(values, "DOC_ID", RefBookAttributeType.REFERENCE, oldRefDul?.DOC_ID?.referenceValue)
+        putOrUpdate(values, "INC_REP", NUMBER, 1)
+        putOrUpdate(values, "DOC_ID", REFERENCE, oldRefDul?.DOC_ID?.referenceValue)
     }
 
     /**
@@ -510,9 +524,9 @@ class Person extends AbstractScriptClass {
      * @return
      */
     def fillIdentityTaxpayerRecord(Map<String, RefBookValue> values, Map<String, RefBookValue> oldRefInp) {
-        putOrUpdate(values, "PERSON_ID", RefBookAttributeType.REFERENCE, uniqueRecordId)
-        putOrUpdate(values, "INP", RefBookAttributeType.STRING, oldRefInp?.INP?.stringValue)
-        putOrUpdate(values, "AS_NU", RefBookAttributeType.REFERENCE, oldRefInp?.AS_NU?.referenceValue)
+        putOrUpdate(values, "PERSON_ID", REFERENCE, uniqueRecordId)
+        putOrUpdate(values, "INP", STRING, oldRefInp?.INP?.stringValue)
+        putOrUpdate(values, "AS_NU", REFERENCE, oldRefInp?.AS_NU?.referenceValue)
     }
 
     /**

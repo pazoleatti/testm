@@ -274,6 +274,20 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     }
 
     /**
+     * Возращяет главный ({@link PersonDocument#incRep} = 1) документ ФЛ
+     */
+    public PersonDocument getMajorDocument() {
+        if (personDocumentList != null && !personDocumentList.isEmpty()) {
+            for (PersonDocument document : personDocumentList) {
+                if (document.getIncRep() == 1) {
+                    return document;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Получить идентификатор ФЛ, данный метод используется при работе с ФЛ из первичных форм, так как там может быть не более одного идентификатора
      *
      * @return идентификатор ФЛ
