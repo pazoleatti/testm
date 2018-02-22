@@ -59,7 +59,6 @@ class Check extends AbstractScriptClass {
     final String R_INP = "Идентификаторы налогоплательщиков"
     final String R_DUL = "Документы, удостоверяющие личность"
     final String R_ADDRESS = "Адреса"
-    final String R_FIAS = "ФИАС"
 
     final String RF_RECORD_ID = "RECORD_ID"
     final String RF_ADDRESS = "ADDRESS"
@@ -148,10 +147,6 @@ class Check extends AbstractScriptClass {
 
     // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
     Map<Long, NdflPersonFL> ndflPersonFLMap = [:]
-    /**
-     * Карта соответствия адреса формы адресу в справочнике ФИАС
-     */
-    Map<Long, FiasCheckInfo> fiasAddressIdsCache = [:];
 
     //Коды стран из справочника
     Map<Long, String> countryCodeCache = [:]
@@ -364,14 +359,6 @@ class Check extends AbstractScriptClass {
         }
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)");
 
-        //поиск всех адресов формы в справочнике ФИАС
-        time = System.currentTimeMillis();
-
-        //первый запрос, проверяет что адрес присутствует в фиас
-        Map<Long, FiasCheckInfo> checkFiasExistAddressMap = getFiasAddressIdsMap();
-
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
-
         long timeIsExistsAddress = 0
         time = System.currentTimeMillis();
         //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
@@ -395,26 +382,9 @@ class Check extends AbstractScriptClass {
             }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
-            // Спр1 ФИАС
-            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
-
             long tIsExistsAddress = System.currentTimeMillis();
             if (!isPersonAddressEmpty(ndflPerson)) {
-
-                List<String> address = []
-                FiasCheckInfo fiasCheckInfo = checkFiasExistAddressMap.get(ndflPerson.id)
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                if (!ScriptUtils.isEmpty(ndflPerson.regionCode) && !fiasCheckInfo.validRegion) {
-                    logFiasError(fioAndInp, pathError, "Код субъекта", ndflPerson.regionCode)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.area) && !fiasCheckInfo.validArea) {
-                    logFiasError(fioAndInp, pathError, "Район", ndflPerson.area)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.city) && !fiasCheckInfo.validCity) {
-                    logFiasError(fioAndInp, pathError, "Город", ndflPerson.city)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.locality) && !fiasCheckInfo.validLoc) {
-                    logFiasError(fioAndInp, pathError, "Населенный пункт", ndflPerson.locality)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.street) && !fiasCheckInfo.validStreet) {
-                    logFiasError(fioAndInp, pathError, "Улица", ndflPerson.street)
-                }
                 if (ndflPerson.postIndex != null && !ndflPerson.postIndex.matches("[0-9]{6}")) {
                     logFiasIndexError(fioAndInp, pathError, "Индекс", ndflPerson.postIndex)
                 }
@@ -2901,13 +2871,6 @@ class Check extends AbstractScriptClass {
             }
         }
         return addressCache;
-    }
-
-    Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
-        if (fiasAddressIdsCache.isEmpty()) {
-            fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id);
-        }
-        return fiasAddressIdsCache;
     }
 
     /**

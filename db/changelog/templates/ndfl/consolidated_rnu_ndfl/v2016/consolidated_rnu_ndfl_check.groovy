@@ -60,7 +60,6 @@ class Check extends AbstractScriptClass {
     final String R_INP = "Идентификаторы налогоплательщиков"
     final String R_DUL = "Документы, удостоверяющие личность"
     final String R_ADDRESS = "Адреса"
-    final String R_FIAS = "ФИАС"
     final String R_DETAIL = "Настройки подразделений"
 
     final String RF_RECORD_ID = "RECORD_ID"
@@ -150,10 +149,6 @@ class Check extends AbstractScriptClass {
 
     // Мапа <ID_Данные о физическом лице - получателе дохода, NdflPersonFL>
     Map<Long, NdflPersonFL> ndflPersonFLMap = [:]
-    /**
-     * Карта соответствия адреса формы адресу в справочнике ФИАС
-     */
-    Map<Long, FiasCheckInfo> fiasAddressIdsCache = [:];
 
     //Коды стран из справочника
     Map<Long, String> countryCodeCache = [:]
@@ -380,12 +375,6 @@ class Check extends AbstractScriptClass {
         }
         logForDebug("Проверки на соответствие справочникам / Выгрузка справочника Адреса (" + (System.currentTimeMillis() - time) + " мс)");
 
-        //поиск всех адресов формы в справочнике ФИАС
-        time = System.currentTimeMillis();
-        Map<Long, FiasCheckInfo> checkFiasAddressMap = getFiasAddressIdsMap();
-        logForDebug(SUCCESS_GET_TABLE, R_FIAS, checkFiasAddressMap.size());
-        logForDebug("Проверки на соответствие справочникам / Выгрузка справочника $R_FIAS (" + (System.currentTimeMillis() - time) + " мс)");
-
         long timeIsExistsAddress = 0
         time = System.currentTimeMillis();
         //в таком цикле не отображается номер строки при ошибках ndflPersonList.each { ndflPerson ->}
@@ -409,25 +398,9 @@ class Check extends AbstractScriptClass {
             }
             String fioAndInp = sprintf(TEMPLATE_PERSON_FL, [ndflPersonFL.fio, ndflPersonFL.inp])
 
-            // Спр1 ФИАС
-            // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-448
             long tIsExistsAddress = System.currentTimeMillis();
             if (!isPersonAddressEmpty(ndflPerson)) {
-
-                List<String> address = []
-                FiasCheckInfo fiasCheckInfo = checkFiasAddressMap.get(ndflPerson.id)
                 String pathError = String.format(SECTION_LINE_MSG, T_PERSON, ndflPerson.rowNum ?: "")
-                if (!ScriptUtils.isEmpty(ndflPerson.regionCode) && !fiasCheckInfo.validRegion) {
-                    logFiasError(fioAndInp, pathError, "Код субъекта", ndflPerson.regionCode)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.area) && !fiasCheckInfo.validArea) {
-                    logFiasError(fioAndInp, pathError, "Район", ndflPerson.area)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.city) && !fiasCheckInfo.validCity) {
-                    logFiasError(fioAndInp, pathError, "Город", ndflPerson.city)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.locality) && !fiasCheckInfo.validLoc) {
-                    logFiasError(fioAndInp, pathError, "Населенный пункт", ndflPerson.locality)
-                } else if (!ScriptUtils.isEmpty(ndflPerson.street) && !fiasCheckInfo.validStreet) {
-                    logFiasError(fioAndInp, pathError, "Улица", ndflPerson.street)
-                }
                 if (!(ndflPerson.postIndex != null && ndflPerson.postIndex.matches("[0-9]{6}"))) {
                     logFiasIndexError(fioAndInp, pathError, "Индекс", ndflPerson.postIndex)
                 }
@@ -2936,13 +2909,6 @@ class Check extends AbstractScriptClass {
         return addressCache;
     }
 
-    Map<Long, FiasCheckInfo> getFiasAddressIdsMap() {
-        if (fiasAddressIdsCache.isEmpty()) {
-            fiasAddressIdsCache = fiasRefBookService.checkAddressByFias(declarationData.id);
-        }
-        return fiasAddressIdsCache;
-    }
-
     /**
      * Проверка адреса на пустоту
      * @param Данные о ФЛ из формы
@@ -3217,14 +3183,6 @@ class Check extends AbstractScriptClass {
  * @param locality населенный пункт
  * @param street улица
  */
-/**
- * Существует ли адрес в справочнике адресов
- */
-    @Memoized
-    boolean isExistsAddress(ndflPersonId) {
-        Map<Long, FiasCheckInfo> checkFiasAddressMap = getFiasAddressIdsMap();
-        return (checkFiasAddressMap.get(ndflPersonId) != null)
-    }
 
     void checkCreate() {
         def departmentReportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())
