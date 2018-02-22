@@ -1259,4 +1259,11 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </insert>
     </changeSet>
 
+    <changeSet id="2.2-dnovikov-11" author="dnovikov">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/person.groovy"/>
+            <where>id='884b9f2e-1678-4d69-9652-b036bba2f728'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
