@@ -106,7 +106,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "подразделение \"%s\". %s не допустима для форм типа \"%s\".",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
+                    departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName(),
                     operationName,
                     declarationFormKind.getTitle());
@@ -129,7 +129,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             " подразделение \"%s\". Период формы закрыт.",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
+                    departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName());
         }
 
@@ -150,7 +150,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "подразделение: \"%s\". %s не допустима для форм в состоянии \"%s\".",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
+                    departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName(),
                     operationName,
                     declarationData.getState().getTitle());
@@ -172,7 +172,7 @@ public abstract class DeclarationDataPermission extends AbstractPermission<Decla
                             "период: \"%s\", подразделение \"%s\". Недостаточно прав для выполнения операции.",
                     operationName,
                     declarationData.getId(),
-                    departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, DATE_FORMAT),
+                    departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, DATE_FORMAT),
                     department.getName());
         }
     }

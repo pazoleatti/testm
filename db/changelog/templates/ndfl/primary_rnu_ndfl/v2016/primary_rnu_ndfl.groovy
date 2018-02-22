@@ -31,7 +31,6 @@ import groovy.util.slurpersupport.NodeChild
 import net.sf.jasperreports.engine.JasperPrint
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
-import org.joda.time.format.DateTimeFormat
 
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
@@ -144,8 +143,8 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 // Формирование спецотчета
                 createSpecificReport()
                 break
-            case FormDataEvent.UPLOAD_DECLARATION_DATA_TO_EXCEL:
-                uploadDeclarationDataToExcel()
+            case FormDataEvent.EXPORT_DECLARATION_DATA_TO_EXCEL:
+                exportDeclarationDataToExcel()
                 break
         }
     }
@@ -783,20 +782,28 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return new XSSFWorkbook(blobData.getInputStream())
     }
 
-    void uploadDeclarationDataToExcel() {
+    /**
+     * Выгрузить данные РНУ НДФЛ в Excel
+     */
+    void exportDeclarationDataToExcel() {
 
-        SheetFillerContext context = createSheetFillerContext()
-        XSSFWorkbook xssfWorkbook = createWorkbook(context)
+        SheetFillerContext context = createExportDeclarationDataSheetFillerContext()
+
+        XSSFWorkbook xssfWorkbook = createExportDeclarationDataWorkbook(context)
 
         Workbook sxssfWorkbook = new SXSSFWorkbook(xssfWorkbook, 100, true)
 
-        new UploadDeclarationDataSheetFiller().fillSheet(sxssfWorkbook, context)
+        new ExportDeclarationDataSheetFiller().fillSheet(sxssfWorkbook, context)
         OutputStream writer = scriptSpecificReportHolder.getFileOutputStream()
         sxssfWorkbook.write(writer)
-        scriptSpecificReportHolder.setFileName(createUploadDeclarationDataToExcelFileName())
+        scriptSpecificReportHolder.setFileName(createExportDeclarationDataToExcelFileName())
     }
 
-    String createUploadDeclarationDataToExcelFileName() {
+    /**
+     * Сформировать название файла для выгрузки данных РНУ НДФЛ в Excel
+     * @return  имя файла
+     */
+    String createExportDeclarationDataToExcelFileName() {
         Department department = departmentService.get(declarationData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
         String asnuName = "";
@@ -808,12 +815,16 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
                 declarationData.getId(),
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 reportPeriod.getReportPeriod().getName(),
-                departmentReportPeriodService.createPeriodName(reportPeriod, DATE_FORMAT),
+                departmentReportPeriodService.formatPeriodName(reportPeriod, DATE_FORMAT),
                 department.getCode(),
                 asnuName);
     }
 
-    SheetFillerContext createSheetFillerContext() {
+    /**
+     * Создает и инициирует объект {@link SheetFillerContext} данными для выгрузки РНУ НДФЛ в Excel
+     * @return
+     */
+    SheetFillerContext createExportDeclarationDataSheetFillerContext() {
         List<NdflPerson> ndflPersonList = ndflPersonService.findNdflPerson(declarationData.id)
         List<NdflPersonIncome> ndflPersonIncomeList = ndflPersonService.findNdflPersonIncome(declarationData.id)
         List<NdflPersonDeduction> ndflPersonDeductionList = ndflPersonService.findNdflPersonDeduction(declarationData.id)
@@ -831,18 +842,23 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
         return context
     }
 
-    XSSFWorkbook createWorkbook(SheetFillerContext context) {
-        int counter = 0
-        int listNumber = 1
+    /**
+     * Создает книгу и листы книги для выгрузки данных РНУ НДФЛ в Excel
+     * @param context   данные выгружаемой НФ на основе которых создаются листы
+     * @return  объект книги
+     */
+    XSSFWorkbook createExportDeclarationDataWorkbook(SheetFillerContext context) {
+        int counter = 2
+        int sheetIndex = 1
         XSSFWorkbook workbook = new XSSFWorkbook(scriptSpecificReportHolder.fileInputStream)
         for (NdflPerson ndflPerson : context.getNdflPersonList()) {
             int maxOperationSize = [ndflPerson.incomes.size(), ndflPerson.deductions.size(), ndflPerson.prepayments.size()].max()
             counter += maxOperationSize
-            if (counter >= 1_000_000) {
-                counter = 0
-                listNumber++
+            if (counter >= 20) {
+                counter = 2
+                sheetIndex++
                 workbook.cloneSheet(1)
-                workbook.setSheetName(listNumber, "РНУ НДФЛ (" + listNumber - 1 + ")")
+                workbook.setSheetName(sheetIndex, "РНУ НДФЛ (" + (sheetIndex - 1) + ")")
             }
         }
         return workbook
@@ -1484,7 +1500,7 @@ class PrimaryRnuNdfl extends AbstractScriptClass {
 }
 
 /**
- * Класс инкапсулирующий данные
+ * Класс инкапсулирующий данные необходимые для заполнения листов Excel файла
  */
 public class SheetFillerContext {
 
@@ -1568,7 +1584,7 @@ public class SheetFillerContext {
 }
 
 /**
- * Интерфейс определяющий заполнение листа и состояние классов реализующих интерфеййс
+ * Интерфейс отвечающий за заполнение листа Excel файла
  */
 interface SheetFiller {
 
@@ -1576,7 +1592,7 @@ interface SheetFiller {
 }
 
 /**
- * Фабрика для получения экземплярая SheetFiller по индексу листа
+ * Фабрика для получения экземплярая {@link SheetFiller} по индексу листа
  */
 @TypeChecked
 class SheetFillerFactory {
@@ -1597,7 +1613,7 @@ class SheetFillerFactory {
 }
 
 /**
- * Заполнитель заголовка
+ * Содержит логику заполнения заголовка листа спецотчета РНУ НДФЛ
  */
 @TypeChecked
 class TitleSheetFiller implements SheetFiller {
@@ -1614,7 +1630,7 @@ class TitleSheetFiller implements SheetFiller {
 }
 
 /**
- * Заполнитель реквизитов
+ * Содержит логику заполнения реквизитов спецотчета РНУ НДФЛ
  */
 @TypeChecked
 class RequisitesSheetFiller implements SheetFiller {
@@ -1623,8 +1639,8 @@ class RequisitesSheetFiller implements SheetFiller {
         Sheet sheet = wb.getSheetAt(1);
         int index = 3;
         Styler styler = new Styler(wb)
-        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPerson np : context.getNdflPersonList()) {
             ScriptUtils.checkInterrupted();
             Row row = sheet.createRow(index);
@@ -1702,7 +1718,7 @@ class RequisitesSheetFiller implements SheetFiller {
 }
 
 /**
- * Заполнитель сведений о доходах
+ * Содержит логику заполнения сведений о доходах спецотчета РНУ НДФЛ
  */
 @TypeChecked
 class IncomesSheetFiller implements SheetFiller {
@@ -1712,9 +1728,9 @@ class IncomesSheetFiller implements SheetFiller {
         Sheet sheet = wb.getSheetAt(2);
         int index = 3;
         Styler styler = new Styler(wb)
-        CellStyle borderStyle = styler.getBorderStyle()
-        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        CellStyle borderStyle = styler.createBorderStyle()
+        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPersonIncome npi : ndflPersonIncomeList) {
             ScriptUtils.checkInterrupted();
 
@@ -1831,7 +1847,7 @@ class IncomesSheetFiller implements SheetFiller {
 }
 
 /**
- * Заполнитель сведений о вычетах
+ * Содержит логику заполнения сведений о вычетах спецотчета РНУ НДФЛ
  */
 @TypeChecked
 class DeductionsSheetFiller implements SheetFiller {
@@ -1841,9 +1857,9 @@ class DeductionsSheetFiller implements SheetFiller {
         Sheet sheet = wb.getSheetAt(3);
         int index = 3;
         Styler styler = new Styler(wb)
-        CellStyle borderStyle = styler.getBorderStyle()
-        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        CellStyle borderStyle = styler.createBorderStyle()
+        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPersonDeduction npd : ndflPersonDeductionList) {
             ScriptUtils.checkInterrupted();
 
@@ -1919,7 +1935,7 @@ class DeductionsSheetFiller implements SheetFiller {
 }
 
 /**
- * Заполнитель сведений об авансах
+ * Содержит логику заполнения сведений об авансах спецотчета РНУ НДФЛ
  */
 @TypeChecked
 class PrepaymentSheetFiller implements SheetFiller {
@@ -1929,9 +1945,9 @@ class PrepaymentSheetFiller implements SheetFiller {
         Sheet sheet = wb.getSheetAt(4);
         int index = 3;
         Styler styler = new Styler(wb)
-        CellStyle borderStyle = styler.getBorderStyle()
-        CellStyle centeredStyle = styler.getBorderStyleCenterAligned()
-        CellStyle centeredStyleDate = styler.getBorderStyleCenterAlignedDate()
+        CellStyle borderStyle = styler.createBorderStyle()
+        CellStyle centeredStyle = styler.createBorderStyleCenterAligned()
+        CellStyle centeredStyleDate = styler.createBorderStyleCenterAlignedDate()
         for (NdflPersonPrepayment npp : ndflPersonPrepaymentList) {
             ScriptUtils.checkInterrupted();
 
@@ -1967,30 +1983,41 @@ class PrepaymentSheetFiller implements SheetFiller {
     }
 }
 
+/**
+ * Содержит логику заполнения листов для выгрузки данных формы РНУ НДФЛ в Excel
+ */
 @TypeChecked
-class UploadDeclarationDataSheetFiller implements SheetFiller {
+class ExportDeclarationDataSheetFiller implements SheetFiller {
     @Override
     void fillSheet(Workbook wb, SheetFillerContext context) {
-        int counter = 0
+        // Сдвиг начальной позиции строки на размер шапки таблицы
         final int OFFSET = 2
+        // Счетчик заполненных строк
+        int counter = OFFSET
+        // Указатель на индекс позиции строки
         int pointer = OFFSET
-        final int MAX_ROWS = 1_000_000
+        // Максимальное количество строк для заполнеиния на одном листе
+        final int MAX_ROWS = 20
+        // Индекс листа
         int sheetIndex = 1
         Sheet sheet = wb.getSheetAt(sheetIndex)
         Styler styler = new Styler(wb)
-        CellStyle centeredStyle =  styler.getVerticalByTopHorizontalByCenter()
-        CellStyle centeredStyleDate = styler.getVerticalByTopHorizontalByCenterDate()
+        CellStyle centeredStyle =  styler.createVerticalByTopHorizontalByCenter()
+        CellStyle centeredStyleDate = styler.createVerticalByTopHorizontalByCenterDate()
         for (NdflPerson np : context.getNdflPersonList()) {
             ScriptUtils.checkInterrupted()
+            // определяем для физлица какой вид операций имеет наибольшее количество строк (доход, вычет, аванс)
             int maxOperationSize = [np.incomes.size(), np.deductions.size(), np.prepayments.size()].max()
+            // Определяем сколько строк будет заполнено на листе после окончания заполнения для текущего физлица
             counter += maxOperationSize
+            // если количество заполненных строк будет больше допустимого, тогда начинаем заполнять следующий лист
             if (counter > MAX_ROWS) {
-                counter = maxOperationSize
+                counter = OFFSET + maxOperationSize
                 pointer = OFFSET
                 sheetIndex++
-                sheet = wb.createSheet("РНУ НДФЛ (" + (sheetIndex - 1) + ")")
+                sheet = wb.getSheetAt(sheetIndex - 1)
             }
-
+            // Сортировка каждого вида операции по № пп
             Collections.sort(np.incomes, new Comparator<NdflPersonIncome>() {
                 @Override
                 int compare(NdflPersonIncome o1, NdflPersonIncome o2) {
@@ -2009,8 +2036,10 @@ class UploadDeclarationDataSheetFiller implements SheetFiller {
                     return o1.rowNum.compareTo(o2.rowNum)
                 }
             })
+            // Для каждого физлица формируем  количество строк равное максимальному количеству строк из каждого вида операций
             for(int i = 0; i < maxOperationSize; i++) {
                 Row row = sheet.createRow(pointer)
+                // Заполненние данными из раздела "Реквизиты"
                 Cell cell_0 = row.createCell(0)
                 cell_0.setCellStyle(centeredStyle)
                 Cell cell_1 = row.createCell(1)
@@ -2083,6 +2112,7 @@ class UploadDeclarationDataSheetFiller implements SheetFiller {
                 Cell cell_22 = row.createCell(22)
                 cell_22.setCellStyle(centeredStyle)
                 cell_22.setCellValue(np.snils != null ? np.snils : "")
+                // Заполнение данными из раздела "Сведения о доходах"
                 Cell cell_23 = row.createCell(23);
                 cell_23.setCellStyle(centeredStyle)
                 Cell cell_24 = row.createCell(24);
@@ -2184,6 +2214,7 @@ class UploadDeclarationDataSheetFiller implements SheetFiller {
                         cell_44.setCellValue(npi.taxSumm.intValue());
                     }
                 }
+                // Заполнение данными из раздела "Сведения о вычетах"
                 Cell cell_45 = row.createCell(45);
                 cell_45.setCellStyle(centeredStyle)
                 Cell cell_46 = row.createCell(46);
@@ -2245,6 +2276,7 @@ class UploadDeclarationDataSheetFiller implements SheetFiller {
                         cell_58.setCellValue(npd.periodCurrSumm.doubleValue());
                     }
                 }
+                // Заполнение данными из раздела "Сведения об авансах"
                 Cell cell_59 = row.createCell(59);
                 cell_59.setCellStyle(centeredStyle)
                 Cell cell_60 = row.createCell(60);
@@ -2273,6 +2305,9 @@ class UploadDeclarationDataSheetFiller implements SheetFiller {
     }
 }
 
+/**
+ * Класс содержащий набор методов отвечающих за стилизацию ячеек при формирования файла Excel
+ */
 class Styler {
 
     Workbook workbook
@@ -2285,10 +2320,10 @@ class Styler {
      * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру
      * @return
      */
-    CellStyle getBorderStyleCenterAligned() {
+    CellStyle createBorderStyleCenterAligned() {
         CellStyle style = workbook.createCellStyle()
         style.setAlignment(CellStyle.ALIGN_CENTER)
-        thinBorderStyle(style)
+        addThinBorderStyle(style)
         return style
     }
 
@@ -2296,9 +2331,9 @@ class Styler {
      * Создать стиль ячейки с нормальным шрифтом с тонкими границами
      * @return
      */
-    CellStyle getBorderStyle() {
+    CellStyle createBorderStyle() {
         CellStyle style = workbook.createCellStyle()
-        thinBorderStyle(style)
+        addThinBorderStyle(style)
         return style
     }
 
@@ -2306,8 +2341,8 @@ class Styler {
      * Создать стиль ячейки с нормальным шрифтом с тонкими границами и выравниваем по центру для дат
      * @return
      */
-    CellStyle getBorderStyleCenterAlignedDate() {
-        CellStyle style = getBorderStyleCenterAligned()
+    CellStyle createBorderStyleCenterAlignedDate() {
+        CellStyle style = createBorderStyleCenterAligned()
         return addDateFormat(style)
     }
 
@@ -2326,7 +2361,7 @@ class Styler {
      * @param style
      * @return
      */
-    CellStyle thinBorderStyle(CellStyle style) {
+    CellStyle addThinBorderStyle(CellStyle style) {
         style.setBorderTop(CellStyle.BORDER_THIN)
         style.setBorderBottom(CellStyle.BORDER_THIN)
         style.setBorderLeft(CellStyle.BORDER_THIN)
@@ -2339,11 +2374,11 @@ class Styler {
      * по вериткали
      * @return
      */
-    CellStyle getVerticalByTopHorizontalByCenter() {
+    CellStyle createVerticalByTopHorizontalByCenter() {
         CellStyle style = workbook.createCellStyle()
         style.setAlignment(HorizontalAlignment.CENTER)
         style.setVerticalAlignment(VerticalAlignment.TOP)
-        thinBorderStyle(style)
+        addThinBorderStyle(style)
         return style
     }
 
@@ -2352,8 +2387,8 @@ class Styler {
      * по вериткали
      * @return
      */
-    CellStyle getVerticalByTopHorizontalByCenterDate() {
-        CellStyle style = getVerticalByTopHorizontalByCenter()
+    CellStyle createVerticalByTopHorizontalByCenterDate() {
+        CellStyle style = createVerticalByTopHorizontalByCenter()
         return addDateFormat(style)
     }
 }

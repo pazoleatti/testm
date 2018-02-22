@@ -3,19 +3,16 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.AbstractStartupAsyncTaskHandler;
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.AsyncTask;
-import com.aplana.sbrf.taxaccounting.model.action.*;
-import com.aplana.sbrf.taxaccounting.model.result.*;
-import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
-import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
-import com.aplana.sbrf.taxaccounting.permissions.Permission;
-import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
-import com.aplana.sbrf.taxaccounting.service.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.ndfl.NdflPersonDao;
+import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.action.AcceptDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateDeclarationDataAction;
+import com.aplana.sbrf.taxaccounting.model.action.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.model.action.PrepareSubreportAction;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -28,14 +25,18 @@ import com.aplana.sbrf.taxaccounting.model.ndfl.NdflPerson;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.model.result.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.permissions.BasePermissionEvaluator;
+import com.aplana.sbrf.taxaccounting.permissions.DeclarationDataPermission;
+import com.aplana.sbrf.taxaccounting.permissions.Permission;
+import com.aplana.sbrf.taxaccounting.permissions.logging.TargetIdAndLogger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.component.MoveToCreateFacade;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
-import com.aplana.sbrf.taxaccounting.dao.util.DBUtils;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -889,12 +890,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 filter.setAsnuIds(asnuIds);
             }
 
-            if (CollectionUtils.isEmpty(filter.getDepartmentIds())) {
-                Set<Integer> receiverDepartmentIds = new HashSet<Integer>();
+            if (!currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP) && currentUser.hasRole(TARole.N_ROLE_OPER)) {
+                filter.setDeclarationTypeDepartmentMap(refBookDepartmentDataService.fetchAllAvailableDepartmentsForEachDeclarationType(currentUser));
+            } else if (currentUser.hasRoles(TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
+                Set<Integer> receiverDepartmentIds = new HashSet<>();
                 for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
                     receiverDepartmentIds.add(department.getId());
                 }
-                filter.setDepartmentIds(new ArrayList<Integer>(receiverDepartmentIds));
+                filter.setDepartmentIds(new ArrayList<>(receiverDepartmentIds));
             }
 
             if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
@@ -3195,24 +3198,24 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public String createExcelTemplate(DeclarationData declaration, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) throws IOException {
         Map<String, Object> params = new HashMap<String, Object>();
         ScriptSpecificDeclarationDataReportHolder scriptSpecificReportHolder = new ScriptSpecificDeclarationDataReportHolder();
-            File reportFile = File.createTempFile("report", ".dat");
-            try (InputStream inputStream = this.getClass().getResourceAsStream("/template/excel_template_dec.xlsx");
-                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile))) {
-                if (inputStream == null) {
-                    throw new ServiceException("Файл не найден");
-                }
-                scriptSpecificReportHolder.setFileOutputStream(outputStream);
-                scriptSpecificReportHolder.setFileInputStream(inputStream);
-                scriptSpecificReportHolder.setFileName("report.xlsx");
-                params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
-                stateLogger.updateState(AsyncTaskState.FILLING_XLSX_REPORT);
-                declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.UPLOAD_DECLARATION_DATA_TO_EXCEL, logger, params);
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
-                }
-                stateLogger.updateState(AsyncTaskState.SAVING_XLSX);
-                return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
-            } catch (IOException e) {
+        File reportFile = File.createTempFile("report", ".dat");
+        try (InputStream inputStream = this.getClass().getResourceAsStream("/template/excel_template_dec.xlsx");
+             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile))) {
+            if (inputStream == null) {
+                throw new ServiceException("Файл не найден");
+            }
+            scriptSpecificReportHolder.setFileOutputStream(outputStream);
+            scriptSpecificReportHolder.setFileInputStream(inputStream);
+            scriptSpecificReportHolder.setFileName("report.xlsx");
+            params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+            stateLogger.updateState(AsyncTaskState.FILLING_XLSX_REPORT);
+            declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.EXPORT_DECLARATION_DATA_TO_EXCEL, logger, params);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
+            }
+            stateLogger.updateState(AsyncTaskState.SAVING_XLSX);
+            return blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName());
+        } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
             if (reportFile != null)

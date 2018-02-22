@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -255,4 +255,11 @@ public interface DepartmentDao extends PermissionDao {
      */
     List<Department> fetchAllDepartmentByIds(List<Integer> ids);
 
+    /**
+     * Получение списка пар (идентификатор типа налоговой формы, идентификатор подразделения, для которого подразделения пользователя назначено исполнителем)
+     *
+     * @param currentUser Пользователь
+     * @return список {@link Pair} или пустой список
+     */
+    List<Pair<Integer,Integer>> fetchNdflDeclarationDepartmentForEachDeclarationType(List<Integer> currentUser);
 }

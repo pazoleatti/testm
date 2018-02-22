@@ -283,7 +283,8 @@ class Calculate extends AbstractScriptClass {
         for (Relation relation : sourcesInfo) {
             Long declarationDataId = relation.declarationDataId;
             if (!relation.declarationState.equals(State.ACCEPTED)) {
-                logger.error(String.format("Налоговая форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", подразделение: \"%s\", id=\"%d\"", relation.getDeclarationTypeName(), relation.getFullDepartmentName(), declarationDataId))
+                logger.warn(String.format("Налоговая форма-источник существует, но не может быть использована в консолидации, так как еще не принята. Вид формы: \"%s\", Подразделение: \"%s\", Номер=\"%s\", Состояние=\"%s\"",
+                        relation.getDeclarationTypeName(), relation.getFullDepartmentName(), declarationDataId, relation.declarationState.title))
                 continue
             }
             List<NdflPerson> ndflPersonList = findNdflPersonWithData(declarationDataId);

@@ -81,5 +81,5 @@ public interface DepartmentReportPeriodService {
      * @return строка с сообщением о корректировочномм приоде, если период не корректировочный возвращается пустая
      * строка
      */
-    String createPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp);
+    String formatPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp);
 }

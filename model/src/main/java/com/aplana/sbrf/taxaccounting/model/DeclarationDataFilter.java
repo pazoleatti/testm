@@ -1,20 +1,24 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DeclarationDataFilter implements Serializable {
 
-	private static final long serialVersionUID = -4400641153082281834L;
+    private static final long serialVersionUID = -4400641153082281834L;
 
-	private TaxType taxType;
+    private TaxType taxType;
 
-	private List<Integer> reportPeriodIds;
+    private List<Integer> reportPeriodIds;
 
-	private List<Integer> departmentIds;
+    private List<Integer> departmentIds;
 
-	private List<Long> declarationTypeIds;
+    private List<Long> declarationTypeIds;
 
     private State formState;
 
@@ -23,10 +27,10 @@ public class DeclarationDataFilter implements Serializable {
     private Date correctionDate;
 
     /*Стартовый индекс списка записей */
-	private int startIndex;
+    private int startIndex;
 
-	/*Количество записей, которые нужно вернуть*/
-	private int countOfRecords;
+    /*Количество записей, которые нужно вернуть*/
+    private int countOfRecords;
 
     private Long declarationDataId;
 
@@ -38,7 +42,7 @@ public class DeclarationDataFilter implements Serializable {
 
     private String taxOrganKpp;
 
-	private String oktmo;
+    private String oktmo;
 
     private List<Long> docStateIds;
 
@@ -58,63 +62,70 @@ public class DeclarationDataFilter implements Serializable {
     private Boolean controlNs;
 
     /*true, если сортируем по возрастанию, false - по убыванию*/
-	private boolean ascSorting;
+    private boolean ascSorting;
 
-	public TaxType getTaxType() {
-		return taxType;
-	}
+    /**
+     * мапа ключ-идентификатор типа налоговой формы, значение-Список идентификаторов подразделений,
+     * для которых подразделение пользователя назначено исполнителем
+     */
+    @JsonIgnore
+    private Map<Integer, Set<Integer>> declarationTypeDepartmentMap;
 
-	public void setTaxType(TaxType taxType) {
-		this.taxType = taxType;
-	}
+    public TaxType getTaxType() {
+        return taxType;
+    }
 
-	public List<Integer> getReportPeriodIds() {
-		return reportPeriodIds;
-	}
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
 
-	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
-		this.reportPeriodIds = reportPeriodIds;
-	}
+    public List<Integer> getReportPeriodIds() {
+        return reportPeriodIds;
+    }
 
-	public List<Integer> getDepartmentIds() {
-		return departmentIds;
-	}
+    public void setReportPeriodIds(List<Integer> reportPeriodIds) {
+        this.reportPeriodIds = reportPeriodIds;
+    }
 
-	public void setDepartmentIds(List<Integer> departmentIds) {
-		this.departmentIds = departmentIds;
-	}
+    public List<Integer> getDepartmentIds() {
+        return departmentIds;
+    }
 
-	public int getStartIndex() {
-		return startIndex;
-	}
+    public void setDepartmentIds(List<Integer> departmentIds) {
+        this.departmentIds = departmentIds;
+    }
 
-	public void setStartIndex(int startIndex) {
-		this.startIndex = startIndex;
-	}
+    public int getStartIndex() {
+        return startIndex;
+    }
 
-	public int getCountOfRecords() {
-		return countOfRecords;
-	}
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
+    }
 
-	public void setCountOfRecords(int countOfRecords) {
-		this.countOfRecords = countOfRecords;
-	}
+    public int getCountOfRecords() {
+        return countOfRecords;
+    }
 
-	public DeclarationDataSearchOrdering getSearchOrdering() {
-		return searchOrdering;
-	}
+    public void setCountOfRecords(int countOfRecords) {
+        this.countOfRecords = countOfRecords;
+    }
 
-	public void setSearchOrdering(DeclarationDataSearchOrdering searchOrdering) {
-		this.searchOrdering = searchOrdering;
-	}
+    public DeclarationDataSearchOrdering getSearchOrdering() {
+        return searchOrdering;
+    }
 
-	public boolean isAscSorting() {
-		return ascSorting;
-	}
+    public void setSearchOrdering(DeclarationDataSearchOrdering searchOrdering) {
+        this.searchOrdering = searchOrdering;
+    }
 
-	public void setAscSorting(boolean ascSorting) {
-		this.ascSorting = ascSorting;
-	}
+    public boolean isAscSorting() {
+        return ascSorting;
+    }
+
+    public void setAscSorting(boolean ascSorting) {
+        this.ascSorting = ascSorting;
+    }
 
     public List<Long> getDeclarationTypeIds() {
         return declarationTypeIds;
@@ -156,15 +167,15 @@ public class DeclarationDataFilter implements Serializable {
         this.taxOrganKpp = taxOrganKpp;
     }
 
-	public String getOktmo() {
-		return oktmo;
-	}
+    public String getOktmo() {
+        return oktmo;
+    }
 
-	public void setOktmo(String oktmo) {
-		this.oktmo = oktmo;
-	}
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
+    }
 
-	public Boolean getCorrectionTag() {
+    public Boolean getCorrectionTag() {
         return correctionTag;
     }
 
@@ -178,6 +189,7 @@ public class DeclarationDataFilter implements Serializable {
 
     /**
      * Устанавливает дату корректировки. Действительно только при установленом {@link #correctionTag}
+     *
      * @param correctionDate Дата корректировки
      */
     public void setCorrectionDate(Date correctionDate) {
@@ -246,5 +258,13 @@ public class DeclarationDataFilter implements Serializable {
 
     public void setControlNs(Boolean controlNs) {
         this.controlNs = controlNs;
+    }
+
+    public Map<Integer, Set<Integer>> getDeclarationTypeDepartmentMap() {
+        return declarationTypeDepartmentMap;
+    }
+
+    public void setDeclarationTypeDepartmentMap(Map<Integer, Set<Integer>> declarationTypeDepartmentMap) {
+        this.declarationTypeDepartmentMap = declarationTypeDepartmentMap;
     }
 }
