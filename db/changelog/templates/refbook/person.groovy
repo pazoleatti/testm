@@ -152,7 +152,7 @@ class Person extends AbstractScriptClass {
                     if ('ИнфЧасть' == tag) {
                         inInfoPart = false
                         infPartCount++
-                        person.setSourceId(getMaxPriorityAsnu(person.personIdentityList)?.id)
+                        person.setSource(getMaxPriorityAsnu(person.personIdentityList))
                         persons.add(person)
                     }
                 }
@@ -288,10 +288,12 @@ class Person extends AbstractScriptClass {
                 validPersons.add(person)
             } else {
                 if (1 == errors.size()) {
-                    logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\". " +
+                    logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\"" +
+                            ", \"${person.personDocument?.documentNumber}\", \"${person.source?.name}\". " +
                             "Не пройдены проверки: " + errors[0])
                 } else {
-                    logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\". " +
+                    logger.warn("Не удалось создать запись \"${person.lastName}\" \"${person.firstName}\" \"${person.middleName}\"" +
+                            ", \"${person.personDocument?.documentNumber}\", \"${person.source?.name}\". " +
                             "Не пройдены проверки:")
                     for (int i = 1; i < errors.size(); i++) {
                         logger.warn("${i}. ${errors[i]}")
@@ -387,7 +389,7 @@ class Person extends AbstractScriptClass {
         putValue(values, "EMPLOYEE", RefBookAttributeType.NUMBER, person.getEmployee() ?: 2)
         putValue(values, "CITIZENSHIP", RefBookAttributeType.REFERENCE, person.getCitizenship()?.getId())
         putValue(values, "TAXPAYER_STATE", RefBookAttributeType.REFERENCE, person.getTaxPayerStatus()?.getId())
-        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, person.getSourceId())
+        putValue(values, "SOURCE_ID", RefBookAttributeType.REFERENCE, person.source?.id)
         return values
     }
 

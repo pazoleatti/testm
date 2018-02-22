@@ -1517,7 +1517,7 @@
                          * Растягивает грид до заполнения контейнера
                          */
                         function fillHeight() {
-                            if (scope && scope.gridFillSpace) {
+                            if (scope && scope.gridFillSpace && $(scope.gridFillSpaceContainerSelector).is(':visible')) {
                                 var container = $(scope.gridFillSpaceContainerSelector);
                                 var containerTop = $(scope.gridFillSpaceContainerSelectorTop);
                                 var containerMinHeight = parseInt($(scope.gridFillSpaceContainerSelector).css('min-height'), 10);
