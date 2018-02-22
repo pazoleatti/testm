@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Сервис для работы со справочником Подразделения
@@ -76,8 +79,17 @@ public interface RefBookDepartmentDataService {
     /**
      * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
      *
-     * @param user           Пользователь
+     * @param user Пользователь
      * @return Список значений справочника
      */
     List<RefBookDepartment> fetchActiveAvailableTB(TAUser user);
+
+    /**
+     * Получение мапы, в которой ключ - идентификатор типа налоговой формы, значение - список идентификаторов подразделений,
+     * для которых подразделение пользователя назначено исполнителем налоговой формы, содержащейся в ключе
+     *
+     * @param currentUser Информация о пользовател
+     * @return мапа {@link DeclarationType#getId()} -> {@link Set<Integer>} или пустая мапа
+     */
+    Map<Integer, Set<Integer>> fetchAllAvailableDepartmentsForEachDeclarationType(TAUser currentUser);
 }

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.SecuredEntity;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,11 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
@@ -499,8 +496,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public List<Integer> fetchAllChildrenIds(List<Integer> parentDepartmentIds) {
         return getJdbcTemplate().queryForList(
-                "select id from department CONNECT BY prior id = parent_id start with " +
-                        SqlUtils.transformToSqlInStatement("id", parentDepartmentIds),
+                "select id from department CONNECT BY prior id = parent_id " +
+                        (parentDepartmentIds.isEmpty() ? "" : "start with " + SqlUtils.transformToSqlInStatement("id", parentDepartmentIds)),
                 Integer.class
         );
     }
@@ -523,11 +520,25 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Department> fetchAllDepartmentByIds(List<Integer> ids){
+    public List<Department> fetchAllDepartmentByIds(List<Integer> ids) {
         String where = "where" + SqlUtils.transformToSqlInStatement("id", ids);
         return getNamedParameterJdbcTemplate().query(
                 "select * from department " + where,
                 new DepartmentJdbcMapper()
+        );
+    }
+
+    @Override
+    public List<Pair<Integer, Integer>> fetchNdflDeclarationDepartmentForEachDeclarationType(List<Integer> performersIds) {
+        return getJdbcTemplate().query("select declaration_type_id, department_id from DEPARTMENT_DECLARATION_TYPE ddt\n" +
+                        "inner join DEPARTMENT_DECL_TYPE_PERFORMER ddtp on ddt.id = ddtp.department_decl_type_id\n" +
+                        "where " + SqlUtils.transformToSqlInStatement("performer_dep_id", performersIds),
+                new RowMapper<Pair<Integer, Integer>>() {
+                    @Override
+                    public Pair<Integer, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Pair<>(SqlUtils.getInteger(rs, "declaration_type_id"), SqlUtils.getInteger(rs, "department_id"));
+                    }
+                }
         );
     }
 }

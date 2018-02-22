@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.refbook.RefBookAsnuService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class RefBookAsnuServiceImpl implements RefBookAsnuService {
         if (userInfo.getUser().hasRoles(TaxType.NDFL, TARole.N_ROLE_CONTROL_NS, TARole.N_ROLE_CONTROL_UNP)) {
             return refBookAsnuDao.fetchAll();
         } else {
-            return refBookAsnuDao.fetchByIds(userInfo.getUser().getAsnuIds());
+            return userInfo.getUser().getAsnuIds().isEmpty() ? new ArrayList<RefBookAsnu>() : refBookAsnuDao.fetchByIds(userInfo.getUser().getAsnuIds());
         }
     }
 

@@ -1,20 +1,17 @@
 package com.aplana.sbrf.taxaccounting.service.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDataDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookDepartment;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.refbook.RefBookDepartmentDataService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -114,7 +111,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
      *
      * @param user           Пользователь
      * @param name           Параметр фильтрации по наименованию подразделения, может содержаться в любой части полного
-     *                     наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
+     *                       наименования или в любой части полного пути до подразделения, состоящего из кратких наименований
      * @param reportPeriodId ID отчетного периода, который должен быть открыт
      * @param pagingParams   Параметры пейджинга
      * @return Страница списка значений справочника
@@ -130,7 +127,7 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     /**
      * Получение действующих доступных (согласно правам доступа пользователя) значений ТБ справочника подразделений.
      *
-     * @param user           Пользователь
+     * @param user Пользователь
      * @return Список значений справочника
      */
     @Override
@@ -139,5 +136,10 @@ public class RefBookDepartmentDataServiceImpl implements RefBookDepartmentDataSe
     public List<RefBookDepartment> fetchActiveAvailableTB(TAUser user) {
         List<Integer> tbDepartmentIds = departmentService.getTBDepartmentIds(user, TaxType.NDFL, false);
         return refBookDepartmentDataDao.fetchDepartments(tbDepartmentIds);
+    }
+
+    @Override
+    public Map<Integer, Set<Integer>> fetchAllAvailableDepartmentsForEachDeclarationType(TAUser currentUser) {
+        return departmentService.fetchNdflDeclarationDepartmentForEachDeclarationType(currentUser);
     }
 }
