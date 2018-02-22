@@ -18,7 +18,7 @@ public class DepartmentReportPeriodFormatter {
      * @return строка с сообщением о корректировочномм приоде, если период не корректировочный возвращается пустая
      * строка
      */
-    public String createPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp) {
+    public String formatPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp) {
         String corrPeriodMessage = "";
         SimpleDateFormat formatter = new SimpleDateFormat(formatExp);
         if (departmentReportPeriod.getCorrectionDate() != null) {

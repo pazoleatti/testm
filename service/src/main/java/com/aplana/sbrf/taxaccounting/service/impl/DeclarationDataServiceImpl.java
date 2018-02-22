@@ -3206,7 +3206,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 scriptSpecificReportHolder.setFileName("report.xlsx");
                 params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
                 stateLogger.updateState(AsyncTaskState.FILLING_XLSX_REPORT);
-                declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.UPLOAD_DECLARATION_DATA_TO_EXCEL, logger, params);
+                declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.EXPORT_DECLARATION_DATA_TO_EXCEL, logger, params);
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
                 }

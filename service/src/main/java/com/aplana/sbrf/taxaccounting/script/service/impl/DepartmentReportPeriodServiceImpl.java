@@ -55,7 +55,7 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public String createPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp) {
-        return departmentReportPeriodFormatter.createPeriodName(departmentReportPeriod, formatExp);
+    public String formatPeriodName(DepartmentReportPeriod departmentReportPeriod, String formatExp) {
+        return departmentReportPeriodFormatter.formatPeriodName(departmentReportPeriod, formatExp);
     }
 }
