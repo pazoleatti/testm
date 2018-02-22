@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.AsyncManager;
-import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -17,7 +16,9 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
+import com.aplana.sbrf.taxaccounting.service.LockDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.impl.validator.XsdValidator;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import net.sf.sevenzipjbinding.ArchiveFormat;
@@ -35,9 +36,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -581,4 +587,86 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         return retVal;
     }
 
+    @Override
+    public void importXml(long refBookId, BlobData blobData, TAUserInfo userInfo, Logger logger) {
+        File xmlFile = createTempFile(blobData.getInputStream());
+        String fileName = blobData.getName();
+        try {
+            List<String> errors = validate(xmlFile);
+            if (errors.isEmpty()) {
+                lockAndImportXml(refBookId, xmlFile, fileName, userInfo, logger);
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceException("Загрузка файла \"%s\" не может быть выполнена.", fileName);
+                }
+            } else {
+                logger.error("Загрузка файла \"%s\" не может быть выполнена. Файл не соответствует xsd-схеме.", fileName);
+                for (String error : errors) {
+                    logger.error(error);
+                }
+                throw new ServiceException();
+            }
+        } finally {
+            if (xmlFile != null) {
+                if (!xmlFile.delete()) {
+                    LOG.warn("Не удален временный файл: " + xmlFile.getAbsoluteFile());
+                }
+            }
+        }
+    }
+
+    private List<String> validate(File xmlFile) {
+        try (InputStream xsd = this.getClass().getResourceAsStream("/xsd/personData.xsd");
+             InputStream xml = new BufferedInputStream(new FileInputStream(xmlFile))
+        ) {
+            return new XsdValidator()
+                    .validate(xml, xsd)
+                    .getErrors();
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage(), e);
+        }
+    }
+
+    private void lockAndImportXml(long refBookId, File xmlFile, String fileName, TAUserInfo userInfo, Logger logger) {
+        TAUser user = userInfo.getUser();
+        String refBookLockKey = refBookFactory.generateTaskKey(refBookId);
+        LockData refBookLockData = lockService.lock(refBookLockKey, user.getId(),
+                refBookFactory.getRefBookDescription(DescriptionTemplate.REF_BOOK_EDIT, refBookId));
+        if (refBookLockData == null || refBookLockData.getUserId() == user.getId()) {
+            try (InputStream xml = new BufferedInputStream(new FileInputStream(xmlFile))) {
+                doImportXml(refBookId, xml, fileName, userInfo, logger);
+            } catch (IOException e) {
+                throw new ServiceException(e.getMessage(), e);
+            } finally {
+                lockService.unlock(refBookLockKey, user.getId());
+            }
+        } else {
+            logger.error(refBookFactory.getRefBookLockDescription(refBookLockData, refBookId));
+        }
+    }
+
+    private void doImportXml(long refBookId, InputStream xml, String fileName, TAUserInfo userInfo, Logger logger) {
+        Map<String, Object> additionalParameters = new HashMap<>();
+        additionalParameters.put("inputStream", xml);
+        additionalParameters.put("fileName", fileName);
+
+        if (!refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters)) {
+            throw new ServiceException();
+        }
+    }
+
+    private File createTempFile(InputStream inputStream) {
+        OutputStream out = null;
+        File file;
+        try {
+            file = File.createTempFile("ref_book_import_", ".tmp");
+            out = new BufferedOutputStream(new FileOutputStream(file));
+            IOUtils.copy(inputStream, out);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(inputStream);
+        }
+        return file;
+    }
 }

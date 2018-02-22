@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.ImportCounter;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -41,5 +42,15 @@ public interface LoadRefBookDataService {
      */
     void saveRefBookRecords(long refBookId, Long uniqueRecordId, Long recordId, Long sourceUniqueRecordId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Загрузка данных из xml в справочник
+     *
+     * @param refBookId идентификатор справочника
+     * @param blobData  загружаемый файл
+     * @param userInfo  пользователь
+     * @param logger    логгер
+     */
+    void importXml(long refBookId, BlobData blobData, TAUserInfo userInfo, Logger logger);
 
 }

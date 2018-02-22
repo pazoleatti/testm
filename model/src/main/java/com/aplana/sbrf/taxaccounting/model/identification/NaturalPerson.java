@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -86,8 +87,15 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
     private Integer employee;
 
     /**
-     * Система источник
+     * Источник (АСНУ)
      */
+    private RefBookAsnu source;
+
+    /**
+     * Система источник
+     * @deprecated см {@link #source}
+     */
+    @Deprecated
     private Long sourceId;
 
 
@@ -234,6 +242,14 @@ public class NaturalPerson extends RefBookObject implements IdentityPerson {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public RefBookAsnu getSource() {
+        return source;
+    }
+
+    public void setSource(RefBookAsnu source) {
+        this.source = source;
     }
 
     public PersonDocument getIncludeReportDocument() {

@@ -96,6 +96,14 @@ public interface ConfigurationService {
     void setCommonParamsDefault(TAUserInfo userInfo);
 
     /**
+     * Возвращяет {@link Configuration} по перечислению {@link ConfigurationParam}
+     *
+     * @param param перечисление {@link ConfigurationParam}
+     * @return параметр {@link Configuration} или null, если не найден
+     */
+    Configuration fetchByEnum(ConfigurationParam param);
+
+    /**
      * Получение списка типов асинхронных задач
      *
      * @param pagingParams параметры пагинации

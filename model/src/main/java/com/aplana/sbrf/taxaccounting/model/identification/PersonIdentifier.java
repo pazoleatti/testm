@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.identification;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -16,8 +17,15 @@ public class PersonIdentifier extends RefBookObject {
     private NaturalPerson naturalPerson;
 
     /**
-     * Идентификатор АСНУ из справочника
+     * АСНУ
      */
+    private RefBookAsnu asnu;
+
+    /**
+     * Идентификатор АСНУ из справочника
+     * @deprecated см {@link #asnu}
+     */
+    @Deprecated
     private Long asnuId;
 
     /**
@@ -40,6 +48,14 @@ public class PersonIdentifier extends RefBookObject {
 
     public void setAsnuId(Long asnuId) {
         this.asnuId = asnuId;
+    }
+
+    public RefBookAsnu getAsnu() {
+        return asnu;
+    }
+
+    public void setAsnu(RefBookAsnu asnu) {
+        this.asnu = asnu;
     }
 
     public String getInp() {

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -265,16 +266,6 @@ public class DepartmentServiceImpl implements DepartmentService {
             for (int tbId : getTBDepartmentIdsByDeclarationPerformer(departmentDao.getParentTBId(userDepartmentId))) {
                 departments.addAll(departmentDao.getDepartmentTBChildrenId(tbId));
             }
-        } else if (user.hasRoles(TARole.N_ROLE_OPER)) {
-            //Дочерние подразделения для подразделения пользователя
-            List<Integer> userDepartmentChildrenIds = departmentDao.fetchAllChildrenIds(userDepartmentId);
-            //Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
-            List<Integer> declarationDepartmentsIds = departmentDao.fetchAllIdsByDeclarationsPerformers(userDepartmentChildrenIds);
-            List<Integer> declarationDepartmentsChildrenIds = departmentDao.fetchAllChildrenIds(declarationDepartmentsIds);
-            //В итоговый список входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
-            //назначены исполнителями, их дочерние подразделения
-            departments.addAll(userDepartmentChildrenIds);
-            departments.addAll(declarationDepartmentsChildrenIds);
         }
         return new ArrayList<Integer>(departments);
     }
@@ -494,5 +485,36 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> fetchAllDepartmentByIds(List<Integer> ids){
         return departmentDao.fetchAllDepartmentByIds(ids);
+    }
+
+    @Override
+    public Map<Integer, Set<Integer>> fetchNdflDeclarationDepartmentForEachDeclarationType(TAUser currentUser) {
+
+        int userDepartmentId = currentUser.getDepartmentId();
+        Map<Integer, Set<Integer>> declarationTypeIdDeclarationDepartmentIdsMap = new HashMap<>();
+        if (currentUser.hasRoles(TARole.N_ROLE_OPER)) {
+            //Дочерние подразделения для подразделения пользователя
+            List<Integer> userDepartmentChildrenIds = departmentDao.fetchAllChildrenIds(userDepartmentId);
+            //Подразделения, исполнителями налоговых форм которых являются подразделение пользователя и его дочерние подразделения, и их дочерние подразделения
+            List<Pair<Integer, Integer>> declarationTypeIdDepartmentIdPairs = departmentDao.fetchNdflDeclarationDepartmentForEachDeclarationType(userDepartmentChildrenIds);
+            Set<Integer> departments;
+            for (Pair<Integer, Integer> pair : declarationTypeIdDepartmentIdPairs){
+                if ((departments = declarationTypeIdDeclarationDepartmentIdsMap.get(pair.getFirst())) == null){
+                    departments = new HashSet<>();
+                    departments.add(pair.getSecond());
+                    departments.addAll(userDepartmentChildrenIds);
+                    declarationTypeIdDeclarationDepartmentIdsMap.put(pair.getFirst(), departments);
+                }else {
+                    departments.add(pair.getSecond());
+                    declarationTypeIdDeclarationDepartmentIdsMap.put(pair.getFirst(), departments);
+                }
+            }
+            //В итоговую мапу входят дочерние подразделения для подразделения пользователя, подразделения, для форм которых они
+            //назначены исполнителями, их дочерние подразделения
+            for (int declarationTypeId : declarationTypeIdDeclarationDepartmentIdsMap.keySet()){
+                declarationTypeIdDeclarationDepartmentIdsMap.put(declarationTypeId, new HashSet<>(departmentDao.fetchAllChildrenIds(new ArrayList<>(declarationTypeIdDeclarationDepartmentIdsMap.get(declarationTypeId)))));
+            }
+        }
+        return declarationTypeIdDeclarationDepartmentIdsMap;
     }
 }

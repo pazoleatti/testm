@@ -40,6 +40,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String NO_CODE_DEFAULT = "9979";
     private static final String SHOW_TIMING_DEFAULT = "0";
     private static final String LIMIT_IDENT_DEFAULT = "0.65";
+    private static final String ENABLE_IMPORT_PERSON_DEFAULT = "1";
     private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
@@ -56,7 +57,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String TASK_LIMIT_FIELD = "Ограничение на выполнение задачи";
     private static final String SHORT_QUEUE_LIMIT = "Ограничение на выполнение задачи в очереди быстрых задач";
     private static final String LIMIT_IDENT_ERROR = "Значение параметра должно быть от \"0\" до \"1\" и иметь не более 2-х знаков после запятой";
-    private static final String SHOW_TIMING_ERROR = "Допустимые значения параметра \"0\" и \"1\"";
+    private static final String ONLY_0_1_AVAILABLE_ERROR = "Допустимые значения параметра \"0\" и \"1\"";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -78,6 +79,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         defaultCommonConfig.add(new Configuration(ConfigurationParam.NO_CODE.getCaption(), COMMON_PARAM_DEPARTMENT_ID, NO_CODE_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.SHOW_TIMING.getCaption(), COMMON_PARAM_DEPARTMENT_ID, SHOW_TIMING_DEFAULT));
         defaultCommonConfig.add(new Configuration(ConfigurationParam.LIMIT_IDENT.getCaption(), COMMON_PARAM_DEPARTMENT_ID, LIMIT_IDENT_DEFAULT));
+        defaultCommonConfig.add(new Configuration(ConfigurationParam.ENABLE_IMPORT_PERSON.getCaption(), COMMON_PARAM_DEPARTMENT_ID, ENABLE_IMPORT_PERSON_DEFAULT));
         return defaultCommonConfig;
     }
 
@@ -450,6 +452,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         model.put(ConfigurationParam.SBERBANK_INN, oldModel.get(ConfigurationParam.SBERBANK_INN));
         model.put(ConfigurationParam.LIMIT_IDENT, oldModel.get(ConfigurationParam.LIMIT_IDENT));
         model.put(ConfigurationParam.SHOW_TIMING, oldModel.get(ConfigurationParam.SHOW_TIMING));
+        model.put(ConfigurationParam.ENABLE_IMPORT_PERSON, oldModel.get(ConfigurationParam.ENABLE_IMPORT_PERSON));
         configurationDao.save(model);
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (ConfigurationParamGroup.COMMON.equals(param.getGroup())) {
@@ -567,6 +570,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @PreAuthorize("hasPermission(#userInfo.user, T(com.aplana.sbrf.taxaccounting.permissions.UserPermission).EDIT_GENERAL_PARAMS)")
     public void setCommonParamsDefault(TAUserInfo userInfo) {
         configurationDao.update(defaultCommonParams());
+    }
+
+    @Override
+    public Configuration fetchByEnum(ConfigurationParam param) {
+        return configurationDao.fetchByEnum(param);
     }
 
     @Override
@@ -693,25 +701,26 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             checkNoCode(config.getValue(), logger);
         } else if (config.getCode().equals(ConfigurationParam.LIMIT_IDENT.name())) {
             checkLimitIdent(config.getValue(), logger);
-        } else if (config.getCode().equals(ConfigurationParam.SHOW_TIMING.name())) {
-            checkShowTiming(config.getValue(), logger);
+        } else if (config.getCode().equals(ConfigurationParam.SHOW_TIMING.name()) ||
+                config.getCode().equals(ConfigurationParam.ENABLE_IMPORT_PERSON.name())) {
+            check01Value(config.getValue(), logger);
         }
     }
 
     /**
-     * Проверка значения параметра {@link ConfigurationParam#SHOW_TIMING}
+     * Проверка значения параметра на 0 или 1
      *
      * @param value  значение параметра
      * @param logger логгер
      */
-    private void checkShowTiming(String value, Logger logger) {
+    private void check01Value(String value, Logger logger) {
         try {
             Double doubleValue = new Double(value);
             if (!Objects.equals(doubleValue, 1d) && !Objects.equals(doubleValue, 0d)) {
-                logger.error(SHOW_TIMING_ERROR);
+                logger.error(ONLY_0_1_AVAILABLE_ERROR);
             }
         } catch (NumberFormatException e) {
-            logger.error(SHOW_TIMING_ERROR);
+            logger.error(ONLY_0_1_AVAILABLE_ERROR);
         }
     }
 

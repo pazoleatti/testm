@@ -2,26 +2,28 @@ package com.aplana.sbrf.taxaccounting.service.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAsnu;
+import com.aplana.sbrf.taxaccounting.service.ScriptExposed;
 
 import java.util.List;
 
 /**
  * Сервис для работы со справочником АСНУ
  */
+@ScriptExposed
 public interface RefBookAsnuService {
     /**
-     * Получение доступных (согласно роли пользователя) значений справочника
+     * Возвращяет доступные (согласно роли пользователя) записи справочника
      *
-     * @param userInfo Информация о пользователей
-     * @return Список доступных значений справочника
+     * @param userInfo информация о пользователей
+     * @return список доступных значений справочника
      */
     List<RefBookAsnu> fetchAvailableAsnu(TAUserInfo userInfo);
 
     /**
-     * Получение значений справочника по идентификаторам
+     * Возвращяет записи справочника по идентификаторам
      *
-     * @param ids Идентификаторы
-     * @return Список значений справочника
+     * @param ids идентификаторы
+     * @return список записей справочника
      */
     List<RefBookAsnu> fetchByIds(List<Long> ids);
 
@@ -29,7 +31,16 @@ public interface RefBookAsnuService {
      * Получение записи справочника по идентификатору
      *
      * @param id идентификатор
-     * @return значение справочника или null
+     * @return запись справочника или null
      */
     RefBookAsnu fetchById(Long id);
+
+    /**
+     * Возвращяет запись справочника по наименованию
+     * (удаляет лишние символы при поиске ({@link com.aplana.sbrf.taxaccounting.model.util.StringUtils#cleanString(String)}))
+     *
+     * @param name наименование АСНУ
+     * @return запись справочника или null
+     */
+    RefBookAsnu fetchByName(String name);
 }

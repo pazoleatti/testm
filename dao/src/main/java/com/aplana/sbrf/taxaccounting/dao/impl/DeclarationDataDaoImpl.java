@@ -259,6 +259,16 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             sql.append(" and ").append(SqlUtils.transformToSqlInStatementViaTmpTable("dep.id", filter.getDepartmentIds()));
         }
 
+        if (!isEmpty(filter.getDeclarationTypeDepartmentMap())){
+            int index = 0;
+            sql.append(" and (");
+            for (Integer typeId : filter.getDeclarationTypeDepartmentMap().keySet()){
+                sql.append("dtype.id = ").append(typeId).append(" and ").append(SqlUtils.transformToSqlInStatement("dep.id", filter.getDeclarationTypeDepartmentMap().get(typeId)))
+                        //если type не последний элемент в множестве добавлем оператор or, иначе закрываем скобку
+                        .append(index++ != filter.getDeclarationTypeDepartmentMap().keySet().size()-1 ? " or " : ")");
+            }
+        }
+
         if (!isEmpty(filter.getFormKindIds())) {
             sql.append(" and ").append(SqlUtils.transformToSqlInStatement("dkind.id", filter.getFormKindIds()));
         }
