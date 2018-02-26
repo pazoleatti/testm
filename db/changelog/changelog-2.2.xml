@@ -1354,4 +1354,19 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
         </update>
     </changeSet>
 
+    <!--https://jira.aplana.com/browse/SBRFNDFL-3675 -->
+    <changeSet id="2.2-dloshkarev-7" author="dloshkarev">
+        <update tableName="DECLARATION_TEMPLATE">
+            <column name="CREATE_SCRIPT" valueClobFile="templates/ndfl/report_6ndfl/v2016/report_6ndfl.groovy"/>
+            <where>id=103</where>
+        </update>
+    </changeSet>
+    <changeSet id="2.2-dloshkarev-8" author="dloshkarev">
+        <update tableName="BLOB_DATA">
+            <column name="data"
+                    valueBlobFile="templates/ndfl/report_6ndfl/v2016/NO_NDFL6_1_152_00_05_01_02.xsd"/>
+            <where>id in (SELECT xsd FROM declaration_template WHERE id=103)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
