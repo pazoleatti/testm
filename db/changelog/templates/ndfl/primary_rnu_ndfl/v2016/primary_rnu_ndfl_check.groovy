@@ -1865,7 +1865,13 @@ class Check extends AbstractScriptClass {
                     dateConditionDataListForBudget.each { dateConditionData ->
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             // Все подпункты, кроме 11-го
-                            if (!dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)) {
+                            boolean check;
+                            if (dateConditionData.checker.class.equals(Column6EqualsColumn7.class)){
+                                check = new Column6EqualsColumn7().check(ndflPersonIncomeCurrentByPersonIdAndOperationIdList)
+                            }else {
+                                check = dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)
+                            }
+                            if (!check) {
                                 // todo turn_to_error https://jira.aplana.com/browse/SBRFNDFL-637
                                 String errMsg = String.format(dateConditionData.conditionMessage,
                                         C_TAX_TRANSFER_DATE, ndflPersonIncome.taxTransferDate ? ScriptUtils.formatDate(ndflPersonIncome.taxTransferDate) : "",
@@ -2517,6 +2523,22 @@ class Check extends AbstractScriptClass {
         boolean check(NdflPersonIncome ndflPersonIncome, DateConditionWorkDay dateConditionWorkDay) {
             String accrued = ndflPersonIncome.incomeAccruedDate?.format("dd.MM.yyyy")
             String payout = ndflPersonIncome.incomePayoutDate?.format("dd.MM.yyyy")
+            return accrued == payout
+        }
+
+        boolean check(List<NdflPersonIncome> ndflPersonIncomes) {
+            Date accuredDate = null;
+            Date payoutDate = null;
+            for(NdflPersonIncome ndflPersonIncome : ndflPersonIncomes){
+                if (accuredDate == null && ndflPersonIncome.incomeAccruedDate != null){
+                    accuredDate = ndflPersonIncome.incomeAccruedDate
+                }
+                if (payoutDate == null && ndflPersonIncome.incomePayoutDate != null){
+                    payoutDate = ndflPersonIncome.incomePayoutDate
+                }
+            }
+            String accrued = accuredDate?.format("dd.MM.yyyy")
+            String payout = payoutDate?.format("dd.MM.yyyy")
             return accrued == payout
         }
     }
