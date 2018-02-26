@@ -1866,7 +1866,7 @@ class Check extends AbstractScriptClass {
                         if (dateConditionData.incomeCodes.contains(ndflPersonIncome.incomeCode) && dateConditionData.incomeTypes.contains(ndflPersonIncome.incomeType)) {
                             // Все подпункты, кроме 11-го
                             boolean check;
-                            if (dateConditionData.checker.class.equals(Column6EqualsColumn7.class)){
+                            if (dateConditionData.checker instanceof Column6EqualsColumn7){
                                 check = new Column6EqualsColumn7().check(ndflPersonIncomeCurrentByPersonIdAndOperationIdList)
                             }else {
                                 check = dateConditionData.checker.check(ndflPersonIncome, dateConditionWorkDay)
