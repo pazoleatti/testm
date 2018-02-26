@@ -41,7 +41,7 @@
                     if ($scope.reportData.period && $scope.reportData.department) {
                         $http({
                             method: "GET",
-                            url: "controller//rest/departmentReportPeriod",
+                            url: "controller/rest/departmentReportPeriod",
                             params: {
                                 projection: "fetchLast",
                                 departmentId: $scope.reportData.department.id,
