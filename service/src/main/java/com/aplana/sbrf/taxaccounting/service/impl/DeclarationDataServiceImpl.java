@@ -897,7 +897,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 for (RefBookDepartment department : refBookDepartmentDataService.fetchAllAvailableDepartments(currentUser)) {
                     receiverDepartmentIds.add(department.getId());
                 }
-                filter.setDepartmentIds(new ArrayList<>(receiverDepartmentIds));
+                for (Integer filterDepartmentId : filter.getDepartmentIds()) {
+                    if (!receiverDepartmentIds.contains(filterDepartmentId))
+                    filter.getDepartmentIds().remove(filterDepartmentId);
+                }
             }
 
             if (CollectionUtils.isEmpty(filter.getFormKindIds())) {
