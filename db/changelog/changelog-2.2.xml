@@ -1321,4 +1321,20 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id=2</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-3756 В справочнике АСНУ в наименовании АС "Back Office" лишний пробел в конце-->
+	<changeSet id="2.2-rnurgaleev-20" author="rnurgaleev">
+        <update tableName="ref_book_asnu">
+            <column name="name"
+                    value="АС &quot;Back Office&quot;"/>
+            <where>code='8000'</where>
+        </update>
+    </changeSet>
+	
+	<changeSet id="2.2-rnurgaleev-21" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/refbook/person.groovy"/>
+            <where>id='884b9f2e-1678-4d69-9652-b036bba2f728'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
