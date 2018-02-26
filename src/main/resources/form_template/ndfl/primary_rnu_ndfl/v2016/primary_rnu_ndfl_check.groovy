@@ -1775,20 +1775,20 @@ class Check extends AbstractScriptClass {
                 // "Сумма Граф 16"
                 BigDecimal calculatedTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.calculatedTax != null) {
+                    if (ndflPersonIncomeCurrent.calculatedTax != null && ndflPersonIncomeCurrent.operationId == operationId) {
                         calculatedTaxSum = calculatedTaxSum.add(ndflPersonIncomeCurrent.calculatedTax)
                     }
                 }
                 // "Сумма Граф 17"
                 BigDecimal withholdingTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.withholdingTax != null)
+                    if (ndflPersonIncomeCurrent.withholdingTax != null && ndflPersonIncomeCurrent.operationId == operationId)
                         withholdingTaxSum = withholdingTaxSum.add(ndflPersonIncomeCurrent.withholdingTax)
                 }
                 // "Сумма Граф 18"
                 BigDecimal notHoldingTaxSum = new BigDecimal(0)
                 ndflPersonIncomeCurrentByPersonIdAndOperationIdList.each { NdflPersonIncome ndflPersonIncomeCurrent ->
-                    if (ndflPersonIncomeCurrent.notHoldingTax != null) {
+                    if (ndflPersonIncomeCurrent.notHoldingTax != null && ndflPersonIncomeCurrent.operationId == operationId) {
                         notHoldingTaxSum = notHoldingTaxSum.add(ndflPersonIncomeCurrent.notHoldingTax)
                     }
                 }
