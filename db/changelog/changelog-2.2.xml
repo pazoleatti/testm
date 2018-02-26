@@ -1337,4 +1337,13 @@ coalesce(e.parentguid,d.parentguid,f.parentguid) parentguid,
             <where>id='884b9f2e-1678-4d69-9652-b036bba2f728'</where>
         </update>
     </changeSet>
+	
+	<!--https://jira.aplana.com/browse/SBRFNDFL-1449 Добавить в XSD РНУ НДФЛ допустимое значение "00.00.0000" для элемента СрокПрчслНал вернул прежнюю версию до 9f785268c7df43310e6fc2402c407210e6071b46-->
+    <changeSet id="2.2-rnurgaleev-22" author="rnurgaleev">
+        <update tableName="BLOB_DATA">
+            <column name="data" valueBlobFile="templates/ndfl/primary_rnu_ndfl/v2016/rnu_ndfl_light.xsd"/>
+            <where>id in (select dt.xsd from declaration_template dt where dt.id = 100)</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
